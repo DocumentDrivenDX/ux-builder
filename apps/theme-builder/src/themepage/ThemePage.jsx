@@ -68,7 +68,7 @@ export function ThemePage({ name }) {
   // Once the page has its sections, go to the one the URL names.
   useEffect(() => { if (theme && location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView(); }, [theme]);
 
-  if (error) return <main className="tp-missing"><h1>No theme here</h1><p role="alert">{error}</p><a href="./">Back to the Theme Builder</a></main>;
+  if (error) return <main className="tp-missing"><h1>No theme here</h1><p role="alert">{error}</p><a href="./">Back to the UX Builder</a></main>;
   if (!theme) return <main className="tp-missing"><p>Loading {name}…</p></main>;
 
   // The artwork is sent apart from the tokens (data: URLs), so the page's own Logo widgets get it here.

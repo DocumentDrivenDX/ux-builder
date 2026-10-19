@@ -169,7 +169,7 @@ export function App() {
   return (
     <ThemeProvider theme={THEME} appearance={appearance} className="tb">
       <header className="tb-hdr"><div className="tb-wrap tb-row tb-spread">
-        <div className="tb-brandmark"><b>Theme Builder</b><span className="tb-eyebrow">AI-UI SDK</span></div>
+        <div className="tb-brandmark"><b>UX Builder</b><span className="tb-eyebrow">AI-UI SDK</span></div>
         <div className="tb-row tb-hdr__tools">
         <AppearanceSwitch value={appearance} onChange={chooseAppearance} />
         <nav aria-label="Help" className="tb-row">
