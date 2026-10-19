@@ -37,6 +37,86 @@ never hard-code presentation:
 `@ux-builder/engine` (the palette engine) and the theme builder app are
 private to this repository and are used to make new themes.
 
+The packages are on the public npm registry. Installing them needs no token
+and no registry configuration.
+
+### Using each package
+
+**`@ux-builder/tokens`: the themes.** Import one theme's CSS and fonts, then
+select the theme on `<html>`:
+
+```sh
+npm install @ux-builder/tokens
+```
+
+```js
+import "@ux-builder/tokens/themes/synaptiq.css";   // or themes.css for every theme
+import "@ux-builder/tokens/fonts/synaptiq.css";    // or fonts.css
+```
+
+```html
+<html data-theme="synaptiq" data-appearance="dark">
+```
+
+Style your own markup with the role tokens (`var(--piq-color-text)`,
+`var(--piq-space-4)`). `resolved/<theme>.<appearance>.json` has every token's
+final value, for code that can't read CSS, and `manifest.json` lists the
+themes. See the [`tokens` README](packages/tokens/README.md).
+
+**`@ux-builder/ui`: the widgets.** Install it beside the tokens, load its CSS
+after the theme's, and wrap the app in `ThemeProvider`:
+
+```sh
+npm install @ux-builder/tokens @ux-builder/ui
+```
+
+```jsx
+import "@ux-builder/tokens/themes/synaptiq.css";
+import "@ux-builder/ui/ui.css";
+import { Button, Logo, ThemeProvider } from "@ux-builder/ui";
+
+<ThemeProvider theme="synaptiq" appearance="system">
+  <Logo /> <Button variant="primary">Save</Button>
+</ThemeProvider>
+```
+
+It also exports the patterns (`@ux-builder/ui/patterns`), icons
+(`@ux-builder/ui/icons`), the ESLint and Stylelint rules, `catalogue.json`
+and `AGENTS.md`. See the [`ui` README](packages/ui/README.md) and the
+[Quick start](#quick-start).
+
+**`@ux-builder/create-app`: a new app.** It scaffolds a React + Vite app that
+is already on the SDK, with lint, the audit and CI:
+
+```sh
+npm create @ux-builder/app my-app -- --theme synaptiq   # --name sets the package name
+```
+
+See the [`create-app` README](packages/create-app/README.md).
+
+**`@ux-builder/audit`: check the running app.** It switches the app through
+every theme and appearance in Chromium, reports anything that isn't the
+theme's, and exits 1 on an error:
+
+```sh
+npm install -D @ux-builder/audit
+npx playwright install chromium   # once per machine
+npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/
+```
+
+You can also call it from code as `audit()` from `@ux-builder/audit`. See the
+[`audit` README](packages/audit/README.md) for every option.
+
+**`@ux-builder/mcp`: the SDK for AI coding agents.** An MCP server over stdio
+that answers from the SDK version installed beside it: themes, widgets and
+their props, tokens, icons and guidance.
+
+```sh
+claude mcp add ux-builder -- npx @ux-builder/mcp   # any MCP client: npx @ux-builder/mcp
+```
+
+See the [`mcp` README](packages/mcp/README.md).
+
 The surface an app may rely on is specified in
 [CONTRACT-004](docs/helix/02-design/contracts/CONTRACT-004-app-integration.md).
 That covers entry points, props, the theme switch event, lint rules, audit
@@ -260,6 +340,21 @@ name (`--piq-color-structure`) comes from `tokens/names.json`.
 Releases use [Changesets](https://github.com/changesets/changesets). Run
 `npx changeset` in any pull request that changes what a consumer gets (see
 `.changeset/README.md`).
+
+### Publishing a release
+
+You need to be logged in to npm (`npm login`) as a member of the `ux-builder`
+organization with publish rights. Then, from a clean, up-to-date `main`:
+
+```sh
+npm run version-packages   # applies the pending changesets: versions, changelogs, catalogue
+npm run check              # every gate, including contrast against every theme
+npx changeset publish      # publishes each public package whose version isn't on npm yet, then tags it
+git push --follow-tags
+```
+
+`changeset publish` skips the private packages (`engine`, `theme-builder`)
+and any version that is already on the registry, so it's safe to run again.
 
 ## Contributing
 
