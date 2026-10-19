@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema/brand.schema.json",
+  "$description": "A second theme proves the tokens are actually load-bearing rather than\ndecorative. Same structure, different voice.",
+  "name": "plain",
+  "title": "Plain",
+  "appearances": {
+    "light": {
+      "color": {
+        "accent": {
+          "$value": "#2563EB"
+        },
+        "border": {
+          "$value": "#E5E7EB"
+        },
+        "ground": {
+          "$value": "#F9FAFB"
+        },
+        "on-accent": {
+          "$value": "#FFFFFF",
+          "$description": "Text and counts drawn on the accent (was the literal value of --badge-fg)."
+        },
+        "structure": {
+          "$value": "#1F2937"
+        },
+        "surface": {
+          "$value": "#FFFFFF"
+        },
+        "surface-sunken": {
+          "$value": "#F3F4F6"
+        },
+        "text": {
+          "$value": "#374151"
+        },
+        "text-muted": {
+          "$value": "#6B7280"
+        },
+        "text-strong": {
+          "$value": "#111827"
+        },
+        "text-subtle": {
+          "$value": "#6B7484",
+          "$description": "Darkened from the platform's #9CA3AF to clear 4.5:1 on paper (4.51); this close to --muted, one quiet text tier, not two."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#047152",
+          "$description": "Darkened from the platform's #047857 to clear 4.5:1 as a pill: on its own 13% tint over the ground, a card or the sunken panel (4.55)."
+        },
+        "limited": {
+          "$value": "#A24A08",
+          "$description": "Darkened from the platform's #B45309 to clear 4.5:1 as a pill: on its own 13% tint over the ground, a card or the sunken panel (4.51). The audit measured the old value at 4.2:1."
+        },
+        "purchasing": {
+          "$value": "#4338CA"
+        },
+        "evaluation": {
+          "$value": "#5E6471",
+          "$description": "Darkened from the platform's #6B7280 to clear 4.5:1 as a pill: on its own 13% tint over the ground, a card or the sunken panel (4.54)."
+        },
+        "closed": {
+          "$value": "#B91C1C"
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#1F2937"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+/* Praxis.
+
+   A member of the conversational family, so everything structural — the near
+   black ground, the surfaces, the type scale, the shape of every control —
+   comes from `[data-family="conversational"]` in claude-like.css. What is
+   declared here is only what makes this theme Praxis: its red, its logo, its
+   mark, and the line of provenance in the corner.
+
+   The highlight is the warm tip of the mark's gradient rather than its red
+   body. The red covers far more of the artwork — it is what the tool picks on
+   coverage alone — but the reddish-orange is the colour the mark is going
+   towards, and it was chosen deliberately over the measurement.
+
+   #FF6642, hue 11, the most prevalent of the seventy warm shades that make up
+   the gradient's tip. It is used as TEXT in the kickers above every answer, so
+   it is fitted to each ground rather than used raw: it clears 4.5:1 untouched
+   on the dark ground, and has to travel 22% darker to clear it on the light
+   one. That second move is large — the hue survives but the orange reads much
+   deeper — and it is the honest cost of a colour this light on a pale ground.
+
+   Logos are drawn as supplied rather than painted, because the mark carries
+   two colours and a gradient that a stencil would flatten to one. That is why
+   there are two of them: dark ink for the light ground, light ink for the
+   dark one.
+
+   A note on the file names they arrived with. `praxis-dark.png` is dark INK,
+   for a LIGHT ground; `powered-by-dark.png` is for a DARK ground. Two opposite
+   conventions in one folder, which is why the copies here are named for the
+   ground they sit on and nothing else. */
+
+[data-theme="praxis"] {
+  --accent:      #FF6642;   /* the warm tip of the mark, as it stands */
+  --logo-paint:  #FF6642;   /* the tab icon, where the mark is painted flat */
+
+  /* The wordmark, drawn as supplied.
+
+     The aspect is set per appearance because the two files are not the same
+     shape — 2.40 and 2.53 — which is whitespace around the artwork rather
+     than a different logo. Using one ratio for both letterboxes one of them. */
+  --logo-image:  url("../brand/praxis/logo-on-dark.png");
+  --logo-bg:     transparent;
+  --logo-mask:   none;
+  --logo-aspect: 2.4;
+  /* A third larger than the default 28px. This artwork is a mark plus a
+     wordmark where the shared default was sized for a wordmark alone, so the
+     letters come out smaller at the same height. */
+  --logo-height:    37px;
+  --logo-height-sm: 27px;
+
+  /* The mark: beside the greeting, and in the tab. 320x292 artwork. */
+  --mark-image:  url("../brand/praxis/mark.png");
+  --mark-bg:     transparent;
+  --mark-mask:   none;
+  --favicon:     url("../brand/praxis/mark.png");
+}
+
+[data-theme="praxis"][data-appearance="light"] {
+  --accent:      #D12800;   /* the same hue, 22% deeper to read on pale */
+  --logo-paint:  #D12800;
+  --logo-image:  url("../brand/praxis/logo-on-light.png");
+  --logo-aspect: 2.526;
+}

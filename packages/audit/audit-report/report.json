@@ -1,0 +1,71 @@
+{
+  "tool": "@ux-builder/audit",
+  "version": "0.1.0",
+  "generatedAt": "2026-10-19T22:40:44.059Z",
+  "urls": [
+    "http://127.0.0.1:49743/only-layout.html"
+  ],
+  "rules": {
+    "theme-applied": "The theme's CSS is on the page and applies.",
+    "token-colors": "Every colour the app draws is one of the theme's colour tokens (or a mix of two).",
+    "token-fonts": "Text is set in the theme's fonts.",
+    "token-radii": "Corners use the theme's radii.",
+    "token-overrides": "The app does not set --piq-* tokens; the theme does.",
+    "widget-overrides": "The app does not restyle SDK widgets.",
+    "sdk-widgets": "Icons, the logo, loaders and controls come from the SDK, not drawn by the app.",
+    "foreign-components": "No other UI library's components.",
+    "outside-theme": "Everything visible is inside the themed element.",
+    "brand": "The page's favicon and logo follow the theme.",
+    "fonts": "The theme's fonts are loaded, from the SDK.",
+    "contrast": "Text meets WCAG AA contrast (axe color-contrast).",
+    "reflow": "The page does not scroll sideways at the audited width (WCAG 1.4.10 at 320px).",
+    "target-size": "Pointer targets are at least the theme's minimum target size (WCAG 2.5.8).",
+    "focus-obscured": "A focused control is never hidden behind sticky or fixed content (WCAG 2.4.11)."
+  },
+  "runs": [
+    {
+      "url": "http://127.0.0.1:49743/only-layout.html",
+      "theme": "praxis-carbon",
+      "appearance": "light",
+      "mode": "event",
+      "screenshot": "screens/1-praxis-carbon-light-320.png",
+      "width": 320
+    }
+  ],
+  "findings": [
+    {
+      "id": 2,
+      "url": "http://127.0.0.1:49743/only-layout.html",
+      "rule": "focus-obscured",
+      "severity": "warning",
+      "selector": "#under",
+      "message": "focused, it is hidden behind html > body > div > div",
+      "preview": null,
+      "runs": [
+        "praxis-carbon/light@320"
+      ]
+    },
+    {
+      "id": 1,
+      "url": "http://127.0.0.1:49743/only-layout.html",
+      "rule": "reflow",
+      "severity": "warning",
+      "selector": "html > body > div > div",
+      "message": "the page scrolls sideways at 320px (content 916px wide; widest: html > body > div > div)",
+      "property": "width",
+      "value": "916px",
+      "runs": [
+        "praxis-carbon/light@320"
+      ]
+    }
+  ],
+  "summary": {
+    "error": 0,
+    "warning": 2,
+    "info": 0,
+    "byRule": {
+      "focus-obscured": 1,
+      "reflow": 1
+    }
+  }
+}

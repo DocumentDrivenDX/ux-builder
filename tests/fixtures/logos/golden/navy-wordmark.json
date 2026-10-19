@@ -1,0 +1,17 @@
+{
+  "format": "svg",
+  "candidates": [
+    {
+      "hex": "#00B3A4",
+      "share": 1,
+      "oklch": {
+        "l": 0.6891,
+        "c": 0.1218,
+        "h": 184.36
+      }
+    }
+  ],
+  "monochrome": false,
+  "warnings": [],
+  "sha256": "189766937c60014a8cdcb2a94df548326c6d052b07a926b2362bf154a22c8f9d"
+}

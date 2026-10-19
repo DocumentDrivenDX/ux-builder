@@ -1,0 +1,901 @@
+{
+  "$description": "CONTRACT-001 as data: every token path, its tier, and its 0.x CSS name (null for roles added since). The composer emits these names; bead 0.5 makes the role names primary.",
+  "tokens": {
+    "badge.bg": {
+      "tier": "component",
+      "css0": "badge-bg"
+    },
+    "badge.fg": {
+      "tier": "component",
+      "css0": "badge-fg"
+    },
+    "badge.font-size": {
+      "tier": "component",
+      "css0": "badge-size"
+    },
+    "badge.radius": {
+      "tier": "component",
+      "css0": "badge-radius"
+    },
+    "border.default": {
+      "tier": "role",
+      "css0": "border"
+    },
+    "brand.favicon": {
+      "tier": "brand",
+      "css0": "favicon"
+    },
+    "brand.logo-aspect": {
+      "tier": "brand",
+      "css0": "logo-aspect"
+    },
+    "brand.logo-bg": {
+      "tier": "brand",
+      "css0": "logo-bg"
+    },
+    "brand.logo-height": {
+      "tier": "brand",
+      "css0": "logo-height"
+    },
+    "brand.logo-height-sm": {
+      "tier": "brand",
+      "css0": "logo-height-sm"
+    },
+    "brand.logo-image": {
+      "tier": "brand",
+      "css0": "logo-image"
+    },
+    "brand.logo-mask": {
+      "tier": "brand",
+      "css0": "logo-mask"
+    },
+    "brand.logo-paint": {
+      "tier": "brand",
+      "css0": "logo-paint"
+    },
+    "brand.mark-bg": {
+      "tier": "brand",
+      "css0": "mark-bg"
+    },
+    "brand.mark-image": {
+      "tier": "brand",
+      "css0": "mark-image"
+    },
+    "brand.mark-mask": {
+      "tier": "brand",
+      "css0": "mark-mask"
+    },
+    "button.font-size": {
+      "tier": "component",
+      "css0": "btn-size"
+    },
+    "button.font-weight": {
+      "tier": "component",
+      "css0": "btn-weight"
+    },
+    "button.ghost-fg": {
+      "tier": "component",
+      "css0": "btn-text-fg"
+    },
+    "button.height": {
+      "tier": "component",
+      "css0": "btn-min-height"
+    },
+    "button.offset-hover": {
+      "tier": "component",
+      "css0": "btn-shift-hover"
+    },
+    "button.offset-press": {
+      "tier": "component",
+      "css0": "btn-shift-press"
+    },
+    "button.padding-x": {
+      "tier": "component",
+      "css0": "btn-pad-x"
+    },
+    "button.radius": {
+      "tier": "component",
+      "css0": "btn-radius"
+    },
+    "button.secondary-bg": {
+      "tier": "component",
+      "css0": "btn-secondary-bg"
+    },
+    "button.secondary-border": {
+      "tier": "component",
+      "css0": "btn-secondary-border"
+    },
+    "button.secondary-fg": {
+      "tier": "component",
+      "css0": "btn-secondary-fg"
+    },
+    "button.shadow": {
+      "tier": "component",
+      "css0": "btn-lift"
+    },
+    "button.shadow-flat": {
+      "tier": "component",
+      "css0": "btn-lift-quiet"
+    },
+    "button.shadow-hover": {
+      "tier": "component",
+      "css0": "btn-lift-hover"
+    },
+    "button.shadow-press": {
+      "tier": "component",
+      "css0": "btn-lift-press"
+    },
+    "card.bg": {
+      "tier": "component",
+      "css0": "card-bg"
+    },
+    "card.border": {
+      "tier": "component",
+      "css0": "card-border"
+    },
+    "card.padding": {
+      "tier": "component",
+      "css0": "card-pad"
+    },
+    "check.border": {
+      "tier": "component",
+      "css0": "check-border"
+    },
+    "check.checked-bg": {
+      "tier": "component",
+      "css0": "check-on-bg"
+    },
+    "check.checked-fg": {
+      "tier": "component",
+      "css0": "check-on-fg"
+    },
+    "check.focus-offset": {
+      "tier": "component",
+      "css0": null
+    },
+    "check.radius": {
+      "tier": "component",
+      "css0": "check-radius"
+    },
+    "check.size": {
+      "tier": "component",
+      "css0": "check-size"
+    },
+    "choice-picker.border": {
+      "tier": "component",
+      "css0": "seg-outline"
+    },
+    "choice-picker.divider": {
+      "tier": "component",
+      "css0": "seg-divider"
+    },
+    "choice-picker.font-size": {
+      "tier": "component",
+      "css0": "seg-size"
+    },
+    "choice-picker.font-weight": {
+      "tier": "component",
+      "css0": "seg-weight"
+    },
+    "choice-picker.gap": {
+      "tier": "component",
+      "css0": "seg-gap"
+    },
+    "choice-picker.height": {
+      "tier": "component",
+      "css0": "seg-height"
+    },
+    "choice-picker.option-bg": {
+      "tier": "component",
+      "css0": "seg-bg"
+    },
+    "choice-picker.option-border": {
+      "tier": "component",
+      "css0": "seg-opt-border"
+    },
+    "choice-picker.option-fg": {
+      "tier": "component",
+      "css0": "seg-fg"
+    },
+    "choice-picker.option-hover-bg": {
+      "tier": "component",
+      "css0": "seg-hover-bg"
+    },
+    "choice-picker.option-radius": {
+      "tier": "component",
+      "css0": "seg-opt-radius"
+    },
+    "choice-picker.option-selected-bg": {
+      "tier": "component",
+      "css0": "seg-on-bg"
+    },
+    "choice-picker.option-selected-check": {
+      "tier": "component",
+      "css0": "seg-tick"
+    },
+    "choice-picker.option-selected-fg": {
+      "tier": "component",
+      "css0": "seg-on-fg"
+    },
+    "choice-picker.option-selected-font-weight": {
+      "tier": "component",
+      "css0": null
+    },
+    "choice-picker.padding-x": {
+      "tier": "component",
+      "css0": "seg-pad-x"
+    },
+    "choice-picker.radius": {
+      "tier": "component",
+      "css0": "seg-radius"
+    },
+    "color.accent": {
+      "tier": "role",
+      "css0": "accent"
+    },
+    "color.border": {
+      "tier": "role",
+      "css0": "rule"
+    },
+    "color.ground": {
+      "tier": "role",
+      "css0": "paper"
+    },
+    "color.ground-recessed": {
+      "tier": "role",
+      "css0": "rail"
+    },
+    "color.on-accent": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.structure": {
+      "tier": "role",
+      "css0": "navy"
+    },
+    "color.surface": {
+      "tier": "role",
+      "css0": "surface"
+    },
+    "color.surface-sunken": {
+      "tier": "role",
+      "css0": "surface-sunken"
+    },
+    "color.text": {
+      "tier": "role",
+      "css0": "body"
+    },
+    "color.text-muted": {
+      "tier": "role",
+      "css0": "muted"
+    },
+    "color.text-strong": {
+      "tier": "role",
+      "css0": "ink"
+    },
+    "color.text-subtle": {
+      "tier": "role",
+      "css0": "muted-2"
+    },
+    "field.bg": {
+      "tier": "component",
+      "css0": "field-bg"
+    },
+    "field.border": {
+      "tier": "component",
+      "css0": "field-border"
+    },
+    "field.border-bottom": {
+      "tier": "component",
+      "css0": "field-border-bottom"
+    },
+    "field.border-hover": {
+      "tier": "component",
+      "css0": "field-hover-edge"
+    },
+    "field.focus-offset": {
+      "tier": "component",
+      "css0": "field-focus-offset"
+    },
+    "field.focus-outline": {
+      "tier": "component",
+      "css0": "field-focus-outline"
+    },
+    "field.focus-shadow": {
+      "tier": "component",
+      "css0": "field-focus-shadow"
+    },
+    "field.height": {
+      "tier": "component",
+      "css0": "field-height"
+    },
+    "field.invalid-shadow": {
+      "tier": "component",
+      "css0": "field-invalid-shadow"
+    },
+    "field.label-fg": {
+      "tier": "component",
+      "css0": "field-label-fg"
+    },
+    "field.label-font-size": {
+      "tier": "component",
+      "css0": "field-label-size"
+    },
+    "field.label-font-weight": {
+      "tier": "component",
+      "css0": "field-label-weight"
+    },
+    "field.label-letter-spacing": {
+      "tier": "component",
+      "css0": "field-label-tracking"
+    },
+    "field.label-text-transform": {
+      "tier": "component",
+      "css0": "field-label-transform"
+    },
+    "field.padding-x": {
+      "tier": "component",
+      "css0": "field-pad-x"
+    },
+    "field.radius": {
+      "tier": "component",
+      "css0": "field-radius"
+    },
+    "focus.offset": {
+      "tier": "role",
+      "css0": "btn-focus-offset"
+    },
+    "focus.ring": {
+      "tier": "role",
+      "css0": "btn-focus-ring"
+    },
+    "font-size.body": {
+      "tier": "role",
+      "css0": "size-body"
+    },
+    "font-size.display": {
+      "tier": "role",
+      "css0": "size-display"
+    },
+    "font-size.heading": {
+      "tier": "role",
+      "css0": "size-heading"
+    },
+    "font-size.label": {
+      "tier": "role",
+      "css0": "size-label"
+    },
+    "font-size.lead": {
+      "tier": "role",
+      "css0": "size-intro"
+    },
+    "font-size.small": {
+      "tier": "role",
+      "css0": "size-small"
+    },
+    "font-size.title": {
+      "tier": "role",
+      "css0": "size-title"
+    },
+    "font-weight.regular": {
+      "tier": "role",
+      "css0": "weight-normal"
+    },
+    "font-weight.strong": {
+      "tier": "role",
+      "css0": "weight-bold"
+    },
+    "font.body": {
+      "tier": "role",
+      "css0": "font-body"
+    },
+    "font.display": {
+      "tier": "role",
+      "css0": "font-display"
+    },
+    "font.heading": {
+      "tier": "role",
+      "css0": "font-heading"
+    },
+    "font.mono": {
+      "tier": "role",
+      "css0": "font-mono"
+    },
+    "letter-spacing.eyebrow": {
+      "tier": "role",
+      "css0": "tracking-kicker"
+    },
+    "letter-spacing.label": {
+      "tier": "role",
+      "css0": "tracking-label"
+    },
+    "line-height.body": {
+      "tier": "role",
+      "css0": "leading-body"
+    },
+    "line-height.tight": {
+      "tier": "role",
+      "css0": "leading-tight"
+    },
+    "menu.bg": {
+      "tier": "component",
+      "css0": "menu-bg"
+    },
+    "menu.border": {
+      "tier": "component",
+      "css0": "menu-border"
+    },
+    "menu.item-height": {
+      "tier": "component",
+      "css0": "menu-item-height"
+    },
+    "menu.item-hover-bg": {
+      "tier": "component",
+      "css0": "menu-item-hover"
+    },
+    "menu.item-selected-bg": {
+      "tier": "component",
+      "css0": "menu-item-on-bg"
+    },
+    "menu.item-selected-fg": {
+      "tier": "component",
+      "css0": "menu-item-on-fg"
+    },
+    "menu.item-selected-font-weight": {
+      "tier": "component",
+      "css0": "menu-item-on-weight"
+    },
+    "menu.item-selected-indicator": {
+      "tier": "component",
+      "css0": "menu-item-on-mark"
+    },
+    "menu.offset": {
+      "tier": "component",
+      "css0": null
+    },
+    "menu.padding-y": {
+      "tier": "component",
+      "css0": "menu-pad-y"
+    },
+    "menu.radius": {
+      "tier": "component",
+      "css0": "menu-radius"
+    },
+    "menu.shadow": {
+      "tier": "component",
+      "css0": "menu-shadow"
+    },
+    "notice.bg": {
+      "tier": "component",
+      "css0": "notice-bg"
+    },
+    "notice.border-tone-mix": {
+      "tier": "component",
+      "css0": "notice-edge-mix"
+    },
+    "notice.border-width": {
+      "tier": "component",
+      "css0": "notice-border-width"
+    },
+    "notice.radius": {
+      "tier": "component",
+      "css0": "notice-radius"
+    },
+    "notice.stripe-width": {
+      "tier": "component",
+      "css0": "notice-stripe"
+    },
+    "notice.tone-mix": {
+      "tier": "component",
+      "css0": "notice-tint"
+    },
+    "pill.bg": {
+      "tier": "component",
+      "css0": "pill-bg"
+    },
+    "pill.border": {
+      "tier": "component",
+      "css0": "pill-border"
+    },
+    "pill.dot-size": {
+      "tier": "component",
+      "css0": "pill-dot-size"
+    },
+    "pill.font-size": {
+      "tier": "component",
+      "css0": "pill-size"
+    },
+    "pill.font-weight": {
+      "tier": "component",
+      "css0": "pill-weight"
+    },
+    "pill.gap": {
+      "tier": "component",
+      "css0": "pill-gap"
+    },
+    "pill.letter-spacing": {
+      "tier": "component",
+      "css0": "pill-tracking"
+    },
+    "pill.padding": {
+      "tier": "component",
+      "css0": "pill-pad"
+    },
+    "pill.radius": {
+      "tier": "component",
+      "css0": "pill-radius"
+    },
+    "pill.text-transform": {
+      "tier": "component",
+      "css0": "pill-transform"
+    },
+    "progress.fill-bg": {
+      "tier": "component",
+      "css0": null
+    },
+    "progress.height": {
+      "tier": "component",
+      "css0": null
+    },
+    "progress.radius": {
+      "tier": "component",
+      "css0": null
+    },
+    "progress.track-bg": {
+      "tier": "component",
+      "css0": null
+    },
+    "radius.card": {
+      "tier": "role",
+      "css0": "radius-card"
+    },
+    "radius.control": {
+      "tier": "role",
+      "css0": "radius"
+    },
+    "shadow.card": {
+      "tier": "role",
+      "css0": "shadow-card"
+    },
+    "shadow.overlay": {
+      "tier": "role",
+      "css0": "shadow-raised"
+    },
+    "size.measure": {
+      "tier": "role",
+      "css0": "measure"
+    },
+    "skeleton.bg": {
+      "tier": "component",
+      "css0": null
+    },
+    "skeleton.effect": {
+      "tier": "component",
+      "css0": null
+    },
+    "skeleton.radius": {
+      "tier": "component",
+      "css0": null
+    },
+    "space.1": {
+      "tier": "role",
+      "css0": "space-1"
+    },
+    "space.2": {
+      "tier": "role",
+      "css0": "space-2"
+    },
+    "space.3": {
+      "tier": "role",
+      "css0": "space-3"
+    },
+    "space.4": {
+      "tier": "role",
+      "css0": "space-4"
+    },
+    "space.5": {
+      "tier": "role",
+      "css0": "space-5"
+    },
+    "space.6": {
+      "tier": "role",
+      "css0": "space-6"
+    },
+    "space.7": {
+      "tier": "role",
+      "css0": "space-7"
+    },
+    "space.8": {
+      "tier": "role",
+      "css0": "space-8"
+    },
+    "spinner.line-cap": {
+      "tier": "component",
+      "css0": null
+    },
+    "spinner.stroke-width": {
+      "tier": "component",
+      "css0": null
+    },
+    "spinner.track-color": {
+      "tier": "component",
+      "css0": null
+    },
+    "state-layer.hover": {
+      "tier": "role",
+      "css0": "btn-hover-mix"
+    },
+    "state-layer.press": {
+      "tier": "role",
+      "css0": "btn-press-mix"
+    },
+    "state.closed": {
+      "tier": "role",
+      "css0": "state-closed"
+    },
+    "state.evaluation": {
+      "tier": "role",
+      "css0": "state-evaluation"
+    },
+    "state.limited": {
+      "tier": "role",
+      "css0": "state-limited"
+    },
+    "state.live": {
+      "tier": "role",
+      "css0": "state-live"
+    },
+    "state.purchasing": {
+      "tier": "role",
+      "css0": "state-purchasing"
+    },
+    "switch.checked-border-color": {
+      "tier": "component",
+      "css0": null
+    },
+    "switch.checked-thumb-bg": {
+      "tier": "component",
+      "css0": "switch-thumb-on-bg"
+    },
+    "switch.checked-thumb-size": {
+      "tier": "component",
+      "css0": "switch-thumb-on"
+    },
+    "switch.checked-track-bg": {
+      "tier": "component",
+      "css0": "switch-on-bg"
+    },
+    "switch.height": {
+      "tier": "component",
+      "css0": "switch-height"
+    },
+    "switch.radius": {
+      "tier": "component",
+      "css0": "switch-radius"
+    },
+    "switch.thumb-bg": {
+      "tier": "component",
+      "css0": "switch-thumb-off-bg"
+    },
+    "switch.thumb-inset": {
+      "tier": "component",
+      "css0": "switch-inset"
+    },
+    "switch.thumb-size": {
+      "tier": "component",
+      "css0": "switch-thumb-off"
+    },
+    "switch.track-bg": {
+      "tier": "component",
+      "css0": "switch-off-bg"
+    },
+    "switch.track-border": {
+      "tier": "component",
+      "css0": "switch-off-border"
+    },
+    "switch.width": {
+      "tier": "component",
+      "css0": "switch-width"
+    },
+    "table.cell-padding-x": {
+      "tier": "component",
+      "css0": "table-pad-x"
+    },
+    "table.cell-padding-y": {
+      "tier": "component",
+      "css0": "table-pad-y"
+    },
+    "table.font-size": {
+      "tier": "component",
+      "css0": "table-size"
+    },
+    "table.header-bg": {
+      "tier": "component",
+      "css0": "table-head-bg"
+    },
+    "table.header-border": {
+      "tier": "component",
+      "css0": "table-head-border"
+    },
+    "table.header-fg": {
+      "tier": "component",
+      "css0": "table-head-fg"
+    },
+    "table.header-font-size": {
+      "tier": "component",
+      "css0": "table-head-size"
+    },
+    "table.header-font-weight": {
+      "tier": "component",
+      "css0": "table-head-weight"
+    },
+    "table.header-height": {
+      "tier": "component",
+      "css0": "table-head-height"
+    },
+    "table.header-letter-spacing": {
+      "tier": "component",
+      "css0": "table-head-tracking"
+    },
+    "table.header-text-transform": {
+      "tier": "component",
+      "css0": "table-head-transform"
+    },
+    "table.row-height": {
+      "tier": "component",
+      "css0": "table-row-height"
+    },
+    "table.row-hover-bg": {
+      "tier": "component",
+      "css0": "table-row-hover"
+    },
+    "toast.action-fg": {
+      "tier": "component",
+      "css0": "toast-action-fg"
+    },
+    "toast.bg": {
+      "tier": "component",
+      "css0": "toast-bg"
+    },
+    "toast.fg": {
+      "tier": "component",
+      "css0": "toast-fg"
+    },
+    "toast.radius": {
+      "tier": "component",
+      "css0": "toast-radius"
+    },
+    "toast.shadow": {
+      "tier": "component",
+      "css0": "toast-shadow"
+    },
+    "toast.stripe-width": {
+      "tier": "component",
+      "css0": "toast-stripe"
+    },
+    "icon.set": {
+      "tier": "component",
+      "css0": null
+    },
+    "size.breakpoint-medium": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.breakpoint-expanded": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.breakpoint-large": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.breakpoint-extra-large": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.content-form": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.content-page": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.target-minimum": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.target-touch": {
+      "tier": "role",
+      "css0": null
+    },
+    "space.gutter-compact": {
+      "tier": "role",
+      "css0": null
+    },
+    "space.gutter-medium": {
+      "tier": "role",
+      "css0": null
+    },
+    "space.gutter-expanded": {
+      "tier": "role",
+      "css0": null
+    },
+    "space.gutter-large": {
+      "tier": "role",
+      "css0": null
+    },
+    "space.gutter-extra-large": {
+      "tier": "role",
+      "css0": null
+    },
+    "nav.width": {
+      "tier": "component",
+      "css0": null
+    },
+    "nav.item-direction": {
+      "tier": "component",
+      "css0": null
+    },
+    "nav.item-gap": {
+      "tier": "component",
+      "css0": null
+    },
+    "nav.item-label-font-size": {
+      "tier": "component",
+      "css0": null
+    },
+    "nav.item-selected-bg": {
+      "tier": "component",
+      "css0": null
+    },
+    "nav.item-selected-border": {
+      "tier": "component",
+      "css0": null
+    },
+    "nav.bar-height": {
+      "tier": "component",
+      "css0": null
+    },
+    "tabs.indicator-height": {
+      "tier": "component",
+      "css0": null
+    },
+    "tabs.list-border": {
+      "tier": "component",
+      "css0": null
+    },
+    "tabs.tab-bg-selected": {
+      "tier": "component",
+      "css0": null
+    },
+    "tabs.tab-radius": {
+      "tier": "component",
+      "css0": null
+    },
+    "tabs.tab-padding-x": {
+      "tier": "component",
+      "css0": null
+    },
+    "page-header.title-font-size": {
+      "tier": "component",
+      "css0": null
+    },
+    "page-header.padding-y": {
+      "tier": "component",
+      "css0": null
+    },
+    "page-header.gap": {
+      "tier": "component",
+      "css0": null
+    },
+    "table.row-stripe-bg": {
+      "tier": "component",
+      "css0": null
+    },
+    "table.row-border": {
+      "tier": "component",
+      "css0": null
+    }
+  }
+}

@@ -1,0 +1,190 @@
+/* Claude-like theme — the Business User concept.
+
+   A deliberate opposite to a printed-document theme:
+   squared corners, rules instead of shadows, dense small type, ink on paper.
+   This is an application surface, and a dark one — taken from the Claude
+   desktop app rather than from a print deck.
+
+   Measured off a screenshot of the real thing rather than guessed:
+     ground          warm charcoal, never a blue-grey
+     sidebar         a shade darker than the working area, not lighter
+     type            off-white, and the greeting is a serif at display size
+     accent          the coral of the Claude mark, used once per screen
+     controls        low-contrast fills; the active one is lighter, not coloured
+
+   The restraint is the point. Almost nothing on that screen carries a colour,
+   and what a control does is said with an icon rather than a word, so the only
+   saturated thing in view is the mark itself.
+
+   Same token contract as the other two themes, so ui.css never learns which
+   one is on. */
+
+[data-family="conversational"] {
+  /* ---- palette ---------------------------------------------------------- */
+  --ink:              #F5F4EE;  /* headings and the greeting */
+  --body:             #D6D3CC;
+  --navy:             #E8E6DF;  /* the structural role; light here, not blue */
+  --accent:           #D97757;  /* the coral of the mark */
+  --rule:             #353431;
+  --paper:            #1B1A19;  /* the working ground — near-black, still warm */
+  --surface:          #242322;  /* composer, cards — lifted off the ground */
+  --surface-sunken:   #201F1E;  /* panels lifted off the ground */
+  --rail:             #141312;  /* the rail: a shelf BEHIND the work,
+                                    so it is darker than the ground */
+
+  --logo-paint:       #D97757;
+
+  /* ---- tab icon ----------------------------------------------------------
+     Optional. Set --favicon to a url() to supply one; leave it out and the
+     app draws one from the brand mark in this theme's --logo-paint, which is
+     why adding a theme never means remembering to draw an icon.
+     See web/favicon.js. */
+  /* Availability, dimmed to sit on a dark ground without glowing. */
+  --state-live:        #7FA98A;
+  --state-limited:     #C2A15F;
+  --state-purchasing:  #8FA3C8;
+  --state-evaluation:  #9B968C;
+  --state-closed:      #D98A78;
+
+  --muted:            #A8A49B;
+  --muted-2:          #7E7A72;
+
+  /* ---- type -------------------------------------------------------------
+     The app pairs a serif display with a sans UI. Neither face is web-licensed
+     here, so each falls back to the closest thing every machine already has —
+     the shapes are close, the names are not. */
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: "Tiempos Text", Georgia, "Iowan Old Style", serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, monospace;
+
+  --size-display:  2.75rem;   /* the greeting is genuinely large */
+  --size-title:    1.5rem;
+  --size-heading:  1.0625rem;
+  --size-intro:    1rem;
+  --size-body:     0.9375rem;
+  --size-small:    0.875rem;
+  --size-label:    0.75rem;
+
+  --weight-normal: 400;
+  --weight-bold:   500;   /* bold is barely bold here; the ground does the work */
+
+  --tracking-label: 0.04em;
+  --tracking-kicker: 0.1em;
+  --leading-tight: 1.15;
+  --leading-body:  1.6;
+
+  /* ---- form -------------------------------------------------------------
+     Radius everywhere, and shadows that read as depth rather than as lift —
+     on a dark ground a drop shadow is nearly invisible, so separation comes
+     from the surface being lighter than what it sits on. */
+  --radius:       10px;
+  --radius-card:  16px;
+  --border:       1px solid var(--rule);
+  --shadow-card:  none;
+  --shadow-raised: 0 8px 28px rgba(0, 0, 0, 0.35);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --measure: 70ch;
+
+  /* ---- controls ---------------------------------------------------------
+     Buttons are quiet fills, not lifted objects. The shape rule still holds —
+     a pill and a button never share a radius — but here the pill goes fully
+     round while the button stays a rounded rectangle, the inverse of the
+     deck's arrangement. */
+
+  /* buttons */
+  --btn-radius:       10px;
+  --btn-min-height:   36px;
+  --btn-pad-x:        var(--space-4);
+  --btn-weight:       var(--weight-bold);
+  --btn-size:         var(--size-small);
+  --btn-lift:         none;
+  --btn-lift-hover:   none;
+  --btn-lift-press:   none;
+  --btn-shift-hover:  0px;
+  --btn-shift-press:  1px;
+  --btn-lift-quiet:   none;
+  --btn-focus-ring:   2px solid var(--accent);
+  --btn-focus-offset: 2px;
+
+  /* pills — round, low contrast, no dot. */
+  --pill-radius:    999px;
+  --pill-border:    1px solid var(--rule);
+  --pill-bg:        var(--surface-sunken);
+  --pill-pad:       0.2em 0.7em;
+  --pill-gap:       0.4em;
+  --pill-dot-size:  0;
+  --pill-weight:    var(--weight-bold);
+  --pill-size:      var(--size-label);
+  --pill-transform: none;
+  --pill-tracking:  0;
+
+  /* badges — a count inside a control. The one other place the accent shows. */
+  --badge-bg:     var(--accent);
+  --badge-fg:     #1F1E1D;
+  --badge-radius: 999px;
+  --badge-size:   0.6875rem;
+}
+
+/* ---------------------------------------------------------------- light ----
+
+   The same theme in daylight. Only the palette and the shadows change: type,
+   spacing, radius and the control treatment are appearance-independent, which
+   is what makes this an appearance rather than a fourth theme.
+
+   `auto` is resolved to `light` or `dark` in App.jsx before it reaches the DOM,
+   so this file never needs a prefers-color-scheme block — and the toggle can
+   report which way `auto` actually went, which a media query alone cannot.
+
+   Where dark separates surfaces by making them lighter than the ground, light
+   has to do it with a shadow: on cream, a white card with no shadow is not a
+   card, it is a hole. */
+
+[data-family="conversational"][data-appearance="light"] {
+  --ink:              #141413;
+  --body:             #3D3D3A;
+  --navy:             #29261F;
+  --accent:           #C15F3C;   /* a shade deeper than the dark-mode coral,
+                                    which would glare against cream */
+  --rule:             #E6E2D8;
+  --paper:            #F0EEE6;
+  /* Same relationship in daylight: a shade deeper than the working
+     ground, not a white card floating on it. */
+  --rail:             #E4E0D4;
+  --surface:          #FFFFFF;
+  --surface-sunken:   #FAF9F5;
+
+  --state-live:        #3F6B4F;
+  --state-limited:     #9A6B24;
+  --state-purchasing:  #4A5A7A;
+  --state-evaluation:  #7A756A;
+  --state-closed:      #A33B2A;
+
+  --muted:            #6B675E;
+  --muted-2:          #8F8A7E;
+
+  --weight-bold:      600;   /* 500 disappears on a light ground */
+
+  --shadow-card:   0 1px 2px rgba(20, 20, 19, 0.04), 0 4px 16px rgba(20, 20, 19, 0.04);
+  --shadow-raised: 0 2px 6px rgba(20, 20, 19, 0.08), 0 8px 28px rgba(20, 20, 19, 0.06);
+
+  --btn-lift:       0 1px 2px rgba(20, 20, 19, 0.16);
+  --btn-lift-hover: 0 2px 8px rgba(20, 20, 19, 0.18);
+  --btn-lift-quiet: 0 1px 2px rgba(20, 20, 19, 0.06);
+
+  --badge-fg:       #FFFFFF;
+}
+
+/* The rail's own light-appearance rules used to live here, keyed to this
+   theme by name. They were component rules in a token file, which meant a
+   theme inheriting this experience got the tokens and not the interface.
+   They now sit in assets/claude-like.css keyed to the appearance alone. */

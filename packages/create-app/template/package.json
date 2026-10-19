@@ -1,0 +1,27 @@
+{
+  "name": "__APP_NAME__",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "stylelint \"src/**/*.css\" && eslint src",
+    "audit": "vite build && ux-builder-audit --serve \"vite preview --port 4173 --strictPort --host 127.0.0.1\" http://127.0.0.1:4173/",
+    "postinstall": "node scripts/install-skill.mjs"
+  },
+  "dependencies": {
+    "@ux-builder/tokens": "__TOKENS__",
+    "@ux-builder/ui": "__UI__",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@ux-builder/audit": "__AUDIT__",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10.12.0",
+    "stylelint": "^17.16.0",
+    "vite": "^8.3.2"
+  }
+}

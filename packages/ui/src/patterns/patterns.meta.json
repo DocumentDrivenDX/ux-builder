@@ -1,0 +1,952 @@
+{
+  "$description": "What the catalogue says about each pattern that its code cannot (FEAT-006 AGT-01, AGT-02; CONTRACT-004): its slots, the states it shows, how it adapts per size class, the variant points it reads, when to choose it and what to choose instead. tools/gen-catalogue.mjs merges it into catalogue.json and fails if it drifts from the code: every pattern needs an entry, every slot must be one of its props, every variant point must exist.",
+  "patterns": {
+    "Stack": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A vertical run with a space step between children; the same at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Children one above another with even spacing.",
+      "insteadOf": [
+        {
+          "name": "Cluster",
+          "when": "children sit in a row and wrap"
+        }
+      ]
+    },
+    "Cluster": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A row that wraps onto more rows when it runs out of width."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Buttons, tags or filters in a row.",
+      "insteadOf": [
+        {
+          "name": "Grid",
+          "when": "items should line up in equal columns"
+        }
+      ]
+    },
+    "Grid": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "1 column by default.",
+        "medium": "2.",
+        "expanded": "3.",
+        "large": "4; each count can be set per size class."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Equal columns of cards or tiles whose count follows the width.",
+      "insteadOf": [
+        {
+          "name": "Dashboard",
+          "when": "it is a dashboard of number tiles and charts"
+        }
+      ]
+    },
+    "Page": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "The compact gutter.",
+        "medium": "The medium gutter.",
+        "expanded": "The expanded gutter; content capped at the page, form or reading width."
+      },
+      "variantPoints": [],
+      "chooseWhen": "The frame of a screen's content inside the app shell.",
+      "insteadOf": []
+    },
+    "SplitView": {
+      "slots": [
+        "primary",
+        "secondary"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One pane: the one show names.",
+        "medium": "One pane.",
+        "expanded": "Both panes side by side."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Two panes of your own that should sit side by side when there is room.",
+      "insteadOf": [
+        {
+          "name": "ListDetail",
+          "when": "it is a list of records and the chosen record"
+        }
+      ]
+    },
+    "PrimaryNav": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A vertical list of links, groups open by disclosure."
+      },
+      "variantPoints": [
+        "navigation"
+      ],
+      "chooseWhen": "An app's main destinations, when you are not using AppShell.",
+      "insteadOf": [
+        {
+          "name": "AppShell",
+          "when": "you need the whole frame of an app"
+        }
+      ]
+    },
+    "WorkspaceSwitcher": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A menu up to seven workspaces; a searchable list from eight."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Switching workspace or tenant in the top bar.",
+      "insteadOf": []
+    },
+    "AppShell": {
+      "slots": [
+        "brand",
+        "actions",
+        "breadcrumbs",
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Bottom bar of up to five destinations and a drawer.",
+        "medium": "A navigation rail.",
+        "expanded": "The design system's side navigation (side menu or rail)."
+      },
+      "variantPoints": [
+        "navigation"
+      ],
+      "chooseWhen": "The frame of every app: navigation, top bar and content.",
+      "insteadOf": []
+    },
+    "ErrorScreen": {
+      "slots": [
+        "children",
+        "actions"
+      ],
+      "statuses": [
+        "not-found",
+        "forbidden",
+        "error"
+      ],
+      "sizeClasses": {
+        "compact": "A centred column at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A whole screen that cannot show: not found, no permission, offline, maintenance, session expired.",
+      "insteadOf": [
+        {
+          "name": "StatePanel",
+          "when": "only one region of the screen has nothing to show"
+        }
+      ]
+    },
+    "PageHeader": {
+      "slots": [
+        "breadcrumbs",
+        "status",
+        "actions",
+        "secondaryActions"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Title and actions wrap onto two rows when there is no room."
+      },
+      "variantPoints": [
+        "page-header"
+      ],
+      "chooseWhen": "The top of a screen of your own: one h1, status and actions.",
+      "insteadOf": []
+    },
+    "FilterBar": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Search and a Filters (n) button.",
+        "medium": "Adds the applied filters as removable chips and Clear all."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Search and filters above a list of your own.",
+      "insteadOf": [
+        {
+          "name": "CollectionList",
+          "when": "it is a list of records"
+        }
+      ]
+    },
+    "FilterPanel": {
+      "slots": [
+        "children",
+        "footer"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A full-screen sheet.",
+        "expanded": "A side panel beside the list."
+      },
+      "variantPoints": [],
+      "chooseWhen": "The filters themselves, opened from a filter bar.",
+      "insteadOf": []
+    },
+    "FilterSection": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A section that opens and closes."
+      },
+      "variantPoints": [],
+      "chooseWhen": "One group of filters in a filter panel.",
+      "insteadOf": []
+    },
+    "StatePanel": {
+      "slots": [
+        "children",
+        "action"
+      ],
+      "statuses": [
+        "empty",
+        "no-results",
+        "forbidden",
+        "error",
+        "partial"
+      ],
+      "sizeClasses": {
+        "compact": "Centred in its region at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A region with nothing to show: first use, no results, no permission, a failed or partial load.",
+      "insteadOf": [
+        {
+          "name": "ErrorScreen",
+          "when": "the whole screen cannot show"
+        }
+      ]
+    },
+    "BulkActionBar": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Sticks to the bottom of the screen after the list, kept clear of focus."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Actions on selected rows of a list of your own.",
+      "insteadOf": [
+        {
+          "name": "CollectionList",
+          "when": "it is a list of records"
+        }
+      ]
+    },
+    "CollectionList": {
+      "slots": [
+        "statusPill",
+        "actions",
+        "secondaryActions",
+        "filterPanel",
+        "bulkActions",
+        "empty"
+      ],
+      "statuses": [
+        "ready",
+        "loading",
+        "empty",
+        "no-results",
+        "forbidden",
+        "error",
+        "partial"
+      ],
+      "sizeClasses": {
+        "compact": "Stacked items with the priority columns; filters in a full-screen sheet.",
+        "medium": "A table of the priority columns.",
+        "expanded": "Every column; filters beside the list."
+      },
+      "variantPoints": [
+        "table",
+        "page-header"
+      ],
+      "chooseWhen": "Finding and acting on many records: search, filters, selection, bulk and row actions, pages. Never choose between a table and stacked items yourself: it shows a table from medium and stacked items at compact.",
+      "insteadOf": [
+        {
+          "name": "ListDetail",
+          "when": "users look at one record at a time while keeping the list in view"
+        }
+      ]
+    },
+    "DescriptionList": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column.",
+        "medium": "Two columns; wide items span both."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A record's fields, read only.",
+      "insteadOf": [
+        {
+          "name": "FormPage",
+          "when": "the fields are edited"
+        }
+      ]
+    },
+    "Timeline": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column of events at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "What has happened to a record: comments, changes and system events.",
+      "insteadOf": []
+    },
+    "TabsSection": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Tabs scroll when they do not fit."
+      },
+      "variantPoints": [
+        "tabs"
+      ],
+      "chooseWhen": "Sections of a record that share one place, with the chosen one in the URL.",
+      "insteadOf": []
+    },
+    "RecordDetail": {
+      "slots": [
+        "statusPill",
+        "actions",
+        "secondaryActions",
+        "back",
+        "children"
+      ],
+      "statuses": [
+        "ready",
+        "loading",
+        "empty",
+        "error",
+        "forbidden",
+        "not-found"
+      ],
+      "sizeClasses": {
+        "compact": "Header, fields, tabs and activity in one column.",
+        "expanded": "Activity in a supporting pane beside the rest."
+      },
+      "variantPoints": [
+        "page-header",
+        "tabs"
+      ],
+      "chooseWhen": "One record: its header, fields, tabs and activity.",
+      "insteadOf": [
+        {
+          "name": "FormPage",
+          "when": "the record is being created or edited"
+        }
+      ]
+    },
+    "ListDetail": {
+      "slots": [
+        "detail"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "The list, then the chosen record's own view with Back.",
+        "medium": "The same.",
+        "expanded": "List and record side by side; selection follows the arrow keys."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Working through records one at a time while the list stays in view, such as triage or review.",
+      "insteadOf": [
+        {
+          "name": "CollectionList",
+          "when": "users mostly search, filter and act on many records at once"
+        }
+      ]
+    },
+    "ErrorSummary": {
+      "slots": [],
+      "statuses": [
+        "error"
+      ],
+      "sizeClasses": {
+        "compact": "At the top of the form at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A form of your own that needs the summary FormPage shows.",
+      "insteadOf": [
+        {
+          "name": "FormPage",
+          "when": "it is a full-page form"
+        }
+      ]
+    },
+    "FormSection": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A group of related fields with a heading.",
+      "insteadOf": []
+    },
+    "FormPage": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [
+        "error"
+      ],
+      "sizeClasses": {
+        "compact": "One column; Save and Cancel stay above the keyboard.",
+        "expanded": "One column no wider than the form width."
+      },
+      "variantPoints": [
+        "page-header"
+      ],
+      "chooseWhen": "Creating or editing a record with more than about six fields, or with sections.",
+      "insteadOf": [
+        {
+          "name": "QuickEdit",
+          "when": "the form is short (about six fields or fewer) and users should stay on the page"
+        }
+      ]
+    },
+    "QuickEdit": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [
+        "error"
+      ],
+      "sizeClasses": {
+        "compact": "A full-screen sheet.",
+        "medium": "A modal dialog."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A short create or edit (about six fields or fewer) without leaving the page.",
+      "insteadOf": [
+        {
+          "name": "FormPage",
+          "when": "the form is long or has sections"
+        }
+      ]
+    },
+    "ConfirmDialog": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A modal dialog at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Before a destructive or irreversible action; requireTyping for serious ones.",
+      "insteadOf": []
+    },
+    "StatTile": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Fills its grid cell."
+      },
+      "variantPoints": [],
+      "chooseWhen": "One figure that matters, with its change in words.",
+      "insteadOf": []
+    },
+    "ChartFrame": {
+      "slots": [
+        "children",
+        "actions"
+      ],
+      "statuses": [
+        "ready",
+        "loading",
+        "empty",
+        "error"
+      ],
+      "sizeClasses": {
+        "compact": "Legend below the chart; data table behind a button."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Around every chart: title, legend, states and the data-table alternative.",
+      "insteadOf": []
+    },
+    "Dashboard": {
+      "slots": [
+        "actions",
+        "filters",
+        "dateRange",
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Tiles two across; charts one across.",
+        "medium": "Charts two across.",
+        "expanded": "Tiles four across."
+      },
+      "variantPoints": [
+        "page-header"
+      ],
+      "chooseWhen": "An overview of figures and charts for a period.",
+      "insteadOf": [
+        {
+          "name": "ReportViewer",
+          "when": "users set parameters, run a report and export or print it"
+        }
+      ]
+    },
+    "ReportViewer": {
+      "slots": [
+        "parameters",
+        "results"
+      ],
+      "statuses": [
+        "ready",
+        "loading",
+        "error",
+        "forbidden",
+        "empty"
+      ],
+      "sizeClasses": {
+        "compact": "Parameters in a sheet.",
+        "medium": "Parameters in a panel that opens and closes.",
+        "expanded": "Parameters in a side panel."
+      },
+      "variantPoints": [
+        "page-header"
+      ],
+      "chooseWhen": "Parameters, Run, results with the applied parameters, Export and Print.",
+      "insteadOf": [
+        {
+          "name": "Dashboard",
+          "when": "it is an at-a-glance overview"
+        }
+      ]
+    },
+    "SettingsPage": {
+      "slots": [],
+      "statuses": [
+        "forbidden"
+      ],
+      "sizeClasses": {
+        "compact": "The list of sections, then one section with Back.",
+        "medium": "The same.",
+        "expanded": "Section navigation beside the section."
+      },
+      "variantPoints": [
+        "page-header"
+      ],
+      "chooseWhen": "An app's or a workspace's settings in sections.",
+      "insteadOf": []
+    },
+    "Wizard": {
+      "slots": [
+        "steps",
+        "review"
+      ],
+      "statuses": [
+        "error"
+      ],
+      "sizeClasses": {
+        "compact": "\"Step 2 of 5: Title\" and a progress bar.",
+        "medium": "A step list above the step."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A task whose steps depend on each other, checked step by step, ending in a review.",
+      "insteadOf": [
+        {
+          "name": "TaskList",
+          "when": "the sections are independent and can be done in any order"
+        },
+        {
+          "name": "FormPage",
+          "when": "it fits on one page"
+        }
+      ]
+    },
+    "TaskList": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column of sections with their status."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A long form in independent sections, done in any order.",
+      "insteadOf": [
+        {
+          "name": "Wizard",
+          "when": "the steps depend on each other"
+        }
+      ]
+    },
+    "ReviewConfirm": {
+      "slots": [
+        "consequence"
+      ],
+      "statuses": [
+        "ready"
+      ],
+      "sizeClasses": {
+        "compact": "One column no wider than the form width."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Before an irreversible submission: answers by section with Change links, then the confirmation and reference.",
+      "insteadOf": [
+        {
+          "name": "ConfirmDialog",
+          "when": "it is a single destructive action"
+        }
+      ]
+    },
+    "EditableGrid": {
+      "slots": [],
+      "statuses": [
+        "error"
+      ],
+      "sizeClasses": {
+        "compact": "A row is edited in a sheet; the grid scrolls sideways.",
+        "medium": "Cells are edited in place."
+      },
+      "variantPoints": [
+        "table"
+      ],
+      "chooseWhen": "Rows edited like a spreadsheet: line items, time entries.",
+      "insteadOf": [
+        {
+          "name": "CollectionList",
+          "when": "rows are read and acted on, not edited in place"
+        }
+      ]
+    },
+    "WorkQueue": {
+      "slots": [],
+      "statuses": [
+        "empty"
+      ],
+      "sizeClasses": {
+        "compact": "One item with its actions at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Working through items one at a time: approvals, triage.",
+      "insteadOf": [
+        {
+          "name": "ListDetail",
+          "when": "users pick items in any order from a list"
+        }
+      ]
+    },
+    "ImportFlow": {
+      "slots": [
+        "result"
+      ],
+      "statuses": [
+        "error"
+      ],
+      "sizeClasses": {
+        "compact": "One step at a time at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Bringing records in from a file: upload, map, validate, preview, import.",
+      "insteadOf": []
+    },
+    "ExportDialog": {
+      "slots": [],
+      "statuses": [
+        "loading"
+      ],
+      "sizeClasses": {
+        "compact": "A modal dialog; progress stays on the page when it closes."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Taking records out in a chosen format and fields.",
+      "insteadOf": []
+    },
+    "Board": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column at a time with tabs to switch.",
+        "medium": "Every status as a column."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Records moving through statuses, moved by drag or a Move to menu.",
+      "insteadOf": [
+        {
+          "name": "CollectionList",
+          "when": "users search and filter more than they move records"
+        }
+      ]
+    },
+    "Calendar": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "An agenda list grouped by date.",
+        "medium": "Month, week and day views."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Events in time: hearings, deadlines, meetings.",
+      "insteadOf": [
+        {
+          "name": "Timeline",
+          "when": "it is the history of one record"
+        }
+      ]
+    },
+    "Attachments": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "The file table scrolls sideways."
+      },
+      "variantPoints": [
+        "table"
+      ],
+      "chooseWhen": "A record's files: upload, list with versions, remove.",
+      "insteadOf": [
+        {
+          "name": "ImportFlow",
+          "when": "the file's rows become records"
+        }
+      ]
+    },
+    "DrillDown": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "The trail wraps; the level fills the width."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Moving from a summary to a breakdown to records, with Back.",
+      "insteadOf": []
+    },
+    "PeriodComparison": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Values wrap onto rows."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A figure against the previous period or a target, with the direction in words.",
+      "insteadOf": [
+        {
+          "name": "StatTile",
+          "when": "it is one figure with an optional change"
+        }
+      ]
+    },
+    "PrintLayout": {
+      "slots": [
+        "logo",
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column; printed in the light appearance."
+      },
+      "variantPoints": [],
+      "chooseWhen": "A report meant for paper or PDF.",
+      "insteadOf": [
+        {
+          "name": "ReportViewer",
+          "when": "the report is read on screen with parameters"
+        }
+      ]
+    },
+    "PivotTable": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "The table scrolls sideways."
+      },
+      "variantPoints": [
+        "table"
+      ],
+      "chooseWhen": "Rows by columns with subtotals and row groups that open and close.",
+      "insteadOf": [
+        {
+          "name": "CollectionList",
+          "when": "it is a list of records, not totals"
+        }
+      ]
+    },
+    "ReportBuilder": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Choices above the preview."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Users choose measures and groupings and save a report.",
+      "insteadOf": [
+        {
+          "name": "ReportViewer",
+          "when": "the report is fixed and only its parameters change"
+        }
+      ]
+    },
+    "Subscriptions": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column of subscriptions."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Scheduled deliveries and alerts for a report.",
+      "insteadOf": []
+    },
+    "UsersAndRoles": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "The members table scrolls sideways."
+      },
+      "variantPoints": [
+        "table"
+      ],
+      "chooseWhen": "A workspace's members: invite by email with a role, change a role.",
+      "insteadOf": [
+        {
+          "name": "CollectionList",
+          "when": "it is a large directory to search and filter"
+        }
+      ]
+    },
+    "PermissionsMatrix": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "The matrix scrolls sideways."
+      },
+      "variantPoints": [
+        "table"
+      ],
+      "chooseWhen": "Which role may do what, each cell Yes or No in text.",
+      "insteadOf": []
+    },
+    "AuditLog": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "Filters stack; the log scrolls sideways."
+      },
+      "variantPoints": [
+        "table"
+      ],
+      "chooseWhen": "A read-only history of who changed what, filterable.",
+      "insteadOf": [
+        {
+          "name": "Timeline",
+          "when": "it is the activity of one record"
+        }
+      ]
+    },
+    "NotificationCentre": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A sheet from the end of the screen."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Notifications with read state, links to records, and channel preferences.",
+      "insteadOf": []
+    },
+    "Integrations": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column of connections."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Connections to other services with Connect and Disconnect.",
+      "insteadOf": []
+    },
+    "ApiKeys": {
+      "slots": [],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "One column of keys."
+      },
+      "variantPoints": [],
+      "chooseWhen": "API keys: shown in full once, then masked; revoke confirmed.",
+      "insteadOf": []
+    },
+    "HomeScreen": {
+      "slots": [
+        "tiles",
+        "assigned",
+        "recent",
+        "children"
+      ],
+      "statuses": [
+        "empty"
+      ],
+      "sizeClasses": {
+        "compact": "Tiles two across; lists stacked.",
+        "expanded": "Lists side by side."
+      },
+      "variantPoints": [
+        "page-header"
+      ],
+      "chooseWhen": "The first screen after signing in: this person's figures, work and recent items.",
+      "insteadOf": [
+        {
+          "name": "Dashboard",
+          "when": "it is an overview of the business for a period"
+        }
+      ]
+    },
+    "CommandPalette": {
+      "slots": [],
+      "statuses": [
+        "empty"
+      ],
+      "sizeClasses": {
+        "compact": "A modal dialog at every size."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Going anywhere or doing anything by typing: Ctrl+K or Cmd+K.",
+      "insteadOf": []
+    },
+    "ContextMenu": {
+      "slots": [
+        "children"
+      ],
+      "statuses": [],
+      "sizeClasses": {
+        "compact": "A menu at the pointer or beside the element."
+      },
+      "variantPoints": [],
+      "chooseWhen": "Right-click shortcuts that repeat a visible menu's actions.",
+      "insteadOf": [
+        {
+          "name": "PrimaryNav",
+          "when": "it is navigation, not actions"
+        }
+      ]
+    }
+  }
+}

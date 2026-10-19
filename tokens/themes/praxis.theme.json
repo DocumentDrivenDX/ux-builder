@@ -1,0 +1,283 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Praxis: brand praxis with its own anatomy (was the praxis design system until ADR-018).",
+  "name": "praxis",
+  "title": "Praxis",
+  "brand": "praxis",
+  "default": "dark",
+  "anatomy": {
+    "source": {
+      "system": "Praxis (the platform's conversational theme)"
+    },
+    "fonts": {
+      "display": {
+        "family": "ui-sans-serif",
+        "fallback": [
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "sans-serif"
+        ],
+        "source": "system"
+      },
+      "heading": {
+        "family": "Tiempos Text",
+        "fallback": [
+          "Georgia",
+          "Iowan Old Style",
+          "serif"
+        ],
+        "source": "system"
+      },
+      "body": {
+        "family": "ui-sans-serif",
+        "fallback": [
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "sans-serif"
+        ],
+        "source": "system"
+      },
+      "mono": {
+        "family": "ui-monospace",
+        "fallback": [
+          "SF Mono",
+          "Menlo",
+          "monospace"
+        ],
+        "source": "system"
+      }
+    },
+    "tokens": {
+      "font-size": {
+        "display": {
+          "$value": "2.75rem",
+          "$description": "the greeting is genuinely large"
+        },
+        "title": {
+          "$value": "1.5rem"
+        },
+        "heading": {
+          "$value": "1.0625rem"
+        },
+        "lead": {
+          "$value": "1rem"
+        },
+        "body": {
+          "$value": "0.9375rem"
+        },
+        "small": {
+          "$value": "0.875rem"
+        },
+        "label": {
+          "$value": "0.75rem"
+        }
+      },
+      "font-weight": {
+        "regular": {
+          "$value": "400"
+        },
+        "strong": {
+          "$value": "500",
+          "$description": "bold is barely bold here; the ground does the work"
+        }
+      },
+      "letter-spacing": {
+        "label": {
+          "$value": "0.04em"
+        },
+        "eyebrow": {
+          "$value": "0.1em"
+        }
+      },
+      "line-height": {
+        "tight": {
+          "$value": "1.15"
+        },
+        "body": {
+          "$value": "1.6"
+        }
+      },
+      "radius": {
+        "control": {
+          "$value": "10px",
+          "$description": "Radius everywhere, and shadows that read as depth rather than as lift —\non a dark ground a drop shadow is nearly invisible, so separation comes\nfrom the surface being lighter than what it sits on."
+        },
+        "card": {
+          "$value": "16px"
+        }
+      },
+      "border": {
+        "default": {
+          "$value": "1px solid {color.border}"
+        }
+      },
+      "shadow": {
+        "card": {
+          "$value": "none"
+        },
+        "overlay": {
+          "$value": "0 8px 28px rgba(0, 0, 0, 0.35)"
+        }
+      },
+      "space": {
+        "1": {
+          "$value": "0.25rem"
+        },
+        "2": {
+          "$value": "0.5rem"
+        },
+        "3": {
+          "$value": "0.75rem"
+        },
+        "4": {
+          "$value": "1rem"
+        },
+        "5": {
+          "$value": "1.5rem"
+        },
+        "6": {
+          "$value": "2rem"
+        },
+        "7": {
+          "$value": "3rem"
+        },
+        "8": {
+          "$value": "4rem"
+        }
+      },
+      "size": {
+        "measure": {
+          "$value": "70ch"
+        }
+      },
+      "button": {
+        "radius": {
+          "$value": "10px",
+          "$description": "Buttons are quiet fills, not lifted objects. The shape rule still holds —\na pill and a button never share a radius — but here the pill goes fully\nround while the button stays a rounded rectangle, the inverse of the\ndeck's arrangement.\n\nbuttons"
+        },
+        "height": {
+          "$value": "36px"
+        },
+        "padding-x": {
+          "$value": "{space.4}"
+        },
+        "font-weight": {
+          "$value": "{font-weight.strong}"
+        },
+        "font-size": {
+          "$value": "{font-size.small}"
+        },
+        "shadow": {
+          "$value": "none"
+        },
+        "shadow-hover": {
+          "$value": "none"
+        },
+        "shadow-press": {
+          "$value": "none"
+        },
+        "offset-hover": {
+          "$value": "0px"
+        },
+        "offset-press": {
+          "$value": "1px"
+        },
+        "shadow-flat": {
+          "$value": "none"
+        }
+      },
+      "focus": {
+        "ring": {
+          "$value": "2px solid {color.accent}"
+        },
+        "offset": {
+          "$value": "2px"
+        }
+      },
+      "pill": {
+        "radius": {
+          "$value": "999px",
+          "$description": "pills — round, low contrast, no dot."
+        },
+        "border": {
+          "$value": "1px solid {color.border}"
+        },
+        "bg": {
+          "$value": "{color.surface-sunken}"
+        },
+        "padding": {
+          "$value": "0.2em 0.7em"
+        },
+        "gap": {
+          "$value": "0.4em"
+        },
+        "dot-size": {
+          "$value": "0"
+        },
+        "font-weight": {
+          "$value": "{font-weight.strong}"
+        },
+        "font-size": {
+          "$value": "{font-size.label}"
+        },
+        "text-transform": {
+          "$value": "none"
+        },
+        "letter-spacing": {
+          "$value": "0"
+        }
+      },
+      "badge": {
+        "bg": {
+          "$value": "{color.accent}",
+          "$description": "badges — a count inside a control. The one other place the accent shows."
+        },
+        "fg": {
+          "$value": "{color.on-accent}"
+        },
+        "radius": {
+          "$value": "999px"
+        },
+        "font-size": {
+          "$value": "0.6875rem"
+        }
+      }
+    },
+    "appearances": {
+      "light": {
+        "font-weight": {
+          "strong": {
+            "$value": "600",
+            "$description": "500 disappears on a light ground"
+          }
+        },
+        "shadow": {
+          "card": {
+            "$value": "0 1px 2px rgba(20, 20, 19, 0.04), 0 4px 16px rgba(20, 20, 19, 0.04)"
+          },
+          "overlay": {
+            "$value": "0 2px 6px rgba(20, 20, 19, 0.08), 0 8px 28px rgba(20, 20, 19, 0.06)"
+          }
+        },
+        "button": {
+          "shadow": {
+            "$value": "0 1px 2px rgba(20, 20, 19, 0.16)"
+          },
+          "shadow-hover": {
+            "$value": "0 2px 8px rgba(20, 20, 19, 0.18)"
+          },
+          "shadow-flat": {
+            "$value": "0 1px 2px rgba(20, 20, 19, 0.06)"
+          }
+        },
+        "badge": {
+          "fg": {
+            "$value": "{color.on-accent}"
+          }
+        }
+      }
+    }
+  }
+}

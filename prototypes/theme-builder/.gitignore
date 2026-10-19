@@ -1,0 +1,4 @@
+node_modules/
+.recording/
+shot-*.png
+*.mp4

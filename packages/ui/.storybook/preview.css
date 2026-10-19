@@ -1,0 +1,16 @@
+/* The story's ground: the theme's paper, body colour and type, so a widget is
+   always seen on the surface it will sit on. */
+
+.ds-frame {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: var(--piq-space-5);
+  background: var(--piq-color-ground);
+  color: var(--piq-color-text);
+  font: var(--piq-font-weight-regular) var(--piq-font-size-body) / var(--piq-line-height-body) var(--piq-font-body);
+}
+
+/* On a docs page each story is a block among others, not the whole page. */
+.docs-story .ds-frame {
+  min-height: 0;
+}

@@ -1,0 +1,284 @@
+# ux-builder
+
+**Turn a logo into a theme, and build apps that can't drift from it.**
+
+ux-builder is an open-source UI SDK for AI-era apps. It holds a product's
+whole look (its theme tokens, widgets, fonts, icons and brand artwork) in one
+place. It also gives people and AI coding agents the tools to build apps that
+never hard-code presentation:
+
+- **Themes made from a brand.** A palette engine reads a logo and proposes
+  palettes that already pass contrast. A local theme builder pairs a palette
+  with a design system (Material 3, Fluent 2, Carbon, Databricks, or one of
+  its own) and saves the result as a reviewable pull request.
+- **Widgets that follow the theme.** React 19 components, plus framework-free
+  CSS, cover forms, tables, notices, loading states, icons, the logo, the
+  favicon and screen patterns. Every one is styled only through `--piq-*`
+  role tokens.
+- **Guardrails.** ESLint and Stylelint rules catch literal colours, fonts and
+  radii. An audit drives the running app through every theme in light and dark
+  and reports anything that isn't the theme's.
+- **Built for coding agents.** Agent guidance (`AGENTS.md`) and a Claude Code
+  skill are generated from the source, and an MCP server describes the SDK
+  version an app actually has installed.
+- **Generative UI bridges.** Theme CSS lets AI Elements and assistant-ui chat
+  components wear the app's theme.
+
+## Packages
+
+| Package | Install as | What it gives an app |
+|---|---|---|
+| [`@ux-builder/tokens`](packages/tokens) | dependency | The themes as CSS, every token's value as JSON, the fonts, brand artwork |
+| [`@ux-builder/ui`](packages/ui) | dependency | Widgets (React 19 and CSS), patterns, `ThemeProvider`, icons, `Logo`, favicon, lint rules, agent guidance |
+| [`@ux-builder/create-app`](packages/create-app) | `npm create` | A new React + Vite app already on the SDK, with lint, the audit and CI |
+| [`@ux-builder/audit`](packages/audit) | devDependency | `ux-builder-audit`: checks the running app in every theme and appearance |
+| [`@ux-builder/mcp`](packages/mcp) | `npx` | The SDK for AI coding agents over MCP |
+
+`@ux-builder/engine` (the palette engine) and the theme builder app are
+private to this repository and are used to make new themes.
+
+The surface an app may rely on is specified in
+[CONTRACT-004](docs/helix/02-design/contracts/CONTRACT-004-app-integration.md).
+That covers entry points, props, the theme switch event, lint rules, audit
+options and compatibility. Token names are specified in CONTRACT-001 and theme
+selection in CONTRACT-003.
+
+## Quick start
+
+Node 20 or later, React 19.
+
+**A new app:**
+
+```sh
+npm create @ux-builder/app my-app -- --theme databricks
+cd my-app && npm install && npm run dev
+```
+
+The starter comes with:
+
+- the theme's CSS and fonts;
+- `ThemeProvider` with a theme and appearance switcher, plus the theme's logo
+  and favicon;
+- a page built only from SDK widgets;
+- `npm run lint` and `npm run audit`, and a CI workflow that runs both;
+- `CLAUDE.md`/`AGENTS.md` pointing at the SDK's guidance.
+
+Without `--theme`, the app starts on `plain`.
+
+**An existing React app:**
+
+```sh
+npm install @ux-builder/tokens @ux-builder/ui
+npm install -D @ux-builder/audit eslint stylelint
+```
+
+```js
+// At the entry point, once, before the app's own CSS:
+import "@ux-builder/tokens/themes/databricks.css";   // or themes.css for every theme
+import "@ux-builder/tokens/fonts/databricks.css";    // or fonts.css
+import "@ux-builder/ui/ui.css";                      // always after the theme CSS
+```
+
+```jsx
+import { ThemeProvider, ToastProvider } from "@ux-builder/ui";
+
+<ThemeProvider theme="databricks" appearance="system" onChange={({ theme, appearance }) => save(theme, appearance)}>
+  <ToastProvider><App /></ToastProvider>
+</ThemeProvider>
+```
+
+The provider does not remember the user's choice. Store what `onChange`
+gives you and pass it back as `theme` and `appearance`. `useTheme()` reads and
+switches the theme anywhere below the provider.
+
+**Without React,** the CSS works on its own markup. Set `data-theme` (and
+optionally `data-appearance`) on `<html>`, and use the `.piq-*` class names
+each component renders (see `catalogue.json` and Storybook).
+
+**In an embedded view,** where a host hands the view a theme's resolved values
+(ADR-011), pass them as `<ThemeProvider tokens={resolved.tokens}>`. No theme
+stylesheet is needed.
+
+## Themes
+
+A **theme** is what an app selects (ADR-018). It is a **brand** (colours,
+logo, fonts) on a **design system** (type, shape, elevation, every widget's
+metrics).
+
+| Theme | Brand | Design system | Appearances (default first) |
+|---|---|---|---|
+| `plain` | none: the control theme, system faces | own | light |
+| `databricks` | Databricks | shared `databricks` | light, dark |
+| `praxis` | Praxis | own: near-square controls, serif headings, rules over shadows | dark, light |
+| `praxis-material` | Praxis | shared `material` | dark, light |
+| `praxis-fluentui` | Praxis | shared `fluent` | dark, light |
+| `praxis-carbon` | Praxis | shared `carbon` | dark, light |
+| `praxis-v2-databricks` | Praxis V2, made in the theme builder | shared `databricks` | light, dark |
+| `synaptiq` | Synaptiq | own: slab headings, Quicksand body, 3px corners, filled fields | light, dark |
+
+| Shared design system | What it looks like |
+|---|---|
+| `material` | Material Design 3: Roboto, fully rounded 40dp buttons, 12dp cards, filled fields |
+| `fluent` | Fluent 2: Segoe UI, 4px corners, 32px controls, outlined fields with a brand underline |
+| `carbon` | Carbon v11: IBM Plex, square 48px buttons and tiles, bottom-ruled fields |
+| `databricks` | Databricks AppKit UI: DM Sans and DM Mono, 36px controls at 8px radius |
+
+Without a provider, select a theme with attributes:
+
+```html
+<html data-theme="praxis-carbon" data-appearance="light">
+```
+
+**Fonts ship with the SDK** (ADR-017). Roboto, IBM Plex, DM Sans and Mono,
+Abril Fatface, Zilla Slab and Quicksand are bundled under OFL-1.1.
+`fonts/<theme>.css` loads one theme's faces and `fonts.css` loads all of them.
+
+### Adding a theme
+
+Add `tokens/themes/<name>.theme.json` naming a brand and either a shared
+`"designSystem"` or an inline `anatomy`. To add a brand, add
+`tokens/brands/<name>.brand.json`. No code changes are needed. `npm run check`
+composes the new files with everything else and fails on a schema error, an
+unresolved reference or a contrast failure (every text role must clear 4.5:1).
+
+You can also generate a brand from a logo:
+
+```sh
+npm run brand -- logo.svg                                  # list palette options
+npm run brand -- logo.svg --out tokens/brands/acme.brand.json --strategy muted --title "Acme" --design-system databricks
+npm run gallery -- --brand tokens/brands/acme.brand.json   # preview on every design system
+```
+
+Or use the guided builder with `npm run builder`
+(http://127.0.0.1:5180). It walks through six steps: upload a logo, pick
+palettes, pick design systems, compare them on real widgets in light and dark,
+save, and follow the steps to use the theme in an app. Saving writes the brand
+and theme files on a branch and opens a pull request with `gh`. Typed feedback
+("more conservative, less orange") goes to an OpenAI model that turns it into
+engine settings only (ADR-014). It reads `OPENAI_API_KEY`, and without a key
+the sliders still work.
+
+## Building the UI
+
+Five rules, the same ones AI agents are given:
+
+1. Use the SDK's widgets for buttons, fields, tables, notices, status pills,
+   toasts, loaders, icons and the logo. Never build your own or bring another
+   UI kit.
+2. Style your own markup with `--piq-*` role tokens (`var(--piq-color-text)`,
+   `var(--piq-space-4)`), chosen by role.
+3. Never hard-code a colour, font family or radius, even one that matches the
+   theme today.
+4. Run lint and the audit, and fix what they report.
+5. Select themes with `ThemeProvider` or `data-theme`. Never restyle per theme
+   in app code.
+
+Every component and prop is in `@ux-builder/ui/catalogue.json` and the
+[`ui` README](packages/ui/README.md). `npm run storybook` shows each widget and
+pattern in every theme.
+
+### Lint
+
+```js
+// eslint.config.js
+import uxBuilder from "@ux-builder/ui/eslint";
+export default [{
+  files: ["src/**/*.{js,jsx}"],
+  plugins: { "ux-builder": uxBuilder },
+  rules: {
+    "ux-builder/no-hard-coded-values": ["error", { theme: "databricks" }],
+    "ux-builder/no-foreign-ui": "error",
+    "ux-builder/no-inline-svg": "error",
+  },
+}];
+```
+
+```json
+// .stylelintrc.json
+{ "plugins": ["@ux-builder/ui/stylelint"],
+  "rules": { "ux-builder/no-hard-coded-values": [true, { "theme": "databricks" }] } }
+```
+
+### Audit
+
+```sh
+npx playwright install chromium
+npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/ /settings
+```
+
+The audit switches the running app through every theme it loads, in light and
+dark. It reports colours, fonts and radii that aren't the theme's,
+hand-drawn icons and loaders, other UI kits, a favicon that doesn't follow the
+theme, and text contrast. It writes `audit-report/index.html` with screenshots
+and `audit-report/report.json`, and exits 1 on an error. See
+[`packages/audit`](packages/audit/README.md) for the options.
+
+### AI coding agents
+
+- `node_modules/@ux-builder/ui/AGENTS.md`: the rules, set-up, and a
+  reference of every component, prop, token, icon and theme.
+- The Claude Code skill `ux-builder-ui`, which the starter installs. Elsewhere,
+  run `cp -R node_modules/@ux-builder/ui/skill/ux-builder-ui .claude/skills/`.
+- The MCP server: `claude mcp add ux-builder -- npx @ux-builder/mcp`.
+
+## Developing
+
+```sh
+npm install
+npm run build      # tokens/ -> packages/tokens/dist/, then packages/ui/dist/
+npm test           # composer, gates, palette engine and builder API tests
+npm run check      # schemas, lint, tests, build, licences, equivalence, contrast, gallery: what CI runs
+npm run storybook  # Storybook for packages/ui on :6006
+npm run builder    # the theme builder
+npm run e2e        # the builder's UI suite and the starter end to end (Chromium)
+```
+
+```
+tokens/          themes, brands, shared design systems, token names, JSON Schemas
+brand/           brand artwork the brand files point at
+packages/
+  tokens/        @ux-builder/tokens: composes themes and builds dist/
+  engine/        palette options from a logo (private)
+  ui/            @ux-builder/ui: widgets, patterns, lint rules, generated guidance, Storybook
+  create-app/    @ux-builder/create-app: the starter
+  audit/         @ux-builder/audit: the running-app audit
+  mcp/           @ux-builder/mcp: the MCP server
+apps/theme-builder/   the guided theme builder
+tools/           gates (contrast, equivalence, schemas, coverage, licences) and generators
+docs/helix/      vision, PRD, features, user stories, ADRs, contracts, solution designs
+```
+
+Design docs follow the [HELIX](https://github.com/DocumentDrivenDX/helix)
+method. The product vision is in `docs/helix/00-discover/product-vision.md` and
+the PRD is in `docs/helix/01-frame/prd.md`. Every user-story acceptance
+criterion is cited by a test (`@covers`), and `npm run coverage` enforces it.
+
+Token files follow the W3C Design Tokens Community Group format (2025.10). A
+token's path is its role (`color.structure`, `button.radius`), and its CSS
+name (`--piq-color-structure`) comes from `tokens/names.json`.
+
+Releases use [Changesets](https://github.com/changesets/changesets). Run
+`npx changeset` in any pull request that changes what a consumer gets (see
+`.changeset/README.md`).
+
+## Contributing
+
+Issues and pull requests are welcome. Please run `npm run check` before
+opening a pull request. Unless you say otherwise, any contribution you
+intentionally submit for inclusion is dual licensed as below, without any
+additional terms or conditions.
+
+## License
+
+Licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
+- MIT license ([LICENSE-MIT](LICENSE-MIT))
+
+at your option.
+
+Third-party code and fonts bundled in the packages keep their own licences.
+They are listed in each package's `THIRD-PARTY-NOTICES.md`, and
+`npm run licences` checks them. Brand names and logos shown in the example
+themes (Databricks, Praxis, Synaptiq) belong to their owners and are not
+covered by this licence.

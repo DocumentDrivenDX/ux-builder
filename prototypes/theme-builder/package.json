@@ -1,0 +1,14 @@
+{
+  "name": "theme-builder-prototype",
+  "version": "1.0.0",
+  "description": "Theme Builder (Option A, guided wizard): a standalone concept prototype for FEAT-003, with a click-through test and a narrated walkthrough recorder.",
+  "scripts": {
+    "smoke": "node smoke.mjs",
+    "record": "node record.mjs"
+  },
+  "type": "module",
+  "dependencies": {
+    "playwright": "^1.63.0"
+  },
+  "private": true
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DocumentDrivenDX/ux-builder/tokens/schema/layout.schema.json",
+  "title": "Layout base layer",
+  "description": "The size-class boundaries (constants) and the default layout measures every anatomy starts from (ADR-021, CONTRACT-002).",
+  "type": "object",
+  "required": ["constants", "defaults"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "$description": { "type": "string" },
+    "constants": {
+      "type": "object", "additionalProperties": false, "required": ["size"],
+      "properties": {
+        "size": {
+          "type": "object", "additionalProperties": false,
+          "required": ["breakpoint-medium", "breakpoint-expanded", "breakpoint-large", "breakpoint-extra-large"],
+          "properties": {
+            "breakpoint-medium": { "$ref": "design-system.schema.json#/$defs/token" },
+            "breakpoint-expanded": { "$ref": "design-system.schema.json#/$defs/token" },
+            "breakpoint-large": { "$ref": "design-system.schema.json#/$defs/token" },
+            "breakpoint-extra-large": { "$ref": "design-system.schema.json#/$defs/token" }
+          }
+        }
+      }
+    },
+    "defaults": { "$ref": "design-system.schema.json#/$defs/groups" }
+  }
+}

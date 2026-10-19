@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # No literal colours, fonts or radii; no other UI kits; no hand-drawn <svg>.
+      - run: npm run lint
+      # The running app in every theme and appearance: colours, fonts, radii,
+      # hand-drawn icons and loaders, the favicon and logo, contrast.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run audit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audit-report
+          path: audit-report

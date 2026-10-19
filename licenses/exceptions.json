@@ -1,0 +1,41 @@
+{
+  "$description": "Third-party packages shipped with an SDK package under a licence outside the allow-list (ADR-023 rule 7), read by tools/check-licences.mjs. An entry passes when approvedBy and approved are set by counsel; one awaiting counsel warns until reviewBy and fails after it. installScript: true allows a package's install script, with the reason.",
+  "exceptions": [
+    {
+      "name": "axe-core",
+      "licence": "MPL-2.0",
+      "reason": "The accessibility engine of @ux-builder/audit, used unmodified as a dependency. MPL-2.0 is file-level copyleft: modified axe-core files would have to be published; using it unmodified does not extend MPL to our code.",
+      "reviewBy": "2026-11-18"
+    },
+    {
+      "name": "@csstools/css-syntax-patches-for-csstree",
+      "licence": "MIT-0",
+      "reason": "Reached through stylelint, a peer dependency of @ux-builder/ui's lint rules. MIT-0 is MIT without the notice condition.",
+      "reviewBy": "2026-11-18"
+    },
+    {
+      "name": "@csstools/selector-resolve-nested",
+      "licence": "MIT-0",
+      "reason": "Reached through stylelint (peer dependency). MIT-0 is MIT without the notice condition.",
+      "reviewBy": "2026-11-18"
+    },
+    {
+      "name": "@csstools/selector-specificity",
+      "licence": "MIT-0",
+      "reason": "Reached through stylelint (peer dependency). MIT-0 is MIT without the notice condition.",
+      "reviewBy": "2026-11-18"
+    },
+    {
+      "name": "argparse",
+      "licence": "Python-2.0",
+      "reason": "Reached through eslint (peer dependency, via js-yaml). The Python Software Foundation licence is permissive.",
+      "reviewBy": "2026-11-18"
+    },
+    {
+      "name": "minimatch",
+      "licence": "BlueOak-1.0.0",
+      "reason": "Reached through eslint and stylelint (peer dependencies). Blue Oak Model License 1.0.0 is permissive, with a patent grant.",
+      "reviewBy": "2026-11-18"
+    }
+  ]
+}

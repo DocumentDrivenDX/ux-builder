@@ -1,0 +1,27 @@
+{
+  "$schema": "./schema/layout.schema.json",
+  "$description": "The layer every anatomy starts from (ADR-021, CONTRACT-002 Composition step 0). constants: the size-class boundaries, the same in every theme; no design system, theme or brand may set them, because @ux-builder/ui's @media and @container conditions use the same numbers literally (CSS cannot read var() in a query condition). defaults: layout measures a design system may override in its own tokens.",
+  "constants": {
+    "size": {
+      "breakpoint-medium": { "$value": "600px", "$description": "Lower bound of the medium size class (Material 3 window size classes)." },
+      "breakpoint-expanded": { "$value": "840px", "$description": "Lower bound of the expanded size class." },
+      "breakpoint-large": { "$value": "1200px", "$description": "Lower bound of the large size class." },
+      "breakpoint-extra-large": { "$value": "1600px", "$description": "Lower bound of the extra-large size class." }
+    }
+  },
+  "defaults": {
+    "size": {
+      "content-form": { "$value": "40rem", "$description": "Maximum width of a form's field column." },
+      "content-page": { "$value": "90rem", "$description": "Maximum width of page content in the extra-large class." },
+      "target-minimum": { "$value": "1.5rem", "$description": "Smallest pointer target on any input: 24 CSS px (WCAG 2.2, 2.5.8)." },
+      "target-touch": { "$value": "2.75rem", "$description": "Smallest target under pointer: coarse: 44 CSS px (Apple HIG)." }
+    },
+    "space": {
+      "gutter-compact": { "$value": "{space.4}", "$description": "Page side gutter, compact class." },
+      "gutter-medium": { "$value": "{space.5}", "$description": "Page side gutter, medium class." },
+      "gutter-expanded": { "$value": "{space.6}", "$description": "Page side gutter, expanded class." },
+      "gutter-large": { "$value": "{space.6}", "$description": "Page side gutter, large class." },
+      "gutter-extra-large": { "$value": "{space.7}", "$description": "Page side gutter, extra-large class." }
+    }
+  }
+}

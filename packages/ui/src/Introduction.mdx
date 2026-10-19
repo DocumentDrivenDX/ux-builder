@@ -1,0 +1,35 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Introduction" />
+
+# @ux-builder/ui
+
+The workbench for the widgets the harness and embedded products share. Under
+**Widgets** are the components, live: switch the theme in the toolbar and the
+same component takes Praxis's, Material's, Fluent's or Carbon's anatomy from
+the theme's tokens. Under **Foundations** are the text pairings the contrast
+gate checks.
+
+## The toolbar
+
+- **Theme** picks one theme and appearance: Praxis dark (the default), Praxis
+  light, Praxis Material dark or light (Praxis on Material Design 3), Praxis
+  Fluent dark or light (on Fluent 2), Praxis Carbon dark or light (on Carbon),
+  Plain, or Synaptiq light or dark.
+- **Delivery** picks how the theme reaches the widget. *CSS* loads the theme
+  stylesheet and sets `data-theme` and `data-appearance`, as the apps do.
+  *Resolved JSON* sets the theme's resolved tokens as inline custom properties
+  with no stylesheet selector in play, as the harness will hand a theme to an
+  embedded view. A widget should look the same both ways.
+
+## Accessibility
+
+The Accessibility panel runs axe against what the browser renders, so it sees
+what the token-level contrast gate cannot, such as a widget's state colours.
+It reports rather than fails.
+
+## The gallery
+
+The design system gallery (`npm run gallery` at the repo root) stays the
+one-file record of each release, and renders these same components in every
+theme. Storybook is where widgets are built, reviewed and tried.

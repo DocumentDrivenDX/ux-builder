@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+packages/*/dist/
+build/
+storybook-static/
+*storybook.log
+packages/ui/src/icons/library.generated.js

@@ -1,0 +1,168 @@
+{
+  "$schema": "../schema/brand.schema.json",
+  "$description": "Synaptiq, from synaptiq.ai and the Synaptiq Design System (brand guide v1.1). Light is the brand as published: white ground, Soil text, Jasper links and calls to action, Arctic and Apricot Ink as supporting colours. Synaptiq defines no dark mode; the dark appearance is derived here (Soil grounds, Apricot Ink as the accent) and should be reviewed by the brand owner. Operator-approved 2026-10-06: the derived dark appearance, the darkened Grapefruit 'limited' state, and Google font stand-ins for the licensed faces.",
+  "name": "synaptiq",
+  "title": "Synaptiq",
+  "appearances": {
+    "light": {
+      "color": {
+        "ground": {
+          "$value": "#FFFFFF",
+          "$description": "White: the site and the decks set every page on white."
+        },
+        "surface": {
+          "$value": "#FFFFFF",
+          "$description": "Cards sit on white and are set off by a hairline and a soft Soil shadow."
+        },
+        "surface-sunken": {
+          "$value": "#F7F6F7",
+          "$description": "The site's light grey: form fields and quiet panels."
+        },
+        "ground-recessed": {
+          "$value": "#F6F8FA",
+          "$description": "Arctic 10: the cool tint the design system uses for sunken surfaces."
+        },
+        "text-strong": {
+          "$value": "#312A29",
+          "$description": "Soil: headings and body copy on the site."
+        },
+        "text": {
+          "$value": "#312A29",
+          "$description": "Soil: the site sets paragraphs in Soil."
+        },
+        "text-muted": {
+          "$value": "#494F5B",
+          "$description": "Hale Navy: the design system's caption colour; 7.6:1 on the light grey."
+        },
+        "text-subtle": {
+          "$value": "#6F6A69",
+          "$description": "Soil 70; 5.3:1 on white."
+        },
+        "structure": {
+          "$value": "#312A29",
+          "$description": "Soil: the design system's primary action and selection colour."
+        },
+        "accent": {
+          "$value": "#C4463F",
+          "$description": "Jasper, the site's link and call-to-action colour (#CC5E58), darkened 6.4% in lightness (hue kept) so it clears 4.5:1 as text on white (4.89) and the light grey (4.54), and under white text. Flagged for review."
+        },
+        "on-accent": {
+          "$value": "#FFFFFF",
+          "$description": "White, as on the site's Jasper buttons."
+        },
+        "border": {
+          "$value": "#D6D4D4",
+          "$description": "Soil 20: the design system's subtle border."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#1D6E6F",
+          "$description": "Pine: the design system's on-track status."
+        },
+        "limited": {
+          "$value": "#7E721A",
+          "$description": "Grapefruit (#E8DE90), the design system's watch status, darkened 44% in lightness (hue kept) to read as text at 4.52:1 on the light grey. A large move: flagged for review. Approved by the operator 2026-10-06."
+        },
+        "purchasing": {
+          "$value": "#5C767A",
+          "$description": "Agave (#6A888D) darkened 6.4% in lightness to clear 4.5:1 on white."
+        },
+        "evaluation": {
+          "$value": "#494F5B",
+          "$description": "Hale Navy."
+        },
+        "closed": {
+          "$value": "#C4463F",
+          "$description": "Jasper, darkened as the accent is; the design system's critical status."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#312A29",
+          "$description": "Soil: the butterfly mark painted flat."
+        }
+      }
+    },
+    "dark": {
+      "color": {
+        "ground": {
+          "$value": "#231E1D",
+          "$description": "Derived: Soil deepened (the design system's active-press Soil). Synaptiq has no dark mode."
+        },
+        "surface": {
+          "$value": "#312A29",
+          "$description": "Derived: Soil, lifted off the ground."
+        },
+        "surface-sunken": {
+          "$value": "#2A2423",
+          "$description": "Derived: between ground and surface."
+        },
+        "ground-recessed": {
+          "$value": "#1B1716",
+          "$description": "Derived: behind the ground."
+        },
+        "text-strong": {
+          "$value": "#FFFFFF",
+          "$description": "White, as the design system sets text on dark (text-on-dark)."
+        },
+        "text": {
+          "$value": "#EAEAEA",
+          "$description": "Soil 10."
+        },
+        "text-muted": {
+          "$value": "#C1BFBF",
+          "$description": "Soil 30."
+        },
+        "text-subtle": {
+          "$value": "#ACAAA9",
+          "$description": "Soil 40; 6.1:1 on the surface."
+        },
+        "structure": {
+          "$value": "#F7CFA5",
+          "$description": "Apricot Ink: the brand's \"present\" colour carries primary actions on dark, with Soil labels (9.7:1)."
+        },
+        "accent": {
+          "$value": "#F7CFA5",
+          "$description": "Apricot Ink, the design system's accent text on dark (text-accent)."
+        },
+        "on-accent": {
+          "$value": "#312A29",
+          "$description": "Soil on Apricot Ink, as the design system's secondary action."
+        },
+        "border": {
+          "$value": "#46403F",
+          "$description": "Soil 90."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#C6E1D9",
+          "$description": "Mint."
+        },
+        "limited": {
+          "$value": "#E8DE90",
+          "$description": "Grapefruit, unmoved: it passes on dark."
+        },
+        "purchasing": {
+          "$value": "#A1B8CA",
+          "$description": "Arctic."
+        },
+        "evaluation": {
+          "$value": "#A59B93",
+          "$description": "Stone; 5.2:1 on the surface."
+        },
+        "closed": {
+          "$value": "#D47873",
+          "$description": "Jasper (#CC5E58) lightened 6.8% to clear 4.5:1 on the surface (4.51). Approved by the operator 2026-10-06."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#F7CFA5",
+          "$description": "Apricot Ink: the mark on dark."
+        }
+      }
+    }
+  }
+}

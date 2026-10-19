@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><!-- synthetic: a red square mark with white letterforms and an anti-aliased red edge (one brand colour) -->
+  <rect width="1024" height="1024" rx="96" fill="#FE2E2C"/>
+  <rect x="8" y="8" width="1008" height="1008" rx="92" fill="none" stroke="#FF4542" stroke-width="4"/>
+  <g fill="#FEFEFE">
+    <rect x="200" y="260" width="120" height="504"/><rect x="320" y="260" width="200" height="110"/><rect x="320" y="459" width="160" height="104"/>
+    <rect x="600" y="260" width="110" height="504"/><rect x="710" y="654" width="140" height="110"/>
+  </g>
+  <g fill="#FE2E2C"><circle cx="512" cy="900" r="40"/></g>
+</svg>

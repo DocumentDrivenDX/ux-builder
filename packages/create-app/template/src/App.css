@@ -1,0 +1,10 @@
+/* The app's own layout: every colour, font, space and radius is a role token. */
+
+.app { min-height: 100vh; background: var(--piq-color-ground); color: var(--piq-color-text); font-family: var(--piq-font-body); }
+.page { max-width: 72rem; margin-inline: auto; padding: var(--piq-space-5); display: grid; gap: var(--piq-space-5); }
+.masthead { display: flex; flex-wrap: wrap; gap: var(--piq-space-4); align-items: end; justify-content: space-between; padding-bottom: var(--piq-space-4); border-bottom: var(--piq-border-default); }
+.brand { display: flex; gap: var(--piq-space-3); align-items: center; }
+.masthead h1 { margin: 0; display: flex; gap: var(--piq-space-2); align-items: center; font-family: var(--piq-font-heading); font-size: var(--piq-font-size-title); color: var(--piq-color-text-strong); }
+.switcher { display: flex; flex-wrap: wrap; gap: var(--piq-space-4); align-items: end; }
+.content { display: grid; gap: var(--piq-space-4); }
+.stack { display: grid; gap: var(--piq-space-4); }

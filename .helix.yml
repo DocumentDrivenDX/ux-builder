@@ -1,0 +1,7 @@
+# HELIX flow marker — authorizes the helix flow for this repo and scopes its writes.
+version: 1
+flows:
+  - id: helix
+    root: docs/helix/
+defaults:
+  flow: helix

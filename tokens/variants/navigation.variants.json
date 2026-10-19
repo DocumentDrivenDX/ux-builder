@@ -1,0 +1,39 @@
+{
+  "$schema": "../schema/variants.schema.json",
+  "$description": "How persistent navigation looks at expanded size and above (FEAT-006 VAR-01). Below expanded every variant uses the bottom bar and a drawer (ADR-021).",
+  "point": "navigation",
+  "title": "Navigation",
+  "default": "side-menu",
+  "variants": {
+    "side-menu": {
+      "title": "Side menu",
+      "$description": "A labelled side menu: icon beside label, an edge indicator on the current destination (Carbon UI shell side nav, Fluent nav drawer).",
+      "tokens": {
+        "nav": {
+          "width": { "$value": "16rem" },
+          "item-direction": { "$value": "row" },
+          "item-gap": { "$value": "{space.3}" },
+          "item-label-font-size": { "$value": "{font-size.body}" },
+          "item-selected-bg": { "$value": "color-mix(in srgb, {color.structure} 10%, transparent)" },
+          "item-selected-border": { "$value": "3px solid {color.accent}" },
+          "bar-height": { "$value": "4rem" }
+        }
+      }
+    },
+    "rail": {
+      "title": "Rail",
+      "$description": "A narrow rail: icon above a short label, the current destination shown by a fill (Material 3 navigation rail).",
+      "tokens": {
+        "nav": {
+          "width": { "$value": "5rem" },
+          "item-direction": { "$value": "column" },
+          "item-gap": { "$value": "{space.1}" },
+          "item-label-font-size": { "$value": "{font-size.small}" },
+          "item-selected-bg": { "$value": "color-mix(in srgb, {color.structure} 14%, transparent)" },
+          "item-selected-border": { "$value": "0 solid transparent" },
+          "bar-height": { "$value": "5rem" }
+        }
+      }
+    }
+  }
+}

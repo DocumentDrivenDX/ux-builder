@@ -1,0 +1,5 @@
+{
+  "$description": "Contrast failures carried over from the platform's themes when they moved here. Fix them; do not add to this list.",
+  "floor": 4.5,
+  "known": []
+}

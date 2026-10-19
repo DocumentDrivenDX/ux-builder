@@ -1,0 +1,29 @@
+{
+  "$schema": "../schema/variants.schema.json",
+  "$description": "The size and spacing of a page's header (FEAT-006 VAR-01).",
+  "point": "page-header",
+  "title": "Page header",
+  "default": "large",
+  "variants": {
+    "large": {
+      "title": "Large",
+      "tokens": {
+        "page-header": {
+          "title-font-size": { "$value": "{font-size.title}" },
+          "padding-y": { "$value": "{space.6}" },
+          "gap": { "$value": "{space.3}" }
+        }
+      }
+    },
+    "compact": {
+      "title": "Compact",
+      "tokens": {
+        "page-header": {
+          "title-font-size": { "$value": "{font-size.heading}" },
+          "padding-y": { "$value": "{space.4}" },
+          "gap": { "$value": "{space.2}" }
+        }
+      }
+    }
+  }
+}

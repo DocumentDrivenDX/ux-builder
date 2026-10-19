@@ -1,0 +1,4 @@
+{
+  "plugins": ["@ux-builder/ui/stylelint"],
+  "rules": { "ux-builder/no-hard-coded-values": [true, { "theme": "__THEME__", "allow": [] }] }
+}

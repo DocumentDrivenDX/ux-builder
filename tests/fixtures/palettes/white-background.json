@@ -1,0 +1,263 @@
+{
+ "options": [
+  {
+   "label": "faithful",
+   "strategy": "faithful",
+   "light": {
+    "color.ground": "#F4FCFC",
+    "color.ground-recessed": "#ECF4F3",
+    "color.surface": "#FFFFFF",
+    "color.surface-sunken": "#EAF2F2",
+    "color.border": "#D5E1E0",
+    "color.text-strong": "#0D1818",
+    "color.text": "#1B2726",
+    "color.text-muted": "#435050",
+    "color.text-subtle": "#596666",
+    "color.structure": "#008080",
+    "color.accent": "#008080",
+    "color.on-accent": "#FFFFFF",
+    "state.live": "#007C59",
+    "state.limited": "#866900",
+    "state.purchasing": "#00658E",
+    "state.closed": "#B23C00",
+    "state.evaluation": "#435050",
+    "brand.logo-paint": "#008080"
+   },
+   "dark": {
+    "color.ground": "#0E1313",
+    "color.ground-recessed": "#070C0C",
+    "color.surface": "#191E1E",
+    "color.surface-sunken": "#222828",
+    "color.border": "#2F3737",
+    "color.text-strong": "#EDFCFC",
+    "color.text": "#E0EFEE",
+    "color.text-muted": "#B3C1C1",
+    "color.text-subtle": "#94A2A1",
+    "color.structure": "#279292",
+    "color.accent": "#279292",
+    "color.on-accent": "#1D1D1D",
+    "state.live": "#4BC899",
+    "state.limited": "#E5C057",
+    "state.purchasing": "#3FB1EA",
+    "state.closed": "#F86F3C",
+    "state.evaluation": "#B3C1C1",
+    "brand.logo-paint": "#008080"
+   },
+   "moves": [
+    {
+     "appearance": "light",
+     "role": "state.limited",
+     "from": "#8B6E00",
+     "to": "#866900",
+     "deltaL": -0.015,
+     "flagged": false
+    },
+    {
+     "appearance": "dark",
+     "role": "color.structure",
+     "from": "#008080",
+     "to": "#279292",
+     "deltaL": 0.06,
+     "flagged": false
+    },
+    {
+     "appearance": "dark",
+     "role": "color.accent",
+     "from": "#008080",
+     "to": "#279292",
+     "deltaL": 0.06,
+     "flagged": false
+    },
+    {
+     "appearance": "dark",
+     "role": "color.on-accent",
+     "from": "#FFFFFF",
+     "to": "#1D1D1D",
+     "deltaL": -0.77,
+     "flagged": true
+    }
+   ]
+  },
+  {
+   "label": "muted",
+   "strategy": "muted",
+   "light": {
+    "color.ground": "#F6FBFB",
+    "color.ground-recessed": "#EEF3F3",
+    "color.surface": "#FFFFFF",
+    "color.surface-sunken": "#ECF1F1",
+    "color.border": "#D9E0DF",
+    "color.text-strong": "#111817",
+    "color.text": "#1F2625",
+    "color.text-muted": "#474F4F",
+    "color.text-subtle": "#5D6565",
+    "color.structure": "#1B4B4B",
+    "color.accent": "#1B4B4B",
+    "color.on-accent": "#FFFFFF",
+    "state.live": "#007C59",
+    "state.limited": "#866900",
+    "state.purchasing": "#00658E",
+    "state.closed": "#B23C00",
+    "state.evaluation": "#474F4F",
+    "brand.logo-paint": "#008080"
+   },
+   "dark": {
+    "color.ground": "#0F1212",
+    "color.ground-recessed": "#090C0C",
+    "color.surface": "#1A1E1E",
+    "color.surface-sunken": "#242727",
+    "color.border": "#313736",
+    "color.text-strong": "#F1FBFA",
+    "color.text": "#E4EDED",
+    "color.text-muted": "#B7C0C0",
+    "color.text-subtle": "#98A0A0",
+    "color.structure": "#88B9B8",
+    "color.accent": "#88B9B8",
+    "color.on-accent": "#070D0C",
+    "state.live": "#4BC899",
+    "state.limited": "#E5C057",
+    "state.purchasing": "#3FB1EA",
+    "state.closed": "#F86F3C",
+    "state.evaluation": "#B7C0C0",
+    "brand.logo-paint": "#008080"
+   },
+   "moves": [
+    {
+     "appearance": "light",
+     "role": "state.limited",
+     "from": "#8B6E00",
+     "to": "#866900",
+     "deltaL": -0.015,
+     "flagged": false
+    }
+   ]
+  },
+  {
+   "label": "vibrant",
+   "strategy": "vibrant",
+   "light": {
+    "color.ground": "#EBFFFE",
+    "color.ground-recessed": "#DCF9F8",
+    "color.surface": "#FFFFFF",
+    "color.surface-sunken": "#DAF7F6",
+    "color.border": "#BCE8E7",
+    "color.text-strong": "#001B1B",
+    "color.text": "#002B2B",
+    "color.text-muted": "#1C5757",
+    "color.text-subtle": "#356E6E",
+    "color.structure": "#006C6C",
+    "color.accent": "#006C6C",
+    "color.on-accent": "#FFFFFF",
+    "state.live": "#007C59",
+    "state.limited": "#866900",
+    "state.purchasing": "#00658E",
+    "state.closed": "#B23C00",
+    "state.evaluation": "#1C5757",
+    "brand.logo-paint": "#008080"
+   },
+   "dark": {
+    "color.ground": "#001616",
+    "color.ground-recessed": "#000E0E",
+    "color.surface": "#092121",
+    "color.surface-sunken": "#132B2B",
+    "color.border": "#143D3C",
+    "color.text-strong": "#E3FFFE",
+    "color.text": "#BDF8F7",
+    "color.text-muted": "#90CAC9",
+    "color.text-subtle": "#71ABAA",
+    "color.structure": "#33BABA",
+    "color.accent": "#33BABA",
+    "color.on-accent": "#000E0E",
+    "state.live": "#4BC899",
+    "state.limited": "#E5C057",
+    "state.purchasing": "#3FB1EA",
+    "state.closed": "#F86F3C",
+    "state.evaluation": "#90CAC9",
+    "brand.logo-paint": "#008080"
+   },
+   "moves": [
+    {
+     "appearance": "light",
+     "role": "state.limited",
+     "from": "#8B6E00",
+     "to": "#866900",
+     "deltaL": -0.015,
+     "flagged": false
+    }
+   ]
+  },
+  {
+   "label": "neutral-accent",
+   "strategy": "neutral-accent",
+   "light": {
+    "color.ground": "#F7FBFB",
+    "color.ground-recessed": "#EFF3F2",
+    "color.surface": "#FFFFFF",
+    "color.surface-sunken": "#EDF1F1",
+    "color.border": "#DADFDF",
+    "color.text-strong": "#121717",
+    "color.text": "#202525",
+    "color.text-muted": "#484E4E",
+    "color.text-subtle": "#5E6565",
+    "color.structure": "#202525",
+    "color.accent": "#008080",
+    "color.on-accent": "#FFFFFF",
+    "state.live": "#007C59",
+    "state.limited": "#866900",
+    "state.purchasing": "#00658E",
+    "state.closed": "#B23C00",
+    "state.evaluation": "#484E4E",
+    "brand.logo-paint": "#008080"
+   },
+   "dark": {
+    "color.ground": "#101212",
+    "color.ground-recessed": "#090C0C",
+    "color.surface": "#1B1D1D",
+    "color.surface-sunken": "#242727",
+    "color.border": "#323636",
+    "color.text-strong": "#F3FAFA",
+    "color.text": "#E5EDED",
+    "color.text-muted": "#B8BFBF",
+    "color.text-subtle": "#99A0A0",
+    "color.structure": "#E5EDED",
+    "color.accent": "#279292",
+    "color.on-accent": "#191E1E",
+    "state.live": "#4BC899",
+    "state.limited": "#E5C057",
+    "state.purchasing": "#3FB1EA",
+    "state.closed": "#F86F3C",
+    "state.evaluation": "#B8BFBF",
+    "brand.logo-paint": "#008080"
+   },
+   "moves": [
+    {
+     "appearance": "light",
+     "role": "state.limited",
+     "from": "#8B6E00",
+     "to": "#866900",
+     "deltaL": -0.015,
+     "flagged": false
+    },
+    {
+     "appearance": "dark",
+     "role": "color.accent",
+     "from": "#008080",
+     "to": "#279292",
+     "deltaL": 0.06,
+     "flagged": false
+    },
+    {
+     "appearance": "dark",
+     "role": "color.on-accent",
+     "from": "#070C0C",
+     "to": "#191E1E",
+     "deltaL": 0.08,
+     "flagged": false
+    }
+   ]
+  }
+ ],
+ "warnings": [
+  "two-colour: the logo has no second brand colour at least 30° away in hue; skipped"
+ ]
+}

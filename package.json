@@ -1,0 +1,39 @@
+{
+  "name": "ux-builder",
+  "private": true,
+  "license": "MIT OR Apache-2.0",
+  "description": "Theme tokens and widgets shared by the AI agent harness and the products embedded in it.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @ux-builder/tokens && npm run build --workspace @ux-builder/ui",
+    "schemas": "node tools/validate-schemas.mjs",
+    "test": "node --test 'tools/__tests__/*.test.mjs' 'packages/engine/test/*.test.mjs' 'apps/theme-builder/test/*.test.mjs'",
+    "verify": "node tools/verify-equivalence.mjs && node tools/diff-resolved.mjs tools/fixtures/resolved-0.3.0 packages/tokens/dist/resolved",
+    "contrast": "node tools/check-contrast.mjs",
+    "gallery": "node tools/gen-gallery.mjs",
+    "brand": "node tools/brand.mjs",
+    "check": "npm run schemas && npm run lint && node tools/gen-catalogue.mjs --check && npm run coverage && npm test && npm run build && npm run licences && npm run test:built && npm test --workspace @ux-builder/tokens && npm test --workspace @ux-builder/ui && npm test --workspace @ux-builder/create-app && npm test --workspace @ux-builder/mcp && npm test --workspace @ux-builder/audit && npm run verify && npm run contrast && npm run gallery && npm run gallery -- --brand tests/fixtures/brands/sample.brand.json",
+    "storybook": "npm run build && npm run storybook --workspace @ux-builder/ui",
+    "build-storybook": "npm run build && npm run build-storybook --workspace @ux-builder/ui",
+    "changeset": "changeset",
+    "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts && node tools/gen-catalogue.mjs",
+    "builder": "npm run build && node apps/theme-builder/server.mjs",
+    "e2e": "npm run build && npm run e2e --workspace @ux-builder/theme-builder && npm run test:e2e --workspace @ux-builder/create-app",
+    "lint": "stylelint \"packages/ui/src/**/*.css\" \"apps/theme-builder/src/**/*.css\" && eslint \"packages/ui/src/**/*.jsx\" \"apps/theme-builder/src/**/*.jsx\"",
+    "catalogue": "node tools/gen-catalogue.mjs",
+    "coverage": "node tools/check-coverage.mjs",
+    "licences": "node tools/check-licences.mjs",
+    "test:built": "node --test 'tools/__tests__/built/*.test.mjs'"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "ajv": "^8.20.0"
+  }
+}

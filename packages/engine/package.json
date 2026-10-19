@@ -1,0 +1,20 @@
+{
+  "name": "@ux-builder/engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The palette engine (FEAT-002, SD-001): reads a logo, generates accessible palette options, and regenerates them from recorded settings. Deterministic, no runtime dependencies, Node and browser.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./node": "./node.js",
+    "./browser": "./browser.js"
+  },
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DocumentDrivenDX/ux-builder.git",
+    "directory": "packages/engine"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "format": "svg",
+  "candidates": [],
+  "monochrome": true,
+  "warnings": [
+    "no brand colour in the artwork: the logo is monochrome (black, white, greys or near-neutral tints only)"
+  ],
+  "sha256": "e3673d4ba79da8494e8ee8d33d5db74bc21c17ac80f579a2a2a9ae54ab781be2"
+}

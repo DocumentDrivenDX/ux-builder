@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DocumentDrivenDX/ux-builder/tokens/schema/variants.schema.json",
+  "title": "Variant point",
+  "description": "One screen-pattern variant point and its variants (ADR-022, CONTRACT-002 Variants). A variant is token values only; every variant of a point sets the same tokens; a design system names one variant per point.",
+  "type": "object",
+  "required": ["point", "title", "default", "variants"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "$description": { "type": "string" },
+    "point": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+    "title": { "type": "string", "minLength": 1 },
+    "default": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+    "variants": {
+      "type": "object", "minProperties": 2, "maxProperties": 3,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+      "additionalProperties": {
+        "type": "object", "required": ["title", "tokens"], "additionalProperties": false,
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "$description": { "type": "string" },
+          "tokens": { "$ref": "design-system.schema.json#/$defs/groups" }
+        }
+      }
+    }
+  }
+}

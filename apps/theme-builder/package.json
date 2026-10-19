@@ -1,0 +1,28 @@
+{
+  "name": "@ux-builder/theme-builder",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The theme builder (FEAT-003, SD-002): logo to palette options on real widgets, refined by feedback, saved as a theme for review. Runs locally (ADR-019).",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test 'test/*.test.mjs'",
+    "e2e": "playwright test --config e2e/playwright.config.mjs",
+    "test:model": "node test/model-live.mjs"
+  },
+  "dependencies": {
+    "@ux-builder/engine": "*",
+    "@ux-builder/tokens": "*",
+    "@ux-builder/ui": "*",
+    "openai": "^7.30.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.2"
+  }
+}

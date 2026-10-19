@@ -1,0 +1,35 @@
+{
+  "$schema": "../schema/variants.schema.json",
+  "$description": "How tabs mark the selected tab (FEAT-006 VAR-01).",
+  "point": "tabs",
+  "title": "Tabs",
+  "default": "underlined",
+  "variants": {
+    "underlined": {
+      "title": "Underlined",
+      "$description": "An indicator line under the selected tab (Material 3 primary tabs, Carbon line tabs, Fluent TabList).",
+      "tokens": {
+        "tabs": {
+          "indicator-height": { "$value": "2px" },
+          "list-border": { "$value": "{border.default}" },
+          "tab-bg-selected": { "$value": "transparent" },
+          "tab-radius": { "$value": "0" },
+          "tab-padding-x": { "$value": "{space.4}" }
+        }
+      }
+    },
+    "enclosed": {
+      "title": "Enclosed",
+      "$description": "The selected tab is a filled container joined to its panel (Carbon contained tabs).",
+      "tokens": {
+        "tabs": {
+          "indicator-height": { "$value": "0" },
+          "list-border": { "$value": "{border.default}" },
+          "tab-bg-selected": { "$value": "{color.surface}" },
+          "tab-radius": { "$value": "{radius.control}" },
+          "tab-padding-x": { "$value": "{space.4}" }
+        }
+      }
+    }
+  }
+}

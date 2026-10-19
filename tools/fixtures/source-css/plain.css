@@ -1,0 +1,98 @@
+/* Plain theme, as the 0.x platform shipped it: the reference for
+   tools/verify-equivalence.mjs. */
+
+[data-theme="plain"] {
+  --ink:              #111827;
+  --body:             #374151;
+  --navy:             #1F2937;
+  --accent:           #2563EB;
+  --rule:             #E5E7EB;
+  --paper:            #F9FAFB;
+  --surface:          #FFFFFF;
+  --surface-sunken:   #F3F4F6;
+
+  --logo-paint:       #1F2937;
+  --state-live:        #047857;
+  --state-limited:     #B45309;
+  --state-purchasing:  #4338CA;
+  --state-evaluation:  #6B7280;
+  --state-closed:      #B91C1C;
+
+  --muted:            #6B7280;
+  --muted-2:          #9CA3AF;
+
+  --font-display: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, monospace;
+
+  --size-display:  2.25rem;
+  --size-title:    1.5rem;
+  --size-heading:  1.0625rem;
+  --size-intro:    0.9375rem;
+  --size-body:     0.9375rem;
+  --size-small:    0.875rem;
+  --size-label:    0.75rem;
+
+  --weight-normal: 400;
+  --weight-bold:   600;
+
+  --tracking-label: 0.04em;
+  --tracking-kicker: 0.06em;
+  --leading-tight: 1.25;
+  --leading-body:  1.6;
+
+  --radius:       6px;
+  --radius-card:  10px;
+  --border:       1px solid var(--rule);
+  --shadow-card:  0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --measure: 70ch;
+
+  /* Plain deliberately runs a DIFFERENT treatment — A + 1: radiused buttons
+     with no shadow, and fully-round tinted pills. Nothing outside this block
+     changes. If the component layer ever hard-codes a corner or a shadow, the
+     two themes stop differing here and the regression is visible. */
+
+  --btn-radius:       6px;
+  --btn-min-height:   34px;
+  --btn-pad-x:        var(--space-4);
+  --btn-weight:       var(--weight-bold);
+  --btn-size:         var(--size-small);
+  --btn-lift:         none;
+  --btn-lift-hover:   none;
+  --btn-lift-press:   none;
+  --btn-shift-hover:  0;
+  --btn-shift-press:  1px;
+  --btn-lift-quiet:   none;
+  --btn-focus-ring:   2px solid var(--accent);
+  --btn-focus-offset: 2px;
+
+  --pill-radius:    999px;
+  --pill-border:    0;
+  /* The tint derives from the state's own colour, so adding a state needs no
+     new token. */
+  --pill-bg:        color-mix(in srgb, currentColor 13%, transparent);
+  --pill-pad:       3px 9px;
+  --pill-gap:       0.3em;
+  --pill-dot-size:  0;
+  --pill-weight:    var(--weight-bold);
+  --pill-size:      var(--size-label);
+  --pill-transform: uppercase;
+  --pill-tracking:  var(--tracking-label);
+
+  --badge-bg:     var(--accent);
+  --badge-fg:     #FFFFFF;
+  --badge-radius: 999px;
+  --badge-size:   0.6875rem;
+}

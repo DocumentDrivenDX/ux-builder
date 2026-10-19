@@ -1,0 +1,29 @@
+{
+  "$schema": "../schema/variants.schema.json",
+  "$description": "How table rows are separated (FEAT-006 VAR-01). ruled is the look every table had before variants.",
+  "point": "table",
+  "title": "Table rows",
+  "default": "ruled",
+  "variants": {
+    "ruled": {
+      "title": "Ruled",
+      "$description": "A rule between rows (Carbon's default data table).",
+      "tokens": {
+        "table": {
+          "row-stripe-bg": { "$value": "transparent" },
+          "row-border": { "$value": "{border.default}" }
+        }
+      }
+    },
+    "banded": {
+      "title": "Banded",
+      "$description": "Alternate rows filled, no rule (Carbon's zebra option).",
+      "tokens": {
+        "table": {
+          "row-stripe-bg": { "$value": "color-mix(in srgb, {color.text-strong} 4%, transparent)" },
+          "row-border": { "$value": "none" }
+        }
+      }
+    }
+  }
+}

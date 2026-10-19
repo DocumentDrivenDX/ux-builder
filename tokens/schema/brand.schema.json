@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DocumentDrivenDX/ux-builder/tokens/schema/brand.schema.json",
+  "title": "Brand file",
+  "description": "A brand's identity (ADR-013, CONTRACT-002): its palette per appearance, its artwork, optional font overrides, and the settings that generated the palette. No shapes, sizes or widget metrics: those belong to design systems.",
+  "type": "object",
+  "required": ["name", "title", "appearances"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "$description": { "type": "string" },
+    "name": { "$ref": "#/$defs/name" },
+    "title": { "type": "string", "minLength": 1 },
+    "appearances": {
+      "type": "object", "minProperties": 1, "additionalProperties": false,
+      "properties": { "light": { "$ref": "#/$defs/appearance" }, "dark": { "$ref": "#/$defs/appearance" } }
+    },
+    "fonts": {
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "description": "Optional overrides of the design system's fonts (ADR-017). A role left out comes from the design system.",
+      "properties": {
+        "display": { "$ref": "font.schema.json" }, "heading": { "$ref": "font.schema.json" },
+        "body": { "$ref": "font.schema.json" }, "mono": { "$ref": "font.schema.json" }
+      }
+    },
+    "generation": { "$ref": "#/$defs/generation" }
+  },
+  "$defs": {
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$", "maxLength": 40 },
+    "description": { "type": "string" },
+    "colour": {
+      "type": "object", "required": ["$value"], "additionalProperties": false,
+      "properties": { "$value": { "type": "string", "pattern": "^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$" }, "$type": { "const": "color" }, "$description": { "$ref": "#/$defs/description" } }
+    },
+    "value": {
+      "type": "object", "required": ["$value"], "additionalProperties": false,
+      "properties": { "$value": { "type": ["string", "number"] }, "$type": { "type": "string" }, "$description": { "$ref": "#/$defs/description" } }
+    },
+    "asset": {
+      "type": "object", "required": ["$value"], "additionalProperties": false,
+      "description": "A path to artwork, relative to the brand file. The build wraps it in url().",
+      "properties": { "$value": { "type": "string", "pattern": "^[^\\s\"()]+\\.(svg|png|webp)$" }, "$type": { "const": "asset" }, "$description": { "$ref": "#/$defs/description" } }
+    },
+    "appearance": {
+      "type": "object", "required": ["color", "state", "brand"], "additionalProperties": false,
+      "properties": {
+        "color": {
+          "type": "object", "additionalProperties": false,
+          "required": ["ground", "surface", "surface-sunken", "text-strong", "text", "text-muted", "text-subtle", "structure", "accent", "on-accent", "border"],
+          "properties": {
+            "ground": { "$ref": "#/$defs/colour" }, "ground-recessed": { "$ref": "#/$defs/colour" },
+            "surface": { "$ref": "#/$defs/colour" }, "surface-sunken": { "$ref": "#/$defs/colour" },
+            "text-strong": { "$ref": "#/$defs/colour" }, "text": { "$ref": "#/$defs/colour" },
+            "text-muted": { "$ref": "#/$defs/colour" }, "text-subtle": { "$ref": "#/$defs/colour" },
+            "structure": { "$ref": "#/$defs/colour" }, "accent": { "$ref": "#/$defs/colour" },
+            "on-accent": { "$ref": "#/$defs/colour" }, "border": { "$ref": "#/$defs/colour" }
+          }
+        },
+        "state": {
+          "type": "object", "additionalProperties": false,
+          "required": ["live", "limited", "purchasing", "evaluation", "closed"],
+          "properties": {
+            "live": { "$ref": "#/$defs/colour" }, "limited": { "$ref": "#/$defs/colour" },
+            "purchasing": { "$ref": "#/$defs/colour" }, "evaluation": { "$ref": "#/$defs/colour" },
+            "closed": { "$ref": "#/$defs/colour" }
+          }
+        },
+        "brand": {
+          "type": "object", "additionalProperties": false, "required": ["logo-paint"],
+          "properties": {
+            "logo-paint": { "$ref": "#/$defs/colour" },
+            "logo-image": { "$ref": "#/$defs/asset" }, "mark-image": { "$ref": "#/$defs/asset" }, "favicon": { "$ref": "#/$defs/asset" },
+            "logo-bg": { "$ref": "#/$defs/value" }, "logo-mask": { "$ref": "#/$defs/value" },
+            "mark-bg": { "$ref": "#/$defs/value" }, "mark-mask": { "$ref": "#/$defs/value" },
+            "logo-aspect": { "$ref": "#/$defs/value" }, "logo-height": { "$ref": "#/$defs/value" }, "logo-height-sm": { "$ref": "#/$defs/value" }
+          }
+        }
+      }
+    },
+    "generation": {
+      "type": "object", "required": ["engine", "strategy", "settings"], "additionalProperties": false,
+      "description": "How the palette was produced (FEAT-002), so it can be regenerated exactly. Absent for hand-made brands.",
+      "properties": {
+        "engine": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$", "description": "Palette engine version." },
+        "logo": {
+          "type": "object", "required": ["path", "sha256"], "additionalProperties": false,
+          "properties": { "path": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+        },
+        "extracted": { "type": "array", "items": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" } },
+        "strategy": { "type": "string", "minLength": 1 },
+        "settings": {
+          "type": "object", "description": "Engine settings by name; names and ranges are defined by the engine's solution design (SD-001).",
+          "additionalProperties": { "type": ["number", "string", "boolean"] }
+        }
+      }
+    }
+  }
+}

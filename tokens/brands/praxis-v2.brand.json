@@ -1,0 +1,237 @@
+{
+  "$schema": "../schema/brand.schema.json",
+  "$description": "Generated in the theme builder by @ux-builder/engine 0.1.0, strategy neutral-accent. Regenerate with: npm run brand -- --regenerate tokens/brands/praxis-v2.brand.json",
+  "name": "praxis-v2",
+  "title": "Praxis V2",
+  "appearances": {
+    "light": {
+      "color": {
+        "ground": {
+          "$value": "#FDF9F9",
+          "$description": "Page ground. Generated (neutral-accent)."
+        },
+        "ground-recessed": {
+          "$value": "#F4F1F0",
+          "$description": "Recessed ground (sidebar). Generated (neutral-accent)."
+        },
+        "surface": {
+          "$value": "#FFFFFF",
+          "$description": "Cards, fields and menus. Generated (neutral-accent)."
+        },
+        "surface-sunken": {
+          "$value": "#F3EFEF",
+          "$description": "Sunken panels and pills. Generated (neutral-accent)."
+        },
+        "border": {
+          "$value": "#E2DCDC",
+          "$description": "Borders. Generated (neutral-accent)."
+        },
+        "text-strong": {
+          "$value": "#1A1514",
+          "$description": "Headings. Generated (neutral-accent)."
+        },
+        "text": {
+          "$value": "#282322",
+          "$description": "Body text. Generated (neutral-accent)."
+        },
+        "text-muted": {
+          "$value": "#514B4B",
+          "$description": "Muted text. Generated (neutral-accent)."
+        },
+        "text-subtle": {
+          "$value": "#686261",
+          "$description": "Subtle text. Generated (neutral-accent)."
+        },
+        "structure": {
+          "$value": "#282322",
+          "$description": "Primary buttons: neutral ink. Generated (neutral-accent)."
+        },
+        "accent": {
+          "$value": "#E1192B",
+          "$description": "Links, focus, kickers: brand colour. Generated (neutral-accent). #E5202E moved −0.010 L (OKLCH, hue kept) to clear 4.5:1."
+        },
+        "on-accent": {
+          "$value": "#FFFFFF",
+          "$description": "Text and icons on the accent. Generated (neutral-accent)."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#467922",
+          "$description": "Status: live. Generated (neutral-accent)."
+        },
+        "limited": {
+          "$value": "#A25900",
+          "$description": "Status: limited. Generated (neutral-accent). #A75C00 moved −0.010 L (OKLCH, hue kept) to clear 4.5:1."
+        },
+        "purchasing": {
+          "$value": "#3959A6",
+          "$description": "Status: purchasing. Generated (neutral-accent)."
+        },
+        "closed": {
+          "$value": "#B23C00",
+          "$description": "Status: closed. Generated (neutral-accent)."
+        },
+        "evaluation": {
+          "$value": "#514B4B",
+          "$description": "Status: evaluation (muted). Generated (neutral-accent)."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#E5202E",
+          "$description": "The logo's top brand colour, as supplied."
+        },
+        "logo-image": {
+          "$value": "../../brand/praxis-v2/logo-on-light.svg",
+          "$description": "The logo for this appearance, framed to its drawn bounds (logo.svg, the uploaded source, is kept for regeneration)."
+        },
+        "logo-aspect": {
+          "$value": "3.029"
+        },
+        "logo-height": {
+          "$value": "37px",
+          "$description": "As Praxis: a mark plus a wordmark, so a third taller than the 28px default."
+        },
+        "logo-height-sm": {
+          "$value": "27px"
+        },
+        "mark-image": {
+          "$value": "../../brand/praxis-v2/mark.svg",
+          "$description": "The mark (praxis-v2-favicon.svg), framed to its drawn bounds. Square."
+        },
+        "favicon": {
+          "$value": "../../brand/praxis-v2/mark.svg"
+        }
+      }
+    },
+    "dark": {
+      "color": {
+        "ground": {
+          "$value": "#131111",
+          "$description": "Page ground. Generated (neutral-accent)."
+        },
+        "ground-recessed": {
+          "$value": "#0D0B0A",
+          "$description": "Recessed ground (sidebar). Generated (neutral-accent)."
+        },
+        "surface": {
+          "$value": "#1F1C1C",
+          "$description": "Cards, fields and menus. Generated (neutral-accent)."
+        },
+        "surface-sunken": {
+          "$value": "#282625",
+          "$description": "Sunken panels and pills. Generated (neutral-accent)."
+        },
+        "border": {
+          "$value": "#383434",
+          "$description": "Borders. Generated (neutral-accent)."
+        },
+        "text-strong": {
+          "$value": "#FEF6F6",
+          "$description": "Headings. Generated (neutral-accent)."
+        },
+        "text": {
+          "$value": "#F0E9E8",
+          "$description": "Body text. Generated (neutral-accent)."
+        },
+        "text-muted": {
+          "$value": "#C3BCBB",
+          "$description": "Muted text. Generated (neutral-accent)."
+        },
+        "text-subtle": {
+          "$value": "#A39D9C",
+          "$description": "Subtle text. Generated (neutral-accent)."
+        },
+        "structure": {
+          "$value": "#F0E9E8",
+          "$description": "Primary buttons: neutral ink. Generated (neutral-accent)."
+        },
+        "accent": {
+          "$value": "#F8393E",
+          "$description": "Links, focus, kickers: brand colour. Generated (neutral-accent). #E5202E moved +0.050 L (OKLCH, hue kept) to clear 4.5:1."
+        },
+        "on-accent": {
+          "$value": "#040202",
+          "$description": "Text and icons on the accent. Generated (neutral-accent). #0E0A09 moved −0.055 L (OKLCH, hue kept) to clear 4.5:1."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#89C06A",
+          "$description": "Status: live. Generated (neutral-accent)."
+        },
+        "limited": {
+          "$value": "#FFB06E",
+          "$description": "Status: limited. Generated (neutral-accent)."
+        },
+        "purchasing": {
+          "$value": "#7CA2F6",
+          "$description": "Status: purchasing. Generated (neutral-accent)."
+        },
+        "closed": {
+          "$value": "#F86F3C",
+          "$description": "Status: closed. Generated (neutral-accent)."
+        },
+        "evaluation": {
+          "$value": "#C3BCBB",
+          "$description": "Status: evaluation (muted). Generated (neutral-accent)."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#E5202E",
+          "$description": "The logo's top brand colour, as supplied."
+        },
+        "logo-image": {
+          "$value": "../../brand/praxis-v2/logo-on-dark.svg",
+          "$description": "The dark-background logo (praxis-v2-dark.svg), framed to its drawn bounds."
+        },
+        "logo-aspect": {
+          "$value": "3.045"
+        },
+        "logo-height": {
+          "$value": "37px",
+          "$description": "As Praxis: a mark plus a wordmark, so a third taller than the 28px default."
+        },
+        "logo-height-sm": {
+          "$value": "27px"
+        },
+        "mark-image": {
+          "$value": "../../brand/praxis-v2/mark.svg",
+          "$description": "The mark (praxis-v2-favicon.svg), framed to its drawn bounds. Square."
+        },
+        "favicon": {
+          "$value": "../../brand/praxis-v2/mark.svg"
+        }
+      }
+    }
+  },
+  "generation": {
+    "engine": "0.1.0",
+    "extracted": [
+      "#E5202E",
+      "#8F0F2A",
+      "#FC6A39"
+    ],
+    "strategy": "neutral-accent",
+    "settings": {
+      "strategies": "faithful,muted,vibrant,neutral-accent,two-colour",
+      "primaryCandidate": 0,
+      "secondaryCandidate": -1,
+      "hueShift": 0,
+      "chromaScale": 1,
+      "neutralTint": 1,
+      "groundLight": 0.985,
+      "groundDark": 0.18,
+      "stateHarmony": 0.5,
+      "minContrast": 4.5,
+      "suggestedHue": 250,
+      "appearances": "light,dark"
+    },
+    "logo": {
+      "path": "../../brand/praxis-v2/logo.svg",
+      "sha256": "ca699053070e3810de6031eb0a000ef887ff4356d4461e9e4246b46cc0f1f42b"
+    }
+  }
+}

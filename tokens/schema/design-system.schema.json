@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DocumentDrivenDX/ux-builder/tokens/schema/design-system.schema.json",
+  "title": "Design system file",
+  "description": "A design system's anatomy (ADR-013, CONTRACT-002): type, shape, elevation, space and widget metrics, and its default fonts. It never holds a brand colour: where its anatomy needs a colour it refers to a role, e.g. {color.accent}.",
+  "type": "object",
+  "required": ["name", "title", "source", "fonts", "tokens"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "$description": { "type": "string" },
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$", "maxLength": 40 },
+    "title": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object", "required": ["system"], "additionalProperties": false,
+      "properties": { "system": { "type": "string" }, "version": { "type": "string" }, "url": { "type": "string", "pattern": "^https://" } }
+    },
+    "fonts": {
+      "type": "object", "additionalProperties": false, "required": ["display", "heading", "body", "mono"],
+      "properties": {
+        "display": { "$ref": "font.schema.json" }, "heading": { "$ref": "font.schema.json" },
+        "body": { "$ref": "font.schema.json" }, "mono": { "$ref": "font.schema.json" }
+      }
+    },
+    "tokens": { "$ref": "#/$defs/groups" },
+    "appearances": {
+      "type": "object", "additionalProperties": false,
+      "description": "Per-appearance overrides of tokens, e.g. stronger shadows in dark.",
+      "properties": { "light": { "$ref": "#/$defs/groups" }, "dark": { "$ref": "#/$defs/groups" } }
+    },
+    "variants": { "$ref": "#/$defs/variants" }
+  },
+  "$defs": {
+    "groups": {
+      "type": "object",
+      "propertyNames": {
+        "description": "Role categories a design system owns, and component names. color, state, brand, font and palette are not a design system's: colours come from the brand, fonts from the fonts block.",
+        "enum": ["font-size", "font-weight", "line-height", "letter-spacing", "space", "size", "radius", "border", "shadow", "focus", "state-layer",
+                 "button", "pill", "badge", "field", "check", "switch", "menu", "choice-picker", "card", "notice", "toast", "progress", "spinner", "skeleton", "table", "icon",
+                 "nav", "tabs", "page-header"]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": { "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "additionalProperties": { "$ref": "#/$defs/token" }
+      }
+    },
+    "variants": {
+      "type": "object",
+      "description": "The variant this anatomy uses at each screen-pattern variant point (ADR-022): point → variant, each defined in tokens/variants/<point>.variants.json. A point not named takes its default.",
+      "propertyNames": { "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+      "additionalProperties": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" }
+    },
+    "token": {
+      "type": "object", "required": ["$value"], "additionalProperties": false,
+      "properties": {
+        "$value": {
+          "type": ["string", "number"],
+          "not": { "type": "string", "pattern": "#[0-9A-Fa-f]{3,8}\\b" },
+          "description": "No literal hex colour: refer to a role ({color.*}, {state.*}). rgba() is allowed only for shadows, which carry no brand colour."
+        },
+        "$type": { "type": "string" },
+        "$description": { "type": "string" }
+      }
+    }
+  }
+}

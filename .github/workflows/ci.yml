@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# No telemetry (ADR-023 rule 8): @carbon/icons, a development dependency, runs
+# IBM's install telemetry on CI servers unless this is set. tools/check-licences.mjs
+# fails if a workflow drops it.
+env:
+  IBM_TELEMETRY_DISABLED: "true"
+  DO_NOT_TRACK: "1"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Build tokens, prove the CSS still matches the platform's originals,
+      # hold every theme to 4.5:1 against the recorded baseline, and draw
+      # the gallery.
+      # Chromium for the browser tests inside npm run check (theme selection,
+      # US-005) and the e2e suites below.
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check
+      # So a reviewer can see what a change looks like before it merges.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gallery
+          path: build/gallery.html
+      # Prove every story still builds against the tokens just built, and
+      # hand reviewers the result to browse (unzip, then open index.html
+      # through a local server: npx http-server).
+      # The theme builder's core flow, logo to saved theme, end to end in
+      # Chromium with the model mocked (US-015).
+      - run: npm run e2e --workspace @ux-builder/theme-builder
+      # The starter: scaffold a fresh app on the packed SDK, install, build,
+      # lint with zero findings, and drive it in Chromium (US-012).
+      - run: npm run test:e2e --workspace @ux-builder/create-app
+      - run: npm run build-storybook --workspace @ux-builder/ui
+      # AI Elements and assistant-ui in every theme, audited (US-045-AC4).
+      - run: npm run test:storybook --workspace @ux-builder/ui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook
+          path: packages/ui/storybook-static

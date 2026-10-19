@@ -1,0 +1,17 @@
+{
+  "format": "png",
+  "candidates": [
+    {
+      "hex": "#C81E2D",
+      "share": 1,
+      "oklch": {
+        "l": 0.5364,
+        "c": 0.2012,
+        "h": 23.95
+      }
+    }
+  ],
+  "monochrome": false,
+  "warnings": [],
+  "sha256": "695e4efe25bff344b7f274f956b6afe8ebf235aec8481315e433aa374afa07d8"
+}

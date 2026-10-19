@@ -1,0 +1,997 @@
+/* @ux-builder/ui: the shared widgets, as prefixed CSS on @ux-builder/tokens.
+
+   Every rule reads a token, never a literal colour, so the theme on the page
+   decides how each widget looks: Praxis's warm hairlines, Material's tonal
+   fields, Fluent's 4px controls, Carbon's square layers.
+
+   Token names are CONTRACT-001 role names (--piq-color-text,
+   --piq-button-radius). The widget tokens (--piq-field-*, --piq-check-*,
+   --piq-switch-*, --piq-menu-*, --piq-choice-picker-*, --piq-card-*,
+   --piq-notice-*, --piq-toast-*, --piq-progress-*, --piq-spinner-*,
+   --piq-skeleton-*, --piq-table-*, and the --piq-button-*
+   variants) are optional. A theme that
+   does not set one gets the fallback written here, which is the treatment
+   the platform's ui.css gave that widget, drawn from the base tokens every
+   theme has. So praxis and plain render as they always did, and a
+   theme opts into a different anatomy by setting the token.
+
+   Load it once, after the theme CSS:
+     import "@ux-builder/tokens/themes.css";
+     import "@ux-builder/ui/ui.css"; */
+
+[class^="piq-"],
+[class*=" piq-"] { box-sizing: border-box; }
+
+/* ----------------------------------------------------------------- buttons */
+
+/* Hover and press are a state layer: the label's own colour mixed over the
+   container, as M3, Fluent and Carbon all do it. Praxis sets no mix, so its
+   lift and shift tokens carry the state instead. */
+.piq-btn {
+  --_state: 0%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--piq-space-2);
+  min-height: var(--piq-button-height);
+  padding: 0 var(--piq-button-padding-x);
+  border: 1px solid var(--piq-color-structure);
+  border-radius: var(--piq-button-radius);
+  background-color: var(--piq-color-structure);
+  background-image: linear-gradient(color-mix(in srgb, currentColor var(--_state), transparent) 0 0);
+  color: var(--piq-color-surface);
+  font: var(--piq-button-font-weight) var(--piq-button-font-size) / 1 var(--piq-font-body);
+  box-shadow: var(--piq-button-shadow);
+  cursor: pointer;
+  transition: box-shadow 90ms ease, transform 90ms ease, background-color 120ms ease;
+}
+.piq-btn:hover:not(:disabled) {
+  --_state: var(--piq-state-layer-hover, 0%);
+  box-shadow: var(--piq-button-shadow-hover);
+  transform: translateY(var(--piq-button-offset-hover));
+}
+.piq-btn:active:not(:disabled) {
+  --_state: var(--piq-state-layer-press, 0%);
+  box-shadow: var(--piq-button-shadow-press);
+  transform: translateY(var(--piq-button-offset-press));
+}
+.piq-btn:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-focus-offset); }
+.piq-btn:disabled { opacity: 0.45; box-shadow: var(--piq-button-shadow-flat); cursor: not-allowed; transform: none; }
+
+.piq-btn--secondary {
+  border: var(--piq-button-secondary-border, 1px solid var(--piq-color-structure));
+  background-color: var(--piq-button-secondary-bg, transparent);
+  color: var(--piq-button-secondary-fg, var(--piq-color-structure));
+  box-shadow: var(--piq-button-shadow-flat);
+}
+.piq-btn--text {
+  border-color: transparent;
+  background-color: transparent;
+  color: var(--piq-button-ghost-fg, var(--piq-color-structure));
+  box-shadow: none;
+}
+.piq-btn--text:hover:not(:disabled) { box-shadow: none; }
+.piq-btn--sm { min-height: 26px; padding: 0 var(--piq-space-3); font-size: var(--piq-font-size-label); }
+
+/* A count on a button: part of the control, never the pill's dot or the
+   button's shadow, so all three stay distinct. */
+.piq-btn__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35em;
+  padding: 0 0.35em;
+  margin-left: var(--piq-space-1);
+  border-radius: var(--piq-badge-radius);
+  background: var(--piq-badge-bg);
+  color: var(--piq-badge-fg);
+  font-size: var(--piq-badge-font-size);
+  font-weight: var(--piq-font-weight-strong);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------ status pill */
+
+/* A pill is a STATUS, never a target: no full border unless the theme's own
+   pill border says so, and never the button's radius. Availability never
+   relies on colour alone; the label always says it. */
+.piq-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--piq-pill-gap);
+  padding: var(--piq-pill-padding);
+  border: var(--piq-pill-border);
+  border-radius: var(--piq-pill-radius);
+  background: var(--piq-pill-bg);
+  font: var(--piq-pill-font-weight) var(--piq-pill-font-size) / 1.5 var(--piq-font-body);
+  text-transform: var(--piq-pill-text-transform);
+  letter-spacing: var(--piq-pill-letter-spacing);
+  white-space: nowrap;
+}
+.piq-pill::before {
+  content: "";
+  flex: none;
+  width: var(--piq-pill-dot-size);
+  height: var(--piq-pill-dot-size);
+  border-radius: 50%;
+  background: currentColor;
+}
+.piq-pill--live { color: var(--piq-state-live); }
+.piq-pill--limited { color: var(--piq-state-limited); }
+.piq-pill--purchasing { color: var(--piq-state-purchasing); }
+.piq-pill--evaluation { color: var(--piq-state-evaluation); }
+.piq-pill--closed { color: var(--piq-state-closed); }
+/* Closed is an outcome, not a status: a hollow dot says "finished". */
+.piq-pill--closed::before { background: transparent; box-shadow: inset 0 0 0 2px currentColor; }
+
+/* ------------------------------------------------------------------ fields */
+
+.piq-field { display: grid; gap: var(--piq-space-2); min-width: 0; }
+.piq-field__label {
+  color: var(--piq-field-label-fg, var(--piq-color-structure));
+  font-size: var(--piq-field-label-font-size, var(--piq-font-size-label));
+  font-weight: var(--piq-field-label-font-weight, var(--piq-font-weight-strong));
+  letter-spacing: var(--piq-field-label-letter-spacing, var(--piq-letter-spacing-label));
+  text-transform: var(--piq-field-label-text-transform, uppercase);
+}
+.piq-field__input {
+  width: 100%;
+  min-height: var(--piq-field-height, var(--piq-button-height));
+  padding: 0 var(--piq-field-padding-x, var(--piq-space-3));
+  border: var(--piq-field-border, var(--piq-border-default));
+  border-bottom: var(--piq-field-border-bottom, var(--piq-field-border, var(--piq-border-default)));
+  border-radius: var(--piq-field-radius, var(--piq-radius-control));
+  background: var(--piq-field-bg, var(--piq-color-surface));
+  color: var(--piq-color-text-strong);
+  font: var(--piq-font-weight-regular) var(--piq-font-size-body) / var(--piq-line-height-body) var(--piq-font-body);
+}
+.piq-field__input::placeholder { color: var(--piq-color-text-muted); opacity: 1; }
+.piq-field__input:hover:not(:disabled) { border-bottom-color: var(--piq-field-border-hover, var(--piq-color-border)); }
+.piq-field__input:focus-visible {
+  outline: var(--piq-field-focus-outline, var(--piq-focus-ring));
+  outline-offset: var(--piq-field-focus-offset, var(--piq-focus-offset));
+  box-shadow: var(--piq-field-focus-shadow, none);
+}
+.piq-field__input:disabled { opacity: 0.45; cursor: not-allowed; }
+.piq-field__input[aria-invalid="true"] {
+  border-color: var(--piq-state-closed);
+  box-shadow: var(--piq-field-invalid-shadow, none);
+}
+.piq-field__hint { color: var(--piq-color-text-muted); font-size: var(--piq-font-size-label); }
+.piq-field__error { color: var(--piq-state-closed); font-size: var(--piq-font-size-label); }
+
+/* ---------------------------------------------------------------- checkbox */
+
+.piq-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--piq-space-2);
+  color: var(--piq-color-text);
+  font: var(--piq-font-weight-regular) var(--piq-font-size-body) / var(--piq-line-height-body) var(--piq-font-body);
+  cursor: pointer;
+}
+.piq-check__box {
+  appearance: none;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--piq-check-size, 16px);
+  height: var(--piq-check-size, 16px);
+  margin: 0;
+  border: var(--piq-check-border, 1.5px solid var(--piq-color-text-muted));
+  border-radius: var(--piq-check-radius, 4px);
+  background: var(--piq-field-bg, var(--piq-color-surface));
+  cursor: pointer;
+}
+.piq-check__box::after {
+  content: "";
+  width: 30%;
+  height: 55%;
+  margin-top: -12%;
+  border: solid var(--piq-check-checked-fg, var(--piq-color-surface));
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 90ms ease;
+}
+.piq-check__box:checked {
+  border-color: var(--piq-check-checked-bg, var(--piq-color-structure));
+  background: var(--piq-check-checked-bg, var(--piq-color-structure));
+}
+.piq-check__box:checked::after { transform: rotate(45deg) scale(1); }
+.piq-check__box:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-check-focus-offset, 2px); }
+.piq-check__box:disabled,
+.piq-check__box:disabled + span { opacity: 0.45; cursor: not-allowed; }
+
+/* ------------------------------------------------------- textarea, select */
+
+.piq-field__input--multi {
+  min-height: calc(var(--piq-field-height, var(--piq-button-height)) * 2);
+  padding-block: var(--piq-space-2);
+  resize: vertical;
+}
+
+/* The closed dropdown is a field with a chevron drawn in currentColor, so it
+   takes the theme's ink. The chevron sits on the wrapper because a select
+   cannot hold generated content. */
+.piq-select { position: relative; display: block; color: var(--piq-color-text-muted); }
+.piq-select::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: calc(var(--piq-field-padding-x, var(--piq-space-3)) + 2px);
+  width: 0.45em;
+  height: 0.45em;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+.piq-select__input {
+  appearance: none;
+  appearance: base-select;
+  display: flex;
+  align-items: center;
+  padding-right: calc(var(--piq-field-padding-x, var(--piq-space-3)) + 1.5em);
+  cursor: pointer;
+}
+.piq-select__input::picker-icon { display: none; }
+.piq-select__input:has(option[value=""]:checked) { color: var(--piq-color-text-muted); }
+
+/* The open list, where the browser lets the page style it, and .piq-menu for
+   the same list drawn anywhere else. */
+.piq-select__input::picker(select),
+.piq-menu {
+  appearance: base-select;
+  margin: var(--piq-menu-offset, 4px) 0 0;
+  padding: var(--piq-menu-padding-y, var(--piq-space-1)) 0;
+  border: var(--piq-menu-border, var(--piq-border-default));
+  border-radius: var(--piq-menu-radius, var(--piq-radius-control));
+  background: var(--piq-menu-bg, var(--piq-color-surface));
+  box-shadow: var(--piq-menu-shadow, var(--piq-shadow-overlay));
+  color: var(--piq-color-text);
+}
+.piq-menu { display: grid; list-style: none; font: var(--piq-font-weight-regular) var(--piq-font-size-body) / var(--piq-line-height-body) var(--piq-font-body); }
+.piq-select__input option,
+.piq-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--piq-space-2);
+  min-height: var(--piq-menu-item-height, 36px);
+  padding: 0 var(--piq-field-padding-x, var(--piq-space-3));
+  color: var(--piq-color-text);
+}
+.piq-select__input option::checkmark { display: none; }
+.piq-select__input option:hover,
+.piq-select__input option:focus-visible,
+.piq-menu__item.is-hover { background: var(--piq-menu-item-hover-bg, var(--piq-color-surface-sunken)); outline: none; }
+.piq-select__input option:checked,
+.piq-menu__item[aria-selected="true"] {
+  background: var(--piq-menu-item-selected-bg, var(--piq-color-surface-sunken));
+  color: var(--piq-menu-item-selected-fg, var(--piq-color-text-strong));
+  font-weight: var(--piq-menu-item-selected-font-weight, var(--piq-font-weight-strong));
+  box-shadow: var(--piq-menu-item-selected-indicator, none);
+}
+.piq-select__input option:disabled { color: var(--piq-color-text-muted); }
+
+/* ------------------------------------------------------------ radio, switch */
+
+.piq-radios { display: grid; gap: var(--piq-space-2); margin: 0; padding: 0; border: 0; min-width: 0; }
+.piq-radios > legend { padding: 0; margin-bottom: var(--piq-space-1); }
+.piq-radio {
+  appearance: none;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--piq-check-size, 16px);
+  height: var(--piq-check-size, 16px);
+  margin: 0;
+  border: var(--piq-check-border, 1.5px solid var(--piq-color-text-muted));
+  border-radius: 50%;
+  background: var(--piq-field-bg, var(--piq-color-surface));
+  cursor: pointer;
+}
+.piq-radio::after {
+  content: "";
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background: var(--piq-check-checked-bg, var(--piq-color-structure));
+  transform: scale(0);
+  transition: transform 90ms ease;
+}
+.piq-radio:checked { border-color: var(--piq-check-checked-bg, var(--piq-color-structure)); }
+.piq-radio:checked::after { transform: scale(1); }
+.piq-radio:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-check-focus-offset, 2px); }
+.piq-radio:disabled,
+.piq-radio:disabled + span { opacity: 0.45; cursor: not-allowed; }
+
+/* A switch: the track is the input, the thumb its ::before. M3 grows the
+   thumb when on, so the thumb has a size per state. */
+.piq-switch__track {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: var(--piq-switch-width, 36px);
+  height: var(--piq-switch-height, 20px);
+  margin: 0;
+  border: var(--piq-switch-track-border, 1.5px solid var(--piq-color-text-muted));
+  border-radius: var(--piq-switch-radius, 999px);
+  background: var(--piq-switch-track-bg, var(--piq-color-surface-sunken));
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+.piq-switch__track::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: var(--piq-switch-thumb-inset, 3px);
+  width: var(--piq-switch-thumb-size, 12px);
+  height: var(--piq-switch-thumb-size, 12px);
+  border-radius: 50%;
+  background: var(--piq-switch-thumb-bg, var(--piq-color-text-muted));
+  transform: translateY(-50%);
+  transition: left 120ms ease, width 120ms ease, height 120ms ease;
+}
+.piq-switch__track:checked {
+  border-color: var(--piq-switch-checked-border-color, var(--piq-switch-checked-track-bg, var(--piq-color-structure)));
+  background: var(--piq-switch-checked-track-bg, var(--piq-color-structure));
+}
+.piq-switch__track:checked::before {
+  left: calc(100% - var(--piq-switch-checked-thumb-size, var(--piq-switch-thumb-size, 12px)) - var(--piq-switch-thumb-inset, 3px));
+  width: var(--piq-switch-checked-thumb-size, var(--piq-switch-thumb-size, 12px));
+  height: var(--piq-switch-checked-thumb-size, var(--piq-switch-thumb-size, 12px));
+  background: var(--piq-switch-checked-thumb-bg, var(--piq-color-surface));
+}
+.piq-switch__track:focus-visible { outline: var(--piq-focus-ring); outline-offset: 2px; }
+.piq-switch__track:disabled,
+.piq-switch__track:disabled + span { opacity: 0.45; cursor: not-allowed; }
+
+/* ----------------------------------------------------------- choice picker */
+
+/* One choice from a few, every option visible: a radio group drawn as
+   segments. Connected segments (--seg-gap 0) share one outline; separated
+   ones each carry their own. The selected segment's label is --seg-on-fg on
+   --seg-on-bg, a pairing the contrast gate checks, never a literal white. */
+/* AppearanceSwitch: three icons in a pill, the chosen one on a raised disc. */
+.piq-appearance {
+  display: inline-flex;
+  gap: var(--piq-space-1);
+  padding: var(--piq-space-1);
+  border: var(--piq-border-default);
+  border-radius: var(--piq-pill-radius, 999em);
+  background: var(--piq-color-surface);
+}
+.piq-appearance__opt {
+  display: inline-grid;
+  place-items: center;
+  inline-size: max(var(--piq-button-height, 36px), var(--piq-size-target-minimum, 24px));
+  block-size: max(var(--piq-button-height, 36px), var(--piq-size-target-minimum, 24px));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--piq-color-text-muted);
+  font-size: 1.25em;
+  cursor: pointer;
+}
+.piq-appearance__opt:hover:not(:disabled) { color: var(--piq-color-text-strong); }
+.piq-appearance__opt[aria-checked="true"] { background: var(--piq-color-surface-sunken); color: var(--piq-color-text-strong); outline: var(--piq-border-default); outline-offset: -1px; }
+.piq-appearance__opt:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-focus-offset); }
+.piq-appearance__opt:disabled { opacity: 0.4; cursor: not-allowed; }
+@media (pointer: coarse) { .piq-appearance__opt { inline-size: var(--piq-size-target-touch, 44px); block-size: var(--piq-size-target-touch, 44px); } }
+@media (forced-colors: active) { .piq-appearance__opt[aria-checked="true"] { outline: 2px solid CanvasText; } }
+
+.piq-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  width: fit-content;
+  max-width: 100%;
+  justify-self: start;
+  gap: var(--piq-choice-picker-gap, 0);
+  border: var(--piq-choice-picker-border, var(--piq-border-default));
+  border-radius: var(--piq-choice-picker-radius, var(--piq-button-radius));
+  overflow: hidden;
+}
+.piq-seg__opt {
+  --_state: 0%;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--piq-space-1);
+  min-height: var(--piq-choice-picker-height, var(--piq-button-height));
+  padding: 0 var(--piq-choice-picker-padding-x, var(--piq-space-4));
+  border: var(--piq-choice-picker-option-border, 0);
+  border-radius: var(--piq-choice-picker-option-radius, 0);
+  background-color: var(--piq-choice-picker-option-bg, var(--piq-color-surface));
+  background-image: linear-gradient(color-mix(in srgb, currentColor var(--_state), transparent) 0 0);
+  color: var(--piq-choice-picker-option-fg, var(--piq-color-text));
+  font: var(--piq-choice-picker-font-weight, var(--piq-font-weight-regular)) var(--piq-choice-picker-font-size, var(--piq-font-size-small)) / 1 var(--piq-font-body);
+  cursor: pointer;
+}
+.piq-seg__opt + .piq-seg__opt { border-left: var(--piq-choice-picker-divider, var(--piq-border-default)); }
+.piq-seg__opt:hover:not([aria-checked="true"]) { --_state: var(--piq-state-layer-hover, 0%); background-color: var(--piq-choice-picker-option-hover-bg, var(--piq-color-surface-sunken)); }
+.piq-seg__opt:focus-visible { outline: var(--piq-focus-ring); outline-offset: -2px; position: relative; }
+.piq-seg__opt[aria-checked="true"] {
+  background-color: var(--piq-choice-picker-option-selected-bg, var(--piq-color-structure));
+  color: var(--piq-choice-picker-option-selected-fg, var(--piq-color-surface));
+  font-weight: var(--piq-choice-picker-option-selected-font-weight, var(--piq-choice-picker-font-weight, var(--piq-font-weight-regular)));
+}
+.piq-seg__tick { display: none; }
+.piq-seg__opt[aria-checked="true"] .piq-seg__tick { display: var(--piq-choice-picker-option-selected-check, none); }
+
+/* -------------------------------------------------------------------- card */
+
+.piq-card {
+  display: grid;
+  gap: var(--piq-space-3);
+  padding: var(--piq-card-padding, var(--piq-space-4));
+  border: var(--piq-card-border, var(--piq-border-default));
+  border-radius: var(--piq-radius-card);
+  background: var(--piq-card-bg, var(--piq-color-surface));
+  box-shadow: var(--piq-shadow-card);
+  color: var(--piq-color-text);
+}
+.piq-card__title { margin: 0; color: var(--piq-color-text-strong); font: var(--piq-font-weight-strong) var(--piq-font-size-heading) / var(--piq-line-height-tight) var(--piq-font-heading); }
+.piq-card__body { margin: 0; }
+.piq-card__actions { display: flex; flex-wrap: wrap; gap: var(--piq-space-2); }
+
+/* ------------------------------------------------------------------ notice */
+
+/* A message in the flow of the page. --_tone is the message's colour:
+   the stripe, the tint and the tinted edge all come from it, so a theme
+   chooses the anatomy and the tone chooses the hue. */
+.piq-notice {
+  --_tone: var(--piq-color-structure);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--piq-space-1) var(--piq-space-3);
+  align-items: start;
+  padding: var(--piq-space-3) var(--piq-space-4);
+  border: var(--piq-notice-border-width, 1px) solid color-mix(in srgb, var(--_tone) var(--piq-notice-border-tone-mix, 0%), var(--piq-color-border));
+  border-left: var(--piq-notice-stripe-width, 3px) solid var(--_tone);
+  border-radius: var(--piq-notice-radius, var(--piq-radius-control));
+  background: color-mix(in srgb, var(--_tone) var(--piq-notice-tone-mix, 0%), var(--piq-notice-bg, var(--piq-color-surface)));
+  color: var(--piq-color-text);
+}
+.piq-notice--accent { --_tone: var(--piq-color-accent); }
+.piq-notice--success { --_tone: var(--piq-state-live); }
+.piq-notice--warning { --_tone: var(--piq-state-limited); }
+.piq-notice--error { --_tone: var(--piq-state-closed); }
+.piq-notice__mark {
+  display: grid;
+  place-items: center;
+  width: 1.25em;
+  height: 1.25em;
+  margin-top: 0.15em;
+  border-radius: 50%;
+  background: var(--_tone);
+  color: var(--piq-color-surface);
+  font: var(--piq-font-weight-strong) var(--piq-font-size-label) / 1 var(--piq-font-body);
+}
+.piq-notice__title { margin: 0; color: var(--piq-color-text-strong); font-weight: var(--piq-font-weight-strong); }
+.piq-notice__body { grid-column: 2; margin: 0; }
+
+/* ------------------------------------------------------------------- toast */
+
+.piq-toasts {
+  position: fixed;
+  inset: auto var(--piq-space-4) var(--piq-space-4) auto;
+  z-index: 1000;
+  display: grid;
+  gap: var(--piq-space-2);
+  width: min(420px, calc(100vw - 2 * var(--piq-space-4)));
+}
+.piq-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--piq-space-3);
+  min-height: 48px;
+  padding: var(--piq-space-2) var(--piq-space-2) var(--piq-space-2) var(--piq-space-4);
+  border-left: var(--piq-toast-stripe-width, 0) solid var(--piq-color-accent);
+  border-radius: var(--piq-toast-radius, var(--piq-radius-control));
+  background: var(--piq-toast-bg, var(--piq-color-surface));
+  box-shadow: var(--piq-toast-shadow, var(--piq-shadow-overlay));
+  color: var(--piq-toast-fg, var(--piq-color-text));
+  font: var(--piq-font-weight-regular) var(--piq-font-size-body) / var(--piq-line-height-body) var(--piq-font-body);
+}
+.piq-toast__text { flex: 1; margin: 0; }
+.piq-toast__action {
+  --_state: 0%;
+  appearance: none;
+  min-height: 36px;
+  padding: 0 var(--piq-space-3);
+  border: 0;
+  border-radius: var(--piq-button-radius);
+  background: linear-gradient(color-mix(in srgb, currentColor var(--_state), transparent) 0 0) transparent;
+  color: var(--piq-toast-action-fg, var(--piq-color-accent));
+  font: var(--piq-font-weight-strong) var(--piq-font-size-small) / 1 var(--piq-font-body);
+  cursor: pointer;
+}
+.piq-toast__action:hover { --_state: 12%; }
+.piq-toast__action:focus-visible { outline: var(--piq-focus-ring); outline-offset: 0; }
+
+/* ------------------------------------------------------ loading and progress */
+
+/* The bar, the spinner and the skeleton read --piq-progress-*,
+   --piq-spinner-* and --piq-skeleton-*, which the shared design systems set
+   (Material's 4px rounded bar, Carbon's square 8px bar and shimmer, Fluent's
+   2px bar and wave, Databricks's 8px pill and pulse). A theme with its own
+   anatomy gets the fallbacks here. */
+.piq-progress { display: grid; gap: var(--piq-space-2); min-width: 0; }
+.piq-progress__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--piq-space-3);
+  color: var(--piq-color-text);
+  font: var(--piq-font-weight-strong) var(--piq-font-size-small) / 1.3 var(--piq-font-body);
+}
+.piq-progress__value { color: var(--piq-color-text-muted); font-weight: var(--piq-font-weight-regular); font-variant-numeric: tabular-nums; }
+.piq-progress__track {
+  position: relative;
+  overflow: hidden;
+  height: var(--piq-progress-height, 6px);
+  border-radius: var(--piq-progress-radius, var(--piq-radius-control));
+  background: var(--piq-progress-track-bg, var(--piq-color-border));
+}
+.piq-progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--piq-progress-fill-bg, var(--piq-color-structure));
+  transition: width 200ms ease;
+}
+.piq-progress--indeterminate .piq-progress__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  animation: piq-progress-sweep 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes piq-progress-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+.piq-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--piq-space-2);
+  vertical-align: middle;
+  color: var(--piq-progress-fill-bg, var(--piq-color-structure));
+}
+.piq-spinner--sm { --_size: 16px; }
+.piq-spinner--md { --_size: 24px; }
+.piq-spinner--lg { --_size: 48px; }
+.piq-spinner .piq-spinner__glyph { width: var(--_size); height: var(--_size); }
+.piq-spinner__label { color: var(--piq-color-text); font: var(--piq-font-weight-regular) var(--piq-font-size-small) / 1.3 var(--piq-font-body); }
+.piq-spinner__glyph {
+  flex: none;
+  display: block;
+  animation: piq-spin 0.9s linear infinite;
+}
+.piq-spinner__track,
+.piq-spinner__arc { stroke-width: var(--piq-spinner-stroke-width, 2.5); }
+.piq-spinner__track { stroke: var(--piq-spinner-track-color, transparent); }
+.piq-spinner__arc {
+  stroke: currentColor;
+  stroke-dasharray: 40 100;
+  stroke-linecap: var(--piq-spinner-line-cap, round);
+}
+@keyframes piq-spin { to { transform: rotate(360deg); } }
+
+/* A busy button keeps its label (and its name) under the spinner, so it
+   keeps its width. */
+.piq-btn--busy { position: relative; cursor: progress; }
+.piq-btn--busy .piq-btn__label { display: inline-flex; align-items: center; gap: inherit; opacity: 0; }
+.piq-btn__spinner { position: absolute; inset: 0; display: grid; place-items: center; }
+.piq-btn__spinner .piq-spinner__glyph { width: 1.25em; height: 1.25em; }
+/* On a filled button the arc is the label's colour; a track would fight it. */
+.piq-btn__spinner .piq-spinner__track { stroke: transparent; }
+
+.piq-skeleton {
+  --_skeleton: var(--piq-skeleton-bg, var(--piq-color-border));
+  display: block;
+  max-width: 100%;
+  border-radius: var(--piq-skeleton-radius, var(--piq-radius-control));
+}
+.piq-skeleton:not(.piq-skeleton--text),
+.piq-skeleton__line {
+  /* The highlight sits off the visible half until piq-shimmer sweeps it. */
+  background: linear-gradient(90deg, transparent 0 15%, color-mix(in srgb, var(--piq-color-surface) 60%, transparent) 25%, transparent 35% 100%) var(--_skeleton);
+  background-position: 100% 0;
+  background-size: 200% 100%;
+  animation: var(--piq-skeleton-effect, piq-pulse) 1.6s ease-in-out infinite;
+}
+.piq-skeleton--text { display: grid; gap: 0.6em; background: none; }
+.piq-skeleton__line { display: block; height: 0.8em; border-radius: inherit; }
+.piq-skeleton__line:last-child:not(:first-child) { width: 60%; }
+.piq-skeleton--rect { width: 100%; height: 6rem; }
+.piq-skeleton--circle { flex: none; border-radius: 50%; }
+@keyframes piq-pulse { 50% { opacity: 0.5; } }
+@keyframes piq-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+/* -------------------------------------------------------------- data table */
+
+.piq-table-wrap { overflow-x: auto; }
+.piq-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--piq-color-text);
+  font-size: var(--piq-table-font-size, var(--piq-font-size-small));
+  font-variant-numeric: tabular-nums;
+}
+.piq-table th {
+  height: var(--piq-table-header-height, auto);
+  padding: var(--piq-space-2) var(--piq-table-cell-padding-x, var(--piq-space-3));
+  border-bottom: var(--piq-table-header-border, 2px solid var(--piq-color-border));
+  background: var(--piq-table-header-bg, transparent);
+  color: var(--piq-table-header-fg, var(--piq-color-structure));
+  font-size: var(--piq-table-header-font-size, var(--piq-font-size-label));
+  font-weight: var(--piq-table-header-font-weight, var(--piq-font-weight-strong));
+  letter-spacing: var(--piq-table-header-letter-spacing, var(--piq-letter-spacing-label));
+  text-align: left;
+  text-transform: var(--piq-table-header-text-transform, uppercase);
+  white-space: nowrap;
+}
+.piq-table td {
+  height: var(--piq-table-row-height, auto);
+  padding: var(--piq-table-cell-padding-y, var(--piq-space-3)) var(--piq-table-cell-padding-x, var(--piq-space-3));
+  border-bottom: var(--piq-table-row-border, var(--piq-border-default));
+  vertical-align: middle;
+}
+/* Ruled or banded rows: the design system's table variant (ADR-022). */
+.piq-table tbody tr:nth-child(even) { background: var(--piq-table-row-stripe-bg, transparent); }
+.piq-table tbody tr:hover { background: var(--piq-table-row-hover-bg, var(--piq-color-surface-sunken)); }
+.piq-table .piq-num { text-align: right; }
+.piq-table__sort {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--piq-space-1);
+  cursor: pointer;
+}
+.piq-table__sort:focus-visible { outline: var(--piq-focus-ring); outline-offset: 2px; }
+.piq-table__arrow { opacity: 0.35; font-size: 0.9em; }
+th[aria-sort="ascending"] .piq-table__arrow,
+th[aria-sort="descending"] .piq-table__arrow { opacity: 1; }
+.piq-table__pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--piq-space-2);
+  padding-top: var(--piq-space-2);
+  color: var(--piq-color-text-muted);
+  font-size: var(--piq-font-size-label);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piq-btn, .piq-check__box::after, .piq-radio::after, .piq-switch__track, .piq-switch__track::before, .piq-progress__fill { transition: none; }
+  /* Still, not gone: an unknown amount fills the track faintly, a skeleton
+     stands as it is, and a spinner turns slowly so the wait still shows. */
+  .piq-progress--indeterminate .piq-progress__fill { width: 100%; opacity: 0.35; animation: none; }
+  .piq-skeleton:not(.piq-skeleton--text), .piq-skeleton__line { animation: none; }
+  .piq-spinner__glyph { animation-duration: 3s; }
+}
+
+/* For text that is for assistive technology only, such as a table caption. */
+.piq-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------- icons */
+
+/* <Icon>: an inline SVG in the text colour, sized by its font (1em) unless
+   told otherwise, sitting on the text's baseline like a glyph. */
+.piq-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: -0.125em;
+}
+
+/* -------------------------------------------------------------------- logo */
+
+/* <Logo>: the brand's artwork from its brand tokens, so it follows the theme
+   and the appearance. Artwork is drawn as supplied (--piq-brand-logo-image)
+   or, for single-colour artwork, as a mask painted in --piq-brand-logo-bg
+   (the brand sets it to its logo paint). Height and aspect come from the
+   brand; 28px and 3:1 when it gives none. A brand without artwork gets its
+   title in --piq-brand-logo-paint (.piq-logo--text). */
+.piq-logo {
+  --piq-logo-height: var(--piq-brand-logo-height, 28px);
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  height: var(--piq-logo-height);
+  aspect-ratio: var(--piq-brand-logo-aspect, 3);
+  background-color: var(--piq-brand-logo-bg, transparent);
+  background-image: var(--piq-brand-logo-image, none);
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  mask-image: var(--piq-brand-logo-mask, none);
+  mask-position: left center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+.piq-logo--sm { --piq-logo-height: var(--piq-brand-logo-height-sm, 22px); }
+.piq-logo--mark {
+  aspect-ratio: 1;
+  background-color: var(--piq-brand-mark-bg, transparent);
+  background-image: var(--piq-brand-mark-image, none);
+  background-position: center;
+  mask-image: var(--piq-brand-mark-mask, none);
+  mask-position: center;
+}
+.piq-logo--text {
+  display: inline-flex;
+  align-items: center;
+  aspect-ratio: auto;
+  background: none;
+  mask-image: none;
+  color: var(--piq-brand-logo-paint, var(--piq-color-text-strong));
+  font-family: var(--piq-font-heading);
+  font-size: calc(var(--piq-logo-height) * 0.72);
+  font-weight: var(--piq-font-weight-strong);
+  line-height: 1;
+  white-space: nowrap;
+}
+.piq-logo--mark.piq-logo--text { justify-content: center; width: var(--piq-logo-height); }
+
+/* ------------------------------------------------------------- menu button */
+
+/* A menu of actions under its button (MenuButton): the same list as .piq-menu,
+   positioned under the button, start-aligned or end-aligned. */
+.piq-menubutton { position: relative; display: inline-block; }
+.piq-menubutton__menu {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 10;
+  min-inline-size: 100%;
+  inline-size: max-content;
+  max-inline-size: var(--piq-size-measure);
+}
+.piq-menubutton[data-align="end"] > .piq-menubutton__menu { inset-inline-start: auto; inset-inline-end: 0; }
+.piq-menubutton__menu .piq-menu__item {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: max(var(--piq-menu-item-height, 36px), var(--piq-size-target-minimum, 24px));
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+.piq-menu__item:focus-visible { outline: var(--piq-focus-ring); outline-offset: calc(var(--piq-focus-offset, 2px) * -1); }
+.piq-menu__item[aria-disabled="true"] { color: var(--piq-color-text-muted); cursor: default; }
+.piq-menu__item[aria-checked="true"] { font-weight: var(--piq-font-weight-strong); }
+.piq-menu__item[aria-checked="true"]::after { content: "✓" / ""; margin-inline-start: auto; }
+
+/* ------------------------------------------------------------- breadcrumbs */
+
+/* The full trail where there is room; below the medium size class only the
+   link back to the parent (the breadcrumbs measure their own width). */
+.piq-breadcrumbs { container-type: inline-size; font-size: var(--piq-font-size-small); }
+.piq-breadcrumbs__list { display: none; flex-wrap: wrap; align-items: center; gap: var(--piq-space-1); margin: 0; padding: 0; list-style: none; }
+.piq-breadcrumbs:not(:has(.piq-breadcrumbs__back)) .piq-breadcrumbs__list { display: flex; }
+.piq-breadcrumbs__item { display: inline-flex; align-items: center; gap: var(--piq-space-1); }
+.piq-breadcrumbs__item + .piq-breadcrumbs__item::before { content: "/" / ""; color: var(--piq-color-text-subtle); }
+.piq-breadcrumbs a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--piq-space-1);
+  min-block-size: var(--piq-size-target-minimum, 24px);
+  color: var(--piq-color-text-muted);
+  text-underline-offset: 0.2em;
+}
+.piq-breadcrumbs a:hover { color: var(--piq-color-text); }
+.piq-breadcrumbs a:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-focus-offset, 2px); }
+.piq-breadcrumbs [aria-current="page"] { color: var(--piq-color-text); font-weight: var(--piq-font-weight-strong); text-decoration: none; }
+@container (min-width: 600px) {
+  .piq-breadcrumbs .piq-breadcrumbs__list { display: flex; }
+  .piq-breadcrumbs .piq-breadcrumbs__back { display: none; }
+}
+
+/* -------------------------------------------------------------------- tabs */
+
+/* The selected tab is marked by the design system's tabs variant: an
+   underline (indicator height) or an enclosed fill (tab background). */
+.piq-tabs__list {
+  display: flex;
+  overflow-x: auto;
+  border-block-end: var(--piq-tabs-list-border, var(--piq-border-default));
+  scrollbar-width: thin;
+}
+.piq-tabs__tab {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--piq-space-2);
+  min-block-size: max(var(--piq-button-height, 36px), var(--piq-size-target-minimum, 24px));
+  padding-inline: var(--piq-tabs-tab-padding-x, var(--piq-space-4));
+  border-start-start-radius: var(--piq-tabs-tab-radius, 0);
+  border-start-end-radius: var(--piq-tabs-tab-radius, 0);
+  color: var(--piq-color-text-muted);
+  font: var(--piq-font-weight-strong) var(--piq-font-size-body) / var(--piq-line-height-tight) var(--piq-font-body);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.piq-tabs__tab:hover { color: var(--piq-color-text); }
+.piq-tabs__tab[aria-selected="true"] {
+  background: var(--piq-tabs-tab-bg-selected, transparent);
+  box-shadow: inset 0 calc(var(--piq-tabs-indicator-height, 2px) * -1) 0 var(--piq-color-structure);
+  color: var(--piq-color-text-strong);
+}
+.piq-tabs__tab:focus-visible { outline: var(--piq-focus-ring); outline-offset: calc(var(--piq-focus-offset, 2px) * -1); }
+.piq-tabs__count {
+  padding-inline: var(--piq-space-2);
+  border-radius: var(--piq-pill-radius, var(--piq-radius-control));
+  background: var(--piq-color-surface-sunken);
+  font-size: var(--piq-font-size-small);
+  font-variant-numeric: tabular-nums;
+}
+.piq-tabs__panel { padding-block: var(--piq-space-4); }
+.piq-tabs__panel:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-focus-offset, 2px); }
+
+/* ------------------------------------------------------------------- sheet */
+
+/* A modal <dialog> from an edge. It leaves a strip of the page showing at the
+   side, so a tap outside can close it. */
+.piq-sheet {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  max-inline-size: none;
+  max-block-size: none;
+  background: var(--piq-color-surface);
+  box-shadow: var(--piq-shadow-overlay);
+  color: var(--piq-color-text);
+}
+.piq-sheet::backdrop { background: color-mix(in srgb, var(--piq-color-text-strong) 40%, transparent); }
+.piq-sheet[data-side="start"],
+.piq-sheet[data-side="end"] { inset-block: 0; block-size: 100dvh; inline-size: min(var(--piq-size-measure), calc(100vw - var(--piq-size-target-touch, 44px))); }
+.piq-sheet[data-side="start"] { inset-inline: 0 auto; }
+.piq-sheet[data-side="end"] { inset-inline: auto 0; }
+.piq-sheet[data-side="bottom"] {
+  inset-inline: 0;
+  inset-block: auto 0;
+  inline-size: 100%;
+  max-block-size: calc(100dvh - var(--piq-size-target-touch, 44px));
+  border-start-start-radius: var(--piq-radius-card);
+  border-start-end-radius: var(--piq-radius-card);
+}
+.piq-sheet[data-side="full"] { inset: 0; inline-size: 100%; block-size: 100dvh; }
+.piq-sheet__body {
+  display: grid;
+  align-content: start;
+  gap: var(--piq-space-4);
+  padding: var(--piq-space-4);
+  padding-block-end: max(var(--piq-space-4), env(safe-area-inset-bottom));
+}
+.piq-sheet__head { display: flex; align-items: center; gap: var(--piq-space-3); }
+.piq-sheet__title { margin: 0; color: var(--piq-color-text-strong); font: var(--piq-font-weight-strong) var(--piq-font-size-heading) / var(--piq-line-height-tight) var(--piq-font-heading); }
+.piq-sheet__close { margin-inline-start: auto; }
+
+/* ------------------------------------------------------------------ dialog */
+
+/* A modal <dialog> centred by the browser, no wider than a reading measure
+   and never wider than the screen less a margin. */
+.piq-dialog {
+  box-sizing: border-box;
+  inline-size: min(var(--piq-size-measure), calc(100vw - var(--piq-space-4) * 2));
+  max-block-size: calc(100dvh - var(--piq-space-4) * 2);
+  padding: var(--piq-space-5);
+  border: var(--piq-card-border, var(--piq-border-default));
+  border-radius: var(--piq-radius-card);
+  background: var(--piq-color-surface);
+  box-shadow: var(--piq-shadow-overlay);
+  color: var(--piq-color-text);
+}
+.piq-dialog[open] { display: grid; gap: var(--piq-space-4); }
+.piq-dialog::backdrop { background: color-mix(in srgb, var(--piq-color-text-strong) 40%, transparent); }
+.piq-dialog__head { display: flex; align-items: center; gap: var(--piq-space-3); }
+.piq-dialog__title { margin: 0; color: var(--piq-color-text-strong); font: var(--piq-font-weight-strong) var(--piq-font-size-heading) / var(--piq-line-height-tight) var(--piq-font-heading); }
+.piq-dialog__close { margin-inline-start: auto; }
+.piq-dialog__description { margin: 0; color: var(--piq-color-text-muted); }
+.piq-dialog__body { display: grid; gap: var(--piq-space-3); }
+.piq-dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--piq-space-2); }
+
+/* -------------------------------------------------------------- date range */
+
+.piq-date-range { display: grid; gap: var(--piq-space-2); margin: 0; padding: 0; border: 0; min-inline-size: 0; }
+.piq-date-range__fields { display: flex; flex-wrap: wrap; gap: var(--piq-space-3); }
+.piq-date-range__fields > .piq-field { flex: 1 1 10rem; }
+
+/* ---------------------------------------------------------------- combobox */
+
+.piq-combobox__field { position: relative; display: block; }
+.piq-combobox__field > .piq-field__input { inline-size: 100%; }
+.piq-combobox__list { position: absolute; inset-inline: 0; inset-block-start: 100%; z-index: 10; max-block-size: calc(var(--piq-size-target-touch, 44px) * 7); margin: var(--piq-menu-offset, 4px) 0 0; overflow-y: auto; }
+.piq-combobox__list[hidden] { display: none; }
+.piq-combobox__list .piq-menu__item { cursor: pointer; }
+.piq-combobox__empty { position: absolute; inset-inline: 0; inset-block-start: 100%; z-index: 10; margin-block-start: var(--piq-menu-offset, 4px); padding: var(--piq-space-2) var(--piq-space-3); border: var(--piq-menu-border, var(--piq-border-default)); border-radius: var(--piq-menu-radius, var(--piq-radius-control)); background: var(--piq-menu-bg, var(--piq-color-surface)); color: var(--piq-color-text-muted); }
+
+/* ----------------------------------------------------------------- tooltip */
+
+/* Above the control by default (placement bottom puts it below); it can be
+   hovered, so the pointer may move onto it. */
+.piq-tooltip-anchor { position: relative; display: inline-flex; }
+.piq-tooltip {
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-start: 50%;
+  z-index: 20;
+  translate: -50% calc(var(--piq-space-1) * -1);
+  inline-size: max-content;
+  max-inline-size: calc(var(--piq-size-measure) / 2);
+  padding: var(--piq-space-1) var(--piq-space-2);
+  border-radius: var(--piq-radius-control);
+  background: var(--piq-color-text-strong);
+  color: var(--piq-color-ground);
+  font-size: var(--piq-font-size-small);
+  line-height: var(--piq-line-height-tight);
+}
+.piq-tooltip[data-placement="bottom"] { inset-block: 100% auto; translate: -50% var(--piq-space-1); }
+.piq-tooltip[hidden] { display: none; }
+
+/* -------------------------------------------------------------- pagination */
+
+.piq-pagination { display: flex; flex-wrap: wrap; align-items: end; justify-content: flex-end; gap: var(--piq-space-3); }
+.piq-pagination__size { flex-direction: row; align-items: center; }
+.piq-pagination__position { margin: 0; align-self: center; color: var(--piq-color-text-muted); font-size: var(--piq-font-size-small); font-variant-numeric: tabular-nums; }
+.piq-pagination__steps { display: flex; gap: var(--piq-space-1); }
+/* Mirrored in a right-to-left page. An attribute selector, not :dir(), which
+   bundlers rewrite into a :lang() list the audit cannot recognise as the SDK's. */
+[dir="rtl"] .piq-pagination__steps svg { transform: scaleX(-1); }
+
+/* -------------------------------------------------------------------- chip */
+
+/* An applied filter: its label and a button that removes it. */
+.piq-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--piq-space-1);
+  min-block-size: var(--piq-size-target-minimum, 24px);
+  padding-inline: var(--piq-space-3) var(--piq-space-1);
+  border: var(--piq-pill-border, var(--piq-border-default));
+  border-radius: var(--piq-pill-radius, var(--piq-radius-control));
+  background: var(--piq-color-surface-sunken);
+  color: var(--piq-color-text);
+  font-size: var(--piq-font-size-small);
+}
+.piq-chip__remove {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  min-inline-size: var(--piq-size-target-minimum, 24px);
+  min-block-size: var(--piq-size-target-minimum, 24px);
+  border-radius: var(--piq-pill-radius, var(--piq-radius-control));
+  color: var(--piq-color-text-muted);
+  cursor: pointer;
+}
+.piq-chip__remove:hover { color: var(--piq-color-text-strong); }
+.piq-chip__remove:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-focus-offset, 2px); }
+
+/* ------------------------------------------------------------ touch input */
+
+/* On a touch screen every control is at least the touch-target size
+   (WCAG 2.5.8; Apple HIG 44pt), whatever the window's width. */
+@media (pointer: coarse) {
+  .piq-btn,
+  .piq-menu__item,
+  .piq-tabs__tab,
+  .piq-breadcrumbs a,
+  .piq-chip__remove { min-block-size: var(--piq-size-target-touch, 44px); }
+  .piq-chip__remove { min-inline-size: var(--piq-size-target-touch, 44px); }
+  .piq-btn { min-inline-size: var(--piq-size-target-touch, 44px); }
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DocumentDrivenDX/ux-builder/tokens/schema/theme.schema.json",
+  "title": "Theme file",
+  "description": "A theme is what an app selects with data-theme (ADR-018, CONTRACT-002 amendment): one brand plus an anatomy. The anatomy is either a shared design system (designSystem: material, fluent, carbon) or the theme's own (anatomy: the same fonts, tokens and appearances a design system file holds). Exactly one of the two.",
+  "type": "object",
+  "required": [
+    "name",
+    "title",
+    "brand"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "$description": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "maxLength": 40
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "brand": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "description": "The name of a brand file in tokens/brands/."
+    },
+    "designSystem": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "description": "The name of a shared design system in tokens/design-systems/."
+    },
+    "anatomy": {
+      "type": "object",
+      "description": "The theme's own anatomy, for a theme that is not built on a shared design system.",
+      "required": [
+        "fonts",
+        "tokens"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "$ref": "design-system.schema.json#/properties/source"
+        },
+        "fonts": {
+          "$ref": "design-system.schema.json#/properties/fonts"
+        },
+        "tokens": {
+          "$ref": "design-system.schema.json#/$defs/groups"
+        },
+        "appearances": {
+          "$ref": "design-system.schema.json#/properties/appearances"
+        },
+        "variants": {
+          "$ref": "design-system.schema.json#/$defs/variants"
+        }
+      }
+    },
+    "default": {
+      "enum": [
+        "light",
+        "dark"
+      ],
+      "description": "The appearance applied when the app sets no data-appearance. Defaults to dark when the brand defines dark, else the brand's only appearance."
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "designSystem"
+      ],
+      "properties": {
+        "designSystem": true,
+        "anatomy": false
+      }
+    },
+    {
+      "required": [
+        "anatomy"
+      ],
+      "properties": {
+        "anatomy": true,
+        "designSystem": false
+      }
+    }
+  ]
+}

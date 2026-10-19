@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DocumentDrivenDX/ux-builder/tokens/schema/font.schema.json",
+  "title": "Font declaration",
+  "description": "One font role (display, heading, body or mono) and where it comes from (ADR-017). Shared by brand files and design system files.",
+  "type": "object",
+  "required": ["family", "fallback", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "family": { "type": "string", "minLength": 1, "description": "The family name as CSS uses it, e.g. \"IBM Plex Sans\"." },
+    "fallback": {
+      "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 },
+      "description": "Fallback stack after the family, ending in a generic family (sans-serif, serif or monospace)."
+    },
+    "source": { "enum": ["bundled", "google", "client-hosted", "system"] },
+    "weights": { "type": "array", "items": { "type": "integer", "minimum": 100, "maximum": 900, "multipleOf": 100 }, "uniqueItems": true },
+    "license": { "enum": ["OFL-1.1", "Apache-2.0"], "description": "Required for bundled fonts: only these licences may be shipped in an SDK package." },
+    "url": { "type": "string", "pattern": "^https://", "description": "Required for client-hosted fonts: the stylesheet that declares the font." }
+  },
+  "allOf": [
+    { "if": { "properties": { "source": { "const": "bundled" } } }, "then": { "properties": { "license": true }, "required": ["license"] } },
+    { "if": { "properties": { "source": { "const": "client-hosted" } } }, "then": { "properties": { "url": true }, "required": ["url"] } }
+  ]
+}

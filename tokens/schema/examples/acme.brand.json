@@ -1,0 +1,99 @@
+{
+  "$schema": "../brand.schema.json",
+  "$description": "Example: an invented light-only brand with a font override and generation settings, exercising the optional parts of the schema.",
+  "name": "acme",
+  "title": "Acme Legal",
+  "appearances": {
+    "light": {
+      "color": {
+        "ground": {
+          "$value": "#F6F7F9"
+        },
+        "surface": {
+          "$value": "#FFFFFF"
+        },
+        "surface-sunken": {
+          "$value": "#EEF1F4"
+        },
+        "text-strong": {
+          "$value": "#101826"
+        },
+        "text": {
+          "$value": "#2A3342"
+        },
+        "text-muted": {
+          "$value": "#55606F"
+        },
+        "text-subtle": {
+          "$value": "#5E6977"
+        },
+        "structure": {
+          "$value": "#1F3A5F"
+        },
+        "accent": {
+          "$value": "#B4442C"
+        },
+        "on-accent": {
+          "$value": "#FFFFFF"
+        },
+        "border": {
+          "$value": "#D7DCE2"
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#2F6B45"
+        },
+        "limited": {
+          "$value": "#8A5A00"
+        },
+        "purchasing": {
+          "$value": "#2F4E8A"
+        },
+        "evaluation": {
+          "$value": "#5E6977"
+        },
+        "closed": {
+          "$value": "#A8321E"
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#1F3A5F"
+        }
+      }
+    }
+  },
+  "fonts": {
+    "body": {
+      "family": "Inter",
+      "fallback": [
+        "system-ui",
+        "sans-serif"
+      ],
+      "source": "google",
+      "weights": [
+        400,
+        600
+      ]
+    }
+  },
+  "generation": {
+    "engine": "0.1.0",
+    "logo": {
+      "path": "acme-logo.svg",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "extracted": [
+      "#1F3A5F",
+      "#B4442C"
+    ],
+    "strategy": "muted",
+    "settings": {
+      "hueShift": -6,
+      "chroma": 0.8,
+      "neutralTint": 0.04,
+      "accentRole": "secondary"
+    }
+  }
+}

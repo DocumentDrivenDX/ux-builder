@@ -1,0 +1,699 @@
+{
+  "$schema": "../schema/design-system.schema.json",
+  "$description": "Databricks AppKit UI: shadcn/ui on Tailwind v4 with the Databricks brand bridge. DM Sans and DM Mono, 0.625rem base radius (8px controls, 10px tab lists and notices, 14px cards), 36px buttons and fields with a 3px half-strength primary focus ring, segmented tabs, fully rounded badges, Tailwind shadows. Source: Databricks AppKit UI (@databricks/appkit-ui 0.81.0) with the dbx-tools brand bridge and default brand (@dbx-tools/ui-appkit, @dbx-tools/ui-branding, @dbx-tools/shared-core 0.9.43), documented at https://docs.dbx.tools/packages/ui-appkit.",
+  "name": "databricks",
+  "title": "Databricks",
+  "source": {
+    "system": "Databricks AppKit UI",
+    "version": "@databricks/appkit-ui 0.81.0; @dbx-tools/ui-appkit 0.9.43",
+    "url": "https://docs.dbx.tools/packages/ui-appkit"
+  },
+  "fonts": {
+    "display": {
+      "family": "DM Sans",
+      "fallback": [
+        "system-ui",
+        "sans-serif"
+      ],
+      "source": "bundled",
+      "weights": [
+        400,
+        500,
+        600
+      ],
+      "license": "OFL-1.1"
+    },
+    "heading": {
+      "family": "DM Sans",
+      "fallback": [
+        "system-ui",
+        "sans-serif"
+      ],
+      "source": "bundled",
+      "weights": [
+        400,
+        500,
+        600
+      ],
+      "license": "OFL-1.1"
+    },
+    "body": {
+      "family": "DM Sans",
+      "fallback": [
+        "system-ui",
+        "sans-serif"
+      ],
+      "source": "bundled",
+      "weights": [
+        400,
+        500,
+        600
+      ],
+      "license": "OFL-1.1"
+    },
+    "mono": {
+      "family": "DM Mono",
+      "fallback": [
+        "ui-monospace",
+        "Menlo",
+        "monospace"
+      ],
+      "source": "bundled",
+      "weights": [
+        400,
+        500
+      ],
+      "license": "OFL-1.1"
+    }
+  },
+  "tokens": {
+    "font-size": {
+      "display": {
+        "$value": "2.25rem",
+        "$description": "text-4xl."
+      },
+      "title": {
+        "$value": "1.5rem",
+        "$description": "text-2xl."
+      },
+      "heading": {
+        "$value": "1.125rem",
+        "$description": "text-lg."
+      },
+      "lead": {
+        "$value": "1.125rem",
+        "$description": "text-lg."
+      },
+      "body": {
+        "$value": "1rem",
+        "$description": "text-base."
+      },
+      "small": {
+        "$value": "0.875rem",
+        "$description": "text-sm: buttons, tables, menus, labels."
+      },
+      "label": {
+        "$value": "0.75rem",
+        "$description": "text-xs: badges, tooltips."
+      }
+    },
+    "font-weight": {
+      "regular": {
+        "$value": "400"
+      },
+      "strong": {
+        "$value": "600",
+        "$description": "font-semibold: card titles."
+      }
+    },
+    "letter-spacing": {
+      "label": {
+        "$value": "0"
+      },
+      "eyebrow": {
+        "$value": "0"
+      }
+    },
+    "line-height": {
+      "tight": {
+        "$value": "1.25",
+        "$description": "leading-tight."
+      },
+      "body": {
+        "$value": "1.5"
+      }
+    },
+    "radius": {
+      "control": {
+        "$value": "8px",
+        "$description": "rounded-md: --radius (0.625rem) - 2px."
+      },
+      "card": {
+        "$value": "14px",
+        "$description": "rounded-xl: --radius + 4px."
+      }
+    },
+    "border": {
+      "default": {
+        "$value": "1px solid {color.border}"
+      }
+    },
+    "shadow": {
+      "card": {
+        "$value": "0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)",
+        "$description": "shadow-sm."
+      },
+      "overlay": {
+        "$value": "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)",
+        "$description": "shadow-md: select and menu content."
+      }
+    },
+    "space": {
+      "1": {
+        "$value": "0.25rem"
+      },
+      "2": {
+        "$value": "0.5rem"
+      },
+      "3": {
+        "$value": "0.75rem"
+      },
+      "4": {
+        "$value": "1rem"
+      },
+      "5": {
+        "$value": "1.5rem"
+      },
+      "6": {
+        "$value": "2rem"
+      },
+      "7": {
+        "$value": "3rem"
+      },
+      "8": {
+        "$value": "4rem"
+      }
+    },
+    "size": {
+      "measure": {
+        "$value": "70ch"
+      }
+    },
+    "button": {
+      "radius": {
+        "$value": "8px",
+        "$description": "rounded-md."
+      },
+      "height": {
+        "$value": "36px",
+        "$description": "h-9."
+      },
+      "padding-x": {
+        "$value": "1rem",
+        "$description": "px-4."
+      },
+      "font-weight": {
+        "$value": "500",
+        "$description": "font-medium."
+      },
+      "font-size": {
+        "$value": "0.875rem",
+        "$description": "text-sm."
+      },
+      "shadow": {
+        "$value": "none"
+      },
+      "shadow-hover": {
+        "$value": "none"
+      },
+      "shadow-press": {
+        "$value": "none"
+      },
+      "offset-hover": {
+        "$value": "0px"
+      },
+      "offset-press": {
+        "$value": "0px"
+      },
+      "shadow-flat": {
+        "$value": "none"
+      },
+      "secondary-bg": {
+        "$value": "{color.surface-sunken}",
+        "$description": "Secondary: bg-secondary."
+      },
+      "secondary-fg": {
+        "$value": "{color.text}"
+      },
+      "secondary-border": {
+        "$value": "1px solid transparent"
+      },
+      "ghost-fg": {
+        "$value": "{color.text}",
+        "$description": "Ghost: foreground text, accent wash on hover."
+      }
+    },
+    "focus": {
+      "ring": {
+        "$value": "3px solid color-mix(in srgb, {color.structure} 50%, transparent)",
+        "$description": "focus-visible:ring-[3px] ring-ring/50; --ring is the brand primary."
+      },
+      "offset": {
+        "$value": "0px"
+      }
+    },
+    "state-layer": {
+      "hover": {
+        "$value": "10%",
+        "$description": "hover:bg-primary/90."
+      },
+      "press": {
+        "$value": "10%"
+      }
+    },
+    "pill": {
+      "radius": {
+        "$value": "999px",
+        "$description": "Badge: rounded-full."
+      },
+      "border": {
+        "$value": "1px solid transparent"
+      },
+      "bg": {
+        "$value": "{color.surface-sunken}",
+        "$description": "Secondary badge: bg-secondary."
+      },
+      "padding": {
+        "$value": "0.125rem 0.5rem",
+        "$description": "px-2 py-0.5."
+      },
+      "gap": {
+        "$value": "0.25rem"
+      },
+      "dot-size": {
+        "$value": "0"
+      },
+      "font-weight": {
+        "$value": "500"
+      },
+      "font-size": {
+        "$value": "0.75rem",
+        "$description": "text-xs."
+      },
+      "text-transform": {
+        "$value": "none"
+      },
+      "letter-spacing": {
+        "$value": "0"
+      }
+    },
+    "badge": {
+      "bg": {
+        "$value": "{color.structure}",
+        "$description": "Default badge: bg-primary."
+      },
+      "fg": {
+        "$value": "{color.surface}"
+      },
+      "radius": {
+        "$value": "999px"
+      },
+      "font-size": {
+        "$value": "0.75rem"
+      }
+    },
+    "field": {
+      "height": {
+        "$value": "36px",
+        "$description": "h-9."
+      },
+      "padding-x": {
+        "$value": "0.75rem",
+        "$description": "px-3."
+      },
+      "bg": {
+        "$value": "{color.ground}",
+        "$description": "bg-transparent over the page."
+      },
+      "border": {
+        "$value": "1px solid {color.border}",
+        "$description": "border-input."
+      },
+      "border-bottom": {
+        "$value": "1px solid {color.border}"
+      },
+      "radius": {
+        "$value": "8px",
+        "$description": "rounded-md."
+      },
+      "border-hover": {
+        "$value": "{color.border}"
+      },
+      "focus-outline": {
+        "$value": "1px solid {color.structure}",
+        "$description": "focus-visible:border-ring."
+      },
+      "focus-offset": {
+        "$value": "-1px"
+      },
+      "focus-shadow": {
+        "$value": "0 0 0 3px color-mix(in srgb, {color.structure} 50%, transparent)",
+        "$description": "ring-[3px] ring-ring/50."
+      },
+      "invalid-shadow": {
+        "$value": "0 0 0 3px color-mix(in srgb, {state.closed} 20%, transparent)",
+        "$description": "aria-invalid:ring-destructive/20."
+      },
+      "label-fg": {
+        "$value": "{color.text}"
+      },
+      "label-font-size": {
+        "$value": "0.875rem",
+        "$description": "Label: text-sm font-medium."
+      },
+      "label-font-weight": {
+        "$value": "500"
+      },
+      "label-letter-spacing": {
+        "$value": "0"
+      },
+      "label-text-transform": {
+        "$value": "none"
+      }
+    },
+    "check": {
+      "size": {
+        "$value": "16px"
+      },
+      "radius": {
+        "$value": "4px",
+        "$description": "rounded-[4px]."
+      },
+      "border": {
+        "$value": "1px solid {color.border}",
+        "$description": "border-input."
+      },
+      "checked-bg": {
+        "$value": "{color.structure}"
+      },
+      "checked-fg": {
+        "$value": "{color.surface}"
+      }
+    },
+    "switch": {
+      "width": {
+        "$value": "32px",
+        "$description": "w-8."
+      },
+      "height": {
+        "$value": "1.15rem",
+        "$description": "h-[1.15rem]."
+      },
+      "radius": {
+        "$value": "999px"
+      },
+      "thumb-inset": {
+        "$value": "1px"
+      },
+      "track-bg": {
+        "$value": "{color.border}",
+        "$description": "Unchecked: bg-input."
+      },
+      "track-border": {
+        "$value": "1px solid transparent"
+      },
+      "thumb-size": {
+        "$value": "16px",
+        "$description": "size-4."
+      },
+      "thumb-bg": {
+        "$value": "{color.ground}"
+      },
+      "checked-track-bg": {
+        "$value": "{color.structure}"
+      },
+      "checked-thumb-bg": {
+        "$value": "{color.ground}"
+      }
+    },
+    "menu": {
+      "radius": {
+        "$value": "8px",
+        "$description": "rounded-md."
+      },
+      "shadow": {
+        "$value": "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)",
+        "$description": "shadow-md."
+      },
+      "border": {
+        "$value": "1px solid {color.border}"
+      },
+      "bg": {
+        "$value": "{color.surface}",
+        "$description": "bg-popover."
+      },
+      "padding-y": {
+        "$value": "0.25rem",
+        "$description": "p-1."
+      },
+      "item-height": {
+        "$value": "32px",
+        "$description": "py-1.5 text-sm."
+      },
+      "item-hover-bg": {
+        "$value": "color-mix(in srgb, {color.accent} 12%, {color.surface})",
+        "$description": "The brand bridge's --accent: primary-hover mixed 12% into the background."
+      },
+      "item-selected-bg": {
+        "$value": "color-mix(in srgb, {color.accent} 12%, {color.surface})"
+      },
+      "item-selected-fg": {
+        "$value": "{color.text}"
+      },
+      "item-selected-font-weight": {
+        "$value": "400",
+        "$description": "Selection is shown with a check, not weight."
+      }
+    },
+    "choice-picker": {
+      "height": {
+        "$value": "36px",
+        "$description": "Tabs list: h-9."
+      },
+      "radius": {
+        "$value": "10px",
+        "$description": "rounded-lg."
+      },
+      "gap": {
+        "$value": "0"
+      },
+      "border": {
+        "$value": "3px solid {color.surface-sunken}",
+        "$description": "The tab list's bg-muted and p-[3px]."
+      },
+      "divider": {
+        "$value": "0 solid transparent"
+      },
+      "padding-x": {
+        "$value": "0.5rem",
+        "$description": "px-2."
+      },
+      "option-radius": {
+        "$value": "8px",
+        "$description": "rounded-md."
+      },
+      "option-bg": {
+        "$value": "{color.surface-sunken}",
+        "$description": "Inactive tabs sit on the muted list."
+      },
+      "option-fg": {
+        "$value": "{color.text}"
+      },
+      "option-hover-bg": {
+        "$value": "{color.surface-sunken}"
+      },
+      "option-selected-bg": {
+        "$value": "{color.ground}",
+        "$description": "Active tab: bg-background."
+      },
+      "option-selected-fg": {
+        "$value": "{color.text}"
+      },
+      "font-size": {
+        "$value": "0.875rem"
+      },
+      "font-weight": {
+        "$value": "500",
+        "$description": "font-medium."
+      }
+    },
+    "card": {
+      "bg": {
+        "$value": "{color.surface}"
+      },
+      "border": {
+        "$value": "1px solid {color.border}"
+      },
+      "padding": {
+        "$value": "1.5rem",
+        "$description": "py-6 px-6."
+      }
+    },
+    "notice": {
+      "radius": {
+        "$value": "10px",
+        "$description": "Alert: rounded-lg."
+      },
+      "stripe-width": {
+        "$value": "0"
+      },
+      "border-width": {
+        "$value": "1px"
+      },
+      "border-tone-mix": {
+        "$value": "0%",
+        "$description": "Alerts keep the default border."
+      },
+      "bg": {
+        "$value": "{color.surface}",
+        "$description": "bg-card."
+      },
+      "tone-mix": {
+        "$value": "0%"
+      }
+    },
+    "toast": {
+      "bg": {
+        "$value": "{color.surface}",
+        "$description": "Sonner: --normal-bg is the popover."
+      },
+      "fg": {
+        "$value": "{color.text}"
+      },
+      "action-fg": {
+        "$value": "{color.structure}"
+      },
+      "radius": {
+        "$value": "8px"
+      },
+      "shadow": {
+        "$value": "0 4px 12px rgba(0,0,0,0.1)",
+        "$description": "Sonner default."
+      },
+      "stripe-width": {
+        "$value": "0"
+      }
+    },
+    "progress": {
+      "height": {
+        "$value": "8px",
+        "$description": "shadcn Progress: h-2."
+      },
+      "radius": {
+        "$value": "9999px",
+        "$description": "shadcn Progress: rounded-full."
+      },
+      "track-bg": {
+        "$value": "{color.border}",
+        "$description": "shadcn Progress track: bg-primary/20."
+      },
+      "fill-bg": {
+        "$value": "{color.structure}",
+        "$description": "shadcn Progress indicator: bg-primary."
+      }
+    },
+    "spinner": {
+      "stroke-width": {
+        "$value": "2",
+        "$description": "Lucide loader-circle at stroke 2, as AppKit's spinner draws it."
+      },
+      "line-cap": {
+        "$value": "round",
+        "$description": "Lucide: round caps."
+      },
+      "track-color": {
+        "$value": "transparent",
+        "$description": "No track."
+      }
+    },
+    "skeleton": {
+      "bg": {
+        "$value": "{color.border}",
+        "$description": "shadcn Skeleton: bg-accent."
+      },
+      "radius": {
+        "$value": "8px",
+        "$description": "shadcn Skeleton: rounded-md."
+      },
+      "effect": {
+        "$value": "piq-pulse",
+        "$description": "shadcn Skeleton: animate-pulse."
+      }
+    },
+    "table": {
+      "font-size": {
+        "$value": "0.875rem",
+        "$description": "text-sm."
+      },
+      "row-height": {
+        "$value": "40px"
+      },
+      "header-height": {
+        "$value": "40px",
+        "$description": "h-10."
+      },
+      "cell-padding-x": {
+        "$value": "0.5rem",
+        "$description": "px-2."
+      },
+      "cell-padding-y": {
+        "$value": "0"
+      },
+      "header-bg": {
+        "$value": "{color.surface}",
+        "$description": "No header fill."
+      },
+      "header-fg": {
+        "$value": "{color.text}"
+      },
+      "header-font-size": {
+        "$value": "0.875rem"
+      },
+      "header-font-weight": {
+        "$value": "500",
+        "$description": "font-medium."
+      },
+      "header-letter-spacing": {
+        "$value": "0"
+      },
+      "header-text-transform": {
+        "$value": "none"
+      },
+      "header-border": {
+        "$value": "1px solid {color.border}"
+      },
+      "row-hover-bg": {
+        "$value": "color-mix(in srgb, {color.surface-sunken} 50%, transparent)",
+        "$description": "hover:bg-muted/50."
+      }
+    },
+    "icon": {
+      "set": {
+        "$value": "lucide",
+        "$description": "Lucide, as AppKit UI uses (@ux-builder/ui Icon)."
+      }
+    }
+  },
+  "appearances": {
+    "dark": {
+      "switch": {
+        "thumb-bg": {
+          "$value": "{color.text}",
+          "$description": "dark:data-[state=unchecked]:bg-foreground."
+        },
+        "checked-thumb-bg": {
+          "$value": "{color.surface}"
+        }
+      },
+      "field": {
+        "bg": {
+          "$value": "color-mix(in srgb, {color.text} 5%, {color.ground})",
+          "$description": "dark:bg-input/30: the input tint (white at 15%) at 30% over the ground."
+        }
+      },
+      "choice-picker": {
+        "option-fg": {
+          "$value": "{color.text-muted}",
+          "$description": "dark:text-muted-foreground."
+        },
+        "option-selected-bg": {
+          "$value": "color-mix(in srgb, {color.text} 5%, {color.ground})",
+          "$description": "dark:data-[state=active]:bg-input/30."
+        },
+        "option-selected-fg": {
+          "$value": "{color.text}"
+        }
+      }
+    }
+  }
+}

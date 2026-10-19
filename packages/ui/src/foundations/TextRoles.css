@@ -1,0 +1,24 @@
+.ds-roles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--piq-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ds-role {
+  display: grid;
+  gap: var(--piq-space-1);
+  padding: var(--piq-space-3) var(--piq-space-4);
+  border: var(--piq-border-default);
+  border-radius: var(--piq-radius-control);
+}
+
+.ds-role__label {
+  font-size: var(--piq-font-size-body);
+}
+
+.ds-role__pair {
+  font: var(--piq-font-size-label) / 1.4 var(--piq-font-mono);
+}

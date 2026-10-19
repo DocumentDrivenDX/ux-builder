@@ -1,0 +1,566 @@
+<title>Theme Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Quicksand:wght@400;500;600;700&family=Zilla+Slab:wght@300;500&family=IBM+Plex+Sans:wght@400;600&family=Roboto:wght@400;500&display=swap">
+<style>
+/* Layout: a six-step wizard under one header; each step is one working surface, previews always show the theme in light and dark. */
+:root {
+  --bg: #ffffff;
+  --panel: #f6f8fa;
+  --fg: #312a29;
+  --muted: #494f5b;
+  --line: #d6d4d4;
+  --line-strong: #312a29;
+  --primary: #312a29;
+  --on-primary: #ffffff;
+  --secondary: #f7cfa5;
+  --on-secondary: #312a29;
+  --soft: #fef5ed;
+  --cool: #ecf1f5;
+  --ok-bg: #c6e1d9;
+  --link: #1d6e6f;
+  --code-bg: #312a29;
+  --code-fg: #fefaf6;
+  --focus: #6a888d;
+  --font-display: "Zilla Slab", Georgia, serif;
+  --font-body: Quicksand, "Helvetica Neue", Helvetica, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1817; --panel: #262120; --fg: #f3ede9; --muted: #c4bdb8; --line: #433c3a; --line-strong: #f3ede9;
+    --primary: #f7cfa5; --on-primary: #231e1d; --secondary: #f7cfa5; --on-secondary: #231e1d;
+    --soft: #3a2f27; --cool: #2b3036; --ok-bg: #234139; --link: #8fd0c4; --code-bg: #0f0d0c; --code-fg: #f3ede9; --focus: #a1b8ca;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1c1817; --panel: #262120; --fg: #f3ede9; --muted: #c4bdb8; --line: #433c3a; --line-strong: #f3ede9;
+  --primary: #f7cfa5; --on-primary: #231e1d; --secondary: #f7cfa5; --on-secondary: #231e1d;
+  --soft: #3a2f27; --cool: #2b3036; --ok-bg: #234139; --link: #8fd0c4; --code-bg: #0f0d0c; --code-fg: #f3ede9; --focus: #a1b8ca;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--font-body); }
+a { color: var(--link); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 300; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 4vw, 2.75rem); line-height: 0.95; }
+h2 { font-size: 1.25rem; font-weight: 500; }
+code, pre { font-family: var(--font-mono); }
+.eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.wrap { max-width: 1280px; margin-inline: auto; padding-inline: max(16px, 2.5vw); }
+.hdr { border-bottom: 1px solid var(--line); }
+.hdr .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding-block: 14px; }
+.brandmark { display: flex; align-items: baseline; gap: 12px; }
+.brandmark b { font-family: var(--font-display); font-weight: 300; font-size: 26px; line-height: 1; }
+.hdr nav { display: flex; gap: 18px; font-size: 14px; }
+main.wrap { padding-block: 24px 120px; display: flex; flex-direction: column; gap: 24px; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.steps button { width: 100%; min-height: 54px; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); text-align: left; cursor: pointer; font-weight: 500; font-size: 14px; }
+.steps button[aria-current="step"] { border-color: var(--line-strong); background: var(--soft); }
+.steps button:disabled { color: var(--muted); cursor: not-allowed; opacity: .7; }
+.steps .n { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--cool); font-family: var(--font-display); font-size: 16px; }
+.steps button.done .n, .steps button[aria-current="step"] .n { background: var(--primary); color: var(--on-primary); }
+
+.btn { min-height: 44px; padding: 0 20px; border-radius: 4px; border: 1px solid transparent; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-secondary { background: var(--secondary); color: var(--on-secondary); }
+.btn-quiet { background: var(--bg); border-color: var(--line); }
+.btn-sm { min-height: 36px; padding: 0 14px; font-size: 13px; }
+.btn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px; border-radius: 999px; background: var(--cool); font-size: 13px; }
+.pill.warm { background: var(--soft); font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.spread { justify-content: space-between; }
+.lede { margin: 0; color: var(--muted); max-width: 70ch; }
+.status { margin: 0; padding: 12px 16px; border-radius: 4px; background: var(--ok-bg); font-size: 14px; }
+.panel { padding: 20px; border-radius: 4px; background: var(--panel); }
+.card { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 4px; border: 2px solid var(--line); background: var(--bg); min-width: 0; }
+.card.on { border-color: var(--line-strong); }
+.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 16px; }
+.seg { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 4px; }
+.seg button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 3px; background: transparent; cursor: pointer; font-size: 13px; font-weight: 500; }
+.seg button[aria-checked="true"] { background: var(--primary); color: var(--on-primary); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-weight: 600; }
+.input { min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); }
+textarea.input { padding: 10px 12px; resize: vertical; min-height: 64px; }
+.hint { font-size: 13px; color: var(--muted); }
+.swatches { display: flex; height: 18px; border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+.swatches span { flex: 1; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pair.single { grid-template-columns: minmax(0, 1fr); }
+.badge-aa { font-size: 12px; font-weight: 700; color: var(--link); }
+.footbar { position: sticky; bottom: 0; z-index: 5; padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--line); }
+.footbar .inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+
+/* Step 1 */
+.drop { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px 20px; border: 2px dashed #a1b8ca; border-radius: 4px; background: var(--panel); text-align: center; cursor: pointer; }
+.drop.over { background: var(--cool); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.chip-in { animation: chipIn .5s ease both; }
+@keyframes chipIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.scan { height: 4px; border-radius: 2px; background: var(--cool); overflow: hidden; }
+.scan i { display: block; height: 100%; width: 40%; background: var(--primary); animation: scan 0.9s ease-in-out infinite; }
+@keyframes scan { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.skeleton { border-radius: 4px; background: linear-gradient(90deg, var(--panel), var(--cool), var(--panel)); background-size: 200% 100%; animation: shimmer 1s linear infinite; min-height: 420px; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* Compare */
+.matrix { overflow-x: auto; }
+.matrix-grid { display: grid; gap: 12px; align-items: start; }
+.cell { padding: 8px; border-radius: 4px; border: 2px solid var(--line); background: var(--bg); display: flex; flex-direction: column; gap: 8px; }
+.cell.chosen { border-color: var(--line-strong); background: var(--soft); }
+
+/* Step 6 */
+.use { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 24px; align-items: start; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--line); }
+.tabs button { min-height: 40px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer; font-weight: 600; color: var(--muted); }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+.task { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.task input[type=checkbox] { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--primary); }
+.task h3 { font-size: 1.15rem; font-weight: 500; }
+.task.done h3 { text-decoration: line-through; color: var(--muted); }
+.task .body { display: flex; flex-direction: column; gap: 10px; grid-column: 2; min-width: 0; }
+.code { position: relative; }
+.code pre { margin: 0; padding: 14px 16px; padding-right: 76px; border-radius: 4px; background: var(--code-bg); color: var(--code-fg); font-size: 13px; line-height: 1.6; overflow-x: auto; white-space: pre; }
+.code .copy { position: absolute; top: 8px; right: 8px; min-height: 30px; padding: 0 10px; border-radius: 3px; border: 1px solid #6f6a69; background: transparent; color: var(--code-fg); cursor: pointer; font-size: 12px; }
+.file { font-size: 12px; color: var(--muted); }
+.progress { height: 8px; border-radius: 4px; background: var(--cool); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--link); transition: width .3s ease; }
+.aside { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 16px; }
+.files li { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.files { list-style: none; margin: 0; padding: 0; }
+.kbd-verify { font-size: 13px; }
+
+.fade { animation: fade .35s ease both; }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fade, .chip-in, .scan i, .skeleton { animation: none; } }
+@media (max-width: 900px) {
+  .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .use { grid-template-columns: minmax(0, 1fr); }
+  .aside { position: static; }
+  .two { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media (max-width: 520px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pair { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<header class="hdr">
+  <div class="wrap">
+    <div class="brandmark"><b>Theme Builder</b><span class="eyebrow">AI-UI SDK · prototype</span></div>
+    <nav aria-label="Help"><a href="#help">Help</a><a href="#themes">Your themes</a></nav>
+  </div>
+</header>
+<main class="wrap" id="app" aria-live="polite"></main>
+
+<script>
+(() => {
+  // ---------- sample data (invented brand: Acme Legal) ----------
+  const L = { appearance: 'light', onStructure: '#FFFFFF', onAccent: '#FFFFFF' };
+  const D = { appearance: 'dark', ground: '#12161D', surface: '#1A1F28', sunken: '#161B23', textStrong: '#F2F4F7', text: '#D5DAE2', muted: '#9AA3B1', onStructure: '#12161D', onAccent: '#1B110E', border: '#2D3440', live: '#7FBF95', limited: '#D9A75A', closed: '#EE8F7C', noticeBg: '#2A241C' };
+  const ROUNDS = {
+    1: [
+      { id: 'faithful', name: 'Faithful', note: 'The logo colours as they are; accent darkened 6% for contrast.',
+        light: { ...L, ground: '#F6F7F9', surface: '#FFFFFF', sunken: '#EEF1F4', textStrong: '#101826', text: '#2A3342', muted: '#55606F', structure: '#1F3A5F', accent: '#B4442C', border: '#D7DCE2', live: '#2F6B45', limited: '#8A5A00', closed: '#A8321E', noticeBg: '#F6EFE3' },
+        dark: { ...D, structure: '#C8D5EA', accent: '#E08266' } },
+      { id: 'muted', name: 'Muted', note: 'Lower saturation, warm greys: quieter and more formal.',
+        light: { ...L, ground: '#F5F4F1', surface: '#FFFFFF', sunken: '#EFEDE8', textStrong: '#1C1A17', text: '#33302B', muted: '#5F5A52', structure: '#34465E', accent: '#8E4A3A', border: '#DDD8CF', live: '#3D6B4C', limited: '#7A5B1E', closed: '#8E3B2E', noticeBg: '#F3EEE4' },
+        dark: { ...D, ground: '#161514', surface: '#1F1D1B', sunken: '#1A1918', border: '#35312D', structure: '#C9D2DE', accent: '#D49A88', noticeBg: '#2B241D' } },
+      { id: 'vibrant', name: 'Vibrant', note: 'Saturation raised; the terracotta accent leads.',
+        light: { ...L, ground: '#F7F8FC', surface: '#FFFFFF', sunken: '#EEF1F9', textStrong: '#0F1730', text: '#1F2740', muted: '#4E5872', structure: '#173B78', accent: '#C23E19', border: '#D5DBEA', live: '#1F7344', limited: '#8A5500', closed: '#B3261E', noticeBg: '#FCEDE6' },
+        dark: { ...D, ground: '#0E1424', surface: '#162036', sunken: '#121A2C', border: '#2A3654', structure: '#B7CBF0', accent: '#F0855F' } },
+      { id: 'neutral', name: 'Neutral + accent', note: 'Greys carry the interface; terracotta is the only colour.',
+        light: { ...L, ground: '#F7F7F7', surface: '#FFFFFF', sunken: '#EFEFEF', textStrong: '#151515', text: '#2B2B2B', muted: '#5C5C5C', structure: '#2B2B2B', accent: '#B4442C', border: '#DADADA', live: '#2E6A43', limited: '#7F5800', closed: '#A8321E', noticeBg: '#F7EEEA' },
+        dark: { ...D, ground: '#151515', surface: '#1E1E1E', sunken: '#191919', border: '#333333', structure: '#E4E4E4', accent: '#E08266', text: '#D9D9D9', muted: '#A3A3A3' } }
+    ]
+  };
+  ROUNDS[2] = [
+    { ...ROUNDS[1][0], name: 'Faithful, quieter', note: 'Navy kept; terracotta deepened toward brick.', light: { ...ROUNDS[1][0].light, structure: '#22385A', accent: '#9C4130', ground: '#F6F6F4', noticeBg: '#F2ECE3' }, dark: { ...ROUNDS[1][0].dark, accent: '#CF8A76' } },
+    { ...ROUNDS[1][1], name: 'Muted, cooler', note: 'Slate greys; the accent reads as rust.', light: { ...ROUNDS[1][1].light, structure: '#2F4258', accent: '#83463A', ground: '#F4F5F6', sunken: '#ECEEF0', border: '#D6DADF' }, dark: { ...ROUNDS[1][1].dark, ground: '#131518', surface: '#1B1E22', structure: '#C3CEDB', accent: '#C9958A' } },
+    { ...ROUNDS[1][2], name: 'Navy-led', note: 'Navy leads; terracotta only for counts and focus.', light: { ...ROUNDS[1][2].light, structure: '#1D355E', accent: '#A44A2F', ground: '#F6F7FA', noticeBg: '#F2ECE6' }, dark: { ...ROUNDS[1][2].dark, accent: '#D99178' } },
+    { ...ROUNDS[1][3], name: 'Monochrome', note: 'Charcoal and paper; a single muted accent.', light: { ...ROUNDS[1][3].light, accent: '#8C4A3D', structure: '#26292E' }, dark: { ...ROUNDS[1][3].dark, accent: '#C99487' } }
+  ];
+  const SYSTEMS = [
+    { id: 'material', label: 'Material 3', icons: 'Material Symbols', fonts: 'Roboto', fontsTodo: 'Load Roboto 400/500 (Google Fonts or self-hosted).', blurb: 'Pill buttons, filled fields, tonal states.' },
+    { id: 'fluent', label: 'Fluent 2', icons: 'Fluent System Icons', fonts: 'Segoe UI', fontsTodo: 'Nothing to load: Segoe UI ships with Windows; other systems fall back.', blurb: '4px corners, compact 32px controls.' },
+    { id: 'carbon', label: 'Carbon', icons: 'Carbon Icons', fonts: 'IBM Plex Sans', fontsTodo: 'Load IBM Plex Sans 400/600 and IBM Plex Mono 400.', blurb: 'Square, 48px buttons, layered surfaces.' },
+    { id: 'databricks', label: 'Databricks', icons: 'Lucide', fonts: 'DM Sans', fontsTodo: 'Load DM Sans 400/500/600 and DM Mono 400.', blurb: 'AppKit UI: 36px controls, 8px radius, segmented tabs.' }
+  ];
+  const EXTRACTED = [
+    { hex: '#1F3A5F', role: 'Navy', cover: '64%' },
+    { hex: '#B4442C', role: 'Terracotta', cover: '9%' },
+    { hex: '#E8A33D', role: 'Gold', cover: '4%' }
+  ];
+  const LOGO_SVG = '<svg width="72" height="72" viewBox="0 0 72 72" role="img" aria-label="Acme Legal logo"><rect x="4" y="4" width="64" height="64" rx="10" fill="#1F3A5F"/><path d="M22 54 36 18l14 36" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/><rect x="27" y="40" width="18" height="6" fill="#B4442C"/><circle cx="54" cy="18" r="6" fill="#E8A33D"/></svg>';
+
+  // ---------- preview: one palette in one design system's anatomy ----------
+  function anatomy(s, p) {
+    const A = {
+      neutral: { font: 'ui-sans-serif, system-ui, sans-serif', btnH: 32, padX: 14, btnR: '10px', sec: p.structure, cardR: '14px', shadow: 'none', fieldH: 32, fieldBg: p.surface, fieldBorder: `1px solid ${p.border}`, fieldBottom: `1px solid ${p.border}`, fieldR: '10px', pillR: '999px', stripe: '3px', noticeR: '10px', swW: 34, swH: 20, thumb: 14, swOn: p.structure,
+        icon: { set: 'Lucide', sw: 2, cap: 'round', join: 'round', tri: 'M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z', tray: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', rx: 2, solid: 'none' } },
+      material: { font: 'Roboto, system-ui, sans-serif', btnH: 36, padX: 18, btnR: '999px', sec: p.muted, cardR: '12px', shadow: '0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15)', fieldH: 42, fieldBg: p.sunken, fieldBorder: '0', fieldBottom: `1px solid ${p.muted}`, fieldR: '4px 4px 0 0', pillR: '8px', stripe: '0', noticeR: '12px', swW: 44, swH: 26, thumb: 20, swOn: p.structure,
+        icon: { set: 'Material Symbols', sw: 2, cap: 'butt', join: 'miter', tri: 'M12 3 2 21h20z', tray: 'M20 15v5H4v-5', rx: 1, solid: 'currentColor' } },
+      fluent: { font: '"Segoe UI", system-ui, sans-serif', btnH: 30, padX: 12, btnR: '4px', sec: p.border, cardR: '4px', shadow: '0 0 2px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.14)', fieldH: 30, fieldBg: p.surface, fieldBorder: `1px solid ${p.border}`, fieldBottom: `1px solid ${p.muted}`, fieldR: '4px', pillR: '4px', stripe: '1px', noticeR: '4px', swW: 36, swH: 18, thumb: 12, swOn: p.structure,
+        icon: { set: 'Fluent System Icons', sw: 1.4, cap: 'round', join: 'round', tri: 'M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z', tray: 'M20 15v3.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5V15', rx: 3, solid: 'none' } },
+      databricks: { font: '"DM Sans", system-ui, sans-serif', btnH: 36, padX: 16, btnR: '8px', sec: p.sunken, secFill: true, secFg: p.text, cardR: '14px', shadow: '0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1)', fieldH: 36, fieldBg: p.ground, fieldBorder: `1px solid ${p.border}`, fieldBottom: `1px solid ${p.border}`, fieldR: '8px', pillR: '999px', stripe: '0', noticeR: '10px', swW: 32, swH: 18, thumb: 16, swOn: p.structure,
+        icon: { set: 'Lucide', sw: 2, cap: 'round', join: 'round', tri: 'M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z', tray: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', rx: 2, solid: 'none' } },
+      carbon: { font: '"IBM Plex Sans", system-ui, sans-serif', btnH: 40, padX: 16, btnR: '0', sec: p.structure, cardR: '0', shadow: 'none', fieldH: 36, fieldBg: p.sunken, fieldBorder: '0', fieldBottom: `1px solid ${p.muted}`, fieldR: '0', pillR: '999px', stripe: '3px', noticeR: '0', swW: 40, swH: 22, thumb: 16, swOn: p.live,
+        icon: { set: 'Carbon Icons', sw: 2, cap: 'square', join: 'miter', tri: 'M12 3 2 21h20z', tray: 'M21 15v6H3v-6', rx: 0, solid: 'none' } }
+    };
+    return A[s];
+  }
+  function icons(a, p) {
+    const i = a.icon, mark = i.solid === 'none' ? 'currentColor' : p.surface;
+    const svg = (label, inner) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${i.sw}" stroke-linecap="${i.cap}" stroke-linejoin="${i.join}" role="img" aria-label="${label}">${inner}</svg>`;
+    return `<span style="display:flex;align-items:center;gap:10px;color:${p.text}">
+      <span style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:${p.muted}">${i.set}</span>
+      <span style="display:flex;gap:9px">
+        ${svg('Search', '<circle cx="11" cy="11" r="7"/><path d="m20 20-4.2-4.2"/>')}
+        ${svg('Warning', `<path d="${i.tri}" fill="${i.solid}"/><path d="M12 9v4" stroke="${mark}"/><path d="M12 17h.01" stroke="${mark}"/>`)}
+        ${svg('Done', `<circle cx="12" cy="12" r="9.5" fill="${i.solid}"/><path d="m8.5 12 2.5 2.5 4.5-5" stroke="${mark}"/>`)}
+        ${svg('Download', `<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="${i.tray}"/>`)}
+        ${svg('Calendar', `<rect x="3" y="5" width="18" height="16" rx="${i.rx}"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M3 10h18"/>`)}
+      </span></span>`;
+  }
+  function preview(p, s, opts = {}) {
+    const a = anatomy(s, p), sys = SYSTEMS.find((x) => x.id === s) ?? { label: 'Palette' };
+    const swThumb = s === 'carbon' ? '#FFFFFF' : p.surface;
+    return `<div style="padding:12px;border-radius:6px;background:${p.ground};color:${p.text};font-family:${a.font};display:flex;flex-direction:column;gap:9px;font-size:12px;min-width:0">
+      <div style="display:flex;justify-content:space-between;gap:6px"><b style="color:${p.textStrong};font-size:12px">Acme Legal</b><span style="color:${p.muted};font-size:11px">${opts.hideSys ? '' : sys.label + ' · '}${p.appearance}</span></div>
+      ${icons(a, p)}
+      <div style="display:flex;flex-direction:column;gap:8px;padding:10px;background:${p.surface};border:1px solid ${p.border};border-radius:${a.cardR};box-shadow:${a.shadow}">
+        <b style="color:${p.textStrong}">Five entries need a look</b>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+          <span style="display:inline-flex;align-items:center;height:${a.btnH}px;padding:0 ${a.padX}px;border-radius:${a.btnR};background:${p.structure};color:${p.onStructure};font-weight:600">Confirm</span>
+          <span style="display:inline-flex;align-items:center;height:${a.btnH}px;padding:0 ${a.padX}px;border-radius:${a.btnR};border:1px solid ${a.sec};background:${a.secFill ? a.sec : 'transparent'};color:${a.secFg || (a.secFill ? p.ground : p.structure)};font-weight:600">Expand</span>
+          <span style="font-weight:600;color:${p.structure}">Pinned <span style="padding:1px 5px;border-radius:999px;background:${p.accent};color:${p.onAccent};font-size:10px">5</span></span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;color:${p.muted}">Matter</span>
+        <span style="display:flex;align-items:center;height:${a.fieldH}px;padding:0 10px;background:${a.fieldBg};border:${a.fieldBorder};border-bottom:${a.fieldBottom};border-radius:${a.fieldR};color:${p.textStrong}">2026-0412 · Halvorsen v. Atlas</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="position:relative;width:${a.swW}px;height:${a.swH}px;border-radius:999px;background:${a.swOn}"><span style="position:absolute;top:50%;right:3px;width:${a.thumb}px;height:${a.thumb}px;border-radius:50%;background:${swThumb};transform:translateY(-50%)"></span></span>Notify partner</div>
+      <div style="padding:7px 9px;background:${p.noticeBg};border-left:${a.stripe} solid ${p.limited};border-radius:${a.noticeR};color:${p.textStrong};font-weight:600">Two entries over the cap</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">${[['Live', p.live], ['Limited', p.limited], ['Closed', p.closed]].map(([l, c]) => `<span style="padding:1px 8px;border-radius:${a.pillR};border:1px solid ${p.border};background:${p.sunken};color:${c};font-weight:600;font-size:11px">${l}</span>`).join('')}</div>
+    </div>`;
+  }
+  function previews(opt, s) {
+    const m = state.view;
+    const parts = m === 'both' ? [opt.light, opt.dark] : [m === 'light' ? opt.light : opt.dark];
+    return `<div class="pair${parts.length === 1 ? ' single' : ''}">${parts.map((p) => preview(p, s, { hideSys: true })).join('')}</div>`;
+  }
+
+  // ---------- state ----------
+  const state = {
+    step: 1, uploaded: false, scanning: false, round: 1, regenerating: false,
+    palettes: {}, systems: {}, final: null, view: 'both',
+    themeName: 'acme-legal-carbon', saving: false, saved: false,
+    framework: 'vite', done: {}, copied: null
+  };
+  const opts = () => ROUNDS[state.round];
+  const chosenP = () => opts().filter((o) => state.palettes[o.id]);
+  const chosenS = () => SYSTEMS.filter((s) => state.systems[s.id]);
+  const finalPair = () => {
+    const [pid, sid] = (state.final || '').split(':');
+    return { opt: opts().find((o) => o.id === pid), sys: SYSTEMS.find((s) => s.id === sid) };
+  };
+  const set = (patch) => { Object.assign(state, patch); render(); };
+
+  // ---------- views ----------
+  let FADE = 'fade';
+  const STEP_LABELS = ['Upload logo', 'Pick palettes', 'Pick design systems', 'Compare', 'Save theme', 'Use in your app'];
+  function stepper() {
+    const canGo = (n) => n === 1 || (n === 2 && state.uploaded) || (n === 3 && chosenP().length) || (n === 4 && chosenP().length && chosenS().length) || (n === 5 && state.final) || (n === 6 && state.saved);
+    return `<ol class="steps" aria-label="Steps">${STEP_LABELS.map((l, i) => {
+      const n = i + 1;
+      return `<li><button type="button" data-go="${n}" id="step-${n}" ${n === state.step ? 'aria-current="step"' : ''} class="${n < state.step ? 'done' : ''}" ${canGo(n) ? '' : 'disabled'}><span class="n">${n}</span><span>${l}</span></button></li>`;
+    }).join('')}</ol>`;
+  }
+  const viewToggle = () => `<div class="seg" role="radiogroup" aria-label="Preview appearance">${[['both', 'Light + dark'], ['light', 'Light'], ['dark', 'Dark']].map(([v, l]) => `<button type="button" role="radio" id="view-${v}" data-view="${v}" aria-checked="${state.view === v}">${l}</button>`).join('')}</div>`;
+
+  function step1() {
+    const chips = state.uploaded ? EXTRACTED.map((c, i) => `<li class="row chip-in" style="animation-delay:${i * 180}ms"><span style="width:36px;height:24px;border-radius:4px;border:1px solid var(--line);background:${c.hex}"></span><code>${c.hex}</code><span class="hint">${c.role} · ${c.cover} of the logo</span></li>`).join('') : '';
+    return `<section class="${FADE} two" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <h1>Start with the client's logo</h1>
+        <p class="lede">Upload an SVG or PNG. We read its brand colours and ignore black, white and greys. Add a dark-background version too if the client has one.</p>
+        <label class="drop" id="drop" for="logo-file">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+          <b>Drop a logo here, or choose a file</b>
+          <span class="hint">SVG or PNG · light and dark versions</span>
+          <input class="sr" id="logo-file" type="file" accept=".svg,.png,image/svg+xml,image/png">
+        </label>
+        <button type="button" class="btn btn-quiet" id="use-sample" style="align-self:flex-start">Use the sample logo</button>
+      </div>
+      <div class="panel" style="display:flex;flex-direction:column;gap:16px">
+        <span class="eyebrow">${state.uploaded ? 'Uploaded' : 'Waiting for a logo'}</span>
+        ${state.uploaded ? `<div class="row">${state.logoHtml || LOGO_SVG}<div><b>${state.logoName || 'acme-legal-logo.svg'}</b><div class="hint">light background · <button type="button" class="btn-link" id="replace" style="border:0;background:none;color:var(--link);text-decoration:underline;cursor:pointer;padding:0">Replace</button></div></div></div>` : '<p class="hint" style="margin:0">Your logo and the colours we find in it appear here.</p>'}
+        ${state.scanning ? '<div><span class="eyebrow">Reading colours</span><div class="scan" style="margin-top:8px"><i></i></div></div>' : ''}
+        ${state.uploaded && !state.scanning ? `<span class="eyebrow">Brand colours we found</span><ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px">${chips}</ul>
+        <button type="button" class="btn btn-primary" id="to-palettes" style="align-self:flex-start">Suggest palettes</button>` : ''}
+      </div>
+    </section>`;
+  }
+
+  function step2() {
+    const cards = state.regenerating ? opts().map(() => '<div class="skeleton"></div>').join('') : opts().map((o) => {
+      const on = !!state.palettes[o.id];
+      return `<article class="card ${on ? 'on' : ''}" id="pal-${o.id}">
+        <div class="row spread"><h2>${o.name}</h2><span class="badge-aa">AA · 23/23</span></div>
+        <div class="swatches"><span style="flex:3;background:${o.light.structure}"></span><span style="flex:2;background:${o.light.accent}"></span><span style="flex:2;background:${o.light.ground}"></span><span style="background:${o.dark.ground}"></span><span style="background:${o.light.live}"></span><span style="background:${o.light.limited}"></span><span style="background:${o.light.closed}"></span></div>
+        <p class="hint" style="margin:0">${o.note}</p>
+        ${previews(o, 'neutral')}
+        <button type="button" class="btn btn-quiet" data-pal="${o.id}" id="add-${o.id}" aria-pressed="${on}">${on ? 'Added to compare' : 'Add to compare'}</button>
+      </article>`;
+    }).join('');
+    return `<section class="${FADE}" style="display:flex;flex-direction:column;gap:20px">
+      <div class="row spread" style="align-items:flex-end">
+        <div style="display:flex;flex-direction:column;gap:8px"><h1>Pick palettes to compare</h1><p class="lede">Choose as many as you like. Every option passes the 4.5:1 contrast check in light and dark. Shown on neutral widgets; you pick design systems next.</p></div>
+        <div class="row">${viewToggle()}<span class="pill">Round ${state.round}</span><span class="pill warm" id="pal-count">${chosenP().length} selected</span></div>
+      </div>
+      ${state.round > 1 && !state.regenerating ? '<p class="status" role="status">From your feedback: shifted hues 8° cooler, reduced saturation 15%, kept terracotta as the accent. Your selections carried over.</p>' : ''}
+      <div class="grid4">${cards}</div>
+      <form class="panel" id="feedback-form" style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end">
+        <div class="field"><label for="feedback">Not quite? Tell us what to change</label>
+          <textarea class="input" id="feedback" rows="2" placeholder="e.g. This is for a law firm: more conservative, less orange">${state.feedback || ''}</textarea>
+          <span class="hint">The AI turns this into generator settings; it never picks colours itself, so every result still passes contrast.</span></div>
+        <button type="submit" class="btn btn-secondary" id="regenerate" ${state.regenerating ? 'disabled' : ''}>${state.regenerating ? 'Regenerating…' : 'Regenerate'}</button>
+      </form>
+      <div class="row spread"><button type="button" class="btn btn-quiet" data-go="1">Back</button><button type="button" class="btn btn-primary" id="to-systems" ${chosenP().length ? '' : 'disabled'}>Pick design systems</button></div>
+    </section>`;
+  }
+
+  function step3() {
+    const first = chosenP()[0] || opts()[0];
+    const cards = SYSTEMS.map((s) => {
+      const on = !!state.systems[s.id];
+      return `<div class="card ${on ? 'on' : ''}" id="sys-${s.id}">
+        <label class="row" style="font-weight:600;cursor:pointer"><input type="checkbox" id="chk-${s.id}" data-sys="${s.id}" ${on ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--primary)"> ${s.label}</label>
+        ${previews(first, s.id)}
+        <span class="hint">${s.blurb} Icons: ${s.icons}. Type: ${s.fonts}.</span>
+      </div>`;
+    }).join('');
+    const n = chosenP().length * chosenS().length;
+    return `<section class="${FADE}" style="display:flex;flex-direction:column;gap:20px">
+      <div class="row spread" style="align-items:flex-end">
+        <div style="display:flex;flex-direction:column;gap:8px"><h1>Pick design systems to compare</h1><p class="lede">Material, Fluent, Carbon and Databricks each bring their own shapes, type and icons. Shown with ${first.name}.</p></div>
+        <div class="row">${viewToggle()}<span class="pill warm">${chosenS().length} selected</span></div>
+      </div>
+      <div class="grid4">${cards}</div>
+      <div class="row spread"><button type="button" class="btn btn-quiet" data-go="2">Back</button><button type="button" class="btn btn-primary" id="to-compare" ${n ? '' : 'disabled'}>Compare ${n} combination${n === 1 ? '' : 's'}</button></div>
+    </section>`;
+  }
+
+  function step4() {
+    const P = chosenP(), S = chosenS();
+    const { opt, sys } = finalPair();
+    const head = `<span></span>${S.map((s) => `<span class="eyebrow">${s.label}</span>`).join('')}`;
+    const rows = P.map((o) => `<div style="display:flex;flex-direction:column;gap:6px;padding-top:6px"><b style="font-family:var(--font-display);font-weight:500;font-size:19px">${o.name}</b><span class="hint">${o.note}</span></div>${S.map((s) => {
+      const key = `${o.id}:${s.id}`, chosen = state.final === key;
+      return `<div class="cell ${chosen ? 'chosen' : ''}" id="cell-${o.id}-${s.id}">${previews(o, s.id)}<button type="button" class="btn btn-sm btn-quiet" role="radio" aria-checked="${chosen}" aria-pressed="${chosen}" data-final="${key}" id="choose-${o.id}-${s.id}">${chosen ? 'Chosen' : 'Choose this theme'}</button></div>`;
+    }).join('')}`).join('');
+    return `<section class="${FADE}" style="display:flex;flex-direction:column;gap:20px">
+      <div class="row spread" style="align-items:flex-end">
+        <div style="display:flex;flex-direction:column;gap:8px"><h1>Compare and choose one theme</h1><p class="lede">A theme is one palette in one design system. Rows are your palettes, columns your design systems, each in light and dark with the system's own widgets and icons.</p></div>
+        ${viewToggle()}
+      </div>
+      <div class="matrix"><div class="matrix-grid" style="grid-template-columns:150px repeat(${S.length}, minmax(440px, 1fr))">${head}${rows}</div></div>
+    </section>
+    <div class="footbar"><div class="inner"><span id="chosen-label"><b>Chosen theme:</b> ${opt ? `${opt.name} × ${sys.label}` : 'none yet — choose one above'}</span><div class="row"><button type="button" class="btn btn-quiet" data-go="3">Back</button><button type="button" class="btn btn-primary" id="to-save" ${state.final ? '' : 'disabled'}>Save this theme</button></div></div></div>`;
+  }
+
+  function step5() {
+    const { opt, sys } = finalPair();
+    const valid = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(state.themeName);
+    return `<section class="${FADE} two" style="display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:24px">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <h1>Save the theme</h1>
+        <p class="lede">${opt.name} × ${sys.label}, in light and dark.</p>
+        <div class="pair">${preview(opt.light, sys.id)}${preview(opt.dark, sys.id)}</div>
+      </div>
+      <form class="panel" id="save-form" style="display:flex;flex-direction:column;gap:16px;align-self:start">
+        <div class="field"><label for="theme-name">Theme name</label>
+          <input class="input" id="theme-name" value="${state.themeName}" spellcheck="false" style="font-family:var(--font-mono)" aria-describedby="theme-name-hint">
+          <span class="hint" id="theme-name-hint">${valid ? 'Lowercase letters, digits and hyphens.' : '<b style="color:#b3261e">Use lowercase letters, digits and hyphens, starting with a letter.</b>'}</span></div>
+        <dl style="margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px">
+          <dt class="hint">Palette</dt><dd style="margin:0">${opt.name} (brand <code>acme-legal</code>)</dd>
+          <dt class="hint">Design system</dt><dd style="margin:0">${sys.label}</dd>
+          <dt class="hint">Icons</dt><dd style="margin:0">${sys.icons}</dd>
+          <dt class="hint">Fonts</dt><dd style="margin:0">${sys.fonts}</dd>
+          <dt class="hint">Appearances</dt><dd style="margin:0">Light and dark</dd>
+          <dt class="hint">Contrast</dt><dd style="margin:0">23 of 23 pairings pass in both</dd>
+        </dl>
+        <p class="hint" style="margin:0">Saving creates theme <code>${state.themeName}</code>: the palette (stored as brand <code>acme-legal</code>) on ${sys.label}.</p>
+        <button type="submit" class="btn btn-primary" id="save" ${valid && !state.saving ? '' : 'disabled'}>${state.saving ? 'Saving…' : 'Save theme'}</button>
+        <button type="button" class="btn btn-quiet" data-go="4">Back to compare</button>
+      </form>
+    </section>`;
+  }
+
+  function code(id, text, file) {
+    const copied = state.copied === id;
+    return `<div class="code">${file ? `<div class="file">${file}</div>` : ''}<pre id="code-${id}">${text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</pre><button type="button" class="copy" data-copy="${id}" aria-label="Copy ${file || 'code'}">${copied ? 'Copied' : 'Copy'}</button></div>`;
+  }
+  function tasksFor(sys, fw) {
+    const t = state.themeName, s = sys.id;
+    const entry = fw === 'next' ? 'app/layout.tsx' : fw === 'html' ? 'index.html' : 'src/main.jsx';
+    const imports = fw === 'html'
+      ? `<link rel="stylesheet" href="/node_modules/@ux-builder/tokens/dist/themes/${t}.css">\n<link rel="stylesheet" href="/node_modules/@ux-builder/ui/dist/ui.css">`
+      : `import "@ux-builder/tokens/themes/${t}.css";\nimport "@ux-builder/ui/ui.css";`;
+    const attrs = fw === 'next'
+      ? `export default function RootLayout({ children }) {\n  return (\n    <html lang="en" data-theme="${t}" data-appearance="light">\n      <body>{children}</body>\n    </html>\n  );\n}`
+      : `<html lang="en" data-theme="${t}" data-appearance="light">`;
+    const fontLink = s === 'carbon' ? '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;600&display=swap">'
+      : s === 'material' ? '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">' : '<!-- nothing to load -->';
+    return [
+      { id: 'install', title: 'Install the SDK', why: `Theme ${t} ships in @ux-builder/tokens.`, files: ['package.json'],
+        code: [['terminal', 'npm install @ux-builder/tokens@^1 @ux-builder/ui@^0.2']] },
+      { id: 'css', title: 'Load the theme', why: 'One file for the theme, then the widgets. Load them once, before your own CSS.', files: [entry],
+        code: [[entry, imports]] },
+      { id: 'attrs', title: 'Turn the theme on', why: 'Name the theme on <html>. Switch data-appearance to change light and dark.', files: [fw === 'next' ? 'app/layout.tsx' : 'index.html'],
+        code: [[fw === 'next' ? 'app/layout.tsx' : 'index.html', attrs]] },
+      { id: 'appearance', title: 'Follow the user’s light or dark setting', why: 'Optional. Resolve the system setting before first paint so the page never flashes the wrong appearance.', files: [fw === 'next' ? 'app/layout.tsx' : 'index.html'],
+        code: [['inline script, in <head>', `const dark = matchMedia("(prefers-color-scheme: dark)");\nconst apply = () => document.documentElement.dataset.appearance =\n  dark.matches ? "dark" : "light";\napply(); dark.addEventListener("change", apply);`]] },
+      { id: 'fonts', title: `Load ${sys.fonts}`, why: sys.fontsTodo, files: [fw === 'next' ? 'app/layout.tsx' : 'index.html'],
+        code: [['<head>', fontLink]] },
+      { id: 'widgets', title: 'Build with the widgets and role tokens', why: `Use the SDK’s components; they take their look from the theme, including ${sys.icons}. Style your own markup with --piq-* role tokens, never hex values.`, files: ['src/**'],
+        code: [['component', `import { Button, TextField, DataTable, Icon } from "@ux-builder/ui";\n\n<Button>Confirm</Button>\n<Icon name="warning" />   {/* renders ${sys.icons} */}`], ['your CSS', `.matter-row {\n  color: var(--piq-color-text);\n  border-bottom: var(--piq-border-default);\n}`]] },
+      { id: 'lint', title: 'Catch hard-coded colours in CI', why: 'The SDK’s lint rule flags literal colours, font families and radii, and suggests the role token.', files: ['.stylelintrc.json', 'package.json'],
+        code: [['.stylelintrc.json', '{ "plugins": ["@ux-builder/ui/stylelint"],\n  "rules": { "ux-builder/no-hard-coded-values": true } }']] },
+      { id: 'verify', title: 'Check it worked', why: 'Open the app and run this in the browser console. It should print the theme’s accent, and every SDK widget should show the new look.', files: [],
+        code: [['browser console', `getComputedStyle(document.documentElement)\n  .getPropertyValue("--piq-color-accent")   // "${finalPair().opt.light.accent}"`]] }
+    ];
+  }
+
+  function step6() {
+    const { opt, sys } = finalPair();
+    const tasks = tasksFor(sys, state.framework);
+    const doneCount = tasks.filter((t) => state.done[t.id]).length;
+    const files = [...new Set(tasks.flatMap((t) => t.files))];
+    const agent = `Use the theme ${state.themeName} from @ux-builder/tokens and @ux-builder/ui in this app.\n1. Install @ux-builder/tokens@^1 and @ux-builder/ui.\n2. Import @ux-builder/tokens/themes/${state.themeName}.css and @ux-builder/ui/ui.css once, before app CSS.\n3. Set data-theme="${state.themeName}" and data-appearance on <html>, following prefers-color-scheme.\n4. Load ${sys.fonts} if the design system needs it.\n5. Replace hand-made buttons, fields, tables and icons with @ux-builder/ui components.\n6. Replace hard-coded colours, font families and radii with --piq-* role tokens; add the SDK stylelint rule.\nVerify: --piq-color-accent on <html> is ${opt.light.accent}.`;
+    return `<section class="${FADE}" style="display:flex;flex-direction:column;gap:20px">
+      <p class="status" role="status">Theme <b>${state.themeName}</b> saved. Follow the steps below to use it in your app.</p>
+      <div class="row spread" style="align-items:flex-end"><div style="display:flex;flex-direction:column;gap:8px"><h1>Use ${state.themeName} in your app</h1><p class="lede">Nine tasks, about 15 minutes. Tick them off as you go; the code below is filled in for this theme and your framework.</p></div></div>
+      <div class="use">
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+          <div class="tabs" role="tablist" aria-label="Framework">${[['vite', 'React + Vite'], ['next', 'Next.js'], ['html', 'Plain HTML']].map(([id, l]) => `<button type="button" role="tab" id="fw-${id}" data-fw="${id}" aria-selected="${state.framework === id}">${l}</button>`).join('')}</div>
+          ${tasks.map((t, i) => `<div class="task ${state.done[t.id] ? 'done' : ''}" id="task-${t.id}">
+            <input type="checkbox" id="done-${t.id}" data-done="${t.id}" ${state.done[t.id] ? 'checked' : ''} aria-label="Mark step ${i + 1} done">
+            <label for="done-${t.id}"><h3><span class="hint" style="font-family:var(--font-body);font-size:13px;margin-right:8px">${i + 1}</span>${t.title}</h3></label>
+            <div class="body"><p style="margin:0;color:var(--muted)">${t.why}</p>${t.code.map(([f, c], j) => code(`${t.id}-${j}`, c, f)).join('')}</div>
+          </div>`).join('')}
+        </div>
+        <aside class="aside">
+          <div class="panel" style="display:flex;flex-direction:column;gap:10px">
+            <span class="eyebrow">Progress</span>
+            <b id="progress-label">${doneCount} of ${tasks.length} done</b>
+            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${tasks.length}" aria-valuenow="${doneCount}"><i style="width:${(doneCount / tasks.length) * 100}%"></i></div>
+          </div>
+          <div class="panel" style="display:flex;flex-direction:column;gap:10px">
+            <span class="eyebrow">Your theme</span>
+            ${preview(opt.light, sys.id)}
+            <span class="hint">${opt.name} × ${sys.label} · ${sys.icons} · ${sys.fonts}</span>
+          </div>
+          <div class="panel" style="display:flex;flex-direction:column;gap:8px">
+            <span class="eyebrow">Files you'll touch</span>
+            <ul class="files">${files.map((f) => `<li><code>${f}</code></li>`).join('')}</ul>
+          </div>
+          <div class="panel" style="display:flex;flex-direction:column;gap:10px">
+            <span class="eyebrow">Using a coding agent?</span>
+            <span class="hint">Paste this into Claude Code in your app's repository.</span>
+            ${code('agent', agent)}
+          </div>
+        </aside>
+      </div>
+    </section>`;
+  }
+
+  // ---------- render + events ----------
+  const app = document.getElementById('app');
+  let lastStep = null;
+  function render() {
+    FADE = state.step !== lastStep ? 'fade' : '';
+    lastStep = state.step;
+    const body = [null, step1, step2, step3, step4, step5, step6][state.step]();
+    const y = window.scrollY;
+    app.innerHTML = stepper() + body;
+    if (state.keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
+    state.keepScroll = false;
+  }
+  const keep = (patch) => { state.keepScroll = true; set(patch); };
+
+  function useLogo(name, html) {
+    set({ uploaded: true, scanning: true, logoName: name, logoHtml: html });
+    setTimeout(() => keep({ scanning: false }), 1200);
+  }
+  app.addEventListener('click', (e) => {
+    const t = e.target.closest('button, [data-done]');
+    if (!t) return;
+    if (t.dataset.go) return set({ step: +t.dataset.go });
+    if (t.id === 'use-sample') return useLogo('acme-legal-logo.svg', null);
+    if (t.id === 'replace') return set({ uploaded: false });
+    if (t.id === 'to-palettes') return set({ step: 2 });
+    if (t.dataset.view) return keep({ view: t.dataset.view });
+    if (t.dataset.pal) { const id = t.dataset.pal; return keep({ palettes: { ...state.palettes, [id]: !state.palettes[id] } }); }
+    if (t.id === 'to-systems') return set({ step: 3 });
+    if (t.id === 'to-compare') {
+      const P = chosenP(), S = chosenS();
+      return set({ step: 4, final: state.final && P.some((o) => state.final.startsWith(o.id + ':')) ? state.final : null });
+    }
+    if (t.dataset.final) { const [, sid] = t.dataset.final.split(':'); return keep({ final: t.dataset.final, themeName: 'acme-legal-' + sid }); }
+    if (t.id === 'to-save') return set({ step: 5 });
+    if (t.dataset.fw) return keep({ framework: t.dataset.fw });
+    if (t.dataset.copy) {
+      const text = document.getElementById('code-' + t.dataset.copy).textContent;
+      const done = () => keep({ copied: t.dataset.copy });
+      try { navigator.clipboard.writeText(text).then(done, done); } catch { done(); }
+    }
+  });
+  app.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.dataset.sys) return keep({ systems: { ...state.systems, [t.dataset.sys]: t.checked } });
+    if (t.dataset.done) return keep({ done: { ...state.done, [t.dataset.done]: t.checked } });
+    if (t.id === 'logo-file' && t.files[0]) {
+      const f = t.files[0], r = new FileReader();
+      r.onload = () => useLogo(f.name, `<img src="${r.result}" alt="Uploaded logo" style="width:72px;height:72px;object-fit:contain">`);
+      r.readAsDataURL(f);
+    }
+  });
+  app.addEventListener('input', (e) => {
+    if (e.target.id === 'feedback') state.feedback = e.target.value;
+    if (e.target.id === 'theme-name') {
+      state.themeName = e.target.value.trim();
+      const hint = document.getElementById('theme-name-hint'), ok = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(state.themeName);
+      hint.innerHTML = ok ? 'Lowercase letters, digits and hyphens.' : '<b style="color:#b3261e">Use lowercase letters, digits and hyphens, starting with a letter.</b>';
+      document.getElementById('save').disabled = !ok;
+    }
+  });
+  app.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (e.target.id === 'feedback-form') {
+      keep({ regenerating: true });
+      setTimeout(() => keep({ regenerating: false, round: 2 }), 1400);
+    }
+    if (e.target.id === 'save-form') {
+      keep({ saving: true });
+      setTimeout(() => set({ saving: false, saved: true, step: 6 }), 1100);
+    }
+  });
+  ['dragover', 'dragleave', 'drop'].forEach((ev) => app.addEventListener(ev, (e) => {
+    const drop = e.target.closest && e.target.closest('#drop');
+    if (!drop) return;
+    e.preventDefault();
+    drop.classList.toggle('over', ev === 'dragover');
+    if (ev === 'drop' && e.dataTransfer.files[0]) {
+      const f = e.dataTransfer.files[0], r = new FileReader();
+      r.onload = () => useLogo(f.name, `<img src="${r.result}" alt="Uploaded logo" style="width:72px;height:72px;object-fit:contain">`);
+      r.readAsDataURL(f);
+    }
+  }));
+  window.themeBuilder = { state, set };
+  render();
+})();
+</script>

@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Praxis V2 on the databricks design system: the praxis-v2 brand. Made in the theme builder.",
+  "name": "praxis-v2-databricks",
+  "title": "Praxis V2 Databricks",
+  "brand": "praxis-v2",
+  "default": "light",
+  "designSystem": "databricks"
+}

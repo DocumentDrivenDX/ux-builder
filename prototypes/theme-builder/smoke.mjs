@@ -1,0 +1,16 @@
+import { chromium } from "playwright";
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+const errs = []; p.on("pageerror", (e) => errs.push(e.message)); p.on("console", (m) => m.type() === "error" && errs.push(m.text()));
+await p.goto("file://" + new URL("index.html", import.meta.url).pathname);
+await p.click("#use-sample"); await p.waitForTimeout(1400); await p.click("#to-palettes");
+await p.click("#add-faithful"); await p.click("#add-muted");
+await p.fill("#feedback", "more conservative"); await p.click("#regenerate"); await p.waitForTimeout(1600);
+await p.screenshot({ path: "shot-2.png", fullPage: false });
+await p.click("#to-systems"); await p.check("#chk-fluent"); await p.check("#chk-carbon"); await p.check("#chk-databricks");
+await p.click("#to-compare"); await p.click("#choose-muted-carbon");
+await p.screenshot({ path: "shot-4.png" });
+await p.click("#to-save"); await p.click("#save"); await p.waitForTimeout(1300);
+await p.click("#fw-next"); await p.check("#done-registry"); await p.check("#done-install");
+await p.screenshot({ path: "shot-6.png" });
+console.log("step:", await p.evaluate(() => window.themeBuilder.state.step), "errors:", errs);
+await b.close();
