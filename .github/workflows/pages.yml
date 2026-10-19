@@ -1,0 +1,52 @@
+name: pages
+
+# Publishes what people browse without cloning the repository: the gallery of
+# every theme and token, and Storybook with every widget in every theme. The
+# theme builder stays local (ADR-019).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+# No telemetry (ADR-023 rule 8), as in ci.yml; tools/check-licences.mjs
+# fails if a workflow drops it.
+env:
+  IBM_TELEMETRY_DISABLED: "true"
+  DO_NOT_TRACK: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run gallery
+      - run: npm run build-storybook --workspace @ux-builder/ui
+      - run: node tools/build-pages.mjs _site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -24,6 +24,10 @@ never hard-code presentation:
 - **Generative UI bridges.** Theme CSS lets AI Elements and assistant-ui chat
   components wear the app's theme.
 
+Browse every theme in the [gallery](https://documentdrivendx.github.io/ux-builder/gallery.html)
+and every widget in [Storybook](https://documentdrivendx.github.io/ux-builder/storybook/).
+Both are rebuilt from `main` by `.github/workflows/pages.yml`.
+
 ## Packages
 
 | Package | Install as | What it gives an app |
