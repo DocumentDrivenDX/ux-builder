@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/tokens",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "license": "MIT OR Apache-2.0",
   "description": "Design tokens for the harness and embedded products: one CSS block per brand and per design system, composed in the browser, and every combination's resolved values, and the open-licensed fonts the themes use.",
   "type": "module",
