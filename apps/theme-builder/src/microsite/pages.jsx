@@ -2,6 +2,7 @@ import { DataTable, Icon, Notice, StatusPill } from "@ux-builder/ui";
 import { iconBot, iconPalette, iconScanEye, iconShieldCheck, iconSparkles, iconWand2 } from "@ux-builder/ui/icons";
 import { Fragment } from "react";
 import { AiSection, Command, GUARDS, LiveDemo, PACKAGES } from "../home/Home.jsx";
+import { ROOT } from "../site-root.js";
 import { href } from "./nav.js";
 import { AI, CONTRACT_LIST, DECISIONS, FEATURES, ICON_COUNT, PATTERNS, RELEASES, REPO, WIDGETS } from "./sources.js";
 
@@ -10,7 +11,7 @@ import { AI, CONTRACT_LIST, DECISIONS, FEATURES, ICON_COUNT, PATTERNS, RELEASES,
    contracts they cite, and the Reference and Proof pages are generated from
    the catalogue, the HELIX artifacts and the changelogs (sources.js). */
 
-const THEME_PAGE = "../themes/?theme=ux-builder-databricks";
+const THEME_PAGE = `${ROOT}themes/?theme=ux-builder-databricks`;
 
 /* Inline `code` and **bold** in generated text, nothing more. */
 export function Md({ children }) {
@@ -391,8 +392,8 @@ function Live() {
       <p className="uxm-lede">Nothing on this site is a screenshot. These pages render the SDK's own components, in the theme, from the stories that test them.</p>
       <ul className="uxm-grid">
         <li><a className="uxm-tile uxm-tile--link" href={THEME_PAGE}><span className="uxm-tile__icon"><Icon icon={iconPalette} /></span><h3>The UX Builder theme</h3><p>Its logos, palette and CSS, and every widget, AI component and screen pattern wearing it.</p></a></li>
-        <li><a className="uxm-tile uxm-tile--link" href="../themes/"><span className="uxm-tile__icon"><Icon icon={iconSparkles} /></span><h3>All public themes</h3><p>Open any theme's page, or enter your own theme's name.</p></a></li>
-        <li><a className="uxm-tile uxm-tile--link" href="../storybook/"><span className="uxm-tile__icon"><Icon icon={iconScanEye} /></span><h3>Storybook</h3><p>Every widget and pattern, with controls and an accessibility panel.</p></a></li>
+        <li><a className="uxm-tile uxm-tile--link" href={`${ROOT}themes/`}><span className="uxm-tile__icon"><Icon icon={iconSparkles} /></span><h3>All public themes</h3><p>Open any theme's page, or enter your own theme's name.</p></a></li>
+        <li><a className="uxm-tile uxm-tile--link" href={`${ROOT}storybook/`}><span className="uxm-tile__icon"><Icon icon={iconScanEye} /></span><h3>Storybook</h3><p>Every widget and pattern, with controls and an accessibility panel.</p></a></li>
       </ul>
     </>
   );
