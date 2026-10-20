@@ -1,0 +1,75 @@
+/* The microsite's information architecture (HELIX concern product-microsite-ia):
+   one section per reader mode, each with a landing page that orients before
+   it sends the reader deeper. A page's address is ?p=<section>/<page>; a
+   section's landing page is ?p=<section>. */
+
+export const SECTIONS = [
+  {
+    id: "why", title: "Why", mode: "Evaluate", question: "What is this, and is it worth my time?",
+    lede: "The problem UX Builder solves, what makes it different, who it is for, and where it is going.",
+    pages: [
+      { id: "problem", title: "The problem and the approach", blurb: "Why apps drift from their brand, and the five ideas UX Builder is built on." },
+      { id: "audience", title: "Who it's for", blurb: "Developers, brand owners, AI coding agents and the teams that maintain the look." },
+      { id: "principles", title: "Principles", blurb: "The rules every package, theme and widget is held to." },
+      { id: "roadmap", title: "Roadmap and measures", blurb: "What is built, what is next, and how success is measured." },
+    ],
+  },
+  {
+    id: "start", title: "Start", mode: "Start", question: "How do I try it correctly?",
+    lede: "From nothing to a themed screen in minutes: a new app, an existing app, a theme from your logo, or an agent doing the work.",
+    pages: [
+      { id: "new-app", title: "Start a new app", blurb: "One command scaffolds a React + Vite app that is on-theme from its first commit." },
+      { id: "existing-app", title: "Add it to an existing app", blurb: "Install two packages, load the theme, wrap the app." },
+      { id: "theme-from-logo", title: "Make a theme from your logo", blurb: "The guided builder: logo in, accessible palettes out, saved for review." },
+      { id: "agents", title: "Work with AI coding agents", blurb: "AGENTS.md, a Claude Code skill and an MCP server that know your installed version." },
+      { id: "ci", title: "Keep it on-theme in CI", blurb: "Lint rules and a running-app audit that catch drift before it ships." },
+    ],
+  },
+  {
+    id: "concepts", title: "Concepts", mode: "Decide", question: "What should I use next?",
+    lede: "The model behind the SDK: what a theme is, how tokens are named, how screens adapt, and how AI UIs wear the theme.",
+    pages: [
+      { id: "themes", title: "Themes: a brand on a design system", blurb: "Identity and anatomy are separate, so any brand can wear any design system." },
+      { id: "tokens", title: "Role tokens and appearances", blurb: "Tokens named by what they are for, in light, dark and auto." },
+      { id: "patterns", title: "Screen patterns and size classes", blurb: "Whole screens that adapt to the space they are given." },
+      { id: "generative-ui", title: "Generative UI and embedded views", blurb: "AI Elements and assistant-ui in your theme, and views a host can dress." },
+    ],
+  },
+  {
+    id: "reference", title: "Reference", mode: "Operate", question: "What exactly does it do?",
+    lede: "Exact lookup: every package, component, pattern, AI component, theme and command, generated from what ships.",
+    pages: [
+      { id: "packages", title: "Packages", blurb: "The five npm packages, their entry points and versions." },
+      { id: "components", title: "UI components", blurb: "Every widget in @ux-builder/ui with its purpose and import." },
+      { id: "screen-patterns", title: "Screen patterns", blurb: "Every pattern in @ux-builder/ui/patterns." },
+      { id: "ai-components", title: "AI components", blurb: "The AI Elements and assistant-ui components the bridges are checked against." },
+      { id: "cli", title: "Command line and MCP", blurb: "create-app, the audit, and the MCP server's tools." },
+    ],
+  },
+  {
+    id: "proof", title: "Proof", mode: "Verify", question: "Can I trust it?",
+    lede: "The project's own source of truth: recorded decisions, specified features, contracts, releases, and every theme rendered live.",
+    pages: [
+      { id: "decisions", title: "Decisions (ADRs)", blurb: "Every architecture decision, with its date, status and what was decided." },
+      { id: "features", title: "Features and contracts", blurb: "What each feature promises, and the contracts an app may rely on." },
+      { id: "live", title: "Live themes and Storybook", blurb: "Every widget and pattern rendered in the theme, not screenshots." },
+      { id: "releases", title: "Releases", blurb: "What changed in each published version." },
+    ],
+  },
+];
+
+export function locate(param) {
+  const [sid, pid] = (param ?? "").split("/");
+  const section = SECTIONS.find((s) => s.id === sid) ?? null;
+  const page = section?.pages.find((p) => p.id === pid) ?? null;
+  return { section, page };
+}
+
+export const href = (section, page) => `?p=${section}${page ? `/${page}` : ""}`;
+
+/* The page before and after, across sections, for the footer links. */
+export function neighbours(section, page) {
+  const flat = SECTIONS.flatMap((s) => [{ s, p: null }, ...s.pages.map((p) => ({ s, p }))]);
+  const i = flat.findIndex((x) => x.s.id === section.id && (x.p?.id ?? null) === (page?.id ?? null));
+  return { prev: flat[i - 1] ?? null, next: flat[i + 1] ?? null };
+}

@@ -37,6 +37,8 @@ jobs:
       - run: npm run gallery
       - run: npm run build-storybook --workspace @ux-builder/ui
       - run: node tools/build-pages.mjs _site
+      # The draft microsite, beside the site at v2/, for review. It touches nothing outside v2/.
+      - run: node tools/build-microsite-draft.mjs _site
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

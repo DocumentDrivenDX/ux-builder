@@ -17,6 +17,8 @@
 /* Markdown is rendered by streamdown and assistant-ui's react-markdown, whose own class names Tailwind must see. */
 @source "../../../node_modules/streamdown/dist";
 @source "../../../node_modules/@assistant-ui/react-markdown/dist";
+/* The draft microsite's prose is not markup; scanning it would add utilities to the published pages' CSS. */
+@source not "../../../apps/theme-builder/src/microsite";
 
 /* The theme's appearance, not a .dark class, decides dark (ADR-023 rule 2). */
 @custom-variant dark (&:is([data-appearance="dark"] *));
