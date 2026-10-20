@@ -57,6 +57,6 @@ import "@ux-builder/tokens/bridges/shadcn/praxis-carbon.css";   // AI Elements o
 ```
 
 Each GitHub release of this package carries `gallery.html`, every theme and
-token on one page. The SDK's packages declare `"license": "UNLICENSED"` and
+token on one page. The SDK's packages are licensed `MIT OR Apache-2.0` and
 ship `THIRD-PARTY-NOTICES.md`; `npm run licences` checks every shipped
 third-party licence (ADR-023).

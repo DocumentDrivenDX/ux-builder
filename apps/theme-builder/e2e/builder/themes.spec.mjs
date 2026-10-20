@@ -90,7 +90,8 @@ test.describe("Your themes", () => {
     await expect(page.locator('[data-theme-preview="plain:dark"]')).toHaveCount(0);
     const word = cell.locator(".tb-themes__wordmark");
     await expect(word).toHaveText("Plain");
-    expect(await word.evaluate((el) => getComputedStyle(el).color)).toBe("rgb(208, 52, 44)");
+    const paint = brandFile("plain").appearances.light.brand["logo-paint"].$value.match(/[0-9a-f]{2}/gi).map((h) => parseInt(h, 16));
+    expect(await word.evaluate((el) => getComputedStyle(el).color)).toBe(`rgb(${paint.join(", ")})`);
     await expect(cell).toContainText("None: the app's own");
     await expect(cell.getByRole("img", { name: /mark|favicon/ })).toHaveCount(0);
   });

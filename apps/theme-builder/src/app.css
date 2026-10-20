@@ -10,7 +10,8 @@ body { margin: 0; }
 .tb-hdr { border-bottom: var(--piq-border-default); background: var(--piq-color-surface); }
 .tb-hdr .tb-wrap { padding-block: var(--piq-space-3); }
 .tb-hdr__tools { gap: var(--piq-space-5); }
-.tb-brandmark { display: flex; align-items: baseline; gap: var(--piq-space-3); font-family: var(--piq-font-heading); font-size: var(--piq-font-size-lead); color: var(--piq-color-text-strong); }
+.tb-brandmark { display: flex; color: var(--piq-color-text-strong); }
+.tb-brandmark svg { display: block; height: var(--piq-space-6); width: auto; }
 .tb-main { display: flex; flex-direction: column; gap: var(--piq-space-5); padding-block: var(--piq-space-5) var(--piq-space-8); }
 .tb-row { display: flex; flex-wrap: wrap; gap: var(--piq-space-3); align-items: center; }
 .tb-spread { justify-content: space-between; }
