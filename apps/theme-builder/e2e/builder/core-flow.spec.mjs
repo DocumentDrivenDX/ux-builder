@@ -41,7 +41,7 @@ test("logo to a saved theme, as in the prototype", async ({ page }) => {
 
   // 6 (@covers US-015-AC5)
   await expect(page.getByRole("heading", { name: "Use acme-legal-carbon in your app" })).toBeVisible();
-  await expect(page.locator(".tb-task")).toHaveCount(9);
+  await expect(page.locator(".tb-task")).toHaveCount(8);
   await expect(page.locator("#code-fonts-0")).toHaveText('import "@ux-builder/tokens/fonts/acme-legal-carbon.css";');
   for (const f of ["tokens/brands/acme-legal.brand.json", "tokens/themes/acme-legal-carbon.theme.json", "brand/acme-legal/logo.svg"]) expect(existsSync(join(root(), f)), f).toBe(true);
   expect(errors).toEqual([]);
