@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /* Build the draft microsite (apps/theme-builder/microsite.html, src/microsite/)
-   into <site>/v2/, beside a site that tools/build-pages.mjs has built, for
-   review on this computer only. pages.yml does not run this, so nothing here
-   is published.
+   into <site>/v2/, beside a site that tools/build-pages.mjs has built. pages.yml
+   runs it, so the draft is published for review at <site>/v2/; it writes
+   nothing outside v2/, so the site's own pages are unchanged. Search engines
+   are asked not to index it.
 
      node tools/build-pages.mjs _site && node tools/build-microsite-draft.mjs _site */
 
@@ -22,4 +23,4 @@ process.env.VITE_SITE_URL = (process.env.SITE_URL ?? "https://documentdrivendx.g
 const out = join(site, "v2");
 await build({ ...viteOptions(), base: "./", publicDir: false, build: { outDir: out, emptyOutDir: true, rolldownOptions: { input: join(APP, "microsite.html") } } });
 renameSync(join(out, "microsite.html"), join(out, "index.html"));
-console.log(`build-microsite-draft: ${out}/ (local review only; not published)`);
+console.log(`build-microsite-draft: ${out}/ (the draft, beside the site)`);
