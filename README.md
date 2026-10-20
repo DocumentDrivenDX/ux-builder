@@ -389,8 +389,35 @@ Releases use [Changesets](https://github.com/changesets/changesets). Run
 
 ### Publishing a release
 
-You need to be logged in to npm (`npm login`) as a member of the `ux-builder`
-organization with publish rights. Then, from a clean, up-to-date `main`:
+Releases are automated by `.github/workflows/release.yml`, which runs on every
+push to `main`:
+
+1. While `.changeset/` holds pending changesets, it opens (or updates) a
+   **Version Packages** pull request made by `npm run version-packages`:
+   versions, changelogs, `package-lock.json` and the catalogue.
+2. Merging that pull request releases it: the workflow runs `npm run release`
+   (`npm run check`, every gate including contrast, then `changeset publish`),
+   which publishes each public package whose version isn't on npm yet, with
+   provenance, then tags it and creates a GitHub release.
+
+It publishes with [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
+(OIDC), so no npm token is stored anywhere. That needs two one-time settings:
+each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`)
+lists GitHub Actions, `DocumentDrivenDX/ux-builder`, workflow `release.yml` as
+a trusted publisher on npmjs.com; and the repository allows GitHub Actions to
+create pull requests (Settings → Actions → General). A brand-new package has to
+be published once by hand before a trusted publisher can be added to it.
+
+The Version Packages pull request is opened with the workflow's own token, so
+GitHub doesn't run `ci.yml` on it; close and reopen it (or push to its branch)
+to run the checks before merging.
+
+#### Publishing by hand
+
+If the workflow can't publish, publish from a terminal. You need to be logged
+in to npm (`npm login`) as a member of the `ux-builder` organization with
+publish rights; npm asks you to approve each package with your passkey in the
+browser. Then, from a clean, up-to-date `main`:
 
 ```sh
 npm run version-packages   # applies the pending changesets: versions, changelogs, catalogue

@@ -1,0 +1,60 @@
+name: release
+
+# Releases without anyone running version-packages or npm publish by hand.
+# On every push to main, changesets/action does one of two things:
+#   - pending changesets in .changeset/: open or update the "Version Packages"
+#     pull request (npm run version-packages: versions, changelogs, lockfile,
+#     catalogue);
+#   - none pending (that pull request just merged): run every gate, publish each
+#     public package whose version isn't on npm yet, tag it, and create a
+#     GitHub release for it.
+# Publishing uses npm Trusted Publishing (OIDC): no npm token is stored. Each
+# public package must name this repository and release.yml as its trusted
+# publisher on npmjs.com (README, "Publishing a release").
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write # push tags, create releases, push the version branch
+  pull-requests: write # open the Version Packages pull request
+  id-token: write # npm Trusted Publishing and provenance
+
+# One release at a time; never cancel one halfway through publishing.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+# No telemetry (ADR-023 rule 8), as in ci.yml; tools/check-licences.mjs
+# fails if a workflow drops it.
+env:
+  IBM_TELEMETRY_DISABLED: "true"
+  DO_NOT_TRACK: "1"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      # Trusted Publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@^11.5.1
+      - run: npm ci
+      # Chromium for the browser tests inside npm run check.
+      - run: npx playwright install --with-deps chromium
+      - uses: changesets/action@v1
+        with:
+          version: npm run version-packages
+          # npm run check (every gate CI runs, contrast included), then
+          # changeset publish.
+          publish: npm run release
+          title: Version Packages
+          commit: Version Packages
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
