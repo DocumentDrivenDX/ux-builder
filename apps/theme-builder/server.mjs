@@ -10,19 +10,15 @@
    BUILDER_ROOT    the repository to read names from and save into (default: this one) */
 
 import OpenAI from "openai";
-import react from "@vitejs/plugin-react";
-import tailwind from "@tailwindcss/vite";
 import { createServer } from "node:http";
-import { fileURLToPath } from "node:url";
 import { createServer as createVite } from "vite";
 import { context } from "./api/context.mjs";
 import { DEFAULT_MODEL, feedback } from "./api/feedback.mjs";
 import { openaiKey } from "./api/key.mjs";
 import { save } from "./api/save.mjs";
 import { theme } from "./api/theme.mjs";
+import { REPO, viteOptions } from "./vite.shared.mjs";
 
-const APP = fileURLToPath(new URL(".", import.meta.url));
-const REPO = fileURLToPath(new URL("../..", import.meta.url));
 const root = process.env.BUILDER_ROOT ?? REPO;
 const review = process.env.BUILDER_REVIEW === "files" ? "files" : "pr";
 const port = Number(process.env.PORT ?? 5180);
@@ -37,15 +33,7 @@ const model = modelName === "mock"
 // Live reload rides on this server's own port, so two dev servers never fight over one.
 const http = createServer();
 const vite = await createVite({
-  // Tailwind compiles only the AI Components' CSS (packages/ui/ai/ai.css), which only the theme pages load.
-  root: APP, configFile: false, appType: "spa", plugins: [react(), tailwind()], logLevel: "warn",
-  // The SDK's components from source, so the theme page's samples (the SDK's own Storybook stories, which import
-  // from source) and the builder share one copy of each, and one ThemeProvider context. Its CSS stays the built files.
-  resolve: { alias: [
-    { find: /^@ux-builder\/ui$/, replacement: `${REPO}packages/ui/src/index.js` },
-    { find: /^@ux-builder\/ui\/patterns$/, replacement: `${REPO}packages/ui/src/patterns/index.js` },
-    { find: /^@ux-builder\/ui\/icons$/, replacement: `${REPO}packages/ui/src/icons/library.js` },
-  ] },
+  ...viteOptions(), appType: "spa",
   server: { middlewareMode: true, hmr: { server: http }, fs: { allow: [REPO] } },
   optimizeDeps: { entries: ["index.html"] },   // not the e2e test client's page
 });

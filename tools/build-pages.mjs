@@ -1,9 +1,16 @@
 #!/usr/bin/env node
-/* Assemble the GitHub Pages site (.github/workflows/pages.yml): the gallery,
-   Storybook, and a landing page that links them.
+/* Assemble the GitHub Pages site (.github/workflows/pages.yml): a page for
+   each theme (the theme builder's own theme pages, built static), the
+   gallery, Storybook, and a landing page that links them.
 
      npm run build && npm run gallery && npm run build-storybook --workspace @ux-builder/ui
      node tools/build-pages.mjs _site
+
+   The theme pages are the builder's front end built with VITE_STATIC: each
+   theme's data is what the builder's local API would answer (GET /api/theme),
+   written to themes/data/ at build time, and their Storybook links go to the
+   Storybook published beside them. The builder's own steps need the local
+   server (ADR-019) and are not part of the site.
 
    The landing page wears the plain theme through its role tokens, like any
    app on the SDK, so it holds no colours or fonts of its own. */
@@ -11,6 +18,10 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { build } from "vite";
+import { context } from "../apps/theme-builder/api/context.mjs";
+import { theme } from "../apps/theme-builder/api/theme.mjs";
+import { viteOptions } from "../apps/theme-builder/vite.shared.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const out = process.argv[2] ?? "_site";
@@ -32,6 +43,20 @@ cpSync(join(ROOT, "packages/ui/storybook-static"), join(out, "storybook"), { rec
 cpSync(need.theme, join(out, "plain.css"));
 cpSync(join(ROOT, "apps/theme-builder/public/favicon.svg"), join(out, "favicon.svg"));
 writeFileSync(join(out, ".nojekyll"), "");   // serve Storybook's _-prefixed files as they are
+
+// The theme pages: the app, then the data it reads in place of the local API.
+const themesOut = join(out, "themes");
+await build({ ...viteOptions(), base: "./", define: { "import.meta.env.VITE_STATIC": JSON.stringify("1") }, build: {
+  outDir: themesOut, emptyOutDir: true,
+  // The page matches stories to widgets by the components' names (themepage/stories.js), so minifying keeps them.
+  rolldownOptions: { output: { keepNames: true } },
+} });
+const ctx = context({ root: ROOT, model: { available: false, reason: "The static theme pages have no model." } });
+const data = join(themesOut, "data");
+mkdirSync(join(data, "themes"), { recursive: true });
+writeFileSync(join(data, "context.json"), JSON.stringify({ themes: ctx.themes }));
+process.env.STORYBOOK_URL = "../storybook";   // from themes/, the Storybook beside it
+for (const t of ctx.themes) writeFileSync(join(data, "themes", `${t.name}.json`), JSON.stringify(theme({ root: ROOT, name: t.name })));
 
 writeFileSync(join(out, "index.html"), `<!doctype html>
 <html lang="en" data-theme="plain">
@@ -60,6 +85,7 @@ writeFileSync(join(out, "index.html"), `<!doctype html>
   <h1>UX Builder</h1>
   <p class="lead">An open-source UI SDK for AI-era apps: themes made from a brand, widgets that follow them, and guardrails so apps can't drift.</p>
   <div class="cards">
+    <a class="card" href="themes/"><b>Themes</b><span>A page for each theme: its logos, palette and CSS, and every widget, AI component and screen pattern in it.</span></a>
     <a class="card" href="gallery.html"><b>Theme gallery</b><span>Every theme and token, in light and dark, on one page.</span></a>
     <a class="card" href="storybook/"><b>Storybook</b><span>Every widget and pattern, switchable through every theme.</span></a>
   </div>
@@ -69,4 +95,4 @@ writeFileSync(join(out, "index.html"), `<!doctype html>
 </body>
 </html>
 `);
-console.log(`build-pages: ${out}/ (index.html, gallery.html, storybook/)`);
+console.log(`build-pages: ${out}/ (index.html, themes/ with ${ctx.themes.length} themes, gallery.html, storybook/)`);

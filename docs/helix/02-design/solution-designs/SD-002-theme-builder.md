@@ -94,6 +94,14 @@ same theme and appearance (`STORYBOOK_URL`, default
 appearances; a theme saved since the last build has a page but not yet a
 Storybook theme.
 
+The theme pages are also published, static, on GitHub Pages
+(`themes/?theme=<name>`, `tools/build-pages.mjs`): the same front end built
+with `VITE_STATIC`, reading each theme's `GET /api/theme` answer and the theme
+list from files written at build time, with its Storybook links going to the
+Storybook published beside it. In place of the builder's steps, which need
+the local server (ADR-019), that build shows the list of themes. It keeps
+component names when minifying, since stories are matched to widgets by name.
+
 1. **Upload logo**: two columns. Drop or choose an SVG/PNG, or "Use the
    sample logo"; optional dark-background version; Replace. The brand colours
    found are listed as chips with an everyday name and their share
