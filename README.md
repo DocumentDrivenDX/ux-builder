@@ -33,12 +33,14 @@ never hard-code presentation:
 - **Licences checked.** Every third-party licence the packages depend on or
   ship is checked before release, and nothing the SDK ships reports usage.
 
-Browse each theme on [its own page](https://documentdrivendx.github.io/ux-builder/themes/)
+The [project site](https://documentdrivendx.github.io/ux-builder/) wears the
+`ux-builder-databricks` theme. It has a page for each theme
 (`themes/?theme=<name>`: its logos, palette and CSS, and every widget, AI
-component and screen pattern in it), every theme at once in the
-[gallery](https://documentdrivendx.github.io/ux-builder/gallery.html), and
-every widget in [Storybook](https://documentdrivendx.github.io/ux-builder/storybook/).
-All three are rebuilt from `main` by `.github/workflows/pages.yml`.
+component and screen pattern in it) and every widget in
+[Storybook](https://documentdrivendx.github.io/ux-builder/storybook/). The
+[theme list](https://documentdrivendx.github.io/ux-builder/themes/) links only
+public themes; any other opens by its name. The site is rebuilt from `main` by
+`.github/workflows/pages.yml`.
 
 ## Packages
 
@@ -246,6 +248,11 @@ Add `tokens/themes/<name>.theme.json` naming a brand and either a shared
 `tokens/brands/<name>.brand.json`. No code changes are needed. `npm run check`
 composes the new files with everything else and fails on a schema error, an
 unresolved reference or a contrast failure (every text role must clear 4.5:1).
+
+Themes are unlisted on the project site unless the theme file says
+`"public": true`. An unlisted theme's page still opens for anyone who enters
+its name, and it still ships in `@ux-builder/tokens`, so unlisted is not
+secret.
 
 You can also generate a brand from a logo:
 

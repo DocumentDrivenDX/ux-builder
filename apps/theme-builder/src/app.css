@@ -229,3 +229,12 @@ body { margin: 0; }
 .tp-ai .tp-entry { border-block-start-color: var(--piq-color-border); }
 .tp-chip { display: inline-block; margin-inline-start: var(--piq-space-2); padding: 0 var(--piq-space-2); border: var(--piq-border-default); border-radius: var(--piq-pill-radius, var(--piq-radius-control)); font-size: var(--piq-font-size-label); font-weight: var(--piq-font-weight-regular); color: var(--piq-color-text-muted); vertical-align: middle; }
 .tp-entry__links { display: inline-flex; gap: var(--piq-space-4); }
+
+/* The static site's theme list (themepage/ThemeIndex.jsx): public themes as cards, and a name box for the rest. */
+.ti-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--piq-space-4); margin: 0; padding: 0; list-style: none; }
+.ti-card { display: flex; flex-direction: column; gap: var(--piq-space-2); text-decoration: none; color: inherit; transition: border-color 150ms ease; }
+.ti-card:hover, .ti-card:focus-visible { border-color: var(--piq-color-accent); }
+.ti-card b { font-family: var(--piq-font-heading); font-size: var(--piq-font-size-heading); color: var(--piq-color-text-strong); }
+.ti-card__go { display: inline-flex; align-items: center; gap: var(--piq-space-1); color: var(--piq-color-accent); font-weight: var(--piq-font-weight-strong); }
+.ti-open { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--piq-space-3); }
+.ti-open .piq-field { flex: 1 1 16rem; max-inline-size: 28rem; }

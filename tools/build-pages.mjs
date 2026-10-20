@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-/* Assemble the GitHub Pages site (.github/workflows/pages.yml): a page for
-   each theme (the theme builder's own theme pages, built static), the
-   gallery, Storybook, and a landing page that links them.
+/* Assemble the GitHub Pages site (.github/workflows/pages.yml): the home
+   page, a page for each theme (the theme builder's own theme pages, built
+   static), the gallery and Storybook.
 
      npm run build && npm run gallery && npm run build-storybook --workspace @ux-builder/ui
      node tools/build-pages.mjs _site
@@ -12,16 +12,21 @@
    Storybook published beside them. The builder's own steps need the local
    server (ADR-019) and are not part of the site.
 
-   The landing page wears the plain theme through its role tokens, like any
-   app on the SDK, so it holds no colours or fonts of its own. */
+   The theme list links only public themes ("public": true in the theme
+   file); every theme's page is built, so an unlisted one opens by its name.
 
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+   The home page (apps/theme-builder/home.html, src/home/) is built from the
+   same app with the SDK's widgets and AI Components, in ux-builder-databricks.
+   Its intro video plays on the brand's logo paint, read here from the brand
+   file, since the intro shows before the page's CSS arrives. */
+
+import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
 import { context } from "../apps/theme-builder/api/context.mjs";
 import { theme } from "../apps/theme-builder/api/theme.mjs";
-import { viteOptions } from "../apps/theme-builder/vite.shared.mjs";
+import { APP, viteOptions } from "../apps/theme-builder/vite.shared.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 // Absolute: Vite resolves a relative outDir against the app's folder, not the working directory.
@@ -29,20 +34,15 @@ const out = resolve(process.argv[2] ?? "_site");
 const need = {
   gallery: join(ROOT, "build/gallery.html"),
   storybook: join(ROOT, "packages/ui/storybook-static/index.html"),
-  theme: join(ROOT, "packages/tokens/dist/themes/plain.css"),
 };
 for (const [what, path] of Object.entries(need)) {
   if (!existsSync(path)) { console.error(`build-pages: no ${what} at ${path}; build it first (see the header of this file)`); process.exit(1); }
 }
 
-const version = (pkg) => JSON.parse(readFileSync(join(ROOT, "packages", pkg, "package.json"), "utf8")).version;
-
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync(need.gallery, join(out, "gallery.html"));
 cpSync(join(ROOT, "packages/ui/storybook-static"), join(out, "storybook"), { recursive: true });
-cpSync(need.theme, join(out, "plain.css"));
-cpSync(join(ROOT, "apps/theme-builder/public/favicon.svg"), join(out, "favicon.svg"));
 writeFileSync(join(out, ".nojekyll"), "");   // serve Storybook's _-prefixed files as they are
 
 // The theme pages: the app, then the data it reads in place of the local API.
@@ -55,46 +55,15 @@ await build({ ...viteOptions(), base: "./", define: { "import.meta.env.VITE_STAT
 const ctx = context({ root: ROOT, model: { available: false, reason: "The static theme pages have no model." } });
 const data = join(themesOut, "data");
 mkdirSync(join(data, "themes"), { recursive: true });
-writeFileSync(join(data, "context.json"), JSON.stringify({ themes: ctx.themes }));
+// The list names only public themes; every theme's page is built, so an unlisted one opens by its name.
+writeFileSync(join(data, "context.json"), JSON.stringify({ themes: ctx.themes.filter((t) => t.public) }));
 process.env.STORYBOOK_URL = "../storybook";   // from themes/, the Storybook beside it
 for (const t of ctx.themes) writeFileSync(join(data, "themes", `${t.name}.json`), JSON.stringify(theme({ root: ROOT, name: t.name })));
 if (!existsSync(join(themesOut, "index.html"))) { console.error(`build-pages: the theme pages did not build into ${themesOut}`); process.exit(1); }
 
-writeFileSync(join(out, "index.html"), `<!doctype html>
-<html lang="en" data-theme="plain">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UX Builder</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="plain.css">
-<style>
-  body { margin: 0; background: var(--piq-color-ground); color: var(--piq-color-text); font-family: var(--piq-font-body); font-size: var(--piq-font-size-body); }
-  main { max-width: 44rem; margin: 0 auto; padding: var(--piq-space-8) var(--piq-space-5); display: flex; flex-direction: column; gap: var(--piq-space-5); }
-  h1 { margin: 0; font-family: var(--piq-font-heading); font-size: var(--piq-font-size-display); color: var(--piq-color-text-strong); }
-  p { margin: 0; }
-  .lead { font-size: var(--piq-font-size-lead); color: var(--piq-color-text-muted); }
-  .cards { display: grid; gap: var(--piq-space-4); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
-  .card { display: flex; flex-direction: column; gap: var(--piq-space-2); padding: var(--piq-space-5); background: var(--piq-color-surface); border: var(--piq-border-default); border-radius: var(--piq-radius-card); color: inherit; text-decoration: none; }
-  .card:hover, .card:focus-visible { border-color: var(--piq-color-accent); }
-  .card b { font-family: var(--piq-font-heading); font-size: var(--piq-font-size-heading); color: var(--piq-color-accent); }
-  code { font-family: var(--piq-font-mono); }
-  .small { font-size: var(--piq-font-size-small); color: var(--piq-color-text-muted); }
-</style>
-</head>
-<body>
-<main>
-  <h1>UX Builder</h1>
-  <p class="lead">An open-source UI SDK for AI-era apps: themes made from a brand, widgets that follow them, and guardrails so apps can't drift.</p>
-  <div class="cards">
-    <a class="card" href="themes/"><b>Themes</b><span>A page for each theme: its logos, palette and CSS, and every widget, AI component and screen pattern in it.</span></a>
-    <a class="card" href="gallery.html"><b>Theme gallery</b><span>Every theme and token, in light and dark, on one page.</span></a>
-    <a class="card" href="storybook/"><b>Storybook</b><span>Every widget and pattern, switchable through every theme.</span></a>
-  </div>
-  <p>Install from npm: <code>npm install @ux-builder/tokens @ux-builder/ui</code>, or start a new app with <code>npm create @ux-builder/app my-app</code>.</p>
-  <p class="small">@ux-builder/tokens ${version("tokens")} · @ux-builder/ui ${version("ui")} · <a href="https://github.com/DocumentDrivenDX/ux-builder">Source on GitHub</a></p>
-</main>
-</body>
-</html>
-`);
-console.log(`build-pages: ${out}/ (index.html, themes/ with ${ctx.themes.length} themes, gallery.html, storybook/)`);
+// The home page, into the site's root beside themes/ (its own assets/; the public/ folder brings favicon.svg).
+const brand = JSON.parse(readFileSync(join(ROOT, "tokens/brands/ux-builder.brand.json"), "utf8"));
+process.env.VITE_INTRO_PAINT = brand.appearances.light.brand["logo-paint"].$value;
+await build({ ...viteOptions(), base: "./", build: { outDir: out, emptyOutDir: false, rolldownOptions: { input: join(APP, "home.html") } } });
+renameSync(join(out, "home.html"), join(out, "index.html"));
+console.log(`build-pages: ${out}/ (index.html, themes/ with ${ctx.themes.length} themes, ${ctx.themes.filter((t) => t.public).length} listed, gallery.html, storybook/)`);

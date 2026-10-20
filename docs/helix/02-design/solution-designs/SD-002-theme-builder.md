@@ -99,7 +99,8 @@ The theme pages are also published, static, on GitHub Pages
 with `VITE_STATIC`, reading each theme's `GET /api/theme` answer and the theme
 list from files written at build time, with its Storybook links going to the
 Storybook published beside it. In place of the builder's steps, which need
-the local server (ADR-019), that build shows the list of themes. It keeps
+the local server (ADR-019), that build shows the list of themes: only those
+whose theme file says `"public": true`, with a box to open any other by name. It keeps
 component names when minifying, since stories are matched to widgets by name.
 
 1. **Upload logo**: two columns. Drop or choose an SVG/PNG, or "Use the
