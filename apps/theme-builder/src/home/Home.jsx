@@ -42,7 +42,7 @@ function previewTokens(system, appearance) {
   return { tokens, logo: appearance === "dark" ? logoOnDark : logoOnLight };
 }
 
-const PACKAGES = [
+export const PACKAGES = [
   { pkg: tokensPkg, icon: iconPalette, what: "Every theme as CSS, every token's value as JSON, the fonts and brand artwork." },
   { pkg: uiPkg, icon: iconWand2, what: "React 19 widgets and screen patterns, ThemeProvider, 2,130 icons, lint rules and agent guidance." },
   { pkg: createPkg, icon: iconSparkles, what: "A new React + Vite app on the SDK from its first commit, with lint, the audit and CI." },
@@ -99,14 +99,14 @@ function PageAppearance() {
   return null;
 }
 
-function Copy({ text, label = "Copy" }) {
+export function Copy({ text, label = "Copy" }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => { try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1600); } catch { /* no clipboard */ } };
   return <Button variant="text" size="sm" onClick={copy} aria-label={`${label}: ${text}`}><Icon icon={copied ? iconCheck : iconCopy} />{copied ? "Copied" : label}</Button>;
 }
 
 /* A line to copy: a shell command gets a prompt; code does not, and wraps rather than scrolls. */
-function Command({ text, code = false }) {
+export function Command({ text, code = false }) {
   return <div className={`uxh-cmd${code ? " uxh-cmd--code" : ""}`}><code>{!code && <span aria-hidden="true">$ </span>}{text}</code><Copy text={text} /></div>;
 }
 
@@ -137,7 +137,7 @@ function Hero() {
 }
 
 /* A small app made of the SDK's widgets, wearing the page's theme. */
-function HeroApp() {
+export function HeroApp() {
   const [previews, setPreviews] = useState(true);
   return (
     <div className="uxh-heroapp"><Card title="Deploy settings" actions={<StatusPill state="live" />}>
@@ -166,7 +166,7 @@ const COLUMNS = [
 ];
 
 /* The same screen in the UX Builder brand on each shared design system. */
-function LiveDemo() {
+export function LiveDemo() {
   const [system, setSystem] = useState("databricks");
   const [ap, setAp] = useState("light");
   const { tokens, logo } = previewTokens(system, ap);
@@ -212,7 +212,7 @@ export function Settings() {
 }`;
 
 /* A coding agent at work, drawn with AI Elements in the page's theme. */
-function AiSection() {
+export function AiSection() {
   return (
     <section className="uxh-section uxh-section--ai" aria-labelledby="ai-h">
       <div className="uxh-wrap uxh-ai">
@@ -262,7 +262,7 @@ function AiSection() {
   );
 }
 
-const GUARDS = [
+export const GUARDS = [
   { icon: iconShieldCheck, title: "Lint that knows your theme", text: "ESLint and Stylelint rules catch literal colours, fonts and radii, and suggest the role token to use instead.", code: `"ux-builder/no-hard-coded-values": ["error", { theme: "ux-builder-databricks" }]` },
   { icon: iconScanEye, title: "An audit of the running app", text: "Switches your app through every theme, light and dark, and reports anything that isn't the theme's: colours, fonts, icons, favicon, contrast.", code: "npx ux-builder-audit http://localhost:5173/" },
   { icon: iconTerminal, title: "A starter that begins on-theme", text: "A React + Vite app with ThemeProvider, an appearance switch, lint, the audit and CI, wired up from the first commit.", code: "npm create @ux-builder/app my-app -- --theme plain" },
