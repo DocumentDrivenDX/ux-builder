@@ -8,19 +8,24 @@ import { useEffect } from "react";
    over the app's: its href is the favicon of the theme on the element it
    reads. A theme without a favicon removes that link, and the app's own icon
    shows again. The token is registered as a URL (@ux-builder/tokens), so the
-   value read here is already absolute.
+   value read here is already absolute, or a data: URI where the app's
+   bundler inlined a small mark: quoted, and holding quotes and brackets of
+   its own, so it is read to its closing quote.
 
    The top-level ThemeProvider does this itself. <Favicon /> does it for a
    page that selects its theme with data-theme on <html> instead. */
 
 const ATTR = "data-piq-favicon";
 const TYPES = { svg: "image/svg+xml", png: "image/png", webp: "image/webp", ico: "image/x-icon" };
+// url("…"), url('…') or url(…), with CSS escapes inside the quotes.
+const URL_TOKEN = /url\(\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"'()]+))\s*\)/;
 
 /* The favicon URL the theme on an element sets, or null. */
 export function faviconOf(element) {
   if (typeof window === "undefined" || !element) return null;
   const value = getComputedStyle(element).getPropertyValue("--piq-brand-favicon").trim();
-  return /url\(\s*["']?([^"')]+)["']?\s*\)/.exec(value)?.[1] ?? null;
+  const m = URL_TOKEN.exec(value);
+  return m ? (m[1] ?? m[2] ?? m[3]).replace(/\\(.)/g, "$1") : null;
 }
 
 /* Sets the page's icon to the favicon of the theme on element (default: <html>); removes the SDK's icon when that theme has none. Returns the URL used, or null. */
@@ -34,7 +39,7 @@ export function applyFavicon(element = typeof document === "undefined" ? null : 
     link.rel = "icon";
     link.setAttribute(ATTR, "");
   }
-  const type = TYPES[/\.(\w+)(?:[?#].*)?$/.exec(href)?.[1]?.toLowerCase()];
+  const type = /^data:([^;,]+)/.exec(href)?.[1] ?? TYPES[/\.(\w+)(?:[?#].*)?$/.exec(href)?.[1]?.toLowerCase()];
   if (type) link.type = type; else link.removeAttribute("type");
   if (link.getAttribute("href") !== href) link.setAttribute("href", href);
   document.head.appendChild(link); // last, so it is the icon browsers use

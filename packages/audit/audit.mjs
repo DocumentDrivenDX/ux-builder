@@ -233,7 +233,7 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
           }
           const applied = await page.evaluate(([t]) => { const r = document.querySelector(`[data-theme="${t}"]`); return !!r && getComputedStyle(r).getPropertyValue("--piq-color-text").trim() !== ""; }, [theme]);
           if (!applied) { add({ url, rule: "theme-applied", severity: "error", selector: null, message: `theme "${theme}" did not apply (no --piq-color-text under it)` }, run); continue; }
-          const result = await page.evaluate(collect, { sdkRules, bundledFamilies, ignore, rules: mode === "attributes" ? { ...rules, brand: false } : rules });
+          const result = await page.evaluate(collect, { sdkRules, bundledFamilies, ignore, theme, appearance, rules: mode === "attributes" ? { ...rules, brand: false } : rules });
           // Inside a builder preview, a finding names the preview's option and design system (SDK-20).
           const previews = await page.evaluate((sels) => sels.map((s) => { try { return s ? document.querySelector(s)?.closest("[data-preview]")?.dataset.preview ?? null : null; } catch { return null; } }), result.findings.map((f) => f.selector));
           const numbers = result.findings.map((f, i) => add({ url, ...f, ...(previews[i] ? { preview: previews[i] } : {}) }, run));

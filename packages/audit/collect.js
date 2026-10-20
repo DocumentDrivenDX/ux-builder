@@ -11,7 +11,7 @@
    CSS, is reported. Icons, logos, loaders and controls the app draws itself,
    and other libraries' components, are reported as places to use the SDK. */
 
-export function collect({ sdkRules, bundledFamilies, ignore, rules }) {
+export function collect({ sdkRules, bundledFamilies, ignore, rules, theme, appearance }) {
   const findings = [];
   const on = (rule) => rules[rule] !== false;
   const ignored = ["[data-audit-ignore]", ...ignore].join(",");
@@ -226,10 +226,14 @@ export function collect({ sdkRules, bundledFamilies, ignore, rules }) {
   for (const [name, n] of libs) if (n > 3) add("foreign-components", "warning", null, `${n - 3} more ${name} elements`, { library: name });
 
   /* ------------------------------------------- the theme's own artwork */
-  const app = document.querySelector("[data-theme]");
+  // The provider's element, which the switch just set; not a data-theme an index.html puts on <html> to start with.
+  const app = [...document.querySelectorAll("[data-theme]")].find((e) => e.dataset.theme === theme && e.dataset.appearance === appearance)
+    ?? document.querySelector("[data-theme]");
   if (app && on("brand")) {
     const cs = getComputedStyle(app);
-    const fav = /url\(\s*["']?([^"')]+)/.exec(cs.getPropertyValue("--piq-brand-favicon"))?.[1];
+    // Read to the closing quote: a data: URI a bundler inlined holds quotes and brackets of its own.
+    const m = /url\(\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^\s"'()]+))\s*\)/.exec(cs.getPropertyValue("--piq-brand-favicon"));
+    const fav = m && (m[1] ?? m[2] ?? m[3]).replace(/\\(.)/g, "$1");
     const link = document.querySelector("link[data-piq-favicon]");
     if (fav && link?.href !== fav) add("brand", "error", null, `the page's icon is not this theme's favicon (${fav.split("/").pop()}): render the top-level <ThemeProvider> (or <Favicon />)`, { value: link?.href ?? null, expected: fav });
     const art = cs.getPropertyValue("--piq-brand-logo-image").trim();
