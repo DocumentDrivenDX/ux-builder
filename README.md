@@ -33,9 +33,12 @@ never hard-code presentation:
 - **Licences checked.** Every third-party licence the packages depend on or
   ship is checked before release, and nothing the SDK ships reports usage.
 
-Browse every theme in the [gallery](https://documentdrivendx.github.io/ux-builder/gallery.html)
-and every widget in [Storybook](https://documentdrivendx.github.io/ux-builder/storybook/).
-Both are rebuilt from `main` by `.github/workflows/pages.yml`.
+Browse each theme on [its own page](https://documentdrivendx.github.io/ux-builder/themes/)
+(`themes/?theme=<name>`: its logos, palette and CSS, and every widget, AI
+component and screen pattern in it), every theme at once in the
+[gallery](https://documentdrivendx.github.io/ux-builder/gallery.html), and
+every widget in [Storybook](https://documentdrivendx.github.io/ux-builder/storybook/).
+All three are rebuilt from `main` by `.github/workflows/pages.yml`.
 
 ## Packages
 

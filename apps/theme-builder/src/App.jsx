@@ -3,6 +3,7 @@ import { AppearanceSwitch, Button, Icon, Notice, ThemeProvider } from "@ux-build
 import { useEffect, useMemo, useState } from "react";
 import { getContext, postFeedback, postSave } from "./api.js";
 import brandmark from "./assets/logo.svg?raw";
+import { THEME } from "./theme.js";
 import { Themes } from "./Themes.jsx";
 import { brandFromFile, optionName, titleOf } from "./model.js";
 import { Compare } from "./steps/Compare.jsx";
@@ -15,8 +16,6 @@ import { Use } from "./steps/Use.jsx";
 /* The theme builder (FEAT-003): the prototype's six steps on the real engine,
    real widgets and a local API (SD-002, ADR-019). */
 
-// The builder wears one of the SDK's own themes; the person picks its appearance.
-const THEME = "ux-builder-databricks";
 const APPEARANCES = ["system", "light", "dark"];
 const PREF = "theme-builder-appearance";
 const savedAppearance = () => { try { const v = localStorage.getItem(PREF); return APPEARANCES.includes(v) ? v : "system"; } catch { return "system"; } };
