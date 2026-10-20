@@ -130,6 +130,19 @@
       "default": "light",
       "css": "@ux-builder/tokens/themes/synaptiq.css",
       "fonts": "@ux-builder/tokens/fonts/synaptiq.css"
+    },
+    {
+      "name": "ux-builder-databricks",
+      "title": "Ux Builder Databricks",
+      "brand": "ux-builder",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/ux-builder-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/ux-builder-databricks.css"
     }
   ],
   "designSystems": [
