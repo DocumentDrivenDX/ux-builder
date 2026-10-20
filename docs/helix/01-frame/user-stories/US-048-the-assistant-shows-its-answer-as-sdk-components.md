@@ -28,7 +28,7 @@ ddx:
 
 ## Context
 
-Requested by the operator on 2026-10-19. All three libraries let a tool call
+Requested by the operator on 2026-10-19. Both supported libraries (AI Elements and assistant-ui), and the AI SDK beneath them, let a tool call
 render a React component. ADR-023 rule 5 limits those components to the
 SDK's catalogue: components marked `renderable`, with props validated against
 a schema generated from the catalogue. Anything else is a plain fallback.

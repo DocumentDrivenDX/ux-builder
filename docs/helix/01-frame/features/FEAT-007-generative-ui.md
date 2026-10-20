@@ -38,8 +38,8 @@ Apps built on the SDK are adding AI assistants, built on AI Elements or
 assistant-ui (CopilotKit is excluded: it costs money and reports telemetry;
 operator, 2026-10-19). This feature makes every
 theme dress whichever library an app uses (bridges), gives the SDK its own
-accessible, secure assistant patterns that run on any of the three
-(adapters), lets agents render SDK components as generative UI, and checks
+accessible, secure assistant patterns that run on either library's
+runtime, or the AI SDK's (adapters), lets agents render SDK components as generative UI, and checks
 every third-party licence before release. Decision: ADR-023, which also
 records the licences as checked on 2026-10-19.
 
@@ -60,14 +60,15 @@ had not approved.
 ## Problem Statement
 
 - **Current situation**: The SDK has no chat or agent UI. Each library brings
-  its own look; an assistant does not match its app. No dependency licence is
-  checked except fonts (ADR-017), and the SDK's packages declare no licence.
+  its own look; an assistant does not match its app. Before this feature, no
+  dependency licence was checked except fonts (ADR-017), and the SDK's
+  packages declared no licence (open question 1, since decided).
 - **Pain points**: Assistants look foreign and differ between apps; streamed
   text is announced token by token or not at all; agents act without
   approval; model output is rendered as raw markup; libraries and their
   dependencies can report usage; obligations for copied
   Apache-2.0 source are easy to miss.
-- **Desired outcome**: Every theme styles all three libraries; one assistant
+- **Desired outcome**: Every theme styles both supported libraries; one assistant
   experience meets WCAG 2.2 AA on any runtime; generative UI is limited to
   catalogue components; the licence check blocks a release that would break
   an obligation.
@@ -76,9 +77,10 @@ had not approved.
 
 - **Bridge** — a generated stylesheet that maps a theme's tokens onto one
   library's theming variables (ADR-023 rule 2).
-- **Theming surface** — the set of variables a library is styled by: shadcn
-  (AI Elements, the components assistant-ui's CLI adds) or assistant-ui
-  (`--aui-*`, the variables of its packaged styles, as HSL channels).
+- **Theming surface** — the set of variables a library is styled by. There is
+  one: shadcn's, used by AI Elements and by the components assistant-ui's
+  CLI adds. assistant-ui's packaged `--aui-*` styles are not supported
+  (ADR-023, amendment of 2026-10-19).
 - **Assistant pattern** — an SDK pattern for conversational UI, taking
   messages and callbacks as props.
 - **Adapter** — an entry point that connects assistant patterns to one
@@ -198,7 +200,9 @@ dated exception list approved by counsel.
 LIC-03. Vendored third-party source is recorded in `licenses/vendored.json`
 (source, version, licence, changed files); the check fails when a vendored
 file has lost its copyright notice, a changed file lacks its "Changed by"
-line, or the licence text or NOTICE file is not shipped.
+line, or, for vendored source the package ships, the licence text or NOTICE
+file is not shipped. Source vendored only for previews is recorded with
+`shipped: false` (ADR-023 rule 6).
 LIC-04. Every SDK package declares a `license` field and ships a generated
 `THIRD-PARTY-NOTICES.md`.
 LIC-05. The check fails when a shipped dependency is a known telemetry
@@ -259,7 +263,7 @@ reviewed exception.
 ## Constraints and Assumptions
 
 - Patterns follow ADR-016 and ADR-021; admission under ADR-020 is by operator
-  decision (2026-10-19), ahead of consumer evidence.
+  decision (2026-10-19, ADR-020 amendment), ahead of consumer evidence.
 - The libraries' theming variables and runtime APIs are as documented on
   2026-10-19; adapters and bridges are versioned against tested releases.
 - The licence reading in ADR-023 is engineering's; counsel confirms it

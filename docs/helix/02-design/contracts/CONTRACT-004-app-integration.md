@@ -30,7 +30,7 @@ ddx:
 
 **Contract ID**: CONTRACT-004 — App integration
 **Type**: library and CLI (the package entry points, React API, lint rules, audit command and MCP server an app builds on)
-**Version**: v1 (for `@ux-builder/tokens` 1.4.0, `@ux-builder/ui` 0.6.0, `@ux-builder/create-app` 0.4.0, `@ux-builder/audit` 0.1.0, `@ux-builder/mcp` 0.3.1)
+**Version**: v1 (for `@ux-builder/tokens` 1.4.1, `@ux-builder/ui` 0.6.0, `@ux-builder/create-app` 0.4.1, `@ux-builder/audit` 0.1.0, `@ux-builder/mcp` 0.3.1)
 **Status**: accepted — by the operator 2026-10-08, as written; matches the packages released that day. *Screen patterns* (below) is a planned amendment of 2026-10-18 for FEAT-006 (ADR-020, ADR-021, ADR-022), accepted with those ADRs; it becomes normative item by item in the releases that ship them.
 **Related**: FEAT-004 (SDK-01–18), FEAT-005 (DIST-01), CONTRACT-001 (token names), CONTRACT-003 (theme selection), ADR-011 (embedded views), ADR-016 (React first), ADR-017 (fonts)
 

@@ -36,7 +36,7 @@ template, a lint rule against hard-coded presentation values, and guidance
 for AI coding agents (PRD P0-5, P1-1 to P1-3), and an audit of the running
 app. First shipped in `@ux-builder/ui` 0.2.0, `@ux-builder/tokens` 1.0.0,
 `@ux-builder/create-app` 0.2.0 and `@ux-builder/mcp` 0.2.0; the current surface
-(`@ux-builder/ui` 0.6.0, `@ux-builder/tokens` 1.4.0, `@ux-builder/create-app` 0.4.0,
+(`@ux-builder/ui` 0.6.0, `@ux-builder/tokens` 1.4.1, `@ux-builder/create-app` 0.4.1,
 `@ux-builder/audit` 0.1.0, `@ux-builder/mcp` 0.3.1) is CONTRACT-004, and the
 repository README's *Using the SDK in an app* walks a client team through it.
 

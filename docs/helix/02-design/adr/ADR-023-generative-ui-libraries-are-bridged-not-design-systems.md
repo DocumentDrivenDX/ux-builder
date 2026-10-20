@@ -95,13 +95,14 @@ Rules:
 2. **Bridges are generated CSS and contain no third-party code.** For each
    theme × appearance the token build emits one stylesheet per **theming
    surface**, mapping `--piq-*` role and anatomy tokens onto the library's
-   CSS variables:
+   CSS variables. There is one surface (amendment above):
    - `@ux-builder/tokens/bridges/shadcn/<theme>.css` — shadcn's variables
      (background, foreground, card, popover, primary, secondary, muted,
      accent, destructive, border, input, ring, chart, sidebar, radius and
-     fonts), which style AI Elements and assistant-ui's added components;
-   - `@ux-builder/tokens/bridges/assistant-ui/<theme>.css` — the `--aui-*`
-     variables of assistant-ui's packaged styles, as HSL channels.
+     fonts), which style AI Elements and assistant-ui's registry components.
+
+   A surface is added only when a supported library needs variables that
+   shadcn's do not cover.
 
    A bridge is scoped like a theme (`[data-theme="T"][data-appearance="A"]`,
    CONTRACT-003), so it follows run-time theme switching and nested themes,
@@ -132,7 +133,11 @@ Rules:
    is allowed only through `licenses/vendored.json`, which records the
    source, version, licence and changed files; the files keep their
    copyright notices and gain a "Changed by …" line; the licence text and any
-   NOTICE file go in the package's `licenses/`.
+   NOTICE file go in the package's `licenses/`. Code copied only for previews
+   (Storybook and the builder) and left out of the published package is
+   recorded with `shipped: false`; its licence texts sit beside it
+   (`packages/ui/ai/licenses/`), and it is not listed in the package's
+   `THIRD-PARTY-NOTICES.md`, because the package does not distribute it.
 7. **The licence check runs in `npm run check` and before every release.**
    `tools/check-licences.mjs` reads every published package's production,
    peer and optional peer dependency tree and `licenses/vendored.json`, and:
@@ -163,10 +168,10 @@ Rules:
 |--------|------|------|------------|
 | **Each library as a second design system the user selects** | One more card in the builder | Mixes a runtime choice into anatomy (against ADR-013 and ADR-022); multiplies themes by libraries; a theme becomes tied to one library | Rejected |
 | **Leave the libraries' own look** | No work | Assistants look foreign in every app; accessibility and security differ per library; nothing for agents to compose | Rejected |
-| **Bridges only** | Small: generated CSS, no new components | Libraries keep their own layout and accessibility behaviour; no approval or generative UI rules; three experiences across apps | Rejected as the whole answer; kept as rule 2 |
+| **Bridges only** | Small: generated CSS, no new components | Libraries keep their own layout and accessibility behaviour; no approval or generative UI rules; one experience per library | Rejected as the whole answer; kept as rule 2 |
 | **Our own patterns only, no bridges** | One consistent experience | Teams already on a library's styled components get nothing; slower to deliver | Rejected as the whole answer; kept as rule 4 |
 | **Vendor AI Elements' source into `@ux-builder/ui`** | Exact AI Elements behaviour inside the SDK | We redistribute Apache-2.0 source and own its updates; Tailwind and shadcn come with it, against ADR-016's framework-free CSS | Rejected as the default; allowed case by case under rule 6 |
-| **Bridges plus our own patterns, adapters per runtime, licence check (selected)** | Every theme dresses every library at once; one accessible, secure assistant experience on any runtime; obligations met by construction | Two surfaces to keep in step with three libraries' releases; a new check in CI | **Selected** |
+| **Bridges plus our own patterns, adapters per runtime, licence check (selected)** | Every theme dresses every library at once; one accessible, secure assistant experience on any runtime; obligations met by construction | One surface to keep in step with two libraries' releases; a new check in CI | **Selected** |
 
 ## Consequences
 
