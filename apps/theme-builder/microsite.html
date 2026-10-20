@@ -51,6 +51,7 @@
     const video = intro.querySelector("video");
     let seen = false;
     try { seen = sessionStorage.getItem("uxb-intro") === "seen"; sessionStorage.setItem("uxb-intro", "seen"); } catch {}
+    if (new URLSearchParams(location.search).has("intro")) seen = false;   // ?intro replays it, for review
     let ended = false, ready = false, gone = false;
     const done = () => {
       if (gone) return;
