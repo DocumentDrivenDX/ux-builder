@@ -62,6 +62,10 @@
         }
       }
     },
+    "public": {
+      "type": "boolean",
+      "description": "Whether the published site lists the theme (its page at themes/?theme=<name> is linked from the theme list). Themes are unlisted unless this is true; an unlisted theme's page still opens for anyone who types its name, and the theme still ships in @ux-builder/tokens."
+    },
     "default": {
       "enum": [
         "light",

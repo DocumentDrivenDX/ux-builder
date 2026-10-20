@@ -4,6 +4,7 @@
   "name": "ux-builder-databricks",
   "title": "UX Builder Databricks",
   "brand": "ux-builder",
+  "public": true,
   "default": "light",
   "designSystem": "databricks"
 }

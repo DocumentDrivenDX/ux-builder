@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UX Builder: turn a logo into a theme</title>
+<meta name="description" content="An open-source UI SDK for AI-era apps: themes made from a brand, React widgets and AI components that follow them, and guardrails so apps can't drift.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<!-- The intro: on screen before the page's own CSS and script arrive, so it is styled here. Its purple is
+     the brand's logo paint, which tools/build-pages.mjs reads from tokens/brands/ux-builder.brand.json. -->
+<style>
+  .uxb-intro { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: %VITE_INTRO_PAINT%; transition: opacity 600ms ease, visibility 600ms; }
+  .uxb-intro--done { opacity: 0; visibility: hidden; }
+  .uxb-intro video { inline-size: min(92vw, 1100px); aspect-ratio: 2 / 1; object-fit: cover; border-radius: 16px; box-shadow: 0 30px 80px rgb(0 0 0 / 0.35); }
+  .uxb-intro button { position: absolute; inset-block-end: 24px; inset-inline-end: 24px; padding: 8px 16px; font: 600 14px/1.2 system-ui, sans-serif; background: rgb(255 255 255 / 0.16); border: 1px solid rgb(255 255 255 / 0.4); border-radius: 999px; cursor: pointer; color: #fff; }
+  .uxb-intro button:hover, .uxb-intro button:focus-visible { background: rgb(255 255 255 / 0.28); }
+  @media (prefers-reduced-motion: reduce) { .uxb-intro { display: none; } }
+</style>
+</head>
+<body>
+<div class="uxb-intro" id="uxb-intro" role="presentation">
+  <video src="/src/home/assets/intro.mp4" poster="/src/home/assets/intro-poster.jpg" muted playsinline autoplay preload="auto" aria-label="UX Builder intro"></video>
+  <button type="button" id="uxb-intro-skip">Skip intro</button>
+</div>
+<script>
+  // The intro plays once a session, then fades into the page as soon as both it has ended and the page is ready.
+  // It never holds the page longer than it must: Skip, Escape, a video that cannot play, or reduced motion end it.
+  (() => {
+    const intro = document.getElementById("uxb-intro");
+    const video = intro.querySelector("video");
+    let seen = false;
+    try { seen = sessionStorage.getItem("uxb-intro") === "seen"; sessionStorage.setItem("uxb-intro", "seen"); } catch {}
+    let ended = false, ready = false, gone = false;
+    const done = () => {
+      if (gone) return;
+      gone = true;
+      intro.classList.add("uxb-intro--done");
+      video.pause();
+      setTimeout(() => intro.remove(), 700);
+      removeEventListener("keydown", onKey);
+    };
+    const maybe = () => { if (ended && ready) done(); };
+    const onKey = (e) => { if (e.key === "Escape") done(); };
+    window.uxbPageReady = () => { ready = true; maybe(); };
+    if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) { intro.remove(); gone = true; return; }
+    video.addEventListener("ended", () => { ended = true; maybe(); });
+    video.addEventListener("error", () => { ended = true; maybe(); });
+    video.play()?.catch(() => { ended = true; maybe(); });
+    document.getElementById("uxb-intro-skip").addEventListener("click", done);
+    addEventListener("keydown", onKey);
+    setTimeout(done, 9000);   // whatever happens, the page is never hidden for long
+  })();
+</script>
+<div id="root"></div>
+<script type="module" src="/src/home/main.jsx"></script>
+</body>
+</html>
