@@ -133,7 +133,7 @@
     },
     {
       "name": "ux-builder-databricks",
-      "title": "Ux Builder Databricks",
+      "title": "UX Builder Databricks",
       "brand": "ux-builder",
       "designSystem": "databricks",
       "appearances": [
