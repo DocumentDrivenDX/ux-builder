@@ -30,7 +30,7 @@ ddx:
 
 | Date | Status | Deciders | Related | Confidence |
 |------|--------|----------|---------|------------|
-| 2026-10-18 | **Accepted** 2026-10-18 | Operator; harness team as owner | ADR-011, ADR-012, ADR-013, ADR-016, ADR-021, ADR-022, FEAT-004, FEAT-006, `00-discover/screen-pattern-inventory.md` | Medium |
+| 2026-10-18 | **Accepted** 2026-10-18; amended 2026-10-19 (operator admission) | Operator; harness team as owner | ADR-011, ADR-012, ADR-013, ADR-016, ADR-021, ADR-022, FEAT-004, FEAT-006, `00-discover/screen-pattern-inventory.md` | Medium |
 
 ## Context
 
@@ -69,7 +69,18 @@ contract a second binding follows.
 pattern enters the package when **two consumers** (the harness, an embedded
 product, or an app built from the starter) need it, or when one consumer needs
 it and the inventory marks it P0. Each pattern records its consumers in its
-story. P1 and P2 patterns in the inventory wait for that evidence.
+story. P1 and P2 patterns in the inventory wait for that evidence, unless
+the operator admits them by a recorded decision.
+
+**Amendment, 2026-10-19 (operator):** the operator may admit patterns ahead
+of consumer evidence. The decision is recorded, with its date, in the feature
+spec that adds them, and the admitted patterns meet the same bar (APG
+keyboard and ARIA, WCAG 2.2 AA, every applicable state, container-based
+responsiveness, slots, no data fetching). Two admissions use this path: the
+inventory's P1 and P2 screen patterns (FEAT-006, *Extended screens*) and the
+assistant patterns (FEAT-007, ADR-023 rule 4). The inventory stays the
+ceiling for evidence-based admission; an operator admission outside it
+revises the inventory or the feature spec.
 
 **Quality bar** for every pattern: keyboard and ARIA behaviour per the WAI-ARIA
 Authoring Practices; WCAG 2.2 AA including reflow at 320 px, target size and
@@ -102,7 +113,7 @@ states.
 
 | Risk | Prob | Impact | Mitigation |
 |------|------|--------|------------|
-| Scope grows into a general design system nobody can own (ADR-011's risk) | M | M | Admission rule above; P1/P2 wait for consumer evidence; inventory is the ceiling until revised |
+| Scope grows into a general design system nobody can own (ADR-011's risk) | M | M | Admission rule above; P1/P2 wait for consumer evidence or a recorded operator decision (amendment); inventory is the ceiling until revised |
 | Patterns too rigid, so apps fork them | M | H | Slots for every content area; layout primitives exported so apps can build the rare custom screen from the same parts |
 | Accessibility regressions in complex widgets | M | H | APG keyboard tests per pattern in `packages/ui/test`; audit run per pattern story |
 | Embedded products need patterns that work inside a narrow iframe | H | M | ADR-021: patterns adapt to their container, not the screen |

@@ -7,8 +7,11 @@ npm build interfaces from. Governed by `.helix.yml` at the repo root.
 | Activity | Contents |
 |---|---|
 | `00-discover/` | `product-vision.md`, `screen-pattern-inventory.md` (discovery note) |
-| `01-frame/` | `prd.md`, `concerns.md`, `features/FEAT-001` … `FEAT-006` |
+| `01-frame/` | `prd.md`, `concerns.md`, `features/FEAT-001` … `FEAT-007`, `user-stories/US-001` … `US-049` |
 | `02-design/adr/` | ADR-011 and ADR-012 (imported), ADR-013 onward |
+| `02-design/contracts/` | CONTRACT-001 … CONTRACT-004 |
+| `02-design/solution-designs/` | SD-001 (palette engine), SD-002 (theme builder) |
+| `06-iterate/alignment-reviews/` | `AR-<date>-<scope>.md`, one per alignment pass |
 
 ## ADR numbering
 

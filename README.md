@@ -12,17 +12,26 @@ never hard-code presentation:
   with a design system (Material 3, Fluent 2, Carbon, Databricks, or one of
   its own) and saves the result as a reviewable pull request.
 - **Widgets that follow the theme.** React 19 components, plus framework-free
-  CSS, cover forms, tables, notices, loading states, icons, the logo, the
-  favicon and screen patterns. Every one is styled only through `--piq-*`
-  role tokens.
+  CSS, cover forms, choices, tables, menus, tabs, sheets, notices, loading
+  states, icons, the logo and the favicon. Every one is styled only through
+  `--piq-*` role tokens.
+- **Screen patterns.** An app shell, navigation, collection lists, record
+  views, forms, wizards, grids, dashboards, reports and settings pages, built
+  on layout primitives. They carry every state (empty, error, loading) and
+  adapt to the width they are given, from a desktop window to a phone or a
+  narrow embedded panel. Each design system picks its own conventions at a
+  few variant points (navigation, page header, tabs, table).
 - **Guardrails.** ESLint and Stylelint rules catch literal colours, fonts and
   radii. An audit drives the running app through every theme in light and dark
   and reports anything that isn't the theme's.
 - **Built for coding agents.** Agent guidance (`AGENTS.md`) and a Claude Code
   skill are generated from the source, and an MCP server describes the SDK
   version an app actually has installed.
-- **Generative UI bridges.** Theme CSS lets AI Elements and assistant-ui chat
-  components wear the app's theme.
+- **Generative UI bridges.** A bridge stylesheet per theme maps the theme onto
+  shadcn/ui's variables, so AI Elements and assistant-ui chat components wear
+  the app's theme and switch with it.
+- **Licences checked.** Every third-party licence the packages depend on or
+  ship is checked before release, and nothing the SDK ships reports usage.
 
 Browse every theme in the [gallery](https://documentdrivendx.github.io/ux-builder/gallery.html)
 and every widget in [Storybook](https://documentdrivendx.github.io/ux-builder/storybook/).
@@ -32,7 +41,7 @@ Both are rebuilt from `main` by `.github/workflows/pages.yml`.
 
 | Package | Install as | What it gives an app |
 |---|---|---|
-| [`@ux-builder/tokens`](packages/tokens) | dependency | The themes as CSS, every token's value as JSON, the fonts, brand artwork |
+| [`@ux-builder/tokens`](packages/tokens) | dependency | The themes as CSS, every token's value as JSON, the fonts, brand artwork, generative UI bridges |
 | [`@ux-builder/ui`](packages/ui) | dependency | Widgets (React 19 and CSS), patterns, `ThemeProvider`, icons, `Logo`, favicon, lint rules, agent guidance |
 | [`@ux-builder/create-app`](packages/create-app) | `npm create` | A new React + Vite app already on the SDK, with lint, the audit and CI |
 | [`@ux-builder/audit`](packages/audit) | devDependency | `ux-builder-audit`: checks the running app in every theme and appearance |
@@ -124,7 +133,11 @@ See the [`mcp` README](packages/mcp/README.md).
 The surface an app may rely on is specified in
 [CONTRACT-004](docs/helix/02-design/contracts/CONTRACT-004-app-integration.md).
 That covers entry points, props, the theme switch event, lint rules, audit
-options and compatibility. Token names are specified in CONTRACT-001 and theme
+options and compatibility.
+
+The screen patterns (`@ux-builder/ui/patterns`), layout and variant tokens are
+built in this repository and ship in the first `@ux-builder/ui` release after
+0.6.0, with the matching `@ux-builder/tokens` release (CONTRACT-004). Token names are specified in CONTRACT-001 and theme
 selection in CONTRACT-003.
 
 ## Quick start
@@ -161,6 +174,7 @@ npm install -D @ux-builder/audit eslint stylelint
 import "@ux-builder/tokens/themes/databricks.css";   // or themes.css for every theme
 import "@ux-builder/tokens/fonts/databricks.css";    // or fonts.css
 import "@ux-builder/ui/ui.css";                      // always after the theme CSS
+import "@ux-builder/ui/patterns.css";                // after ui.css, if you use the screen patterns
 ```
 
 ```jsx
@@ -178,6 +192,10 @@ switches the theme anywhere below the provider.
 **Without React,** the CSS works on its own markup. Set `data-theme` (and
 optionally `data-appearance`) on `<html>`, and use the `.piq-*` class names
 each component renders (see `catalogue.json` and Storybook).
+
+**With a chat library** (AI Elements or assistant-ui), also import the theme's
+bridge: `import "@ux-builder/tokens/bridges/shadcn/databricks.css";`. It follows
+`data-theme` and `data-appearance`, with no `.dark` class.
 
 **In an embedded view,** where a host hands the view a theme's resolved values
 (ADR-011), pass them as `<ThemeProvider tokens={resolved.tokens}>`. No theme
@@ -235,8 +253,10 @@ npm run gallery -- --brand tokens/brands/acme.brand.json   # preview on every de
 
 Or use the guided builder with `npm run builder`
 (http://127.0.0.1:5180). It walks through six steps: upload a logo, pick
-palettes, pick design systems, compare them on real widgets in light and dark,
-save, and follow the steps to use the theme in an app. Saving writes the brand
+palettes, pick design systems, compare them on real widgets and screen
+patterns in light and dark, save, and follow the steps to use the theme in an
+app, including the chat library, if any. Each theme also has a page showing
+its widgets, patterns and the AI components it dresses. Saving writes the brand
 and theme files on a branch and opens a pull request with `gh`. Typed feedback
 ("more conservative, less orange") goes to an OpenAI model that turns it into
 engine settings only (ADR-014). It reads `OPENAI_API_KEY`, and without a key
@@ -244,11 +264,11 @@ the sliders still work.
 
 ## Building the UI
 
-Five rules, the same ones AI agents are given:
+Six rules, the same ones AI agents are given:
 
-1. Use the SDK's widgets for buttons, fields, tables, notices, status pills,
-   toasts, loaders, icons and the logo. Never build your own or bring another
-   UI kit.
+1. Use the SDK's widgets for buttons, fields, choices, tables, menus, tabs,
+   breadcrumbs, sheets, notices, status pills, toasts, loaders, icons and the
+   logo. Never build your own or bring another UI kit.
 2. Style your own markup with `--piq-*` role tokens (`var(--piq-color-text)`,
    `var(--piq-space-4)`), chosen by role.
 3. Never hard-code a colour, font family or radius, even one that matches the
@@ -256,6 +276,11 @@ Five rules, the same ones AI agents are given:
 4. Run lint and the audit, and fix what they report.
 5. Select themes with `ThemeProvider` or `data-theme`. Never restyle per theme
    in app code.
+6. Compose screens from `@ux-builder/ui/patterns` before writing any layout
+   CSS: `AppShell` for the frame, the screen patterns (`CollectionList`,
+   `RecordDetail`, `FormPage`, `Dashboard`, `SettingsPage` and others), and the
+   layout primitives (`Stack`, `Cluster`, `Grid`, `Page`, `SplitView`) for the
+   rest. Fill their slots; never fork or restyle a pattern.
 
 Every component and prop is in `@ux-builder/ui/catalogue.json` and the
 [`ui` README](packages/ui/README.md). `npm run storybook` shows each widget and
@@ -293,7 +318,9 @@ npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4
 The audit switches the running app through every theme it loads, in light and
 dark. It reports colours, fonts and radii that aren't the theme's,
 hand-drawn icons and loaders, other UI kits, a favicon that doesn't follow the
-theme, and text contrast. It writes `audit-report/index.html` with screenshots
+theme, and text contrast. With `--width` (one per size class, for example
+`--width 360 --width 1366`) it also checks reflow, target size and focus that
+is hidden behind sticky content. It writes `audit-report/index.html` with screenshots
 and `audit-report/report.json`, and exits 1 on an error. See
 [`packages/audit`](packages/audit/README.md) for the options.
 
@@ -311,19 +338,20 @@ and `audit-report/report.json`, and exits 1 on an error. See
 npm install
 npm run build      # tokens/ -> packages/tokens/dist/, then packages/ui/dist/
 npm test           # composer, gates, palette engine and builder API tests
-npm run check      # schemas, lint, tests, build, licences, equivalence, contrast, gallery: what CI runs
+npm run check      # schemas, lint, coverage, tests, build, licences, equivalence, contrast, gallery: what CI runs
 npm run storybook  # Storybook for packages/ui on :6006
 npm run builder    # the theme builder
 npm run e2e        # the builder's UI suite and the starter end to end (Chromium)
 ```
 
 ```
-tokens/          themes, brands, shared design systems, token names, JSON Schemas
+tokens/          themes, brands, shared design systems, layout, variants, token names, JSON Schemas
 brand/           brand artwork the brand files point at
 packages/
-  tokens/        @ux-builder/tokens: composes themes and builds dist/
+  tokens/        @ux-builder/tokens: composes themes and bridges, builds dist/
   engine/        palette options from a logo (private)
   ui/            @ux-builder/ui: widgets, patterns, lint rules, generated guidance, Storybook
+                 (ai/: AI Elements and assistant-ui previews, not published)
   create-app/    @ux-builder/create-app: the starter
   audit/         @ux-builder/audit: the running-app audit
   mcp/           @ux-builder/mcp: the MCP server

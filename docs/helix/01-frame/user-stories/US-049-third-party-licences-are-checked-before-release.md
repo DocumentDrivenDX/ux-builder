@@ -38,7 +38,8 @@ out telemetry altogether the same day, so the check also refuses telemetry
 packages (Scarf's install analytics, for one) and unreviewed install scripts.
 Fonts are already
 checked under ADR-017; this extends the idea to every dependency. The SDK's
-own packages declare no licence today.
+own packages declared no licence; they now declare `MIT OR Apache-2.0`
+(FEAT-007 open question 1).
 
 ## Walkthrough
 
@@ -56,8 +57,8 @@ own packages declare no licence today.
 
 - [ ] **US-049-AC1** — Given `npm run check` and the release workflow, when they run, then `tools/check-licences.mjs` reads every published SDK package's production, peer and optional peer dependency tree and `licenses/vendored.json`.
 - [ ] **US-049-AC2** — Given a dependency whose licence is not MIT, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, 0BSD or CC0-1.0, or is unknown, missing or `SEE LICENSE IN`, when the check runs, then it fails naming the package, version and licence, unless the package is in the exception list with counsel's approval and a date.
-- [ ] **US-049-AC3** — Given vendored third-party source, when the check runs, then it fails if a vendored file has lost its copyright notice, a changed file lacks its "Changed by" line, or the licence text or NOTICE file is not shipped in the package's `licenses/`.
-- [ ] **US-049-AC4** — Given every SDK package, when the check runs, then it fails on a package without a `license` field, and each published package ships a generated `THIRD-PARTY-NOTICES.md` listing every third-party package and vendored source with its licence.
+- [ ] **US-049-AC3** — Given vendored third-party source that a package ships, when the check runs, then it fails if a vendored file has lost its copyright notice, a changed file lacks its "Changed by" line, or the licence text or NOTICE file is not shipped in the package's `licenses/`.
+- [ ] **US-049-AC4** — Given every SDK package, when the check runs, then it fails on a package without a `license` field, and each published package ships a generated `THIRD-PARTY-NOTICES.md` listing every third-party package and shipped vendored source with its licence (source vendored only for previews, `shipped: false`, is not distributed and not listed; ADR-023 rule 6).
 - [ ] **US-049-AC5** — Given a shipped dependency that is a known telemetry package, or that runs an install script without a reviewed exception, when the check runs, then it fails naming the package and the script.
 - [ ] **US-049-AC6** — Given a package whose `package.json` licence differs from its LICENSE file, when the check runs, then it fails naming both.
 
@@ -84,7 +85,7 @@ own packages declare no licence today.
 - **Stories**: US-045, US-046
 - **Feature Spec**: FEAT-007
 - **PRD Requirements**: FR-31
-- **External**: counsel's confirmation of the allow-list (ADR-023 rule 7); the operator's choice of the SDK's own licence (FEAT-007 open question 1)
+- **External**: counsel's confirmation of the allow-list (ADR-023 rule 7)
 
 ## Out of Scope
 

@@ -14,7 +14,9 @@ ddx:
 > (2026-10-05: own the design system, turn logos into themes, start new apps;
 > a first client, then Synaptiq and its clients; React first; brands may
 > override fonts; palettes offered as options and regenerated from feedback)
-> and from what has been built since. For the operator to review.
+> and from what has been built since. For the operator to review. Updated
+> 2026-10-19 to the codebase: screen patterns (FEAT-006), generative UI
+> bridges and the licence check (FEAT-007).
 
 ## Vision
 
@@ -41,9 +43,9 @@ cannot be re-themed.
 
 | Who | What they get |
 |-----|---------------|
-| **App developers** at Synaptiq and its clients' teams, and anyone who installs the packages from npm | Widgets, fonts, icons and themes from packages; a starter that is on the design system from the first commit; a lint rule that keeps it there |
+| **App developers** at Synaptiq and its clients' teams, and anyone who installs the packages from npm | Widgets, screen patterns, fonts, icons and themes from packages; a starter that is on the design system from the first commit; lint rules and an audit that keep it there; a bridge that dresses the chat library they choose in the app's theme |
 | **Brand owners** (delivery leads, designers, client stakeholders) | A guided builder: logo in, palette options shown on real widgets in light and dark, plain-language feedback, a theme saved for review |
-| **AI coding agents** working in those apps | Guidance and a catalogue (and an MCP server) that name the real widgets and tokens, so generated UI uses them |
+| **AI coding agents** working in those apps | Guidance and a catalogue (and an MCP server) that name the real widgets, patterns and tokens, so generated UI uses them |
 | **Synaptiq** | One design system to maintain instead of one per app; client looks delivered as data, not code |
 
 ## What makes it different
@@ -61,6 +63,10 @@ cannot be re-themed.
 4. **Built for agents as much as people.** The same source generates the
    documentation, the catalogue and the agent guidance, so they cannot drift
    from what ships.
+5. **Whole screens, at any width.** Patterns carry the structure and states
+   (empty, error, loading) that basic widgets do not, and adapt to the space
+   they are given, from a desktop window to a phone or a narrow embedded
+   panel.
 
 ## Principles
 
@@ -72,15 +78,17 @@ cannot be re-themed.
   code review; releases carry a gallery of every theme.
 - **Prefer the platform.** Native elements restyled, CSS custom properties,
   React for components but framework-free CSS.
-- **Scope by need.** Widgets are admitted when an app needs them, not to be
-  complete.
+- **Scope by need.** Widgets and patterns are admitted when an app needs
+  them, or by a recorded operator decision, not to be complete.
+- **Licences checked, nothing reported.** Every third-party licence is
+  checked before release, and nothing the SDK ships reports usage.
 
 ## Where it is going
 
 | Horizon | Outcome |
 |---------|---------|
-| **Now** (built, 2026-10) | Role-based tokens and themes; four shared design systems plus Praxis, Plain and Synaptiq; widgets, fonts and icons in `@ux-builder/*` on the public npm registry; the palette engine; the theme builder (local, OpenAI-steered); starter, lint rule, agent guidance, MCP server |
-| **Next** | The first client apps (the platform and a billing-review app) adopt the SDK; the AI harness and its embedded products share one presentation contract (ADR-011); measure agent-built UI against the guidance |
+| **Now** (built, 2026-10) | Role-based tokens and eight themes on four shared design systems (Material, Fluent, Carbon, Databricks); widgets, fonts and icons in `@ux-builder/*` on the public npm registry; the palette engine; the theme builder (local, OpenAI-steered) with a screens preview and a chat-library step; starter, lint rules, audit, agent guidance, MCP server. Built in the repository, awaiting release: screen patterns that adapt by size class, with design-system variants; bridges that dress AI Elements and assistant-ui in every theme; the third-party licence check |
+| **Next** | Release the patterns and bridges; the SDK's own assistant patterns, with adapters per runtime and generative UI limited to catalogue components (FEAT-007); the first client apps (the platform and a billing-review app) adopt the SDK; the AI harness and its embedded products share one presentation contract (ADR-011); measure agent-built UI against the guidance |
 | **Later** | Client brands released apart from the public core (FEAT-005) as more clients adopt; a hosted builder for brand owners who are not developers; frameworks beyond React if a client needs one |
 
 ## Measures of success
@@ -88,7 +96,9 @@ cannot be re-themed.
 - Adopting apps contain **zero** hard-coded presentation values (lint).
 - A logo becomes a reviewed theme in **under 30 minutes**.
 - A new app shows a themed screen in **under an hour**.
-- **90%** of agent-built components use SDK widgets and role tokens.
+- **90%** of agent-built components use SDK widgets and role tokens, and
+  agent-built screens use the matching patterns with no app-written layout
+  CSS.
 - Re-theming an app (another client or design system) is a **package
   change**, with no app code edited.
 
@@ -96,6 +106,11 @@ cannot be re-themed.
 
 - Not a general-purpose design system competing with Material or Carbon: it
   carries them, it does not replace them.
-- Not a page builder or app framework: layouts and screens stay the app's.
+- Not a page builder or app framework: the SDK supplies screen patterns
+  (structure, states, responsive behaviour); apps own their screens' content,
+  data, routing and domain logic.
+- Not a chat library or AI runtime: it styles the library an app chooses and
+  supplies accessible assistant patterns; the app chooses its model and
+  runtime.
 - Not a logo or brand-strategy tool: it starts from the client's logo.
 - Not a way to publish without review.

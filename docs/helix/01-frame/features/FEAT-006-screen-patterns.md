@@ -2,7 +2,7 @@
 ddx:
   id: FEAT-006
   type: feature-specification
-  status: specified
+  status: draft
   links:
     - kind: informed_by
       to: prd
@@ -26,7 +26,7 @@ ddx:
 
 **Feature ID**: FEAT-006
 **Status**: Specified
-**Priority**: P0 (foundations, navigation, regions, P0 screens) / P1 and P2 per the inventory, admitted by evidence (ADR-020)
+**Priority**: P0 (foundations, navigation, regions, P0 screens) / P1 and P2 per the inventory, admitted by operator decision on 2026-10-19 (ADR-020 amendment)
 **Owner**: Operator (until a design-system owner is named); harness team as future owner
 **Covered PRD Subsystem(s)**: App SDK
 **Covered PRD Requirements**: FR-21, FR-25, FR-26 (FR-27 is FEAT-001's; this feature reads the variants it declares)
@@ -240,7 +240,7 @@ from patterns and layout primitives before writing layout CSS.
 #### Extended screens *[Added 2026-10-19 — operator decision]*
 
 The inventory's P1 and P2 patterns, admitted by the operator on 2026-10-19
-ahead of the consumer evidence ADR-020's admission rule asks for ("do all P1
+ahead of consumer evidence, under ADR-020's operator-admission amendment ("do all P1
 and P2 screen patterns"). The same quality bar applies: APG keyboard and ARIA,
 WCAG 2.2 AA, every applicable state, container-based responsiveness, slots and
 no data fetching.
@@ -413,8 +413,8 @@ builder's screens preview is US-032, under FEAT-003 (BB-18).
   pagination.
 - **Contracts**: CONTRACT-001 (layout and variant token names), CONTRACT-002
   (`variants` member in design system and anatomy), CONTRACT-004 (the
-  `@ux-builder/ui/patterns` entry point and pattern slots) — each needs a revision
-  before build.
+  `@ux-builder/ui/patterns` entry point and pattern slots) — each revised for this
+  feature.
 - **PRD requirements**: FR-21, FR-25, FR-26; FR-27 through FEAT-001.
 
 ## Out of Scope
