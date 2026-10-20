@@ -4,7 +4,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, test } from "node:test";
@@ -59,6 +59,15 @@ describe("scaffold", () => {
     mkdirSync(join(tmp, "full")); writeFileSync(join(tmp, "full", "keep.txt"), "x");
     assert.match(run(join(tmp, "full")).stderr, /exists and is not empty/);
     assert.match(run(join(tmp, "x2"), "--name", "Bad Name").stderr, /not a valid package name/);
+  });
+
+  test("runs through a symlinked bin, as npm create does", () => {
+    mkdirSync(join(tmp, "bin"));
+    symlinkSync(CLI, join(tmp, "bin", "create-app"));
+    const r = spawnSync(process.execPath, [join(tmp, "bin", "create-app"), join(tmp, "linked"), "--theme", "databricks"], { encoding: "utf8", cwd: tmp });
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /Created linked on the databricks theme/);
+    assert.match(readFileSync(join(tmp, "linked", "package.json"), "utf8"), /"name": "linked"/);
   });
 
   test("--help lists the themes", () => {
