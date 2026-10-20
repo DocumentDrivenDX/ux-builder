@@ -81,6 +81,22 @@
         "logo-paint": {
           "$value": "#312A29",
           "$description": "Soil: the butterfly mark painted flat."
+        },
+        "logo-image": {
+          "$value": "../../brand/synaptiq/logo-on-light.svg",
+          "$description": "The horizontal logo, synaptiq-logo-rgb_full-color-horizontal.svg from the Synaptiq Logo Pack 08/18/21, DIGITAL-RGB/HEX SVG, framed to its drawn bounds plus 4 units."
+        },
+        "logo-aspect": {
+          "$value": "4.097",
+          "$description": "The framed logo's width over its height."
+        },
+        "mark-image": {
+          "$value": "../../brand/synaptiq/mark.svg",
+          "$description": "The butterfly logomark, synaptiq-logo-rgb_full-color-logomark.svg from the logo pack, framed square about its drawn bounds."
+        },
+        "favicon": {
+          "$value": "../../brand/synaptiq/mark.svg",
+          "$description": "The logomark, as the favicon."
         }
       }
     },
@@ -161,6 +177,22 @@
         "logo-paint": {
           "$value": "#F7CFA5",
           "$description": "Apricot Ink: the mark on dark."
+        },
+        "logo-image": {
+          "$value": "../../brand/synaptiq/logo-on-dark.svg",
+          "$description": "The horizontal logo, synaptiq-logo-rgb_apricot-white-horizontal.svg from the Synaptiq Logo Pack 08/18/21, DIGITAL-RGB/HEX SVG, framed to its drawn bounds plus 4 units."
+        },
+        "logo-aspect": {
+          "$value": "4.097",
+          "$description": "The framed logo's width over its height."
+        },
+        "mark-image": {
+          "$value": "../../brand/synaptiq/mark-on-dark.svg",
+          "$description": "The butterfly logomark, synaptiq-logo-rgb_apricot-white-logomark.svg from the logo pack, framed square about its drawn bounds."
+        },
+        "favicon": {
+          "$value": "../../brand/synaptiq/mark-on-dark.svg",
+          "$description": "The logomark, as the favicon."
         }
       }
     }
