@@ -9,8 +9,8 @@ import { DECISIONS, FEATURES, PATTERNS, REPO, WIDGETS } from "./sources.js";
 
 /* The project site (tools/build-pages.mjs), laid out by HELIX's
    product-microsite-ia concern: the home page (the hero, the reader paths,
-   the live demo, the AI section, guardrails, packages, proof and a quick
-   start), then one section per reader mode (Why, Start, Concepts, Reference,
+   the live demo, the AI section, guardrails, packages, a quick start and
+   proof), then one section per reader mode (Why, Start, Concepts, Reference,
    Proof), each with a landing page. On a section page the left menu is the
    site's hierarchy and the current page; the right menu is this page's
    headings only. It wears ux-builder-databricks. */
@@ -70,8 +70,8 @@ function HomePage() {
       <AiSection />
       <Guardrails />
       <Packages />
-      <Proof />
       <GetStarted />
+      <Proof />
     </main>
   );
 }
