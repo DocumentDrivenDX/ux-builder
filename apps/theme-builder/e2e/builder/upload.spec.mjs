@@ -84,13 +84,13 @@ test.describe("Upload logo", () => {
 });
 
 test.describe("The builder's own look", () => {
-  test("it wears the praxis-v2-databricks theme, and Auto, Light and Dark switch its appearance and are remembered", async ({ page }) => {
+  test("it wears the ux-builder-databricks theme, and Auto, Light and Dark switch its appearance and are remembered", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     const shell = page.locator(".tb");
-    await expect(shell).toHaveAttribute("data-theme", "praxis-v2-databricks");
+    await expect(shell).toHaveAttribute("data-theme", "ux-builder-databricks");
     const picker = page.getByRole("radiogroup", { name: "Appearance" });
     await expect(picker.getByRole("radio", { name: "Auto" })).toHaveAttribute("aria-checked", "true");
     await expect(shell).toHaveAttribute("data-appearance", "dark", { timeout: 2000 });

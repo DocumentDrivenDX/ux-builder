@@ -9,7 +9,7 @@ cd my-app && npm install && npm run dev
 
 | Option | |
 |---|---|
-| `--theme <name>` | The theme to start on: any theme in `@ux-builder/tokens` (`databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `plain`). Default `plain` |
+| `--theme <name>` | The theme to start on: any theme in `@ux-builder/tokens` (`databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `ux-builder-databricks`, `plain`). Default `plain` |
 | `--name <name>` | The package name. Default: the directory's name |
 
 ## What the app has

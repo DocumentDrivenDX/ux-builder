@@ -276,4 +276,5 @@ The page's favicon follows the theme too: the top-level `ThemeProvider` sets it 
 | `praxis-material` | material | dark, light (default dark) |
 | `praxis-v2-databricks` | databricks | dark, light (default light) |
 | `synaptiq` | own anatomy | dark, light (default light) |
+| `ux-builder-databricks` | databricks | dark, light (default light) |
 <!-- catalogue:end -->
