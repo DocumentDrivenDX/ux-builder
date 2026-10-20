@@ -13,7 +13,7 @@
      --name <name>      the package name (default: the directory's name)
      --sdk-from <dir>   install @ux-builder/* from .tgz files in <dir> (testing) */
 
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { basename, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -70,7 +70,8 @@ export function scaffold(dir, { theme, name, sdkFrom } = {}) {
   return { dir: target, theme, name, versions, files: written.sort() };
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+// npm create runs the bin through a symlink in node_modules/.bin, so compare real paths.
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: { theme: { type: "string" }, name: { type: "string" }, "sdk-from": { type: "string" }, help: { type: "boolean", short: "h" } } });
   if (values.help || !positionals[0]) {
     console.log(`npm create @ux-builder/app <dir> -- [--theme <name>] [--name <package>]\n\nThemes: ${themes().join(", ")}`);
