@@ -15,8 +15,8 @@ import { after, before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { createElement as h } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { Button, Checkbox, Tabs, TextField } from "@ux-builder/ui";
-import { AppShell, Board, Calendar, CollectionList, Cluster, EditableGrid, FilterSection, Grid, Page, PeriodComparison, PermissionsMatrix, PivotTable, RecordDetail, SplitView, Stack, StatTile, TaskList, Wizard, WorkQueue } from "@ux-builder/ui/patterns";
+import { AppearanceSwitch, Button, Card, Checkbox, DataTable, MenuButton, StatusPill, Tabs, TextField } from "@ux-builder/ui";
+import { AppShell, Board, Calendar, CollectionList, Cluster, Dashboard, EditableGrid, FilterSection, Grid, Page, PeriodComparison, PermissionsMatrix, PivotTable, RecordDetail, SplitView, Stack, StatTile, TaskList, Wizard, WorkQueue } from "@ux-builder/ui/patterns";
 import { audit } from "../audit.mjs";
 
 const PKG = fileURLToPath(new URL("..", import.meta.url));
@@ -32,7 +32,25 @@ const NAV = ["Home", "Matters", "Clients", "Reports"].map((label, i) => ({ id: l
 const ROWS = Array.from({ length: 6 }, (_, i) => ({ id: `m${i}`, name: `Matter ${i + 1}`, client: ["Acme", "Globex"][i % 2], owner: "R. Lee", value: `£${(i + 1) * 1000}` }));
 const shell = (content) => renderToStaticMarkup(h(AppShell, { nav: NAV, current: "matters", brand: h("strong", null, "Acme") }, content));
 
+// The app's own markup inside the SDK's frame, as an agent-built app has it: a hand-made filter bar
+// in a Page and Stack, and a bare icon and button, beside SDK widgets with parts of their own.
+const COLS = [{ key: "name", label: "Matter", sortable: true }, { key: "client", label: "Client" }, { key: "state", label: "Status", render: (r) => h(StatusPill, { state: r.state }) }];
+const inShell = shell(h(Page, null, h(Stack, null,
+  h(Dashboard, { title: "Billing", tiles: [h(StatTile, { key: "b", label: "Billed", value: "£381k" })] },
+    h("div", { id: "bar", style: { display: "flex", gap: 8, padding: 12, background: "#f3f4f6", borderRadius: 12, fontFamily: "Inter, sans-serif" } },
+      h("svg", { id: "bar-icon", width: 16, height: 16, viewBox: "0 0 16 16" }, h("circle", { cx: 7, cy: 7, r: 5, stroke: "#6366f1", fill: "none" })),
+      h("input", { id: "bar-input", placeholder: "Filter", style: { border: "1px solid #d1d5db", borderRadius: 6 } }),
+      h("button", { id: "bar-button", style: { background: "#6366f1", color: "white", borderRadius: 9999, fontFamily: "Inter" } }, "Apply")),
+    h(Card, { title: "Matters", actions: h(MenuButton, { label: "More", items: [{ label: "Export" }] }) },
+      h(DataTable, { columns: COLS, rows: ROWS.map((r, i) => ({ ...r, state: ["live", "closed"][i % 2] })), caption: "Matters" }))),
+  h("svg", { id: "bare-icon", width: 16, height: 16, viewBox: "0 0 16 16" }, h("path", { d: "M2 2h12v12H2z", fill: "currentColor" })),
+  h("button", { id: "bare-button" }, "Plain"),
+  h(AppearanceSwitch, { value: "light" }))));
+
 const PAGES = {
+  "/app-in-shell.html": page(inShell),
+  // How Lightning CSS (Vite) bundles patterns.css: the selector list merged into one :is().
+  "/merged.html": page(shell(h(Page, null, h("p", null, "Text")))).replace("</body>", `<style>:is(.piq-shell__main:has(.piq-bulk-bar),:root:has(.piq-bulk-bar):not(:has(.piq-shell__main .piq-bulk-bar))){scroll-padding-block-end:calc((var(--piq-size-target-touch) + var(--piq-space-2) * 2) * 2 + var(--piq-space-2) * 2)}</style></body>`),
   // US-023: every layout primitive.
   "/layout.html": page(renderToStaticMarkup(h(Page, { as: "main" }, h(Stack, { gap: 5 },
     h("h1", null, "Matters"),
@@ -224,5 +242,34 @@ describe("the screen patterns audited at every size class", () => {
   test("patterns.css is the SDK's own CSS, not the app restyling widgets", async () => {
     const r = await audit({ urls: [`${base}/list.html`], themes: ["praxis-carbon"], appearances: ["light"] });
     assert.deepEqual(r.findings.filter((f) => f.rule === "widget-overrides"), []);
+  });
+});
+
+describe("the app's own markup inside the SDK's frame and patterns", () => {
+  let r;
+  before(async () => { r = await audit({ urls: [`${base}/app-in-shell.html`], themes: ["praxis-carbon"], appearances: ["light"] }); });
+  const at = (id) => r.findings.filter((f) => (f.selector ?? "").includes(`#${id}`));
+
+  test("is held to the theme: colours, fonts, radii, icons and controls it draws itself", () => {
+    assert.ok(at("bar").some((f) => f.rule === "token-colors" && f.severity === "error"), "the bar's hard-coded grey");
+    assert.ok(at("bar").some((f) => f.rule === "token-fonts"), "Inter");
+    assert.ok(at("bar").some((f) => f.rule === "token-radii"), "a 12px corner");
+    assert.ok(at("bar-button").some((f) => f.rule === "token-colors" && f.severity === "error"), "the button's purple");
+    assert.ok(at("bar-button").some((f) => f.rule === "contrast" && f.severity === "error"), "the app's contrast failure is an error, not the SDK's warning");
+    assert.ok(at("bar-icon").some((f) => f.rule === "sdk-widgets" && f.severity === "error"), "an icon drawn inside the app's styled markup");
+    assert.ok(at("bare-icon").some((f) => f.rule === "sdk-widgets" && f.severity === "error"), "an unstyled icon placed straight into a Stack");
+    assert.ok(at("bare-button").some((f) => f.rule === "sdk-widgets"), "a native button placed straight into a Stack");
+    assert.ok(at("bar-input").some((f) => f.rule === "sdk-widgets"), "a native text input");
+  });
+
+  test("while the SDK's widgets and their parts stay trusted: table cells, the menu button, the appearance switch", () => {
+    const ours = new Set(["bar", "bar-icon", "bar-input", "bar-button", "bare-icon", "bare-button"]);
+    const others = r.findings.filter((f) => f.selector && ![...ours].some((id) => f.selector.includes(`#${id}`)));
+    assert.deepEqual(others.map((f) => `${f.rule}: ${f.selector}`), []);
+  });
+
+  test("a bundler's :is() of patterns.css is still the SDK's own CSS", async () => {
+    const m = await audit({ urls: [`${base}/merged.html`], themes: ["praxis-carbon"], appearances: ["light"] });
+    assert.deepEqual(m.findings.filter((f) => f.rule === "widget-overrides"), []);
   });
 });

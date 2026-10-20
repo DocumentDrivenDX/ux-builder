@@ -20,7 +20,7 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 import { chromium } from "playwright";
-import { collect } from "./collect.js";
+import { collect, installAppOwned } from "./collect.js";
 
 const own = createRequire(import.meta.url);
 export const VERSION = JSON.parse(readFileSync(own.resolve("./package.json"), "utf8")).version;
@@ -233,6 +233,7 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
           }
           const applied = await page.evaluate(([t]) => { const r = document.querySelector(`[data-theme="${t}"]`); return !!r && getComputedStyle(r).getPropertyValue("--piq-color-text").trim() !== ""; }, [theme]);
           if (!applied) { add({ url, rule: "theme-applied", severity: "error", selector: null, message: `theme "${theme}" did not apply (no --piq-color-text under it)` }, run); continue; }
+          await page.evaluate(installAppOwned);
           const result = await page.evaluate(collect, { sdkRules, bundledFamilies, ignore, theme, appearance, rules: mode === "attributes" ? { ...rules, brand: false } : rules });
           // Inside a builder preview, a finding names the preview's option and design system (SDK-20).
           const previews = await page.evaluate((sels) => sels.map((s) => { try { return s ? document.querySelector(s)?.closest("[data-preview]")?.dataset.preview ?? null : null; } catch { return null; } }), result.findings.map((f) => f.selector));
@@ -249,7 +250,7 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
             // A logo's text is exempt (WCAG 1.4.3, logotypes).
             const v = await page.evaluate(async (exclude) => {
               const { violations } = await window.axe.run({ exclude: [["#__piq_audit_overlay"], [".piq-logo"], ...exclude.map((s) => [s])] }, { runOnly: ["color-contrast"], resultTypes: ["violations"] });
-              return violations.flatMap((x) => x.nodes).map((n) => { const el = document.querySelector(n.target.join(" ")); return { target: n.target, data: n.any?.[0]?.data ?? {}, sdk: !!el?.closest('[class^="piq-"], [class*=" piq-"]'), preview: el?.closest("[data-preview]")?.dataset.preview ?? null }; });
+              return violations.flatMap((x) => x.nodes).map((n) => { const el = document.querySelector(n.target.join(" ")); return { target: n.target, data: n.any?.[0]?.data ?? {}, sdk: !!el && !globalThis.__piqAppOwned(el), preview: el?.closest("[data-preview]")?.dataset.preview ?? null }; });
             }, ["[data-audit-ignore]", ...ignore]);
             for (const n of v) {
               const d = n.data;
