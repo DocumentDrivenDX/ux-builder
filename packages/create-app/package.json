@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/create-app",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT OR Apache-2.0",
   "description": "Scaffold a React + Vite app that is on the AI-UI SDK from its first commit: npm create @ux-builder/app my-app -- --theme databricks (FEAT-004 SDK-08, SDK-09).",
   "type": "module",
@@ -17,9 +17,9 @@
     "test:e2e": "node --test test/starter.e2e.mjs"
   },
   "dependencies": {
-    "@ux-builder/tokens": "^1.4.1",
-    "@ux-builder/ui": "^0.6.0",
-    "@ux-builder/audit": "^0.1.0"
+    "@ux-builder/tokens": "^1.6.0",
+    "@ux-builder/ui": "^0.6.2",
+    "@ux-builder/audit": "^0.1.1"
   },
   "publishConfig": {
     "access": "public"
