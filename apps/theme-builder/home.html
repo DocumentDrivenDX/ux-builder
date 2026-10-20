@@ -6,6 +6,25 @@
 <title>UX Builder: turn a logo into a theme</title>
 <meta name="description" content="An open-source UI SDK for AI-era apps: themes made from a brand, React widgets and AI components that follow them, and guardrails so apps can't drift.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<!-- Link previews (Slack, LinkedIn, X, iMessage...). They need absolute URLs, so tools/build-pages.mjs supplies
+     the site's address and copies the image to og-image.jpg at the site's root. -->
+<link rel="canonical" href="%VITE_SITE_URL%">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="UX Builder">
+<meta property="og:url" content="%VITE_SITE_URL%">
+<meta property="og:title" content="UX Builder: turn a logo into a theme">
+<meta property="og:description" content="An open-source UI SDK for AI-era apps: themes made from a brand, React widgets and AI components that follow them, and guardrails so apps can't drift.">
+<meta property="og:image" content="%VITE_SITE_URL%og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The UX Builder logo among glowing purple and cyan app screens">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="UX Builder: turn a logo into a theme">
+<meta name="twitter:description" content="An open-source UI SDK for AI-era apps: themes made from a brand, React widgets and AI components that follow them, and guardrails so apps can't drift.">
+<meta name="twitter:image" content="%VITE_SITE_URL%og-image.jpg">
+<meta name="twitter:image:alt" content="The UX Builder logo among glowing purple and cyan app screens">
+<meta name="theme-color" content="%VITE_INTRO_PAINT%">
 <!-- The intro: on screen before the page's own CSS and script arrive, so it is styled here. Its purple is
      the brand's logo paint, which tools/build-pages.mjs reads from tokens/brands/ux-builder.brand.json. -->
 <style>

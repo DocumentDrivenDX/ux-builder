@@ -18,7 +18,9 @@
    The home page (apps/theme-builder/home.html, src/home/) is built from the
    same app with the SDK's widgets and AI Components, in ux-builder-databricks.
    Its intro video plays on the brand's logo paint, read here from the brand
-   file, since the intro shows before the page's CSS arrives. */
+   file, since the intro shows before the page's CSS arrives. Its link
+   preview tags take the site's address from SITE_URL (default: the project
+   site) and point at og-image.jpg, copied to the site's root. */
 
 import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -64,6 +66,21 @@ if (!existsSync(join(themesOut, "index.html"))) { console.error(`build-pages: th
 // The home page, into the site's root beside themes/ (its own assets/; the public/ folder brings favicon.svg).
 const brand = JSON.parse(readFileSync(join(ROOT, "tokens/brands/ux-builder.brand.json"), "utf8"));
 process.env.VITE_INTRO_PAINT = brand.appearances.light.brand["logo-paint"].$value;
+// Link previews need the site's absolute address (SITE_URL for a fork or another host), and the image at a fixed name.
+process.env.VITE_SITE_URL = (process.env.SITE_URL ?? "https://documentdrivendx.github.io/ux-builder/").replace(/\/?$/, "/");
 await build({ ...viteOptions(), base: "./", build: { outDir: out, emptyOutDir: false, rolldownOptions: { input: join(APP, "home.html") } } });
 renameSync(join(out, "home.html"), join(out, "index.html"));
+cpSync(join(APP, "src/home/assets/og-image.jpg"), join(out, "og-image.jpg"));
+// The theme pages' link preview: added to the published copy only, since index.html is also the local builder's page.
+const site = process.env.VITE_SITE_URL;
+const themesHtml = join(themesOut, "index.html");
+writeFileSync(themesHtml, readFileSync(themesHtml, "utf8").replace("</head>", [
+  `<meta name="description" content="A page for each UX Builder theme: its logos, palette and CSS, and every widget, AI component and screen pattern wearing it.">`,
+  `<meta property="og:type" content="website">`, `<meta property="og:site_name" content="UX Builder">`,
+  `<meta property="og:url" content="${site}themes/">`, `<meta property="og:title" content="UX Builder themes">`,
+  `<meta property="og:description" content="A page for each theme: its logos, palette and CSS, and every widget, AI component and screen pattern wearing it.">`,
+  `<meta property="og:image" content="${site}og-image.jpg">`, `<meta property="og:image:width" content="1200">`, `<meta property="og:image:height" content="630">`,
+  `<meta name="twitter:card" content="summary_large_image">`, `<meta name="twitter:image" content="${site}og-image.jpg">`,
+  "</head>",
+].join("\n")));
 console.log(`build-pages: ${out}/ (index.html, themes/ with ${ctx.themes.length} themes, ${ctx.themes.filter((t) => t.public).length} listed, gallery.html, storybook/)`);
