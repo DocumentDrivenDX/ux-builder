@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "UX Builder on the databricks design system: the ux-builder brand. Made in the theme builder.",
+  "name": "ux-builder-databricks",
+  "title": "UX Builder Databricks",
+  "brand": "ux-builder",
+  "default": "light",
+  "designSystem": "databricks"
+}
