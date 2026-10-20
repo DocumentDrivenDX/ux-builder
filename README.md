@@ -216,6 +216,7 @@ metrics).
 | `praxis-fluentui` | Praxis | shared `fluent` | dark, light |
 | `praxis-carbon` | Praxis | shared `carbon` | dark, light |
 | `praxis-v2-databricks` | Praxis V2, made in the theme builder | shared `databricks` | light, dark |
+| `ux-builder-databricks` | UX Builder, made in the theme builder; the builder wears it | shared `databricks` | light, dark |
 | `synaptiq` | Synaptiq | own: slab headings, Quicksand body, 3px corners, filled fields | light, dark |
 
 | Shared design system | What it looks like |

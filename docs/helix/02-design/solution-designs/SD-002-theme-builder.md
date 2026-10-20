@@ -74,8 +74,8 @@ kept three additions on 2026-10-06: the settings sliders, opening a pull
 request on save, and flagged colour moves. Round history, side-by-side
 pinning and a full-size view were removed.
 
-The builder itself wears one of the SDK's own themes, `praxis-v2-databricks`
-(operator, 2026-10-19; `synaptiq` before), with the SDK's AppearanceSwitch in
+The builder itself wears one of the SDK's own themes, `ux-builder-databricks`
+(operator, 2026-10-19; `praxis-v2-databricks`, and `synaptiq`, before), with the SDK's AppearanceSwitch in
 the header: light, auto and dark as icons (auto follows the system setting;
 the choice is remembered in the browser). Operator, 2026-10-06.
 
