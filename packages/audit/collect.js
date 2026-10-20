@@ -3,19 +3,45 @@
    page.evaluate, so it is one self-contained function: no imports, no
    closures over this module.
 
-   The app's own elements (anything not inside an SDK widget, a .piq-*
-   element) are held to the theme: every colour they draw is one of the
-   theme's colour tokens (or a mix of two), every font one of its fonts,
-   every corner radius one of its radii. SDK widgets are trusted, but a
-   stylesheet that restyles them, or sets --piq-* tokens outside the theme
-   CSS, is reported. Icons, logos, loaders and controls the app draws itself,
-   and other libraries' components, are reported as places to use the SDK. */
+   The app's own elements (see appOwned below) are held to the theme: every
+   colour they draw is one of the theme's colour tokens (or a mix of two),
+   every font one of its fonts, every corner radius one of its radii. SDK
+   widgets are trusted, but a stylesheet that restyles them, or sets --piq-*
+   tokens outside the theme CSS, is reported. Icons, logos, loaders and
+   controls the app draws itself, and other libraries' components, are
+   reported as places to use the SDK. */
+
+/* Installs globalThis.__piqAppOwned(el) in the page, for collect and the
+   contrast check to share: is this element the app's own, rather than drawn
+   by the SDK? Being inside a .piq-* element is not enough to be the SDK's,
+   because the app's content sits inside the SDK's frame and patterns
+   (AppShell, Page, Stack, Card, Dashboard…). Everything the SDK draws has a
+   .piq-* class of its own, except parts of a widget (table rows and cells,
+   list items, options), which carry no styling of their own. So an element
+   inside the SDK is the app's when it, or anything between it and the SDK
+   element, has an inline style or a class that is not the SDK's; or when it
+   is a control, picture or icon, which the SDK always draws with a class
+   (its two bare buttons, a menu item and an appearance option, have a
+   role). */
+export function installAppOwned() {
+  const SDK = '[class^="piq-"], [class*=" piq-"]';
+  const DRAWN = /^(button|input|select|textarea|table|svg|img|progress)$/;
+  globalThis.__piqAppOwned = (el) => {
+    const sdk = el.closest(SDK);
+    if (!sdk) return true;
+    if (sdk === el) return false;
+    for (let e = el; e && e !== sdk; e = e.parentElement) {
+      if (e.hasAttribute("style") || [...e.classList].some((c) => !c.startsWith("piq-"))) return true;
+    }
+    return DRAWN.test(el.tagName.toLowerCase()) && !el.hasAttribute("role");
+  };
+}
 
 export function collect({ sdkRules, bundledFamilies, ignore, rules, theme, appearance }) {
   const findings = [];
   const on = (rule) => rules[rule] !== false;
   const ignored = ["[data-audit-ignore]", ...ignore].join(",");
-  const SDK = '[class^="piq-"], [class*=" piq-"]';
+  const appOwned = globalThis.__piqAppOwned;
 
   /* ------------------------------------------------------------- helpers */
   const selectorOf = (el) => {
@@ -119,7 +145,10 @@ export function collect({ sdkRules, bundledFamilies, ignore, rules, theme, appea
 
   /* --------------------------------------------- stylesheets (whole page) */
   // Compared one selector at a time: a minifier splits and merges lists.
-  const parts = (sel) => { const out = []; let depth = 0, cur = ""; for (const c of sel) { if ("([".includes(c)) depth++; if (")]".includes(c)) depth--; if (c === "," && !depth) { out.push(cur.trim()); cur = ""; } else cur += c; } out.push(cur.trim()); return out.map((x) => x.replace(/\s+/g, " ")); };
+  // A bundler may also merge a list into one :is(…, …) (Lightning CSS does), so a whole :is() is opened up.
+  const parts = (sel) => { const out = []; let depth = 0, cur = ""; for (const c of sel) { if ("([".includes(c)) depth++; if (")]".includes(c)) depth--; if (c === "," && !depth) { out.push(cur.trim()); cur = ""; } else cur += c; } out.push(cur.trim()); return out.flatMap((x) => { const inner = isWhole(x); return inner === null ? [x.replace(/\s+/g, " ")] : parts(inner); }); };
+  // The list inside x when x is one :is(…) and nothing else, else null.
+  const isWhole = (x) => { if (!x.startsWith(":is(") || !x.endsWith(")")) return null; let depth = 0; for (let i = 3; i < x.length; i++) { if ("([".includes(x[i])) depth++; if (")]".includes(x[i])) depth--; if (!depth && i < x.length - 1) return null; } return x.slice(4, -1); };
   // The SDK's declarations by selector, so an app rule that reuses an SDK
   // selector with its own values (.piq-btn { border-radius: 3px }) is told
   // from the SDK's rule itself, however a minifier split, merged or
@@ -171,7 +200,7 @@ export function collect({ sdkRules, bundledFamilies, ignore, rules, theme, appea
     if (el.closest(".piq-visually-hidden")) continue;
     const ownText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
     if (ownText) usedFamilies.add(firstFamily(cs.fontFamily));
-    if (el.closest(SDK) || el.ownerSVGElement && el.ownerSVGElement.closest(SDK)) continue; // an SDK widget: trusted
+    if (!appOwned(el.ownerSVGElement ?? el)) continue; // drawn by the SDK: trusted
     if (el.ownerSVGElement) continue; // parts of an <svg> are reported with the <svg>
 
     for (const c of el.classList) for (const [re, name] of LIBS) if (re.test(c)) { libs.set(name, (libs.get(name) ?? 0) + 1); if (libs.get(name) <= 3) add("foreign-components", "warning", el, `a ${name} component: use the SDK's widget instead, so it follows the theme`, { library: name }); }
