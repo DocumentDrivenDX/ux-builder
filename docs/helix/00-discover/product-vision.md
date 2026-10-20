@@ -21,13 +21,21 @@ ddx:
 ## Vision
 
 **Every app Synaptiq or a client builds looks and behaves like that client
-from its first commit, and keeps doing so as brands, design systems and
-people change, without anyone hard-coding a colour, a font or a widget.**
+from its first commit, in every screen, widget and AI assistant. It keeps
+doing so as brands, design systems and people change, without anyone
+hard-coding a colour, a font, a widget or a screen layout.**
 
-The AI-UI SDK is where a client's look lives. A brand owner turns a logo into
-an accessible, reviewed theme in one sitting; a developer, or an AI agent
-working for one, starts a new app already wearing it; and when the brand or
-the design system changes, every app follows by upgrading a package.
+The AI-UI SDK is where a client's look lives, along with the building blocks
+of its screens:
+- A brand owner turns a logo into an accessible, reviewed theme in one
+  sitting.
+- A developer, or an AI agent working for one, starts a new app already
+  wearing that theme.
+- They build its screens from widgets and patterns that adapt from desktop
+  to phone.
+- The app's AI assistant wears the same theme.
+- When the brand or the design system changes, every app follows by
+  upgrading a package.
 
 ## The problem
 

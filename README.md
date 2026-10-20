@@ -1,11 +1,17 @@
 # ux-builder
 
-**Turn a logo into a theme, and build apps that can't drift from it.**
+**Turn a logo into a theme, then build whole apps (screens, widgets and AI
+assistants) that can't drift from it.**
 
 ux-builder is an open-source UI SDK for AI-era apps. It holds a product's
-whole look (its theme tokens, widgets, fonts, icons and brand artwork) in one
-place. It also gives people and AI coding agents the tools to build apps that
-never hard-code presentation:
+whole look, and the building blocks of its screens, in one place:
+- theme tokens, fonts, icons and brand artwork;
+- widgets;
+- screen patterns, from the app shell to lists, forms and dashboards;
+- bridges that dress the AI chat components an app uses in the same theme.
+
+It also gives people and AI coding agents the tools to build apps that never
+hard-code presentation:
 
 - **Themes made from a brand.** A palette engine reads a logo and proposes
   palettes that already pass contrast. A local theme builder pairs a palette
