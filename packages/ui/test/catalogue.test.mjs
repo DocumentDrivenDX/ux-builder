@@ -148,4 +148,9 @@ describe("US-031 patterns for agents", () => {
     assert.ok(cat.rules.some((r) => /Compose screens from @ux-builder\/ui\/patterns before writing any layout CSS/.test(r) && /Stack, Cluster, Grid, Page, SplitView/.test(r)));
     for (const g of GUIDES) assert.match(read(g), /Compose screens from @ux-builder\/ui\/patterns before writing any layout CSS/);
   });
+
+  test("the rules say each screen goes inside a Page, since AppShell's content area and the screen patterns have no gutter of their own", () => {
+    assert.ok(cat.rules.some((r) => /AppShell for the frame, with each screen inside a Page/.test(r)));
+    for (const g of GUIDES) assert.match(read(g), /AppShell for the frame, with each screen inside a Page/);
+  });
 });

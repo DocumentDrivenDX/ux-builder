@@ -288,10 +288,13 @@ Six rules, the same ones AI agents are given:
 5. Select themes with `ThemeProvider` or `data-theme`. Never restyle per theme
    in app code.
 6. Compose screens from `@ux-builder/ui/patterns` before writing any layout
-   CSS: `AppShell` for the frame, the screen patterns (`CollectionList`,
-   `RecordDetail`, `FormPage`, `Dashboard`, `SettingsPage` and others), and the
-   layout primitives (`Stack`, `Cluster`, `Grid`, `Page`, `SplitView`) for the
-   rest. Fill their slots; never fork or restyle a pattern.
+   CSS: `AppShell` for the frame, with each screen inside a `Page`, which
+   gives it the page gutter and width (`AppShell`'s content area and the
+   screen patterns have none of their own; `ErrorScreen` excepted); the screen
+   patterns (`CollectionList`, `RecordDetail`, `FormPage`, `Dashboard`,
+   `SettingsPage` and others); and the layout primitives (`Stack`, `Cluster`,
+   `Grid`, `Page`, `SplitView`) for the rest. Fill their slots; never fork or
+   restyle a pattern.
 
 Every component and prop is in `@ux-builder/ui/catalogue.json` and the
 [`ui` README](packages/ui/README.md). `npm run storybook` shows each widget and

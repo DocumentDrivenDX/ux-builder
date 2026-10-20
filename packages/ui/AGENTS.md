@@ -13,7 +13,7 @@ to the app, as long as the app follows the rules below.
 3. Never hard-code colours, font families or radii: no hex, rgb(), named colours, font names or pixel radii in CSS or style props.
 4. Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui and ux-builder/no-inline-svg, then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.
 5. Select themes with ThemeProvider (theme, appearance) or data-theme and data-appearance on <html>; never restyle per theme in app code.
-6. Compose screens from @ux-builder/ui/patterns before writing any layout CSS: AppShell for the frame; CollectionList, ListDetail, RecordDetail, FormPage, QuickEdit, Dashboard, ReportViewer, SettingsPage and ErrorScreen for screens; the regions and the layout primitives (Stack, Cluster, Grid, Page, SplitView) for anything else. Supply content, data and actions through their slots; never fork or restyle a pattern.
+6. Compose screens from @ux-builder/ui/patterns before writing any layout CSS: AppShell for the frame, with each screen inside a Page, which gives it the page gutter and width (AppShell's content area and the screen patterns have none of their own; ErrorScreen excepted); CollectionList, ListDetail, RecordDetail, FormPage, QuickEdit, Dashboard, ReportViewer, SettingsPage and ErrorScreen for screens; the regions and the layout primitives (Stack, Cluster, Grid, Page, SplitView) for anything else. Supply content, data and actions through their slots; never fork or restyle a pattern.
 <!-- rules:end -->
 
 ## Setting up
