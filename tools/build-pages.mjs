@@ -16,7 +16,7 @@
    app on the SDK, so it holds no colours or fonts of its own. */
 
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
 import { context } from "../apps/theme-builder/api/context.mjs";
@@ -24,7 +24,8 @@ import { theme } from "../apps/theme-builder/api/theme.mjs";
 import { viteOptions } from "../apps/theme-builder/vite.shared.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const out = process.argv[2] ?? "_site";
+// Absolute: Vite resolves a relative outDir against the app's folder, not the working directory.
+const out = resolve(process.argv[2] ?? "_site");
 const need = {
   gallery: join(ROOT, "build/gallery.html"),
   storybook: join(ROOT, "packages/ui/storybook-static/index.html"),
@@ -57,6 +58,7 @@ mkdirSync(join(data, "themes"), { recursive: true });
 writeFileSync(join(data, "context.json"), JSON.stringify({ themes: ctx.themes }));
 process.env.STORYBOOK_URL = "../storybook";   // from themes/, the Storybook beside it
 for (const t of ctx.themes) writeFileSync(join(data, "themes", `${t.name}.json`), JSON.stringify(theme({ root: ROOT, name: t.name })));
+if (!existsSync(join(themesOut, "index.html"))) { console.error(`build-pages: the theme pages did not build into ${themesOut}`); process.exit(1); }
 
 writeFileSync(join(out, "index.html"), `<!doctype html>
 <html lang="en" data-theme="plain">
