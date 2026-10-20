@@ -1,6 +1,7 @@
-import { AppearanceSwitch, Button, Card, ChoicePicker, DataTable, Icon, Logo, Notice, ProgressBar, Select, StatusPill, Switch, TextField, ThemeProvider, useTheme } from "@ux-builder/ui";
+import { Button, Card, ChoicePicker, DataTable, Icon, Notice, ProgressBar, Select, StatusPill, Switch, TextField, ThemeProvider } from "@ux-builder/ui";
 import { iconBell, iconBot, iconCheck, iconCopy, iconPalette, iconPlug, iconScanEye, iconShieldCheck, iconSparkles, iconTerminal, iconWand2 } from "@ux-builder/ui/icons";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { ROOT } from "../site-root.js";
 import { AiFrame } from "../../../../packages/ui/ai/stories/frame.jsx";
 import { CodeBlock, CodeBlockCopyButton } from "../../../../packages/ui/ai/vendor/ai-elements/code-block";
 import { Message, MessageContent, MessageResponse } from "../../../../packages/ui/ai/vendor/ai-elements/message";
@@ -16,16 +17,13 @@ import createPkg from "../../../../packages/create-app/package.json";
 import auditPkg from "../../../../packages/audit/package.json";
 import mcpPkg from "../../../../packages/mcp/package.json";
 
-/* The GitHub Pages home page (tools/build-pages.mjs). It wears the SDK's own
-   ux-builder-databricks theme and is built only from the SDK: its widgets,
+/* The GitHub Pages home page's sections (tools/build-pages.mjs), shown by the
+   site's shell (microsite/Site.jsx). They wear the SDK's own
+   ux-builder-databricks theme and are built only from the SDK: its widgets,
    its AI Components (AI Elements, through the theme's shadcn bridge) and its
-   role tokens. The intro video before it is in home.html. */
+   role tokens. The intro video before the page is in home.html. */
 
-const THEME = "ux-builder-databricks";
 const REPO = "https://github.com/DocumentDrivenDX/ux-builder";
-const PREF = "uxb-home-appearance";
-const APPEARANCES = ["system", "light", "dark"];
-const saved = () => { try { const v = localStorage.getItem(PREF); return APPEARANCES.includes(v) ? v : "system"; } catch { return "system"; } };
 
 // The UX Builder brand on each shared design system, light and dark: the build's own resolved tokens.
 const RESOLVED = import.meta.glob("../../../../packages/tokens/dist/resolved/ux-builder.*.json", { eager: true, import: "default" });
@@ -50,55 +48,6 @@ export const PACKAGES = [
   { pkg: mcpPkg, icon: iconPlug, what: "The SDK over MCP: themes, widgets and props, tokens and icons for any coding agent." },
 ];
 
-export function Home() {
-  const [appearance, setAppearance] = useState(saved);
-  const choose = (v) => { setAppearance(v); try { localStorage.setItem(PREF, v); } catch { /* not remembered */ } };
-  useEffect(() => { window.uxbPageReady?.(); }, []);
-  return (
-    <ThemeProvider theme={THEME} appearance={appearance} className="uxh">
-      <PageAppearance />
-      <header className="uxh-top"><div className="uxh-wrap uxh-row uxh-spread">
-        <a href="./" className="uxh-brand" aria-label="UX Builder home"><Logo /></a>
-        <nav aria-label="Site" className="uxh-row uxh-nav">
-          <a href="themes/">Themes</a>
-          <a href="storybook/">Storybook</a>
-          <a href={`${REPO}#readme`}>Docs</a>
-          <a href={REPO}>GitHub</a>
-          <AppearanceSwitch value={appearance} onChange={choose} />
-        </nav>
-      </div></header>
-
-      <main>
-        <Hero />
-        <LiveDemo />
-        <AiSection />
-        <Guardrails />
-        <Packages />
-        <GetStarted />
-      </main>
-
-      <footer className="uxh-foot"><div className="uxh-wrap uxh-row uxh-spread">
-        <Logo variant="mark" size="sm" />
-        <p>Open source under MIT OR Apache-2.0. Built with the SDK it describes, in the <code>{THEME}</code> theme.</p>
-        <nav aria-label="Footer" className="uxh-row">
-          <a href="themes/">Themes</a><a href="storybook/">Storybook</a><a href={REPO}>GitHub</a><a href="https://www.npmjs.com/org/ux-builder">npm</a>
-        </nav>
-      </div></footer>
-    </ThemeProvider>
-  );
-}
-
-/* The AI Components' menus and tooltips render at the end of the page, so <html> wears the theme too. */
-function PageAppearance() {
-  const { appearance } = useTheme();
-  useEffect(() => {
-    const root = document.documentElement;
-    root.dataset.theme = THEME;
-    root.dataset.appearance = appearance;
-  }, [appearance]);
-  return null;
-}
-
 export function Copy({ text, label = "Copy" }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => { try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1600); } catch { /* no clipboard */ } };
@@ -110,7 +59,7 @@ export function Command({ text, code = false }) {
   return <div className={`uxh-cmd${code ? " uxh-cmd--code" : ""}`}><code>{!code && <span aria-hidden="true">$ </span>}{text}</code><Copy text={text} /></div>;
 }
 
-function Hero() {
+export function Hero() {
   return (
     <section className="uxh-hero" aria-labelledby="hero-h">
       <div className="uxh-wrap uxh-hero__grid">
@@ -120,7 +69,7 @@ function Hero() {
           <p className="uxh-lede">UX Builder reads a brand, proposes palettes that already pass contrast, and pairs them with a design system. Your app, and the coding agents that write it, build with widgets and AI components that follow the theme everywhere: light, dark and every screen.</p>
           <Command text="npm create @ux-builder/app my-app" />
           <div className="uxh-row">
-            <a className="uxh-btn uxh-btn--primary" href="themes/?theme=ux-builder-databricks">See this theme's page<Icon name="arrow-right" /></a>
+            <a className="uxh-btn uxh-btn--primary" href={`${ROOT}themes/?theme=ux-builder-databricks`}>See this theme's page<Icon name="arrow-right" /></a>
             <a className="uxh-btn" href={REPO}>Star on GitHub</a>
           </div>
           <ul className="uxh-stats" aria-label="In the box">
@@ -268,7 +217,7 @@ export const GUARDS = [
   { icon: iconTerminal, title: "A starter that begins on-theme", text: "A React + Vite app with ThemeProvider, an appearance switch, lint, the audit and CI, wired up from the first commit.", code: "npm create @ux-builder/app my-app -- --theme plain" },
 ];
 
-function Guardrails() {
+export function Guardrails() {
   return (
     <section className="uxh-section" aria-labelledby="guard-h">
       <div className="uxh-wrap uxh-col uxh-gap">
@@ -291,7 +240,7 @@ function Guardrails() {
   );
 }
 
-function Packages() {
+export function Packages() {
   return (
     <section className="uxh-section" aria-labelledby="pkg-h">
       <div className="uxh-wrap uxh-col uxh-gap">
@@ -316,7 +265,7 @@ function Packages() {
   );
 }
 
-function GetStarted() {
+export function GetStarted() {
   return (
     <section className="uxh-section uxh-section--start" aria-labelledby="start-h">
       <div className="uxh-wrap uxh-col uxh-gap">
@@ -331,7 +280,7 @@ function GetStarted() {
         </ol>
         <div className="uxh-row">
           <a className="uxh-btn uxh-btn--primary" href={`${REPO}#quick-start`}>Read the quick start<Icon name="arrow-right" /></a>
-          <a className="uxh-btn" href="storybook/">Browse every widget</a>
+          <a className="uxh-btn" href={`${ROOT}storybook/`}>Browse every widget</a>
         </div>
       </div>
     </section>

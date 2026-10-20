@@ -21,6 +21,6 @@ const brand = JSON.parse(readFileSync(join(ROOT, "tokens/brands/ux-builder.brand
 process.env.VITE_INTRO_PAINT = brand.appearances.light.brand["logo-paint"].$value;
 process.env.VITE_SITE_URL = (process.env.SITE_URL ?? "https://documentdrivendx.github.io/ux-builder/v2/").replace(/\/?$/, "/");
 const out = join(site, "v2");
-await build({ ...viteOptions(), base: "./", publicDir: false, build: { outDir: out, emptyOutDir: true, rolldownOptions: { input: join(APP, "microsite.html") } } });
+await build({ ...viteOptions(), base: "./", publicDir: false, define: { "import.meta.env.VITE_SITE_ROOT": JSON.stringify("../") }, build: { outDir: out, emptyOutDir: true, rolldownOptions: { input: join(APP, "microsite.html") } } });
 renameSync(join(out, "microsite.html"), join(out, "index.html"));
 console.log(`build-microsite-draft: ${out}/ (the draft, beside the site)`);

@@ -48,6 +48,7 @@
     const intro = document.getElementById("uxb-intro");
     const video = intro.querySelector("video");
     let seen = false;
+    const onHome = !new URLSearchParams(location.search).has("p");   // the home page only, not a section page
     try { seen = sessionStorage.getItem("uxb-intro") === "seen"; sessionStorage.setItem("uxb-intro", "seen"); } catch {}
     let ended = false, ready = false, gone = false;
     const done = () => {
@@ -61,7 +62,7 @@
     const maybe = () => { if (ended && ready) done(); };
     const onKey = (e) => { if (e.key === "Escape") done(); };
     window.uxbPageReady = () => { ready = true; maybe(); };
-    if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) { intro.remove(); gone = true; return; }
+    if (seen || !onHome || matchMedia("(prefers-reduced-motion: reduce)").matches) { intro.remove(); gone = true; return; }
     video.addEventListener("ended", () => { ended = true; maybe(); });
     video.addEventListener("error", () => { ended = true; maybe(); });
     video.play()?.catch(() => { ended = true; maybe(); });

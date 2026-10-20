@@ -104,7 +104,11 @@
   .uxm-outline { display: none; }
 }
 @media (max-width: 900px) {
-  .uxm-sections, .uxm-gh { display: none; }
+  /* The five sections move to a second header row that scrolls sideways, so every width reaches them. */
+  .uxh-top .uxh-wrap.uxh-row { flex-wrap: wrap; row-gap: var(--piq-space-2); }
+  .uxm-sections { order: 3; flex: 1 0 100%; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--piq-space-3)); padding-inline: var(--piq-space-1); }
+  .uxm-sections a { flex: none; }
+  .uxm-gh { display: none; }
   .uxm-layout { grid-template-columns: minmax(0, 1fr); gap: var(--piq-space-4); padding-block-start: var(--piq-space-4); }
   .uxm-side { display: none; }
   .uxm-drawer { display: block; padding: var(--piq-space-3) var(--piq-space-4); border-radius: var(--piq-radius-card); background: var(--piq-color-surface); border: var(--piq-border-default); }

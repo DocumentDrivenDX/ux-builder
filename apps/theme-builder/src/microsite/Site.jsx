@@ -1,14 +1,16 @@
 import { AppearanceSwitch, Icon, Logo, ThemeProvider, useTheme } from "@ux-builder/ui";
 import { iconArrowRight, iconBot, iconPalette, iconShieldCheck, iconSparkles, iconTerminal } from "@ux-builder/ui/icons";
 import { useEffect, useState } from "react";
-import { Command, HeroApp, LiveDemo } from "../home/Home.jsx";
+import { AiSection, GetStarted, Guardrails, Hero, LiveDemo, Packages } from "../home/Home.jsx";
+import { ROOT } from "../site-root.js";
 import { SECTIONS, href, locate, neighbours } from "./nav.js";
 import { PAGES } from "./pages.jsx";
 import { DECISIONS, FEATURES, PATTERNS, REPO, WIDGETS } from "./sources.js";
 
-/* A draft of the project site laid out by HELIX's product-microsite-ia
-   concern: a home page that answers what the product is and offers a next
-   action, then one section per reader mode (Why, Start, Concepts, Reference,
+/* The project site (tools/build-pages.mjs), laid out by HELIX's
+   product-microsite-ia concern: the home page (the hero, the reader paths,
+   the live demo, the AI section, guardrails, packages, proof and a quick
+   start), then one section per reader mode (Why, Start, Concepts, Reference,
    Proof), each with a landing page. On a section page the left menu is the
    site's hierarchy and the current page; the right menu is this page's
    headings only. It wears ux-builder-databricks. */
@@ -44,7 +46,7 @@ export function Site() {
       {section ? <SectionPage section={section} page={page} /> : <HomePage />}
       <footer className="uxh-foot"><div className="uxh-wrap uxh-row uxh-spread">
         <Logo variant="mark" size="sm" />
-        <p>Open source under MIT OR Apache-2.0. A draft of the site, laid out by HELIX's product-microsite-ia concern.</p>
+        <p>Open source under MIT OR Apache-2.0. Built with the SDK it describes, in the <code>{THEME}</code> theme.</p>
         <nav aria-label="Footer" className="uxh-row">{SECTIONS.map((s) => <a key={s.id} href={href(s.id)}>{s.title}</a>)}<a href={REPO}>GitHub</a></nav>
       </div></footer>
     </ThemeProvider>
@@ -62,60 +64,61 @@ function PageAppearance() {
 function HomePage() {
   return (
     <main>
-      <section className="uxh-hero" aria-labelledby="hero-h">
-        <div className="uxh-wrap uxh-hero__grid">
-          <div className="uxh-col">
-            <span className="uxh-eyebrow"><Icon icon={iconSparkles} />Open-source UI SDK for AI-era apps</span>
-            <h1 id="hero-h">Turn a logo into a theme. Ship apps that <em>can't drift</em> from it.</h1>
-            <p className="uxh-lede">Themes made from your brand, React widgets and AI components that follow them, and guardrails that keep people and coding agents on-theme in light, dark and every screen.</p>
-            <Command text="npm create @ux-builder/app my-app" />
-            <div className="uxh-row">
-              <a className="uxh-btn uxh-btn--primary" href={href("start", "new-app")}>Get started<Icon icon={iconArrowRight} /></a>
-              <a className="uxh-btn" href={href("why")}>Why UX Builder</a>
-            </div>
-          </div>
-          <HeroApp />
-        </div>
-      </section>
-
-      <section className="uxh-section" aria-labelledby="paths-h">
-        <div className="uxh-wrap uxh-col uxh-gap">
-          <div className="uxh-head"><h2 id="paths-h">Where do you want to start?</h2><p className="uxh-lede">Five paths, one for each question you might be asking.</p></div>
-          <ul className="uxm-paths">
-            {SECTIONS.map((s) => (
-              <li key={s.id}>
-                <a className="uxh-card uxh-card--link" href={href(s.id)}>
-                  <span className="uxh-card__icon"><Icon icon={ICONS[s.id]} /></span>
-                  <span className="uxm-mode">{s.mode}</span>
-                  <h3>{s.question}</h3>
-                  <p>{s.lede}</p>
-                  <span className="uxm-go">{s.title}<Icon icon={iconArrowRight} /></span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
+      <Hero />
+      <Paths />
       <LiveDemo />
-
-      <section className="uxh-section" aria-labelledby="proof-h">
-        <div className="uxh-wrap uxh-col uxh-gap">
-          <div className="uxh-head"><span className="uxh-eyebrow"><Icon icon={iconShieldCheck} />Proof, not claims</span><h2 id="proof-h">Everything here is generated from what ships.</h2></div>
-          <ul className="uxh-stats uxm-proof">
-            <li><b>{WIDGETS.length}</b><span>widgets</span></li>
-            <li><b>{PATTERNS.length}</b><span>screen patterns</span></li>
-            <li><b>4.5:1</b><span>contrast, every theme, every appearance</span></li>
-            <li><b>{DECISIONS.length}</b><span>recorded decisions</span></li>
-            <li><b>{FEATURES.length}</b><span>specified features</span></li>
-          </ul>
-          <div className="uxh-row">
-            <a className="uxh-btn uxh-btn--primary" href={href("proof", "decisions")}>Read the decisions<Icon icon={iconArrowRight} /></a>
-            <a className="uxh-btn" href="../themes/?theme=ux-builder-databricks">See every component live</a>
-          </div>
-        </div>
-      </section>
+      <AiSection />
+      <Guardrails />
+      <Packages />
+      <Proof />
+      <GetStarted />
     </main>
+  );
+}
+
+/* One path per reader mode, each to its section. */
+function Paths() {
+  return (
+    <section className="uxh-section" aria-labelledby="paths-h">
+      <div className="uxh-wrap uxh-col uxh-gap">
+        <div className="uxh-head"><h2 id="paths-h">Where do you want to start?</h2><p className="uxh-lede">Five paths, one for each question you might be asking.</p></div>
+        <ul className="uxm-paths">
+          {SECTIONS.map((s) => (
+            <li key={s.id}>
+              <a className="uxh-card uxh-card--link" href={href(s.id)}>
+                <span className="uxh-card__icon"><Icon icon={ICONS[s.id]} /></span>
+                <span className="uxm-mode">{s.mode}</span>
+                <h3>{s.question}</h3>
+                <p>{s.lede}</p>
+                <span className="uxm-go">{s.title}<Icon icon={iconArrowRight} /></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/* Counts generated from what ships, and where to check them. */
+function Proof() {
+  return (
+    <section className="uxh-section" aria-labelledby="proof-h">
+      <div className="uxh-wrap uxh-col uxh-gap">
+        <div className="uxh-head"><span className="uxh-eyebrow"><Icon icon={iconShieldCheck} />Proof, not claims</span><h2 id="proof-h">Everything here is generated from what ships.</h2></div>
+        <ul className="uxh-stats uxm-proof">
+          <li><b>{WIDGETS.length}</b><span>widgets</span></li>
+          <li><b>{PATTERNS.length}</b><span>screen patterns</span></li>
+          <li><b>4.5:1</b><span>contrast, every theme, every appearance</span></li>
+          <li><b>{DECISIONS.length}</b><span>recorded decisions</span></li>
+          <li><b>{FEATURES.length}</b><span>specified features</span></li>
+        </ul>
+        <div className="uxh-row">
+          <a className="uxh-btn uxh-btn--primary" href={href("proof", "decisions")}>Read the decisions<Icon icon={iconArrowRight} /></a>
+          <a className="uxh-btn" href={`${ROOT}themes/?theme=ux-builder-databricks`}>See every component live</a>
+        </div>
+      </div>
+    </section>
   );
 }
 
