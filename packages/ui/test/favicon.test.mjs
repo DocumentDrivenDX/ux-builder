@@ -75,6 +75,22 @@ describe("US-010 favicon", () => {
     el.remove();
   });
 
+  test("a mark the bundler inlined as a data: URI is read whole, quotes and brackets included", () => {
+    // What Vite writes for a mark under its inline limit: single quotes and a url(#…) inside.
+    const inlined = "data:image/svg+xml,%3csvg%20id='Layer_1'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20fill='url(%23g)'/%3e%3c/svg%3e";
+    const el = document.createElement("div");
+    el.style.setProperty("--piq-brand-favicon", `url("${inlined}")`);
+    document.body.appendChild(el);
+    assert.equal(applyFavicon(el), inlined);
+    assert.equal(sdkIcon().getAttribute("href"), inlined);
+    assert.equal(sdkIcon().type, "image/svg+xml");
+    el.style.setProperty("--piq-brand-favicon", 'url("http://localhost/a/say \\"hi\\".svg")');
+    assert.equal(applyFavicon(el), 'http://localhost/a/say "hi".svg', "CSS escapes undone");
+    el.style.setProperty("--piq-brand-favicon", "url(http://localhost/a/bare.png)");
+    assert.equal(applyFavicon(el), "http://localhost/a/bare.png", "unquoted");
+    el.remove();
+  });
+
   // @covers US-010-AC12
   test("AC12: an embedded view, a nested provider and favicon={false} set no icon", () => {
     render(h(ThemeProvider, { tokens: { "piq-brand-favicon": `url("${MARK}")` }, style: withFavicon }, "embedded"));

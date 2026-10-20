@@ -31,7 +31,8 @@ const PROVIDER = `<script>
 addEventListener("piq:set-theme", (e) => {
   const app = document.getElementById("app");
   app.dataset.theme = e.detail.theme; app.dataset.appearance = e.detail.appearance;
-  const href = /url\\(\\s*["']?([^"')]+)/.exec(getComputedStyle(app).getPropertyValue("--piq-brand-favicon"))?.[1];
+  const m = /url\\(\\s*(?:"((?:[^"\\\\]|\\\\.)*)"|'((?:[^'\\\\]|\\\\.)*)'|([^\\s"'()]+))\\s*\\)/.exec(getComputedStyle(app).getPropertyValue("--piq-brand-favicon"));
+  const href = m && (m[1] ?? m[2] ?? m[3]).replace(/\\\\(.)/g, "$1");
   let link = document.querySelector("link[data-piq-favicon]");
   if (!href) { link?.remove(); return; }
   if (!link) { link = document.createElement("link"); link.rel = "icon"; link.setAttribute("data-piq-favicon", ""); document.head.append(link); }
@@ -65,6 +66,9 @@ const PAGES = {
   { provider: false, head: "<style>.accent-local { --piq-color-accent: red; } .piq-btn { border-radius: 3px; } @keyframes spin { to { transform: rotate(1turn); } }</style>" })
     .replace("</body>", `<p id="outside" style="color:#333">Outside the theme</p>${PROVIDER.replace(/link\.href = href;/, "/* never sets the favicon */")}</body>`),
   "/no-provider.html": page(sdk, { provider: false }),
+  // The starter's index.html: a theme on <html> to start with, and a mark the bundler inlined, quotes and brackets in it.
+  "/inlined.html": page(sdk, { head: `<style>#app[data-theme="praxis-carbon"] { --piq-brand-favicon: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20fill='url(%23g)'%20d='M0%200h1v1z'/%3e%3c/svg%3e"); }</style>` })
+    .replace('<html lang="en">', `<html lang="en" data-theme="databricks" style="--piq-brand-favicon: url('/brand/elsewhere.svg')">`),
 };
 
 before(async () => {
@@ -173,6 +177,12 @@ describe("US-022 @ux-builder/audit", () => {
     const clean = await run("--theme", "databricks", "--appearance", "light", "--out", join(tmp, "cli3"), `${base}/clean.html`);
     assert.equal(clean.status, 0, clean.stdout + clean.stderr);
     assert.equal((await run("--off", "nonsense", base)).status, 2);
+  });
+
+  test("the favicon is checked on the provider's element, not a data-theme on <html>, and an inlined data: URI is read whole", async () => {
+    const r = await audit({ urls: [`${base}/inlined.html`], themes: THEMES });
+    assert.equal(r.runs.length, 4);
+    assert.deepEqual(r.findings.filter((f) => f.rule === "brand" && /favicon/.test(f.message)), []);
   });
 
   test("an app that does not answer the switch is switched by attribute, and says so", async () => {
