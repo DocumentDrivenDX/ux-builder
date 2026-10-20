@@ -16,7 +16,7 @@ import { Use } from "./steps/Use.jsx";
    real widgets and a local API (SD-002, ADR-019). */
 
 // The builder wears one of the SDK's own themes; the person picks its appearance.
-const THEME = "praxis-v2-databricks";
+const THEME = "ux-builder-databricks";
 const APPEARANCES = ["system", "light", "dark"];
 const PREF = "theme-builder-appearance";
 const savedAppearance = () => { try { const v = localStorage.getItem(PREF); return APPEARANCES.includes(v) ? v : "system"; } catch { return "system"; } };

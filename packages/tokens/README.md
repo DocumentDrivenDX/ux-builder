@@ -19,7 +19,7 @@ in the repository README, *Quick start*.
 
 | Import | Contents |
 |---|---|
-| `@ux-builder/tokens/themes/<theme>.css` | One theme, selected with `data-theme` and an optional `data-appearance`: `databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `plain` |
+| `@ux-builder/tokens/themes/<theme>.css` | One theme, selected with `data-theme` and an optional `data-appearance`: `databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `ux-builder-databricks`, `plain` |
 | `@ux-builder/tokens/themes.css` | Every theme in one file |
 | `@ux-builder/tokens/fonts/<theme>.css`, `fonts.css` | The faces one theme uses, or every bundled face; browsers fetch only what a page uses |
 | `@ux-builder/tokens/resolved/<theme>.<appearance>.json` | Every token's final value for one theme: what the harness passes to an embedded view |
