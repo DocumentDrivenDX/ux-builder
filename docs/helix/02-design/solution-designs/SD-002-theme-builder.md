@@ -118,7 +118,7 @@ Storybook theme.
    `<brand>` and the theme as `<brand>-<design system>`, and opens a pull
    request.
 6. **Use in your app**: framework tabs (React + Vite, Next.js, plain HTML);
-   nine tasks to tick off, each with why, file names and copyable code
+   eight tasks to tick off (nine with a chat library), each with why, file names and copyable code
    filled in for this theme; progress; the theme's preview; files you'll
    touch; a prompt to paste into Claude Code.
 

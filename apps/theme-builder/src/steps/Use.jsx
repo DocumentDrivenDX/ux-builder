@@ -3,7 +3,8 @@ import { useState } from "react";
 import { fontsOf, iconsOf, optionName } from "../model.js";
 import { Preview } from "../preview/Preview.jsx";
 
-/* Step 6, "Use in your app" (prototype step 6): nine tasks per framework,
+/* Step 6, "Use in your app" (prototype step 6): eight tasks per framework
+   (nine with a chat library),
    with the code filled in for this theme, progress, and a prompt for a
    coding agent. The code reflects what the SDK ships today. */
 

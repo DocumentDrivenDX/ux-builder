@@ -34,7 +34,7 @@ ddx:
 - [ ] **US-019-AC5** — Given an uploaded logo (and dark-background logo) drawn with margins around it, when saved, then the brand draws a copy framed to the drawing (an SVG's artwork unchanged under a new `viewBox`; a PNG cropped), with its `logo-aspect`, and the upload is kept as the generation source.
 - [ ] **US-019-AC6** — Given a saved theme, when the pull request is opened, then it includes a changeset (`@ux-builder/tokens` minor), so merging it queues a release with the theme.
 - [ ] **US-019-AC7** — Given a mark, when saved, then it is stored framed to a square around its drawing as `brand/<brand>/mark.<ext>`, and the brand's `mark-image` and `favicon` point at it in every appearance; without one, neither is set.
-- [ ] **US-019-AC4** — Given a saved theme, when "Use in your app" shows, then nine tasks for React + Vite, Next.js or plain HTML give the registry, install, theme CSS, `data-theme`, appearance, fonts, widgets, lint and a check, each with copyable code for that theme, plus progress, the files touched and a prompt for a coding agent.
+- [ ] **US-019-AC4** — Given a saved theme, when "Use in your app" shows, then eight tasks for React + Vite, Next.js or plain HTML (nine with a chat library) give the install, theme CSS, `data-theme`, appearance, fonts, widgets, lint and a check, each with copyable code for that theme, plus progress, the files touched and a prompt for a coding agent.
 
 ## Dependencies
 

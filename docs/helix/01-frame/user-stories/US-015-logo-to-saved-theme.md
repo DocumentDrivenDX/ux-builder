@@ -36,7 +36,7 @@ Follows the approved prototype (`prototypes/theme-builder/`).
 2. Pick two palettes to compare; give feedback "more conservative"; a new round keeps the selection.
 3. Pick Carbon and Fluent; compare four combinations, each in light and dark.
 4. Choose one theme; save it as `acme-legal-fluent` (brand `acme-legal`); a pull request opens.
-5. The builder shows the nine tasks to use it in an app.
+5. The builder shows the eight tasks to use it in an app.
 
 ## Acceptance Criteria
 
@@ -44,7 +44,7 @@ Follows the approved prototype (`prototypes/theme-builder/`).
 - [ ] **US-015-AC2** — Given chosen palettes and design systems, when compared, then every combination is shown in light and dark on that system's real widgets, and the Light + dark / Light / Dark toggle applies to all.
 - [ ] **US-015-AC3** — Given feedback "more conservative" on the palettes step, when regenerated, then new options replace the old, the change is explained, and the selections carry over.
 - [ ] **US-015-AC4** — Given a chosen option and design system and a unique name, when saved, then a brand file and a theme file are written, both schema-valid, and submitted for review (a branch and pull request; never published).
-- [ ] **US-015-AC5** — Given a saved theme, when "Use in your app" shows, then it lists nine tasks per framework with the code filled in for that theme, and a link to the review.
+- [ ] **US-015-AC5** — Given a saved theme, when "Use in your app" shows, then it lists eight tasks per framework (nine with a chat library) with the code filled in for that theme, and a link to the review.
 
 ## Dependencies
 

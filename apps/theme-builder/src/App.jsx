@@ -2,6 +2,7 @@ import { analyse, analysePixels, generate, inflate, normalise, SETTINGS } from "
 import { AppearanceSwitch, Button, Icon, Notice, ThemeProvider } from "@ux-builder/ui";
 import { useEffect, useMemo, useState } from "react";
 import { getContext, postFeedback, postSave } from "./api.js";
+import brandmark from "./assets/logo.svg?raw";
 import { Themes } from "./Themes.jsx";
 import { brandFromFile, optionName, titleOf } from "./model.js";
 import { Compare } from "./steps/Compare.jsx";
@@ -169,7 +170,7 @@ export function App() {
   return (
     <ThemeProvider theme={THEME} appearance={appearance} className="tb">
       <header className="tb-hdr"><div className="tb-wrap tb-row tb-spread">
-        <div className="tb-brandmark"><b>Theme Builder</b><span className="tb-eyebrow">AI-UI SDK</span></div>
+        <div className="tb-brandmark" dangerouslySetInnerHTML={{ __html: brandmark }} />
         <div className="tb-row tb-hdr__tools">
         <AppearanceSwitch value={appearance} onChange={chooseAppearance} />
         <nav aria-label="Help" className="tb-row">

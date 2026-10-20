@@ -50,7 +50,7 @@ test.describe("Save theme", () => {
 
 test.describe("Save and use", () => {
   // @covers US-015-AC4 @covers US-019-AC3 @covers US-019-AC4 @covers US-015-AC5 @covers US-019-AC5 @covers US-019-AC6 @covers US-045-AC6
-  test("saving writes a theme that builds, then nine tasks to use it", async ({ page }) => {
+  test("saving writes a theme that builds, then eight tasks to use it", async ({ page }) => {
     const errors = watch(page);
     await toSave(page, { systems: ["Fluent 2"], palettes: [1] });
     await page.locator("#theme-name").fill("saveuse-fluent");
@@ -73,8 +73,8 @@ test.describe("Save and use", () => {
     // And a changeset, so merging the pull request releases it (US-019-AC6).
     expect(readFileSync(join(root(), ".changeset/theme-saveuse-fluent.md"), "utf8")).toContain('"@ux-builder/tokens": minor');
 
-    await expect(page.locator(".tb-task")).toHaveCount(9);
-    await expect(page.locator(".tb-task h3")).toContainText(["Give npm access", "Install the SDK", "Load the theme", "Turn the theme on", "Follow the user", "Load", "Build with the widgets", "Catch hard-coded colours", "Check it worked"]);
+    await expect(page.locator(".tb-task")).toHaveCount(8);
+    await expect(page.locator(".tb-task h3")).toContainText(["Install the SDK", "Load the theme", "Turn the theme on", "Follow the user", "Load", "Build with the widgets", "Catch hard-coded colours", "Check it worked"]);
     const accent = src.brands.get("saveuse").appearances.light.color.accent.$value;
     await expect(page.locator("#code-verify-0")).toContainText(`"${accent}"`);
     await expect(page.locator("#code-css-0")).toHaveText('import "@ux-builder/tokens/themes/saveuse-fluent.css";\nimport "@ux-builder/ui/ui.css";');
@@ -102,7 +102,7 @@ test.describe("Save and use", () => {
     const chat = page.getByRole("radiogroup", { name: "Chat library" });
     await expect(chat.getByRole("radio")).toHaveText(["None", "AI Elements", "assistant-ui"], { useInnerText: true });
     await chat.getByRole("radio", { name: "AI Elements" }).click();
-    await expect(page.locator(".tb-task")).toHaveCount(10);
+    await expect(page.locator(".tb-task")).toHaveCount(9);
     await expect(page.locator("#task-chat h3")).toContainText("Add the assistant with AI Elements");
     await expect(page.locator("#code-chat-0")).toContainText("npx ai-elements@latest add conversation message prompt-input");
     await expect(page.locator("#code-chat-1")).toContainText('href="/node_modules/@ux-builder/tokens/dist/bridges/shadcn/saveuse-fluent.css"');
@@ -115,7 +115,7 @@ test.describe("Save and use", () => {
     await expect(page.locator("#code-chat-2")).toContainText('import { useChatRuntime } from "@assistant-ui/react-ai-sdk";');
     await expect(page.locator("#task-chat")).not.toContainText(/copilotkit/i);
     await chat.getByRole("radio", { name: "None" }).click();
-    await expect(page.locator(".tb-task")).toHaveCount(9);
+    await expect(page.locator(".tb-task")).toHaveCount(8);
     expect(errors).toEqual([]);
   });
 });

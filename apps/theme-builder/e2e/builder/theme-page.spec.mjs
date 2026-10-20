@@ -128,7 +128,7 @@ test.describe("A theme's page", () => {
     await expect(page.locator("#css-dark")).toContainText("has no dark appearance");
     await page.goto("/?theme=no-such-theme");
     await expect(page.getByRole("alert")).toContainText('no theme called "no-such-theme"');
-    await expect(page.getByRole("link", { name: "Back to the Theme Builder" })).toHaveAttribute("href", "./");
+    await expect(page.getByRole("link", { name: "Back to the UX Builder" })).toHaveAttribute("href", "./");
   });
 
   // @covers US-020-AC7
