@@ -46,15 +46,18 @@ jobs:
       - run: npm ci
       # Chromium for the browser tests inside npm run check.
       - run: npx playwright install --with-deps chromium
-      - uses: changesets/action@v1
+      # v2 is the action for Changesets CLI v3, which this repository uses: v1 reads
+      # CLI v2's "New tag:" output, so with CLI v3 it published but pushed no tags
+      # and created no releases. v2 pushes them through the GitHub API, signed,
+      # with the workflow's own token.
+      - uses: changesets/action@v2
         with:
-          version: npm run version-packages
+          version-script: npm run version-packages
           # npm run check (every gate CI runs, contrast included), then
           # changeset publish.
-          publish: npm run release
-          title: Version Packages
-          commit: Version Packages
-          createGithubReleases: true
+          publish-script: npm run release
+          pr-title: Version Packages
+          commit-message: Version Packages
+          create-github-releases: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
