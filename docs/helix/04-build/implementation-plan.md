@@ -20,6 +20,9 @@ Increments 2 and 3 get their own slices when they are planned.
 **Status (2026-10-20)**: B-001 to B-006 built, each committed after the full
 local suite passed. Increment 1's criteria (US-056, US-057, US-058, US-059,
 US-062) are cited by tests and out of `tools/coverage-exceptions.json`.
+B-007 to B-012 built 2026-10-21: every FEAT-009 criterion is cited by a test.
+The legal review ADR-025 asks for is prepared as `docs/legal/counsel-brief-interaction-rules.md`;
+counsel's answer is still to come.
 
 ## Scope
 
@@ -49,6 +52,17 @@ US-062) are cited by tests and out of `tools/coverage-exceptions.json`.
 | B-004 | US-058: `collect`; the pilot manifest | CONTRACT-006 Records; STP-058 | B-003 | `assess-collect.test.mjs`; `apps/theme-builder/test/assessment.test.mjs` | Pilot: the theme builder |
 | B-005 | US-059: `baseline`; `serve.mjs` | SD-004 Baseline; STP-059 | B-003, B-001 | `assess-baseline.test.mjs` | |
 | B-006 | US-057: the skill; the MCP version fix; `validate-report` for increment-1 records; README; changeset (audit minor, mcp patch) | SD-004 Components; STP-057 | B-002, B-004, B-005 | `assess-skill.test.mjs`; `npm test --workspace @ux-builder/mcp` | Last: documents the commands that now exist |
+
+### Increments 2 and 3 *[Added 2026-10-21]*
+
+| Slice | Story / Area | Governing Artifacts | Depends On | Validation Gate | Notes |
+|-------|---------------|---------------------|------------|-----------------|-------|
+| B-007 | US-060-AC1, US-061: `plan`, the coverage matrix, heuristics and user claims | CONTRACT-006 "Increments 2 and 3"; STP-060, STP-061 | B-004 | `assess-coverage.test.mjs`, `assess-walkthrough.test.mjs` | Starts the agent's records |
+| B-008 | US-060-AC2 to AC5: walkthrough records, `browser --manifest`, `reset`, `inspect --manifest` | STP-060 | B-002, B-007 | `assess-walkthrough.test.mjs` | Safety at the browser |
+| B-009 | US-063: backlog rules, `merge`, stable IDs | STP-063 | B-007 | `assess-backlog.test.mjs` | |
+| B-010 | US-064: `propose`, `check-writes`, `apply-check` | STP-064 | B-003, B-009 | `assess-proposals.test.mjs` | Proposals aimed at HELIX artifacts |
+| B-011 | US-065: `report`, `compare`, `gate`, agent identity | STP-065 | B-009, B-010 | `assess-runs.test.mjs` | Increment 3 |
+| B-012 | Increment 3 extras: MCP tools for the manifest and report checks, the CI workflow, a Playwright MCP test; the counsel brief for ADR-025 | ADR-026 decision 5 | B-011 | `npm test --workspace @ux-builder/mcp`; `inspect-playwright-mcp.test.mjs` | Optional wrappers, as the brief allows |
 
 ## Issue Decomposition
 

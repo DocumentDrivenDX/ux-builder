@@ -134,7 +134,7 @@ export function loadTypes(catalog) {
       const naming = m?.output?.naming ?? null;
       const dir = loc.endsWith("/") || !/\.[a-z]+$/.test(loc) ? loc.replace(/\/?$/, "/") : dirname(loc) === "." ? "" : dirname(loc) + "/";
       const file = loc.endsWith("/") ? null : loc.split("/").pop();
-      types.push({ id: m?.artifact?.id ?? t, activity: m?.artifact?.activity ?? a.replace(/^\d+-/, ""), dir, re: namingRe(file && !/[{[]/.test(file) ? file : (naming ?? file ?? "")), pattern: m?.id_format?.pattern ? new RegExp(`^${m.id_format.pattern}$`) : null, template: existsSync(join(arts, t, "template.md")) ? join(arts, t, "template.md") : null });
+      types.push({ id: m?.artifact?.id ?? t, activity: m?.artifact?.activity ?? a.replace(/^\d+-/, ""), dir, naming: file && !/[{[]/.test(file) ? file : naming ?? file, re: namingRe(file && !/[{[]/.test(file) ? file : (naming ?? file ?? "")), pattern: m?.id_format?.pattern ? new RegExp(`^${m.id_format.pattern}$`) : null, template: existsSync(join(arts, t, "template.md")) ? join(arts, t, "template.md") : null });
     }
   }
   return types;

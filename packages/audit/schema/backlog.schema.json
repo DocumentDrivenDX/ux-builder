@@ -142,6 +142,36 @@
           },
           "uncertainty": {
             "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "validation_work": {
+            "type": "boolean"
+          },
+          "usage": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "user_validation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "claim",
+          "why"
+        ],
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
           }
         }
       }

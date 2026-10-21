@@ -12,7 +12,8 @@
     "./report": "./report.mjs",
     "./package.json": "./package.json",
     "./schema/*": "./schema/*",
-    "./skill/*": "./skill/*"
+    "./skill/*": "./skill/*",
+    "./assess/*": "./assess/*"
   },
   "files": [
     "audit.mjs",
@@ -45,5 +46,8 @@
     "type": "git",
     "url": "git+https://github.com/DocumentDrivenDX/ux-builder.git",
     "directory": "packages/audit"
+  },
+  "devDependencies": {
+    "@playwright/mcp": "0.0.83"
   }
 }

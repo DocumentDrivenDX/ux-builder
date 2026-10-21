@@ -29,6 +29,13 @@ const require = { resolve: (spec) => { try { return app.resolve(spec); } catch {
 // The rules and the blueprint check, from the same copy (0.7 and later).
 let blueprint = null;
 try { blueprint = await import(pathToFileURL(require.resolve("@ux-builder/ui/blueprint")).href); } catch { /* an older @ux-builder/ui */ }
+// The UX assessment's checks, when the app has @ux-builder/audit 0.3 or later (FEAT-009, optional wrappers).
+let assess = null;
+try {
+  const at = (m) => pathToFileURL(require.resolve(`@ux-builder/audit/assess/${m}`)).href;
+  const [manifest, report] = await Promise.all([import(at("manifest.mjs")), import(at("validate-report.mjs"))]);
+  assess = { manifest, report, skill: readFileSync(require.resolve("@ux-builder/audit/skill/ux-builder-assess/SKILL.md"), "utf8") };
+} catch { /* no @ux-builder/audit, or an older one */ }
 const readJson = (spec) => JSON.parse(readFileSync(require.resolve(spec), "utf8"));
 const readText = (spec) => readFileSync(require.resolve(spec), "utf8");
 
@@ -46,7 +53,7 @@ const near = (name, names) => names.filter((n) => n.includes(name) || name.inclu
 
 const SIZE_CLASSES = ["compact", "medium", "expanded", "large", "extra-large"];
 
-export function createServer(s = sdk(), bp = blueprint) {
+export function createServer(s = sdk(), bp = blueprint, ux = assess) {
   const { catalogue: cat, manifest, resolved } = s;
   const server = new McpServer({ name: "ux-builder", version: cat.packages["@ux-builder/ui"] }, {
     instructions: `The AI-UI SDK (@ux-builder/ui ${cat.packages["@ux-builder/ui"]}, @ux-builder/tokens ${cat.packages["@ux-builder/tokens"]}). Before writing UI in an app that uses it, read get_guidance. Rules: ${cat.rules.join(" ")}`,
@@ -207,6 +214,35 @@ export function createServer(s = sdk(), bp = blueprint) {
     }, async ({ blueprint: b }) => {
       const findings = bp.checkBlueprint(b);
       return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings });
+    });
+  }
+
+  // The UX assessment (FEAT-009): its deterministic checks and the skill, for agents without a shell.
+  if (ux) {
+    server.registerTool("get_assessment_skill", {
+      title: "Get the UX assessment skill",
+      description: "How to assess a HELIX-governed app's UX with @ux-builder/audit: the stages, the commands, how to label every conclusion, the P0–P3 rubric and the safety rules. The assessment only proposes; it never changes the app or its HELIX documents.",
+      inputSchema: {},
+    }, async () => ({ content: [{ type: "text", text: ux.skill }] }));
+
+    server.registerTool("validate_assessment_manifest", {
+      title: "Validate an assessment manifest",
+      description: "Check ux-assessment.yml against its schema, the repository and the app's HELIX marker, flow and catalogue. Returns each problem with its path, and the HELIX binding.",
+      inputSchema: { path: z.string().describe("Path to ux-assessment.yml") },
+    }, async ({ path }) => {
+      let m;
+      try { m = ux.manifest.load(path); } catch (e) { return fail(`${path}: ${e.message.split("\n")[0]}`); }
+      const { problems, helix } = ux.manifest.validate(m);
+      return ok({ valid: !problems.length, problems, helix: helix && { flow: helix.flow.id, root: helix.flow.rootRel, catalog: helix.catalog, documents: helix.documents } });
+    });
+
+    server.registerTool("validate_assessment_report", {
+      title: "Validate an assessment run",
+      description: "Check a run package (ux-assessment/<run>/): every record against its schema, the coverage matrix, walkthroughs, findings and proposals. Run it before handing an assessment over.",
+      inputSchema: { dir: z.string().describe("The run's directory") },
+    }, async ({ dir }) => {
+      const problems = ux.report.validateReport(dir);
+      return ok({ valid: !problems.length, problems });
     });
   }
 

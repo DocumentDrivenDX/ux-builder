@@ -123,7 +123,8 @@ export function collect({ manifest, resolved, helix, out, run = runId(), now = n
   const record = {
     schema: "run", version: 1, id: run, startedAt: prior?.startedAt ?? now.toISOString(),
     manifest: { path: relative(repo, manifest.file).split(sep).join("/"), version: manifest.data.version, hash: sha(manifest.text) },
-    app: { name: resolved.app.name, commit: git(repo, "rev-parse", "HEAD"), dirty: !!git(repo, "status", "--porcelain") },
+    // What was already changed when the run began, so check-writes reports only the run's own (DOC-03).
+    app: { name: resolved.app.name, commit: git(repo, "rev-parse", "HEAD"), dirty: !!git(repo, "status", "--porcelain"), changed: [...new Set([...(git(repo, "diff", "--name-only", "HEAD") ?? "").split("\n"), ...(git(repo, "ls-files", "--others", "--exclude-standard") ?? "").split("\n")].filter(Boolean))] },
     helix: { marker: relative(repo, helix.marker.file).split(sep).join("/"), flow: helix.flow.id, root: helix.flow.rootRel, catalog: { source: helix.catalog.source, path: helix.catalog.path, version: helix.catalog.version, commit: helix.catalog.commit } },
     documents: documents.map(({ id, path, revision, hash }) => ({ id, path, revision, hash })),
     versions: versions(resolved.run.cwd),

@@ -122,7 +122,16 @@ code or its HELIX documents.
 | `assess baseline --run <R-id>` | Runs the declared tests and the audit before any change, and writes `baseline.json`; a page not on the SDK is also inspected as it is, with its SDK-adoption gaps counted apart |
 | `assess browser` | Starts Chromium with a CDP endpoint for the agent's browser driver (Playwright MCP: `--cdp-endpoint <url>`) |
 | `assess inspect --cdp <url> --page <match> --checkpoint <C-id>` | Inspects the page the agent reached, in place: no reload, no reset, same session. Writes `inspection.json`, a screenshot and the accessibility tree. `--replay <steps.json>` reproduces a state instead, and inspects it only if the expected state is there |
-| `assess validate-report <run-dir>` | Checks a run package: every record's schema, evidence that resolves, findings qualified where HELIX's alignment review found a conflict |
+| `assess plan --run <R-id>` | Writes the journey plan (goal, criteria, expected outcomes, the E2E tests to reuse) and a coverage matrix with every journey × state pair, so nothing passes by being left out |
+| `assess browser --manifest f` | Refuses every host outside `run.origins` at the browser; `inspect --manifest` also refuses off-origin pages and masks the manifest's selectors and text |
+| `assess reset --fixture <id>` | Runs a fixture's reset between scenarios |
+| `assess merge --run <R-id>` | One finding per user problem, with every evidence reference and a stable `F-` ID |
+| `assess propose --finding <F-id> --target <HELIX ID> \| --new <type>` | Writes a patch against a HELIX artifact (by `ddx.id`), or a new instance named and numbered by the catalogue and drafted from its template; nothing is applied |
+| `assess check-writes`, `assess apply-check P-<n>` | Nothing under the HELIX root or the app changed during the run; a proposal's target is unchanged before it is applied |
+| `assess report <run-dir>` | `report.html`, `report.md` and `evidence.json`: what was checked, seen and left uncertain; heuristics as recommendations; claims for representative users |
+| `assess compare <earlier> <later>` | Each finding new, persistent, resolved, regressed or not rechecked; an unassessed state never resolves one |
+| `assess gate <run-dir> --fail-on P1` | For CI: fails on an open finding at that priority or above, or a blocked stage. See `examples/ux-assessment.workflow.yml` |
+| `assess validate-report <run-dir>` | Checks a run package: every record's schema, the coverage matrix, walkthroughs, findings and proposals |
 
 The manifest binds HELIX rather than describing it: name the flow (or let the
 marker's `defaults.flow` choose), and the assessment finds the documents and
