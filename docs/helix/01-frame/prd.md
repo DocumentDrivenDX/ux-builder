@@ -56,7 +56,7 @@ kind: product
 > FR-45 under the App SDK, P1-8 and its sketch added. Evolved 2026-10-21
 > with ADR-028 and FEAT-011 (AI and agent experience rules, at the operator's
 > request): the "AI and agent experience" subsystem, FR-46 to FR-50, P1-9 and
-> its sketch added.
+> its sketch added; FR-51 and FR-52 (Adaptive Cards, ADR-029) the same day.
 
 ## Summary
 
@@ -222,8 +222,9 @@ rules, so it invents colours and components.
    from Microsoft's agent guidance and HAX guidelines, Google PAIR, Apple's
    generative AI guidance and Cheng et al. (IUI '26); applied by a screen's
    declared AI role in the blueprint, in marked markup by the audit, in the
-   lint, and in the UX assessment (operator, 2026-10-21; FR-46 to FR-50,
-   FEAT-011).
+   lint, and in the UX assessment; Adaptive Cards rendered with the SDK's
+   components and checked by the card rules (operator, 2026-10-21; FR-46 to
+   FR-52, FEAT-011, ADR-029).
 
 ### Nice to Have (P2)
 
@@ -396,6 +397,14 @@ rules, so it invents colours and components.
 - **FR-50** — The UX assessment evaluates AI journeys against the AI rules
   and heuristics, in normal, error-prone and risky scenarios, and never lets
   an agent under assessment complete an irreversible action.
+  *(Added 2026-10-21.)*
+- **FR-51** — An app renders Adaptive Cards (open-source schema 1.6) that an
+  agent sends, with the SDK's own components in the app's theme, beside
+  catalogue components as a second generated-UI format; a card action marked
+  high-impact gets an approval first (ADR-029). *(Added 2026-10-21.)*
+- **FR-52** — A card payload can be checked against the card rules (actions,
+  labels, wrapping, columns, alternative text, tab order, version) before it
+  is sent, and a rendered card is audited like any other UI.
   *(Added 2026-10-21.)*
 
 ### Subsystem: UX assessment

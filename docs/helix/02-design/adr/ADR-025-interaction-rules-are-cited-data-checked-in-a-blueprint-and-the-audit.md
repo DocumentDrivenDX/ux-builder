@@ -133,7 +133,8 @@ changelog.
 and agent experience rules, which paraphrase the following sources: the
 Microsoft Design article, Microsoft Learn's agent design guidance, the HAX
 Toolkit, Google PAIR (CC BY-NC-SA 4.0), Apple's generative AI guidance and
-Cheng et al. (IUI '26, CC BY-NC-ND 4.0). The counsel brief lists them.
+Cheng et al. (IUI '26, CC BY-NC-ND 4.0), and the Adaptive Cards hub and
+Copilot Studio's card accessibility tips (ADR-029). The counsel brief lists them.
 Counsel's answer is tracked as DDx bead `ux-builder-78483e2c` until resolved.
 
 ## Concern Impact

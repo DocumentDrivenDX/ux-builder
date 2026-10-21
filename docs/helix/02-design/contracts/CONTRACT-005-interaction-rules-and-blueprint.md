@@ -148,7 +148,8 @@ a rule, blueprint or page without these fields behaves as before.
 | Field | Type | Rules |
 |---|---|---|
 | `when.aiRole` | (`"generative"`, `"assistant"`, `"agent"`)[] | Matches a target with any listed role. A target with no AI role matches no rule that has `aiRole` |
-| `sources[].licence` | adds `"microsoft-terms"`, `"CC-BY-NC-SA-4.0"`, `"CC-BY-NC-ND-4.0"` | None is open: `wording` MUST be `paraphrased` |
+| `sources[].licence` | adds `"microsoft-terms"`, `"CC-BY-NC-SA-4.0"`, `"CC-BY-NC-ND-4.0"`, `"CC-BY-4.0"` | Only `CC-BY-4.0` is open (quotable with attribution); the others MUST be `paraphrased` |
+| `checks[].kind` | adds `"card"` | `id` names a check `checkCard` runs (ADR-029) |
 
 `rulesFor` takes `aiRoles?` beside `context`, `sizeClasses` and `inputs`.
 

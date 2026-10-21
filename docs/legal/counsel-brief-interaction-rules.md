@@ -25,7 +25,7 @@ The rules restate guidance from four sources:
 
 ### Added 2026-10-21: AI and agent experience rules (FEAT-011, ADR-028)
 
-32 further rules (SD-005 *Rule catalogue*) restate guidance on generative AI,
+47 further rules (SD-005 *Rule catalogue*, including 15 Adaptive Cards rules) restate guidance on generative AI,
 assistants and agents from these sources. All are paraphrased; 0 are quoted.
 
 | Source | Terms as we read them (2026-10-21) | How the rules use it |
@@ -36,6 +36,9 @@ assistants and agents from these sources. All are paraphrased; 0 are quoted.
 | Google PAIR: People + AI Guidebook | CC BY-NC-SA 4.0 | Paraphrase and link; no text, since NonCommercial and ShareAlike terms do not suit MIT/Apache packages |
 | Apple HIG: Generative AI | Apple Website Terms of Use | Paraphrase and link, as for the other Apple rules |
 | Cheng, Liang, Schoop, Nichols: Mapping the Design Space of UX for Computer Use Agents (IUI '26, arXiv 2602.07283) | CC BY-NC-ND 4.0 | Cite the taxonomy and findings in our own words; no text or figures |
+| Adaptive Cards principles; Microsoft Teams card design (MicrosoftDocs repositories) | CC BY 4.0 | Paraphrase and link; quotation would be allowed with attribution |
+| Adaptive Cards documentation hub; Copilot Studio card accessibility tips | Microsoft terms (no open licence shown; source repository private) | Paraphrase and link |
+| Adaptive Cards schema 1.6 (microsoft/AdaptiveCards) | MIT | Vendored to validate cards; recorded in `licenses/vendored.json` when built (ADR-029) |
 
 The operator waived counsel's review for these too (ADR-025 *Amendment*,
 extended 2026-10-21). They may ship before counsel answers, and anything

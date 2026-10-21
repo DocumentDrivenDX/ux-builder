@@ -171,6 +171,18 @@ steps, approvals). An inline component keeps its user's edits when its
 message is regenerated, and shows its submitted values, read-only, in the
 history (`genui.keep-input`, `genui.history`). US-046 to US-048 are checked
 against FEAT-011's rules when they are built.
+GEN-05. *[Amended 2026-10-21 — ADR-029]* `@ux-builder/ui/adaptive-cards`
+renders an Adaptive Card (open-source schema 1.6) with SDK widgets and
+patterns in the app's theme (CONTRACT-004 *Adaptive Cards*). A tool result
+may carry a card instead of a catalogue component. Elements outside the
+schema use the card's `fallback`, else render a plain notice (GEN-03); card
+text is a sanitised markdown subset, never HTML.
+GEN-06. *[Amended 2026-10-21 — ADR-029]* A card's `Action.Submit` and
+`Action.Execute` call the app's `onAction` with the card's inputs. One
+marked high-impact (`data["ux-builder"].highImpact`) first shows an
+approval stating its `consequence`, as AGT-T-04 does. `Action.OpenUrl` is a
+link marked as leaving the app, and `Action.ShowCard` and
+`Action.ToggleVisibility` are disclosures.
 
 #### Adapters
 

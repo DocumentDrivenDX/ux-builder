@@ -18,6 +18,8 @@ ddx:
       to: ADR-025
     - kind: informed_by
       to: ADR-028
+    - kind: informed_by
+      to: ADR-029
 ---
 
 # Feature Specification: FEAT-011 — AI and agent experience rules
@@ -27,7 +29,7 @@ ddx:
 **Priority**: P1
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: AI and agent experience
-**Covered PRD Requirements**: FR-46, FR-47, FR-48, FR-49, FR-50 (drafted with this feature)
+**Covered PRD Requirements**: FR-46, FR-47, FR-48, FR-49, FR-50, FR-51, FR-52 (drafted with this feature)
 **Cross-Subsystem Rationale**: Extends FEAT-008's rule catalogue, blueprint, MCP tools and audit (FR-32 to FR-36), and FEAT-009's assessment (FR-37 to FR-42), with AI-specific rules. It governs FEAT-007's unbuilt assistant patterns (US-046 to US-048).
 
 ## Overview
@@ -88,6 +90,7 @@ risky), stops at the approval, and reports what a person would find hard.
 | Markup and audit | "Does the built screen do it?" | Markers the components emit; audit checks by rule ID |
 | Hybrid | "My chat renders a wizard. Which rules apply?" | Inline patterns keep their rules at the container's size class, plus generated-UI rules |
 | Voice | "Does our copy make the AI sound like a person?" | A lint warning |
+| Adaptive Cards | "An agent sends Adaptive Cards. Will they work, and are they well made?" | Cards rendered with SDK components in the app's theme; the card rules; `checkCard` |
 | Assessment | "Is this AI journey usable when things go wrong?" | AI heuristics; normal, error-prone and risky scenarios |
 | Provenance | "Can we use these sources?" | Paraphrased, cited, licence recorded; counsel's review open |
 
@@ -213,6 +216,38 @@ first minor release:
 AIA-02. The audit reports AI-marked content on a page whose blueprint
 screen declares no AI role (a warning, `ai.declared`).
 
+#### Adaptive Cards
+
+AIC-01. An app renders an Adaptive Card from an agent with
+`@ux-builder/ui/adaptive-cards` (ADR-029; FEAT-007 GEN-05, GEN-06):
+- every element of the open-source schema 1.6 becomes an SDK widget or
+  pattern in the app's theme, adapting to its container's size class;
+- the rendered card carries ADR-028's AI markers.
+
+AIC-02. The rule catalogue gains card rules (`card.*`, SD-005):
+- primary actions: few, at most six;
+- text wraps;
+- every input has a label, and an error message where it validates;
+- headings are marked;
+- few columns, laid out for the narrowest width first;
+- visual order matches the keyboard order;
+- images have alternative text and transparent backgrounds;
+- action titles describe what they do;
+- hidden inputs are avoided;
+- the card declares a supported version;
+- cards are sent sparingly.
+
+They apply to generated UI on `assistant` and `agent` screens.
+
+AIC-03. `checkCard(card)` checks a payload against the card rules and the
+vendored 1.6 schema, before it is sent. It returns FEAT-008 findings with a
+JSON Pointer path, and is offered over MCP as `check_card`.
+
+AIC-04. A card action marked high-impact gets an approval before the app
+receives it, and a `destructive` one gets a safeguard (ADR-029 decision 5).
+`checkCard` warns on an `Action.Submit` or `Action.Execute` that is not
+marked although its title names paying, sending or deleting.
+
 #### Voice
 
 AIV-01. An ESLint rule in `@ux-builder/ui/eslint` warns on UI text (JSX
@@ -245,11 +280,13 @@ ranked by the same rubric as FEAT-009's (impact, confidence, effort).
 
 AIP-01. Every AI rule cites at least one source and paraphrases it.
 - Licence values: `microsoft-terms` (the Microsoft Design article, Microsoft
-  Learn's agent design guidance, the HAX Toolkit), `CC-BY-NC-SA-4.0` (Google
+  Learn's agent design guidance, the HAX Toolkit, the Adaptive Cards hub,
+  Copilot Studio's card accessibility tips), `CC-BY-4.0` (the Adaptive Cards
+  and Teams card documentation), `CC-BY-NC-SA-4.0` (Google
   PAIR) and `CC-BY-NC-ND-4.0` (Cheng et al., IUI '26), with `apple-terms`
   as now.
-- None of these allows quotation in the SDK's MIT/Apache packages, so none
-  is quoted (FEAT-008 PRV-02).
+- Only `CC-BY-4.0` allows quotation (with attribution). The rules still
+  paraphrase every source (FEAT-008 PRV-02).
 
 AIP-02. The operator's waiver of counsel's review (ADR-025 *Amendment*)
 extends to these sources. The counsel brief lists them, and counsel's answer
@@ -276,6 +313,14 @@ AIP-03. Microsoft Learn's agent pages are marked *preview* and
 - [US-080 — A chat that renders UI inline](../user-stories/US-080-a-chat-that-renders-ui-inline.md)
 - [US-081 — Copy does not present the AI as a person](../user-stories/US-081-copy-does-not-present-the-ai-as-a-person.md)
 - [US-082 — Assess an AI journey in three scenarios](../user-stories/US-082-assess-an-ai-journey-in-three-scenarios.md)
+- [US-083 — Render an agent's Adaptive Card in the app's theme](../user-stories/US-083-render-an-agents-adaptive-card-in-the-apps-theme.md)
+- [US-084 — Check an Adaptive Card before it is sent](../user-stories/US-084-check-an-adaptive-card-before-it-is-sent.md)
+- [US-085 — Card actions call the app, with approval when high-impact](../user-stories/US-085-card-actions-call-the-app-with-approval.md)
+
+Build tracked as DDx beads: epic `ux-builder-8234c40f`, steps 1–6 in
+SD-005's order (`ux-builder-9402b67e`, `-ed8a47cf`, `-eab73205`, `-2cdcb19a`,
+`-3ef4b8a5`, `-f10240e5`). Step 3 also waits on FEAT-007's components
+(`ux-builder-57aaa4c2`).
 
 ## Edge Cases and Error Handling
 
@@ -316,7 +361,8 @@ AIP-03. Microsoft Learn's agent pages are marked *preview* and
   (container size class).
 - **Contracts**: CONTRACT-005 (rule `when.aiRole`, blueprint `ai`, AI
   markup, licence values), CONTRACT-004 (audit checks, MCP inputs, lint
-  rule), CONTRACT-006 (manifest scenarios).
+  rule, *Adaptive Cards*), CONTRACT-006 (manifest scenarios).
+- **External**: the Adaptive Cards open-source schema 1.6 (MIT), vendored.
 
 ## Out of Scope
 
@@ -324,6 +370,8 @@ AIP-03. Microsoft Learn's agent pages are marked *preview* and
 - Model choice, datasets and evaluation, beyond `review` guidance.
 - Building FEAT-007's assistant components. That work has its own stories;
   this feature specifies the markers they must emit.
+- Emitting Adaptive Cards or host config for Microsoft hosts (bead
+  `ux-builder-5060d23c`, ADR-029 decision 7), hub-only card elements, and card templating.
 
 ## Review Checklist
 

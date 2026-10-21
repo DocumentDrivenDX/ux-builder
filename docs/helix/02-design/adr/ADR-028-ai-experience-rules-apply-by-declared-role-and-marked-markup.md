@@ -109,7 +109,7 @@ citation (SD-005 *Sources*). Three questions arise:
 | Type | Impact |
 |------|--------|
 | Positive | AI screens are planned, built and checked like other screens; agents get cited AI rules; hybrid chats are handled by existing pattern rules; the assessment tests failure and risk |
-| Negative | Apps on other AI libraries must add markers to get audit coverage; 32 more rules to maintain against fast-moving sources |
+| Negative | Apps on other AI libraries must add markers to get audit coverage; 47 more rules to maintain (with ADR-029) against fast-moving sources |
 | Neutral | `rules.json`, the blueprint schema and the manifest schema gain optional fields; existing files stay valid |
 
 ## Risks
