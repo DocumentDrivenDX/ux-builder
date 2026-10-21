@@ -11,14 +11,23 @@
    and inspects it in place; it never closes the agent's pages. Where a
    driver cannot share its browser, `inspect --replay` reproduces the state
    in a browser of its own from recorded steps, and inspects it only if the
-   expected state is there. */
+   expected state is there.
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+   With the manifest, both enforce its restrictions (FEAT-009 ENV-01,
+   ENV-02; CONTRACT-006 `restrictions`): only the allowed origins resolve in
+   the browser, excluded integrations are refused, and a replay takes no
+   step until every step is checked against the denied and allowed actions.
+   `inspect` also enforces `limits` (runMinutes, steps, journeyMinutes) and
+   writes the evidence `evidence.capture` names. A step refused is recorded
+   `blocked: restricted` or `blocked: limit`, never inspected. */
+
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { join, relative, resolve } from "node:path";
 import { chromium } from "playwright";
 import { enrich, inspect, prepare } from "../inspect.mjs";
 import { VERSION } from "../audit.mjs";
+import { DENY, excluded } from "./manifest.mjs";
 
 export const runId = (d = new Date()) => `R-${d.toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z")}`;
 const ID = /^C-[a-z0-9][a-z0-9-]*$/;
@@ -26,14 +35,27 @@ const ID = /^C-[a-z0-9][a-z0-9-]*$/;
 /* A free local port, for the CDP endpoint. */
 const freePort = () => new Promise((res, rej) => { const s = createServer(); s.on("error", rej); s.listen(0, "127.0.0.1", () => { const { port } = s.address(); s.close(() => res(port)); }); });
 
+/* The browser's host-resolver rules: with origins, every host but theirs
+   fails to resolve, and an origin's host that an excluded integration names
+   is not kept; without origins, the excluded hosts alone fail (ENV-02).
+   Chromium checks EXCLUDE before MAP, so an excluded host is never EXCLUDEd. */
+export function resolverRules(origins = [], exclude = []) {
+  const ex = excluded(exclude);
+  const hosts = [...new Set(origins.map((o) => { try { return new URL(o).hostname; } catch { return null; } }).filter(Boolean))].filter((h) => !ex.host(h));
+  if (origins.length) return ["MAP * ~NOTFOUND", ...hosts.map((h) => `EXCLUDE ${h}`)].join(", ");
+  const named = ex.entries.filter((x) => x.host?.includes(".") || x.host === "localhost").flatMap((x) => [`MAP ${x.host} ~NOTFOUND`, `MAP *.${x.host} ~NOTFOUND`]);
+  return named.length ? named.join(", ") : null;
+}
+
 /* Start Chromium with a CDP endpoint. Resolves with { cdp, browser }. With
    origins, every other host name fails to resolve in this browser, so a step
-   that would leave the allowed origins cannot load (FEAT-009 ENV-02). */
-export async function startBrowser({ port, headed = false, origins = [] } = {}) {
+   that would leave the allowed origins cannot load; nor can one to an
+   excluded integration (FEAT-009 ENV-02). */
+export async function startBrowser({ port, headed = false, origins = [], exclude = [] } = {}) {
   port ??= await freePort();
-  const hosts = [...new Set(origins.map((o) => { try { return new URL(o).hostname; } catch { return null; } }).filter(Boolean))];
   const args = [`--remote-debugging-port=${port}`, "--remote-debugging-address=127.0.0.1"];
-  if (hosts.length) args.push(`--host-resolver-rules=MAP * ~NOTFOUND, ${hosts.map((h) => `EXCLUDE ${h}`).join(", ")}`);
+  const rules = resolverRules(origins, exclude);
+  if (rules) args.push(`--host-resolver-rules=${rules}`);
   const browser = await chromium.launch({ headless: !headed, args });
   const cdp = `http://127.0.0.1:${port}`;
   // Ready when the endpoint answers.
@@ -44,7 +66,12 @@ export async function startBrowser({ port, headed = false, origins = [] } = {}) 
 /* Attach to a browser over CDP and find the one page whose URL contains
    `page`. detach() disconnects; the agent's pages and contexts stay open. */
 export async function attach({ cdp, page: match }) {
-  const browser = await chromium.connectOverCDP(cdp);
+  let browser;
+  try { browser = await chromium.connectOverCDP(cdp); } catch (e) {
+    const err = new Error(`no browser at ${cdp}: ${e.message.split("\n")[0]}`);
+    err.code = "no-browser";
+    throw err;
+  }
   const pages = browser.contexts().flatMap((c) => c.pages()).filter((p) => !p.isClosed() && (!match || p.url().includes(match)));
   const detach = () => browser.close();
   if (pages.length !== 1) {
@@ -57,12 +84,45 @@ export async function attach({ cdp, page: match }) {
   return { page: pages[0], detach };
 }
 
+const restricted = (message) => { const e = new Error(message); e.code = "restricted"; return e; };
+
+/* Why a replay may not run, or null: every step is checked before any is
+   taken. A step's optional `action` is its action class; a denied one is
+   never taken, and any other must be in restrictions.allow (ENV-01). A goto
+   must stay within the origins and off the excluded integrations (ENV-02). */
+export function refusal(plan, { origins = null, exclude = [], allow = [], deny = DENY } = {}) {
+  const ex = excluded(exclude);
+  for (const [i, s] of (plan.steps ?? []).entries()) {
+    const n = i + 1;
+    if (s.action && deny.includes(s.action)) return `step ${n} takes the denied action "${s.action}"; a denied action is never taken`;
+    if (s.action && !allow.includes(s.action)) return `step ${n} takes the action "${s.action}", which restrictions.allow does not permit`;
+    if (s.goto) {
+      let url;
+      try { url = new URL(s.goto, plan.baseUrl); } catch { return `step ${n} goes to ${s.goto}, which is not a URL`; }
+      if (origins?.length && !origins.includes(url.origin)) return `step ${n} goes to ${url.origin}, outside run.origins (${origins.join(", ")})`;
+      const x = ex.by(url.href);
+      if (x) return `step ${n} goes to ${url.href}, an excluded integration (${x.entry})`;
+    }
+  }
+  return null;
+}
+
 /* Replay recorded steps in a browser of our own; true when the expected
-   state is there. Steps: { goto } | { click } | { fill, value } | { press } | { waitFor }. */
-async function replay(file) {
-  const plan = JSON.parse(readFileSync(file, "utf8"));
+   state is there. Steps: { goto } | { click } | { fill, value } | { press } | { waitFor },
+   each with an optional action class. Nothing runs if a step is refused;
+   while it runs, requests off the origins or to an excluded integration are aborted. */
+async function replay(plan, guard) {
+  const why = refusal(plan, guard);
+  if (why) throw restricted(why);
+  const ex = excluded(guard.exclude);
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: plan.viewport ?? { width: 1280, height: 900 } });
+  await context.route("**/*", (route) => {
+    const u = route.request().url();
+    if (!/^https?:/.test(u)) return route.continue();
+    const off = guard.origins?.length && !guard.origins.includes(new URL(u).origin);
+    return off || ex.by(u) ? route.abort("blockedbyclient") : route.continue();
+  });
   const page = await context.newPage();
   for (const s of plan.steps ?? []) {
     if (s.goto) await page.goto(new URL(s.goto, plan.baseUrl).href, { waitUntil: "networkidle" });
@@ -80,37 +140,91 @@ async function replay(file) {
   return { page, passed, assertion: e, detach: () => browser.close() };
 }
 
+/* Record a stage in the run's run.json (written by every command). */
+export function recordStage(runRoot, stage) {
+  const file = join(runRoot, "run.json");
+  const now = new Date().toISOString();
+  let rec;
+  try { rec = JSON.parse(readFileSync(file, "utf8")); } catch { rec = { schema: "run", version: 1, id: runRoot.split(/[\\/]/).pop(), startedAt: now, stages: [] }; }
+  rec.stages = [...(rec.stages ?? []).filter((s) => s.stage !== stage.stage), { ...stage, finishedAt: now }];
+  mkdirSync(runRoot, { recursive: true });
+  writeFileSync(file, JSON.stringify(rec, null, 2) + "\n");
+}
+
+/* The limit a step would pass, or null (CONTRACT-006 `limits`): the run's
+   minutes from run.json's startedAt, its steps (each inspection's `steps`),
+   and the journey's minutes from its first checkpoint. */
+export function limitReached({ runRoot, id, journey, steps, limits, now = Date.now() }) {
+  if (!limits) return null;
+  const others = [];
+  const cps = join(runRoot, "checkpoints");
+  if (existsSync(cps)) for (const c of readdirSync(cps)) {
+    if (c === id) continue;
+    try { others.push(JSON.parse(readFileSync(join(cps, c, "inspection.json"), "utf8"))); } catch { /* not a checkpoint */ }
+  }
+  const taken = others.filter((r) => !r.error);
+  const at = (r) => Date.parse(r.inspectedAt ?? "") || null;
+  let started = null;
+  try { started = Date.parse(JSON.parse(readFileSync(join(runRoot, "run.json"), "utf8")).startedAt) || null; } catch { /* no run record */ }
+  started ??= Math.min(...taken.map(at).filter(Boolean), now);
+  if (limits.runMinutes != null && now - started > limits.runMinutes * 60_000) return `the run's ${limits.runMinutes} minutes (limits.runMinutes) are spent`;
+  const used = taken.reduce((n, r) => n + (r.steps ?? 1), 0);
+  if (limits.steps != null && used + steps > limits.steps) return `${used} of the run's ${limits.steps} steps (limits.steps) are taken; this one needs ${steps}`;
+  const first = journey ? Math.min(...taken.filter((r) => r.checkpoint?.journey === journey).map(at).filter(Boolean)) : Infinity;
+  if (limits.journeyMinutes != null && Number.isFinite(first) && now - first > limits.journeyMinutes * 60_000) return `${journey}'s ${limits.journeyMinutes} minutes (limits.journeyMinutes) are spent`;
+  return null;
+}
+
 /* Inspect one checkpoint and write its record. Returns { record, code }:
-   code 0 inspected, 1 lost, ambiguous or unverified. */
-export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: id, journey, step, role, state, stateAffecting = false, redact = [], redactText = [], origins = null, out = "ux-assessment", run = runId(), cwd = process.cwd(), ignore = [], rules = {} }) {
+   code 0 inspected, 1 lost, ambiguous, unverified, no browser, restricted or a limit. */
+export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: id, journey, step, role, state, stateAffecting = false, redact = [], redactText = [], origins = null, exclude = [], allow = [], deny = DENY, capture = "both", limits = null, out = "ux-assessment", run = runId(), cwd = process.cwd(), ignore = [], rules = {} }) {
   if (!ID.test(id ?? "")) throw new Error(`--checkpoint must look like C-<journey>-<n>, got "${id}"`);
-  const dir = resolve(out, run, "checkpoints", id);
+  const runRoot = resolve(out, run);
+  const dir = join(runRoot, "checkpoints", id);
   mkdirSync(dir, { recursive: true });
-  const base = { schema: "inspection", version: 1, auditor: VERSION, checkpoint: { id, journey: journey ?? null, step: step == null ? null : Number(step), role: role ?? null, state: state ?? null } };
+  const plan = steps ? JSON.parse(readFileSync(steps, "utf8")) : null;
+  const mode = steps ? "replay" : "in-place";
+  const taken = plan ? (plan.steps ?? []).length + 1 : 1;
+  const base = { schema: "inspection", version: 1, auditor: VERSION, checkpoint: { id, journey: journey ?? null, step: step == null ? null : Number(step), role: role ?? null, state: state ?? null }, inspectedAt: new Date().toISOString() };
   const write = (record) => { writeFileSync(join(dir, "inspection.json"), JSON.stringify(record, null, 2) + "\n"); return record; };
+  // Limits first: a step past one is not taken (AGW-02).
+  const limit = limitReached({ runRoot, id, journey, steps: taken, limits });
+  if (limit) {
+    recordStage(runRoot, { stage: "walkthrough", status: "partial", reason: `limit reached: ${limit}` });
+    return { code: 1, record: write({ ...base, mode, steps: 0, error: "limit", message: `blocked: limit — ${limit}; not taken`, findings: [] }) };
+  }
   let session;
   try {
-    session = steps ? await replay(steps) : await attach({ cdp, page: match });
+    session = plan ? await replay(plan, { origins, exclude, allow, deny }) : await attach({ cdp, page: match });
   } catch (e) {
-    return { code: 1, record: write({ ...base, mode: steps ? "replay" : "in-place", error: e.code ?? "error", message: e.message, findings: [] }) };
+    if (e.code === "no-browser") recordStage(runRoot, { stage: "walkthrough", status: "blocked", reason: e.message });
+    return { code: 1, record: write({ ...base, mode, steps: 0, error: e.code ?? "error", message: e.code === "restricted" ? `blocked: restricted — ${e.message}; nothing was taken` : e.message, findings: [] }) };
   }
   try {
-    const mode = steps ? "replay" : "in-place";
-    if (steps && !session.passed) return { code: 1, record: write({ ...base, mode, url: session.page.url(), verified: { assertion: session.assertion, passed: false }, findings: [], message: "the replayed state does not match the expected state; nothing was inspected" }) };
+    if (plan && !session.passed) return { code: 1, record: write({ ...base, mode, steps: taken, url: session.page.url(), verified: { assertion: session.assertion, passed: false }, findings: [], message: "the replayed state does not match the expected state; nothing was inspected" }) };
     const { page } = session;
-    // A page outside the allowed origins is not evidence this assessment may collect (ENV-02).
-    if (origins?.length && !origins.includes(new URL(page.url()).origin)) return { code: 1, record: write({ ...base, mode, url: page.url(), error: "restricted", message: `blocked: restricted — ${new URL(page.url()).origin} is outside run.origins (${origins.join(", ")}); not inspected`, findings: [] }) };
+    // A page outside the allowed origins, or on an excluded integration, is not evidence this assessment may collect (ENV-02).
+    if (origins?.length && !origins.includes(new URL(page.url()).origin)) return { code: 1, record: write({ ...base, mode, steps: 0, url: page.url(), error: "restricted", message: `blocked: restricted — ${new URL(page.url()).origin} is outside run.origins (${origins.join(", ")}); not inspected`, findings: [] }) };
+    const x = excluded(exclude).by(page.url());
+    if (x) return { code: 1, record: write({ ...base, mode, steps: 0, url: page.url(), error: "restricted", message: `blocked: restricted — ${page.url()} is an excluded integration (${x.entry}); not inspected`, findings: [] }) };
     const sdk = prepare(cwd);
     const result = await inspect(page, { sdk, ignore, rules, stateAffecting });
     const shown = await page.evaluate(() => { const r = [...document.querySelectorAll("[data-theme]")].find((e) => !e.parentElement?.closest("[data-theme]")); return { theme: r?.dataset.theme ?? null, appearance: r?.dataset.appearance ?? null, viewport: { width: innerWidth, height: innerHeight } }; });
-    // Evidence of the state inspected, masked where the manifest says (FEAT-009 ENV-03).
-    const shot = join(dir, "screenshot.png");
-    await page.screenshot({ path: shot, mask: redact.map((s) => page.locator(s)), animations: "disabled" });
-    let tree = await page.locator("body").ariaSnapshot();
-    for (const re of redactText) tree = tree.replace(new RegExp(re, "g"), "***");
-    writeFileSync(join(dir, "tree.yml"), tree + "\n");
+    // Evidence of the state inspected, as evidence.capture says, masked where the manifest says (FEAT-009 ENV-03).
+    let screenshot = null, tree = null;
+    if (capture !== "tree") {
+      const shot = join(dir, "screenshot.png");
+      await page.screenshot({ path: shot, mask: redact.map((s) => page.locator(s)), animations: "disabled" });
+      screenshot = relative(dir, shot);
+    }
+    if (capture !== "screenshot") {
+      let text = await page.locator("body").ariaSnapshot();
+      for (const re of redactText) text = text.replace(new RegExp(re, "g"), "***");
+      writeFileSync(join(dir, "tree.yml"), text + "\n");
+      tree = "tree.yml";
+    }
     const findings = enrich(result.findings, sdk.interaction).map((f) => ({ ...f, finding_type: "deterministic", checkpoint: base.checkpoint, viewport: shown.viewport, theme: shown.theme }));
-    return { code: 0, record: write({ ...base, mode, url: page.url(), viewport: shown.viewport, theme: shown.theme, appearance: shown.appearance, ...(steps ? { verified: { assertion: session.assertion, passed: true } } : {}), skipped: result.skipped, stateAffecting: result.stateAffecting, findings, screenshot: relative(dir, shot), tree: "tree.yml" }) };
+    return { code: 0, record: write({ ...base, mode, steps: taken, url: page.url(), viewport: shown.viewport, theme: shown.theme, appearance: shown.appearance, ...(plan ? { verified: { assertion: session.assertion, passed: true } } : {}), skipped: result.skipped, stateAffecting: result.stateAffecting, findings, screenshot, tree }) };
   } finally {
     await session.detach();
   }

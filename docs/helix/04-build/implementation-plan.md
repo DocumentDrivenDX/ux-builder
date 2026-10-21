@@ -14,24 +14,27 @@ ddx:
 
 # Build Plan
 
-The project's first build plan, written for FEAT-009 increment 1 (2026-10-20).
-Increments 2 and 3 get their own slices when they are planned.
+The project's first build plan, written for FEAT-009 increment 1 (2026-10-20)
+and extended the next day with increments 2 and 3 (B-007 to B-012), FEAT-010
+(B-013 to B-016) and the FEAT-009 alignment fixes (B-017).
 
 **Status (2026-10-20)**: B-001 to B-006 built, each committed after the full
 local suite passed. Increment 1's criteria (US-056, US-057, US-058, US-059,
 US-062) are cited by tests and out of `tools/coverage-exceptions.json`.
-B-007 to B-012 built 2026-10-21: every FEAT-009 criterion is cited by a test.
+B-007 to B-012 built 2026-10-21: increments 2 and 3 (US-060, US-061,
+US-063, US-064, US-065) are built and every FEAT-009 criterion is cited by a
+test. B-017 built 2026-10-21 (AR-2026-10-21 C1 to C8).
 The legal review ADR-025 asks for is prepared as `docs/legal/counsel-brief-interaction-rules.md`;
 counsel's answer is still to come.
 
 ## Scope
 
 **Governing Artifacts**:
-- `docs/helix/01-frame/features/FEAT-009-helix-aware-ux-assessment.md`; user stories US-056 to US-059 and US-062
+- `docs/helix/01-frame/features/FEAT-009-helix-aware-ux-assessment.md`; user stories US-056 to US-065
 - `docs/helix/02-design/adr/ADR-026-ux-assessment-binds-helix-and-inspects-the-agents-browser.md`
 - `docs/helix/02-design/contracts/CONTRACT-006-ux-assessment.md`; the CONTRACT-004 amendment "UX assessment"
 - `docs/helix/02-design/solution-designs/SD-004-helix-aware-ux-assessment.md`
-- `docs/helix/03-test/test-plan.md` (TP-001); `docs/helix/03-test/test-plans/STP-056`, `STP-057`, `STP-058`, `STP-059`, `STP-062`
+- `docs/helix/03-test/test-plan.md` (TP-001); `docs/helix/03-test/test-plans/STP-056` to `STP-065`
 
 ## Shared Constraints
 
@@ -51,7 +54,7 @@ counsel's answer is still to come.
 | B-003 | US-056: manifest schema, `validate`, `init`, HELIX binding | CONTRACT-006 Manifest, HELIX resolution; STP-056 | None | `assess-manifest.test.mjs`, `assess-helix.test.mjs` | Can run beside B-001 and B-002 |
 | B-004 | US-058: `collect`; the pilot manifest | CONTRACT-006 Records; STP-058 | B-003 | `assess-collect.test.mjs`; `apps/theme-builder/test/assessment.test.mjs` | Pilot: the theme builder |
 | B-005 | US-059: `baseline`; `serve.mjs` | SD-004 Baseline; STP-059 | B-003, B-001 | `assess-baseline.test.mjs` | |
-| B-006 | US-057: the skill; the MCP version fix; `validate-report` for increment-1 records; README; changeset (audit minor, mcp patch) | SD-004 Components; STP-057 | B-002, B-004, B-005 | `assess-skill.test.mjs`; `npm test --workspace @ux-builder/mcp` | Last: documents the commands that now exist |
+| B-006 | US-057: the skill; the MCP version fix; `validate-report` for increment-1 records; README; changeset (audit minor, mcp minor) | SD-004 Components; STP-057 | B-002, B-004, B-005 | `assess-skill.test.mjs`; `npm test --workspace @ux-builder/mcp` | Last: documents the commands that now exist |
 
 ### Increments 2 and 3 *[Added 2026-10-21]*
 
@@ -63,6 +66,7 @@ counsel's answer is still to come.
 | B-010 | US-064: `propose`, `check-writes`, `apply-check` | STP-064 | B-003, B-009 | `assess-proposals.test.mjs` | Proposals aimed at HELIX artifacts |
 | B-011 | US-065: `report`, `compare`, `gate`, agent identity | STP-065 | B-009, B-010 | `assess-runs.test.mjs` | Increment 3 |
 | B-012 | Increment 3 extras: MCP tools for the manifest and report checks, the CI workflow, a Playwright MCP test; the counsel brief for ADR-025 | ADR-026 decision 5 | B-011 | `npm test --workspace @ux-builder/mcp`; `inspect-playwright-mcp.test.mjs` | Optional wrappers, as the brief allows |
+| B-017 | AR-2026-10-21 C1 to C8: the `improvement-backlog` proposal; excluded integrations, denied actions and limits enforced by `browser` and `inspect`; `evidence.capture`; `evidence.schema.json`; baseline failures in `comparison.json`; US-057-AC2's cases; CONTRACT-006 and CONTRACT-004 matched to the shipped commands and MCP tools; changeset (audit patch, mcp patch) | FEAT-009 HLX-06, ENV-01, ENV-02, AGW-02, BAS-04; ADR-026 decisions 6, 7; CONTRACT-006 | B-012 | `assess-proposals`, `assess-walkthrough`, `assess-skill`, `assess-baseline`, `assess-runs` tests; `node tools/check-coverage.mjs` | Docs first, then code, then tests |
 
 ### FEAT-010: the starter on HELIX *[Added 2026-10-21]*
 
@@ -85,6 +89,11 @@ external tracker is used in this repository.
 | US-058 | Journeys traced to HELIX intent and tests | US-056 |
 | US-059 | A recorded baseline before redesign | US-056, US-062 (B-001) |
 | US-057 | One agent request runs the available stages | US-062, US-058, US-059 |
+| US-060 | Journeys planned and walked within the manifest's restrictions | US-058, US-062 |
+| US-061 | A coverage matrix with no false pass | US-060 |
+| US-063 | Ranked, merged findings with stable IDs | US-061 |
+| US-064 | Proposed HELIX changes, never applied | US-056, US-063 |
+| US-065 | A report, run comparison and a CI gate | US-063, US-064 |
 
 ## Validation Plan
 

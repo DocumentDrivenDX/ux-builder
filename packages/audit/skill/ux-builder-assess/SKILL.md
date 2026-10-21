@@ -26,10 +26,21 @@ Keep the two apart in everything you write (FEAT-009, ADR-026, CONTRACT-006).
    `sdk-adoption` (only means "not yet on the SDK"), `real-user` (evidence from
    people). Confusion, trust and time saved need representative users: list
    them, never claim them.
-5. **Stay safe.** Local or staging only; stay within `run.origins`; never take
-   a denied action (payments, outbound messages, production approvals,
-   deleting real data); reset fixtures between scenarios; never write a
-   secret, and mask what the manifest says to mask.
+5. **Stay safe.** Local or staging only; stay within `run.origins`; never call
+   an integration in `restrictions.excludeIntegrations`; never take a denied
+   action (payments, outbound messages, production approvals, deleting real
+   data; no manifest can allow one); take a data-changing action only if
+   `restrictions.allow` lists it; reset fixtures between scenarios; never
+   write a secret, and mask what the manifest says to mask. A step you do not
+   take for these reasons is `blocked` with the reason `restricted: …`.
+6. **Stay within the limits.** The manifest's `limits` (defaults: 60
+   `runMinutes` for the run from `run.json`'s `startedAt`, 200 `steps` —
+   checkpoints you inspect plus actions a replay takes — and 15
+   `journeyMinutes` per journey from its first checkpoint) bound the whole
+   assessment. `inspect` refuses a step past a limit (`blocked: limit`) and
+   `browser --run` stops when the run's time is spent; both record the
+   `walkthrough` stage `partial`. Do not work around them: record what is
+   left as `not-assessed` with the limit as its reason, and report.
 
 ## Stages
 
@@ -53,8 +64,9 @@ assessment.
    writes `plan.json` (each journey's goal, criteria, expected outcomes and the
    E2E tests to reuse) and a `coverage.json` with every journey × state pair:
    not-assessed or not-applicable until you record it.
-5. **Walk and inspect.** `npx ux-builder-audit assess browser --manifest ux-assessment.yml`
-   prints a CDP endpoint, and refuses every host outside `run.origins`; connect your browser driver to it (Playwright MCP:
+5. **Walk and inspect.** `npx ux-builder-audit assess browser --manifest ux-assessment.yml --run <R-id>`
+   prints a CDP endpoint, refuses every host outside `run.origins` and every
+   excluded integration, and stops when `limits.runMinutes` are spent; connect your browser driver to it (Playwright MCP:
    `--cdp-endpoint <url>`). Walk the journey from its entry route. At each
    significant step, inspect the state you reached without reloading it:
 
@@ -67,7 +79,11 @@ assessment.
    your judgment apart). Look at the screenshot and accessibility tree yourself; do not judge visual
    quality from DOM text. Induce failures only with the manifest's fixtures or
    mocks. If your driver cannot share its browser, use `--replay <steps.json>`;
-   a replay that does not reach the expected state is not evidence.
+   give a step that changes data its `action` (such as `create-test-data`),
+   and `inspect` refuses the replay if any step is denied, not allowed, or
+   leaves the origins. A replay that does not reach the expected state is
+   not evidence. `inspect` writes the screenshot, the tree or both, as
+   `evidence.capture` says; a `visual` observation needs a screenshot.
 6. **Findings and coverage.** Update `coverage.json` for every pair you walked
    (status, reason, outcome, evidence). Write `backlog.json`: one finding per
    user problem (give it a `key`), ranked P0–P3 with confidence and effort
@@ -78,11 +94,14 @@ assessment.
 7. **Proposals.** For each finding worth a HELIX change:
    `assess propose --run <R-id> --finding <F-id> --target <US-…>` (or
    `--new user-stories --title …`) `--kind unmet-criterion|new-requirement|scope
-   --criterion "Given …" --test "…"`. It writes a patch in `proposals/`; nothing is applied.
+   --criterion "Given …" --test "…"`. It writes a patch in `proposals/`, and
+   rewrites `proposals/improvement-backlog.patch`, the backlog proposed as an
+   entry in the app's HELIX `improvement-backlog`; nothing is applied.
    `assess check-writes --run <R-id>` must report no change.
 8. **Report and check.** `assess report <out>/<run>`, then
    `assess validate-report <out>/<run>`; fix what it reports. To compare with
-   an earlier run: `assess compare <earlier> <later>`. In CI:
+   an earlier run: `assess compare <earlier> <later>`; `comparison.json`
+   keeps the earlier baseline's failures, so name them in what you hand over. In CI:
    `assess gate <run> --fail-on P1` (see `examples/ux-assessment.workflow.yml`).
 
 ## Ranking (FND-04)

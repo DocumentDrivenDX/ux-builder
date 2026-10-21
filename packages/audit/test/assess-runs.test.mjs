@@ -46,6 +46,12 @@ describe("US-065: compare assessments and hand work to an agent", () => {
     const ev = p.read("evidence.json").files;
     assert.deepEqual(ev.find((x) => x.path === "checkpoints/C-review-1/screenshot.png").referencedBy.sort(), [f.id, "coverage J-review × success"].sort());
     assert.equal(p.cli("validate-report", p.dir).status, 0);
+    // evidence.json is schema-checked, and lists only what the package holds.
+    const index = p.read("evidence.json");
+    p.write("evidence.json", { ...index, files: [...index.files, { path: "checkpoints/C-review-9/screenshot.png", kind: "picture", bytes: 1, referencedBy: [] }] });
+    const bad = p.cli("validate-report", p.dir).stdout;
+    assert.match(bad, /evidence\.json \/files\/\d+\/kind\s+must be equal to one of the allowed values/);
+    assert.match(bad, /evidence\.json \/files\/\d+\s+checkpoints\/C-review-9\/screenshot\.png is not in the package/);
   });
 
   // @covers US-065-AC2

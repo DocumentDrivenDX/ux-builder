@@ -5,7 +5,7 @@
 
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join } from "node:path";
 import { after, before, describe, test } from "node:test";
@@ -112,5 +112,62 @@ describe("US-060: see what the agent attempted and observed", () => {
       await client.close();
       child.kill("SIGINT");
     }
+  });
+
+  // @covers US-060-AC5
+  test("AC5: an excluded integration cannot load even on an allowed origin; a replay with a denied, unpermitted or excluded step takes none of its steps", async () => {
+    const other = base.replace("127.0.0.1", "localhost");
+    const p = pkg({ manifest: { run: { baseUrl: `${base}/`, environment: "local", origins: [`${base}/`, `${other}/`] }, restrictions: { writes: "report-only", allow: ["create-test-data"], excludeIntegrations: ["localhost"] } } });
+    const run = (args) => new Promise((resolve) => { const c = spawn(process.execPath, [join(PKG, "cli.mjs"), "assess", ...args], { cwd: p.r.dir }); let o = "", e = ""; c.stdout.on("data", (d) => { o += d; }); c.stderr.on("data", (d) => { e += d; }); c.on("close", (code) => resolve({ code, o, e })); });
+    // At the agent's browser: localhost is in run.origins, but excluded, so it does not resolve.
+    const child = spawn(process.execPath, [join(PKG, "cli.mjs"), "assess", "browser", "--manifest", "ux-assessment.yml"], { cwd: p.r.dir });
+    const cdp = await new Promise((resolve, reject) => { let out = ""; child.stdout.on("data", (d) => { out += d; const m = /"cdp":\s*"([^"]+)"/.exec(out); if (m) resolve(m[1]); }); child.on("exit", (c) => reject(new Error(`browser exited ${c}`))); });
+    const client = await chromium.connectOverCDP(cdp);
+    try {
+      const page = await (client.contexts()[0] ?? await client.newContext()).newPage();
+      await page.goto(`${base}/queue`);
+      assert.equal(await page.textContent("h1"), "Queue");
+      await assert.rejects(page.goto(`${other}/queue`), /ERR_NAME_NOT_RESOLVED/);
+    } finally {
+      await client.close();
+      child.kill("SIGINT");
+    }
+    // In a replay: every step is checked before any is taken.
+    const replay = async (id, steps) => {
+      writeFileSync(join(p.r.dir, `${id}.json`), JSON.stringify({ baseUrl: base, steps, expect: { selector: "h1", text: "Queue" } }));
+      const r = await run(["inspect", "--manifest", "ux-assessment.yml", "--run", p.run, "--replay", `${id}.json`, "--checkpoint", id]);
+      return { ...r, record: p.read(`checkpoints/${id}/inspection.json`) };
+    };
+    const denied = await replay("C-review-3", [{ goto: "/queue" }, { click: "#who", action: "payment" }]);
+    assert.equal(denied.code, 1);
+    assert.equal(denied.record.error, "restricted");
+    assert.match(denied.record.message, /^blocked: restricted — step 2 takes the denied action "payment"/);
+    assert.ok(!existsSync(join(p.dir, "checkpoints/C-review-3/screenshot.png")), "nothing was taken or captured");
+    const unpermitted = await replay("C-review-4", [{ goto: "/queue" }, { click: "#who", action: "edit-test-data" }]);
+    assert.match(unpermitted.record.message, /blocked: restricted — step 2 takes the action "edit-test-data", which restrictions.allow does not permit/);
+    const integration = await replay("C-review-5", [{ goto: `${other}/queue` }]);
+    assert.match(integration.record.message, /blocked: restricted — step 1 goes to .*, an excluded integration \(localhost\)/);
+    const allowed = await replay("C-review-6", [{ goto: "/queue" }, { click: "#who", action: "create-test-data" }]);
+    assert.equal(allowed.code, 0, allowed.e + allowed.o);
+    // A denied action can never be allowed, and excluding the app's own origin is refused.
+    writeFileSync(join(p.r.dir, "bad.yml"), readFileSync(join(p.r.dir, "ux-assessment.yml"), "utf8").replace("- create-test-data", "- payment").replace("- localhost", "- 127.0.0.1"));
+    const bad = await run(["validate", "--manifest", "bad.yml"]);
+    assert.equal(bad.code, 1);
+    assert.match(bad.o, /\/restrictions\/allow\/0\s+"payment" is a consequential action and cannot be allowed/);
+    assert.match(bad.o, /\/restrictions\/excludeIntegrations\/0\s+127\.0\.0\.1 excludes the app's own origin/);
+  });
+
+  // @covers US-060-AC2
+  test("AC2: inspect captures what evidence.capture names; a tree-only checkpoint supports no visual judgment", async () => {
+    const p = pkg({ manifest: { run: { baseUrl: `${base}/`, environment: "local" }, evidence: { capture: "tree" } } });
+    writeFileSync(join(p.r.dir, "steps.json"), JSON.stringify({ baseUrl: base, steps: [{ goto: "/queue" }], expect: { selector: "h1", text: "Queue" } }));
+    const out = await new Promise((resolve) => { const c = spawn(process.execPath, [join(PKG, "cli.mjs"), "assess", "inspect", "--manifest", "ux-assessment.yml", "--run", p.run, "--replay", "steps.json", "--checkpoint", "C-review-1"], { cwd: p.r.dir }); let e = ""; c.stderr.on("data", (d) => { e += d; }); c.on("close", (code) => resolve({ code, e })); });
+    assert.equal(out.code, 0, out.e);
+    const rec = p.read("checkpoints/C-review-1/inspection.json");
+    assert.deepEqual([rec.screenshot, rec.tree], [null, "tree.yml"]);
+    assert.ok(!existsSync(join(p.dir, "checkpoints/C-review-1/screenshot.png")));
+    assert.match(readFileSync(join(p.dir, "checkpoints/C-review-1/tree.yml"), "utf8"), /heading "Queue"/);
+    p.write("walkthrough.json", steps([{ n: 1, action: "open the queue", url: "/queue", checkpoint: "C-review-1", status: "done", observation: { text: "The heading is cramped", basis: ["tree"], visual: true } }]));
+    assert.match(p.cli("validate-report", p.dir).stdout, /makes a visual judgment without a screenshot/);
   });
 });

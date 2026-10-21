@@ -302,12 +302,26 @@ Normative from `@ux-builder/audit` 0.2.0 and `@ux-builder/mcp` 0.4.0. The format
   report and exit behaviour; it is implemented on `inspect()`, and its
   findings for the same pages are unchanged.
 - The command gains `ux-builder-audit assess <subcommand>`: `init`,
-  `validate`, `collect`, `baseline`, `browser`, `inspect`, `validate-report`.
+  `validate`, `collect`, `baseline`, `plan`, `browser`, `reset`, `merge`,
+  `inspect`, `validate-report`, `propose`, `check-writes`, `apply-check`,
+  `report`, `compare` and `gate` (their options, records and exit codes are
+  CONTRACT-006 "Command" and "Increments 2 and 3").
 - The package ships the skill `skill/ux-builder-assess/SKILL.md` and the
   JSON Schemas under `schema/`.
 - `@ux-builder/mcp`, run from an app's directory, reads that app's
   installed `@ux-builder/ui` catalogue before its own and names the version
   it served in its instructions.
+- `@ux-builder/mcp` registers three tools when it can load the app's
+  `@ux-builder/audit` (0.2.0 or later; without it, none of them):
+
+  | Tool | Input | Returns |
+  |---|---|---|
+  | `get_assessment_skill` | none | The text of `skill/ux-builder-assess/SKILL.md` |
+  | `validate_assessment_manifest` | `path`: the manifest | `{ valid, problems: [{ path, message }], helix: { flow, root, catalog, documents } \| null }`, as `assess validate`; a manifest that cannot be read is a tool error |
+  | `validate_assessment_report` | `dir`: a run's directory | `{ valid, problems: [{ file, path, message }] }`, as `assess validate-report` |
+
+  The tools only read and check; every stage that writes a record runs
+  through the commands above.
 
 ## The starter on HELIX *[Amended 2026-10-21 — FEAT-010, ADR-027]*
 
