@@ -313,8 +313,10 @@ Field and record changes:
 
 | Where | Change |
 |---|---|
-| `walkthrough.json` `steps[]` | Gains `do`: the replay step the agent took (`{ goto } \| { click } \| { fill, value } \| { press } \| { waitFor }`, the `inspect --replay` format), with optional `action` class. A secret value is `{ secret: NAME }`, never a literal. A `done` step with a browser action and no `do` is reported by `validate-report` as not replayable |
-| `backlog.json` `findings[]` | Gains `plain: { problem, recommendation }`: one or two sentences each, in the user's terms, with no rule ID, `--piq-` token or component name. Required for every finding shown in a video |
+| `walkthrough.json` `steps[]` | Gains `do`: the replay step the agent took (`{ goto } \| { click } \| { fill, value } \| { press } \| { waitFor }`, the `inspect --replay` format), with optional `action` class. A secret value is `{ secret: NAME }`, never a literal; a literal matching a secret pattern is always reported. When the run has `video/`, a `done` step with no `do` is reported by `validate-report` as not replayable *(built: only then, so runs without videos validate as before)* |
+| `walkthrough.json` `steps[]` | Gains `alternate`: the blueprint alternate (`plan.json` `alternates[].n`) the step belongs to; absent for the main path. Each alternate is its own chapter, replayed from its own first step *(added at build)* |
+| `backlog.json` `findings[]` | Gains `plain: { problem, recommendation }`: one or two sentences each, in the user's terms, with no rule ID, `--piq-` token or component name. Required for every finding shown in a video. A component name is one written as code would (`ToastProvider`, `useToast`, `<Button>`); a one-word name in ordinary prose (a button) is not *(built)* |
+| `backlog.json` `findings[]` | Gains `elements`: selectors of the elements the finding is about, outlined in the video; without it, the replay outlines the selectors of the cited checkpoint's audit findings with the finding's `rule`, else shows the caption only *(added at build)* |
 
 Further records in the run package, under `video/`:
 

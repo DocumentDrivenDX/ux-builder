@@ -131,6 +131,15 @@
         "redact": { "type": "object", "additionalProperties": false, "properties": { "selectors": { "type": "array", "items": { "type": "string" } }, "text": { "type": "array", "items": { "type": "string" } } } }
       }
     },
+    "video": {
+      "description": "Walkthrough videos (FEAT-013; CONTRACT-006 Walkthrough videos). Defaults: one 1440 × 900 viewport; a hold of at least 4 s plus 0.3 s a word of caption; the player pauses at pop-ups",
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "viewports": { "type": "array", "minItems": 1, "items": { "type": "object", "additionalProperties": false, "required": ["width", "height"], "properties": { "width": { "type": "integer", "minimum": 200, "maximum": 3840 }, "height": { "type": "integer", "minimum": 200, "maximum": 3840 } } } },
+        "holdSeconds": { "type": "object", "additionalProperties": false, "properties": { "min": { "type": "number", "minimum": 0 }, "perWord": { "type": "number", "minimum": 0 } } },
+        "autoPause": { "type": "boolean" }
+      }
+    },
     "limits": {
       "type": "object", "additionalProperties": false,
       "properties": { "runMinutes": { "type": "number", "exclusiveMinimum": 0 }, "steps": { "type": "integer", "minimum": 1 }, "journeyMinutes": { "type": "number", "exclusiveMinimum": 0 } }

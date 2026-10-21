@@ -11,13 +11,18 @@
    findings, validation work for uncertain severe concerns, proposals aimed
    at HELIX artifacts that still exist, and qualified findings where the
    alignment review found a conflict, and an AI journey's findings each
-   naming the AI rule or heuristic they are about (FEAT-011 AIX-03).
+   naming the AI rule or heuristic they are about (FEAT-011 AIX-03). With
+   walkthrough videos (FEAT-013; CONTRACT-006 "Walkthrough videos"): steps
+   that can be replayed, secrets only by reference, plain-English findings,
+   and annotations that show only findings of the backlog, at the
+   checkpoints they cite, never after a chapter stopped.
    Returns the problems; writes nothing. */
 
 import Ajv2020 from "ajv/dist/2020.js";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
+import { SECRETS } from "./manifest.mjs";
 import { findingId } from "./plan.mjs";
 
 const own = createRequire(import.meta.url);
@@ -28,10 +33,25 @@ const json = (f) => JSON.parse(readFileSync(f, "utf8"));
 function catalogueFor(dir, run) {
   const app = run?.config?.appDir != null ? resolve(dir, run.config.appDir) : null;
   for (const r of [app && createRequire(join(app, "package.json")), own].filter(Boolean)) {
-    try { const c = json(r.resolve("@ux-builder/ui/catalogue.json")); return { version: c.packages?.["@ux-builder/ui"] ?? null, names: new Map([...c.widgets, ...c.patterns].map((x) => [x.name, x.tier ? "pattern" : "widget"])) }; } catch { /* next */ }
+    try { const c = json(r.resolve("@ux-builder/ui/catalogue.json")); return { version: c.packages?.["@ux-builder/ui"] ?? null, names: new Map([...c.widgets, ...c.patterns].map((x) => [x.name, x.tier ? "pattern" : "widget"])), rules: (c.interaction?.rules ?? []).map((x) => x.id) }; } catch { /* next */ }
   }
   return null;
 }
+
+/* What makes a plain-English caption technical (FEAT-013 ANN-03): a rule
+   ID, a token, or a component's name as code would write it. A one-word
+   name (Button, Tabs) is ordinary English unless written as <Button>. */
+export function jargon(text, catalogue) {
+  const found = [];
+  if (/--piq-|var\(--/.test(text)) found.push("a token");
+  for (const id of catalogue?.rules ?? []) if (new RegExp(`(^|[^\\w.-])${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\w-])`).test(text)) found.push(`the rule ID ${id}`);
+  for (const n of catalogue?.names?.keys() ?? []) {
+    const camel = /^[A-Z][a-z0-9]+[A-Z]|^[a-z]+[A-Z]/.test(n);
+    if ((camel && new RegExp(`\\b${n}\\b`).test(text)) || new RegExp(`<${n}\\b`).test(text)) found.push(`the component name ${n}`);
+  }
+  return found;
+}
+const sentences = (t) => t.trim().split(/(?<=[.!?])\s+(?=\S)/).filter(Boolean).length;
 
 export function validateReport(dir) {
   const problems = [];
@@ -56,6 +76,8 @@ export function validateReport(dir) {
   for (const j of got.plan?.journeys ?? []) for (const s of j.states) if (!entries.some((e) => e.journey === j.id && e.state === s.state)) add("coverage.json", "/entries", `${j.id} × ${s.state} is planned but missing from the matrix`);
   for (const [i, e] of entries.entries()) for (const [k, ref] of (e.evidence ?? []).entries()) if (!resolves(ref)) add("coverage.json", `/entries/${i}/evidence/${k}`, `${ref} is not in the package`);
 
+  const hasVideo = existsSync(join(dir, "video"));
+
   // Walkthroughs (JRN-02 to JRN-05).
   for (const [i, j] of (got.walkthrough?.journeys ?? []).entries()) for (const [k, s] of (j.steps ?? []).entries()) {
     const at = `/journeys/${i}/steps/${k}`;
@@ -67,6 +89,10 @@ export function validateReport(dir) {
     if (s.checkpoint && (!s.url || !s.observation)) add("walkthrough.json", at, `step ${s.n}'s checkpoint needs its URL and observation`);
     if (s.checkpoint && !resolves(s.checkpoint)) add("walkthrough.json", `${at}/checkpoint`, `${s.checkpoint} is not a checkpoint in the package`);
     if (s.observation?.visual && !(s.observation.basis ?? []).includes("screenshot")) add("walkthrough.json", `${at}/observation`, `step ${s.n} makes a visual judgment without a screenshot; DOM text alone cannot show how a screen looks`);
+    // Replayable steps (FEAT-013 REP-01): what the agent did, with secrets by reference.
+    const value = s.do?.value;
+    if (typeof value === "string") { const hit = SECRETS.find(([re]) => re.test(value)); if (hit) add("walkthrough.json", `${at}/do/value`, `step ${s.n} records ${hit[1]} as a literal; record { secret: NAME } instead`); }
+    if (hasVideo && !s.do) add("walkthrough.json", at, `step ${s.n} of ${j.id} is not replayable: record the browser action it took as "do" (goto, click, fill, press or waitFor)`);
   }
 
   // Findings (FND-01 to FND-04, COV-02, COV-03, TRC-03).
@@ -99,6 +125,48 @@ export function validateReport(dir) {
       if (!catalogue.names.has(c.name)) add("backlog.json", `${at}/component_mapping/${k}`, `${c.name} is not in the app's installed @ux-builder/ui ${catalogue.version}; name a real one or mark the work custom-gap`);
       else if (c.version !== catalogue.version) add("backlog.json", `${at}/component_mapping/${k}/version`, `the app has @ux-builder/ui ${catalogue.version}, not ${c.version}`);
     }
+  }
+
+  // Walkthrough videos (FEAT-013 ANN-01 to ANN-03, OUT-01, REP-05).
+  if (hasVideo) {
+    const vdir = join(dir, "video");
+    const byId = new Map(findings.map((f) => [f.id, f]));
+    const shown = new Set();
+    for (const file of readdirSync(vdir).filter((f) => f.endsWith(".annotations.json")).sort()) {
+      const rel = join("video", file);
+      const a = check("annotations", rel);
+      if (!a) continue;
+      const chapters = new Map((a.chapters ?? []).map((c) => [c.id, c]));
+      for (const [i, n] of (a.annotations ?? []).entries()) {
+        const at = `/annotations/${i}`;
+        const f = byId.get(n.finding);
+        shown.add(n.finding);
+        if (!f) { add(rel, `${at}/finding`, `${n.finding} is not a finding in the backlog; a video shows only the backlog's findings`); continue; }
+        if (!(f.evidence_refs ?? []).some((r) => r === n.checkpoint || r.startsWith(`checkpoints/${n.checkpoint}/`) || r === `checkpoints/${n.checkpoint}`)) add(rel, `${at}/checkpoint`, `${n.finding} cites no evidence at ${n.checkpoint}; it is shown only where it was found`);
+        const c = chapters.get(n.chapter);
+        if (!c) add(rel, `${at}/chapter`, `${n.chapter} is not a chapter of this video`);
+        else if (c.status === "stopped" && n.end > c.end) add(rel, at, `${n.finding} is shown after ${c.id} stopped (${c.reason ?? "the replayed state differed"}); nothing is shown on a state the replay did not reach`);
+        if (n.start > n.end) add(rel, at, `${n.finding} ends before it starts`);
+      }
+    }
+    if (existsSync(join(vdir, "video.json"))) {
+      const v = check("video", join("video", "video.json"));
+      for (const [i, x] of (v?.videos ?? []).entries()) for (const [k, f] of Object.entries(x.files ?? {})) if (!existsSync(join(vdir, f))) add("video/video.json", `/videos/${i}/files/${k}`, `${f} is not in video/`);
+    }
+    for (const id of shown) {
+      const f = byId.get(id);
+      if (f && !f.plain) add("backlog.json", `/findings/${findings.indexOf(f)}`, `${id} is shown in a video but has no "plain": its problem and recommendation in plain English`);
+    }
+  }
+  // Plain English (FEAT-013 ANN-03): short, and in the user's terms.
+  const plainCatalogue = findings.some((f) => f.plain) ? catalogue ?? catalogueFor(dir, got.run) : null;
+  for (const [i, f] of findings.entries()) for (const k of ["problem", "recommendation"]) {
+    const t = f.plain?.[k];
+    if (!t) continue;
+    const at = `/findings/${i}/plain/${k}`;
+    if (sentences(t) > 2) add("backlog.json", at, `${f.id}'s plain ${k} is ${sentences(t)} sentences; keep it to one or two`);
+    const words = jargon(t, plainCatalogue);
+    if (words.length) add("backlog.json", at, `${f.id}'s plain ${k} names ${words.join(", ")}; say it in the user's terms and keep specifics in recommendation and component_mapping`);
   }
 
   // Proposals (DOC-01 to DOC-04).
