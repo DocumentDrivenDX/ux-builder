@@ -75,6 +75,15 @@
 /* AI Elements sizes a reply to fill its scroll area; laid out in full here, each part takes its own height. */
 .uxh-chat__log .size-full { block-size: auto; }
 .uxh-chat pre { max-inline-size: 100%; overflow-x: auto; }
+/* The SDK's own Conversation needs a height to scroll its log in. */
+.uxh-assistant { display: flex; block-size: 36rem; padding: var(--piq-space-3); border-radius: var(--piq-radius-card); background: var(--piq-color-surface); border: var(--piq-border-default); box-shadow: var(--piq-shadow-overlay); overflow: hidden; }
+.uxh-assistant > .piq-conversation { flex: 1; min-inline-size: 0; }
+
+/* Plan, check, build, assess: four linked steps in a row */
+.uxh-loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--piq-space-4); margin: 0; padding: 0; list-style: none; }
+.uxh-loop > li { display: flex; }
+.uxh-loop__n { display: inline-grid; place-items: center; inline-size: 1.75rem; block-size: 1.75rem; border-radius: var(--piq-pill-radius); background: var(--piq-color-accent); color: var(--piq-color-on-accent); font-size: var(--piq-font-size-small); font-weight: var(--piq-font-weight-strong); }
+.uxh-loop__go { display: inline-flex; align-items: center; gap: var(--piq-space-1); margin-block-start: auto; font-weight: var(--piq-font-weight-strong); color: var(--piq-color-accent); }
 
 /* Cards */
 .uxh-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: var(--piq-space-4); margin: 0; padding: 0; list-style: none; }
@@ -99,6 +108,7 @@
 /* Footer */
 .uxh-foot { padding-block: var(--piq-space-6); border-block-start: var(--piq-border-default); color: var(--piq-color-text-muted); font-size: var(--piq-font-size-small); }
 .uxh-foot nav { gap: var(--piq-space-4); }
+.uxh-foot p { max-inline-size: 60ch; }
 
 @media (max-width: 900px) {
   .uxh-hero__grid, .uxh-ai { grid-template-columns: minmax(0, 1fr); }
