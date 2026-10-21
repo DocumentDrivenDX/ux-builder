@@ -6,7 +6,7 @@
   "type": "module",
   "bin": { "ux-builder-audit": "./cli.mjs" },
   "exports": { ".": "./audit.mjs", "./report": "./report.mjs", "./package.json": "./package.json" },
-  "files": ["audit.mjs", "inspect.mjs", "cli.mjs", "collect.js", "report.mjs", "README.md", "THIRD-PARTY-NOTICES.md"],
+  "files": ["audit.mjs", "inspect.mjs", "assess", "cli.mjs", "collect.js", "report.mjs", "README.md", "THIRD-PARTY-NOTICES.md"],
   "scripts": { "test": "node --test 'test/*.test.mjs'" },
   "dependencies": {
     "@ux-builder/tokens": "^1.6.0",

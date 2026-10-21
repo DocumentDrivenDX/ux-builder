@@ -20,7 +20,7 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 import { chromium } from "playwright";
-import { inspect, modalEscape, prepare, sdkRulesIn, settle } from "./inspect.mjs";
+import { enrich, inspect, modalEscape, prepare, sdkRulesIn, settle } from "./inspect.mjs";
 export { inspect, STATE_AFFECTING } from "./inspect.mjs";
 
 const own = createRequire(import.meta.url);
@@ -47,9 +47,6 @@ export const RULES = {
   "nav-per-breakpoint": "Navigation suits the width: few destinations when narrow, standing when wide (rules nav.compact-destinations, nav.standing-at-expanded).",
   "line-length": "Lines of prose stay readable (rule text.line-length).",
 };
-// Checks added in 0.2: warnings for one minor release before they can fail a build (CONTRACT-004).
-// The interaction checks (0.2 of the audit, FEAT-008 AUD-01) are warnings too.
-const NEW_CHECKS = new Set(["reflow", "target-size", "focus-obscured", "one-modal", "modal-contract", "one-primary-action", "nav-per-breakpoint", "line-length"]);
 const SEVERITY = ["error", "warning", "info"];
 
 /* Switch the app to a theme and appearance. "event" when the app's
@@ -203,13 +200,8 @@ export function toBaseline(report) {
 /* Order and count the findings; mark a colour that is the same in every
    theme as hard-coded. */
 function report({ urls, runs, findings, interaction = null, baseline = null }) {
-  const byCheck = new Map();
-  for (const r of interaction?.rules ?? []) for (const c of r.checks) if (c.kind === "audit") (byCheck.get(c.id) ?? byCheck.set(c.id, []).get(c.id)).push(r);
+  enrich(findings, interaction);
   for (const f of findings) {
-    // The rule a finding enforces and its sources (FEAT-008 AUD-02).
-    const rule = (byCheck.get(f.rule) ?? []).find((r) => r.id === f.ruleId) ?? (byCheck.get(f.rule) ?? [])[0];
-    if (rule) { f.ruleId = rule.id; f.sources = rule.sources.map(({ title, url }) => ({ title, url })); }
-    if (NEW_CHECKS.has(f.rule)) f.severity = "warning";
     if (f.preview) f.message += ` — in the preview ${f.preview}`;
     const pageRuns = runs.filter((r) => r.url === f.url).length;
     if (f.rule === "token-colors" && pageRuns > 1 && f.runs.length === pageRuns) { f.everyTheme = true; f.message += " — the same in every theme: hard-coded"; }

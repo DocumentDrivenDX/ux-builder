@@ -28,6 +28,12 @@
    browser is Playwright's Chromium: install it once with
    npx playwright install chromium. */
 
+// The assessment's subcommands (FEAT-009) parse their own options.
+if (process.argv[2] === "assess") {
+  const { main } = await import("./assess/cli.mjs");
+  process.exit(await main(process.argv.slice(3)));
+}
+
 import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";

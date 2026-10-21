@@ -24,6 +24,21 @@ import { collect, installAppOwned } from "./collect.js";
 
 const own = createRequire(import.meta.url);
 export const STATE_AFFECTING = ["focus-obscured", "modal-escape"];
+// Checks added in 0.2: warnings for one minor release before they can fail a build (CONTRACT-004).
+export const NEW_CHECKS = new Set(["reflow", "target-size", "focus-obscured", "one-modal", "modal-contract", "one-primary-action", "nav-per-breakpoint", "line-length"]);
+
+/* Each finding with the rule it enforces and that rule's sources (FEAT-008
+   AUD-02), and a new check's severity held at warning. */
+export function enrich(findings, interaction) {
+  const byCheck = new Map();
+  for (const r of interaction?.rules ?? []) for (const c of r.checks) if (c.kind === "audit") (byCheck.get(c.id) ?? byCheck.set(c.id, []).get(c.id)).push(r);
+  for (const f of findings) {
+    const rule = (byCheck.get(f.rule) ?? []).find((r) => r.id === f.ruleId) ?? (byCheck.get(f.rule) ?? [])[0];
+    if (rule) { f.ruleId = rule.id; f.sources = rule.sources.map(({ title, url }) => ({ title, url })); }
+    if (NEW_CHECKS.has(f.rule)) f.severity = "warning";
+  }
+  return findings;
+}
 
 /* @ux-builder/ui and @ux-builder/tokens as the app has them, else this package's. */
 export function sdkFiles(cwd) {
