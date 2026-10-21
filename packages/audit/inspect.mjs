@@ -26,6 +26,9 @@ const own = createRequire(import.meta.url);
 export const STATE_AFFECTING = ["focus-obscured", "modal-escape"];
 // Checks added in 0.2: warnings for one minor release before they can fail a build (CONTRACT-004).
 export const NEW_CHECKS = new Set(["reflow", "target-size", "focus-obscured", "one-modal", "modal-contract", "one-primary-action", "nav-per-breakpoint", "line-length"]);
+// The AI checks (FEAT-011), added in 0.2: warnings for their first minor release too.
+export const AI_CHECKS = ["ai-disclose", "ai-stop", "ai-correct", "ai-starters", "ai-declared", "agent-approval", "agent-plan", "agent-interrupt", "agent-who-acts", "agent-recover", "agent-summary", "genui-review-prefill", "card-input-label", "card-narrow-first"];
+for (const c of AI_CHECKS) NEW_CHECKS.add(c);
 
 /* Each finding with the rule it enforces and that rule's sources (FEAT-008
    AUD-02), and a new check's severity held at warning. */
@@ -200,6 +203,168 @@ export function interactionChecks({ ignore, rules, limits, widths }) {
   return findings;
 }
 
+/* The AI checks (FEAT-011 AIA-01, AIA-02; US-078 to US-080; SD-005),
+   run in the page. They look only at elements CONTRACT-005 *AI markup*
+   marks (data-piq-ai and its companions): a page with no markers gets no
+   AI finding. `screens` is the blueprint's screens by id, { id: ai | null },
+   or null without --blueprint; a marked element belongs to the screen its
+   nearest data-piq-screen names. Every finding names its SD-005 rule. */
+export function aiChecks({ ignore, rules, screens = null, sizes = false }) {
+  const findings = [];
+  if (!document.querySelector("[data-piq-ai], [data-piq-ai-actor], [data-piq-ai-takeover]")) return findings;
+  const skip = (e) => e.closest(["[data-audit-ignore]", "#__piq_audit_overlay", ...ignore].join(", "));
+  const path = (e) => { const out = []; for (let n = e; n && n.nodeType === 1 && out.length < 4; n = n.parentElement) { out.unshift(n.id ? `#${CSS.escape(n.id)}` : n.tagName.toLowerCase() + (n.classList.length ? `.${[...n.classList].map((c) => CSS.escape(c)).join(".")}` : "")); if (n.id) break; } return out.join(" > "); };
+  const visible = (e) => !!e && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== "hidden" && !e.closest("[hidden], [inert], dialog:not([open])");
+  const box = (e) => { const r = e.getBoundingClientRect(); return { x: r.x + scrollX, y: r.y + scrollY, w: r.width, h: r.height }; };
+  const text = (e) => (e?.textContent ?? "").replace(/\s+/g, " ").trim();
+  const on = (check) => rules[check] !== false;
+  const add = (rule, ruleId, e, message, extra = {}) => findings.push({ rule, ruleId, severity: "warning", selector: e ? path(e) : null, message, box: e ? box(e) : undefined, ...extra });
+  const marked = (kind) => [...document.querySelectorAll(`[data-piq-ai="${kind}"]`)].filter((e) => !skip(e));
+  const byIds = (e, attr) => (e.getAttribute(attr) ?? "").split(/\s+/).filter(Boolean).map((id) => document.getElementById(id)).filter(Boolean);
+  const CONTROL = 'button, a[href], input[type=button], input[type=submit], input[type=reset], [role=button], [role=menuitem], [data-piq-ai-control]';
+  const nameOf = (c) => (c.getAttribute("aria-label")?.trim() || byIds(c, "aria-labelledby").map(text).join(" ").trim() || text(c) || c.value || c.getAttribute("title") || "").trim();
+  const enabled = (c) => !c.disabled && c.getAttribute("aria-disabled") !== "true";
+  const reachable = (c) => visible(c) && enabled(c) && c.getAttribute("tabindex") !== "-1";
+  const controlsIn = (scope) => [...scope.querySelectorAll(CONTROL)].filter((c) => !skip(c));
+  // "In or beside": inside the element, or inside its parent (its siblings and theirs).
+  const near = (e) => [...new Set([...controlsIn(e), ...(e.parentElement && e.parentElement !== document.body ? controlsIn(e.parentElement) : [])])];
+  const kind = (c, kinds, names) => kinds.includes(c.getAttribute("data-piq-ai-control")) || (names && names.test(nameOf(c)));
+  const outermost = (e) => !e.parentElement?.closest('[data-piq-ai="generated"]');
+
+  // ai-disclose and ai-correct: on the outermost generated content (inner content shares its label and controls).
+  const generated = marked("generated");
+  for (const g of generated.filter(outermost)) {
+    if (on("ai-disclose")) {
+      const label = (l) => visible(l) && (text(l) || l.getAttribute("data-piq-ai-label")?.trim() || l.getAttribute("aria-label")?.trim());
+      const own = g.closest("[data-piq-ai-label]") ?? [...g.querySelectorAll("[data-piq-ai-label]")].find(label);
+      const described = byIds(g, "aria-describedby").some((d) => visible(d) && text(d));
+      if (!(own && label(own)) && !described) add("ai-disclose", "ai.disclose", g, "AI-generated content with no visible disclosure: label it, or an ancestor (data-piq-ai-label), or point aria-describedby at a visible label");
+    }
+    if (on("ai-correct")) {
+      const ref = g.id ? [...document.querySelectorAll(`[aria-controls~="${CSS.escape(g.id)}"]`)] : [];
+      const ok = [...near(g), ...ref].some((c) => enabled(c) && kind(c, ["retry", "regenerate", "edit", "undo"], /\b(retry|try again|regenerate|edit|undo)\b/i));
+      if (!ok) add("ai-correct", "ai.correct", g, "AI-generated content with no way to correct it: add a retry, regenerate, edit or undo control (data-piq-ai-control) in or beside it");
+    }
+  }
+
+  // ai-stop and agent-interrupt: a busy status region.
+  const STOP = /\b(stop|pause)\b/i;
+  const statuses = marked("status");
+  const busy = statuses.filter((s) => s.getAttribute("aria-busy") === "true");
+  if (on("ai-stop")) for (const s of busy) {
+    if (!near(s).some((c) => reachable(c) && STOP.test(nameOf(c)))) add("ai-stop", "ai.stop", s, "the AI is working (aria-busy) and no reachable control named Stop or Pause is in or beside its status region");
+  }
+  const screenOf = (e) => e.closest("[data-piq-screen]")?.getAttribute("data-piq-screen") ?? null;
+  const aiOf = (e) => (screens && screenOf(e) ? screens[screenOf(e)] ?? null : null);
+  const agentPage = !!document.querySelector('[data-piq-ai="plan"], [data-piq-ai="step"], [data-piq-ai="approval"], [data-piq-ai-actor], [data-piq-ai-takeover]');
+  if (on("agent-interrupt")) for (const s of busy) {
+    if (!agentPage && !aiOf(s)?.roles?.includes("agent")) continue;
+    if (!controlsIn(document.body).some((c) => reachable(c) && STOP.test(nameOf(c)))) add("agent-interrupt", "agent.interrupt", s, "the agent is running and the page has no reachable Pause or Stop control");
+  }
+
+  // agent-approval: approve and deny, neither chosen for the user.
+  if (on("agent-approval")) for (const a of marked("approval")) {
+    const cs = controlsIn(a).concat([...a.querySelectorAll("input[data-piq-ai-control], option[data-piq-ai-control]")]);
+    const approve = cs.filter((c) => c.getAttribute("data-piq-ai-control") === "approve"), deny = cs.filter((c) => c.getAttribute("data-piq-ai-control") === "deny");
+    const missing = [!approve.some((c) => visible(c) && enabled(c)) && "approve", !deny.some((c) => visible(c) && enabled(c)) && "deny"].filter(Boolean);
+    if (missing.length) add("agent-approval", "agent.approve-high-impact", a, `the approval has no ${missing.join(" or ")} control (data-piq-ai-control="${missing.join('", "')}")`, { property: "controls" });
+    const chosen = [...approve, ...deny].filter((c) => c.checked || c.selected && c.hasAttribute("selected") || ["aria-pressed", "aria-checked", "aria-selected"].some((x) => c.getAttribute(x) === "true") || c.hasAttribute("autofocus"));
+    if (chosen.length) add("agent-approval", "agent.approve-high-impact", chosen[0], `the approval's ${chosen[0].getAttribute("data-piq-ai-control")} control is chosen for the user (pre-selected, or focused on load with autofocus); leave the choice to them`, { property: "default" });
+  }
+
+  // agent-plan and agent-recover: each step states its status in text; a failed step says why and offers a way back.
+  const WORDS = { pending: /\b(pending|waiting|queued|to do|not started|next|up next)\b/i, running: /\b(running|in progress|working|underway|doing)\b/i, done: /\b(done|complete|completed|finished|succeeded)\b/i, failed: /\b(failed|error|could not|couldn't|did not|unable)\b/i, skipped: /\b(skipped)\b/i };
+  const ANY = /\b(pending|waiting|queued|to do|not started|up next|next|running|in progress|working|underway|doing|done|complete|completed|finished|succeeded|failed|error|skipped)\b/gi;
+  const stepText = (s) => `${s.getAttribute("aria-label") ?? ""} ${text(s)} ${[...s.querySelectorAll("[aria-label]")].map((x) => x.getAttribute("aria-label")).join(" ")}`;
+  const plans = marked("plan");
+  if (on("agent-plan")) for (const p of plans) {
+    const steps = [...p.querySelectorAll('[data-piq-ai="step"]')].filter((s) => s.closest('[data-piq-ai="plan"]') === p && !skip(s));
+    if (!steps.length) { add("agent-plan", "agent.plan-visible", p, 'the plan has no steps (data-piq-ai="step")', { property: "steps" }); continue; }
+    for (const s of steps) {
+      const st = s.getAttribute("data-piq-ai-status");
+      if (!WORDS[st]) add("agent-plan", "agent.plan-visible", s, `a step has ${st ? `an unknown status "${st}"` : "no data-piq-ai-status"}; use pending, running, done, failed or skipped`, { property: "status" });
+      else if (!WORDS[st].test(stepText(s))) add("agent-plan", "agent.plan-visible", s, `a step's status (${st}) is not stated in text; colour or an icon alone does not say it`, { property: "status-text", value: st });
+    }
+  }
+  if (on("agent-recover")) for (const s of marked("step").filter((s) => s.getAttribute("data-piq-ai-status") === "failed")) {
+    // The failure's description: text at the step beyond its title (its first heading or text block) and its status.
+    const ownText = (e) => [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(" ").trim();
+    const blocks = [s, ...s.querySelectorAll("*")].filter((e) => !e.closest(CONTROL) && ownText(e) && (e === s || visible(e)));
+    const heading = s.querySelector("h1, h2, h3, h4, h5, h6, [role=heading]");
+    const strip = (t) => t.replace(ANY, "").replace(/[\s\p{P}]+/gu, " ").trim();
+    // The title: the step's heading, else its first text that is not only its status.
+    const title = heading ?? blocks.find((b) => strip(ownText(b)));
+    const why = [...blocks.filter((b) => b !== title && !title?.contains(b)).map(ownText), ...byIds(s, "aria-describedby").map(text)].map(strip).join(" ").trim();
+    if (!why) add("agent-recover", "agent.recover", s, "a failed step does not say in text what went wrong", { property: "description" });
+    const plan = s.closest('[data-piq-ai="plan"]');
+    const back = [...controlsIn(s), ...(plan ? controlsIn(plan) : near(s))].some((c) => enabled(c) && kind(c, ["retry", "previous"], /\b(retry|try again|previous|go back|back to|return to)\b/i));
+    if (!back) add("agent-recover", "agent.recover", s, 'a failed step has no control to retry it or return to the previous step (data-piq-ai-control="retry" or "previous")', { property: "control" });
+  }
+
+  // agent-summary: a finished run shows what was done.
+  if (on("agent-summary")) for (const s of statuses.filter((s) => s.getAttribute("data-piq-ai-status") === "done")) {
+    if (!marked("summary").some((m) => visible(m) && text(m))) add("agent-summary", "agent.summary", s, 'the run is done and no summary of what it did is shown (data-piq-ai="summary")');
+  }
+
+  // agent-who-acts: a screen with takeover states the actor in a live region.
+  const takeover = [...document.querySelectorAll("[data-piq-ai-takeover]")].filter((e) => !skip(e) && e.getAttribute("data-piq-ai-takeover") !== "false");
+  const marks = [...document.querySelectorAll("[data-piq-ai], [data-piq-ai-actor], [data-piq-ai-takeover]")].filter((e) => !skip(e));
+  const declared = marks.find((e) => aiOf(e)?.takeover === true);
+  if (on("agent-who-acts") && (takeover.length || declared)) {
+    const live = (e) => !!e.closest("[aria-live]:not([aria-live=off]), [role=status], [role=log], [role=alert]");
+    const actors = [...document.querySelectorAll("[data-piq-ai-actor]")].filter((e) => !skip(e) && /^(agent|user)$/.test(e.getAttribute("data-piq-ai-actor")));
+    if (!actors.some((e) => live(e) && visible(e) && text(e))) add("agent-who-acts", "agent.who-acts", takeover[0] ?? declared, 'the user can take over from the agent, and no live region states who is acting now (data-piq-ai-actor="agent" or "user", with aria-live)');
+  }
+
+  // ai-starters: an empty conversation offers starting points, and the prompt stays open.
+  if (on("ai-starters")) for (const p of marked("prompt")) {
+    const field = p.matches("input, textarea, [contenteditable]") ? p : p.querySelector("textarea, input:not([type=hidden]):not([type=button]):not([type=submit]), [contenteditable=true]");
+    const starters = [...document.querySelectorAll('[data-piq-ai-control="starter"]')].filter((c) => !skip(c) && visible(c));
+    if (!generated.length && !starters.length) add("ai-starters", "ai.starters", p, 'an empty conversation offers no suggested starting points (data-piq-ai-control="starter")', { property: "starters" });
+    if (starters.length && (!field || field.disabled || field.readOnly || field.getAttribute("contenteditable") === "false" || field.getAttribute("aria-disabled") === "true")) add("ai-starters", "ai.starters", p, "the suggested starting points are the only way to start: the prompt cannot be typed in", { property: "prompt" });
+  }
+
+  // genui-review-prefill, card-input-label: the inputs of generated UI.
+  const FIELD = 'input:not([type=hidden]):not([type=button]):not([type=submit]):not([type=reset]):not([type=image]), select, textarea';
+  const inGenerated = (e) => e.closest('[data-piq-ai="generated"]');
+  const fields = [...document.querySelectorAll(FIELD)].filter((f) => inGenerated(f) && !skip(f) && !f.closest('[data-piq-ai="prompt"]'));
+  const prefilled = (f) => f.matches("[type=checkbox], [type=radio]") ? f.checked : f.tagName === "SELECT" ? !!f.value && [...f.options].some((o) => o.selected && o.hasAttribute("selected")) : !!f.value;
+  if (on("genui-review-prefill")) for (const g of new Set(fields.filter(prefilled).map(inGenerated))) {
+    const filled = fields.filter((f) => inGenerated(f) === g && prefilled(f));
+    const locked = filled.filter((f) => f.disabled || f.readOnly || f.getAttribute("aria-readonly") === "true" || f.getAttribute("aria-disabled") === "true");
+    if (locked.length) add("genui-review-prefill", "genui.review-prefill", locked[0], `${locked.length} value${locked.length > 1 ? "s" : ""} the AI pre-filled cannot be edited; let the user change them before submitting`, { property: "editable" });
+    const submits = [...g.querySelectorAll("button[type=submit], input[type=submit], form button:not([type]), [data-piq-ai-control=submit]")].filter((b) => !skip(b) && visible(b) && !b.closest('[data-piq-ai="prompt"]'));
+    const shared = filled.some((f) => f.form?.querySelector('[data-piq-ai="prompt"]'));
+    if (!submits.length || shared) add("genui-review-prefill", "genui.review-prefill", g, shared ? "the pre-filled inline form is submitted with the conversation's message; give it a submit control of its own" : "the pre-filled inline component has no submit control of its own, so the user cannot review it before it is submitted", { property: "submit" });
+  }
+  if (on("card-input-label")) for (const f of fields.filter(visible)) {
+    const named = f.getAttribute("aria-label")?.trim() || byIds(f, "aria-labelledby").map(text).join("").trim() || [...(f.labels ?? [])].map(text).join("").trim() || f.getAttribute("title")?.trim();
+    if (!named) add("card-input-label", "card.input-label", f, `an input in generated UI has no label of its own${f.placeholder ? ` (the placeholder "${f.placeholder}" is not a label)` : ""}`);
+  }
+  if (on("card-narrow-first") && sizes && innerWidth < 600) for (const g of generated.filter(outermost).filter(visible)) {
+    const r = g.getBoundingClientRect(), cw = document.documentElement.clientWidth;
+    if (g.scrollWidth > g.clientWidth + 1 || r.right > cw + 1) add("card-narrow-first", "card.narrow-first", g, `generated UI scrolls sideways at ${innerWidth}px (${Math.max(g.scrollWidth, Math.round(r.right))}px wide); lay it out for the narrowest width first`, { property: "width", value: `${Math.max(g.scrollWidth, Math.round(r.width))}px` });
+  }
+
+  // ai-declared: with --blueprint, AI content on a screen whose blueprint declares no AI role.
+  if (on("ai-declared") && screens) {
+    const seen = new Set();
+    for (const e of marks) {
+      const id = screenOf(e);
+      const key = id ?? "";
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (!id) add("ai-declared", "ai.declared", e, "AI-marked content on a page that names no blueprint screen; add data-piq-screen=\"<screen id>\" to the page's root", { property: "screen" });
+      else if (!(id in screens)) add("ai-declared", "ai.declared", e, `AI-marked content on screen "${id}", which the blueprint does not have`, { property: "screen", value: id });
+      else if (!screens[id]?.roles?.length) add("ai-declared", "ai.declared", e, `screen "${id}" shows AI content and its blueprint declares no AI role; add "ai": { "roles": [...] } to it`, { property: "screen", value: id });
+    }
+  }
+  return findings;
+}
+
+/* The blueprint's screens as aiChecks takes them: { id: ai | null }. */
+export const blueprintScreens = (blueprint) => (blueprint ? Object.fromEntries((blueprint.screens ?? []).filter((s) => s?.id).map((s) => [s.id, s.ai ?? null])) : null);
+
 /* modal-escape: press Escape in each open modal, topmost first, and report
    one that stays open (FEAT-008 modal.dismiss). State-affecting. Returns the
    findings and the names of the dialogs it closed. */
@@ -249,9 +414,10 @@ const restore = (page, s) => page.evaluate((s) => {
      contrast        axe's colour-contrast (default true)
      layout          the size-class checks: reflow, target-size, nav-per-breakpoint, focus-obscured (default true)
      stateAffecting  true, or a list of STATE_AFFECTING checks to run (default none)
+     blueprint       the app's blueprint (parsed), for ai-declared and the screens' declared AI
    Returns { findings, marked, skipped, stateAffecting: { ran, restored, notes } }:
    findings in audit()'s shape, marked boxes whose ids index findings. */
-export async function inspect(page, { sdk = null, cwd = process.cwd(), theme, appearance, ignore = [], rules = {}, contrast = true, layout = true, stateAffecting = false, sdkRules = null } = {}) {
+export async function inspect(page, { sdk = null, cwd = process.cwd(), theme, appearance, ignore = [], rules = {}, contrast = true, layout = true, stateAffecting = false, sdkRules = null, blueprint = null } = {}) {
   sdk ??= prepare(cwd, { contrast });
   const asked = stateAffecting === true ? STATE_AFFECTING : Array.isArray(stateAffecting) ? stateAffecting : [];
   const applies = { "focus-obscured": layout && rules["focus-obscured"] !== false, "modal-escape": rules["modal-contract"] !== false };
@@ -270,6 +436,7 @@ export async function inspect(page, { sdk = null, cwd = process.cwd(), theme, ap
   const marked = [...result.marked];
   const more = layout || run.includes("focus-obscured") ? await page.evaluate(layoutChecks, { ignore: all, rules, sizes: layout, focus: run.includes("focus-obscured") }) : [];
   more.push(...await page.evaluate(interactionChecks, { ignore, rules, limits: sdk.limits, widths: layout }));
+  more.push(...await page.evaluate(aiChecks, { ignore, rules, screens: blueprintScreens(blueprint), sizes: layout }));
   for (const f of more) {
     const { box, ...rest } = f;
     if (box) marked.push({ ...box, ids: [findings.length] });

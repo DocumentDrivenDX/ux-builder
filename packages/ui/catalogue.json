@@ -20287,6 +20287,10 @@
         },
         "checks": [
           {
+            "kind": "audit",
+            "id": "ai-disclose"
+          },
+          {
             "kind": "review",
             "id": "ai.disclose"
           }
@@ -20416,6 +20420,10 @@
         },
         "checks": [
           {
+            "kind": "audit",
+            "id": "ai-starters"
+          },
+          {
             "kind": "review",
             "id": "ai.starters"
           }
@@ -20482,8 +20490,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "ai.stop"
+            "kind": "audit",
+            "id": "ai-stop"
           }
         ],
         "severity": "warning",
@@ -20522,8 +20530,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "ai.correct"
+            "kind": "audit",
+            "id": "ai-correct"
           }
         ],
         "severity": "warning",
@@ -20664,6 +20672,10 @@
           {
             "kind": "blueprint",
             "id": "agent.approve-high-impact"
+          },
+          {
+            "kind": "audit",
+            "id": "agent-approval"
           }
         ],
         "severity": "warning",
@@ -20706,8 +20718,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "agent.plan-visible"
+            "kind": "audit",
+            "id": "agent-plan"
           }
         ],
         "severity": "warning",
@@ -20732,8 +20744,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "agent.interrupt"
+            "kind": "audit",
+            "id": "agent-interrupt"
           }
         ],
         "severity": "warning",
@@ -20764,8 +20776,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "agent.who-acts"
+            "kind": "audit",
+            "id": "agent-who-acts"
           }
         ],
         "severity": "warning",
@@ -20790,8 +20802,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "agent.recover"
+            "kind": "audit",
+            "id": "agent-recover"
           }
         ],
         "severity": "warning",
@@ -20828,8 +20840,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "agent.summary"
+            "kind": "audit",
+            "id": "agent-summary"
           }
         ],
         "severity": "warning",
@@ -21255,8 +21267,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "genui.review-prefill"
+            "kind": "audit",
+            "id": "genui-review-prefill"
           }
         ],
         "severity": "warning",
@@ -21340,8 +21352,8 @@
         "rationale": "The AI rules apply by declared role; an undeclared AI screen escapes every rule meant for it.",
         "checks": [
           {
-            "kind": "review",
-            "id": "ai.declared"
+            "kind": "audit",
+            "id": "ai-declared"
           }
         ],
         "severity": "warning",
@@ -21467,8 +21479,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "card.input-label"
+            "kind": "audit",
+            "id": "card-input-label"
           }
         ],
         "severity": "warning",
@@ -21580,6 +21592,10 @@
           ]
         },
         "checks": [
+          {
+            "kind": "audit",
+            "id": "card-narrow-first"
+          },
           {
             "kind": "review",
             "id": "card.narrow-first"

@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "kind": "app",
+  "name": "AI fixtures",
+  "supports": {
+    "sizeClasses": [
+      "compact",
+      "medium",
+      "expanded"
+    ],
+    "inputs": [
+      "coarse",
+      "fine"
+    ]
+  },
+  "destinations": [
+    {
+      "id": "chat",
+      "label": "Assistant",
+      "screen": "chat"
+    },
+    {
+      "id": "agent",
+      "label": "Agent",
+      "screen": "agent"
+    }
+  ],
+  "screens": [
+    {
+      "id": "chat",
+      "title": "Assistant",
+      "pattern": "FormPage"
+    },
+    {
+      "id": "agent",
+      "title": "Invoice reminders",
+      "pattern": "TaskList",
+      "ai": {
+        "roles": [
+          "agent"
+        ],
+        "acts": true,
+        "takeover": true,
+        "highImpactActions": [
+          {
+            "label": "Pay",
+            "approval": "each"
+          }
+        ]
+      }
+    }
+  ]
+}

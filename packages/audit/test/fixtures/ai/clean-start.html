@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- Clean twin: an empty conversation with starting points. -->
+<html lang="en" data-theme="praxis-carbon" data-appearance="light" data-piq-screen="chat">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assistant</title>
+<link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css">
+<style>body { margin: 0; padding: 16px; font-family: var(--piq-font-body); color: var(--piq-color-text); background: var(--piq-color-ground); } p { margin: 0 0 8px; } button, input, select, textarea { font: inherit; min-block-size: 44px; min-inline-size: 44px; box-sizing: border-box; max-inline-size: 100%; }</style>
+</head>
+<body>
+<main>
+<h1>Assistant</h1>
+<ul id="starters" aria-label="Suggestions">
+  <li><button type="button" data-piq-ai-control="starter">Summarize my week</button></li>
+  <li><button type="button" data-piq-ai-control="starter">Draft a reminder</button></li>
+</ul>
+<form id="composer"><textarea id="prompt" data-piq-ai="prompt" aria-label="Ask the assistant"></textarea> <button id="send">Send</button></form>
+</main>
+</body>
+</html>

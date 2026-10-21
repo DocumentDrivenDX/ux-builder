@@ -295,22 +295,22 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `view.one-task` | context: view | blueprint `view.one-task` | Keep an embedded view to one screen and one task; put further steps in modal tasks or sections of that screen. |
 | `view.states` | context: view | blueprint `view.states` | Every screen of an embedded view, whatever its pattern, declares its empty, loading and error states. |
 | `view.theme-from-host` | context: view | review | Take the theme only from the host's styles and appearance, and follow the host when it changes them. |
-| `ai.disclose` | aiRole: generative, assistant, agent | review | Content made by AI is labelled as AI-made where it appears, or sits in a region whose label says so. |
+| `ai.disclose` | aiRole: generative, assistant, agent | audit `ai-disclose`, review | Content made by AI is labelled as AI-made where it appears, or sits in a region whose label says so. |
 | `ai.not-a-person` | aiRole: generative, assistant, agent | lint `ux-builder/ai-neutral-voice`, review | The UI never presents the AI as a person: no first-person thinking or feeling, and no human name or face that implies a human author. |
 | `ai.capabilities` | aiRole: generative, assistant, agent | review | At first use, the screen says what the AI can and cannot do, and that its results may need checking. |
-| `ai.starters` | aiRole: assistant, agent | review | An open-ended prompt offers suggested starting points, and they are never the only way to start. |
+| `ai.starters` | aiRole: assistant, agent | audit `ai-starters`, review | An open-ended prompt offers suggested starting points, and they are never the only way to start. |
 | `ai.fallback` | aiRole: generative | blueprint `ai.fallback` | Where AI adds to a task rather than being the task, the task can still be done without it. |
-| `ai.stop` | aiRole: generative, assistant, agent | review | While AI is generating or working, a Stop control is reachable and named; stopping keeps what has arrived and says that it stopped. |
-| `ai.correct` | aiRole: generative, assistant, agent | review | AI output can be edited, retried, regenerated or reverted, and the screen says when a correction has taken effect. |
+| `ai.stop` | aiRole: generative, assistant, agent | audit `ai-stop` | While AI is generating or working, a Stop control is reachable and named; stopping keeps what has arrived and says that it stopped. |
+| `ai.correct` | aiRole: generative, assistant, agent | audit `ai-correct` | AI output can be edited, retried, regenerated or reverted, and the screen says when a correction has taken effect. |
 | `ai.dismiss` | aiRole: generative | review | An AI suggestion the user did not ask for can be dismissed in one action, and stays dismissed. |
 | `agent.on-off` | aiRole: agent | review | The user can turn the agent off, and its state (off, idle, working, waiting for you) is shown. |
 | `agent.declare-high-impact` | aiRole: agent | blueprint `agent.declare-high-impact` | A screen whose agent acts lists the actions it can take that are irreversible, costly or seen by other people. |
-| `agent.approve-high-impact` | aiRole: agent | blueprint `agent.approve-high-impact` | Each high-impact action waits for the user's approval, shows what will happen and to what, offers Deny, and is never approved on the user's behalf. |
-| `agent.plan-visible` | aiRole: agent | review | When an agent works in steps, its plan and next step are shown, each step with its status, and a change of plan is shown too. |
-| `agent.interrupt` | aiRole: agent | review | A working agent can be paused or stopped at any step, and the user can then give a new instruction. |
-| `agent.who-acts` | aiRole: agent | review | When the user can take over and hand back, the screen states who is acting now, and the agent's actions are distinguishable from the user's. |
-| `agent.recover` | aiRole: agent | review | A failed step is described at that step and in text, and the user can retry it or return to an earlier step without starting over. |
-| `agent.summary` | aiRole: agent | review | A finished run ends with a summary of what was done, with the detail available on request. |
+| `agent.approve-high-impact` | aiRole: agent | blueprint `agent.approve-high-impact`, audit `agent-approval` | Each high-impact action waits for the user's approval, shows what will happen and to what, offers Deny, and is never approved on the user's behalf. |
+| `agent.plan-visible` | aiRole: agent | audit `agent-plan` | When an agent works in steps, its plan and next step are shown, each step with its status, and a change of plan is shown too. |
+| `agent.interrupt` | aiRole: agent | audit `agent-interrupt` | A working agent can be paused or stopped at any step, and the user can then give a new instruction. |
+| `agent.who-acts` | aiRole: agent | audit `agent-who-acts` | When the user can take over and hand back, the screen states who is acting now, and the agent's actions are distinguishable from the user's. |
+| `agent.recover` | aiRole: agent | audit `agent-recover` | A failed step is described at that step and in text, and the user can retry it or return to an earlier step without starting over. |
+| `agent.summary` | aiRole: agent | audit `agent-summary` | A finished run ends with a summary of what was done, with the detail available on request. |
 | `agent.status-unwatched` | aiRole: agent | review | Progress, duration and step status reach a user who is not watching (a persistent status region or a notification), above all for risky steps. |
 | `ai.sources` | aiRole: assistant, agent | review | Output that relies on documents, data or the web shows which, linked where possible. |
 | `ai.uncertainty` | aiRole: generative, assistant, agent | review | The UI says when the AI is unsure or has assumed something the user did not say, instead of presenting a guess as fact. |
@@ -322,18 +322,18 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `ai.notify-changes` | aiRole: generative, assistant, agent | review | When the AI's behaviour or model changes in a way users would notice, they are told. |
 | `ai.inclusive` | aiRole: generative, assistant, agent | review | The AI does not infer personal or cultural attributes it can ask for, and is tested with diverse people for stereotyped output. |
 | `genui.renderable` | aiRole: assistant | blueprint `genui.renderable` | An assistant renders inline only components the catalogue marks renderable. |
-| `genui.review-prefill` | aiRole: assistant, agent | review | Values the AI pre-fills in an inline form or wizard are editable, and are submitted only by the user's own action. |
+| `genui.review-prefill` | aiRole: assistant, agent | audit `genui-review-prefill` | Values the AI pre-fills in an inline form or wizard are editable, and are submitted only by the user's own action. |
 | `genui.keep-input` | aiRole: assistant | review | Regenerating an answer never silently discards what the user typed into its inline UI. |
 | `genui.history` | aiRole: assistant | review | A submitted inline component stays readable in the conversation, shows what was submitted, and can no longer be changed. |
-| `ai.declared` | always | review | A screen that shows AI content declares its AI role in the blueprint. |
+| `ai.declared` | always | audit `ai-declared` | A screen that shows AI content declares its AI role in the blueprint. |
 | `ai.user-initiates` | aiRole: generative, assistant, agent | lint `ux-builder/ai-neutral-voice` | Labels keep the user as the one who starts an action ("Summarize", "Summarize with Assistant"), not the AI ("Assistant, summarize"). |
 | `card.actions-few` | aiRole: assistant, agent | review | A card offers few primary actions, usually one to three and never more than six. |
 | `card.wrap` | aiRole: assistant, agent | review | Text blocks and choice labels in a card wrap, so text is never cut off on a narrow screen. |
-| `card.input-label` | aiRole: assistant, agent | review | Every input in a card has a label of its own; a placeholder is never the only label. |
+| `card.input-label` | aiRole: assistant, agent | audit `card-input-label` | Every input in a card has a label of its own; a placeholder is never the only label. |
 | `card.input-error` | aiRole: assistant, agent | review | An input in a card that validates (required, pattern, range) says what is wrong in an error message. |
 | `card.heading` | aiRole: assistant, agent | review | A card with more than its title marks the title as a heading. |
 | `card.columns-few` | aiRole: assistant, agent | review | A column layout in a card uses few columns (at most three) and no fixed widths wider than a compact screen allows. |
-| `card.narrow-first` | aiRole: assistant, agent | review | A card is laid out for the narrowest width it will show at and still works wider; it never scrolls sideways. |
+| `card.narrow-first` | aiRole: assistant, agent | audit `card-narrow-first`, review | A card is laid out for the narrowest width it will show at and still works wider; it never scrolls sideways. |
 | `card.reading-order` | aiRole: assistant, agent | review | The order a card is read and tabbed in matches the order it is seen in. |
 | `card.image-alt` | aiRole: assistant, agent | review | Every informative image in a card has alternative text. |
 | `card.image-transparent` | aiRole: assistant, agent | review | Images in a card use transparent backgrounds so they suit light and dark themes, and text never sits on a colour that hurts reading. |
@@ -373,12 +373,17 @@ Declare each screen's AI role in the blueprint: a screen where AI generates cont
 
 Mark AI in the markup so the audit can check it (the SDK's assistant components do this for you):
 
-- `data-piq-ai="generated"`: content made by AI, with a visible disclosure and a correction control (data-piq-ai-control="retry", "regenerate", "edit" or "undo").
+- `data-piq-ai="generated"`: content made by AI, with a visible disclosure and a correction control (data-piq-ai-control="retry", "regenerate", "edit" or "undo"); inline UI it makes has a label on each input, pre-filled values the user can edit, and a submit control of its own.
 - `data-piq-ai="status"`: the live region saying what the AI is doing (aria-live; aria-busy="true" while working), with a Stop or Pause control in or beside it.
 - `data-piq-ai="plan"`: an agent's steps, each data-piq-ai="step" with data-piq-ai-status (pending, running, done, failed or skipped) and that status in text.
 - `data-piq-ai="approval"`: a request for approval, with data-piq-ai-control="approve" and "deny", neither pre-chosen.
 - `data-piq-ai-actor="agent" | "user"`: the live region saying who is acting now, updated on takeover and hand-back.
 - `data-piq-ai-label`: an ancestor whose visible text discloses AI for everything inside it.
+- `data-piq-ai="prompt"`: the field or form where the user asks the AI; an empty conversation offers suggested starting points (data-piq-ai-control="starter").
+- `data-piq-ai-status="done"`: on the status region when a run has finished, with its summary shown (data-piq-ai="summary").
+- `data-piq-ai-takeover`: on the agent region when the user can take over; then data-piq-ai-actor says who is acting.
+- `data-piq-ai-control="previous"`: returns to the previous step, beside "retry", on a failed step.
+- `data-piq-screen="<screen id>"`: on the page's root: the blueprint screen it shows, for ux-builder-audit --blueprint.
 
 The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC. The AI rules also restate, in the SDK's own words, Microsoft's HAX Toolkit, its design and Learn guidance and the Adaptive Cards documentation, Google PAIR's People + AI Guidebook, and Cheng, Liang, Schoop and Nichols (IUI '26); ux-builder is not affiliated with or endorsed by Microsoft either.
 
