@@ -48,15 +48,24 @@ apps/theme-builder/
   server.mjs           Node: Vite in middleware mode + the API below
   api/
     context.mjs        GET  /api/context   shared design systems, existing names, model availability
+    theme.mjs          GET  /api/theme     one saved theme, composed from tokens/ (US-020)
     feedback.mjs       POST /api/feedback  feedback -> setting changes + explanation (OpenAI, or mock)
     save.mjs           POST /api/save      brand + theme files, branch, commit, PR
+    artwork.mjs        frames an uploaded logo to its drawn bounds for save (US-019-AC5)
+    key.mjs            the OpenAI key, server only (ADR-019)
   src/
     App.jsx            the six steps and session state
-    steps/             Logo, Palettes, Systems, Compare, Save, Integrate
-    preview/Cell.jsx   one option on one design system, on real widgets
+    steps/             Upload, Palettes, Systems, Compare, Save, Use; ViewToggle (light/dark)
+    preview/Preview.jsx  one option on one design system, on real widgets
+    preview/Screens.jsx  the screen patterns in a preview cell (AppShell adapt="container")
     preview/compose.js option brand x design system -> resolved custom properties
-  test/                API unit tests (node:test), component tests (happy-dom)
-  e2e/                 Playwright: the core flow (US-015)
+    model.js, theme.js the builder's copy and its own theme (ux-builder-databricks)
+    Themes.jsx         "Your themes" (US-020)
+    themepage/         one page per theme: tokens, widgets, bridges (US-020)
+    home/, microsite/  the public site's home page and section pages
+  test/                API unit tests and story tests (node:test)
+  e2e/builder/         Playwright: the core flow (US-015) and each step
+  e2e/client/          Playwright: a client app on a saved theme
 ```
 
 | Concern | Where | How |
@@ -68,8 +77,9 @@ apps/theme-builder/
 
 ## Steps
 
-The prototype (`prototypes/theme-builder/`, approved by the operator) is the
-specification for the screens: same six steps, copy and layout. The operator
+The prototype (`prototypes/theme-builder/`, approved by the operator) was the
+starting specification for the screens: same six steps, copy and layout. It is
+superseded: the stories (US-015..US-020) and this design now govern the builder. The operator
 kept three additions on 2026-10-06: the settings sliders, opening a pull
 request on save, and flagged colour moves. Round history, side-by-side
 pinning and a full-size view were removed.

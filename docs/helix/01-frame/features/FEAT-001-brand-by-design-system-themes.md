@@ -116,8 +116,9 @@ THEME-09. The existing 0.x themes are reproduced exactly (`npm run verify`
 and a resolved-JSON diff show no change). *[Amended — ADR-018]* They
 are themes: `praxis` and `plain` are their brands with their own
 anatomy; `praxis-material`, `praxis-fluentui` and `praxis-carbon` are the
-praxis brand on the shared design systems `material`, `fluent` and `carbon`,
-the only shared design systems.
+praxis brand on the shared design systems `material`, `fluent` and `carbon`.
+The shared design systems are `material`, `fluent`, `carbon` and
+`databricks`.
 
 #### Themes *[Added — ADR-018]*
 
@@ -187,7 +188,7 @@ major version, and its removal is announced in a changelog.
 ## Dependencies
 
 - **Other features**: Enables FEAT-002, FEAT-003, FEAT-004.
-- **External services**: Style Dictionary 5.
+- **External services**: none. The token build is hand-written (`packages/tokens/build.mjs`).
 - **PRD requirements**: P0-1, P0-2; P1-4.
 
 ## Out of Scope

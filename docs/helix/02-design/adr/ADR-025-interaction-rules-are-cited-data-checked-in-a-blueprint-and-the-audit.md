@@ -26,7 +26,7 @@ ddx:
 
 | Date | Status | Deciders | Related | Confidence |
 |------|--------|----------|---------|------------|
-| 2026-10-20 | **Accepted** 2026-10-20 (operator: "update all the relevant helix docs to prepare for implementation then develop it") | Operator; harness team for the Praxis rules; legal counsel for PRV-02 before the first release that ships rules | ADR-020, ADR-021, ADR-023, ADR-024, FEAT-008, CONTRACT-004, CONTRACT-005 | Medium |
+| 2026-10-20 | **Accepted** 2026-10-20 (operator: "update all the relevant helix docs to prepare for implementation then develop it") | Operator; harness team for the Praxis rules; legal counsel for PRV-02 (operator waiver for the first release, 2026-10-21: see *Amendment*) | ADR-020, ADR-021, ADR-023, ADR-024, FEAT-008, CONTRACT-004, CONTRACT-005 | Medium |
 
 ## Context
 
@@ -108,7 +108,7 @@ ddx:
 
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
-| A paraphrase is too close to the source | Low | Medium | PRV-02; counsel review before the first release that ships rules |
+| A paraphrase is too close to the source | Low | Medium | PRV-02; `check-rules` (licence, 25-word quote limit, credit in the notices); counsel review, waived by the operator for the first release (*Amendment*) — a paraphrase counsel flags is rewritten in the next patch |
 | Heuristic audit checks misfire on custom navigation | Medium | Low | Warnings first; `data-audit-ignore`; rule IDs in findings |
 | Rules lag a guideline update | Medium | Low | Sources carry URLs; a review per minor release |
 
@@ -117,6 +117,16 @@ ddx:
 | Success Metric | Review Trigger |
 |----------------|----------------|
 | FEAT-008's success metrics | A source guideline's major revision; an agent-built example that passes the blueprint check but fails a person's review |
+
+## Amendment *[2026-10-21 — operator waiver]*
+
+The operator waived counsel's review of the paraphrases as a precondition for
+the first release that ships rules (`@ux-builder/ui` 0.7.0), choosing to
+release now and revise if counsel objects (AR-2026-10-21 A4, decision D-1).
+The brief is `docs/legal/counsel-brief-interaction-rules.md`. Counsel's
+review stays open: no rule quotes a source today, and a paraphrase counsel
+flags is rewritten in the next patch release, with the change in its
+changelog.
 
 ## Concern Impact
 

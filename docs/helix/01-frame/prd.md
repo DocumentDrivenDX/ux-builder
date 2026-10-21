@@ -409,7 +409,8 @@ rules, so it invents colours and components.
 - **Language/Runtime**: JavaScript (ES modules) on Node 20+. The palette engine
   (`@ux-builder/engine`) replaced `tools/theme_accent.py`, which stays as its
   extraction reference.
-- **Key Libraries**: Style Dictionary 5 (token build), React 19 and Vite 8
+- **Key Libraries**: a hand-written token build (`packages/tokens/build.mjs`; no
+  Style Dictionary), React 19 and Vite 8
   (`@ux-builder/ui`), Storybook 10 (workbench), Changesets 3 (releases).
 - **Packages**: `@ux-builder/tokens` 1.6.0, `@ux-builder/ui` 0.6.3,
   `@ux-builder/create-app` 0.4.2, `@ux-builder/audit` 0.1.2 and `@ux-builder/mcp`
