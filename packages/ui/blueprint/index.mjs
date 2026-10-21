@@ -2,7 +2,7 @@
    app's or view's plan against them (FEAT-008, ADR-025, CONTRACT-005).
 
      import { rulesFor, checkBlueprint } from "@ux-builder/ui/blueprint";
-     rulesFor({ context: "view", sizeClasses: ["compact"], inputs: ["coarse"] });
+     rulesFor({ context: "view", sizeClasses: ["compact"], inputs: ["coarse"], aiRoles: ["agent"] });
      checkBlueprint(JSON.parse(readFileSync("app.blueprint.json", "utf8")));
 
    Reads only the installed catalogue.json, so it runs in Node or a browser
@@ -10,7 +10,7 @@
 
 import catalogue from "../catalogue.json" with { type: "json" };
 
-const { rules: RULES, recipes: RECIPES, limits: LIMITS, blueprintSchema } = catalogue.interaction;
+const { rules: RULES, recipes: RECIPES, limits: LIMITS, blueprintSchema, aiRoles: AI_ROLES } = catalogue.interaction;
 const PATTERNS = catalogue.patterns.filter((p) => p.type === "component").map((p) => p.name);
 const byId = new Map(RULES.map((r) => [r.id, r]));
 
@@ -26,11 +26,14 @@ const STATES = ["empty", "loading", "error"];
 
 /* ------------------------------------------------------------ rulesFor */
 const meets = (axis, values) => !axis || values == null || axis.some((v) => [].concat(values).includes(v));
+/* AI roles are the exception: a target with no role matches no AI rule (FEAT-011 AIO-02). */
+const meetsRole = (axis, roles) => !axis || axis.some((v) => [].concat(roles ?? []).includes(v));
 
 /* Rules whose `when` matches the target on every axis the rule names; an
-   axis the target leaves out matches every value. */
-export function rulesFor({ context, sizeClasses, inputs } = {}) {
-  return RULES.filter((r) => meets(r.when?.context, context) && meets(r.when?.sizeClass, sizeClasses) && meets(r.when?.input, inputs));
+   axis the target leaves out matches every value, except `aiRoles`: a rule
+   for an AI role applies only to a target with that role. */
+export function rulesFor({ context, sizeClasses, inputs, aiRoles } = {}) {
+  return RULES.filter((r) => meets(r.when?.context, context) && meets(r.when?.sizeClass, sizeClasses) && meets(r.when?.input, inputs) && meetsRole(r.when?.aiRole, aiRoles));
 }
 
 /* ----------------------------------------------------------- recipes */

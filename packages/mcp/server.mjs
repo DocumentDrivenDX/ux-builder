@@ -176,15 +176,22 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess) {
 
   // Interaction and IA rules, recipes and the blueprint check (FEAT-008 AGT-01; US-053).
   if (bp && cat.interaction) {
+    // AI roles (FEAT-011 AIO-02), from @ux-builder/ui 0.x with FEAT-011; an unknown role is refused, naming the valid ones.
+    const aiRoles = cat.interaction.aiRoles;
     server.registerTool("get_rules", {
       title: "Get the interaction rules",
-      description: "The interaction and information-architecture rules that apply to a target: how screens fit together and behave (navigation by size, modals, safeguards, states, emphasis). Rules apply by context (app, or an embedded view), size class and input, never by device. Each has an ID the blueprint check and the audit report use, and links to its sources.",
+      description: `The interaction and information-architecture rules that apply to a target: how screens fit together and behave (navigation by size, modals, safeguards, states, emphasis${aiRoles ? ", and AI and agent screens" : ""}). Rules apply by context (app, or an embedded view), size class and input${aiRoles ? ", and by a screen's AI role" : ""}, never by device. Each has an ID the blueprint check and the audit report use, and links to its sources.`,
       inputSchema: {
         context: z.enum(["app", "view"]).optional().describe("A whole app with its own shell, or a view embedded in a host (an MCP App view)"),
         sizeClasses: z.array(z.enum(SIZE_CLASSES)).optional().describe("The size classes the app or view supports: compact from 0px, medium 600, expanded 840, large 1200, extra-large 1600"),
         inputs: z.array(z.enum(["coarse", "fine"])).optional().describe("coarse: touch; fine: mouse, trackpad or pen"),
+        ...(aiRoles ? { aiRoles: z.array(z.string()).optional().describe(`The screen's AI roles: ${aiRoles.join(", ")} (generative: AI output in an ordinary screen; assistant: a conversation; agent: the AI acts for the user). Without one, no AI rule is returned`) } : {}),
       },
-    }, async (target) => ok(bp.rulesFor(target)));
+    }, async (target) => {
+      const unknown = (target.aiRoles ?? []).filter((r) => !aiRoles.includes(r));
+      if (unknown.length) return fail(`Unknown AI role${unknown.length > 1 ? "s" : ""} ${unknown.map((r) => `"${r}"`).join(", ")}. The roles are: ${aiRoles.join(", ")}.`);
+      return ok(bp.rulesFor(target));
+    });
 
     server.registerTool("list_recipes", {
       title: "List recipes",

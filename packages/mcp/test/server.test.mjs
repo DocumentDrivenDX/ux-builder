@@ -169,6 +169,27 @@ describe("US-053: an agent plans and checks screens through MCP", () => {
   });
 });
 
+describe("US-076: an agent reads the AI rules for a screen's role through MCP", () => {
+  // @covers US-076-AC1
+  test("AC1: get_rules with role agent returns what rulesFor does: the agent rules and the rules with no AI condition", async () => {
+    const { rulesFor } = await import("@ux-builder/ui/blueprint");
+    for (const target of [{ aiRoles: ["agent"] }, { context: "view", aiRoles: ["agent"] }, { aiRoles: ["assistant", "generative"], sizeClasses: ["compact"] }]) {
+      assert.deepEqual((await call("get_rules", target)).data, rulesFor(target));
+    }
+    const got = (await call("get_rules", { aiRoles: ["agent"] })).data;
+    assert.ok(got.some((r) => r.id === "agent.approve-high-impact") && got.some((r) => r.id === "modal.one-at-a-time"));
+    assert.ok(!got.some((r) => r.when?.aiRole && !r.when.aiRole.includes("agent")));
+  });
+
+  // @covers US-076-AC2
+  test("AC2: without a role, no AI rule; an unknown role is refused, naming the roles", async () => {
+    assert.ok((await call("get_rules", {})).data.every((r) => !r.when?.aiRole));
+    const miss = await call("get_rules", { aiRoles: ["chatbot"] });
+    assert.equal(miss.isError, true);
+    assert.match(miss.content[0].text, /"chatbot"[\s\S]*generative, assistant, agent/);
+  });
+});
+
 describe("FEAT-009 AGW-04: the SDK as the app has it", () => {
   // @covers US-057-AC4
   test("run from an app's directory, the server serves that app's installed @ux-builder/ui catalogue and guidance", async () => {

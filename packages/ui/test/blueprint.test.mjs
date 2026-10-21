@@ -33,13 +33,13 @@ describe("US-050: cited rules for a target", () => {
   // @covers US-050-AC2
   test("AC2: rulesFor returns exactly the rules whose conditions match on every axis they name", () => {
     const target = { context: "app", sizeClasses: ["compact"], inputs: ["coarse"] };
-    const expected = source.rules.filter((r) => (!r.when?.context || r.when.context.includes("app")) && (!r.when?.sizeClass || r.when.sizeClass.includes("compact")) && (!r.when?.input || r.when.input.includes("coarse")));
+    const expected = source.rules.filter((r) => !r.when?.aiRole && (!r.when?.context || r.when.context.includes("app")) && (!r.when?.sizeClass || r.when.sizeClass.includes("compact")) && (!r.when?.input || r.when.input.includes("coarse")));
     assert.deepEqual(rulesFor(target).map((r) => r.id), expected.map((r) => r.id));
     const got = new Set(rulesFor(target).map((r) => r.id));
     assert.ok(got.has("modal.one-at-a-time"), "a rule with no conditions matches every target");
     assert.ok(got.has("nav.compact-destinations") && got.has("input.touch-targets"));
     assert.ok(!got.has("nav.standing-at-expanded") && !got.has("input.focus-visible") && !got.has("view.no-shell"));
-    assert.equal(rulesFor().length, source.rules.length, "an axis left out matches every value");
+    assert.equal(rulesFor().length, source.rules.filter((r) => !r.when?.aiRole).length, "an axis left out matches every value (but a target with no AI role gets no AI rule)");
   });
 
   // @covers US-050-AC3

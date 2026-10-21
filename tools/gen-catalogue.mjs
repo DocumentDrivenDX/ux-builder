@@ -193,7 +193,9 @@ export const RULES = [
 export function interaction() {
   const rules = json("guidelines/rules.json"), recipes = json("guidelines/recipes.json");
   const blueprintSchema = json("guidelines/schema/blueprint.schema.json");
-  return { version: rules.version, limits: rules.limits, rules: rules.rules, recipes: recipes.recipes, blueprintSchema };
+  // The AI roles a rule or a screen may name (FEAT-011, CONTRACT-005), from the rule schema.
+  const aiRoles = json("guidelines/schema/rules.schema.json").$defs.rule.properties.when.properties.aiRole.items.enum;
+  return { version: rules.version, limits: rules.limits, aiRoles, rules: rules.rules, recipes: recipes.recipes, blueprintSchema };
 }
 
 export function catalogue() {
@@ -299,7 +301,9 @@ function reference(cat) {
     "",
     ...cat.interaction.recipes.map((r) => `- ${code(r.id)} (${r.kind}): ${r.job} ${r.screens.map((x) => code(`<${x.pattern}>`)).join(", ")}.`),
     "",
-    "The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.",
+    ...aiSection(cat),
+    "",
+    "The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC. The AI rules also restate, in the SDK's own words, Microsoft's HAX Toolkit, its design and Learn guidance and the Adaptive Cards documentation, Google PAIR's People + AI Guidebook, and Cheng, Liang, Schoop and Nichols (IUI '26); ux-builder is not affiliated with or endorsed by Microsoft either.",
     "",
     "### Themes",
     "",
@@ -307,6 +311,34 @@ function reference(cat) {
     "|-------|---------------|-------------|",
     ...cat.themes.map((t) => `| ${code(t.name)} | ${t.designSystem ?? "own anatomy"} | ${t.appearances.join(", ")} (default ${t.default}) |`),
   ].join("\n");
+}
+
+/* The AI and agent section (FEAT-011 AIO-01, US-076-AC5): the AI rule IDs
+   by role, how to declare a screen's role, and the markers the audit reads
+   (CONTRACT-005 AI markup). */
+const AI_MARKERS = [
+  ['data-piq-ai="generated"', 'content made by AI, with a visible disclosure and a correction control (data-piq-ai-control="retry", "regenerate", "edit" or "undo")'],
+  ['data-piq-ai="status"', 'the live region saying what the AI is doing (aria-live; aria-busy="true" while working), with a Stop or Pause control in or beside it'],
+  ['data-piq-ai="plan"', 'an agent\'s steps, each data-piq-ai="step" with data-piq-ai-status (pending, running, done, failed or skipped) and that status in text'],
+  ['data-piq-ai="approval"', 'a request for approval, with data-piq-ai-control="approve" and "deny", neither pre-chosen'],
+  ['data-piq-ai-actor="agent" | "user"', "the live region saying who is acting now, updated on takeover and hand-back"],
+  ["data-piq-ai-label", "an ancestor whose visible text discloses AI for everything inside it"],
+];
+function aiSection(cat) {
+  const ai = cat.interaction.rules.filter((r) => r.when?.aiRole);
+  const any = cat.interaction.rules.filter((r) => /^(ai|agent|genui|card)\./.test(r.id) && !r.when?.aiRole);
+  return [
+    "### AI and agent screens",
+    "",
+    `Declare each screen's AI role in the blueprint: a screen where AI generates content, converses or acts has ${code("ai")} in ${code("app.blueprint.json")}, for example ${code('"ai": { "roles": ["agent"], "acts": true, "highImpactActions": [{ "label": "Pay", "approval": "each" }] }')}. The roles are ${cat.interaction.aiRoles.map(code).join(", ")}: ${code("generative")} for AI output inside an ordinary screen, ${code("assistant")} for a conversation, ${code("agent")} where the AI acts for the user. The AI rules apply by declared role and combine with the others, so an embedded agent view gets the view rules and the agent rules. Get them with ${code("rulesFor({ aiRoles })")} or ${code("get_rules")} with ${code("aiRoles")}; a target with no role gets no AI rule. The AI rules by role:`,
+    "",
+    ...cat.interaction.aiRoles.map((role) => `- **${role}**: ${ai.filter((r) => r.when.aiRole.includes(role)).map((r) => code(r.id)).join(", ")}`),
+    ...(any.length ? [`- **any screen**: ${any.map((r) => code(r.id)).join(", ")}`] : []),
+    "",
+    "Mark AI in the markup so the audit can check it (the SDK's assistant components do this for you):",
+    "",
+    ...AI_MARKERS.map(([m, what]) => `- ${code(m)}: ${what}.`),
+  ];
 }
 
 const START = "<!-- catalogue:start -->", END = "<!-- catalogue:end -->";

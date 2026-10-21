@@ -163,6 +163,18 @@ rendered card with the rest of the page.
 Total: 47 rules: 30 with an automated check (blueprint, audit, lint or
 card) and 17 review only.
 
+*[Build note 2026-10-21 — FEAT-011 step 1]* In `guidelines/rules.json`:
+- `ai.user-initiates` also cites ADR-028 (own). Its only source above was
+  MSL, which FEAT-011 AIP-03 does not allow to stand alone;
+  `check-rules` now fails a rule whose only sources are Microsoft Learn's
+  agent pages.
+- `genui.keep-input` and `genui.history` cite FEAT-007 (GEN-04, AGT-T-04)
+  for "own".
+- Until the audit checks, the lint rule and `checkCard` are built, a rule
+  whose only automated checks are of those kinds carries a `review` check
+  with its own ID, so `check-rules` (which requires every named check to
+  exist) passes. Each later step replaces it with the real check.
+
 ## Checks
 
 | Kind | Where | What it reads |
