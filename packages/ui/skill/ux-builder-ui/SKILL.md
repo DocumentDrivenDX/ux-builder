@@ -304,13 +304,13 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `ai.not-a-person` | aiRole: generative, assistant, agent | review | The UI never presents the AI as a person: no first-person thinking or feeling, and no human name or face that implies a human author. |
 | `ai.capabilities` | aiRole: generative, assistant, agent | review | At first use, the screen says what the AI can and cannot do, and that its results may need checking. |
 | `ai.starters` | aiRole: assistant, agent | review | An open-ended prompt offers suggested starting points, and they are never the only way to start. |
-| `ai.fallback` | aiRole: generative | review | Where AI adds to a task rather than being the task, the task can still be done without it. |
+| `ai.fallback` | aiRole: generative | blueprint `ai.fallback` | Where AI adds to a task rather than being the task, the task can still be done without it. |
 | `ai.stop` | aiRole: generative, assistant, agent | review | While AI is generating or working, a Stop control is reachable and named; stopping keeps what has arrived and says that it stopped. |
 | `ai.correct` | aiRole: generative, assistant, agent | review | AI output can be edited, retried, regenerated or reverted, and the screen says when a correction has taken effect. |
 | `ai.dismiss` | aiRole: generative | review | An AI suggestion the user did not ask for can be dismissed in one action, and stays dismissed. |
 | `agent.on-off` | aiRole: agent | review | The user can turn the agent off, and its state (off, idle, working, waiting for you) is shown. |
-| `agent.declare-high-impact` | aiRole: agent | review | A screen whose agent acts lists the actions it can take that are irreversible, costly or seen by other people. |
-| `agent.approve-high-impact` | aiRole: agent | review | Each high-impact action waits for the user's approval, shows what will happen and to what, offers Deny, and is never approved on the user's behalf. |
+| `agent.declare-high-impact` | aiRole: agent | blueprint `agent.declare-high-impact` | A screen whose agent acts lists the actions it can take that are irreversible, costly or seen by other people. |
+| `agent.approve-high-impact` | aiRole: agent | blueprint `agent.approve-high-impact` | Each high-impact action waits for the user's approval, shows what will happen and to what, offers Deny, and is never approved on the user's behalf. |
 | `agent.plan-visible` | aiRole: agent | review | When an agent works in steps, its plan and next step are shown, each step with its status, and a change of plan is shown too. |
 | `agent.interrupt` | aiRole: agent | review | A working agent can be paused or stopped at any step, and the user can then give a new instruction. |
 | `agent.who-acts` | aiRole: agent | review | When the user can take over and hand back, the screen states who is acting now, and the agent's actions are distinguishable from the user's. |
@@ -321,12 +321,12 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `ai.uncertainty` | aiRole: generative, assistant, agent | review | The UI says when the AI is unsure or has assumed something the user did not say, instead of presenting a guess as fact. |
 | `ai.ask-when-unclear` | aiRole: agent | review | In a high-stakes step an ambiguous request is clarified with the user; in a low-stakes one a stated default may be used. |
 | `ai.improve-request` | aiRole: generative, assistant, agent | review | A blocked or unhelpful result says why, where it can, and how to ask differently. |
-| `ai.consent` | aiRole: generative, assistant, agent | review | Before personal data or usage leaves the device for an AI feature, the user is told what is sent and why, gives permission, and can opt out later. |
+| `ai.consent` | aiRole: generative, assistant, agent | blueprint `ai.consent`, review | Before personal data or usage leaves the device for an AI feature, the user is told what is sent and why, gives permission, and can opt out later. |
 | `ai.feedback` | aiRole: generative, assistant, agent | review | Users can give feedback on a specific output; giving it is optional and never blocks the task. |
 | `ai.memory-visible` | aiRole: assistant, agent | review | What the AI remembers or has learned about the user can be seen and changed. |
 | `ai.notify-changes` | aiRole: generative, assistant, agent | review | When the AI's behaviour or model changes in a way users would notice, they are told. |
 | `ai.inclusive` | aiRole: generative, assistant, agent | review | The AI does not infer personal or cultural attributes it can ask for, and is tested with diverse people for stereotyped output. |
-| `genui.renderable` | aiRole: assistant | review | An assistant renders inline only components the catalogue marks renderable. |
+| `genui.renderable` | aiRole: assistant | blueprint `genui.renderable` | An assistant renders inline only components the catalogue marks renderable. |
 | `genui.review-prefill` | aiRole: assistant, agent | review | Values the AI pre-fills in an inline form or wizard are editable, and are submitted only by the user's own action. |
 | `genui.keep-input` | aiRole: assistant | review | Regenerating an answer never silently discards what the user typed into its inline UI. |
 | `genui.history` | aiRole: assistant | review | A submitted inline component stays readable in the conversation, shows what was submitted, and can no longer be changed. |

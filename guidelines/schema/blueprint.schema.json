@@ -167,6 +167,9 @@
             "items": {
               "$ref": "#/$defs/modal"
             }
+          },
+          "ai": {
+            "$ref": "#/$defs/ai"
           }
         }
       }
@@ -229,6 +232,93 @@
           "items": {
             "$ref": "#/$defs/modal"
           }
+        }
+      }
+    },
+    "ai": {
+      "description": "What AI does on this screen (FEAT-011, CONTRACT-005 AI and agent experience).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roles"
+      ],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "generative",
+              "assistant",
+              "agent"
+            ]
+          }
+        },
+        "acts": {
+          "type": "boolean"
+        },
+        "highImpactActions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approval": {
+                "enum": [
+                  "each",
+                  "plan",
+                  "none"
+                ]
+              }
+            }
+          }
+        },
+        "renders": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "region": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "compact",
+              "medium",
+              "expanded",
+              "large",
+              "extra-large"
+            ]
+          }
+        },
+        "essential": {
+          "type": "boolean"
+        },
+        "fallback": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataLeavesDevice": {
+          "type": "boolean"
+        },
+        "consent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "takeover": {
+          "type": "boolean"
         }
       }
     }

@@ -168,6 +168,13 @@ a rule, blueprint or page without these fields behaves as before.
 | `consent` | string | no | The screen or modal `id` where the user consents |
 | `takeover` | boolean | no | `true`: the user can take over from the agent and hand back |
 
+*[Amended 2026-10-21 — build of FEAT-011 step 2]* `highImpactActions[].approval`
+may be omitted; it is then treated as `"none"` and warned on
+(`agent.approve-high-impact`, US-077-AC2), not a schema error. `fallback`
+may also name a destination `id` (FEAT-011 AIB-01: "the screen or
+destination"). Inside `ai`, a `blueprint.valid` message for a value outside
+its enum names the value.
+
 ### AI markup
 
 Attributes the audit reads. SDK components emit them, and apps with their

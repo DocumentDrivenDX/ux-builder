@@ -1022,7 +1022,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "blueprint",
           "id": "ai.fallback"
         }
       ],
@@ -1198,7 +1198,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "blueprint",
           "id": "agent.declare-high-impact"
         }
       ],
@@ -1230,7 +1230,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "blueprint",
           "id": "agent.approve-high-impact"
         }
       ],
@@ -1613,6 +1613,10 @@
       },
       "checks": [
         {
+          "kind": "blueprint",
+          "id": "ai.consent"
+        },
+        {
           "kind": "review",
           "id": "ai.consent"
         }
@@ -1786,7 +1790,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "blueprint",
           "id": "genui.renderable"
         }
       ],

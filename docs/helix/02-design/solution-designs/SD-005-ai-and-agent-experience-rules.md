@@ -175,6 +175,33 @@ card) and 17 review only.
   with its own ID, so `check-rules` (which requires every named check to
   exist) passes. Each later step replaces it with the real check.
 
+*[Build note 2026-10-21 — FEAT-011 step 2]* The blueprint checks:
+- **Renderable.** The catalogue has no `renderable` flags yet (FEAT-007
+  GEN-01 is unbuilt). Until it does, `genui.renderable` uses an allow-list
+  in `packages/ui/blueprint/index.mjs`, derived from US-048 (tables, cards
+  and forms) and FEAT-011 (`Wizard`, `FormPage`): the widgets `Button`,
+  `Card`, `Checkbox`, `ChoicePicker`, `Combobox`, `DataTable`,
+  `DatePicker`, `DateRangePicker`, `Notice`, `ProgressBar`, `RadioGroup`,
+  `Select`, `StatusPill`, `Switch`, `TextArea`, `TextField`; and the
+  patterns `ChartFrame`, `DescriptionList`, `ErrorSummary`, `FormPage`,
+  `FormSection`, `PeriodComparison`, `ReviewConfirm`, `StatePanel`,
+  `StatTile`, `TaskList`, `Timeline`, `Wizard`. Shells, navigation,
+  multi-pane screens and modals are left out (open them as an artifact
+  pane, FEAT-007 AGT-T-05). Once any catalogue component carries
+  `renderable`, the flags replace the list.
+- **`approval: "plan"`.** The blueprint has no field that says a plan is
+  shown, and `agent.approve-high-impact` applies only to `agent` screens, so
+  `plan` is accepted there; the audit's `agent.plan-visible` confirms the
+  plan in the markup.
+- **Inline patterns.** Each pattern in `ai.renders` is checked with the
+  catalogue rules that name it in `appliesTo.patterns` and have a blueprint
+  check, where their `when` matches the blueprint's kind and inputs and
+  `ai.region`'s size classes (default `compact`, `medium`). Today these are
+  `screen.states` (an inline data pattern's states are the screen's
+  `states`) and, in a view, `view.no-shell`. Findings point to
+  `/screens/<i>/ai/renders/<j>` and are warnings (ADR-028 decision 5),
+  whatever the rule's own severity.
+
 ## Checks
 
 | Kind | Where | What it reads |
