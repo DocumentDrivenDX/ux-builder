@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/backlog.schema.json",
+  "title": "ux-builder assessment record: backlog (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "findings"
+  ],
+  "properties": {
+    "schema": {
+      "const": "backlog"
+    },
+    "version": {
+      "const": 1
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "run_id",
+          "title",
+          "finding_type",
+          "journey_id",
+          "state_id",
+          "role",
+          "source_refs",
+          "test_refs",
+          "evidence_refs",
+          "observed_behavior",
+          "expected_behavior_or_proposed_requirement",
+          "recommendation",
+          "component_mapping",
+          "priority",
+          "confidence",
+          "effort",
+          "dependencies",
+          "verification",
+          "proposed_doc_changes",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^F-"
+          },
+          "finding_type": {
+            "enum": [
+              "deterministic",
+              "observed",
+              "heuristic",
+              "sdk-adoption",
+              "real-user"
+            ]
+          },
+          "priority": {
+            "enum": [
+              "P0",
+              "P1",
+              "P2",
+              "P3"
+            ]
+          },
+          "confidence": {
+            "type": "object",
+            "required": [
+              "level",
+              "reason"
+            ],
+            "properties": {
+              "level": {
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ]
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "effort": {
+            "enum": [
+              "S",
+              "M",
+              "L",
+              "unknown"
+            ]
+          },
+          "status": {
+            "enum": [
+              "open",
+              "accepted",
+              "rejected",
+              "deferred"
+            ]
+          },
+          "verification": {
+            "type": "string",
+            "minLength": 1
+          },
+          "component_mapping": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "kind",
+                "version",
+                "catalogue_ref",
+                "work"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "pattern",
+                    "widget"
+                  ]
+                },
+                "work": {
+                  "enum": [
+                    "composition",
+                    "custom-gap",
+                    "sdk-defect"
+                  ]
+                }
+              }
+            }
+          },
+          "qualified": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "alignment"
+              ]
+            }
+          },
+          "uncertainty": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

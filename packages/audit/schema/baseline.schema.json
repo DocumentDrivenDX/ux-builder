@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/baseline.schema.json",
+  "title": "ux-builder assessment record: baseline (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "tests",
+    "note"
+  ],
+  "properties": {
+    "schema": {
+      "const": "baseline"
+    },
+    "version": {
+      "const": 1
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "command",
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "not-run",
+              "error"
+            ]
+          }
+        }
+      }
+    },
+    "note": {
+      "const": "Passing functional tests do not show that usability criteria are met."
+    }
+  }
+}

@@ -49,6 +49,9 @@ kind: product
 > FR-31 added. Evolved 2026-10-20 with ADR-025 and FEAT-008 (interaction and
 > information architecture): the "Interaction and information architecture"
 > subsystem, FR-32 to FR-36, P1-6 and the P1-6 acceptance sketch added.
+> Evolved 2026-10-20 with ADR-026 and FEAT-009 (HELIX-aware UX assessment,
+> from the planning brief of that date): the "UX assessment" subsystem,
+> FR-37 to FR-42, P1-7 and the P1-7 acceptance sketch added.
 
 ## Summary
 
@@ -200,6 +203,12 @@ rules, so it invents colours and components.
    Interface Guidelines, Material 3 and W3C guidance, applied to a blueprint
    before code and by the audit after, for new and existing apps and for
    embedded views (operator, 2026-10-20; FR-32 to FR-36, FEAT-008).
+7. A repeatable UX assessment of a HELIX-governed app: its journeys traced
+   to its HELIX documents and tests, a baseline, walkthroughs whose screens
+   the audit inspects in place, and ranked, evidence-backed recommendations
+   with proposed HELIX changes (operator, 2026-10-20; FR-37 to FR-42,
+   FEAT-009). Increment 1 (context, traceability, baseline, same-state
+   inspection) is P1; walkthroughs and proposals follow.
 
 ### Nice to Have (P2)
 
@@ -331,6 +340,36 @@ rules, so it invents colours and components.
   whose licence does not allow it; a release is blocked otherwise.
   *(Added 2026-10-20.)*
 
+### Subsystem: UX assessment
+
+- **FR-37** — An app owner commits an assessment manifest that binds the
+  app's HELIX marker, flow and artifact catalogue (never restating their
+  paths or requirements) and declares how to run the app, its journeys,
+  roles, fixtures, tests, limits and restrictions, with credentials only by
+  reference; it is proposed from the repository and validated (ADR-026).
+  *(Added 2026-10-20.)*
+- **FR-38** — A coding agent runs one complete assessment from a companion
+  skill and the audit's deterministic commands, without a mandatory MCP
+  server, recording stages it could not complete as blocked or partial and
+  keeping its judgments apart from deterministic results.
+  *(Added 2026-10-20.)*
+- **FR-39** — The assessment traces each journey to its HELIX goals,
+  stories, acceptance criteria and tests, records HELIX alignment issues,
+  and records the app's functional tests and audit as a baseline before
+  any change, with SDK adoption gaps apart from usability findings.
+  *(Added 2026-10-20.)*
+- **FR-40** — Journeys are walked through every applicable state, each
+  state's coverage is recorded with no false pass, and the audit's checks
+  run on the exact page state a walkthrough reached. *(Added 2026-10-20.)*
+- **FR-41** — Findings are deduplicated, mapped to installed SDK components,
+  ranked by an explicit rubric with confidence and effort, and turned into
+  proposed changes to HELIX artifacts and tests that the assessment never
+  applies itself. *(Added 2026-10-20.)*
+- **FR-42** — Each run records its inputs and versions and is comparable
+  with earlier runs; assessments stay within local or staging environments,
+  allowed origins and actions, and keep secrets out of what they write.
+  *(Added 2026-10-20.)*
+
 ## Acceptance Test Sketches
 
 | Requirement | Scenario | Input | Expected Output |
@@ -341,6 +380,7 @@ rules, so it invents colours and components.
 | P0-4 (FR-13–FR-16) | Create a theme end to end | Upload a logo, give feedback "more conservative", pick option 2, pick Carbon and Fluent, choose Carbon light | A brand file and a theme file are saved on a branch and a review PR is opened |
 | P0-5 (FR-17, FR-18) | Switch theme in an app | App built from the starter; user picks Carbon dark | Every widget and font changes; no app file was edited |
 | P1-6 (FR-32–FR-35) | Plan, check and audit an app | A blueprint with seven destinations at compact, a nested modal and an unguarded delete; the built app with two primary buttons | Three blueprint findings and one audit finding, each with its rule ID and source |
+| P1-7 (FR-37–FR-40) | Assess the theme builder, increment 1 | Its manifest; the builder running on the mock model; three checkpoints (a signed-in fixture screen, an open dialog, a form with a validation error and its input kept) | The manifest validates against the repository's HELIX marker and catalogue; every journey traces to its stories, criteria and tests; the baseline records the e2e suite and the audit; each checkpoint is inspected in place with linked findings and the task continues |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context

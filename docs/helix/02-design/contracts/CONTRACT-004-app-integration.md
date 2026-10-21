@@ -28,6 +28,10 @@ ddx:
       to: CONTRACT-005
     - kind: informed_by
       to: ADR-025
+    - kind: informed_by
+      to: CONTRACT-006
+    - kind: informed_by
+      to: ADR-026
 ---
 
 # Contract
@@ -285,6 +289,22 @@ The formats are CONTRACT-005; this section lists where an app meets them.
 | `report.json` | A finding from these checks adds `ruleId` (the rule catalogue ID) and `sources[]` (`{ title, url }`); with `--baseline`, `summary` adds `baselined` and `resolved` (counts) and the report lists `resolved[]` |
 | Baseline file | `{ tool: "ux-builder-audit", version, findings: [{ rule, url, selector, runs }] }`, sorted by `rule`, `url`, `selector` |
 | `@ux-builder/create-app` | Writes `app.blueprint.json`, a `check:blueprint` script and a CI step; option `--blueprint <file>` |
+
+## UX assessment *[Amended 2026-10-20 — planned, FEAT-009, ADR-026]*
+
+Normative from `@ux-builder/audit` 0.3.0. The formats are CONTRACT-006.
+
+- `@ux-builder/audit` exports `inspect(page, options)` and
+  `attach({ cdp, page })` beside `audit()`. `audit()` keeps its options,
+  report and exit behaviour; it is implemented on `inspect()`, and its
+  findings for the same pages are unchanged.
+- The command gains `ux-builder-audit assess <subcommand>`: `init`,
+  `validate`, `collect`, `baseline`, `browser`, `inspect`, `validate-report`.
+- The package ships the skill `skill/ux-builder-assess/SKILL.md` and the
+  JSON Schemas under `schema/`.
+- `@ux-builder/mcp`, run from an app's directory, reads that app's
+  installed `@ux-builder/ui` catalogue before its own and names the version
+  it served in its instructions.
 
 ## Error Semantics
 

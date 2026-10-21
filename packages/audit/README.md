@@ -105,6 +105,51 @@ finding's element, value, the token or widget to use, and the themes it was
 seen in. "Fix every error in `audit-report/report.json`, then run
 `npm run audit` again" is a complete instruction.
 
+## UX assessment
+
+`ux-builder-audit assess` helps a coding agent assess a HELIX-governed app's
+UX (FEAT-009, CONTRACT-006). The agent does the reasoning, guided by the
+skill `skill/ux-builder-assess/SKILL.md` shipped in this package; the
+commands do the deterministic work. An assessment writes only under its
+output path (`ux-assessment/<run>/` by default) and never changes the app's
+code or its HELIX documents.
+
+| Command | Does |
+|---|---|
+| `assess init` | Proposes `ux-assessment.yml` from the repository: the HELIX marker, flow and catalogue, the test scripts, and the flow's stories as candidate journeys, by ID only. Values it cannot work out are `<fill-in: …>` |
+| `assess validate` | Checks the manifest against its schema, the repository and HELIX: the marker as HELIX reads it, one flow, existing stories, criteria and commands, credentials only by reference, local or staging only |
+| `assess collect --run <R-id>` | Writes `requirements.json` (every HELIX document with its type, ID, path, hash and revision; goals, roles, stories and criteria) and `traceability.json` (each journey's criteria, linked to the tests that cite them with `@covers`, or marked uncovered) |
+| `assess baseline --run <R-id>` | Runs the declared tests and the audit before any change, and writes `baseline.json`; a page not on the SDK is also inspected as it is, with its SDK-adoption gaps counted apart |
+| `assess browser` | Starts Chromium with a CDP endpoint for the agent's browser driver (Playwright MCP: `--cdp-endpoint <url>`) |
+| `assess inspect --cdp <url> --page <match> --checkpoint <C-id>` | Inspects the page the agent reached, in place: no reload, no reset, same session. Writes `inspection.json`, a screenshot and the accessibility tree. `--replay <steps.json>` reproduces a state instead, and inspects it only if the expected state is there |
+| `assess validate-report <run-dir>` | Checks a run package: every record's schema, evidence that resolves, findings qualified where HELIX's alignment review found a conflict |
+
+The manifest binds HELIX rather than describing it: name the flow (or let the
+marker's `defaults.flow` choose), and the assessment finds the documents and
+their types the way HELIX does.
+
+```yaml
+version: 1
+app: { name: Review app }
+helix: { flow: helix }
+run: { start: npm run preview, baseUrl: http://127.0.0.1:4173/, environment: local }
+roles: [{ id: reviewer, auth: { storageState: .auth/reviewer.json } }]
+journeys:
+  - { id: J-review, story: US-012, priority: critical, role: reviewer, entry: /queue }
+tests: [{ id: e2e, command: npm run test:e2e }]
+restrictions: { writes: report-only }
+```
+
+From code, `inspect(page)` runs the audit's checks on a Playwright page as it
+is; `audit()` is built on it. Checks that change the page (`focus-obscured`,
+pressing Escape in dialogs) run only with `stateAffecting`, and the result
+says what could not be put back.
+
+A clean audit is not proof of usability or of full accessibility
+compliance, and passing functional tests do not show that usability criteria
+are met. The assessment says what it checked, what it saw and what remains
+for representative users to confirm.
+
 ## In CI
 
 The starter (`npm create @ux-builder/app`) runs `npm run lint` and `npm run audit`

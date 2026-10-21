@@ -5,7 +5,9 @@
 
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -164,5 +166,27 @@ describe("US-053: an agent plans and checks screens through MCP", () => {
     assert.match(text, /\*\*plan\*\*[\s\S]*\*\*check\*\*[\s\S]*\*\*build\*\*[\s\S]*\*\*lint\*\*[\s\S]*\*\*audit\*\*/);
     assert.match(text, /ux-builder-blueprint check/);
     assert.match(client.getInstructions(), /app\.blueprint\.json/);
+  });
+});
+
+describe("FEAT-009 AGW-04: the SDK as the app has it", () => {
+  // @covers US-057-AC4
+  test("run from an app's directory, the server serves that app's installed @ux-builder/ui catalogue and guidance", async () => {
+    const app = mkdtempSync(join(tmpdir(), "mcp-app-"));
+    try {
+      const ui = join(app, "node_modules/@ux-builder/ui");
+      mkdirSync(ui, { recursive: true });
+      writeFileSync(join(app, "package.json"), JSON.stringify({ name: "app", private: true }));
+      writeFileSync(join(ui, "package.json"), JSON.stringify({ name: "@ux-builder/ui", version: "9.8.7" }));
+      writeFileSync(join(ui, "catalogue.json"), JSON.stringify({ ...cat, packages: { ...cat.packages, "@ux-builder/ui": "9.8.7" } }));
+      writeFileSync(join(ui, "AGENTS.md"), "# The app's own guidance, version 9.8.7\n");
+      const c = new Client({ name: "app-test", version: "1" });
+      await c.connect(new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL("../server.mjs", import.meta.url))], cwd: app }));
+      try {
+        assert.match(c.getInstructions(), /@ux-builder\/ui 9\.8\.7/);
+        const g = await c.callTool({ name: "get_guidance", arguments: {} });
+        assert.match(g.content[0].text, /The app's own guidance, version 9\.8\.7/);
+      } finally { await c.close(); }
+    } finally { rmSync(app, { recursive: true, force: true }); }
   });
 });

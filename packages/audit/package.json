@@ -2,18 +2,48 @@
   "name": "@ux-builder/audit",
   "version": "0.1.2",
   "license": "MIT OR Apache-2.0",
-  "description": "Audit a running app's use of the AI-UI SDK theme: switches it through every theme and appearance in Chromium and reports colours, fonts and radii that are not the theme's, restyled widgets, hand-drawn icons and loaders, other UI libraries, the favicon and logo, and contrast (FEAT-004 SDK-18).",
+  "description": "Audit a running app's use of the AI-UI SDK theme: switches it through every theme and appearance in Chromium and reports colours, fonts and radii that are not the theme's, restyled widgets, hand-drawn icons and loaders, other UI libraries, the favicon and logo, and contrast (FEAT-004 SDK-18); and a HELIX-aware UX assessment (FEAT-009): page-level inspection of an agent's browser state, journeys traced to HELIX documents and tests, and a recorded baseline.",
   "type": "module",
-  "bin": { "ux-builder-audit": "./cli.mjs" },
-  "exports": { ".": "./audit.mjs", "./report": "./report.mjs", "./package.json": "./package.json" },
-  "files": ["audit.mjs", "cli.mjs", "collect.js", "report.mjs", "README.md", "THIRD-PARTY-NOTICES.md"],
-  "scripts": { "test": "node --test 'test/*.test.mjs'" },
+  "bin": {
+    "ux-builder-audit": "./cli.mjs"
+  },
+  "exports": {
+    ".": "./audit.mjs",
+    "./report": "./report.mjs",
+    "./package.json": "./package.json",
+    "./schema/*": "./schema/*",
+    "./skill/*": "./skill/*"
+  },
+  "files": [
+    "audit.mjs",
+    "inspect.mjs",
+    "assess",
+    "schema",
+    "skill",
+    "cli.mjs",
+    "collect.js",
+    "serve.mjs",
+    "report.mjs",
+    "README.md",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'"
+  },
   "dependencies": {
     "@ux-builder/tokens": "^1.6.0",
     "@ux-builder/ui": "^0.6.3",
+    "ajv": "^8.20.0",
     "axe-core": "^4.14.0",
-    "playwright": "~1.63.0"
+    "playwright": "~1.63.0",
+    "yaml": "^2.9.1"
   },
-  "publishConfig": { "access": "public" },
-  "repository": { "type": "git", "url": "git+https://github.com/DocumentDrivenDX/ux-builder.git", "directory": "packages/audit" }
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DocumentDrivenDX/ux-builder.git",
+    "directory": "packages/audit"
+  }
 }

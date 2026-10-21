@@ -7,6 +7,12 @@ package as installed; the licence texts of vendored source are in this package's
 
 | Package | Version | Licence | Repository |
 |---|---|---|---|
+| ajv | 8.20.0 | MIT | ajv-validator/ajv |
 | axe-core | 4.14.0 | MPL-2.0 (exception awaiting counsel until 2026-11-18) | https://github.com/dequelabs/axe-core |
+| fast-deep-equal | 3.1.3 | MIT | https://github.com/epoberezkin/fast-deep-equal |
+| fast-uri | 3.1.8 | BSD-3-Clause | https://github.com/fastify/fast-uri |
+| json-schema-traverse | 1.0.0 | MIT | https://github.com/epoberezkin/json-schema-traverse |
 | playwright | 1.63.0 | Apache-2.0 | https://github.com/microsoft/playwright |
 | playwright-core | 1.63.0 | Apache-2.0 | https://github.com/microsoft/playwright |
+| require-from-string | 2.0.2 | MIT | floatdrop/require-from-string |
+| yaml | 2.9.1 | ISC | github:eemeli/yaml |

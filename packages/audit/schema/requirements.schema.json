@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/requirements.schema.json",
+  "title": "ux-builder assessment record: requirements (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "documents",
+    "criteria",
+    "problems"
+  ],
+  "properties": {
+    "schema": {
+      "const": "requirements"
+    },
+    "version": {
+      "const": 1
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "typedBy",
+          "hash"
+        ],
+        "properties": {
+          "typedBy": {
+            "enum": [
+              "frontmatter",
+              "location",
+              "template",
+              "none"
+            ]
+          }
+        }
+      }
+    },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "text",
+          "path"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^US-\\d+-AC\\d+$"
+          }
+        }
+      }
+    },
+    "problems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "severity": {
+            "enum": [
+              "warning",
+              "info"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

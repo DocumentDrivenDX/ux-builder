@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/inspection.schema.json",
+  "title": "ux-builder assessment record: inspection (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "checkpoint",
+    "mode",
+    "findings"
+  ],
+  "properties": {
+    "schema": {
+      "const": "inspection"
+    },
+    "version": {
+      "const": 1
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^C-"
+        }
+      }
+    },
+    "mode": {
+      "enum": [
+        "in-place",
+        "replay"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "rule",
+          "severity"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/traceability.schema.json",
+  "title": "ux-builder assessment record: traceability (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "journeys"
+  ],
+  "properties": {
+    "schema": {
+      "const": "traceability"
+    },
+    "version": {
+      "const": 1
+    },
+    "journeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "story",
+          "criteria"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^J-"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "link",
+                "tests"
+              ],
+              "properties": {
+                "link": {
+                  "enum": [
+                    "explicit",
+                    "inferred",
+                    "uncovered"
+                  ]
+                }
+              },
+              "if": {
+                "properties": {
+                  "link": {
+                    "const": "inferred"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
