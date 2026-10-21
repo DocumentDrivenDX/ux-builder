@@ -2,6 +2,8 @@
    operations (FEAT-009; CONTRACT-006 "Command"). The coding agent, guided by
    the ux-builder-assess skill, does the reasoning around them.
 
+     init        propose ux-assessment.yml from the repository
+     validate    check the manifest against its schema, the repository and HELIX
      browser     start Chromium with a CDP endpoint for the agent's driver
      inspect     inspect a checkpoint: the agent's page in place, or a replay
 
@@ -11,6 +13,11 @@ import { parseArgs } from "node:util";
 
 const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
 
+  init [--out ux-assessment.yml]
+      Propose a manifest from the repository's HELIX marker, package.json and
+      Playwright configuration. Refuses to overwrite.
+  validate [--manifest ux-assessment.yml]
+      Check the manifest; print each problem with its path.
   browser [--port n] [--headed]
       Start Chromium with a CDP endpoint and print it; connect the agent's
       browser driver to it (Playwright MCP: --cdp-endpoint <url>). Ctrl-C stops it.
@@ -21,6 +28,30 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       <out>/<run>/checkpoints/<id>/inspection.json, screenshot.png, tree.yml.`;
 
 const SUB = {
+  async init(args) {
+    const { values: o } = parseArgs({ args, options: { out: { type: "string", default: "ux-assessment.yml" } } });
+    const { existsSync, writeFileSync } = await import("node:fs");
+    if (existsSync(o.out)) { console.error(`${o.out} exists; not overwriting it.`); return 1; }
+    const { propose } = await import("./init.mjs");
+    const { text, manifest } = propose(process.cwd());
+    writeFileSync(o.out, text);
+    console.log(`Wrote ${o.out}: ${manifest.journeys.length} candidate journey${manifest.journeys.length === 1 ? "" : "s"}. Fill in every <fill-in: …>, then run: ux-builder-audit assess validate`);
+    return 0;
+  },
+  async validate(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, json: { type: "boolean" } } });
+    const m = await loaded(o.manifest);
+    if (typeof m === "number") return m;
+    const { validate } = await import("./manifest.mjs");
+    const { problems, helix } = validate(m);
+    if (o.json) console.log(JSON.stringify({ problems, helix: helix && { marker: helix.marker.file, flow: helix.flow.id, root: helix.flow.rootRel, catalog: helix.catalog, documents: helix.documents } }, null, 2));
+    else {
+      for (const p of problems) console.log(`${p.path.padEnd(28)} ${p.message}`);
+      if (helix) console.log(`HELIX: flow "${helix.flow.id}" (root ${helix.flow.rootRel}), catalogue ${helix.catalog.source}${helix.catalog.version ? ` ${helix.catalog.version}` : ""}, ${helix.documents} documents`);
+      console.log(problems.length ? `${o.manifest}: ${problems.length} problem${problems.length === 1 ? "" : "s"}` : `${o.manifest}: valid`);
+    }
+    return problems.length ? 1 : 0;
+  },
   async browser(args) {
     const { values: o } = parseArgs({ args, options: { port: { type: "string" }, headed: { type: "boolean" } } });
     const { startBrowser } = await import("./checkpoint.mjs");
@@ -44,6 +75,14 @@ const SUB = {
     return code;
   },
 };
+
+/* Load a manifest, or the exit code for one that cannot be read. */
+async function loaded(file) {
+  const { existsSync } = await import("node:fs");
+  if (!existsSync(file)) { console.error(`${file} not found; propose one with: ux-builder-audit assess init`); return 2; }
+  const { load } = await import("./manifest.mjs");
+  try { return load(file); } catch (e) { console.error(`${file}: ${e.message.split("\n")[0]}`); return 2; }
+}
 
 export async function main(argv) {
   const [sub, ...rest] = argv;
