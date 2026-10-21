@@ -5,9 +5,11 @@
      npm test --workspace @ux-builder/audit */
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { after, describe, test } from "node:test";
 import { prepared } from "./fixtures/run-package.mjs";
 
+const SKILL = readFileSync(new URL("../skill/ux-builder-assess/SKILL.md", import.meta.url), "utf8");
 const made = [];
 const pkg = (o) => { const p = prepared(o); made.push(p); return p; };
 after(() => { for (const p of made) p.remove(); });
@@ -67,6 +69,23 @@ describe("US-092: the agent records replayable steps and plain-English findings"
     assert.match(shown(p.finding({ plain: { ...plain, recommendation: "Add a ToastProvider and a toast. Follow modal.dismiss. Use --piq-color-accent." } })),
       /plain recommendation is 3 sentences[\s\S]*plain recommendation names a token, the rule ID modal\.dismiss, the component name ToastProvider/);
     assert.equal(shown(p.finding({ plain: { ...plain, recommendation: "Make Approve the one main button, and confirm before Reject." } })), "", "ordinary words such as button are fine");
+  });
+
+  // @covers US-092-AC4
+  test("AC4: the skill says to record do with each action and plain with each finding, keeping specifics in their fields", () => {
+    const section = SKILL.slice(SKILL.indexOf("## Replayable steps and plain English"), SKILL.indexOf("## Stages"));
+    assert.ok(section.length > 200, "the skill has the section");
+    for (const k of ["goto", "click", "fill", "press", "waitFor"]) assert.match(section, new RegExp(`\\{ "${k}": `), k);
+    assert.match(section, /\{ "secret": "ENV_NAME" \}/);
+    assert.match(section, /never the literal/);
+    assert.match(section, /alternate: <n>/);
+    assert.match(section, /"problem": "…", "recommendation": "…"/);
+    assert.match(section, /No rule ID, token or component name/);
+    assert.match(section, /Keep the\s+specifics \(the rule, `component_mapping`, the proposal\) in their own\s+fields/);
+    const stages = SKILL.slice(SKILL.indexOf("## Stages"));
+    assert.match(stages, /and `do`, the replay step/);
+    assert.match(stages, /`plain` \(the problem and\s+recommendation in plain English\)/);
+    assert.match(stages, /assess video --run <R-id>/);
   });
 });
 
