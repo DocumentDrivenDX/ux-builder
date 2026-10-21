@@ -214,6 +214,34 @@ logo, mark and favicon as `data:` URLs read from under `brand/`. The panel
 draws each appearance in a `ThemeProvider` given those tokens, with the
 preview's widgets (`Specimen`) in the theme's icon set.
 
+## The site's Reference and Proof pages *[Added 2026-10-21]*
+
+The public site (`src/microsite/`, built by `tools/build-pages.mjs`)
+follows HELIX's `product-microsite-ia`: Reference is exact lookup and Proof
+is the project's own record, and both are generated from the repository
+when the site is built or served, so they cannot drift from what ships.
+Browser-readable sources come through `src/microsite/sources.js`; anything
+only Node can read comes through `apps/theme-builder/microsite-data.mjs`,
+which `vite.shared.mjs` serves as the virtual module
+`virtual:microsite-data`.
+
+| Page (`?p=`) | Generated from |
+|------|----------------|
+| `reference/packages` | Each public package's `package.json` `exports` and `bin`, with a one-line note per entry point (`NOTES`) |
+| `reference/components`, `screen-patterns`, `ai-components` | The catalogue and the vendored AI components list |
+| `reference/cli` | `create-app`'s and `ux-builder-audit`'s header and `parseArgs` options; the audit's `RULES`; `assess`'s header and `--help`; `ux-builder-blueprint --help`; every MCP tool from `createServer` listed over an in-memory MCP client |
+| `reference/rules` | The catalogue's `interaction.rules`, filterable by family, AI role and check kind |
+| `reference/adaptive-cards` | CONTRACT-004 *Adaptive Cards* (element mapping, high-impact marker), checked against the renderer's `ELEMENTS` and `ACTIONS`; a live `AdaptiveCard` |
+| `proof/decisions`, `features`, `releases` | The ADRs, feature specs, contracts and changelogs |
+| `proof/traceability` | `tools/check-coverage.mjs` `coverage()`: counts, by feature and story, the excepted criteria with reasons; the alignment reviews |
+| `proof/sources` | Every distinct source the rules cite with its licence (`LICENCES` says what each allows); ADR-025's *Amendment* (counsel's review waived for release, bead `ux-builder-78483e2c`); the disclaimer from `AGENTS.md` |
+| `proof/live` | Links to the theme pages and Storybook |
+
+`test/microsite-data.test.mjs` fails when an option, command, MCP tool,
+export, licence or card element is missing from the generated data;
+`e2e/builder/microsite-reference.spec.mjs` visits the pages and checks
+their counts against the source.
+
 ## Security
 
 - The API listens on `127.0.0.1` only.

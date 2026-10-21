@@ -4,7 +4,8 @@ import { Fragment } from "react";
 import { AiSection, Command, GUARDS, LiveDemo, PACKAGES } from "../home/Home.jsx";
 import { ROOT } from "../site-root.js";
 import { href } from "./nav.js";
-import { AI, CONTRACT_LIST, DECISIONS, FEATURES, ICON_COUNT, PATTERNS, RELEASES, REPO, WIDGETS } from "./sources.js";
+import { AdaptiveCards, Cli, EntryPoints, Rules, Sources, Traceability } from "./reference.jsx";
+import { AI, CONTRACT_LIST, DECISIONS, FEATURES, PATTERNS, RELEASES, REPO, WIDGETS } from "./sources.js";
 
 /* The microsite's pages. The Why pages follow the product vision
    (docs/helix/00-discover/product-vision.md), the Concepts pages the ADRs and
@@ -294,26 +295,14 @@ function GenerativeUi() {
 function Packages() {
   return (
     <>
-      <p className="uxm-lede">Five packages on the public npm registry, installable with no token or registry configuration.</p>
+      <p className="uxm-lede">{PACKAGES.length} packages on the public npm registry, installable with no token or registry configuration. Their entry points below are generated from each package's own <code>exports</code>.</p>
       <ul className="uxm-grid">
         {PACKAGES.map(({ pkg, icon, what }) => (
           <li key={pkg.name}><a className="uxm-tile uxm-tile--link" href={`https://www.npmjs.com/package/${pkg.name}`}><span className="uxm-tile__icon"><Icon icon={icon} /></span><h3><code>{pkg.name}</code></h3><p>{what}</p><span className="uxm-version">v{pkg.version}</span></a></li>
         ))}
       </ul>
       <H2 id="entry">Entry points</H2>
-      <table className="uxm-table">
-        <thead><tr><th>Import</th><th>What it gives an app</th></tr></thead>
-        <tbody>
-          <tr><td><code>@ux-builder/tokens/themes/&lt;theme&gt;.css</code></td><td>One theme, selected with <code>data-theme</code></td></tr>
-          <tr><td><code>@ux-builder/tokens/fonts/&lt;theme&gt;.css</code></td><td>The faces that theme uses</td></tr>
-          <tr><td><code>@ux-builder/tokens/resolved/&lt;theme&gt;.&lt;appearance&gt;.json</code></td><td>Every token's final value, for code that can't read CSS</td></tr>
-          <tr><td><code>@ux-builder/tokens/bridges/shadcn/&lt;theme&gt;.css</code></td><td>The theme for AI Elements and assistant-ui</td></tr>
-          <tr><td><code>@ux-builder/ui</code>, <code>/patterns</code>, <code>/icons</code></td><td>Widgets, screen patterns, {ICON_COUNT.toLocaleString("en")} icons</td></tr>
-          <tr><td><code>@ux-builder/ui/ui.css</code>, <code>/patterns.css</code></td><td>The framework-free CSS</td></tr>
-          <tr><td><code>@ux-builder/ui/eslint</code>, <code>/stylelint</code></td><td>The lint rules</td></tr>
-          <tr><td><code>@ux-builder/ui/catalogue.json</code>, <code>/AGENTS.md</code></td><td>The machine-readable catalogue and agent guidance</td></tr>
-        </tbody>
-      </table>
+      <EntryPoints />
     </>
   );
 }
@@ -352,24 +341,6 @@ function AiComponents() {
     </>
   );
 }
-function Cli() {
-  const tools = [["list_themes", "Every theme: brand, design system, appearances, its CSS and font imports"], ["get_theme", "One theme's imports, icon set and every role token's value"], ["list_widgets, get_widget", "Widgets; one widget's props, defaults and import line"], ["list_tokens, get_token", "Tokens with their purpose; one token's value in every theme"], ["list_icons", "Icon names, optionally matching a query"], ["get_guidance", "The SDK's rules and how-tos"]];
-  const audit = [["--theme <name>", "Audit only this theme (repeat)"], ["--appearance <light|dark>", "Repeat. Default: both"], ["--width <px>", "Repeat, one per size class; adds the reflow and target-size checks"], ["--serve \"<command>\"", "Start the app first, stop it afterwards"], ["--fail-on <error|warning|never>", "What makes the exit code 1. Default error"]];
-  return (
-    <>
-      <H2 id="create-app">npm create @ux-builder/app</H2>
-      <table className="uxm-table"><thead><tr><th>Option</th><th>Effect</th></tr></thead><tbody>
-        <tr><td><code>--theme &lt;name&gt;</code></td><td>The theme to start on. Default <code>plain</code></td></tr>
-        <tr><td><code>--name &lt;name&gt;</code></td><td>The package name. Default: the directory's name</td></tr>
-      </tbody></table>
-      <H2 id="audit">ux-builder-audit</H2>
-      <table className="uxm-table"><thead><tr><th>Option</th><th>Effect</th></tr></thead><tbody>{audit.map(([o, e]) => <tr key={o}><td><code>{o}</code></td><td>{e}</td></tr>)}</tbody></table>
-      <H2 id="mcp">ux-builder-mcp tools</H2>
-      <table className="uxm-table"><thead><tr><th>Tool</th><th>Returns</th></tr></thead><tbody>{tools.map(([t, r]) => <tr key={t}><td><code>{t}</code></td><td>{r}</td></tr>)}</tbody></table>
-    </>
-  );
-}
-
 /* ---- Proof ---- */
 
 function Decisions() {
@@ -437,6 +408,6 @@ export const PAGES = {
   "why/problem": Problem, "why/audience": Audience, "why/principles": Principles, "why/roadmap": Roadmap,
   "start/new-app": NewApp, "start/existing-app": ExistingApp, "start/theme-from-logo": ThemeFromLogo, "start/agents": Agents, "start/ci": Ci,
   "concepts/themes": Themes, "concepts/tokens": Tokens, "concepts/patterns": Patterns, "concepts/generative-ui": GenerativeUi,
-  "reference/packages": Packages, "reference/components": Components, "reference/screen-patterns": ScreenPatterns, "reference/ai-components": AiComponents, "reference/cli": Cli,
-  "proof/decisions": Decisions, "proof/features": Features, "proof/live": Live, "proof/releases": Releases,
+  "reference/packages": Packages, "reference/components": Components, "reference/screen-patterns": ScreenPatterns, "reference/ai-components": AiComponents, "reference/cli": Cli, "reference/rules": Rules, "reference/adaptive-cards": AdaptiveCards,
+  "proof/decisions": Decisions, "proof/features": Features, "proof/live": Live, "proof/releases": Releases, "proof/traceability": Traceability, "proof/sources": Sources,
 };
