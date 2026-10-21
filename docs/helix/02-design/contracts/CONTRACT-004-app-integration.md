@@ -40,8 +40,8 @@ ddx:
 
 **Contract ID**: CONTRACT-004 — App integration
 **Type**: library and CLI (the package entry points, React API, lint rules, audit command and MCP server an app builds on)
-**Version**: v1 (for `@ux-builder/tokens` 1.4.1, `@ux-builder/ui` 0.6.0, `@ux-builder/create-app` 0.4.1, `@ux-builder/audit` 0.1.0, `@ux-builder/mcp` 0.3.1)
-**Status**: accepted — by the operator 2026-10-08, as written; matches the packages released that day. *Screen patterns* (below) is a planned amendment of 2026-10-18 for FEAT-006 (ADR-020, ADR-021, ADR-022), accepted with those ADRs; it becomes normative item by item in the releases that ship them.
+**Version**: v1 (current releases: `@ux-builder/tokens` 1.6.0, `@ux-builder/ui` 0.6.3, `@ux-builder/create-app` 0.4.2, `@ux-builder/audit` 0.1.2, `@ux-builder/mcp` 0.3.1; each amendment below names the release it is normative from)
+**Status**: accepted — by the operator 2026-10-08, as written; matches the packages released that day. *Screen patterns* (below), an amendment of 2026-10-18 for FEAT-006 (ADR-020, ADR-021, ADR-022) accepted with those ADRs, shipped in `@ux-builder/ui` 0.6.0. The amendments for FEAT-008, FEAT-009 and FEAT-010 ship in `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0, `@ux-builder/mcp` 0.4.0 and `@ux-builder/create-app` 0.5.0.
 **Related**: FEAT-004 (SDK-01–18), FEAT-005 (DIST-01), CONTRACT-001 (token names), CONTRACT-003 (theme selection), ADR-011 (embedded views), ADR-016 (React first), ADR-017 (fonts)
 
 ## Purpose
@@ -187,11 +187,11 @@ Tools: `list_themes`, `get_theme`, `list_brands`, `list_design_systems`,
 server MUST describe the `@ux-builder/ui` and `@ux-builder/tokens` installed beside
 it.
 
-## Screen patterns *[Amended 2026-10-18 — planned, FEAT-006]*
+## Screen patterns *[Amended 2026-10-18 — FEAT-006]*
 
-Not in `@ux-builder/ui` 0.6.0. Each row becomes normative in the release whose
-changelog ships it; until then a name may change only by amending this
-section. **Shipped** (in the release after 0.6.0): the `patterns` and
+Normative from `@ux-builder/ui` 0.6.0. Anything below not listed as shipped
+becomes normative in the release whose changelog ships it; until then a name
+may change only by amending this section. **Shipped** (in 0.6.0): the `patterns` and
 `patterns.css` entry points; the widgets `Tabs`, `Sheet`, `Dialog`,
 `MenuButton`, `Breadcrumbs`, `Pagination`, `DatePicker` and
 `DateRangePicker` (native date inputs); the reporting patterns `StatTile`,
@@ -207,7 +207,7 @@ tab in the URL parameter `tab` by default); `RecordDetail` and `ListDetail`;
 the URL as `<key>.page`, `.size`, `.q`, `.f` and `.sort`); the helpers
 `sizeClassOf`, `sizeAtLeast` and `useSizeClass`; and the catalogue's
 `patterns[]` (with `tier` `primitive`, `navigation`, `region`, `screen` or
-`helper`), `variants[]` and `sizeClasses[]`. *Shipped 2026-10-19 (FEAT-006
+`helper`), `variants[]` and `sizeClasses[]`. *Shipped 2026-10-19 in 0.6.0 (FEAT-006
 Extended screens, FEAT-004 SDK-19):* the widgets `Combobox` and `Tooltip`;
 `Wizard`, `TaskList`, `ReviewConfirm`, `EditableGrid`, `WorkQueue`,
 `ImportFlow`, `ExportDialog`, `Board`, `Calendar`, `Attachments`,
@@ -278,7 +278,8 @@ these conventions:
 
 ## Interaction rules and blueprint *[Amended 2026-10-20 — FEAT-008, ADR-025]*
 
-The formats are CONTRACT-005; this section lists where an app meets them.
+Normative from `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0, `@ux-builder/mcp` 0.4.0
+and `@ux-builder/create-app` 0.5.0. The formats are CONTRACT-005; this section lists where an app meets them.
 
 | Surface | Addition |
 |---|---|
@@ -292,9 +293,9 @@ The formats are CONTRACT-005; this section lists where an app meets them.
 | Baseline file | `{ tool: "ux-builder-audit", version, findings: [{ rule, url, selector, runs }] }`, sorted by `rule`, `url`, `selector` |
 | `@ux-builder/create-app` | Writes `app.blueprint.json`, a `check:blueprint` script and a CI step; option `--blueprint <file>` |
 
-## UX assessment *[Amended 2026-10-20 — planned, FEAT-009, ADR-026]*
+## UX assessment *[Amended 2026-10-20 — FEAT-009, ADR-026]*
 
-Normative from `@ux-builder/audit` 0.3.0. The formats are CONTRACT-006.
+Normative from `@ux-builder/audit` 0.2.0 and `@ux-builder/mcp` 0.4.0. The formats are CONTRACT-006.
 
 - `@ux-builder/audit` exports `inspect(page, options)` and
   `attach({ cdp, page })` beside `audit()`. `audit()` keeps its options,
@@ -308,9 +309,9 @@ Normative from `@ux-builder/audit` 0.3.0. The formats are CONTRACT-006.
   installed `@ux-builder/ui` catalogue before its own and names the version
   it served in its instructions.
 
-## The starter on HELIX *[Amended 2026-10-21 — planned, FEAT-010, ADR-027]*
+## The starter on HELIX *[Amended 2026-10-21 — FEAT-010, ADR-027]*
 
-Normative from `@ux-builder/create-app` 0.6.0.
+Normative from `@ux-builder/create-app` 0.5.0.
 
 | Option | Behaviour |
 |---|---|

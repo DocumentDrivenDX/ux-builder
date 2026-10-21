@@ -16,7 +16,7 @@ ddx:
 
 **Contract ID**: CONTRACT-006 — UX assessment
 **Type**: data formats, library API and command (the manifest, the run package and its records, `inspect()`, and `ux-builder-audit assess`)
-**Version**: v1 (from `@ux-builder/audit` 0.3.0)
+**Version**: v1 (from `@ux-builder/audit` 0.2.0)
 **Status**: draft — 2026-10-20, with ADR-026
 **Related**: FEAT-009, ADR-026, CONTRACT-004 (the audit's library and command), CONTRACT-005 (rule IDs), HELIX's artifact schema and marker
 

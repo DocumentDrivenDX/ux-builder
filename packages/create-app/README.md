@@ -51,7 +51,7 @@ cd my-app && npm install && npm run dev
   installed into `.claude/skills/` by `npm install`.
 
 The new app pins the exact SDK versions npm installed with the starter: the
-newest within the starter's ranges (`@ux-builder/tokens` ^1.4.1, `@ux-builder/ui`
-^0.6.0, `@ux-builder/audit` ^0.1.0). Upgrade them together afterwards. If
+newest within the starter's ranges (`@ux-builder/tokens` ^1.6.0, `@ux-builder/ui`
+^0.6.2, `@ux-builder/audit` ^0.1.1). Upgrade them together afterwards. If
 `npm create` gives an older version than expected, npx has reused a cached
 starter: `npm create @ux-builder/app@latest`.
