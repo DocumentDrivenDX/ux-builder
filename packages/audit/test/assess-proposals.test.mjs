@@ -38,6 +38,15 @@ describe("US-064: review exact requirement changes before implementation", () =>
     assert.equal(p.cli("propose", "--run", p.run, "--finding", F, "--target", "US-099", "--criterion", "x", "--test", "y").status, 1);
   });
 
+  test("a type with a naming rule but no ID format is numbered from its naming rule and the IDs in use", () => {
+    const p = prepared({ files: { "workflows/activities/01-frame/artifacts/user-stories/meta.yml": "artifact:\n  name: user-stories\n  id: user-stories\n  type: document\n  activity: frame\ndescription: x\noutput:\n  location: docs/helix/01-frame/user-stories/\n  format: markdown\n  naming: US-{number}-{slug}.md\n" } });
+    made.push(p); p.checkpointAt("C-review-1"); p.write("backlog.json", { schema: "backlog", version: 1, findings: [p.finding()], user_validation: [] });
+    const F = p.read("backlog.json").findings[0].id;
+    assert.equal(p.cli("propose", "--run", p.run, "--finding", F, "--new", "user-stories", "--title", "Phone width", "--criterion", "c", "--test", "t").status, 0);
+    const x = p.read("proposals.json").proposals[0];
+    assert.deepEqual([x.target.id, x.target.path], ["US-004", "docs/helix/01-frame/user-stories/US-004-phone-width.md"]);
+  });
+
   // @covers US-064-AC2
   test("AC2: a proposal keeps its finding and evidence, says what kind of change it is, and carries its test change", () => {
     const p = pkg();

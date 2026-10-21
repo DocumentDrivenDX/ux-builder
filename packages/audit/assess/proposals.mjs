@@ -33,9 +33,14 @@ function diff(path, before, after) {
 
 /* The next free ID of a catalogue type: its prefix and the next number, as wide as its pattern. */
 function nextId(type, docs) {
-  const m = /^\^?([A-Z]+)-\[0-9\]\{(\d+)\}\$?$/.exec(type.pattern?.source ?? "");
-  if (!m) return null;
-  const [, prefix, width] = m;
+  // From the type's ID format; else from its naming rule (US-{number}-{slug}.md), as wide as the IDs in use.
+  let [, prefix, width] = /^\^?([A-Z]+)-\[0-9\]\{(\d+)\}\$?$/.exec(type.pattern?.source ?? "") ?? [];
+  if (!prefix) {
+    prefix = /^([A-Z]+)-\{number\}/.exec(type.naming ?? "")?.[1];
+    if (!prefix) return null;
+    const widths = docs.map((d) => d.id && new RegExp(`^${prefix}-(\\d+)$`).exec(d.id)?.[1]?.length).filter(Boolean);
+    width = widths.length ? Math.max(...widths) : 3;
+  }
   // Numbers taken by an ID, or by a file name (a document without frontmatter still holds its number).
   const used = docs.flatMap((d) => [d.id && new RegExp(`^${prefix}-(\\d+)$`).exec(d.id)?.[1], new RegExp(`(?:^|/)${prefix}-(\\d+)-[^/]*$`).exec(d.path)?.[1]]).filter(Boolean).map(Number);
   return `${prefix}-${String((used.length ? Math.max(...used) : 0) + 1).padStart(Number(width), "0")}`;
@@ -78,8 +83,13 @@ export function propose({ manifest, resolved, helix, out, run, finding: fid, tar
     const nid = nextId(type, docs);
     const name = (type.naming ?? "{number}-{slug}.md").replace(/\{number\}|\[nnn\]/, nid?.split("-")[1] ?? "").replace(/\{[^}]*(slug|title|name)[^}]*\}|\[[^\]]*(slug|name)[^\]]*\]/, slug(title ?? finding.title));
     const path = relative(repo, join(helix.flow.root, type.dir, name)).split(sep).join("/");
-    const body = (type.template ? readFileSync(type.template, "utf8") : `# ${nid}: ${title ?? finding.title}\n`).replace(/(US|FEAT|TD|STP|SD)-XXX/g, nid ?? "$&").replace(/\[(?:title|story-name|Feature Name|story title)[^\]]*\]/i, title ?? finding.title);
-    const draft = `---\nddx:\n  id: ${nid}\n  type: ${type.id}\n  status: draft\n---\n\n${body.replace(/^---\n[\s\S]*?\n---\n\n?/, "")}${nid?.startsWith("US-") ? `\n- [ ] **${nid}-AC1** — ${criterion} *(Proposed by the UX assessment, ${fid}.)*\n` : `\n${criterion}\n`}`;
+    const body = (type.template ? readFileSync(type.template, "utf8") : `# ${nid}: ${title ?? finding.title}\n`).replace(nid ? new RegExp(`${nid.split("-")[0]}-XXX`, "g") : /$^/, nid ?? "").replace(/\[(?:title|story-name|Feature Name|story title)[^\]]*\]/i, title ?? finding.title);
+    // The proposed criterion fills the template's first placeholder criterion, else follows the body.
+    const ac = `- [ ] **${nid}-AC1** — ${criterion} *(Proposed by the UX assessment, ${fid}.)*`;
+    let text = body.replace(/^---\n[\s\S]*?\n---\n\n?/, "");
+    const slot = nid?.startsWith("US-") ? new RegExp(`^- \\[ \\] \\*\\*${nid}-AC1\\*\\*.*$`, "m") : null;
+    text = slot && slot.test(text) ? text.replace(slot, ac) : `${text}\n${nid?.startsWith("US-") ? ac : criterion}\n`;
+    const draft = `---\nddx:\n  id: ${nid}\n  type: ${type.id}\n  status: draft\n---\n\n${text}`;
     writeFileSync(join(dir, "proposals", `${id}.patch`), diff(path, null, draft));
     entry = { target: { kind: "new", id: nid, type: type.id, path, template: { source: type.template ? relative(repo, type.template).split(sep).join("/") : null, catalog: helix.catalog.source, version: helix.catalog.version } } };
   }
