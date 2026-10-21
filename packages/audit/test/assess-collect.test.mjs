@@ -109,4 +109,21 @@ describe("US-058: trace each assessed journey to product intent", () => {
     assert.match(bare.stdout, /F-undo-missing relies on US-002, which the alignment review found in conflict/);
     assert.equal(report(finding({ qualified: ["alignment"] })).status, 0, "qualified, it stands; the rest of the assessment is unaffected");
   });
+
+  test("a report written from a HELIX template is recognised by its title; a document that is no artifact is information, not a gap", () => {
+    const { read } = collected({ files: {
+      "workflows/templates/alignment-review.md": "# Alignment Review: [Scope]\n\n**Date:** [YYYY-MM-DD]\n",
+      "docs/helix/06-iterate/alignment-reviews/AR-2026-10-01-repo.md": "# Alignment Review: the whole repository\n\n**Date:** 2026-10-01\n",
+      "docs/helix/README.md": "# HELIX artifacts\n\nAn index of the documents.\n",
+      "docs/helix/06-iterate/notes.md": "---\nddx:\n  id: notes\n  type: lab-notebook\n---\n\n# Notes\n",
+    } });
+    const req = read("requirements.json");
+    const ar = req.documents.find((d) => d.path.endsWith("AR-2026-10-01-repo.md"));
+    assert.deepEqual([ar.type, ar.typedBy], ["alignment-review", "template"]);
+    const p = Object.fromEntries(req.problems.filter((x) => x.path).map((x) => [x.path.split("/").pop(), x]));
+    assert.deepEqual([p["AR-2026-10-01-repo.md"].kind, p["AR-2026-10-01-repo.md"].severity], ["untyped", "warning"], "recognised, but frontmatter is still asked for");
+    assert.deepEqual([p["README.md"].kind, p["README.md"].severity], ["unclassified", "info"]);
+    assert.deepEqual([p["notes.md"].kind, p["notes.md"].severity], ["type-not-in-catalogue", "info"]);
+    assert.ok(req.problems.every((x) => ["warning", "info"].includes(x.severity)));
+  });
 });

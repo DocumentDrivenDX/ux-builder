@@ -73,32 +73,35 @@ export function collect({ manifest, resolved, helix, out, run = runId(), now = n
   const repo = helix.marker.repo;
   const dir = resolve(manifest.dir, out ?? resolved.evidence?.out ?? "ux-assessment", run);
   mkdirSync(dir, { recursive: true });
-  const docs = instances(helix.flow, helix.types, { include: resolved.helix?.include, exclude: resolved.helix?.exclude, repo });
+  const docs = instances(helix.flow, helix.types, { include: resolved.helix?.include, exclude: resolved.helix?.exclude, repo, templates: helix.templates });
+  const known = new Set([...helix.types.map((t) => t.id), ...(helix.templates ?? []).map((t) => t.id)]);
   const ids = new Set(docs.map((d) => d.id).filter(Boolean));
   const problems = [];
   const documents = docs.map((d) => {
     const revision = revisionOf(d.abs);
-    if (d.typedBy === "none") problems.push({ kind: "unclassified", path: d.path, detail: "no ddx.type and no catalogue location matches" });
-    else if (d.typedBy === "location") problems.push({ kind: "untyped", path: d.path, detail: `typed ${d.type} by its location; add ddx: frontmatter with id and type` });
-    if (!d.id && ["user-stories", "feature-specification"].includes(d.type)) problems.push({ kind: "no-id", path: d.path, detail: `a ${d.type} without a stable ddx.id` });
-    if (d.id && !d.idValid) problems.push({ kind: "bad-id", path: d.path, detail: `${d.id} does not match its type's ID format` });
-    for (const l of d.links) if (!ids.has(l.to)) problems.push({ kind: "dangling-link", path: d.path, detail: `links ${l.kind} to ${l.to}, which no document in the flow has as its ID` });
+    // info: worth knowing, not a gap (a README, a discovery note); warning: a gap in the documents.
+    if (d.typedBy === "none") problems.push({ kind: "unclassified", severity: "info", path: d.path, detail: "not a HELIX artifact or report: no ddx.type, and no catalogue location or template title matches" });
+    else if (d.typedBy === "location" || d.typedBy === "template") problems.push({ kind: "untyped", severity: "warning", path: d.path, detail: `typed ${d.type} by its ${d.typedBy === "location" ? "location" : "title (a HELIX template)"}; add ddx: frontmatter with id and type` });
+    else if (helix.catalog.source !== "none" && !known.has(d.type)) problems.push({ kind: "type-not-in-catalogue", severity: "info", path: d.path, detail: `ddx.type ${d.type} is not an artifact type or template in the bound catalogue (${helix.catalog.source}${helix.catalog.version ? ` ${helix.catalog.version}` : ""})` });
+    if (!d.id && ["user-stories", "feature-specification"].includes(d.type)) problems.push({ kind: "no-id", severity: "warning", path: d.path, detail: `a ${d.type} without a stable ddx.id` });
+    if (d.id && !d.idValid) problems.push({ kind: "bad-id", severity: "warning", path: d.path, detail: `${d.id} does not match its type's ID format` });
+    for (const l of d.links) if (!ids.has(l.to)) problems.push({ kind: "dangling-link", severity: "warning", path: d.path, detail: `links ${l.kind} to ${l.to}, which no document in the flow has as its ID` });
     return { id: d.id, type: d.type, typedBy: d.typedBy, path: d.path, revision, hash: d.hash, links: d.links };
   });
   const of = (type) => docs.filter((d) => d.type === type);
-  for (const t of READS.required) if (!of(t).length) problems.push({ kind: "missing-type", type: t, required: true, detail: `no ${t} in the flow` });
-  for (const t of READS.optional) if (!of(t).length) problems.push({ kind: "missing-type", type: t, required: false, detail: `no ${t} in the flow` });
+  for (const t of READS.required) if (!of(t).length) problems.push({ kind: "missing-type", severity: "warning", type: t, required: true, detail: `no ${t} in the flow` });
+  for (const t of READS.optional) if (!of(t).length) problems.push({ kind: "missing-type", severity: "info", type: t, required: false, detail: `no ${t} in the flow` });
 
   const goals = of("product-vision").flatMap((d) => itemsUnder(d.text, /goal|outcome/i).map((text) => ({ text, source: d.path })));
   const roles = docs.filter((d) => ["prd", "product-vision"].includes(d.type)).flatMap((d) => [...d.text.matchAll(/^#{2,4}\s+(?:Primary |Secondary )?Persona:\s*(.+)$/gmi)].map((m) => ({ name: m[1].trim(), source: d.path })));
   const features = of("feature-specification").map((d) => ({ id: d.id, title: titleOf(d.text), path: d.path }));
   const stories = of("user-stories").map((d) => ({ id: d.id, title: titleOf(d.text), path: d.path, feature: d.links.find((l) => /^FEAT-/.test(l.to))?.to ?? null }));
   const criteria = of("user-stories").flatMap((d) => criteriaOf(d).map((c) => ({ id: c.id, story: d.id ?? c.id.replace(/-AC\d+$/, ""), text: c.text, path: d.path })));
-  const known = new Set(criteria.map((c) => c.id));
+  const knownCriteria = new Set(criteria.map((c) => c.id));
 
   // Links (TRC-02): explicit by @covers or the manifest, otherwise uncovered; the agent adds inferred ones.
   const cited = citations([resolved.run.cwd, repo]);
-  for (const [id, files] of cited) if (!known.has(id)) problems.push({ kind: "dangling-citation", detail: `${id} is cited by ${[...files].map((f) => relative(repo, f)).join(", ")} but no story has it` });
+  for (const [id, files] of cited) if (!knownCriteria.has(id)) problems.push({ kind: "dangling-citation", severity: "warning", detail: `${id} is cited by ${[...files].map((f) => relative(repo, f)).join(", ")} but no story has it` });
   const journeys = (resolved.journeys ?? []).map((j) => {
     const all = criteria.filter((c) => c.story === j.story).map((c) => c.id);
     const wanted = j.criteria?.length ? j.criteria : all;

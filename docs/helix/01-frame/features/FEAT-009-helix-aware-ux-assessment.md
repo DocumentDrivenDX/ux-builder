@@ -186,8 +186,9 @@ artifact-type metadata and templates come from that one source.
 
 HLX-04. Documents are the instances under the flow's root. Each is
 classified by its `ddx.type`, else by matching the catalogue's
-`output.location` and `output.naming` (relative to the root), else
-reported as unclassified. Its ID is its `ddx.id`, checked against the
+`output.location` and `output.naming` (relative to the root), else by the
+title of a HELIX report template (an alignment review, a backfill report),
+else reported as unclassified, as information rather than a gap. Its ID is its `ddx.id`, checked against the
 type's `id_format`; its upstream links are `ddx.links` and
 `ddx.depends_on`. Acceptance criteria are read by HELIX's `US-<n>-AC<m>`
 form, and test citations by HELIX's `@covers US-<n>-AC<m>` syntax.

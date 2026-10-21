@@ -92,7 +92,7 @@ State classes: `success`, `empty`, `loading`, `recoverable-error`,
 | Flow | `helix.flow`, else `defaults.flow`, else the only flow; else stop listing the flows |
 | Catalogue | Bind per `helix.catalog`; record `{ source, path, version?, commit? }` |
 | Instances | Markdown under the root (after `include`/`exclude`) |
-| Type | `ddx.type`; else match a catalogue type's `output.location` + `output.naming` (the location's `docs/helix/` prefix read as the flow's root); else `unclassified` |
+| Type | `ddx.type`; else match a catalogue type's `output.location` + `output.naming` (the location's `docs/helix/` prefix read as the flow's root); else a HELIX report template (`templates/*.md`, such as `alignment-review`) whose title the document's title starts with; else `unclassified`, reported as information |
 | ID | `ddx.id`, checked against the type's `id_format.pattern` when it has one |
 | Links | `ddx.links[]` and `ddx.depends_on[]` |
 | Criteria | Lines matching `\*\*(US-\d+-AC\d+)\*\*` or `(US-\d+-AC\d+)` at a list item's start |
@@ -124,7 +124,7 @@ against `@ux-builder/audit/schema/<name>.schema.json`.
 
 **`run.json`**: `{ id, startedAt, finishedAt?, manifest: { path, version, hash }, app: { name, commit, dirty }, helix: { marker, flow, root, catalog: { source, path, version?, commit? } }, documents: [{ id, path, revision, hash }], versions: { ui?, audit, tokens?, node, playwright }, agent?: { name, model? }, stages: [{ stage, status: completed | partial | blocked | not-run | not-available, reason?, startedAt, finishedAt }], config }`.
 
-**`requirements.json`**: `{ documents: [{ id, type, typedBy: frontmatter | location | none, path, revision, hash, links: [{ kind, to }] }], goals: [{ id?, text, source }], roles: [{ name, source }], features: [{ id, title, path }], stories: [{ id, title, path, feature? }], criteria: [{ id, story, text, path }], problems: [{ kind: missing-type | no-id | bad-id | unclassified | dangling-link, path?, detail }] }`. Text is quoted from the source with its path; it is evidence, not a copy of authority.
+**`requirements.json`**: `{ documents: [{ id, type, typedBy: frontmatter | location | template | none, path, revision, hash, links: [{ kind, to }] }], goals: [{ id?, text, source }], roles: [{ name, source }], features: [{ id, title, path }], stories: [{ id, title, path, feature? }], criteria: [{ id, story, text, path }], problems: [{ kind: missing-type | untyped | no-id | bad-id | unclassified | type-not-in-catalogue | dangling-link | dangling-citation, severity: warning | info, path?, detail }] }`: `warning` is a gap in the documents; `info` is worth knowing but not a gap (a README, a discovery note, an optional type the app does not have). Text is quoted from the source with its path; it is evidence, not a copy of authority.
 
 **`traceability.json`**: `{ journeys: [{ id, story, criteria: [{ id, link: explicit | inferred | uncovered, tests: [{ file, title?, via: covers | manifest | agent }], reason? }] }] }`.
 

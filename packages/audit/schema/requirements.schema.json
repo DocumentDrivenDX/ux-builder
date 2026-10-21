@@ -31,6 +31,7 @@
             "enum": [
               "frontmatter",
               "location",
+              "template",
               "none"
             ]
           }
@@ -60,7 +61,15 @@
         "type": "object",
         "required": [
           "kind"
-        ]
+        ],
+        "properties": {
+          "severity": {
+            "enum": [
+              "warning",
+              "info"
+            ]
+          }
+        }
       }
     }
   }

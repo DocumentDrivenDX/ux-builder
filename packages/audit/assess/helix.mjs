@@ -140,6 +140,19 @@ export function loadTypes(catalog) {
   return types;
 }
 
+/* HELIX's report templates (workflows/templates/*.md: alignment review,
+   backfill report, polish report…): each one's id and the opening of its
+   title, so a report written from one is recognised even without frontmatter. */
+export function loadTemplates(catalog) {
+  const dir = catalog?.path && join(catalog.path, "templates");
+  if (!dir || !existsSync(dir)) return [];
+  return readdirSync(dir).filter((f) => f.endsWith(".md")).map((f) => {
+    const h1 = /^#\s+(.+)$/m.exec(readFileSync(join(dir, f), "utf8"))?.[1] ?? "";
+    const prefix = h1.split(/[:[{]/)[0].trim();
+    return { id: f.replace(/\.md$/, ""), prefix, file: join(dir, f) };
+  }).filter((t) => t.prefix.length >= 6);
+}
+
 /* A glob relative to the root as a regex: ** any depth, * one segment, ? one character. */
 const globRe = (g) => new RegExp("^" + g.split(/(\*\*\/?|\*|\?)/).map((p) => p === "**/" ? "(?:.*/)?" : p === "**" ? ".*" : p === "*" ? "[^/]*" : p === "?" ? "[^/]" : p.replace(/[.+^${}()|[\]\\]/g, "\\$&")).join("") + "$");
 export const globOutsideRoot = (g) => isAbsolute(g) || g.split("/").includes("..");
@@ -151,7 +164,7 @@ const frontmatter = (text) => {
 };
 
 /* Every Markdown instance under the flow's root, typed and identified. */
-export function instances(flow, types, { include = [], exclude = [], repo } = {}) {
+export function instances(flow, types, { include = [], exclude = [], repo, templates = [] } = {}) {
   const inc = include.map(globRe), exc = exclude.map(globRe);
   const files = [];
   const visit = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (e.isDirectory()) { if (e.name !== "node_modules" && !e.name.startsWith(".")) visit(p); } else if (e.name.endsWith(".md")) files.push(p); } };
@@ -169,6 +182,12 @@ export function instances(flow, types, { include = [], exclude = [], repo } = {}
       const name = rel.split("/").pop();
       const t = types.find((x) => x.dir === dir && x.re.test(name));
       if (t) { type = t.id; typedBy = "location"; }
+    }
+    if (!type) {
+      // A report written from a HELIX template, by its title.
+      const h1 = /^#\s+(.+)$/m.exec(text)?.[1] ?? "";
+      const t = templates.find((x) => h1.startsWith(x.prefix));
+      if (t) { type = t.id; typedBy = "template"; }
     }
     const id = fm?.id != null ? String(fm.id) : null;
     const t = types.find((x) => x.id === type);
@@ -195,5 +214,5 @@ export function bind(manifestDir, helix = {}) {
   const marker = readMarker(file);
   const flow = resolveFlow(marker, helix.flow);
   const catalog = bindCatalog(marker, helix.catalog ?? "auto");
-  return { marker, flow, catalog, types: loadTypes(catalog) };
+  return { marker, flow, catalog, types: loadTypes(catalog), templates: loadTemplates(catalog) };
 }

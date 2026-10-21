@@ -1,3 +1,12 @@
+---
+ddx:
+  id: AR-2026-10-08-consumer-docs
+  type: alignment-review
+  activity: iterate
+  status: complete
+  updated: 2026-10-08
+---
+
 # Alignment Review: what a consuming app needs to know
 
 **Review Date**: 2026-10-08
