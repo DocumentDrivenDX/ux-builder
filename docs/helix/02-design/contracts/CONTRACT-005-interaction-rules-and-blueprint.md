@@ -244,6 +244,10 @@ How the audit decides each companion:
   below 600px, an outermost `generated` element neither overflows itself
   nor reaches past the viewport (`card.narrow-first`).
 
+*[Amended 2026-10-21 — integration of FEAT-007 and the AI audit checks]*:
+- Generated content inside an element with `aria-busy="true"` is still arriving. It is not checked for a correction control until it ends, and Stop is its control meanwhile (`ai.stop`).
+- A step's status may be stated in any text node within the step, for example a separate `<span>`.
+
 ### Findings and checks
 
 The blueprint checks and audit checks of these rules are warnings

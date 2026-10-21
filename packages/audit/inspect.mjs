@@ -240,7 +240,8 @@ export function aiChecks({ ignore, rules, screens = null, sizes = false }) {
       const described = byIds(g, "aria-describedby").some((d) => visible(d) && text(d));
       if (!(own && label(own)) && !described) add("ai-disclose", "ai.disclose", g, "AI-generated content with no visible disclosure: label it, or an ancestor (data-piq-ai-label), or point aria-describedby at a visible label");
     }
-    if (on("ai-correct")) {
+    // Output still arriving (inside aria-busy) is corrected once it ends; until then Stop is its control (ai-stop).
+    if (on("ai-correct") && !g.closest('[aria-busy="true"]')) {
       const ref = g.id ? [...document.querySelectorAll(`[aria-controls~="${CSS.escape(g.id)}"]`)] : [];
       const ok = [...near(g), ...ref].some((c) => enabled(c) && kind(c, ["retry", "regenerate", "edit", "undo"], /\b(retry|try again|regenerate|edit|undo)\b/i));
       if (!ok) add("ai-correct", "ai.correct", g, "AI-generated content with no way to correct it: add a retry, regenerate, edit or undo control (data-piq-ai-control) in or beside it");
@@ -275,7 +276,9 @@ export function aiChecks({ ignore, rules, screens = null, sizes = false }) {
   // agent-plan and agent-recover: each step states its status in text; a failed step says why and offers a way back.
   const WORDS = { pending: /\b(pending|waiting|queued|to do|not started|next|up next)\b/i, running: /\b(running|in progress|working|underway|doing)\b/i, done: /\b(done|complete|completed|finished|succeeded)\b/i, failed: /\b(failed|error|could not|couldn't|did not|unable)\b/i, skipped: /\b(skipped)\b/i };
   const ANY = /\b(pending|waiting|queued|to do|not started|up next|next|running|in progress|working|underway|doing|done|complete|completed|finished|succeeded|failed|error|skipped)\b/gi;
-  const stepText = (s) => `${s.getAttribute("aria-label") ?? ""} ${text(s)} ${[...s.querySelectorAll("[aria-label]")].map((x) => x.getAttribute("aria-label")).join(" ")}`;
+  // Words: each text node apart, so a name and a status in adjacent spans ("entries" "Done") stay two words.
+  const words = (e) => { const w = document.createTreeWalker(e, NodeFilter.SHOW_TEXT); const out = []; while (w.nextNode()) out.push(w.currentNode.textContent); return out.join(" ").replace(/\s+/g, " ").trim(); };
+  const stepText = (s) => `${s.getAttribute("aria-label") ?? ""} ${words(s)} ${[...s.querySelectorAll("[aria-label]")].map((x) => x.getAttribute("aria-label")).join(" ")}`;
   const plans = marked("plan");
   if (on("agent-plan")) for (const p of plans) {
     const steps = [...p.querySelectorAll('[data-piq-ai="step"]')].filter((s) => s.closest('[data-piq-ai="plan"]') === p && !skip(s));
