@@ -1,0 +1,175 @@
+# Metadata for Feature Specification
+
+artifact:
+  name: Feature Specification
+  id: feature-specification
+  type: collection
+  activity: frame
+
+voice: artifact-signal
+
+description: |
+  Feature-level authority document that translates PRD requirements into
+  precise behavior, boundaries, functional areas, non-functional expectations,
+  edge cases, and feature-specific success measures. Acceptance criteria live
+  in user-stories (ADR-009); the feature spec carries FR-IDs and the
+  decomposition test but does not define AC. Broad product-surface, workflow,
+  IA, and documentation features must state the ideal future state and map
+  functional areas before requirements.
+
+output:
+  location: docs/helix/01-frame/features/
+  format: markdown
+  naming: FEAT-{number}-{title-with-hyphens}.md
+  structure: per-feature
+
+validation:
+  required_sections:
+    - problem_statement
+    - requirements
+    - edge_cases_and_error_handling
+    - success_metrics
+    - constraints_and_assumptions
+    - out_of_scope
+
+  quality_checks:
+    - check: requirements_testable
+      description: All requirements must be testable
+      severity: blocking
+
+    - check: future_state_first
+      description: Broad feature specs must define the desired future state before optimizing around current problems
+      severity: blocking
+
+    - check: functional_areas_separated
+      description: Multi-surface features must group requirements by functional area
+      severity: blocking
+
+    - check: similar_domain_objects_separated
+      description: Similar domain objects must be defined separately before requirements are written
+      severity: warning
+
+    - check: nfr_measurable
+      description: NFRs must have measurable criteria
+      severity: blocking
+
+    - check: edge_cases_identified
+      description: Edge cases must be documented
+      severity: warning
+
+    - check: no_implementation_details
+      description: Should not specify HOW, only WHAT
+      severity: warning
+
+    - check: no_surface_leak
+      description: Feature specs may name high-level interface dependencies but must not define exact API, CLI, event, schema, config, telemetry, or adapter surfaces; use Contract artifacts for normative interface detail
+      severity: blocking
+
+    - check: story_and_traceability_boundaries
+      description: Acceptance criteria live in referenced user stories; requirements connect to the governing PRD; stories are referenced by ID without duplicating their content; dependencies use specific artifact IDs or external systems
+      severity: blocking
+
+    - check: scope_and_outcomes
+      description: Broad features state the user-visible future state; areas stay within one capability and requirements are grouped when needed; feature-level edge cases span stories; success measures are feature-specific; out-of-scope items answer plausible scope questions
+      severity: warning
+
+  pattern_checks:
+    - pattern: "\\[NEEDS CLARIFICATION"
+      expected: 0
+      message: Identify unresolved requirement choices; block only work that depends on them
+      severity: blocking
+
+    - pattern: "must|shall|will"
+      expected: ">=1"
+      message: Use clear requirement language
+
+variables:
+  - name: feature_id
+    description: FEAT-XXX identifier
+    required: true
+
+  - name: feature_title
+    description: Descriptive feature name
+    required: true
+
+  - name: priority
+    description: P0/P1/P2 priority level
+    required: true
+
+prompts:
+  generation: prompt.md
+  clarification: |
+    Mark unclear requirements with [NEEDS CLARIFICATION: specific question]
+    Focus on WHAT not HOW
+    Make everything testable
+    For broad product-surface, workflow, IA, or documentation features, define ideal future state and functional areas before requirements
+
+template:
+  file: template.md
+  clarification_markers: true
+  focus: future_state_and_requirements_not_implementation
+
+references:
+  - title: "IBM Requirements Management"
+    file: docs/resources/ibm-requirements-management.md
+    relationship: "Grounds traceable, prioritized, verifiable requirements"
+  - title: "Cucumber Executable Specifications"
+    file: docs/resources/cucumber-executable-specifications.md
+    relationship: "Grounds concrete examples as readable acceptance specifications without prescribing implementation"
+
+examples:
+  - file: example.md
+    description: DepositMatch CSV import and column mapping feature specification
+
+workflow:
+  creation_order: 4
+  review_cycles: 2-3
+
+relationships:
+  derived_from:
+    - prd
+
+  informs:
+    - user-stories
+    - solution-design
+    - contract
+    - test-plan
+
+  registered_in:
+    - feature-registry
+
+specification_rules:
+  language:
+    - use: "The system must..."
+    - avoid: "The system should..."
+    - avoid: "Using PostgreSQL..."
+    - avoid: "Implemented with..."
+    - avoid: "A flat requirements list for multi-surface features"
+
+  requirements:
+    functional:
+      prefix: FR-
+      numbering: sequential
+      area_prefixes_allowed: true
+    non_functional:
+      prefix: NFR-
+      categories:
+        - performance
+        - security
+        - scalability
+        - usability
+        - reliability
+
+tracking:
+  id_format: FEAT-XXX
+  id_scope: project
+
+tags:
+  - requirements
+  - specification
+  - features
+  - functional
+  - non-functional
+
+version: 1.0.0
+last_updated: 2024-01-14

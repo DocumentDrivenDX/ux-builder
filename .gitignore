@@ -11,3 +11,6 @@ _site/
 ux-assessment/
 # Playwright MCP snapshots from local runs.
 .playwright-mcp/
+
+# The HELIX package bundled at pack time (scripts/bundle-helix.mjs).
+packages/create-app/helix/

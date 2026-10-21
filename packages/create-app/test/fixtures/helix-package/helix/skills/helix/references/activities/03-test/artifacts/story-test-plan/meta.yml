@@ -1,0 +1,177 @@
+# Metadata for Story Test Plan (Story-Level)
+
+artifact:
+  name: Story Test Plan
+  id: story-test-plan
+  type: document
+  activity: test
+  level: story
+
+voice: artifact-signal
+
+id_format:
+  prefix: STP
+  pattern: "STP-[0-9]{3}"
+  example: STP-011
+  description: |
+    Story test plans use STP-XXX identifiers. Each number is unique across
+    the project and should align with the governing story slice.
+
+description: |
+  The story test plan translates one bounded technical design into executable
+  verification intent before implementation starts. It maps story acceptance
+  criteria to concrete new or existing tests, names the required setup and data, and
+  gives Build a precise handoff for one story-sized slice.
+
+output:
+  location: docs/helix/03-test/test-plans/STP-{id}-{name}.md
+  format: markdown
+  naming: STP-{story-number}-{story-name}.md
+  examples:
+    - STP-014-helix-workflow-coverage.md
+
+reuse_policy: |
+  One story test plan per story slice. Update it in place as the technical
+  design or acceptance criteria evolve; do not create parallel TP documents for
+  the same story unless the story itself was decomposed into new bounded slices.
+
+validation:
+  required_sections:
+    - story_reference
+    - scope_and_objective
+    - acceptance_criteria_test_mapping
+    - executable_proof
+    - data_and_setup
+    - build_handoff
+
+  automated_checks:
+    - check: ux_coverage
+      type: ux_coverage
+      severity: blocking
+      description: When present, UX Coverage maps all six patterns to populated existing AC test rows or concrete non-applicability reasons
+
+  pattern_checks:
+    - pattern: "\\[\\[US-[0-9]{3}-"
+      expected: ">=1"
+      message: Must reference the governing user story
+
+    - pattern: "\\[\\[TD-[0-9]{3}-"
+      expected: ">=1"
+      message: Must reference the governing technical design
+
+    - pattern: "`[^`]+`"
+      expected: ">=2"
+      message: Must name concrete tests, commands, or fixtures rather than prose only
+
+    - pattern: "US-[0-9]+-AC[0-9]+"
+      expected: ">=1"
+      message: The AC↔test matrix must key each row on the story's stable US-<n>-AC<m> ID
+
+  quality_checks:
+    - check: diagnostic_proof_executable
+      description: For relevant diagnostic stories, name real OTel receiver mapping and correlation proof plus privacy, duplication, bounded failure and retrieval tests rather than JSONL parsing alone
+      severity: warning
+
+    - check: acceptance_traced
+      description: Every active acceptance criterion maps to at least one concrete new or existing test
+      severity: blocking
+
+    - check: proof_is_executable
+      description: The plan must name real commands, files, or test identifiers that can be run or created
+      severity: blocking
+
+    - check: setup_is_explicit
+      description: Fixtures, seed data, mocks, or environment assumptions must be explicit
+      severity: warning
+
+    - check: scope_is_bounded
+      description: The plan must stay story-scoped and call out out-of-scope coverage explicitly
+      severity: blocking
+
+    - check: review_references_the_governing_story_and_01
+      description: >-
+        References the governing story and technical design
+      severity: warning
+    - check: review_active_acceptance_criterion_maps_concrete
+      description: >-
+        Every active acceptance criterion maps to concrete new or existing tests, keyed by its stable `US-<n>-AC<m>` ID
+      severity: warning
+    - check: review_ac_row_names_behavior_assertion
+      description: >-
+        Every AC row names the asserted behavior; test names describe behavior and relevant conditions, while stable source citations identify requirements
+      severity: warning
+    - check: review_ac_row_names_covering_test
+      description: >-
+        Every AC row names the covering test AND records its `@covers US-<n>-AC<m>` citation (canonical AC-ID syntax)
+      severity: warning
+    - check: review_file_paths_commands_test_identifiers
+      description: >-
+        File paths, commands, or test identifiers are specific enough to execute
+      severity: warning
+    - check: review_setup_fixtures_mocks_seed_data
+      description: >-
+        Setup, fixtures, mocks, and seed data are explicit
+      severity: warning
+    - check: review_edge_cases_cover_real_story
+      description: >-
+        Edge cases cover real story risks rather than generic boilerplate
+      severity: warning
+    - check: review_scope_remains_bounded_one_story
+      description: >-
+        Scope remains bounded to one story slice
+      severity: warning
+    - check: review_build_handoff_gives_implementation_usable
+      description: >-
+        Build handoff gives implementation a usable sequence
+      severity: warning
+
+prompts:
+  generation: prompt.md
+  review: |
+    Review this story test plan for:
+    1. Clear traceability from story acceptance criteria to new or existing tests
+    2. Executable evidence paths (commands, files, test identifiers)
+    3. Explicit setup, fixtures, and data dependencies
+    4. Bounded story scope without feature-level drift
+    5. Useful build handoff sequencing for implementation
+
+template:
+  file: template.md
+
+example:
+  file: example.md
+
+references:
+  - title: "Cucumber Executable Specifications"
+    file: docs/resources/cucumber-executable-specifications.md
+    relationship: "Grounds acceptance criteria as observable executable examples"
+  - title: "Google Testing Blog: Test Sizes"
+    file: docs/resources/google-test-sizes.md
+    relationship: "Grounds story test levels by scope, dependency, and execution cost"
+
+workflow:
+  creation_order: 2
+  review_cycles: 1-2
+
+relationships:
+  informed_by:
+    - user-story
+    - technical-design
+    - solution-design
+
+  informs:
+    - test-suites
+    - implementation-plan
+
+  referenced_by:
+    - technical-design
+    - implementation-plan
+
+tags:
+  - test
+  - story-level
+  - acceptance
+  - traceability
+
+version: 1.0.0
+last_updated: 2026-04-09
