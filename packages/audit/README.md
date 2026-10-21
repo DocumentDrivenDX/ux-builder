@@ -149,6 +149,17 @@ tests: [{ id: e2e, command: npm run test:e2e }]
 restrictions: { writes: report-only }
 ```
 
+A journey can come from the app's blueprint (`app.blueprint.json`, or the
+manifest's `blueprint` path) instead: `{ blueprint: J-review, role: reviewer, priority: critical }`
+takes its story, criteria, entry screen, steps and alternates from there, and
+`assess plan` turns each alternate into a walkthrough of its journey-and-state
+pair. A journey through an assistant or agent is marked `ai: true` and
+declares three scenarios, `normal`, `errorProne` and `risky` (with `step`, the
+high-impact step); its plan carries the catalogue's AI rules for its roles as
+heuristics, and `assess inspect --scenario risky` stops at the approval,
+records it and chooses Deny. No step that would activate an approve control
+(`data-piq-ai-control="approve"`) is ever taken.
+
 From code, `inspect(page)` runs the audit's checks on a Playwright page as it
 is; `audit()` is built on it. Checks that change the page (`focus-obscured`,
 pressing Escape in dialogs) run only with `stateAffecting`, and the result

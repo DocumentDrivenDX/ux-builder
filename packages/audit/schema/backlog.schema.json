@@ -47,6 +47,11 @@
             "type": "string",
             "pattern": "^F-"
           },
+          "rule": {
+            "description": "The interaction rule or heuristic the finding is about (CONTRACT-005 rule id); required for a finding of an AI journey, from that journey's plan.json ai.heuristics (FEAT-011 AIX-03)",
+            "type": "string",
+            "minLength": 1
+          },
           "finding_type": {
             "enum": [
               "deterministic",

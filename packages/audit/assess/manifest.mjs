@@ -9,8 +9,9 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
+import { rolesOf, riskyStep, SCENARIOS } from "./ai.mjs";
 import { bind, criteriaOf, globOutsideRoot, HelixError, instances } from "./helix.mjs";
 
 const own = createRequire(import.meta.url);
@@ -81,6 +82,22 @@ function commandProblem(cmd, cwd) {
 }
 
 const origin = (u, base) => { try { return new URL(u, base).origin; } catch { return null; } };
+const SCENARIO_TEXT = { normal: "normal (the task as intended)", errorProne: "error-prone (an ambiguous or failing request)", risky: "risky (a step with a high-impact action)" };
+
+/* The app's blueprint (CONTRACT-005): the manifest's `blueprint` path, else
+   app.blueprint.json beside the manifest. { data, file, rel } or { why }. */
+function blueprintOf(m, d, add) {
+  const file = resolve(m.dir, typeof d.blueprint === "string" ? d.blueprint : "app.blueprint.json");
+  const rel = relative(m.dir, file) || file;
+  if (!existsSync(file)) {
+    if (d.blueprint !== undefined) add("/blueprint", `${d.blueprint} does not exist`);
+    return { data: null, why: `the app has no blueprint (${rel} does not exist; name another with the manifest's blueprint field)` };
+  }
+  try { return { data: JSON.parse(readFileSync(file, "utf8")), file, rel }; } catch (e) {
+    add("/blueprint", `${rel} is not JSON: ${e.message}`);
+    return { data: null, why: `${rel} is not JSON` };
+  }
+}
 
 /* Validate a loaded manifest. Returns { problems: [{ path, message }], helix, resolved }:
    helix is the binding when the marker resolved; resolved the manifest
@@ -94,7 +111,9 @@ export function validate(m) {
   const ajv = new Ajv2020({ allErrors: true, strict: false });
   const ok = ajv.validate(SCHEMA, d);
   if (!ok) for (const e of ajv.errors) {
-    if (e.keyword === "oneOf" || (e.keyword === "const" && e.instancePath.includes("/auth"))) continue;
+    if (e.keyword === "oneOf" || e.keyword === "if" || (e.keyword === "const" && e.instancePath.includes("/auth"))) continue;
+    // Missing scenarios are reported one by one below (US-082-AC1).
+    if (e.keyword === "required" && (e.params.missingProperty === "scenarios" || /\/scenarios$/.test(e.instancePath))) continue;
     add(e.keyword === "additionalProperties" ? `${e.instancePath}/${e.params.additionalProperty}` : e.instancePath || "/", e.keyword === "additionalProperties" ? `"${e.params.additionalProperty}" is not a manifest field` : e.keyword === "required" ? `needs "${e.params.missingProperty}"` : e.message);
   }
   for (const [i, r] of (d.roles ?? []).entries()) {
@@ -139,6 +158,25 @@ export function validate(m) {
     for (const s of (j?.states ? STATES.filter((x) => !j.states.includes(x)) : [])) if (!j.notApplicable?.[s]) add(["journeys", i, "notApplicable"], `state "${s}" is left out without a reason; add notApplicable.${s}`);
   }
 
+  // Journeys from the app's blueprint (FEAT-012 ASM-01; CONTRACT-006 journeys[].blueprint).
+  const bp = blueprintOf(m, d, add);
+  const journeys = (d.journeys ?? []).map((j, i) => {
+    if (!j || typeof j !== "object" || !j.blueprint) return j;
+    const own = ["story", "criteria", "entry"].filter((k) => j[k] !== undefined);
+    if (own.length) add(["journeys", i], `gives both definitions: blueprint journey "${j.blueprint}" and its own ${own.join(", ")}; a journey is defined once, so remove ${own.join(", ")} or blueprint`);
+    if (!bp.data) { add(["journeys", i, "blueprint"], `"${j.blueprint}" cannot be resolved: ${bp.why}`); return j; }
+    const bj = (bp.data.journeys ?? []).find((x) => x?.id === j.blueprint);
+    if (!bj) { add(["journeys", i, "blueprint"], `no journey "${j.blueprint}" in the app's blueprint (${bp.rel}); it has ${(bp.data.journeys ?? []).map((x) => x?.id).filter(Boolean).join(", ") || "no journeys"}`); return j; }
+    return { ...j, id: j.id ?? bj.id, story: bj.story, ...(bj.criteria ? { criteria: bj.criteria } : {}), entry: bj.entry, entryKind: "screen", steps: bj.steps ?? [], alternates: bj.alternates ?? [], aiRoles: rolesOf(bj, bp.data) };
+  });
+
+  // AI journeys (FEAT-011 AIX-02; US-082-AC1): the three scenarios, each reported when missing.
+  for (const [i, j] of journeys.entries()) {
+    if (j?.ai !== true) continue;
+    for (const s of SCENARIOS) if (!j.scenarios?.[s]) add(["journeys", i, "scenarios", s], `an AI journey needs its ${SCENARIO_TEXT[s]} scenario (scenarios.${s}: { description, inputs?, step? })`);
+    if (j.scenarios?.risky && riskyStep(j) == null) add(["journeys", i, "scenarios", "risky", "step"], "needs the high-impact step: the walkthrough stops there, chooses Deny and never approves");
+  }
+
   // Repository (CTX-03).
   const cwd = resolve(m.dir, d.run?.cwd ?? ".");
   if (!existsSync(cwd)) add("/run/cwd", `${cwd} does not exist`);
@@ -155,19 +193,20 @@ export function validate(m) {
     helix = bind(m.dir, d.helix ?? {});
     const docs = instances(helix.flow, helix.types, { include: d.helix?.include, exclude: d.helix?.exclude, repo: helix.marker.repo });
     const stories = new Map(docs.filter((x) => x.id && /^US-\d+$/.test(x.id)).map((x) => [x.id, x]));
-    for (const [i, j] of (d.journeys ?? []).entries()) {
+    for (const [i, j] of journeys.entries()) {
       if (!j?.story || PLACEHOLDER.test(j.story)) continue;
+      const from = j.entryKind === "screen" ? `, from blueprint journey ${j.blueprint}` : "";
       const s = stories.get(j.story);
-      if (!s) { add(["journeys", i, "story"], `no story ${j.story} in the flow "${helix.flow.id}" (${helix.flow.rootRel})`); continue; }
+      if (!s) { add(["journeys", i, from ? "blueprint" : "story"], `no story ${j.story} in the flow "${helix.flow.id}" (${helix.flow.rootRel})${from}`); continue; }
       const crit = new Set(criteriaOf(s).map((c) => c.id));
-      for (const [k, c] of (j.criteria ?? []).entries()) if (!crit.has(c)) add(["journeys", i, "criteria", k], `${c} is not a criterion of ${j.story}`);
+      for (const [k, c] of (j.criteria ?? []).entries()) if (!crit.has(c)) add(from ? ["journeys", i, "blueprint"] : ["journeys", i, "criteria", k], `${c} is not a criterion of ${j.story}${from}`);
     }
     helix = { ...helix, documents: docs.length };
   } catch (e) {
     if (!(e instanceof HelixError)) throw e;
     add("/helix", e.code === "ambiguous" ? e.message : `HELIX ${e.code}: ${e.message}`);
   }
-  const resolved = { ...d, run: { ...d.run, cwd, origins }, limits: { ...LIMITS, ...d.limits }, restrictions: { ...d.restrictions, allow: (d.restrictions?.allow ?? []).filter((a) => !DENY.includes(a)), deny: [...new Set([...DENY, ...(d.restrictions?.deny ?? [])])], excludeIntegrations: d.restrictions?.excludeIntegrations ?? [] } };
+  const resolved = { ...d, journeys, blueprintFile: bp.data ? bp.file : null, run: { ...d.run, cwd, origins }, limits: { ...LIMITS, ...d.limits }, restrictions: { ...d.restrictions, allow: (d.restrictions?.allow ?? []).filter((a) => !DENY.includes(a)), deny: [...new Set([...DENY, ...(d.restrictions?.deny ?? [])])], excludeIntegrations: d.restrictions?.excludeIntegrations ?? [] } };
   problems.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
   return { problems, helix, resolved };
 }

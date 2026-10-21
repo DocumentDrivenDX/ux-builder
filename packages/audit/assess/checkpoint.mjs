@@ -27,6 +27,7 @@ import { join, relative, resolve } from "node:path";
 import { chromium } from "playwright";
 import { enrich, inspect, prepare } from "../inspect.mjs";
 import { VERSION } from "../audit.mjs";
+import { APPROVE_SELECTOR, approvalProbe, errorFindings, errorProbe, NEVER_APPROVE, SCENARIOS, wouldApprove } from "./ai.mjs";
 import { DENY, excluded } from "./manifest.mjs";
 
 export const runId = (d = new Date()) => `R-${d.toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z")}`;
@@ -94,6 +95,8 @@ export function refusal(plan, { origins = null, exclude = [], allow = [], deny =
   const ex = excluded(exclude);
   for (const [i, s] of (plan.steps ?? []).entries()) {
     const n = i + 1;
+    // An approve control is never activated, as a denied action is never taken (ADR-028 decision 8).
+    if ((s.click && APPROVE_SELECTOR.test(s.click)) || s.action === "approve") return `step ${n} would activate an approve control (data-piq-ai-control="approve"); ${NEVER_APPROVE}`;
     if (s.action && deny.includes(s.action)) return `step ${n} takes the denied action "${s.action}"; a denied action is never taken`;
     if (s.action && !allow.includes(s.action)) return `step ${n} takes the action "${s.action}", which restrictions.allow does not permit`;
     if (s.goto) {
@@ -111,33 +114,82 @@ export function refusal(plan, { origins = null, exclude = [], allow = [], deny =
    state is there. Steps: { goto } | { click } | { fill, value } | { press } | { waitFor },
    each with an optional action class. Nothing runs if a step is refused;
    while it runs, requests off the origins or to an excluded integration are aborted. */
-async function replay(plan, guard) {
+async function replay(plan, guard, { scenario = null, highImpactStep = null, dir = null, capture = "both", redact = [] } = {}) {
   const why = refusal(plan, guard);
   if (why) throw restricted(why);
+  const risky = scenario === "risky";
+  if (risky && !Number.isInteger(highImpactStep)) throw restricted("the risky scenario names no high-impact step (a replay step with highImpact: true, --high-impact-step, or the manifest's scenarios.risky.step as a number), so it cannot stop before it");
   const ex = excluded(guard.exclude);
   const browser = await chromium.launch();
-  const context = await browser.newContext({ viewport: plan.viewport ?? { width: 1280, height: 900 } });
-  await context.route("**/*", (route) => {
-    const u = route.request().url();
-    if (!/^https?:/.test(u)) return route.continue();
-    const off = guard.origins?.length && !guard.origins.includes(new URL(u).origin);
-    return off || ex.by(u) ? route.abort("blockedbyclient") : route.continue();
-  });
-  const page = await context.newPage();
-  for (const s of plan.steps ?? []) {
-    if (s.goto) await page.goto(new URL(s.goto, plan.baseUrl).href, { waitUntil: "networkidle" });
-    else if (s.click) await page.click(s.click);
-    else if (s.fill) await page.fill(s.fill, s.value ?? "");
-    else if (s.press) await page.keyboard.press(s.press);
-    else if (s.waitFor) await page.waitForSelector(s.waitFor);
-  }
-  const e = plan.expect ?? {};
-  let passed = false;
   try {
-    const l = page.locator(e.selector);
-    passed = (await l.count()) > 0 && (await l.first().isVisible()) && (!e.text || (await l.first().innerText()).includes(e.text));
-  } catch { passed = false; }
-  return { page, passed, assertion: e, detach: () => browser.close() };
+    const context = await browser.newContext({ viewport: plan.viewport ?? { width: 1280, height: 900 } });
+    await context.route("**/*", (route) => {
+      const u = route.request().url();
+      if (!/^https?:/.test(u)) return route.continue();
+      const off = guard.origins?.length && !guard.origins.includes(new URL(u).origin);
+      return off || ex.by(u) ? route.abort("blockedbyclient") : route.continue();
+    });
+    const page = await context.newPage();
+    // The risky scenario (US-082-AC3, AC4): at an approval, record it, choose Deny and stop;
+    // with none before the high-impact step, stop before it.
+    const approvalNow = async () => {
+      try { await page.waitForSelector('[data-piq-ai="approval"]', { state: "visible", timeout: 300 }); } catch { /* none shown */ }
+      return page.evaluate(approvalProbe);
+    };
+    const denyAt = async (approval, n) => {
+      let shot = null;
+      if (dir && capture !== "tree") { await page.screenshot({ path: join(dir, "approval.png"), mask: redact.map((x) => page.locator(x)), animations: "disabled" }); shot = "approval.png"; }
+      const deny = page.locator('[data-piq-ai="approval"] [data-piq-ai-control="deny"]').first();
+      const can = approval.deny && (await deny.count()) > 0 && (await deny.isVisible());
+      if (can) { await deny.click(); await page.waitForLoadState("networkidle").catch(() => {}); }
+      return { highImpactStep, stoppedAt: n, approval: { ...approval, screenshot: shot }, denied: !!can, approved: false };
+    };
+    let stop = null;
+    const steps = plan.steps ?? [];
+    for (const [i, s] of steps.entries()) {
+      const n = i + 1;
+      if (risky) {
+        const a = await approvalNow();
+        if (a) { stop = await denyAt(a, n); break; }
+        if (n === highImpactStep) { stop = { highImpactStep, stoppedAt: n, approval: null, denied: false, approved: false }; break; }
+      }
+      // Checked as the page is now: a step that would activate an approve control is not taken (ENV-01).
+      if ((s.click && await page.evaluate(wouldApprove, { selector: s.click })) || (s.press && await page.evaluate(wouldApprove, { key: s.press }))) {
+        throw Object.assign(restricted(`step ${n} would activate an approve control (data-piq-ai-control="approve"); ${NEVER_APPROVE}`), { taken: n - 1 });
+      }
+      if (s.goto) await page.goto(new URL(s.goto, plan.baseUrl).href, { waitUntil: "networkidle" });
+      else if (s.click) await page.click(s.click);
+      else if (s.fill) await page.fill(s.fill, s.value ?? "");
+      else if (s.press) await page.keyboard.press(s.press);
+      else if (s.waitFor) await page.waitForSelector(s.waitFor);
+    }
+    if (risky && !stop) {
+      const a = await approvalNow();
+      const n = steps.length + 1;
+      stop = a ? await denyAt(a, n) : { highImpactStep, stoppedAt: n, approval: null, denied: false, approved: false, ...(highImpactStep > n ? { reached: false } : {}) };
+    }
+    const e = plan.expect ?? null;
+    let passed = false;
+    if (!e && risky) passed = true;
+    else try {
+      const l = page.locator(e.selector);
+      passed = (await l.count()) > 0 && (await l.first().isVisible()) && (!e.text || (await l.first().innerText()).includes(e.text));
+    } catch { passed = false; }
+    return { page, passed, assertion: e ?? { scenario: "risky", stoppedAt: stop.stoppedAt }, risky: stop, detach: () => browser.close() };
+  } catch (err) {
+    await browser.close();
+    throw err;
+  }
+}
+
+/* The findings of a risky stop (US-082-AC4): no approval before the
+   high-impact step, or an approval with no Deny. */
+function riskyFindings(stop) {
+  if (!stop) return [];
+  const f = (message) => ({ rule: "agent.approve-high-impact", severity: "warning", priority: "P1", finding_type: "observed", scenario: "risky", message });
+  if (!stop.approval && stop.reached !== false) return [f(`no approval appeared before step ${stop.highImpactStep}, the high-impact step; the walkthrough stopped before it and took nothing`)];
+  if (stop.approval && !stop.denied) return [f("the approval offers no visible Deny control; nothing was chosen and the walkthrough stopped")];
+  return [];
 }
 
 /* Record a stage in the run's run.json (written by every command). */
@@ -177,7 +229,7 @@ export function limitReached({ runRoot, id, journey, steps, limits, now = Date.n
 
 /* Inspect one checkpoint and write its record. Returns { record, code }:
    code 0 inspected, 1 lost, ambiguous, unverified, no browser, restricted or a limit. */
-export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: id, journey, step, role, state, stateAffecting = false, redact = [], redactText = [], origins = null, exclude = [], allow = [], deny = DENY, capture = "both", limits = null, out = "ux-assessment", run = runId(), cwd = process.cwd(), ignore = [], rules = {} }) {
+export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: id, journey, step, role, state, scenario = null, highImpactStep = null, stateAffecting = false, redact = [], redactText = [], origins = null, exclude = [], allow = [], deny = DENY, capture = "both", limits = null, out = "ux-assessment", run = runId(), cwd = process.cwd(), ignore = [], rules = {} }) {
   if (!ID.test(id ?? "")) throw new Error(`--checkpoint must look like C-<journey>-<n>, got "${id}"`);
   const runRoot = resolve(out, run);
   const dir = join(runRoot, "checkpoints", id);
@@ -185,7 +237,11 @@ export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: 
   const plan = steps ? JSON.parse(readFileSync(steps, "utf8")) : null;
   const mode = steps ? "replay" : "in-place";
   const taken = plan ? (plan.steps ?? []).length + 1 : 1;
-  const base = { schema: "inspection", version: 1, auditor: VERSION, checkpoint: { id, journey: journey ?? null, step: step == null ? null : Number(step), role: role ?? null, state: state ?? null }, inspectedAt: new Date().toISOString() };
+  if (scenario != null && !SCENARIOS.includes(scenario)) throw new Error(`--scenario must be one of ${SCENARIOS.join(", ")}, got "${scenario}"`);
+  // The risky scenario's high-impact step: given, else a replay step marked highImpact (1-based).
+  const marked = (plan?.steps ?? []).findIndex((s) => s.highImpact === true);
+  const impact = highImpactStep != null ? Number(highImpactStep) : marked >= 0 ? marked + 1 : null;
+  const base = { schema: "inspection", version: 1, auditor: VERSION, checkpoint: { id, journey: journey ?? null, step: step == null ? null : Number(step), role: role ?? null, state: state ?? null, ...(scenario ? { scenario } : {}) }, inspectedAt: new Date().toISOString(), ...(scenario ? { scenario } : {}) };
   const write = (record) => { writeFileSync(join(dir, "inspection.json"), JSON.stringify(record, null, 2) + "\n"); return record; };
   // Limits first: a step past one is not taken (AGW-02).
   const limit = limitReached({ runRoot, id, journey, steps: taken, limits });
@@ -195,10 +251,10 @@ export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: 
   }
   let session;
   try {
-    session = plan ? await replay(plan, { origins, exclude, allow, deny }) : await attach({ cdp, page: match });
+    session = plan ? await replay(plan, { origins, exclude, allow, deny }, { scenario, highImpactStep: impact, dir, capture, redact }) : await attach({ cdp, page: match });
   } catch (e) {
     if (e.code === "no-browser") recordStage(runRoot, { stage: "walkthrough", status: "blocked", reason: e.message });
-    return { code: 1, record: write({ ...base, mode, steps: 0, error: e.code ?? "error", message: e.code === "restricted" ? `blocked: restricted — ${e.message}; nothing was taken` : e.message, findings: [] }) };
+    return { code: 1, record: write({ ...base, mode, steps: e.taken ?? 0, error: e.code ?? "error", message: e.code === "restricted" ? `blocked: restricted — ${e.message}; ${e.taken != null ? `step ${e.taken + 1} and those after it were not taken` : "nothing was taken"}` : e.message, findings: [] }) };
   }
   try {
     if (plan && !session.passed) return { code: 1, record: write({ ...base, mode, steps: taken, url: session.page.url(), verified: { assertion: session.assertion, passed: false }, findings: [], message: "the replayed state does not match the expected state; nothing was inspected" }) };
@@ -224,7 +280,24 @@ export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: 
       tree = "tree.yml";
     }
     const findings = enrich(result.findings, sdk.interaction).map((f) => ({ ...f, finding_type: "deterministic", checkpoint: base.checkpoint, viewport: shown.viewport, theme: shown.theme }));
-    return { code: 0, record: write({ ...base, mode, steps: taken, url: page.url(), viewport: shown.viewport, theme: shown.theme, appearance: shown.appearance, ...(plan ? { verified: { assertion: session.assertion, passed: true } } : {}), skipped: result.skipped, stateAffecting: result.stateAffecting, findings, screenshot, tree }) };
+    // An AI scenario (US-082): the risky stop, or what an error-prone state shows; their findings name the AI rule.
+    const ai = {};
+    const mask = (t) => redactText.reduce((x, re) => x.replace(new RegExp(re, "g"), "***"), t ?? "");
+    if (scenario === "risky") {
+      // In place, the agent chooses Deny itself; the approval on screen is recorded.
+      const stop = session.risky ?? { approval: await page.evaluate(approvalProbe), approved: false };
+      if (stop.approval) stop.approval = { ...stop.approval, text: mask(stop.approval.text) };
+      ai.risky = stop;
+      if (session.risky) findings.push(...riskyFindings(stop).map((f) => ({ ...f, checkpoint: base.checkpoint })));
+    }
+    if (scenario === "errorProne") {
+      const probe = await page.evaluate(errorProbe);
+      ai.errorProne = { ...probe, error: probe.error && mask(probe.error), rules: ["agent.recover", "ai.improve-request"] };
+      findings.push(...errorFindings(probe).map((f) => ({ ...f, checkpoint: base.checkpoint })));
+    }
+    // A risky replay takes its steps up to where it stopped, plus the inspection.
+    const used = session.risky ? Math.min(taken, session.risky.stoppedAt) : taken;
+    return { code: 0, record: write({ ...base, mode, steps: used, url: page.url(), viewport: shown.viewport, theme: shown.theme, appearance: shown.appearance, ...(plan ? { verified: { assertion: session.assertion, passed: true } } : {}), skipped: result.skipped, stateAffecting: result.stateAffecting, ...ai, findings, screenshot, tree }) };
   } finally {
     await session.detach();
   }

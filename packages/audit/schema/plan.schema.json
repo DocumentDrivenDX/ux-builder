@@ -35,6 +35,60 @@
             "type": "string",
             "pattern": "^J-"
           },
+          "entryKind": {
+            "description": "screen: entry is a blueprint screen id (a blueprint journey); otherwise a path or URL",
+            "enum": ["screen"]
+          },
+          "blueprint": {
+            "description": "The blueprint journey this journey is (FEAT-012 ASM-01)",
+            "type": "string",
+            "pattern": "^J-"
+          },
+          "steps": {
+            "description": "A blueprint journey's steps, numbered from 1",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["n", "screen"]
+            }
+          },
+          "alternates": {
+            "description": "Each blueprint alternate as a walkthrough of one journey-and-state pair (US-088-AC4)",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["n", "from", "steps", "state", "pair", "applies"],
+              "properties": {
+                "state": { "enum": ["success", "empty", "loading", "recoverable-error", "system-failure", "ai", "responsive-keyboard"] },
+                "pair": { "type": "string", "pattern": "^S-" }
+              }
+            }
+          },
+          "ai": {
+            "description": "An AI journey's rubric: the AI rules for its roles, review heuristics included (FEAT-011 AIX-01)",
+            "type": "object",
+            "required": ["roles", "heuristics"],
+            "properties": {
+              "roles": { "type": "array", "items": { "enum": ["generative", "assistant", "agent"] } },
+              "roleSource": { "enum": ["blueprint", "all"] },
+              "heuristics": {
+                "type": "array",
+                "items": { "type": "object", "required": ["rule", "review"], "properties": { "rule": { "type": "string" }, "review": { "type": "boolean" } } }
+              }
+            }
+          },
+          "walkthroughs": {
+            "description": "An AI journey's three scenario walkthroughs (FEAT-011 AIX-02)",
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "object",
+              "required": ["scenario", "state", "pair"],
+              "properties": { "scenario": { "enum": ["normal", "errorProne", "risky"] } },
+              "if": { "properties": { "scenario": { "const": "risky" } } },
+              "then": { "required": ["step", "stop", "never"], "properties": { "never": { "const": "approve" } } }
+            }
+          },
           "criteria": {
             "type": "array",
             "items": {
