@@ -1,0 +1,68 @@
+# UX assessment manifest for the theme builder (FEAT-009 pilot; CONTRACT-006).
+# It binds this repository's HELIX documents through the marker at the
+# repository root: flow "helix", root docs/helix/, catalogue found as HELIX
+# finds it. Journeys name stories by ID; their criteria and text stay in HELIX.
+version: 1
+app:
+  name: Theme builder
+  repository: https://github.com/DocumentDrivenDX/ux-builder
+helix:
+  flow: helix
+run:
+  # The builder on the mock model and a throwaway repository: deterministic, touches nothing real.
+  start: PORT=5195 node e2e/serve.mjs
+  baseUrl: http://127.0.0.1:5195/
+  ready:
+    url: http://127.0.0.1:5195/api/context
+  environment: local
+roles:
+  - id: brand-owner
+    description: Makes a theme from a logo; no sign-in in this app.
+    auth: none
+journeys:
+  - id: J-logo-to-theme
+    story: US-015
+    priority: critical
+    role: brand-owner
+    entry: /
+    states: [success, empty, recoverable-error, ai, responsive-keyboard]
+    notApplicable:
+      loading: the mock model answers at once; covered under ai
+      system-failure: the builder runs locally with no remote service in the pilot
+  - id: J-refine-with-feedback
+    story: US-018
+    priority: important
+    role: brand-owner
+    entry: /
+    states: [success, recoverable-error, ai]
+    notApplicable:
+      empty: feedback starts from generated options
+      loading: the mock model answers at once
+      system-failure: covered by the model-error state under recoverable-error
+      responsive-keyboard: assessed in J-logo-to-theme
+  - id: J-save-and-adopt
+    story: US-019
+    priority: critical
+    role: brand-owner
+    entry: /
+    states: [success, recoverable-error, responsive-keyboard]
+    notApplicable:
+      empty: saving needs a chosen theme
+      loading: saving to files-only review is immediate
+      system-failure: covered by the server-refusal state under recoverable-error
+      ai: no model in this step
+tests:
+  - id: unit
+    command: npm test
+  - id: builder-e2e
+    command: npm run e2e
+    timeoutMinutes: 10
+audit:
+  urls: [/]
+  widths: [390, 1280]
+  themes: [ux-builder-databricks]
+limits:
+  runMinutes: 60
+restrictions:
+  allow: [create-test-data]
+  writes: report-only

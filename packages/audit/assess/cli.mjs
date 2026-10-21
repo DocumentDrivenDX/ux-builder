@@ -4,6 +4,7 @@
 
      init        propose ux-assessment.yml from the repository
      validate    check the manifest against its schema, the repository and HELIX
+     collect     map the HELIX documents and criteria to the journeys and tests
      browser     start Chromium with a CDP endpoint for the agent's driver
      inspect     inspect a checkpoint: the agent's page in place, or a replay
 
@@ -18,6 +19,8 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       Playwright configuration. Refuses to overwrite.
   validate [--manifest ux-assessment.yml]
       Check the manifest; print each problem with its path.
+  collect [--manifest f] [--run R-id] [--out dir]
+      Write requirements.json, traceability.json and run.json for the run.
   browser [--port n] [--headed]
       Start Chromium with a CDP endpoint and print it; connect the agent's
       browser driver to it (Playwright MCP: --cdp-endpoint <url>). Ctrl-C stops it.
@@ -28,6 +31,18 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       <out>/<run>/checkpoints/<id>/inspection.json, screenshot.png, tree.yml.`;
 
 const SUB = {
+  async collect(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    const { collect, runId } = await import("./collect.mjs");
+    const r = collect({ ...ready, out: o.out, run: o.run ?? runId() });
+    const p = r.requirements.problems;
+    const crit = r.traceability.journeys.flatMap((j) => j.criteria);
+    console.log(`${r.run.id}: ${r.requirements.documents.length} documents, ${r.requirements.criteria.length} criteria; journeys' criteria ${crit.filter((c) => c.link === "explicit").length} explicit, ${crit.filter((c) => c.link === "uncovered").length} uncovered; ${p.length} problem${p.length === 1 ? "" : "s"} recorded`);
+    console.log(`Wrote ${r.dir}/requirements.json, traceability.json, run.json`);
+    return 0;
+  },
   async init(args) {
     const { values: o } = parseArgs({ args, options: { out: { type: "string", default: "ux-assessment.yml" } } });
     const { existsSync, writeFileSync } = await import("node:fs");
@@ -82,6 +97,21 @@ async function loaded(file) {
   if (!existsSync(file)) { console.error(`${file} not found; propose one with: ux-builder-audit assess init`); return 2; }
   const { load } = await import("./manifest.mjs");
   try { return load(file); } catch (e) { console.error(`${file}: ${e.message.split("\n")[0]}`); return 2; }
+}
+
+/* A manifest that validates, with its HELIX binding, or the exit code: a
+   manifest with problems blocks the stage (printed with their paths). */
+async function validated(file) {
+  const m = await loaded(file);
+  if (typeof m === "number") return m;
+  const { validate } = await import("./manifest.mjs");
+  const { problems, helix, resolved } = validate(m);
+  if (problems.length) {
+    for (const p of problems) console.error(`${p.path.padEnd(28)} ${p.message}`);
+    console.error(`${file}: ${problems.length} problem${problems.length === 1 ? "" : "s"}; fix them first (ux-builder-audit assess validate)`);
+    return 1;
+  }
+  return { manifest: m, resolved, helix };
 }
 
 export async function main(argv) {

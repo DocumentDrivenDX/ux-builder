@@ -6,3 +6,6 @@ storybook-static/
 *storybook.log
 packages/ui/src/icons/library.generated.js
 _site/
+
+# UX assessment runs (FEAT-009); evidence stays local unless shared on purpose.
+ux-assessment/
