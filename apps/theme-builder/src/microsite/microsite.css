@@ -57,6 +57,23 @@
 .uxm-prose .uxh-section .uxh-wrap { inline-size: 100%; }
 .uxm-prose .uxh-ai { grid-template-columns: minmax(0, 1fr); }
 
+/* Prose stays within about 80 characters a line (rule text.line-length): ch is a wide glyph in the theme's fonts. */
+.uxm-prose > p, .uxm-prose > ul > li, .uxm-prose > ol > li { max-inline-size: 54ch; }
+
+/* Live demos (demos.jsx): the SDK's own components in a framed stage; a conversation gets a height to scroll in */
+.uxm-demo { display: flex; flex-direction: column; gap: var(--piq-space-3); padding: var(--piq-space-4); border-radius: var(--piq-radius-card); background: var(--piq-color-surface); border: var(--piq-border-default); }
+.uxm-demo--chat { block-size: 36rem; padding: var(--piq-space-3); overflow: hidden; }
+.uxm-demo--chat > .piq-conversation { flex: 1; min-block-size: 0; }
+.uxm-prose .uxm-demo p, .uxm-prose .uxm-demo li { max-inline-size: none; }
+.uxm-prose .uxm-demo ul, .uxm-prose .uxm-demo ol { padding-inline-start: 0; }
+.uxm-figures { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); gap: var(--piq-space-4); align-items: start; }
+.uxm-figure { display: flex; flex-direction: column; gap: var(--piq-space-2); margin: 0; }
+.uxm-figure img { display: block; inline-size: 100%; block-size: auto; border-radius: var(--piq-radius-card); border: var(--piq-border-default); }
+.uxm-figure figcaption { font-size: var(--piq-font-size-small); color: var(--piq-color-text-muted); }
+.uxm-pre { margin: 0; padding: var(--piq-space-4); overflow-x: auto; border-radius: var(--piq-radius-card); background: var(--piq-color-surface-sunken); font-family: var(--piq-font-mono); font-size: var(--piq-font-size-small); line-height: 1.5; }
+.uxm-details summary { cursor: pointer; font-weight: var(--piq-font-weight-strong); min-block-size: 2.75rem; display: flex; align-items: center; }
+@media (max-width: 700px) { .uxm-figures { grid-template-columns: minmax(0, 1fr); } }
+
 /* Tiles, grids, tables */
 .uxm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--piq-space-4); margin: 0; padding: 0 !important; list-style: none; }
 .uxm-grid--3 { grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }

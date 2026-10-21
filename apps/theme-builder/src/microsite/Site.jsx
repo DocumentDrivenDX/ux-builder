@@ -1,7 +1,7 @@
 import { AppearanceSwitch, Icon, Logo, ThemeProvider, useTheme } from "@ux-builder/ui";
 import { iconArrowRight, iconBot, iconPalette, iconShieldCheck, iconSparkles, iconTerminal } from "@ux-builder/ui/icons";
 import { useEffect, useState } from "react";
-import { AiSection, GetStarted, Guardrails, Hero, LiveDemo, Packages } from "../home/Home.jsx";
+import { AiSection, GetStarted, Guardrails, Hero, LiveDemo, Loop, Packages } from "../home/Home.jsx";
 import { ROOT } from "../site-root.js";
 import { SECTIONS, href, locate, neighbours } from "./nav.js";
 import { PAGES } from "./pages.jsx";
@@ -9,7 +9,7 @@ import { DECISIONS, FEATURES, PATTERNS, REPO, WIDGETS } from "./sources.js";
 
 /* The project site (tools/build-pages.mjs), laid out by HELIX's
    product-microsite-ia concern: the home page (the hero, the reader paths,
-   the live demo, the AI section, guardrails, packages, a quick start and
+   the live demo, the AI section, plan-check-build-assess, guardrails, packages, a quick start and
    proof), then one section per reader mode (Why, Start, Concepts, Reference,
    Proof), each with a landing page. On a section page the left menu is the
    site's hierarchy and the current page; the right menu is this page's
@@ -46,7 +46,7 @@ export function Site() {
       {section ? <SectionPage section={section} page={page} /> : <HomePage />}
       <footer className="uxh-foot"><div className="uxh-wrap uxh-row uxh-spread">
         <Logo variant="mark" size="sm" />
-        <p>Open source under MIT OR Apache-2.0. Built with the SDK it describes, in the <code>{THEME}</code> theme.</p>
+        <p>Open source under MIT OR Apache-2.0. Built with the SDK it describes, in the <code>{THEME}</code> theme. Not affiliated with or endorsed by Apple, Google or Microsoft; their names and marks are theirs.</p>
         <nav aria-label="Footer" className="uxh-row">{SECTIONS.map((s) => <a key={s.id} href={href(s.id)}>{s.title}</a>)}<a href={REPO}>GitHub</a></nav>
       </div></footer>
     </ThemeProvider>
@@ -68,6 +68,7 @@ function HomePage() {
       <Paths />
       <LiveDemo />
       <AiSection />
+      <Loop />
       <Guardrails />
       <Packages />
       <GetStarted />
@@ -187,7 +188,7 @@ function useOutline(key) {
   const [items, setItems] = useState([]);
   const [current, setCurrent] = useState(null);
   useEffect(() => {
-    const hs = [...document.querySelectorAll(".uxm-main h2[id]")].map((h) => ({ id: h.id, text: h.textContent }));
+    const hs = [...document.querySelectorAll(".uxm-main h2[id]:not([data-demo] h2)")].map((h) => ({ id: h.id, text: h.textContent }));
     setItems(hs);
     let frame = 0;
     const update = () => {
