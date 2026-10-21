@@ -19,7 +19,7 @@ ddx:
 # Feature Specification: FEAT-010 — A new app starts on HELIX
 
 **Feature ID**: FEAT-010
-**Status**: Specified (ADR-027, 2026-10-21); built 2026-10-21 (B-013 to B-016)
+**Status**: Draft (the document awaits review); specified with ADR-027 and built 2026-10-21 (B-013 to B-016)
 **Priority**: P1
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: App SDK (the starter)
@@ -97,14 +97,19 @@ publishes one), its plugin manifest's version matches the tag, and it holds
 `references/activities/`, `references/concerns/`).
 
 HLF-03. The request uses no credentials unless `GITHUB_TOKEN` is set (read,
-never written), honours the standard proxy variables, and gives up after 20
+never written), honours the standard proxy variables (`HTTPS_PROXY`,
+`HTTP_PROXY` and `NO_PROXY`, in upper or lower case), and gives up after 20
 seconds.
 
 HLF-04. If the release cannot be fetched or verified, the starter uses the
 bundled HELIX and says which version it used and why. `--helix-offline`
 uses the bundled HELIX without a network request. A version named with
 `--helix-version` that cannot be fetched stops creation (exit 1) and writes
-nothing. `--no-helix` creates the app without HELIX, as before.
+nothing. `--helix-offline` with `--helix-version` is refused (exit 1,
+nothing written): they ask for different releases. `--no-helix` creates the
+app without HELIX: no marker, documents, skill or `ux-assessment.yml`. The app
+still gets `e2e/starter.spec.js` and `npm run test:e2e`, but the test has no
+`@covers` lines, because without HELIX there is no US-001.
 
 #### Install
 
@@ -171,17 +176,24 @@ under the package's `helix/` root to `.claude/skills/helix/`; an entry with
 an absolute path, `..`, a link or a device is refused, and the package with
 it.
 
-HLS-02. HELIX never makes creation fail except a pinned version that cannot
-be had (HLF-04); every other problem falls back to the bundled HELIX, with
-the reason printed and recorded in `HELIX-VERSION.json`.
+HLS-02. HELIX never makes creation fail, except a pinned version that cannot
+be had or the refused option combination (HLF-04). Every other problem falls
+back to the bundled HELIX, with the reason printed and recorded in
+`HELIX-VERSION.json`. If the bundled HELIX is missing or fails its own check
+when it is needed, the app is created without HELIX, as with `--no-helix`.
+The output then gives the reason and says that no `HELIX-VERSION.json` was
+written.
 
 ### Non-Functional Requirements
 
 - **Time**: fetching and installing HELIX adds under 10 seconds on a normal
-  connection.
+  connection. No test measures this.
 - **Size**: the bundled HELIX adds under 1.5 MB to the create-app package.
+  `helix-fetch.test.mjs` checks it when the bundle is present, which it is
+  after `npm pack`, and skips the check otherwise.
 - **Determinism**: the same HELIX version and options give the same
-  documents.
+  documents, apart from the date. Each document's drafting note carries the
+  day it was created; nothing else differs (US-069-AC5).
 - **Compatibility**: `--no-helix` gives today's app; the documents follow the
   HELIX version installed, not one fixed in create-app.
 
@@ -201,7 +213,10 @@ the reason printed and recorded in `HELIX-VERSION.json`.
   contents check alone, and `digest` records `null`.
 - **A template renamed or removed in a later release**: that document is
   written from the starter's own section list with the type's frontmatter,
-  and the problem is printed.
+  and the problem is printed, naming the type (US-069-AC4).
+- **The bundled HELIX is missing or unusable when it is needed**: the app is
+  created without HELIX, and the reason is printed (HLS-02).
+- **A proxy is set**: the requests to GitHub go through it (HLF-03).
 - **The target directory exists**: unchanged behaviour: refused.
 
 ## Success Metrics

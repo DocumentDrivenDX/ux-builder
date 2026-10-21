@@ -318,13 +318,35 @@ Normative from `@ux-builder/create-app` 0.5.0.
 | (default) | Fetches the latest HELIX release's plugin package from GitHub, verifies it, installs `skills/helix/` at `.claude/skills/helix/`, and writes `.helix.yml` and the starter set (FEAT-010 HLA-01) |
 | `--helix-version <tag>` | That release; exit 1 and nothing written if it cannot be fetched and verified |
 | `--helix-offline` | The bundled HELIX; no network request |
-| `--no-helix` | No marker, documents or skill |
+| `--helix-offline` with `--helix-version` | Refused: exit 1, nothing written |
+| `--no-helix` | No marker, documents, skill, `ux-assessment.yml` or `assess:validate` |
 
-The app also gets `ux-assessment.yml`, `e2e/starter.spec.js` (citing US-001)
-and the scripts `test:e2e` and `assess:validate`. `HELIX-VERSION.json`:
-`{ version, tag, source, digest, fetchedAt, bundled, reason? }`.
-`UX_BUILDER_HELIX_API` (default `https://api.github.com`) and
-`GITHUB_TOKEN` are read from the environment.
+Every app gets `e2e/starter.spec.js` and the `test:e2e` script. On HELIX,
+the test cites US-001's criteria with `@covers`, and the app also gets
+`ux-assessment.yml` and the `assess:validate` script. Without HELIX
+(`--no-helix`, or the fallback below), the test has no `@covers` lines,
+since there is no US-001.
+
+`HELIX-VERSION.json`: `{ version, tag, source, digest, fetchedAt, bundled,
+reason? }`. When the fetch fails, the bundled HELIX is used and `reason`
+says why. When the bundled HELIX is missing or fails its check as well, the
+app is created without HELIX and exits 0. The output gives the reason and
+says that no `HELIX-VERSION.json` was written.
+
+Environment:
+
+| Variable | Use |
+|---|---|
+| `GITHUB_TOKEN` | Sent as a bearer token to the API only; never written |
+| `HTTPS_PROXY`, `HTTP_PROXY`, `NO_PROXY` (either case) | The requests go through the proxy (undici's `EnvHttpProxyAgent`) |
+| `UX_BUILDER_HELIX_API` | The release API's base, default `https://api.github.com`. For tests and mirrors |
+| `UX_BUILDER_HELIX_BUNDLE` | Test and maintenance only, not a supported option: the directory read as the bundled HELIX instead of the package's `helix/` |
+
+`fetchRelease({ keepArchive })` in `helix.mjs` is also test and maintenance
+only: `scripts/bundle-helix.mjs` uses it to keep the downloaded archive. That
+script runs on `prepack`, and also as `npm run bundle-helix`. It writes
+`helix/`, and it sets the HELIX version in `licenses/vendored.json`. It is
+not part of the published interface.
 
 ## Error Semantics
 

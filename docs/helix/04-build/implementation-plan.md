@@ -70,7 +70,7 @@ counsel's answer is still to come.
 |-------|---------------|---------------------|------------|-----------------|-------|
 | B-013 | US-067, US-068: fetch, verify, extract, install, fall back; the bundled package (`prepack`) | ADR-027 1 to 4, 8; STP-067, STP-068 | None | `create-app/test/helix-fetch.test.mjs` against a local release server | No test touches GitHub; the starter e2e fetches the real latest |
 | B-014 | US-069: the starter set from the installed templates, heading merge, prefill | ADR-027 5, 6; STP-069 | B-013 | `create-app/test/helix-docs.test.mjs` | |
-| B-015 | US-070, US-071: manifest, e2e test, scripts, guidance | ADR-027 7; STP-070, STP-071 | B-014 | `create-app/test/helix-wiring.test.mjs`; the starter e2e runs `assess validate`, `collect` and `test:e2e` | |
+| B-015 | US-070, US-071: manifest, e2e test, scripts, guidance | ADR-027 7; STP-070, STP-071 | B-014 | `create-app/test/helix-wiring.test.mjs`; the starter e2e runs `assess:validate`, `assess collect` (0 warnings; US-001's criteria explicit) and `test:e2e` in the installed app | |
 | B-016 | README, CONTRACT-004, changeset (create-app minor) | CONTRACT-004 | B-015 | `npm run check`, starter e2e | |
 
 ## Issue Decomposition

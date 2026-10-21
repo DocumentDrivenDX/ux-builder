@@ -21,7 +21,7 @@ function typeOf(helix, type) {
   const meta = ref(helix, `${base}/meta.yml`) ?? "";
   const location = (/^\s*location:\s*"?([^"\n]+)"?/m.exec(meta)?.[1] ?? "").trim().replace(/^docs\/helix\//, "");
   const naming = (/^\s*naming:\s*"?([^"\n]+)"?/m.exec(meta)?.[1] ?? "").trim();
-  return { template: ref(helix, `${base}/template.md`), location, naming };
+  return { base, template: ref(helix, `${base}/template.md`), location, naming };
 }
 
 /* The instance's path under docs/helix/ for its type, named by the catalogue. */
@@ -181,8 +181,10 @@ function content(r, helix) {
   };
 }
 
-/* Write the starter set into the app (HLA-01). Returns the paths written. */
-export function writeStarterSet(helix, r) {
+/* Write the starter set into the app (HLA-01). Returns the paths written.
+   A type the installed HELIX has no template or location for is still
+   written, from the starter's own sections, and the problem is printed. */
+export function writeStarterSet(helix, r, { log = () => {} } = {}) {
   const c = content(r, helix);
   const docs = [
     ["product-vision", { id: "product-vision", ...c.vision }],
@@ -198,6 +200,8 @@ export function writeStarterSet(helix, r) {
   for (const [type, d] of docs) {
     const t = typeOf(helix, type);
     const path = pathFor(t, d) ?? `${TYPES[type]}/${type}.md`;
+    const missing = [t.template == null && `template (${t.base}/template.md)`, !t.location && `output location (${t.base}/meta.yml)`].filter(Boolean);
+    if (missing.length) log(`HELIX ${helix.manifest.version} has no ${missing.join(" and no ")} for the ${type} type; docs/helix/${path} was drafted from the starter's own sections`);
     const file = join(r.dir, "docs/helix", path);
     mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, draft(t.template, { ...d, type }));
@@ -239,4 +243,4 @@ Other agent hosts install HELIX from https://github.com/DocumentDrivenDX/helix/b
   for (const f of ["AGENTS.md", "CLAUDE.md"]) appendFileSync(join(r.dir, f), guide);
 }
 
-const MANIFEST = "# UX assessment manifest (FEAT-009, CONTRACT-006), written by @ux-builder/create-app.\n# It binds this app's HELIX documents through .helix.yml; the journeys name\n# stories by ID. Check it with: npx ux-builder-audit assess validate\nversion: 1\napp:\n  name: __APP_NAME__\nhelix:\n  flow: helix\nrun:\n  start: npm run build && npx vite preview --port 4173 --strictPort --host 127.0.0.1\n  baseUrl: http://127.0.0.1:4173/\n  environment: local\nroles:\n  - id: member\n    description: A member of the team using the app\n    auth: none\njourneys:\n  - id: J-matters\n    story: US-001\n    priority: critical\n    role: member\n    entry: /\n    states: [success, empty, responsive-keyboard]\n    notApplicable:\n      loading: the starter's data is local\n      recoverable-error: the starter screen has no form that can fail\n      system-failure: the starter has no server\n      ai: the starter has no AI feature\ntests:\n  - id: e2e\n    command: npm run test:e2e\naudit:\n  widths: [390, 1280]\nrestrictions:\n  writes: report-only\n";
+const MANIFEST = "# UX assessment manifest (FEAT-009, CONTRACT-006), written by @ux-builder/create-app.\n# It binds this app's HELIX documents through .helix.yml; the journeys name\n# stories by ID. Check it with: npx ux-builder-audit assess validate\nversion: 1\napp:\n  name: __APP_NAME__\nhelix:\n  flow: helix\nrun:\n  start: npm run build && npx vite preview --port 4173 --strictPort --host 127.0.0.1\n  baseUrl: http://127.0.0.1:4173/\n  environment: local\nroles:\n  - id: member\n    description: A member of the team using the app\n    auth: none\njourneys:\n  - id: J-matters\n    story: US-001\n    priority: critical\n    role: member\n    entry: /\n    states: [success, empty, responsive-keyboard]\n    notApplicable:\n      loading: the starter's data is local\n      recoverable-error: the starter screen has no form that can fail\n      system-failure: the starter has no server\n      ai: the starter has no AI feature\ntests:\n  - id: lint\n    command: npm run lint\n  - id: audit\n    command: npm run audit\n  - id: e2e\n    command: npm run test:e2e\naudit:\n  widths: [390, 1280]\nrestrictions:\n  writes: report-only\n";
