@@ -97,8 +97,11 @@ The operator answered these questions on 2026-10-21:
    like any SDK page. The pop-ups pause playback by default, expand for
    evidence and link to the finding in `report.html`.
 8. **One file per journey and viewport, chaptered.** The main path, then
-   each alternate, is a chapter. Each is recorded in a fresh context
-   (fixture reset between them), and they are joined with title cards.
+   each alternate, is a chapter, with title cards. *(Built 2026-10-21 as one
+   recording per journey: between chapters, behind a card, the fixture is
+   reset and cookies and storage are put back to the role's signed-in
+   state. Joining separate recordings would have needed `ffmpeg` for the
+   player too; CONTRACT-006 Walkthrough videos.)*
    Desktop 1440 × 900 is the default; `video.viewports` adds others.
 
 ## Alternatives Considered

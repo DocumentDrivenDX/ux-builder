@@ -333,7 +333,38 @@ Further subcommand:
 
 | Subcommand | Behaviour | Exit |
 |---|---|---|
-| `video --run id [--journey J-id]... [--viewport WxH]... [--no-mp4] [--manifest f] [--out dir]` | For each journey with `done` steps (or the ones named): for the main path and each walked alternate, runs the fixture's reset, starts a fresh context, signs in by the role's `auth` before recording, installs `evidence.redact` masking from the first paint, replays `do` at a human pace, re-checks each checkpoint's state, and holds at checkpoints with findings, writing their annotations. Then writes the files above. Applies `run.origins`, `restrictions` and `limits` as `inspect --replay` does | 0 every journey recorded; 1 a journey not recorded, a chapter stopped, or no `ffmpeg` (MP4 skipped), with the `video` stage `partial`; 2 usage |
+| `video --run id [--journey J-id]... [--viewport WxH]... [--manifest f] [--out dir]` | For each journey with `done` steps (or the ones named): in one recording, the title card, then for the main path and each walked alternate (after the first: the fixture's reset and the signed-in state put back, behind a card), signed in by the role's `auth` before recording, installs `evidence.redact` masking from the first paint, replays `do` at a human pace, re-checks each checkpoint's state, and holds at checkpoints with findings, writing their annotations. Then writes the files above. Applies `run.origins`, `restrictions` and `limits` as `inspect --replay` does | 0 every journey recorded; 1 a journey not recorded, a chapter stopped, or no `ffmpeg` (MP4 skipped), with the `video` stage `partial`; 2 usage |
+
+Decisions the build had to make *(FEAT-013 step 3, 2026-10-21)*:
+- **One recording per journey and viewport.** Playwright records a browser
+  context from its first page, and chapters joined from separate
+  recordings would need `ffmpeg` even for the player. So each journey is one
+  context: the title card, then each chapter, then the end card. Between
+  chapters, behind an opaque card, the fixture's reset runs (without
+  blocking the replay), cookies and `localStorage`/`sessionStorage` are
+  cleared, and the role's storage state is put back. ADR-031 decision 8's
+  "fresh context" is met by this reset.
+- **Signing in.** `auth: { storageState }` is loaded into the context
+  before its first page, so no sign-in is filmed. `auth: { env: NAME }`
+  names a variable holding a Playwright storage state (a path to one, or
+  its JSON); unset or unreadable, the journey is not recorded, with the
+  reason. `auth: none` starts signed out.
+- **The checkpoint's state** is the step's `url` (else the inspection's)
+  by path and query, and, for a replayed inspection, its
+  `verified.assertion`. A difference stops the chapter.
+- **Fail closed.** The mask layer's `window.__piqVideo.ok` is checked after
+  every step; if it is missing on any page, the journey's whole recording
+  is deleted and listed in `notRecorded`. Every password field is masked
+  besides `evidence.redact`.
+- **The top layer.** An app's modal dialog or popover renders above any
+  z-index, so the layer is itself a manual popover and shows itself again
+  above each modal or popover the app opens.
+- **Element boxes** are measured after scrolling the first element into
+  view, in viewport pixels, while the page holds still.
+- **Pacing** (ms): 450 before a step, 650 for the cursor to move, 55 a
+  character typed, 900 to settle, 3200 for the title card, 4500 for the end
+  card; network waits are cut off at 1 s. A missing element fails its step
+  after 10 s.
 
 Further rules `validate-report` enforces when `video/` exists: every
 annotation's `finding` is in `backlog.json` and cites its `checkpoint`; a

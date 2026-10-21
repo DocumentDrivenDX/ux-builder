@@ -44,7 +44,7 @@ and FEAT-013; the criteria name them so tests can cite them.
 - [ ] **US-093-AC1** — Given a role with `auth: { storageState }` or `auth: { env }`, when its journey is recorded, then sign-in completes before recording starts and no frame shows the sign-in screen or a credential.
 - [ ] **US-093-AC2** — Given a role with `auth: none`, when its journey is recorded, then it starts signed out (guest access).
 - [ ] **US-093-AC3** — Given `evidence.redact` selectors and text patterns, when a chapter is recorded, then every matching element and text is masked in every frame, including content added after load.
-- [ ] **US-093-AC4** — Given a masking script that fails to install, when a chapter would be recorded, then that chapter is not recorded, the reason is listed, and the `video` stage is `partial`.
+- [ ] **US-093-AC4** — Given a page on which the masking is not installed, when the journey is recorded, then its recording is discarded, the reason is listed, and the `video` stage is `partial`.
 - [ ] **US-093-AC5** — Given a role whose sign-in fails or whose `auth.env` is not set, when its journey would be recorded, then no video is written for it and `video.json` lists it with the reason.
 - [ ] **US-093-AC6** — Given any `video` run, when it finishes, then it wrote only under the run package; `check-writes` reports nothing.
 
@@ -59,7 +59,7 @@ and FEAT-013; the criteria name them so tests can cite them.
 | AC1 | US-093-AC1 | a role with `auth: { storageState }` or `auth: { env }` | its journey is recorded | sign-in completes before recording starts and no frame shows the sign-in screen or a credential |
 | AC2 | US-093-AC2 | a role with `auth: none` | its journey is recorded | it starts signed out (guest access) |
 | AC3 | US-093-AC3 | `evidence.redact` selectors and text patterns | a chapter is recorded | every matching element and text is masked in every frame, including content added after load |
-| AC4 | US-093-AC4 | a masking script that fails to install | a chapter would be recorded | that chapter is not recorded, the reason is listed, and the `video` stage is `partial` |
+| AC4 | US-093-AC4 | a page on which the masking is not installed | the journey is recorded | its recording is discarded, the reason is listed, and the `video` stage is `partial` |
 | AC5 | US-093-AC5 | a role whose sign-in fails or whose `auth.env` is not set | its journey would be recorded | no video is written for it and `video.json` lists it with the reason |
 | AC6 | US-093-AC6 | any `video` run | it finishes | it wrote only under the run package; `check-writes` reports nothing |
 

@@ -18,6 +18,7 @@
      report      write report.html, report.md and evidence.json
      compare     classify findings across two runs of one scope
      gate        CI exit: fail on open findings at a priority, or a blocked stage
+     video       replay the walked journeys as annotated walkthrough videos
 
    Exit codes: 0 done; 1 the stage could not complete (reported); 2 usage. */
 
@@ -79,11 +80,31 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       and list the earlier baseline's failures.
   gate <run-dir> [--fail-on P0|P1|P2|P3]
       For CI: exit 1 on an open finding at that priority or above, or a blocked stage.
+  video --run R-id [--journey J-id]... [--viewport WxH]... [--manifest f] [--out dir]
+      Replay each walked journey (walkthrough.json's do steps) in a browser of
+      its own, signed in as its role, masked as evidence.redact says, holding at
+      each checkpoint's findings; write <out>/<run>/video/: a clean recording,
+      its annotation timeline and captions per journey, and video.json.
 
 The ux-builder-assess skill (node_modules/@ux-builder/audit/skill/) says how
 an agent runs these as one assessment.`;
 
 const SUB = {
+  async video(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, journey: { type: "string", multiple: true }, viewport: { type: "string", multiple: true } } });
+    const viewports = (o.viewport ?? []).map((v) => { const m = /^(\d+)x(\d+)$/.exec(v); return m && { width: Number(m[1]), height: Number(m[2]) }; });
+    if (!o.run || viewports.some((v) => !v)) { console.error(USAGE); return 2; }
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    const { video } = await import("./video.mjs");
+    const r = await video({ ...ready, out: o.out, run: o.run, journeys: o.journey ?? [], viewports });
+    if (r.error) { console.error(r.error); return r.code; }
+    for (const v of r.record.videos) console.log(`${v.journey} ${v.viewport.width}×${v.viewport.height}: ${v.chapters.filter((c) => c.kind === "main" || c.kind === "alternate").length} chapter(s), ${v.findings.length} finding(s) shown → video/${v.files.clean}`);
+    for (const n of r.record.notRecorded) console.error(`${n.journey}: not recorded — ${n.reason}`);
+    if (r.stage.status !== "completed") console.error(`video ${r.stage.status}: ${r.stage.reason}`);
+    console.log(`Wrote ${r.dir}/video/video.json`);
+    return r.code;
+  },
   async propose(args) {
     const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, finding: { type: "string" }, target: { type: "string" }, new: { type: "string" }, kind: { type: "string", default: "new-requirement" }, criterion: { type: "string" }, test: { type: "string" }, "test-file": { type: "string" }, keeps: { type: "string" }, title: { type: "string" } } });
     if (!o.run || !o.finding || !(o.target || o.new) || !o.criterion || !o.test || !["new-requirement", "unmet-criterion", "scope"].includes(o.kind)) { console.error(USAGE); return 2; }

@@ -228,8 +228,8 @@ needs only the clean WebM and the timeline.
 
 PRV-01. The manifest's `evidence.redact` selectors and text patterns are
 masked from the first frame of every chapter, including content that
-appears later. If the masking cannot be installed, that chapter is not
-recorded.
+appears later, and inside the app's modal dialogs. If the masking is not
+on any page, the journey's recording is discarded.
 
 PRV-02. Signing in happens before recording starts. No credential or
 secret value appears on screen: a secret field's typed value is masked as

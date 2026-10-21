@@ -46,7 +46,7 @@ and FEAT-013; the criteria name them so tests can cite them.
 - [ ] **US-091-AC2** — Given a merged finding citing a journey's checkpoint, when its video is recorded, then the replay pauses at that checkpoint, outlines each element the evidence locates, and shows the priority, F- ID, plain-English problem and recommendation.
 - [ ] **US-091-AC3** — Given a heuristic finding and a deterministic finding, when they are shown, then the heuristic's caption says **Judgment** and the deterministic one's **Checked**; a low-confidence finding says it is worth checking with users.
 - [ ] **US-091-AC4** — Given a checkpoint whose replayed state differs from the recorded one, when the chapter reaches it, then the chapter stops with a card naming the step, none of its findings are shown, and the `video` stage is `partial`.
-- [ ] **US-091-AC5** — Given a journey with walked alternates, when its video is recorded, then the main path and each alternate are chapters of one MP4, each recorded in a fresh context after the fixture's reset.
+- [ ] **US-091-AC5** — Given a journey with walked alternates, when its video is recorded, then the main path and each alternate are chapters of one MP4, each started after the fixture's reset with the role's signed-in state put back.
 - [ ] **US-091-AC6** — Given no `ffmpeg` on the PATH, when `assess video` runs, then no MP4 is written, the player still works, and the `video` stage is `partial` with that reason.
 - [ ] **US-091-AC7** — Given no `video.viewports` in the manifest, when `assess video` runs, then videos are 1440 × 900; with two viewports listed, each journey has one MP4 per viewport.
 
@@ -63,7 +63,7 @@ and FEAT-013; the criteria name them so tests can cite them.
 | AC2 | US-091-AC2 | a merged finding citing a journey's checkpoint | its video is recorded | the replay pauses at that checkpoint, outlines each element the evidence locates, and shows the priority, F- ID, plain-English problem and recommendation |
 | AC3 | US-091-AC3 | a heuristic finding and a deterministic finding | they are shown | the heuristic's caption says **Judgment** and the deterministic one's **Checked**; a low-confidence finding says it is worth checking with users |
 | AC4 | US-091-AC4 | a checkpoint whose replayed state differs from the recorded one | the chapter reaches it | the chapter stops with a card naming the step, none of its findings are shown, and the `video` stage is `partial` |
-| AC5 | US-091-AC5 | a journey with walked alternates | its video is recorded | the main path and each alternate are chapters of one MP4, each recorded in a fresh context after the fixture's reset |
+| AC5 | US-091-AC5 | a journey with walked alternates | its video is recorded | the main path and each alternate are chapters of one MP4, each started after the fixture's reset with the role's signed-in state put back |
 | AC6 | US-091-AC6 | no `ffmpeg` on the PATH | `assess video` runs | no MP4 is written, the player still works, and the `video` stage is `partial` with that reason |
 | AC7 | US-091-AC7 | no `video.viewports` in the manifest | `assess video` runs | videos are 1440 × 900; with two viewports listed, each journey has one MP4 per viewport |
 
