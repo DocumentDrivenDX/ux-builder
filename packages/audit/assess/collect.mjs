@@ -32,7 +32,9 @@ const write = (dir, name, data) => writeFileSync(join(dir, name), JSON.stringify
 export function versions(cwd) {
   const req = createRequire(join(cwd, "package.json"));
   const v = (spec, r = req) => { try { return JSON.parse(readFileSync(r.resolve(`${spec}/package.json`), "utf8")).version; } catch { return null; } };
-  return { ui: v("@ux-builder/ui"), tokens: v("@ux-builder/tokens"), audit: JSON.parse(readFileSync(own.resolve("../package.json"), "utf8")).version, playwright: v("playwright") ?? v("playwright", own), node: process.versions.node };
+  // ui: the app's own copy (null when it has none); uiUsedByAudit: the copy the audit's checks read.
+  const ui = v("@ux-builder/ui");
+  return { ui, uiUsedByAudit: ui ?? v("@ux-builder/ui", own), tokens: v("@ux-builder/tokens"), audit: JSON.parse(readFileSync(own.resolve("../package.json"), "utf8")).version, playwright: v("playwright") ?? v("playwright", own), node: process.versions.node };
 }
 
 /* Lines under a heading whose text matches re, as list items. */

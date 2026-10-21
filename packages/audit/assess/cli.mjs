@@ -5,6 +5,7 @@
      init        propose ux-assessment.yml from the repository
      validate    check the manifest against its schema, the repository and HELIX
      collect     map the HELIX documents and criteria to the journeys and tests
+     baseline    run the app's tests and the audit before any change
      browser     start Chromium with a CDP endpoint for the agent's driver
      inspect     inspect a checkpoint: the agent's page in place, or a replay
 
@@ -21,6 +22,9 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       Check the manifest; print each problem with its path.
   collect [--manifest f] [--run R-id] [--out dir]
       Write requirements.json, traceability.json and run.json for the run.
+  baseline [--manifest f] [--run R-id] [--out dir]
+      Run the declared tests and the audit (serving the app with run.start);
+      write baseline.json, the audit report and the masked test logs.
   browser [--port n] [--headed]
       Start Chromium with a CDP endpoint and print it; connect the agent's
       browser driver to it (Playwright MCP: --cdp-endpoint <url>). Ctrl-C stops it.
@@ -31,6 +35,19 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       <out>/<run>/checkpoints/<id>/inspection.json, screenshot.png, tree.yml.`;
 
 const SUB = {
+  async baseline(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    const { runId } = await import("./collect.mjs");
+    const { baseline } = await import("./baseline.mjs");
+    const { dir, record, stage } = await baseline({ ...ready, out: o.out, run: o.run ?? runId(), log: (m) => console.error(m) });
+    for (const t of record.tests) console.log(`test ${t.id.padEnd(16)} ${t.status}${t.reason ? ` (${t.reason})` : ""}${t.counts !== "unknown" && t.counts ? ` — ${t.counts.passed} passed, ${t.counts.failed} failed, ${t.counts.skipped} skipped` : ""}`);
+    if (record.audit) console.log(`audit: ${record.audit.findings.usability} usability and ${record.audit.findings.sdkAdoption} SDK-adoption findings${record.audit.pagesNotOnSdk.length ? `; ${record.audit.pagesNotOnSdk.length} page(s) not on the SDK, inspected as they are` : ""}`);
+    if (stage.status !== "completed") console.error(`baseline ${stage.status}: ${stage.reason}`);
+    console.log(`${record.note}\nWrote ${dir}/baseline.json`);
+    return stage.status === "completed" ? 0 : 1;
+  },
   async collect(args) {
     const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
     const ready = await validated(o.manifest);

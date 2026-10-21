@@ -20,6 +20,7 @@
     "schema",
     "cli.mjs",
     "collect.js",
+    "serve.mjs",
     "report.mjs",
     "README.md",
     "THIRD-PARTY-NOTICES.md"

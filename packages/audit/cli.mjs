@@ -34,7 +34,6 @@ if (process.argv[2] === "assess") {
   process.exit(await main(process.argv.slice(3)));
 }
 
-import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -73,15 +72,10 @@ const urls = positionals.map((u) => (u.startsWith("/") && base ? new URL(u, base
 let server = null;
 async function serve() {
   if (!o.serve) return;
-  server = spawn(o.serve, { shell: true, stdio: "ignore", detached: true });
-  for (let i = 0; i < 240; i++) {
-    try { if ((await fetch(urls[0])).status < 500) return; } catch { /* starting */ }
-    if (server.exitCode != null) throw new Error(`--serve exited (${server.exitCode}) before ${urls[0]} answered`);
-    await new Promise((r) => setTimeout(r, 250));
-  }
-  throw new Error(`${urls[0]} did not answer within a minute of --serve`);
+  const { serve: start } = await import("./serve.mjs");
+  server = await start({ command: o.serve, url: urls[0] }).catch((e) => { throw new Error(e.code === "exited" ? `--serve ${e.message}` : `${urls[0]} did not answer within a minute of --serve`); });
 }
-const stop = () => { if (server && server.exitCode == null) { try { process.kill(-server.pid); } catch { /* gone */ } } };
+const stop = () => server?.stop();
 process.on("exit", stop);
 
 try {
