@@ -9,8 +9,8 @@ import { indexStories, storybookUrl } from "./stories.js";
 
 /* A theme's own page (?theme=<name>): the page wears the theme, in light,
    dark or the system's setting, and shows its brand (logos, mark, favicon,
-   palette), its CSS for each appearance and for auto, and every widget and
-   screen pattern in the SDK, each rendered from its own Storybook story
+   palette), its CSS for each appearance and for auto, and every widget,
+   screen pattern, assistant part and Adaptive Card in the SDK, each rendered from its own Storybook story
    with a link to that story in Storybook, in this theme. A menu on the left
    reaches every part; on a phone it sits above the content. */
 
@@ -30,6 +30,8 @@ const PATTERNS = catalogue.patterns.filter((p) => p.type === "component").sort(b
 // The SDK's own assistant (ADR-023 rule 4; FEAT-007 BLD-01): the conversation first, then its parts.
 const first = (name) => (a, b) => Number(b.name === name) - Number(a.name === name) || byName(a, b);
 const ASSISTANT = (catalogue.assistant ?? []).filter((p) => p.type === "component").sort(first("Conversation"));
+// Cards an agent sends (ADR-029), drawn with the SDK's components.
+const ADAPTIVE = (catalogue.adaptiveCards ?? []).filter((c) => c.type === "component").sort(byName);
 const PREF = "theme-page-appearance";
 const slug = (kind, name) => `${kind}-${name}`;
 
@@ -97,6 +99,7 @@ export function ThemePage({ name }) {
           <AiCatalogue theme={theme} tokens={a.tokens} appearance={appearance} link={link} />
           <Catalogue id="patterns" title="Screen patterns" items={PATTERNS} from="@ux-builder/ui/patterns" link={link} />
           <Catalogue id="assistant" title="Assistant" items={ASSISTANT} from="@ux-builder/ui/assistant" link={link} />
+          <Catalogue id="adaptive-cards" title="Adaptive Cards" items={ADAPTIVE} from="@ux-builder/ui/adaptive-cards" link={link} />
         </main>
       </div>
     </ThemeProvider>
@@ -139,6 +142,8 @@ function Nav() {
       <ul>{PATTERNS.map((p) => item(slug("pattern", p.name), p.name))}</ul>
       <p className="tp-nav__group">Assistant</p>
       <ul>{ASSISTANT.map((p) => item(slug("assistant", p.name), p.name))}</ul>
+      <p className="tp-nav__group">Adaptive Cards</p>
+      <ul>{ADAPTIVE.map((c) => item(slug("adaptive-card", c.name), c.name))}</ul>
     </nav>
   );
 }
@@ -196,7 +201,7 @@ function Catalogue({ id, title, items, from, link }) {
   return (
     <section id={id} className="tp-section tp-catalogue" aria-labelledby={`${id}-h`}>
       <h2 id={`${id}-h`}>{title}</h2>
-      {items.map((w) => <Entry key={w.name} kind={id === "widgets" ? "widget" : id === "assistant" ? "assistant" : "pattern"} item={w} from={from} link={link} />)}
+      {items.map((w) => <Entry key={w.name} kind={{ widgets: "widget", assistant: "assistant", "adaptive-cards": "adaptive-card" }[id] ?? "pattern"} item={w} from={from} link={link} />)}
     </section>
   );
 }
