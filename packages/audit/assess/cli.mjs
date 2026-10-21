@@ -6,9 +6,18 @@
      validate    check the manifest against its schema, the repository and HELIX
      collect     map the HELIX documents and criteria to the journeys and tests
      baseline    run the app's tests and the audit before any change
+     plan        the journey-and-state plan and the starting coverage matrix
      browser     start Chromium with a CDP endpoint for the agent's driver
+     reset       run a fixture's reset between scenarios
+     merge       merge findings of one user problem; give each a stable ID
      inspect     inspect a checkpoint: the agent's page in place, or a replay
      validate-report  check a run package before handing it over
+     propose     propose a change to a HELIX artifact for a finding (a patch; nothing applied)
+     check-writes  list files under the HELIX root or the app changed during the run
+     apply-check   check a proposal's target is unchanged before it is applied
+     report      write report.html, report.md and evidence.json
+     compare     classify findings across two runs of one scope
+     gate        CI exit: fail on open findings at a priority, or a blocked stage
 
    Exit codes: 0 done; 1 the stage could not complete (reported); 2 usage. */
 
@@ -26,22 +35,95 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
   baseline [--manifest f] [--run R-id] [--out dir]
       Run the declared tests and the audit (serving the app with run.start);
       write baseline.json, the audit report and the masked test logs.
-  browser [--port n] [--headed]
+  plan [--manifest f] [--run R-id] [--agent name] [--model id]
+      Write plan.json and the starting coverage.json (after collect).
+  merge [--manifest f] [--run R-id]
+      Merge backlog.json's findings of one problem, keeping every evidence reference.
+  reset --fixture id [--manifest f]
+      Run the fixture's reset command.
+  browser [--port n] [--headed] [--manifest f]
       Start Chromium with a CDP endpoint and print it; connect the agent's
       browser driver to it (Playwright MCP: --cdp-endpoint <url>). Ctrl-C stops it.
   inspect (--cdp <url> --page <url-match> | --replay <steps.json>) --checkpoint <C-id>
           [--journey <J-id>] [--step n] [--role id] [--state class]
-          [--state-affecting] [--redact <selector>]... [--out dir] [--run R-id]
+          [--state-affecting] [--redact <selector>]... [--manifest f] [--out dir] [--run R-id]
       Inspect the page in place (or a verified replay) and write
       <out>/<run>/checkpoints/<id>/inspection.json, screenshot.png, tree.yml.
   validate-report <run-dir>
       Check every record in a run package, that its evidence resolves, and that
       findings relying on a conflicting HELIX ID are qualified.
 
+  propose --run R-id --finding F-id (--target <HELIX ID> | --new <type> [--title t])
+          --kind new-requirement|unmet-criterion|scope --criterion "Given…" --test "…" [--test-file f]
+  check-writes --run R-id · apply-check P-n --run R-id
+  report <run-dir> · compare <earlier-run-dir> <later-run-dir> · gate <run-dir> [--fail-on P1]
+
 The ux-builder-assess skill (node_modules/@ux-builder/audit/skill/) says how
 an agent runs these as one assessment.`;
 
 const SUB = {
+  async propose(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, finding: { type: "string" }, target: { type: "string" }, new: { type: "string" }, kind: { type: "string", default: "new-requirement" }, criterion: { type: "string" }, test: { type: "string" }, "test-file": { type: "string" }, keeps: { type: "string" }, title: { type: "string" } } });
+    if (!o.run || !o.finding || !(o.target || o.new) || !o.criterion || !o.test || !["new-requirement", "unmet-criterion", "scope"].includes(o.kind)) { console.error(USAGE); return 2; }
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    const { propose } = await import("./proposals.mjs");
+    try {
+      const { proposal } = propose({ ...ready, out: o.out, run: o.run, finding: o.finding, target: o.target, newType: o.new, kind: o.kind, criterion: o.criterion, test: o.test, testFile: o["test-file"], keeps: o.keeps, title: o.title });
+      console.log(`${proposal.id}: ${proposal.target.kind === "new" ? `new ${proposal.target.type} ${proposal.target.id}` : proposal.target.id} (${proposal.target.path}); patch ${proposal.patch}. Nothing was applied.`);
+      return 0;
+    } catch (e) { console.error(e.message); return e.code === "missing" ? 1 : 2; }
+  },
+  async "check-writes"(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    if (!o.run) { console.error(USAGE); return 2; }
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    const { checkWrites } = await import("./proposals.mjs");
+    const changed = checkWrites({ ...ready, out: o.out, run: o.run });
+    for (const p of changed) console.log(`changed: ${p}`);
+    console.log(changed.length ? `${changed.length} file(s) under the HELIX root or the app changed during the run` : "no file under the HELIX root or the app changed during the run");
+    return changed.length ? 1 : 0;
+  },
+  async "apply-check"(args) {
+    const { values: o, positionals: [proposal] } = parseArgs({ args, allowPositionals: true, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    if (!o.run || !proposal) { console.error(USAGE); return 2; }
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    const { applyCheck } = await import("./proposals.mjs");
+    const r = applyCheck({ ...ready, out: o.out, run: o.run, proposal });
+    console.log(r.message);
+    return r.ok ? 0 : 1;
+  },
+  async report(args) {
+    const [dir] = args;
+    if (!dir) { console.error(USAGE); return 2; }
+    const { report } = await import("./report.mjs");
+    const r = report(dir);
+    console.log(`Wrote ${dir}/report.html, report.md and evidence.json (${r.files} evidence files)`);
+    return 0;
+  },
+  async compare(args) {
+    const [from, to] = args;
+    if (!from || !to) { console.error(USAGE); return 2; }
+    const { compare } = await import("./report.mjs");
+    try {
+      const r = compare(from, to);
+      const by = (s) => r.findings.filter((f) => f.status === s).length;
+      console.log(`${r.from} → ${r.to}: ${by("new")} new, ${by("persistent")} persistent, ${by("regressed")} regressed, ${by("resolved")} resolved, ${by("not-rechecked")} not rechecked`);
+      return 0;
+    } catch (e) { console.error(e.message); return e.code === "scope" ? 1 : 2; }
+  },
+  async gate(args) {
+    const { values: o, positionals: [dir] } = parseArgs({ args, allowPositionals: true, options: { "fail-on": { type: "string", default: "P1" } } });
+    if (!dir || !["P0", "P1", "P2", "P3"].includes(o["fail-on"])) { console.error(USAGE); return 2; }
+    const { gate } = await import("./report.mjs");
+    const g = gate(dir, o["fail-on"]);
+    for (const f of g.open) console.log(`open ${f.priority} ${f.id}: ${f.title}`);
+    for (const s of g.stages) console.log(`blocked stage ${s.stage}: ${s.reason ?? ""}`);
+    console.log(g.ok ? `no open finding at ${o["fail-on"]} or above, and no blocked stage` : "gate failed");
+    return g.ok ? 0 : 1;
+  },
   async "validate-report"(args) {
     const [dir, ...rest] = args;
     if (!dir || rest.length) { console.error(USAGE); return 2; }
@@ -102,10 +184,52 @@ const SUB = {
     }
     return problems.length ? 1 : 0;
   },
+  async plan(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, agent: { type: "string" }, model: { type: "string" } } });
+    if (!o.run) { console.error("plan needs --run: the run collect wrote"); return 2; }
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    const { plan } = await import("./plan.mjs");
+    try {
+      const { dir, journeys, entries } = plan({ ...ready, out: o.out, run: o.run, agent: o.agent, model: o.model });
+      console.log(`${o.run}: ${journeys.length} journeys, ${entries.filter((e) => e.status === "not-assessed").length} pairs to walk, ${entries.filter((e) => e.status === "not-applicable").length} not applicable\nWrote ${dir}/plan.json, coverage.json`);
+      return 0;
+    } catch (e) { console.error(e.message); return e.code === "blocked" ? 1 : 2; }
+  },
+  async merge(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    if (!o.run) { console.error("merge needs --run"); return 2; }
+    const { merge, runDir } = await import("./plan.mjs");
+    const { existsSync, readFileSync, writeFileSync } = await import("node:fs");
+    const file = `${runDir(ready.manifest, ready.resolved, o.out, o.run)}/backlog.json`;
+    if (!existsSync(file)) { console.error(`${file} does not exist`); return 1; }
+    const b = JSON.parse(readFileSync(file, "utf8"));
+    const before = b.findings.length;
+    b.findings = merge(b.findings);
+    writeFileSync(file, JSON.stringify(b, null, 2) + "\n");
+    console.log(`${before} findings → ${b.findings.length}, each with a stable ID`);
+    return 0;
+  },
+  async reset(args) {
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, fixture: { type: "string" } } });
+    const ready = await validated(o.manifest);
+    if (typeof ready === "number") return ready;
+    const f = (ready.resolved.fixtures ?? []).find((x) => x.id === o.fixture);
+    if (!f) { console.error(`no fixture "${o.fixture}" in the manifest`); return 2; }
+    if (!f.reset) { console.log(`fixture ${f.id} has no reset`); return 0; }
+    const { spawnSync } = await import("node:child_process");
+    const r = spawnSync(f.reset, { shell: true, cwd: ready.resolved.run.cwd, stdio: "inherit" });
+    return r.status === 0 ? 0 : 1;
+  },
   async browser(args) {
-    const { values: o } = parseArgs({ args, options: { port: { type: "string" }, headed: { type: "boolean" } } });
+    const { values: o } = parseArgs({ args, options: { port: { type: "string" }, headed: { type: "boolean" }, manifest: { type: "string" } } });
+    let origins = [];
+    if (o.manifest) { const ready = await validated(o.manifest); if (typeof ready === "number") return ready; origins = ready.resolved.run.origins; }
     const { startBrowser } = await import("./checkpoint.mjs");
-    const { cdp, browser } = await startBrowser({ port: o.port ? Number(o.port) : undefined, headed: o.headed });
+    const { cdp, browser } = await startBrowser({ port: o.port ? Number(o.port) : undefined, headed: o.headed, origins });
+    if (origins.length) console.error(`Only ${origins.join(", ")} can load in this browser.`);
     console.log(JSON.stringify({ cdp }));
     console.error(`Chromium is listening at ${cdp}. Connect the browser driver to it, e.g.\n  npx @playwright/mcp --cdp-endpoint ${cdp}\nCtrl-C stops it.`);
     await new Promise((resolve) => { for (const s of ["SIGINT", "SIGTERM"]) process.once(s, resolve); });
@@ -116,11 +240,20 @@ const SUB = {
     const { values: o } = parseArgs({ args, options: {
       cdp: { type: "string" }, page: { type: "string" }, replay: { type: "string" }, checkpoint: { type: "string" },
       journey: { type: "string" }, step: { type: "string" }, role: { type: "string" }, state: { type: "string" },
-      "state-affecting": { type: "boolean" }, redact: { type: "string", multiple: true }, out: { type: "string", default: "ux-assessment" }, run: { type: "string" },
+      "state-affecting": { type: "boolean" }, redact: { type: "string", multiple: true }, manifest: { type: "string" }, out: { type: "string" }, run: { type: "string" },
     } });
     if (!o.checkpoint || !(o.replay || (o.cdp && o.page))) { console.error(USAGE); return 2; }
+    // With the manifest: its output path, origins and redaction apply (ENV-02, ENV-03).
+    let extra = { out: o.out ?? "ux-assessment" };
+    if (o.manifest) {
+      const ready = await validated(o.manifest);
+      if (typeof ready === "number") return ready;
+      const { runDir } = await import("./plan.mjs");
+      const r = ready.resolved;
+      extra = { out: o.out ?? runDir(ready.manifest, r, undefined, ".").replace(/\/\.$/, ""), origins: r.run.origins, redactText: r.evidence?.redact?.text ?? [], cwd: r.run.cwd, redactSelectors: r.evidence?.redact?.selectors ?? [] };
+    }
     const { checkpoint, runId } = await import("./checkpoint.mjs");
-    const { code, record } = await checkpoint({ ...o, run: o.run ?? runId(), stateAffecting: !!o["state-affecting"], redact: o.redact ?? [] });
+    const { code, record } = await checkpoint({ ...o, ...extra, run: o.run ?? runId(), stateAffecting: !!o["state-affecting"], redact: [...(o.redact ?? []), ...(extra.redactSelectors ?? [])] });
     console.log(code ? `${record.checkpoint.id}: ${record.message}` : `${record.checkpoint.id}: ${record.findings.length} finding${record.findings.length === 1 ? "" : "s"} at ${record.url} (${record.mode})`);
     return code;
   },

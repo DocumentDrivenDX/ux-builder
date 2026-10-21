@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/walkthrough.schema.json",
+  "title": "ux-builder assessment record: walkthrough (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "journeys"
+  ],
+  "properties": {
+    "schema": {
+      "const": "walkthrough"
+    },
+    "version": {
+      "const": 1
+    },
+    "journeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "steps"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^J-"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "partial",
+              "blocked"
+            ]
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "n",
+                "action",
+                "status"
+              ],
+              "properties": {
+                "n": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "action": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "url": {
+                  "type": "string"
+                },
+                "checkpoint": {
+                  "type": "string",
+                  "pattern": "^C-"
+                },
+                "status": {
+                  "enum": [
+                    "done",
+                    "blocked",
+                    "not-assessed"
+                  ]
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "judgment": {
+                  "type": "string"
+                },
+                "state": {
+                  "enum": [
+                    "success",
+                    "empty",
+                    "loading",
+                    "recoverable-error",
+                    "system-failure",
+                    "ai",
+                    "responsive-keyboard"
+                  ]
+                },
+                "observation": {
+                  "type": "object",
+                  "required": [
+                    "text",
+                    "basis"
+                  ],
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "basis": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "screenshot",
+                          "tree",
+                          "dom-text"
+                        ]
+                      }
+                    },
+                    "visual": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

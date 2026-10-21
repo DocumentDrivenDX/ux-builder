@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { stringify } from "yaml";
+import { findingId } from "../assess/plan.mjs";
 import { makeRepo } from "./fixtures/helix-repo.mjs";
 
 const CLI = fileURLToPath(new URL("../cli.mjs", import.meta.url));
@@ -97,16 +98,16 @@ describe("US-058: trace each assessed journey to product intent", () => {
     const { r } = collected();
     const run = join(r.dir, "ux-assessment", "R-20261020T120000Z");
     writeFileSync(join(run, "alignment.json"), JSON.stringify({ schema: "alignment", version: 1, source: "helix align, 2026-10-20", conflicts: [{ ids: ["US-002"], detail: "US-002 and FEAT-001 disagree on whether approvals can be undone" }] }));
-    const finding = (over = {}) => ({
-      id: "F-undo-missing", run_id: "R-20261020T120000Z", title: "Undo is not offered", finding_type: "observed", journey_id: "J-undo", state_id: "S-undo-success", role: "reviewer",
+    const finding = (over = {}) => { const f = {
+      run_id: "R-20261020T120000Z", title: "Undo is not offered", finding_type: "observed", journey_id: "J-undo", state_id: "S-undo-success", role: "reviewer",
       source_refs: ["US-002"], test_refs: [], evidence_refs: [], uncertainty: "seen once; not yet reproduced", observed_behavior: "No Undo after approving.",
       expected_behavior_or_proposed_requirement: "US-002-AC1", recommendation: "Show an Undo toast.", component_mapping: [], priority: "P1",
       confidence: { level: "medium", reason: "one observation" }, effort: "S", dependencies: [], verification: "Approve, then Undo; the entry returns.", proposed_doc_changes: [], status: "open", ...over,
-    });
-    const report = (f) => { writeFileSync(join(run, "backlog.json"), JSON.stringify({ schema: "backlog", version: 1, findings: [f] })); return spawnSync(process.execPath, [CLI, "assess", "validate-report", run], { encoding: "utf8" }); };
+    }; return { ...f, id: findingId(f) }; };
+    const report = (f) => { writeFileSync(join(run, "backlog.json"), JSON.stringify({ schema: "backlog", version: 1, findings: [f], user_validation: [] })); return spawnSync(process.execPath, [CLI, "assess", "validate-report", run], { encoding: "utf8" }); };
     const bare = report(finding());
     assert.equal(bare.status, 1);
-    assert.match(bare.stdout, /F-undo-missing relies on US-002, which the alignment review found in conflict/);
+    assert.match(bare.stdout, /F-[0-9a-f]{10} relies on US-002, which the alignment review found in conflict/);
     assert.equal(report(finding({ qualified: ["alignment"] })).status, 0, "qualified, it stands; the rest of the assessment is unaffected");
   });
 

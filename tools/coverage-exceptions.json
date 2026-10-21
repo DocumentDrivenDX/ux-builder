@@ -22,26 +22,6 @@
     { "id": "US-047-AC7", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
     { "id": "US-048-AC1", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
     { "id": "US-048-AC2", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
-    { "id": "US-048-AC3", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
-    { "id": "US-060-AC1", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-060-AC2", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-060-AC3", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-060-AC4", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-061-AC1", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-061-AC2", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-061-AC3", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-063-AC1", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-063-AC2", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-063-AC3", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-063-AC4", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-064-AC1", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-064-AC2", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-064-AC3", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-064-AC4", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-065-AC1", "reason": "Planned: FEAT-009 (UX assessment) increment 3, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-065-AC2", "reason": "Planned: FEAT-009 (UX assessment) increment 3, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-065-AC3", "reason": "Planned: FEAT-009 (UX assessment) increment 3, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-065-AC4", "reason": "Planned: FEAT-009 (UX assessment) increment 3, drafted 2026-10-20 with ADR-026; not built yet." },
-    { "id": "US-060-AC5", "reason": "Planned: FEAT-009 (UX assessment) increment 2, drafted 2026-10-20 with ADR-026; not built yet." }
+    { "id": "US-048-AC3", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." }
   ]
 }

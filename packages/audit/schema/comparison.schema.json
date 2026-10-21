@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/comparison.schema.json",
+  "title": "ux-builder assessment record: comparison (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "from",
+    "to",
+    "findings"
+  ],
+  "properties": {
+    "schema": {
+      "const": "comparison"
+    },
+    "version": {
+      "const": 1
+    },
+    "from": {
+      "type": "string"
+    },
+    "to": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "new",
+              "persistent",
+              "resolved",
+              "regressed",
+              "not-rechecked"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
