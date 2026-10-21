@@ -283,14 +283,14 @@ and `@ux-builder/create-app` 0.5.0. The formats are CONTRACT-005; this section l
 
 | Surface | Addition |
 |---|---|
-| `@ux-builder/ui` entry points | `@ux-builder/ui/blueprint`: `rulesFor`, `checkBlueprint`, `blueprintSchema`, `findRecipes`, `skeleton` (CONTRACT-005) |
+| `@ux-builder/ui` entry points | `@ux-builder/ui/blueprint`: `rulesFor`, `checkBlueprint`, `blueprintSchema`, `findRecipes`, `getRecipe`, `skeleton`, `rules`, `recipes`, `limits` (CONTRACT-005; its `CHECKS` and `nearestPattern` are internal) |
 | `@ux-builder/ui` command | `ux-builder-blueprint check <file> [--json]`, `ux-builder-blueprint init [--kind app\|view] [--out <file>]` (CONTRACT-005) |
-| `catalogue.json` | `interaction`: `{ version, limits, rules[], recipes[] }` (CONTRACT-005) |
+| `catalogue.json` | `interaction`: `{ version, limits, rules[], recipes[], blueprintSchema }` (CONTRACT-005) |
 | `AGENTS.md`, skill | An "Interaction and screen rules" section: every rule's ID and statement, and the plan → check → build → lint → audit loop |
-| `@ux-builder/mcp` | Tools `get_rules` (`context?`, `sizeClasses?`, `inputs?`), `list_recipes` (`job?`, `kind?`), `get_recipe` (`id`), `get_blueprint_schema`, `check_blueprint` (`blueprint`); `get_guidance` includes the loop |
+| `@ux-builder/mcp` | Tools `get_rules` (`context?`, `sizeClasses?`, `inputs?`), `list_recipes` (`job?`, `kind?`), `get_recipe` (`id`), `get_blueprint_schema`, `check_blueprint` (`blueprint`); `get_guidance` includes the loop. `get_blueprint_schema` returns `{ schema, skeleton: { app, view } }`: the blueprint's JSON Schema and `skeleton("app")` and `skeleton("view")` |
 | `ux-builder-audit` | Checks `one-modal`, `modal-contract`, `one-primary-action`, `nav-per-breakpoint` (with `--width`), `line-length`: warnings for their first minor release. Options `--write-baseline <file>` and `--baseline <file>` |
 | `report.json` | A finding from these checks adds `ruleId` (the rule catalogue ID) and `sources[]` (`{ title, url }`); with `--baseline`, `summary` adds `baselined` and `resolved` (counts) and the report lists `resolved[]` |
-| Baseline file | `{ tool: "ux-builder-audit", version, findings: [{ rule, url, selector, runs }] }`, sorted by `rule`, `url`, `selector` |
+| Baseline file | `{ tool: "ux-builder-audit", version, findings: [{ rule, url, selector, message?, runs }] }`, sorted by `rule`, `url`, `selector`, `message`. `selector` is `null` for a finding with no element; such a finding carries `message`, and a later finding matches it by `rule`, `url` and `message`. A finding with a selector carries no `message` and matches by `rule`, `url` and `selector` |
 | `@ux-builder/create-app` | Writes `app.blueprint.json`, a `check:blueprint` script and a CI step; option `--blueprint <file>` |
 
 ## UX assessment *[Amended 2026-10-20 — FEAT-009, ADR-026]*

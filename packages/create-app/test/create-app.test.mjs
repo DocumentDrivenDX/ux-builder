@@ -104,6 +104,7 @@ describe("US-051: a new app starts from a blueprint", () => {
   });
 
   // @covers US-051-AC3
+  // @covers US-051-AC5
   test("AC3: --blueprint with an error prints each error with its rule ID, exits 1 and creates nothing", () => {
     const bad = { ...skeleton("app"), screens: [{ id: "home", title: "Home", pattern: "SettingsPage", modals: [{ id: "a", title: "A", kind: "dialog", dismiss: "cancel", modals: [{ id: "b", title: "B", kind: "dialog", dismiss: "close" }] }] }] };
     writeFileSync(join(tmp, "bad.json"), JSON.stringify(bad));
