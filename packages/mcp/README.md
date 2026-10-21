@@ -27,6 +27,7 @@ Any MCP client can run it over stdio: the command is `npx @ux-builder/mcp` (bin
 | `list_recipes`, `get_recipe` | Recipes for a job described in words, best match first; one recipe's patterns and rule IDs |
 | `get_blueprint_schema` | The JSON Schema of `app.blueprint.json`, with a starting blueprint for an app and a view |
 | `check_blueprint` | A blueprint's findings: rule ID, severity, path, message and fix |
+| `propose_from_blueprint` | HELIX content drafted from a blueprint's flow and journeys, as patches with a disagreement report; reads the HELIX documents above the blueprint's `path`, writes and applies nothing |
 
 Resources: `ux-builder://catalogue` (the full catalogue, JSON) and
 `ux-builder://guidance` (the guidance, Markdown).

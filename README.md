@@ -377,6 +377,41 @@ npx ux-builder-audit --baseline audit-baseline.json http://localhost:4173/      
 Agents get the rules where they plan, over MCP: `get_rules`,
 `list_recipes`, `get_recipe`, `get_blueprint_schema` and `check_blueprint`.
 
+#### Flows, journeys and what they draft
+
+A blueprint's screens can declare `actions` (where each leads), and its
+`journeys` tie a HELIX story and its criteria to a path through them
+(CONTRACT-005 *Flows and journeys*). From those, three commands draft and
+draw; each reads `app.blueprint.json` unless given a file:
+
+```sh
+npx ux-builder-blueprint propose      # HELIX proposals as patches, in helix-proposals/; applies nothing
+npx ux-builder-blueprint draw         # IA map, flow and journey diagrams: .mmd and .svg, in blueprint-drawings/
+npx ux-builder-blueprint wireframes   # each screen at each size class: .html and .png, in blueprint-wireframes/
+```
+
+- **`propose`** needs the `.helix.yml` marker above the blueprint (exit 2
+  without it). It reads the flow's documents and the installed HELIX's
+  templates, and writes one patch per section: each journey's story
+  *Walkthrough*, a Mermaid *Screen Flow* in the stories' solution design,
+  the first journey's sequence diagram as architecture's *Data Flow*,
+  `DESIGN.md`'s *Destinations by Size Class*, and *Journey Scenarios* in each
+  story test plan. A document that does not exist yet is drafted from its
+  template as a new file. HELIX governs: where a section already says
+  something else, there is no patch, and `report.md` shows both texts.
+  Review the patches, then `git apply` the ones you accept.
+- **`draw`** writes each diagram as Mermaid and as SVG. The SVG comes from
+  the SDK's own small layered layout, so no Mermaid renderer or browser is
+  needed; render the `.mmd` with Mermaid for its layout.
+- **`wireframes`** server-renders each screen's pattern with placeholder
+  content in the neutral `plain` theme, inside `AppShell` with the app's
+  destinations, and screenshots it at each supported size class with
+  Playwright's Chromium (exit 2, HTML still written, without it). A pattern
+  the catalogue lacks is a labelled box.
+
+The same blueprint and documents give the same files. Over MCP,
+`propose_from_blueprint` returns the proposals and writes nothing.
+
 ux-builder is not affiliated with or endorsed by Apple or Google. Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.
 
 ### UX assessment

@@ -37,16 +37,6 @@
     { "id": "US-085-AC3", "reason": "Planned: FEAT-011 (Adaptive Cards, ADR-029), drafted 2026-10-21; not built yet." },
     { "id": "US-085-AC4", "reason": "Planned: FEAT-011 (Adaptive Cards, ADR-029), drafted 2026-10-21; not built yet." },
     { "id": "US-085-AC5", "reason": "Planned: FEAT-011 (Adaptive Cards, ADR-029), drafted 2026-10-21; not built yet." },
-    { "id": "US-085-AC6", "reason": "Planned: FEAT-011 (Adaptive Cards, ADR-029), drafted 2026-10-21; not built yet." },
-    { "id": "US-089-AC1", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-089-AC2", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-089-AC3", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-089-AC4", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-089-AC5", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-089-AC6", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-090-AC1", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-090-AC2", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-090-AC3", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." },
-    { "id": "US-090-AC4", "reason": "Planned: FEAT-012 (screen flows and journeys, ADR-030), drafted 2026-10-21; not built yet." }
+    { "id": "US-085-AC6", "reason": "Planned: FEAT-011 (Adaptive Cards, ADR-029), drafted 2026-10-21; not built yet." }
   ]
 }

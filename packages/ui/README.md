@@ -115,7 +115,12 @@ checkBlueprint(JSON.parse(readFileSync("app.blueprint.json", "utf8")));         
 The command `ux-builder-blueprint` does the same from a shell:
 `ux-builder-blueprint init [--kind app|view]` writes a starting
 `app.blueprint.json`, and `ux-builder-blueprint check app.blueprint.json`
-prints each finding and exits 1 on an error. The rules, recipes and the
+prints each finding and exits 1 on an error. From a blueprint's actions
+and journeys (FEAT-012), `ux-builder-blueprint propose` drafts HELIX
+content as patches it never applies, `draw` writes the IA map, flow and
+journey diagrams as Mermaid and SVG, and `wireframes` renders each screen's
+pattern at each supported size class as HTML and PNG (PNG needs
+`playwright` and its Chromium); see the repository README. The rules, recipes and the
 blueprint schema are also in `catalogue.json` (`interaction`) and in
 `AGENTS.md`.
 
