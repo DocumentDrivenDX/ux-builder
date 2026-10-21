@@ -166,7 +166,9 @@ describe("US-077: plan an AI screen in the blueprint", () => {
   test("AC5: a blueprint with no ai gives exactly the findings it gave before this feature, byte for byte", () => {
     const { cases } = JSON.parse(read("packages/ui/test/fixtures/pre-ai-findings.json"));
     assert.ok(cases.length >= 10 && cases.some((c) => c.findings.length > 20));
-    for (const c of cases) assert.equal(JSON.stringify(checkBlueprint(c.blueprint)), JSON.stringify(c.findings), c.name);
+    // The SDK's version in messages changes with every release; the findings must not.
+    const unversioned = (x) => JSON.stringify(x).replace(/@ux-builder\/ui \d+\.\d+\.\d+[^ \\"]*/g, "@ux-builder/ui <version>");
+    for (const c of cases) assert.equal(unversioned(checkBlueprint(c.blueprint)), unversioned(c.findings), c.name);
   });
 
   // @covers US-077-AC6
