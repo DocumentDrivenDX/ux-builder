@@ -33,7 +33,7 @@ before(async () => {
 describe("US-014-AC5: agents list the SDK over MCP", () => {
   test("the tools and resources are listed, with instructions carrying the rules", async () => {
     const { tools } = await client.listTools();
-    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_themes", "list_tokens", "list_variants", "list_widgets", "validate_assessment_manifest", "validate_assessment_report"]);
+    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_renderable", "list_themes", "list_tokens", "list_variants", "list_widgets", "validate_assessment_manifest", "validate_assessment_report"]);
     const { resources } = await client.listResources();
     assert.deepEqual(resources.map((r) => r.uri).sort(), ["ux-builder://catalogue", "ux-builder://guidance"]);
     assert.match(client.getInstructions(), /Never hard-code colours, font families or radii/);
@@ -103,7 +103,7 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
     await c.connect(new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL("../server.mjs", import.meta.url))] }));
     try {
       const { tools } = await c.listTools();
-      assert.equal(tools.length, 21);
+      assert.equal(tools.length, 22);
     } finally { await c.close(); }
   });
 });
@@ -122,6 +122,27 @@ describe("US-031: agents find the screen patterns over MCP", () => {
     assert.equal(miss.isError, true);
     assert.match(miss.content[0].text, /Did you mean: CollectionList/);
     assert.deepEqual((await call("list_variants")).data, cat.variants);
+  });
+});
+
+describe("US-048: agents find the renderable components over MCP", () => {
+  // @covers US-048-AC1
+  test("list_renderable serves every component the catalogue marks renderable, with its props schema", async () => {
+    const marked = [...cat.widgets, ...cat.patterns, ...cat.assistant].filter((e) => e.renderable);
+    assert.ok(marked.length >= 5);
+    const served = (await call("list_renderable")).data;
+    assert.deepEqual(served.map((e) => e.name), marked.map((e) => e.name));
+    for (const e of served) {
+      const own = marked.find((m) => m.name === e.name);
+      assert.deepEqual(e.propsSchema, own.propsSchema, e.name);
+      assert.equal(e.import, own.import, e.name);
+      assert.equal(e.propsSchema.type, "object", e.name);
+    }
+    assert.ok(served.some((e) => e.name === "DataTable" && e.propsSchema.required.includes("rows")));
+    assert.ok(!served.some((e) => e.name === "Conversation"), "the conversation itself is not renderable");
+    const table = (await call("get_widget", { name: "DataTable" })).data;
+    assert.equal(table.renderable, true);
+    assert.deepEqual(table.propsSchema, served.find((e) => e.name === "DataTable").propsSchema);
   });
 });
 

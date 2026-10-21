@@ -21,6 +21,9 @@
     ".": "./dist/index.js",
     "./icons": "./dist/icons.js",
     "./patterns": "./dist/patterns.js",
+    "./assistant": "./dist/assistant.js",
+    "./assistant/ai-sdk": "./dist/assistant-ai-sdk.js",
+    "./assistant/assistant-ui": "./dist/assistant-assistant-ui.js",
     "./ui.css": "./dist/ui.css",
     "./patterns.css": "./dist/patterns.css",
     "./stylelint": "./lint/stylelint.mjs",
@@ -44,6 +47,8 @@
     "@ux-builder/tokens": "^1.6.0"
   },
   "peerDependencies": {
+    "@assistant-ui/react": ">=0.15 <0.16",
+    "ai": ">=5 <8",
     "eslint": ">=9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -98,6 +103,12 @@
     "directory": "packages/ui"
   },
   "peerDependenciesMeta": {
+    "@assistant-ui/react": {
+      "optional": true
+    },
+    "ai": {
+      "optional": true
+    },
     "stylelint": {
       "optional": true
     },

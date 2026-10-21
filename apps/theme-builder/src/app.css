@@ -166,6 +166,7 @@ body { margin: 0; }
 .tb-screen__frame--desktop { inline-size: 1024px; flex: none; }
 .tb-screen__page { padding: var(--piq-space-4); }
 .tb-screen__chart { block-size: 8rem; background: var(--piq-color-surface-sunken); }
+.tb-screen__assistant { block-size: 520px; }
 
 /* A theme's own page (?theme=<name>): it wears the theme, with a menu of
    its parts on the left; on a phone the menu sits above the content. */

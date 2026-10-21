@@ -409,9 +409,10 @@ MUST NOT need `assistant`, and no assistant code reaches its bundle.
 |---|---|---|
 | `Conversation` | component | `messages` (required, below), `onSend(text)`, `onStop()`, `onRetry(messageId)`, `onRegenerate(messageId)`, `suggestions` (`string[]` or `{ label, prompt }[]`), `onDecide({ id, action, decision, messageId })`, `decisions` (`{ [approvalId]: "approved" \| "denied" }`), `onComponentSubmit({ messageId, partId, component, values })`, `renderArtifact(artifact)`, `disabledReason`, `actor` (`"agent" \| "user"`), `label`, `composerLabel` (default "Ask the assistant"), `disclosure`, `strings` |
 | `AssistantPanel` | component | `open`, `onClose()`, `title` (default "Assistant"), `panel` (required: the `Conversation`), `children` (the page beside it) |
-| `Markdown` | component | `text` (required) |
+| `Markdown` | component | `text` (required), `sources`, `idPrefix` (link each `[n]` to source *n* of a `Sources` with the same `idPrefix`) |
 | `Reasoning` | component | `text` (required), `seconds` |
-| `ToolCall` | component | `name` (required), `title`, `status` (`running` \| `done` \| `failed`), `input`, `output`, `error` |
+| `ToolCalls` | component | `calls` (required: `tool` parts): one plan, grouped under "Used *n* tools" when there are more than three |
+| `ToolCall` | component | `name` (required), `title`, `status` (`running` \| `done` \| `failed`), `input`, `output`, `error`; a list item, inside `ToolCalls` or an `ol` |
 | `Sources` | component | `sources` (required: `{ id?, title, href? }[]`), `idPrefix` |
 | `ApprovalCard` | component | `summary` (required), `details`, `decision`, `current` (default `true`), `onDecide(decision)` |
 | `GenerativeComponent` | component | `component` (required), `props`, `values`, `onValuesChange(values)`, `onSubmit(values)`, `submitted` |
@@ -471,7 +472,7 @@ nor any other AI library, so it adds no dependency.
 |---|---|---|---|
 | `assistant/ai-sdk` | `useAiSdkConversation(chat, options?)` | The object `useChat()` returns (`@ai-sdk/react`, AI SDK 5 or later), or an `AbstractChat` from `ai`: `messages`, `status`, `error`, `sendMessage`, `stop`, `regenerate`, `addToolApprovalResponse` | `text`, `reasoning`, `tool-*` and `dynamic-tool` (state → `running`, `done`, `failed`), and `source-url` and `source-document` (→ `sources`). A tool part in `approval-requested` → an `approval` with its `approval.id` (`options.describeApproval(part)` gives the summary); any later state makes it not current. A tool output `{ component, props }` → a `component` part. `status` `submitted` or `streaming` → the last reply streams; `error` → `status: "error"`; Stop records the reply as stopped |
 | | `fromAiSdk(messages, { status, error, stopped, describeApproval })` | The same, without React | A pure function, for tests and servers |
-| `assistant/assistant-ui` | `useAssistantUiConversation(thread, options?)` | assistant-ui's `ThreadRuntime` (`useThreadRuntime()`, or `runtime.thread`; 0.15) | Subscribes to it. `text`, `reasoning`, `tool-call` (`result` → done, `isError` → failed) and `source` → parts; a tool call with `approval` and no `approved` → an `approval`; message status `running` → streaming, `incomplete` `cancelled` → stopped, `incomplete` `error` → error. `onSend` appends, `onStop` cancels the run, Retry and Regenerate reload the message, `onDecide` calls the part's `respondToToolApproval` |
+| `assistant/assistant-ui` | `useAssistantUiConversation(thread, options?)` | assistant-ui's `ThreadRuntime` (`runtime.thread` of the app's runtime, rendered inside its `AssistantRuntimeProvider`; 0.15) | Subscribes to it, reading it in an effect, never while rendering. `text`, `reasoning`, `tool-call` (`result` → done, `isError` → failed) and `source` → parts; a tool call with `approval` and no `approved` → an `approval`; message status `running` → streaming, `incomplete` `cancelled` → stopped, `incomplete` `error` → error. `onSend` appends, `onStop` cancels the run, Retry and Regenerate reload the message, `onDecide` calls the part's `respondToToolApproval` |
 | | `fromAssistantUi(messages, options?)` | The thread's messages | A pure function |
 
 `package.json`: `ai` (`>=5 <8`) and `@assistant-ui/react` (`>=0.15 <0.16`)

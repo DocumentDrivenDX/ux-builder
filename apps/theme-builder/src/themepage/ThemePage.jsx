@@ -27,6 +27,9 @@ const AI = aiComponents.components.map((c) => ({ ...c, story: AI_INDEX.stories.f
 const byName = (a, b) => a.name.localeCompare(b.name);
 const WIDGETS = catalogue.widgets.filter((w) => w.type === "component").sort(byName);
 const PATTERNS = catalogue.patterns.filter((p) => p.type === "component").sort(byName);
+// The SDK's own assistant (ADR-023 rule 4; FEAT-007 BLD-01): the conversation first, then its parts.
+const first = (name) => (a, b) => Number(b.name === name) - Number(a.name === name) || byName(a, b);
+const ASSISTANT = (catalogue.assistant ?? []).filter((p) => p.type === "component").sort(first("Conversation"));
 const PREF = "theme-page-appearance";
 const slug = (kind, name) => `${kind}-${name}`;
 
@@ -93,6 +96,7 @@ export function ThemePage({ name }) {
           <Catalogue id="widgets" title="UI Components" items={WIDGETS} from="@ux-builder/ui" link={link} />
           <AiCatalogue theme={theme} tokens={a.tokens} appearance={appearance} link={link} />
           <Catalogue id="patterns" title="Screen patterns" items={PATTERNS} from="@ux-builder/ui/patterns" link={link} />
+          <Catalogue id="assistant" title="Assistant" items={ASSISTANT} from="@ux-builder/ui/assistant" link={link} />
         </main>
       </div>
     </ThemeProvider>
@@ -133,6 +137,8 @@ function Nav() {
       </div>
       <p className="tp-nav__group">Screen patterns</p>
       <ul>{PATTERNS.map((p) => item(slug("pattern", p.name), p.name))}</ul>
+      <p className="tp-nav__group">Assistant</p>
+      <ul>{ASSISTANT.map((p) => item(slug("assistant", p.name), p.name))}</ul>
     </nav>
   );
 }
@@ -190,7 +196,7 @@ function Catalogue({ id, title, items, from, link }) {
   return (
     <section id={id} className="tp-section tp-catalogue" aria-labelledby={`${id}-h`}>
       <h2 id={`${id}-h`}>{title}</h2>
-      {items.map((w) => <Entry key={w.name} kind={id === "widgets" ? "widget" : "pattern"} item={w} from={from} link={link} />)}
+      {items.map((w) => <Entry key={w.name} kind={id === "widgets" ? "widget" : id === "assistant" ? "assistant" : "pattern"} item={w} from={from} link={link} />)}
     </section>
   );
 }

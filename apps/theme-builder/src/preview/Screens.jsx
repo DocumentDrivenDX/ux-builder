@@ -1,5 +1,6 @@
 import { Button, Checkbox, StatusPill, TextField, ThemeProvider } from "@ux-builder/ui";
 import { AppShell, ChartFrame, CollectionList, Dashboard, FilterSection, FormPage, ListDetail, RecordDetail, StatTile } from "@ux-builder/ui/patterns";
+import { Conversation } from "@ux-builder/ui/assistant";
 import { tokensFor } from "./Preview.jsx";
 
 /* The SDK's screen patterns, previewed in a palette × design system cell
@@ -8,7 +9,7 @@ import { tokensFor } from "./Preview.jsx";
    and the shell is told to as well (adapt="container"), so both frames show
    their real layout in one window. Sample content only: nothing is fetched. */
 
-export const SCREENS = [["widgets", "Widgets"], ["collection", "Collection list"], ["list-detail", "List with detail"], ["form", "Form"], ["dashboard", "Dashboard"]];
+export const SCREENS = [["widgets", "Widgets"], ["collection", "Collection list"], ["list-detail", "List with detail"], ["form", "Form"], ["dashboard", "Dashboard"], ["assistant", "Assistant"]];
 
 const NAV = [
   { id: "home", label: "Home", href: "#home", icon: "home" },
@@ -31,6 +32,17 @@ const COLUMNS = [
 ];
 const none = () => {};
 
+/* The Assistant screen (FEAT-007 BLD-01, US-046-AC10): a conversation with a tool call, cited sources and an approval. */
+export const ASSISTANT = [
+  { id: "u1", role: "user", text: "Draft a bill for Acme v Beta for October" },
+  { id: "a1", role: "assistant", parts: [
+    { type: "tool", id: "t1", name: "lookup_time", title: "Looked up time entries", status: "done", input: { matter: "Acme v Beta" }, output: { hours: 27.5 } },
+    { type: "text", text: "October has **27.5 hours** [1] at the agreed £450 an hour [2]: £12,400." },
+    { type: "sources", sources: [{ id: "s1", title: "Time entries, October", href: "https://example.com/time" }, { id: "s2", title: "Engagement letter" }] },
+    { type: "approval", id: "ap1", action: "create-bill", summary: "Create bill B-1044 for Acme v Beta, £12,400?" },
+  ] },
+];
+
 function Screen({ id }) {
   if (id === "collection") {
     return <CollectionList title="Matters" actions={<Button size="sm">New matter</Button>} columns={COLUMNS} rows={MATTERS}
@@ -44,6 +56,9 @@ function Screen({ id }) {
       detail={<RecordDetail title="Halvorsen v. Atlas" statusPill={<StatusPill state="live" />} actions={<Button size="sm">Edit</Button>}
         fields={[{ label: "Client", value: "Halvorsen" }, { label: "Owner", value: "R. Lee" }, { label: "Opened", value: "3 Mar 2026" }, { label: "Value", value: "£42,100" }]}
         tabs={[{ id: "overview", label: "Overview", panel: <p>Two entries need review.</p> }, { id: "documents", label: "Documents", count: 12, panel: null }]} tabsParam="preview-tab" />} />;
+  }
+  if (id === "assistant") {
+    return <div className="tb-screen__assistant"><Conversation messages={ASSISTANT} onSend={none} onDecide={none} suggestions={["When is the hearing?"]} /></div>;
   }
   if (id === "form") {
     return <FormPage title="New matter" onCancel={none}>

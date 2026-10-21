@@ -20,7 +20,6 @@
     { "id": "US-047-AC5", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
     { "id": "US-047-AC6", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
     { "id": "US-047-AC7", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
-    { "id": "US-048-AC1", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
     { "id": "US-048-AC2", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
     { "id": "US-048-AC3", "reason": "Planned: FEAT-007 (generative UI), drafted 2026-10-19 with ADR-023; not built yet." },
     { "id": "US-072-AC1", "reason": "Built: .github/workflows/release.yml (changesets/action, Trusted Publishing, create-github-releases). Evidenced by each release run, not yet by a test (FEAT-005, framed 2026-10-21)." },

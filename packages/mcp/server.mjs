@@ -8,7 +8,7 @@
      { "mcpServers": { "ux-builder": { "command": "npx", "args": ["@ux-builder/mcp"] } } }
 
    Tools: list_themes, get_theme, list_brands, list_design_systems,
-   list_widgets, get_widget, list_patterns, get_pattern, list_variants,
+   list_widgets, get_widget, list_patterns, get_pattern, list_renderable, list_variants,
    list_tokens, get_token, list_icons, get_guidance; and, from @ux-builder/ui
    0.7, the interaction rules and blueprint (FEAT-008): get_rules,
    list_recipes, get_recipe, get_blueprint_schema, check_blueprint. Resources:
@@ -125,6 +125,13 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess) {
     if (!p) return fail(`No pattern "${name}" in @ux-builder/ui/patterns.${near(name.toLowerCase(), patterns.map((x) => x.name.toLowerCase())).length ? ` Did you mean: ${patterns.filter((x) => near(name.toLowerCase(), [x.name.toLowerCase()]).length).map((x) => x.name).join(", ")}?` : ""} Use list_patterns.`);
     return ok(p);
   });
+
+  // Generative UI (FEAT-007 GEN-01; US-048-AC1): the components an agent may render in a conversation, with their props schemas.
+  server.registerTool("list_renderable", {
+    title: "List renderable components",
+    description: "The components an assistant may render in a conversation from a tool result ({ component, props }), each with the JSON Schema its props must pass. Anything else renders as a plain notice. Props are JSON only.",
+    inputSchema: {},
+  }, async () => ok([...cat.widgets, ...patterns, ...(cat.assistant ?? [])].filter((e) => e.renderable).map(({ name, import: imp, purpose, propsSchema }) => ({ name, import: imp, purpose, propsSchema }))));
 
   server.registerTool("list_variants", {
     title: "List variants",
