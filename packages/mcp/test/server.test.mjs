@@ -31,7 +31,7 @@ before(async () => {
 describe("US-014-AC5: agents list the SDK over MCP", () => {
   test("the tools and resources are listed, with instructions carrying the rules", async () => {
     const { tools } = await client.listTools();
-    assert.deepEqual(tools.map((t) => t.name).sort(), ["get_guidance", "get_pattern", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_themes", "list_tokens", "list_variants", "list_widgets"]);
+    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_themes", "list_tokens", "list_variants", "list_widgets"]);
     const { resources } = await client.listResources();
     assert.deepEqual(resources.map((r) => r.uri).sort(), ["ux-builder://catalogue", "ux-builder://guidance"]);
     assert.match(client.getInstructions(), /Never hard-code colours, font families or radii/);
@@ -101,7 +101,7 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
     await c.connect(new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL("../server.mjs", import.meta.url))] }));
     try {
       const { tools } = await c.listTools();
-      assert.equal(tools.length, 13);
+      assert.equal(tools.length, 18);
     } finally { await c.close(); }
   });
 });
@@ -120,5 +120,49 @@ describe("US-031: agents find the screen patterns over MCP", () => {
     assert.equal(miss.isError, true);
     assert.match(miss.content[0].text, /Did you mean: CollectionList/);
     assert.deepEqual((await call("list_variants")).data, cat.variants);
+  });
+});
+
+describe("US-053: an agent plans and checks screens through MCP", () => {
+  // @covers US-053-AC1
+  test("get_rules returns the same rules as rulesFor", async () => {
+    const { rulesFor } = await import("@ux-builder/ui/blueprint");
+    for (const target of [{}, { context: "view" }, { context: "app", sizeClasses: ["compact"], inputs: ["coarse"] }, { sizeClasses: ["large"], inputs: ["fine"] }]) {
+      assert.deepEqual((await call("get_rules", target)).data, rulesFor(target));
+    }
+    assert.ok((await call("get_rules", { context: "view" })).data.some((r) => r.id === "view.no-shell"));
+  });
+
+  // @covers US-053-AC2
+  test("list_recipes: best match first; get_recipe: patterns and rule IDs", async () => {
+    const found = (await call("list_recipes", { job: "review and approve flagged time entries" })).data;
+    assert.equal(found[0].id, "review-queue");
+    assert.ok(found[0].patterns.includes("WorkQueue"));
+    assert.equal((await call("list_recipes", {})).data.length, cat.interaction.recipes.length);
+    const r = (await call("get_recipe", { id: "review-queue" })).data;
+    assert.ok(r.screens.every((x) => x.pattern && x.role));
+    assert.ok(r.rules.includes("action.destructive-safeguard"));
+    assert.equal((await call("get_recipe", { id: "nope" })).isError, true);
+  });
+
+  // @covers US-053-AC3
+  test("check_blueprint returns the validator's findings; get_blueprint_schema the schema", async () => {
+    const { checkBlueprint } = await import("@ux-builder/ui/blueprint");
+    const plan = { version: 1, kind: "app", name: "x", supports: { sizeClasses: ["compact"], inputs: ["coarse"] }, destinations: [{ id: "a", label: "A", screen: "a" }], screens: [{ id: "a", title: "A", pattern: "ListDetails" }] };
+    const res = (await call("check_blueprint", { blueprint: plan })).data;
+    assert.deepEqual(res.findings, checkBlueprint(plan));
+    assert.equal(res.errors, 1);
+    const { schema, skeleton } = (await call("get_blueprint_schema")).data;
+    assert.equal(schema.$schema, "https://json-schema.org/draft/2020-12/schema");
+    assert.deepEqual(schema, cat.interaction.blueprintSchema);
+    assert.deepEqual(checkBlueprint(skeleton.app), []);
+  });
+
+  // @covers US-053-AC6
+  test("get_guidance states the plan, check, build, lint and audit loop", async () => {
+    const text = (await client.callTool({ name: "get_guidance", arguments: {} })).content[0].text;
+    assert.match(text, /\*\*plan\*\*[\s\S]*\*\*check\*\*[\s\S]*\*\*build\*\*[\s\S]*\*\*lint\*\*[\s\S]*\*\*audit\*\*/);
+    assert.match(text, /ux-builder-blueprint check/);
+    assert.match(client.getInstructions(), /app\.blueprint\.json/);
   });
 });

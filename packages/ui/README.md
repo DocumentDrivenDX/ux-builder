@@ -86,7 +86,7 @@ The package ships guidance an agent reads before writing UI, and a
 machine-readable catalogue, both generated from this package's source so
 they never name anything that does not exist (FEAT-004 SDK-12, SDK-13):
 
-- `AGENTS.md`: the five rules, how to set up, how to do common things, and
+- `AGENTS.md`: the rules, how to set up, how to do common things, and
   a reference of every component and prop, role token, icon and theme.
 - `skill/ux-builder-ui/SKILL.md`: the same, as a Claude Code skill. Install it
   in an app with
@@ -99,6 +99,29 @@ Agents can also query the SDK over MCP with `@ux-builder/mcp`
 (`claude mcp add ux-builder -- npx @ux-builder/mcp`): themes with every role
 token's value, brands, design systems, widgets with props, tokens with
 purposes, icons and this guidance.
+
+### Interaction rules and the blueprint
+
+`@ux-builder/ui/blueprint` holds the interaction and IA rules (navigation by
+size, modals, safeguards, states, emphasis) and checks an app's plan against
+them, in Node or a browser, with no network (FEAT-008, CONTRACT-005):
+
+```js
+import { rulesFor, checkBlueprint, findRecipes, skeleton } from "@ux-builder/ui/blueprint";
+rulesFor({ context: "view", sizeClasses: ["compact", "medium"], inputs: ["coarse"] }); // the rules for an embedded view
+checkBlueprint(JSON.parse(readFileSync("app.blueprint.json", "utf8")));              // [{ rule, severity, path, message, fix }]
+```
+
+The command `ux-builder-blueprint` does the same from a shell:
+`ux-builder-blueprint init [--kind app|view]` writes a starting
+`app.blueprint.json`, and `ux-builder-blueprint check app.blueprint.json`
+prints each finding and exits 1 on an error. The rules, recipes and the
+blueprint schema are also in `catalogue.json` (`interaction`) and in
+`AGENTS.md`.
+
+The rules restate guidance from Apple's Human Interface Guidelines, Material
+Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this package's own
+words, with links to the sources. ux-builder is not affiliated with or endorsed by Apple or Google. Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.
 
 For other agents, point the app's own `AGENTS.md` or `CLAUDE.md` at
 `node_modules/@ux-builder/ui/AGENTS.md`. In this repository, `npm run catalogue`

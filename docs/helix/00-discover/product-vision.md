@@ -63,6 +63,9 @@ cannot be re-themed.
 4. **Built for agents as much as people.** The same source generates the
    documentation, the catalogue and the agent guidance, so they cannot drift
    from what ships.
+   The same holds for how screens fit together and behave: cited rules, a
+   blueprint checked before code, and an audit that checks the running app
+   by the same rule IDs.
 5. **Whole screens, at any width.** Patterns carry the structure and states
    (empty, error, loading) that basic widgets do not, and adapt to the space
    they are given, from a desktop window to a phone or a narrow embedded
@@ -88,7 +91,7 @@ cannot be re-themed.
 | Horizon | Outcome |
 |---------|---------|
 | **Now** (built, 2026-10) | Role-based tokens and eight themes on four shared design systems (Material, Fluent, Carbon, Databricks); widgets, fonts and icons in `@ux-builder/*` on the public npm registry; the palette engine; the theme builder (local, OpenAI-steered) with a screens preview and a chat-library step; starter, lint rules, audit, agent guidance, MCP server. Built in the repository, awaiting release: screen patterns that adapt by size class, with design-system variants; bridges that dress AI Elements and assistant-ui in every theme; the third-party licence check |
-| **Next** | Release the patterns and bridges; the SDK's own assistant patterns, with adapters per runtime and generative UI limited to catalogue components (FEAT-007); the first client apps (the platform and a billing-review app) adopt the SDK; the AI harness and its embedded products share one presentation contract (ADR-011); measure agent-built UI against the guidance |
+| **Next** | Interaction and IA rules drawn from Apple's HIG and Material 3, applied to an app's or view's blueprint before code and by the audit after, served to agents over MCP (FEAT-008); release the patterns and bridges; the SDK's own assistant patterns, with adapters per runtime and generative UI limited to catalogue components (FEAT-007); the first client apps (the platform and a billing-review app) adopt the SDK; the AI harness and its embedded products share one presentation contract (ADR-011); measure agent-built UI against the guidance |
 | **Later** | Client brands released apart from the public core (FEAT-005) as more clients adopt; a hosted builder for brand owners who are not developers; frameworks beyond React if a client needs one |
 
 ## Measures of success

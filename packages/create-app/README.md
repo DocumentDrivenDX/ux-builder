@@ -11,6 +11,7 @@ cd my-app && npm install && npm run dev
 |---|---|
 | `--theme <name>` | The theme to start on: any theme in `@ux-builder/tokens` (`databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `ux-builder-databricks`, `plain`). Default `plain` |
 | `--name <name>` | The package name. Default: the directory's name |
+| `--blueprint <file>` | Start from this plan of the app's screens instead of the starter's. A plan with an error (`ux-builder-blueprint check`) is refused, with each error, and nothing is written |
 
 ## What the app has
 
@@ -24,7 +25,9 @@ cd my-app && npm install && npm run dev
 - `npm run audit`: builds, serves and audits the app in every theme and
   appearance with `@ux-builder/audit` (run `npx playwright install chromium`
   once); the report is in `audit-report/`.
-- `.github/workflows/ci.yml`: `npm ci`, lint and the audit on every push,
+- `app.blueprint.json`: the plan of the app's destinations and screens, and
+  `npm run check:blueprint`, which checks it against the interaction rules.
+- `.github/workflows/ci.yml`: `npm ci`, the blueprint check, lint and the audit on every push,
   with the report as an artifact.
 - `CLAUDE.md` and `AGENTS.md`
   pointing at the SDK's guidance, and the Claude Code skill `ux-builder-ui`,

@@ -4,10 +4,14 @@
   "license": "MIT OR Apache-2.0",
   "description": "Widgets for the harness and embedded products: prefixed CSS and React 19 components on @ux-builder/tokens, shaped by whichever theme is on.",
   "type": "module",
+  "bin": {
+    "ux-builder-blueprint": "blueprint/cli.mjs"
+  },
   "files": [
     "dist",
     "licenses",
     "lint",
+    "blueprint",
     "catalogue.json",
     "AGENTS.md",
     "skill",
@@ -21,6 +25,7 @@
     "./patterns.css": "./dist/patterns.css",
     "./stylelint": "./lint/stylelint.mjs",
     "./eslint": "./lint/eslint.mjs",
+    "./blueprint": "./blueprint/index.mjs",
     "./catalogue.json": "./catalogue.json",
     "./AGENTS.md": "./AGENTS.md",
     "./skill/*": "./skill/*",

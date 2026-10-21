@@ -47,7 +47,8 @@ td.n { font-variant-numeric: tabular-nums; text-align: right; }
 </style></head><body><main>
 <header><h1>Theme audit: <span class="${s.error ? "error" : ""}">${esc(verdict)}</span></h1>
 <p class="meta">${r.urls.map((u) => `<code>${esc(u)}</code>`).join(", ")} · ${esc(new Date(r.generatedAt).toLocaleString())} · ${esc(r.tool)} ${esc(r.version)} · ${r.runs.length} theme × appearance${r.runs.some((x) => x.width) ? " × width" : ""} runs</p></header>
-<section class="counts"><div class="count"><b class="error">${s.error}</b>errors</div><div class="count"><b class="warning">${s.warning}</b>warnings</div><div class="count"><b class="info">${s.info}</b>notes</div></section>
+<section class="counts"><div class="count"><b class="error">${s.error}</b>errors</div><div class="count"><b class="warning">${s.warning}</b>warnings</div><div class="count"><b class="info">${s.info}</b>notes</div>${s.baselined != null ? `<div class="count"><b>${s.baselined}</b>in the baseline</div><div class="count"><b>${s.resolved}</b>resolved</div>` : ""}</section>
+${r.resolved?.length ? `<section><h2>Resolved since the baseline</h2><p class="meta">Remove these from the baseline file.</p><ul>${r.resolved.map((b) => `<li><code>${esc(b.rule)}</code> ${esc(b.selector ?? b.message ?? "")} <span class="meta">${esc(b.url)}</span></li>`).join("")}</ul></section>` : ""}
 <section><h2>Checks</h2><div style="overflow-x:auto"><table><thead><tr><th>Check</th><th>What it holds the app to</th><th class="n">Findings</th></tr></thead><tbody>
 ${byRule.map((g) => `<tr><td><a href="#${g.rule}"><code>${g.rule}</code></a></td><td>${esc(g.about)}</td><td class="n">${g.items.length || "—"}</td></tr>`).join("\n")}
 </tbody></table></div></section>
@@ -55,7 +56,7 @@ ${r.runs.some((x) => x.screenshot) ? `<section><h2>Screens</h2><p class="meta">E
 ${r.runs.filter((x) => x.screenshot).map((x) => `<a href="${esc(x.screenshot)}"><img src="${esc(x.screenshot)}" alt="${esc(`${x.theme} ${x.appearance}`)}" loading="lazy"><span><b>${esc(x.theme)}</b> · ${esc(x.appearance)}${x.width ? ` · ${x.width}px` : ""}${r.urls.length > 1 ? ` · <code>${esc(new URL(x.url).pathname)}</code>` : ""}</span></a>`).join("\n")}
 </div></section>` : ""}
 ${byRule.filter((g) => g.items.length).map((g) => `<section class="rule" id="${g.rule}"><h2><code>${g.rule}</code></h2><p>${esc(g.about)}</p>
-${g.items.map((f) => `<div class="f"><span class="id">#${f.id}</span><div><span class="sev ${f.severity}">${f.severity}</span><span>${esc(f.message)}</span>${f.selector ? `<code>${esc(f.selector)}</code>` : ""}${f.rule_selector ? `<code>${esc(f.rule_selector)}</code>` : ""}${f.runs.length ? `<span class="chips">${f.runs.map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</span>` : ""}</div></div>`).join("\n")}
+${g.items.map((f) => `<div class="f"><span class="id">#${f.id}</span><div><span class="sev ${f.severity}">${f.severity}</span><span>${esc(f.message)}</span>${f.selector ? `<code>${esc(f.selector)}</code>` : ""}${f.rule_selector ? `<code>${esc(f.rule_selector)}</code>` : ""}${f.ruleId ? `<span>Rule <code>${esc(f.ruleId)}</code>${f.sources?.length ? `: ${f.sources.map((x) => `<a href="${esc(x.url)}">${esc(x.title)}</a>`).join(", ")}` : ""}</span>` : ""}${f.runs.length ? `<span class="chips">${f.runs.map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</span>` : ""}</div></div>`).join("\n")}
 </section>`).join("\n")}
 </main></body></html>
 `;
@@ -64,12 +65,14 @@ ${g.items.map((f) => `<div class="f"><span class="id">#${f.id}</span><div><span 
 /* A few lines for the terminal. */
 export function summaryText(r, { limit = 25 } = {}) {
   const s = r.summary;
-  const lines = [`Theme audit: ${s.error} errors, ${s.warning} warnings, ${s.info} notes across ${r.runs.length} theme × appearance runs.`];
+  const lines = [`Theme audit: ${s.error} errors, ${s.warning} warnings, ${s.info} notes across ${r.runs.length} theme × appearance runs.${s.baselined != null ? ` ${s.baselined} in the baseline; ${s.resolved} resolved.` : ""}`];
   for (const f of r.findings.filter((x) => x.severity !== "info").slice(0, limit)) {
     lines.push(`  #${f.id} ${f.severity.padEnd(7)} ${f.rule.padEnd(17)} ${f.selector ?? f.rule_selector ?? ""}`.trimEnd());
-    lines.push(`      ${f.message}${f.runs.length ? ` [${f.runs.length === r.runs.length ? "every theme" : f.runs.join(", ")}]` : ""}`);
+    lines.push(`      ${f.message}${f.ruleId ? ` (rule ${f.ruleId})` : ""}${f.runs.length ? ` [${f.runs.length === r.runs.length ? "every theme" : f.runs.join(", ")}]` : ""}`);
   }
   const rest = r.findings.filter((x) => x.severity !== "info").length - limit;
   if (rest > 0) lines.push(`  … ${rest} more in the report`);
+  for (const b of r.resolved ?? []) lines.push(`  resolved: ${b.rule} ${b.selector ?? b.message ?? ""} (${b.url}); remove it from the baseline`);
+  for (const n of r.baselineIgnored ?? []) lines.push(`  baseline: ${n}`);
   return lines.join("\n");
 }

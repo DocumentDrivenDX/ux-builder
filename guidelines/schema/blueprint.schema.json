@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/blueprint.schema.json",
+  "title": "ux-builder blueprint (CONTRACT-005)",
+  "description": "One file per app or view: its kind, the size classes and inputs it supports, its destinations and its screens. Checked by ux-builder-blueprint check.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "kind",
+    "name",
+    "supports",
+    "screens"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "app",
+        "view"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sizeClasses",
+        "inputs"
+      ],
+      "properties": {
+        "sizeClasses": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "compact",
+              "medium",
+              "expanded",
+              "large",
+              "extra-large"
+            ]
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "coarse",
+              "fine"
+            ]
+          }
+        }
+      }
+    },
+    "destinations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "screen"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "screen": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "screens": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "pattern"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pattern": {
+            "type": "string",
+            "minLength": 1
+          },
+          "primaryAction": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "destructiveActions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "label",
+                "safeguard"
+              ],
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "safeguard": {
+                  "enum": [
+                    "undo",
+                    "confirm",
+                    "none"
+                  ]
+                }
+              }
+            }
+          },
+          "states": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "empty",
+                "loading",
+                "error"
+              ]
+            }
+          },
+          "modals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/modal"
+            }
+          }
+        }
+      }
+    }
+  },
+  "if": {
+    "required": [
+      "kind"
+    ],
+    "properties": {
+      "kind": {
+        "const": "app"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "destinations"
+    ]
+  },
+  "$defs": {
+    "modal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "kind",
+        "dismiss"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "dialog",
+            "sheet"
+          ]
+        },
+        "dismiss": {
+          "enum": [
+            "cancel",
+            "close",
+            "done"
+          ]
+        },
+        "editsData": {
+          "type": "boolean"
+        },
+        "guardsUnsavedChanges": {
+          "type": "boolean"
+        },
+        "modals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/modal"
+          }
+        }
+      }
+    }
+  }
+}

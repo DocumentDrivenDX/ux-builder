@@ -1,0 +1,266 @@
+{
+  "$schema": "./schema/recipes.schema.json",
+  "$description": "Recipes: tested combinations of patterns for common jobs, with the rules they satisfy (FEAT-008 RUL-05, CONTRACT-005).",
+  "version": 1,
+  "recipes": [
+    {
+      "id": "review-queue",
+      "title": "Review and approve a queue",
+      "job": "People work through items waiting for a decision and approve, reject or reassign them.",
+      "keywords": [
+        "review",
+        "approve",
+        "approval",
+        "reject",
+        "queue",
+        "triage",
+        "inbox",
+        "flagged",
+        "pending",
+        "decide"
+      ],
+      "kind": "any",
+      "screens": [
+        {
+          "pattern": "WorkQueue",
+          "role": "The queue, with bulk actions"
+        },
+        {
+          "pattern": "RecordDetail",
+          "role": "One item's detail beside or after the queue"
+        },
+        {
+          "pattern": "ConfirmDialog",
+          "role": "Only for an irreversible decision"
+        }
+      ],
+      "rules": [
+        "screen.states",
+        "action.destructive-safeguard",
+        "emphasis.one-primary",
+        "modal.one-at-a-time"
+      ]
+    },
+    {
+      "id": "manage-records",
+      "title": "Find, view and edit records",
+      "job": "People search a collection, open a record and change it.",
+      "keywords": [
+        "records",
+        "list",
+        "table",
+        "manage",
+        "edit",
+        "crud",
+        "customers",
+        "matters",
+        "items",
+        "search",
+        "browse"
+      ],
+      "kind": "app",
+      "screens": [
+        {
+          "pattern": "CollectionList",
+          "role": "Search, filter and select"
+        },
+        {
+          "pattern": "ListDetail",
+          "role": "The list beside the chosen record from expanded"
+        },
+        {
+          "pattern": "FormPage",
+          "role": "Create or edit a record"
+        },
+        {
+          "pattern": "QuickEdit",
+          "role": "A small change without leaving the list"
+        }
+      ],
+      "rules": [
+        "screen.states",
+        "layout.panes-by-size",
+        "modal.unsaved-changes",
+        "action.destructive-safeguard"
+      ]
+    },
+    {
+      "id": "settings",
+      "title": "Change settings",
+      "job": "People adjust preferences or configuration in sections.",
+      "keywords": [
+        "settings",
+        "preferences",
+        "configure",
+        "configuration",
+        "options",
+        "profile",
+        "account"
+      ],
+      "kind": "any",
+      "screens": [
+        {
+          "pattern": "SettingsPage",
+          "role": "Sections, side by side from expanded"
+        }
+      ],
+      "rules": [
+        "layout.dense-medium-single-pane",
+        "feedback.status-in-place"
+      ]
+    },
+    {
+      "id": "dashboard",
+      "title": "Read a dashboard and its reports",
+      "job": "People check key figures and drill into a report.",
+      "keywords": [
+        "dashboard",
+        "metrics",
+        "kpi",
+        "figures",
+        "report",
+        "analytics",
+        "overview",
+        "chart"
+      ],
+      "kind": "app",
+      "screens": [
+        {
+          "pattern": "Dashboard",
+          "role": "Key figures and charts"
+        },
+        {
+          "pattern": "ReportViewer",
+          "role": "One report, with its filters"
+        },
+        {
+          "pattern": "DrillDown",
+          "role": "From a figure to its rows"
+        }
+      ],
+      "rules": [
+        "screen.states",
+        "loading.show-something"
+      ]
+    },
+    {
+      "id": "import-data",
+      "title": "Import data",
+      "job": "People upload a file, map its columns, check the result and commit it.",
+      "keywords": [
+        "import",
+        "upload",
+        "csv",
+        "spreadsheet",
+        "map",
+        "columns",
+        "bulk"
+      ],
+      "kind": "any",
+      "screens": [
+        {
+          "pattern": "ImportFlow",
+          "role": "Upload, map, preview and commit"
+        },
+        {
+          "pattern": "ReviewConfirm",
+          "role": "Check before committing"
+        }
+      ],
+      "rules": [
+        "loading.progress-kind",
+        "feedback.explain-failure",
+        "modal.short-task"
+      ]
+    },
+    {
+      "id": "guided-setup",
+      "title": "Guide someone through a multi-step task",
+      "job": "People complete a task in ordered steps and confirm it at the end.",
+      "keywords": [
+        "wizard",
+        "steps",
+        "onboarding",
+        "setup",
+        "guided",
+        "multi-step",
+        "create"
+      ],
+      "kind": "any",
+      "screens": [
+        {
+          "pattern": "Wizard",
+          "role": "Ordered steps"
+        },
+        {
+          "pattern": "ReviewConfirm",
+          "role": "Check answers before submitting"
+        }
+      ],
+      "rules": [
+        "modal.short-task",
+        "modal.unsaved-changes"
+      ]
+    },
+    {
+      "id": "users-and-access",
+      "title": "Manage users and access",
+      "job": "Administrators invite people, assign roles and set permissions.",
+      "keywords": [
+        "users",
+        "members",
+        "roles",
+        "permissions",
+        "access",
+        "invite",
+        "admin",
+        "team"
+      ],
+      "kind": "app",
+      "screens": [
+        {
+          "pattern": "UsersAndRoles",
+          "role": "Members and their roles"
+        },
+        {
+          "pattern": "PermissionsMatrix",
+          "role": "What each role may do"
+        }
+      ],
+      "rules": [
+        "screen.states",
+        "action.destructive-safeguard"
+      ]
+    },
+    {
+      "id": "embedded-tool",
+      "title": "An embedded tool view",
+      "job": "A tool's result is shown inside a host (an MCP App view, such as a Praxis plug-in) for one task.",
+      "keywords": [
+        "view",
+        "embedded",
+        "plugin",
+        "plug-in",
+        "mcp",
+        "widget",
+        "panel",
+        "praxis",
+        "tool"
+      ],
+      "kind": "view",
+      "screens": [
+        {
+          "pattern": "RecordDetail",
+          "role": "One result or record, or CollectionList for a short list"
+        }
+      ],
+      "rules": [
+        "view.no-shell",
+        "view.size-classes",
+        "view.one-task",
+        "view.theme-from-host",
+        "screen.states"
+      ]
+    }
+  ]
+}

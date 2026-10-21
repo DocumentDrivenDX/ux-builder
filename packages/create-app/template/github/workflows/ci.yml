@@ -14,6 +14,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # The plan of the app's screens against the interaction and IA rules.
+      - run: npm run check:blueprint
       # No literal colours, fonts or radii; no other UI kits; no hand-drawn <svg>.
       - run: npm run lint
       # The running app in every theme and appearance: colours, fonts, radii,

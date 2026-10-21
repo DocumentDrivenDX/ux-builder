@@ -19,6 +19,7 @@ to the app, as long as the app follows the rules below.
 4. Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui and ux-builder/no-inline-svg, then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.
 5. Select themes with ThemeProvider (theme, appearance) or data-theme and data-appearance on <html>; never restyle per theme in app code.
 6. Compose screens from @ux-builder/ui/patterns before writing any layout CSS: AppShell for the frame, with each screen inside a Page, which gives it the page gutter and width (AppShell's content area and the screen patterns have none of their own; ErrorScreen excepted); CollectionList, ListDetail, RecordDetail, FormPage, QuickEdit, Dashboard, ReportViewer, SettingsPage and ErrorScreen for screens; the regions and the layout primitives (Stack, Cluster, Grid, Page, SplitView) for anything else. Supply content, data and actions through their slots; never fork or restyle a pattern.
+7. Plan before you build: describe the app or view in app.blueprint.json (ux-builder-blueprint init, or the MCP tool get_blueprint_schema), choose its screens from the recipes (list_recipes), and run ux-builder-blueprint check (or check_blueprint) until it reports no errors. Then build, lint and audit. Rules apply by size class, input and context (app or embedded view), never by device.
 <!-- rules:end -->
 
 ## Setting up
@@ -263,6 +264,54 @@ Show waiting with the SDK, never a hand-drawn loader or another library's: `<Pro
 `<Logo />` in the app's header (`variant="mark"` where space is tight, `size="sm"` for the compact height). It draws the theme's brand artwork, or the brand's title as a wordmark when the brand has none, and changes with the theme and appearance. Never import or hard-code a logo file. An embedded view draws no logo.
 
 The page's favicon follows the theme too: the top-level `ThemeProvider` sets it (`favicon={false}` turns that off). An app that sets `data-theme` on `<html>` without a provider renders `<Favicon />` once. Keep the app's own `<link rel="icon">` in index.html: it shows for a theme without a favicon. Never hard-code the brand's favicon.
+
+### Interaction and screen rules
+
+How screens fit together and behave: navigation by size, modals, safeguards, states and emphasis (FEAT-008). Each rule has an ID that the blueprint check and the audit report use. The loop: **plan** the app in `app.blueprint.json` (`npx ux-builder-blueprint init`) from the recipes, **check** it (`npx ux-builder-blueprint check app.blueprint.json`, or the MCP tool `check_blueprint`) until it has no errors, **build** from the patterns it names, then **lint** and **audit**. Rules apply by size class, input (`coarse` touch, `fine` pointer) and context (`app`, or an embedded `view`), never by device. Get the rules for a target with `rulesFor()` from `@ux-builder/ui/blueprint` or the MCP tool `get_rules`; the full rules, recipes and blueprint schema are in `catalogue.json` (`interaction`).
+
+| Rule | Applies | Checked by | Statement |
+|------|---------|------------|-----------|
+| `blueprint.valid` | always | blueprint `blueprint.valid` | A blueprint has the fields CONTRACT-005 requires, no unknown fields, unique screen IDs, and destinations that name existing screens. |
+| `pattern.exists` | always | blueprint `pattern.exists` | Every screen names a pattern the installed SDK ships. |
+| `nav.compact-destinations` | context: app; sizeClass: compact, medium | blueprint `nav.compact-destinations`, audit `nav-per-breakpoint` | In an app that supports the compact or medium size class, keep the top-level destinations to five; group the rest or move them to a drawer. |
+| `nav.standing-at-expanded` | context: app; sizeClass: expanded, large, extra-large | audit `nav-per-breakpoint` | From the expanded size class, show primary navigation as a standing rail or side navigation, not behind a menu button. |
+| `nav.links-not-menus` | context: app | review | Move between top-level destinations with navigation links; keep menu buttons for actions on the current page or item. |
+| `layout.panes-by-size` | always | review | Use one pane in compact and medium windows, two from expanded (a list beside its detail), and three only in extra-large ones. |
+| `layout.dense-medium-single-pane` | sizeClass: medium | review | At the medium size class, use two panes only for sparse content with clear actions, such as settings; keep dense lists and tables in one. |
+| `modal.only-when-needed` | always | review | Present a task modally only when it needs focus or a decision before the person continues; otherwise keep it in the page. |
+| `modal.one-at-a-time` | always | blueprint `modal.one-at-a-time`, audit `one-modal` | Never open a modal on top of another, and never show more than one alert at once; close one before presenting the next. |
+| `modal.titled` | always | blueprint `modal.titled`, audit `modal-contract` | Give every modal a title that says what the task is, as its accessible name. |
+| `modal.dismiss` | always | blueprint `modal.dismiss`, audit `modal-contract` | Give every modal an obvious way out (Cancel, Close or Done), and let Escape close it. |
+| `modal.unsaved-changes` | always | blueprint `modal.unsaved-changes` | When closing a modal would lose what the person entered, explain that and let them save, discard or keep editing. |
+| `modal.short-task` | always | review | Keep a modal task brief; if it needs several steps, give them a single path and no buttons that could be mistaken for dismissing it. |
+| `action.destructive-safeguard` | always | blueprint `action.destructive-safeguard` | Give every destructive action a safeguard: Undo when the loss is expected and reversible, a confirmation only when it is unexpected or irreversible; never neither, and not both. |
+| `feedback.status-in-place` | always | review | Show the status of something next to it, passively; interrupt with an alert only for critical, actionable information. |
+| `feedback.explain-failure` | always | review | When an action cannot be carried out, say why and what to do, in text next to it. |
+| `loading.show-something` | always | review | Show placeholder content, such as a skeleton, as soon as a region starts loading; never leave it blank. |
+| `loading.progress-kind` | always | review | Use a determinate progress indicator when the duration is known and an indeterminate one when it is not. |
+| `screen.states` | always | blueprint `screen.states` | A screen that shows a collection, a record or figures declares its empty, loading and error states. |
+| `emphasis.one-primary` | always | audit `one-primary-action` | Give each page region or dialog at most one primary (filled) button; make the others secondary or text buttons. |
+| `input.touch-targets` | input: coarse | audit `target-size` | Under touch input, make every control at least the theme's touch-target size (44 points on Apple platforms, 48 dp in Material). |
+| `input.no-hover-only` | input: coarse | review | Under touch input, never put content or actions where only hovering reveals them. |
+| `input.focus-visible` | input: fine | review | Show a visible focus indicator on every focusable control, distinct from hover and selection. |
+| `text.line-length` | always | audit `line-length` | Keep running text to at most 80 characters per line, 40 to 60 where possible, by limiting the measure rather than shrinking the type. |
+| `view.no-shell` | context: view | blueprint `view.no-shell` | An embedded view draws no app shell, primary navigation or brand; the host provides its chrome, title and pins. |
+| `view.size-classes` | context: view | blueprint `view.size-classes` | An embedded view supports the compact and medium size classes, since a host's panel is often that narrow even on a desktop. |
+| `view.one-task` | context: view | blueprint `view.one-task` | Keep an embedded view to one screen and one task; put further steps in modal tasks or sections of that screen. |
+| `view.theme-from-host` | context: view | review | Take the theme only from the host's styles and appearance, and follow the host when it changes them. |
+
+Recipes (tested combinations of patterns for a job):
+
+- `review-queue` (any): People work through items waiting for a decision and approve, reject or reassign them. `<WorkQueue>`, `<RecordDetail>`, `<ConfirmDialog>`.
+- `manage-records` (app): People search a collection, open a record and change it. `<CollectionList>`, `<ListDetail>`, `<FormPage>`, `<QuickEdit>`.
+- `settings` (any): People adjust preferences or configuration in sections. `<SettingsPage>`.
+- `dashboard` (app): People check key figures and drill into a report. `<Dashboard>`, `<ReportViewer>`, `<DrillDown>`.
+- `import-data` (any): People upload a file, map its columns, check the result and commit it. `<ImportFlow>`, `<ReviewConfirm>`.
+- `guided-setup` (any): People complete a task in ordered steps and confirm it at the end. `<Wizard>`, `<ReviewConfirm>`.
+- `users-and-access` (app): Administrators invite people, assign roles and set permissions. `<UsersAndRoles>`, `<PermissionsMatrix>`.
+- `embedded-tool` (view): A tool's result is shown inside a host (an MCP App view, such as a Praxis plug-in) for one task. `<RecordDetail>`.
+
+The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.
 
 ### Themes
 

@@ -9,7 +9,9 @@
 
    Tools: list_themes, get_theme, list_brands, list_design_systems,
    list_widgets, get_widget, list_patterns, get_pattern, list_variants,
-   list_tokens, get_token, list_icons, get_guidance. Resources:
+   list_tokens, get_token, list_icons, get_guidance; and, from @ux-builder/ui
+   0.7, the interaction rules and blueprint (FEAT-008): get_rules,
+   list_recipes, get_recipe, get_blueprint_schema, check_blueprint. Resources:
    ux-builder://catalogue, ux-builder://guidance. */
 
 import { readFileSync } from "node:fs";
@@ -20,6 +22,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 const require = createRequire(import.meta.url);
+// The rules and the blueprint check, as the installed @ux-builder/ui has them (0.7 and later).
+let blueprint = null;
+try { blueprint = await import("@ux-builder/ui/blueprint"); } catch { /* an older @ux-builder/ui */ }
 const readJson = (spec) => JSON.parse(readFileSync(require.resolve(spec), "utf8"));
 const readText = (spec) => readFileSync(require.resolve(spec), "utf8");
 
@@ -35,7 +40,9 @@ const ok = (data) => ({ content: [{ type: "text", text: JSON.stringify(data, nul
 const fail = (message) => ({ content: [{ type: "text", text: message }], isError: true });
 const near = (name, names) => names.filter((n) => n.includes(name) || name.includes(n)).slice(0, 5);
 
-export function createServer(s = sdk()) {
+const SIZE_CLASSES = ["compact", "medium", "expanded", "large", "extra-large"];
+
+export function createServer(s = sdk(), bp = blueprint) {
   const { catalogue: cat, manifest, resolved } = s;
   const server = new McpServer({ name: "ux-builder", version: cat.packages["@ux-builder/ui"] }, {
     instructions: `The AI-UI SDK (@ux-builder/ui ${cat.packages["@ux-builder/ui"]}, @ux-builder/tokens ${cat.packages["@ux-builder/tokens"]}). Before writing UI in an app that uses it, read get_guidance. Rules: ${cat.rules.join(" ")}`,
@@ -155,6 +162,49 @@ export function createServer(s = sdk()) {
       library: lib ? { import: lib.import, icons: lib.icons.filter((i) => i.name.includes(q)).slice(0, 100) } : null,
     });
   });
+
+  // Interaction and IA rules, recipes and the blueprint check (FEAT-008 AGT-01; US-053).
+  if (bp && cat.interaction) {
+    server.registerTool("get_rules", {
+      title: "Get the interaction rules",
+      description: "The interaction and information-architecture rules that apply to a target: how screens fit together and behave (navigation by size, modals, safeguards, states, emphasis). Rules apply by context (app, or an embedded view), size class and input, never by device. Each has an ID the blueprint check and the audit report use, and links to its sources.",
+      inputSchema: {
+        context: z.enum(["app", "view"]).optional().describe("A whole app with its own shell, or a view embedded in a host (an MCP App view)"),
+        sizeClasses: z.array(z.enum(SIZE_CLASSES)).optional().describe("The size classes the app or view supports: compact from 0px, medium 600, expanded 840, large 1200, extra-large 1600"),
+        inputs: z.array(z.enum(["coarse", "fine"])).optional().describe("coarse: touch; fine: mouse, trackpad or pen"),
+      },
+    }, async (target) => ok(bp.rulesFor(target)));
+
+    server.registerTool("list_recipes", {
+      title: "List recipes",
+      description: "Recipes: tested combinations of patterns for common jobs, with the rules they satisfy. Describe the job in words; the best matches come first. Start a blueprint's screens from a recipe.",
+      inputSchema: { job: z.string().optional().describe("e.g. review and approve flagged time entries"), kind: z.enum(["app", "view"]).optional() },
+    }, async ({ job, kind }) => ok(bp.findRecipes(job ?? "", kind).map(({ id, title, job: j, kind: k, screens }) => ({ id, title, job: j, kind: k, patterns: screens.map((x) => x.pattern) }))));
+
+    server.registerTool("get_recipe", {
+      title: "Get a recipe",
+      description: "One recipe: its screens (pattern and role) and the rule IDs it satisfies.",
+      inputSchema: { id: z.string() },
+    }, async ({ id }) => {
+      const r = bp.getRecipe(id);
+      return r ? ok(r) : fail(`No recipe "${id}". Recipes: ${cat.interaction.recipes.map((x) => x.id).join(", ")}`);
+    });
+
+    server.registerTool("get_blueprint_schema", {
+      title: "Get the blueprint schema",
+      description: "The JSON Schema of app.blueprint.json: an app's or view's kind, supported size classes and inputs, destinations and screens (each a catalogue pattern, with its primary action, destructive actions and safeguards, states and modals). Plan here before building.",
+      inputSchema: {},
+    }, async () => ok({ schema: bp.blueprintSchema, skeleton: { app: bp.skeleton("app"), view: bp.skeleton("view") } }));
+
+    server.registerTool("check_blueprint", {
+      title: "Check a blueprint",
+      description: "Check an app's or view's blueprint against the rules. Returns findings, each with its rule ID, severity, JSON Pointer path, message and fix. Fix every error before building; the same check runs as ux-builder-blueprint check in CI.",
+      inputSchema: { blueprint: z.record(z.string(), z.unknown()).describe("The blueprint object (app.blueprint.json)") },
+    }, async ({ blueprint: b }) => {
+      const findings = bp.checkBlueprint(b);
+      return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings });
+    });
+  }
 
   server.registerTool("get_guidance", {
     title: "Get the SDK guidance",

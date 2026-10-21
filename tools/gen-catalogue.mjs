@@ -186,7 +186,15 @@ export const RULES = [
   "Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui and ux-builder/no-inline-svg, then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.",
   "Select themes with ThemeProvider (theme, appearance) or data-theme and data-appearance on <html>; never restyle per theme in app code.",
   "Compose screens from @ux-builder/ui/patterns before writing any layout CSS: AppShell for the frame, with each screen inside a Page, which gives it the page gutter and width (AppShell's content area and the screen patterns have none of their own; ErrorScreen excepted); CollectionList, ListDetail, RecordDetail, FormPage, QuickEdit, Dashboard, ReportViewer, SettingsPage and ErrorScreen for screens; the regions and the layout primitives (Stack, Cluster, Grid, Page, SplitView) for anything else. Supply content, data and actions through their slots; never fork or restyle a pattern.",
+  "Plan before you build: describe the app or view in app.blueprint.json (ux-builder-blueprint init, or the MCP tool get_blueprint_schema), choose its screens from the recipes (list_recipes), and run ux-builder-blueprint check (or check_blueprint) until it reports no errors. Then build, lint and audit. Rules apply by size class, input and context (app or embedded view), never by device.",
 ];
+
+/* ------------------------------------------- interaction rules (FEAT-008) */
+export function interaction() {
+  const rules = json("guidelines/rules.json"), recipes = json("guidelines/recipes.json");
+  const blueprintSchema = json("guidelines/schema/blueprint.schema.json");
+  return { version: rules.version, limits: rules.limits, rules: rules.rules, recipes: recipes.recipes, blueprintSchema };
+}
 
 export function catalogue() {
   const systems = themesAndSystems();
@@ -204,6 +212,7 @@ export function catalogue() {
     icons: icons(),
     iconLibrary: iconLibrary(),
     tokens: tokens(),
+    interaction: interaction(),
   };
 }
 
@@ -277,6 +286,20 @@ function reference(cat) {
     `${code("<Logo />")} in the app's header (${code('variant="mark"')} where space is tight, ${code('size="sm"')} for the compact height). It draws the theme's brand artwork, or the brand's title as a wordmark when the brand has none, and changes with the theme and appearance. Never import or hard-code a logo file. An embedded view draws no logo.`,
     "",
     `The page's favicon follows the theme too: the top-level ${code("ThemeProvider")} sets it (${code("favicon={false}")} turns that off). An app that sets ${code("data-theme")} on ${code("<html>")} without a provider renders ${code("<Favicon />")} once. Keep the app's own ${code('<link rel="icon">')} in index.html: it shows for a theme without a favicon. Never hard-code the brand's favicon.`,
+    "",
+    "### Interaction and screen rules",
+    "",
+    `How screens fit together and behave: navigation by size, modals, safeguards, states and emphasis (FEAT-008). Each rule has an ID that the blueprint check and the audit report use. The loop: **plan** the app in ${code("app.blueprint.json")} (${code("npx ux-builder-blueprint init")}) from the recipes, **check** it (${code("npx ux-builder-blueprint check app.blueprint.json")}, or the MCP tool ${code("check_blueprint")}) until it has no errors, **build** from the patterns it names, then **lint** and **audit**. Rules apply by size class, input (${code("coarse")} touch, ${code("fine")} pointer) and context (${code("app")}, or an embedded ${code("view")}), never by device. Get the rules for a target with ${code("rulesFor()")} from ${code("@ux-builder/ui/blueprint")} or the MCP tool ${code("get_rules")}; the full rules, recipes and blueprint schema are in ${code("catalogue.json")} (${code("interaction")}).`,
+    "",
+    "| Rule | Applies | Checked by | Statement |",
+    "|------|---------|------------|-----------|",
+    ...cat.interaction.rules.map((r) => `| ${code(r.id)} | ${r.when ? Object.entries(r.when).map(([k, v]) => `${k}: ${v.join(", ")}`).join("; ") : "always"} | ${r.checks.map((c) => c.kind === "review" ? "review" : `${c.kind} ${code(c.id)}`).join(", ")} | ${r.statement.replace(/\|/g, "\\|")} |`),
+    "",
+    "Recipes (tested combinations of patterns for a job):",
+    "",
+    ...cat.interaction.recipes.map((r) => `- ${code(r.id)} (${r.kind}): ${r.job} ${r.screens.map((x) => code(`<${x.pattern}>`)).join(", ")}.`),
+    "",
+    "The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.",
     "",
     "### Themes",
     "",

@@ -132,7 +132,13 @@ function NewApp() {
         <li>A page built only from SDK widgets</li>
         <li><code>npm run lint</code> and <code>npm run audit</code>, and a CI workflow that runs both</li>
         <li><code>CLAUDE.md</code> and <code>AGENTS.md</code> pointing at the SDK's guidance</li>
+        <li><code>app.blueprint.json</code>, the plan of the app's screens, and <code>npm run check:blueprint</code>, which CI runs too</li>
       </ul>
+      <H2 id="plan">Plan the screens first</H2>
+      <p>Before building a screen, add it to <code>app.blueprint.json</code>: its pattern, its primary action, what it deletes and how that is safeguarded, its states and its modals. The check holds the plan to the interaction rules (navigation for the space available, one modal at a time, safeguards, states) before any code exists. To start from your own plan:</p>
+      <Command text="npm create @ux-builder/app my-app -- --blueprint plan.json" />
+      <p>A plan with an error is refused, with each error, and nothing is written.</p>
+      <p className="uxm-cite">The rules restate Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in UX Builder's own words, with links to each. UX Builder is not affiliated with or endorsed by Apple or Google. Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.</p>
       <Notice tone="info" title="Node 20 or later, React 19">Without <code>--theme</code>, the app starts on <code>plain</code>.</Notice>
     </>
   );
@@ -151,7 +157,15 @@ function ExistingApp() {
       <H2 id="no-react">Without React</H2>
       <p>Set <code>data-theme</code> (and optionally <code>data-appearance</code>) on <code>&lt;html&gt;</code>, and use the <code>.piq-*</code> class names each component renders.</p>
       <Command code text={'<html data-theme="ux-builder-databricks" data-appearance="light">'} />
-      <Cite ids={["CONTRACT-003", "CONTRACT-004"]} />
+      <H2 id="rules">Adopt the interaction rules</H2>
+      <p>Describe the screens you already have, check the plan, and let the audit fail only on what is new:</p>
+      <Command text="npx ux-builder-blueprint init" />
+      <Command text="npx ux-builder-blueprint check app.blueprint.json" />
+      <Command text="npx ux-builder-audit --write-baseline audit-baseline.json http://localhost:4173/" />
+      <Command text="npx ux-builder-audit --baseline audit-baseline.json http://localhost:4173/" />
+      <p>Commit the blueprint and the baseline. Findings you fix show as resolved, so the baseline only shrinks.</p>
+      <p className="uxm-cite">The rules restate Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in UX Builder's own words, with links to each. UX Builder is not affiliated with or endorsed by Apple or Google. Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.</p>
+      <Cite ids={["CONTRACT-003", "CONTRACT-004", "CONTRACT-005"]} />
     </>
   );
 }
@@ -190,6 +204,9 @@ function Agents() {
         <li><code>node_modules/@ux-builder/ui/AGENTS.md</code>: the rules, set-up, and a reference of every component, prop, token, icon and theme.</li>
         <li>The Claude Code skill <code>ux-builder-ui</code>, which the starter installs.</li>
       </ul>
+      <H2 id="loop">Plan, check, build, lint, audit</H2>
+      <p>Agents get the interaction rules where they plan. Over MCP, <code>list_recipes</code> suggests patterns for a job, <code>get_rules</code> gives the rules for a context, size classes and inputs (never a device), and <code>check_blueprint</code> checks the plan. Each finding has a rule ID, a path and a fix. Then the agent builds each screen from its pattern, and lint and the audit check the result against the same rule IDs.</p>
+      <p className="uxm-cite">The rules restate Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in UX Builder's own words, with links to each. UX Builder is not affiliated with or endorsed by Apple or Google. Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.</p>
       <H2 id="demo">See it work</H2>
       <AiSection />
       <Cite ids={["FEAT-004", "ADR-023"]} />
@@ -200,13 +217,16 @@ function Agents() {
 function Ci() {
   return (
     <>
-      <p className="uxm-lede">Two checks keep an app on its theme: lint reads the source, the audit drives the running app.</p>
+      <p className="uxm-lede">Two checks keep an app on its theme: lint reads the source, the audit drives the running app. A third, the blueprint check, holds the plan of the screens to the interaction rules.</p>
       <ul className="uxm-grid">{GUARDS.map((g) => <li key={g.title} className="uxm-tile"><span className="uxm-tile__icon"><Icon icon={g.icon} /></span><h3>{g.title}</h3><p>{g.text}</p><code className="uxm-tile__code">{g.code}</code></li>)}</ul>
       <H2 id="lint">Lint</H2>
       <Command code text={'// eslint.config.js\nimport uxBuilder from "@ux-builder/ui/eslint";\nexport default [{\n  files: ["src/**/*.{js,jsx}"],\n  plugins: { "ux-builder": uxBuilder },\n  rules: {\n    "ux-builder/no-hard-coded-values": ["error", { theme: "ux-builder-databricks" }],\n    "ux-builder/no-foreign-ui": "error",\n    "ux-builder/no-inline-svg": "error",\n  },\n}];'} />
       <H2 id="audit">The audit</H2>
       <Command text={'npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/'} />
-      <p>It writes <code>audit-report/index.html</code> with screenshots and exits 1 on an error.</p>
+      <p>It writes <code>audit-report/index.html</code> with screenshots and exits 1 on an error. Each interaction finding names its rule and links its sources.</p>
+      <H2 id="blueprint">The blueprint check</H2>
+      <Command text="npx ux-builder-blueprint check app.blueprint.json" />
+      <p>It exits 1 on an error. In an existing app, <code>--baseline</code> lets the audit fail only on new findings.</p>
     </>
   );
 }

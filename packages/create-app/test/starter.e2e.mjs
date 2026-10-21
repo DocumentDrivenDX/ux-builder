@@ -44,6 +44,12 @@ test("npm install puts the SDK's Claude Code skill in place", () => {
   sh("test", ["-f", join(app, ".claude/skills/ux-builder-ui/SKILL.md")], app);
 });
 
+// @covers US-051-AC1
+test("US-051-AC1: the fresh app's blueprint passes ux-builder-blueprint check, as its CI runs it", () => {
+  const out = sh("npm", ["run", "check:blueprint"], app);
+  assert.match(out, /app\.blueprint\.json: no findings/);
+});
+
 // @covers US-012-AC3
 // @covers US-022-AC10
 test("AC3: the fresh app passes the lint rule with zero findings", () => {
