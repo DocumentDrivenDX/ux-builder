@@ -242,6 +242,36 @@ export, licence or card element is missing from the generated data;
 `e2e/builder/microsite-reference.spec.mjs` visits the pages and checks
 their counts against the source.
 
+## Public site: Why, Start, Concepts and home *[Added 2026-10-21]*
+
+The site (`src/home/`, `src/microsite/`, HELIX concern
+`product-microsite-ia`) is brought up to what ui 0.7.0, audit 0.2.0, mcp
+0.4.0 and create-app 0.5.0 ship (FEAT-007 to FEAT-012). Reference and Proof
+are planned separately.
+
+| Section | Page (`?p=`) | Says |
+|---------|--------------|------|
+| Why | `why/problem` | Six ideas (adds plan, check, assess); what it is not: not an AI runtime or model provider, though it ships `@ux-builder/ui/assistant` and `@ux-builder/ui/adaptive-cards` with adapters; not proof of usability |
+| Why | `why/audience` | Adds app owners and UX reviewers (the assessment) |
+| Why | `why/roadmap` | Now: FEAT-001 to FEAT-012 except FEAT-005. Next and Later are generated at build time from `.ddx/beads.jsonl` (`roadmap.js`): Next is open build items outside FEAT-005 and the site; Later is the FEAT-005 epic's open items |
+| Start | `start/new-app` | Adds HELIX: what the starter installs and drafts, the docs-first order of work, `ux-assessment.yml`, `e2e/starter.spec.js`, `--helix-version`, `--helix-offline`, `--no-helix` |
+| Start | `start/assess` (new) | The manifest, `assess init`/`validate`, the `ux-builder-assess` skill's stages, walkthroughs, the normal, error-prone and risky scenarios and never-approve, the report; the theme builder's own `ux-assessment.yml` as the example |
+| Start | `start/microsoft-agents` (new) | Adaptive Cards from Copilot, Teams and Bot Framework agents in the app's theme; the high-impact marker; `checkCard` and MCP `check_card`, run live on a draft card; what is not supported |
+| Start | `start/agents`, `start/ci` | The MCP tools for blueprints, cards and the assessment; the audit's AI checks and `ai-neutral-voice` |
+| Concepts | `concepts/generative-ui` | Three routes: the SDK's own assistant (live Conversation), bridges for AI Elements and assistant-ui, embedded views |
+| Concepts | `concepts/ai-agent-experience` (new) | AI roles per screen, rule families (counted from the catalogue), the `data-piq-ai` markers, approvals, hybrid chat; live Conversation, ApprovalCard, inline Wizard and AdaptiveCard |
+| Concepts | `concepts/flows-journeys` (new) | Tree to graph, the flow and journey checks (live on a sample), propose into HELIX as patches, draw and wireframes |
+| Home | — | Hero counts from the catalogue; the AI section shows the SDK's assistant with an Adaptive Card (AI Elements behind a switch); a fourth guard (the AI checks); a Plan, check, build, assess strip linking the pages above; the footer names Apple, Google and Microsoft as not affiliated |
+
+The live demos (`microsite/demos.jsx`) import the SDK's components from
+source, with the stories' sample data. The flow SVG and two wireframes come
+from `microsite/diagrams/review.blueprint.json` by the blueprint's own `draw`
+and `wireframes` code (`tools/gen-site-diagrams.mjs`), checked in; the test
+`tools/__tests__/built/site-diagrams.test.mjs` regenerates them and fails if
+they differ. Every page that cites a guideline carries one affiliation
+paragraph naming Apple, Google (including PAIR) and Microsoft. The builder's
+e2e `e2e/builder/microsite.spec.mjs` visits the new pages and runs the demos.
+
 ## Security
 
 - The API listens on `127.0.0.1` only.
