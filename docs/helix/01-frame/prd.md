@@ -57,6 +57,9 @@ kind: product
 > with ADR-028 and FEAT-011 (AI and agent experience rules, at the operator's
 > request): the "AI and agent experience" subsystem, FR-46 to FR-50, P1-9 and
 > its sketch added; FR-51 and FR-52 (Adaptive Cards, ADR-029) the same day.
+> Evolved 2026-10-21 with ADR-030 and FEAT-012 (screen flows and user journeys
+> in the blueprint): FR-53 to FR-56 under Interaction and information
+> architecture, and P2-3.
 
 ## Summary
 
@@ -231,6 +234,10 @@ rules, so it invents colours and components.
 1. An MCP server exposing tokens, widgets and brands to agents.
 2. A neutral, public package home on the npm registry, with client brands in
    their own packages.
+3. Screen flows and user journeys in the blueprint, checked, and used to
+   draft HELIX content and draw flows and wireframes (operator, 2026-10-21;
+   FR-53 to FR-56, FEAT-012). The flow and journey fields and their checks
+   come first; drafting and drawing follow.
 
 ## Functional Requirements
 
@@ -370,6 +377,24 @@ rules, so it invents colours and components.
 - **FR-36** — Every rule cites its source, and no rule reproduces a source
   whose licence does not allow it; a release is blocked otherwise.
   *(Added 2026-10-20.)*
+- **FR-53** — A blueprint can describe the screen flow: each screen's actions
+  and where each leads (another screen, a modal, back, a state, or out of
+  the app). It is checked for unreachable screens, dead ends and actions
+  that lead nowhere (ADR-030). *(Added 2026-10-21.)*
+- **FR-54** — A blueprint can describe user journeys, each tied to a HELIX
+  story and its acceptance criteria, as steps through screens, actions and
+  states with alternates. It is checked against the flow and against the
+  safeguard and approval rules. *(Added 2026-10-21.)*
+- **FR-55** — The UX assessment's manifest references blueprint journeys
+  instead of restating them, so a journey is defined once.
+  *(Added 2026-10-21.)*
+- **FR-56** — From a blueprint, the SDK drafts HELIX content as proposals a
+  person accepts, never applied silently: story walkthroughs, a solution
+  design's flow diagram, architecture's data flow, the design system's
+  navigation table and story test plan scenarios. It also draws an IA map,
+  screen flows and wireframes from the SDK's real patterns. HELIX documents
+  stay the authority, and a disagreement is reported, not overwritten.
+  *(Added 2026-10-21.)*
 
 ### Subsystem: AI and agent experience
 
