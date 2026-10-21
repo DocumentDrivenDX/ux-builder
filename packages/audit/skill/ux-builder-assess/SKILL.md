@@ -49,35 +49,41 @@ assessment.
 3. **Baseline.** `npx ux-builder-audit assess baseline --run <R-id>` runs the
    declared tests and the audit before any change. Read `baseline.json`; keep
    its failures visible in everything after.
-4. **Plan.** For each journey and each state class (success, empty, loading,
-   recoverable-error, system-failure, ai, responsive-keyboard), decide whether
-   it applies, from the story and the manifest's `states`/`notApplicable`.
-5. **Walk and inspect.** `npx ux-builder-audit assess browser` prints a CDP
-   endpoint; connect your browser driver to it (Playwright MCP:
+4. **Plan.** `npx ux-builder-audit assess plan --run <R-id> --agent <you> --model <id>`
+   writes `plan.json` (each journey's goal, criteria, expected outcomes and the
+   E2E tests to reuse) and a `coverage.json` with every journey × state pair:
+   not-assessed or not-applicable until you record it.
+5. **Walk and inspect.** `npx ux-builder-audit assess browser --manifest ux-assessment.yml`
+   prints a CDP endpoint, and refuses every host outside `run.origins`; connect your browser driver to it (Playwright MCP:
    `--cdp-endpoint <url>`). Walk the journey from its entry route. At each
    significant step, inspect the state you reached without reloading it:
 
        npx ux-builder-audit assess inspect --cdp <url> --page <url-part> \
          --checkpoint C-<journey>-<n> --journey J-<id> --step <n> --role <id> \
-         --state <class> --run <R-id>
+         --state <class> --run <R-id> --manifest ux-assessment.yml
 
-   Look at the screenshot and accessibility tree yourself; do not judge visual
+   Run `assess reset --fixture <id>` before each scenario. Record every step in
+   `walkthrough.json` (action, URL, checkpoint, observation with its basis;
+   your judgment apart). Look at the screenshot and accessibility tree yourself; do not judge visual
    quality from DOM text. Induce failures only with the manifest's fixtures or
    mocks. If your driver cannot share its browser, use `--replay <steps.json>`;
    a replay that does not reach the expected state is not evidence.
-6. **Findings, coverage, proposals.** Write `coverage.json` (every journey ×
-   state with status, reason, outcome and evidence), `backlog.json` (one
-   finding per user problem, deduplicated, ranked P0–P3 with confidence and
-   effort apart; components named from the app's installed
-   `@ux-builder/ui/catalogue.json`), and `proposals/` (a patch per change to a
-   HELIX artifact, by `ddx.id` and type, or a new instance named and numbered
-   by its catalogue type and drafted from its template).
-7. **Check the package.** `npx ux-builder-audit assess validate-report <out>/<run>`
-   before handing it over. Fix what it reports.
-
-In this version, stages 1, 2, 3 and the inspection in 5 are commands; you
-write the records of stage 6. A stage a command does not support yet is
-recorded as `not-available`, never skipped silently.
+6. **Findings and coverage.** Update `coverage.json` for every pair you walked
+   (status, reason, outcome, evidence). Write `backlog.json`: one finding per
+   user problem (give it a `key`), ranked P0–P3 with confidence and effort
+   apart, components named from the app's installed `@ux-builder/ui`
+   catalogue, heuristics as "Proposed criterion: …", and `user_validation` for
+   claims only people can confirm. Then `assess merge --run <R-id>` gives each
+   a stable ID and merges duplicates.
+7. **Proposals.** For each finding worth a HELIX change:
+   `assess propose --run <R-id> --finding <F-id> --target <US-…>` (or
+   `--new user-stories --title …`) `--kind unmet-criterion|new-requirement|scope
+   --criterion "Given …" --test "…"`. It writes a patch in `proposals/`; nothing is applied.
+   `assess check-writes --run <R-id>` must report no change.
+8. **Report and check.** `assess report <out>/<run>`, then
+   `assess validate-report <out>/<run>`; fix what it reports. To compare with
+   an earlier run: `assess compare <earlier> <later>`. In CI:
+   `assess gate <run> --fail-on P1` (see `examples/ux-assessment.workflow.yml`).
 
 ## Ranking (FND-04)
 

@@ -20,6 +20,9 @@ Increments 2 and 3 get their own slices when they are planned.
 **Status (2026-10-20)**: B-001 to B-006 built, each committed after the full
 local suite passed. Increment 1's criteria (US-056, US-057, US-058, US-059,
 US-062) are cited by tests and out of `tools/coverage-exceptions.json`.
+B-007 to B-012 built 2026-10-21: every FEAT-009 criterion is cited by a test.
+The legal review ADR-025 asks for is prepared as `docs/legal/counsel-brief-interaction-rules.md`;
+counsel's answer is still to come.
 
 ## Scope
 

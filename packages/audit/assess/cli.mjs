@@ -55,8 +55,17 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
 
   propose --run R-id --finding F-id (--target <HELIX ID> | --new <type> [--title t])
           --kind new-requirement|unmet-criterion|scope --criterion "Given…" --test "…" [--test-file f]
-  check-writes --run R-id · apply-check P-n --run R-id
-  report <run-dir> · compare <earlier-run-dir> <later-run-dir> · gate <run-dir> [--fail-on P1]
+      Write a patch in proposals/ for one finding; nothing is applied.
+  check-writes --run R-id
+      List files under the HELIX root or the app that changed during the run.
+  apply-check P-n --run R-id
+      Check a proposal's target is unchanged since the proposal was written.
+  report <run-dir> [--self-contained]
+      Write report.html, report.md and evidence.json; --self-contained embeds the screenshots.
+  compare <earlier-run-dir> <later-run-dir>
+      Classify findings: new, persistent, resolved, regressed, not rechecked.
+  gate <run-dir> [--fail-on P0|P1|P2|P3]
+      For CI: exit 1 on an open finding at that priority or above, or a blocked stage.
 
 The ux-builder-assess skill (node_modules/@ux-builder/audit/skill/) says how
 an agent runs these as one assessment.`;
@@ -96,10 +105,10 @@ const SUB = {
     return r.ok ? 0 : 1;
   },
   async report(args) {
-    const [dir] = args;
+    const { values: o, positionals: [dir] } = parseArgs({ args, allowPositionals: true, options: { "self-contained": { type: "boolean" } } });
     if (!dir) { console.error(USAGE); return 2; }
     const { report } = await import("./report.mjs");
-    const r = report(dir);
+    const r = report(dir, { selfContained: !!o["self-contained"] });
     console.log(`Wrote ${dir}/report.html, report.md and evidence.json (${r.files} evidence files)`);
     return 0;
   },

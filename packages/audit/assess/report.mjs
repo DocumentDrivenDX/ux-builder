@@ -118,8 +118,10 @@ function markdown(dir, r) {
   return L.join("\n");
 }
 
-const md2html = (md, dir) => {
-  const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, (m, c) => (/\.png$/.test(c) && existsSync(join(dir, c)) ? `<a href="${c}"><img src="${c}" alt="${c}" loading="lazy"></a>` : `<code>${c}</code>`));
+const md2html = (md, dir, selfContained) => {
+  // Screenshots are shown, not just named; self-contained, they are embedded so the file stands alone.
+  const src = (c) => (selfContained ? `data:image/png;base64,${readFileSync(join(dir, c)).toString("base64")}` : c);
+  const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, (m, c) => (/\.png$/.test(c) && existsSync(join(dir, c)) ? `<a href="${selfContained ? "#" : c}"><img src="${src(c)}" alt="${c}" loading="lazy"></a>` : `<code>${c}</code>`));
   const out = []; let list = false, table = false;
   for (const line of md.split("\n")) {
     const close = () => { if (list) { out.push("</ul>"); list = false; } if (table) { out.push("</table>"); table = false; } };
@@ -133,7 +135,7 @@ const md2html = (md, dir) => {
   return out.join("\n");
 };
 
-export function report(dir) {
+export function report(dir, { selfContained = false } = {}) {
   const r = load(dir);
   const md = markdown(dir, r);
   writeFileSync(join(dir, "report.md"), md + "\n");
@@ -141,7 +143,7 @@ export function report(dir) {
 <style>:root{color-scheme:light dark;--fg:#1d1c1a;--bg:#f7f6f2;--line:#dcd9d0;--muted:#66625a}@media (prefers-color-scheme:dark){:root{--fg:#ecebe7;--bg:#171716;--line:#34332f;--muted:#a29f97}}
 body{margin:0;padding:32px 16px 64px;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:980px;margin:0 auto}h1{font-size:1.6rem;text-wrap:balance}h2{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:1rem}h3{margin-bottom:.3rem}p,li{max-width:75ch}
 code{font:13px ui-monospace,Menlo,monospace;overflow-wrap:anywhere}table{border-collapse:collapse;display:block;overflow-x:auto}td{border:1px solid var(--line);padding:4px 8px;font-size:13px;white-space:nowrap}img{max-width:min(100%,520px);border:1px solid var(--line);border-radius:6px;display:block;margin:6px 0}</style></head><body><main>
-${md2html(md, dir)}
+${md2html(md, dir, selfContained)}
 </main></body></html>\n`);
   const index = evidenceIndex(dir, r);
   writeFileSync(join(dir, "evidence.json"), JSON.stringify(index, null, 2) + "\n");

@@ -115,4 +115,13 @@ describe("US-057: one complete assessment from a coding agent", () => {
     assert.equal((await cli(r.dir, ["collect", "--run", run])).code, 0);
     assert.equal(read(r, run, "run.json").versions.ui, "9.8.7");
   });
+
+  test("the CI workflow example only runs subcommands that exist", async () => {
+    const { parse } = await import("yaml");
+    const wf = parse(readFileSync(join(PKG, "examples/ux-assessment.workflow.yml"), "utf8"));
+    const runs = wf.jobs.assess.steps.map((s) => s.run).filter((r) => r?.includes("ux-builder-audit assess"));
+    assert.ok(runs.length >= 6);
+    const help = await cli(PKG, ["--help"]);
+    for (const r of runs) { const sub = /assess (\S+)/.exec(r)[1]; assert.match(help.stderr, new RegExp(`^\\s+${sub}\\b`, "m"), sub); }
+  });
 });

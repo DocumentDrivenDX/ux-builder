@@ -9,3 +9,5 @@ _site/
 
 # UX assessment runs (FEAT-009); evidence stays local unless shared on purpose.
 ux-assessment/
+# Playwright MCP snapshots from local runs.
+.playwright-mcp/

@@ -41,6 +41,8 @@ describe("US-065: compare assessments and hand work to an agent", () => {
     assert.match(md, /1 of 14 journey × state pairs assessed/);
     const html = readFileSync(join(p.dir, "report.html"), "utf8");
     assert.match(html, /<img src="checkpoints\/C-review-1\/screenshot\.png"/, "the evidence is shown, not just named");
+    assert.equal(p.cli("report", p.dir, "--self-contained").status, 0);
+    assert.match(readFileSync(join(p.dir, "report.html"), "utf8"), /<img src="data:image\/png;base64,/, "self-contained: embedded");
     const ev = p.read("evidence.json").files;
     assert.deepEqual(ev.find((x) => x.path === "checkpoints/C-review-1/screenshot.png").referencedBy.sort(), [f.id, "coverage J-review × success"].sort());
     assert.equal(p.cli("validate-report", p.dir).status, 0);
