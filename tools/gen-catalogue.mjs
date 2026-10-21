@@ -157,6 +157,13 @@ function assistant() {
   return [...main.sort((a, b) => a.name.localeCompare(b.name)), ...adapters];
 }
 
+/* Adaptive Cards (@ux-builder/ui/adaptive-cards, ADR-029): each export with its import line. */
+function adaptiveCards() {
+  return exportedFrom("packages/ui/src/adaptive-cards/index.js", "@ux-builder/ui/adaptive-cards")
+    .map((e) => ({ ...e, import: `import { ${e.name} } from "@ux-builder/ui/adaptive-cards";` }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 /* Which components an agent may render, with their props schemas
    (FEAT-007 GEN-01, ADR-023 rule 5): renderable.json marks catalogue entries,
    and must name only components the catalogue has. */
@@ -234,6 +241,7 @@ export function catalogue() {
     widgets: w,
     patterns: p,
     assistant: a,
+    adaptiveCards: adaptiveCards(),
     icons: icons(),
     iconLibrary: iconLibrary(),
     tokens: tokens(),
@@ -321,6 +329,10 @@ function reference(cat) {
     ...cat.assistant.filter((w) => w.type === "component" || w.type === "hook").map((w) => `| ${code(w.type === "hook" ? `${w.name}()` : `<${w.name}>`)} | ${code(sig(w) || "—")} | ${w.purpose.replace(/\|/g, "\\|")} |`),
     "",
     `A tool result renders UI as ${code("{ component, props }")}, with props as JSON. Only these components may be rendered, and only with props that pass their schema (${code("propsSchema")} in ${code("catalogue.json")}, or the MCP tool ${code("list_renderable")}); anything else shows a plain notice: ${[...cat.widgets, ...cat.patterns, ...cat.assistant].filter((x) => x.renderable).map((x) => code(x.name)).sort().join(", ")}.`,
+    "",
+    "### Adaptive Cards",
+    "",
+    `An agent built for Microsoft hosts may answer with an Adaptive Card (open-source schema 1.6) instead of a component. Render it with ${code("<AdaptiveCard card onAction />")} from ${code("@ux-builder/ui/adaptive-cards")}: each element becomes an SDK widget in the app's theme, a ColumnSet stacks at compact, and an element outside 1.6 shows its fallback or a plain notice; nothing is inserted as HTML. In a ${code("<Conversation>")}, a tool result ${code('{ type: "adaptive-card", card }')} (or the card itself) is an ${code('"adaptive-card"')} part, and ${code("onCardAction")} receives its actions. ${code("onAction")} gets ${code("{ type, id, verb, data, inputs }")} for Action.Submit and Action.Execute. Mark an action that pays, sends, deletes or publishes with ${code('"data": { "ux-builder": { "highImpact": true, "consequence": "Pay £120.00 to Acme Ltd" } }')}: the user approves it before ${code("onAction")}, and the marker is removed from ${code("data")}. Check every card before the agent sends it with ${code("checkCard(card)")} (also ${code("@ux-builder/ui/adaptive-cards/check")} for Node, or the MCP tool ${code("check_card")}), and fix what it reports: ${cat.interaction.rules.filter((r) => r.checks.some((c) => c.kind === "card")).map((r) => code(r.id)).join(", ")}.`,
     "",
     "### Interaction and screen rules",
     "",

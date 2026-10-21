@@ -17,6 +17,9 @@ const STATUS = (s) => {
 /* A tool call's approval, if it has one: current only while assistant-ui
    still waits for an answer. approved, isAutomatic or the tool's result are
    never read as a decision; they only end the request. */
+/* A tool result that is an Adaptive Card (ADR-029): { type: "adaptive-card", card }, or the card itself. */
+const cardOf = (o) => (o && typeof o === "object" ? (o.type === "adaptive-card" && o.card && typeof o.card === "object" ? o.card : o.type === "AdaptiveCard" ? o : null) : null);
+
 function approvalOf(p, describe) {
   const a = p.approval;
   if (!a?.id) return null;
@@ -40,6 +43,8 @@ function partsOf(message, describe) {
       if (approval) out.push(approval);
       if (!p.isError && p.result && typeof p.result === "object" && typeof p.result.component === "string") {
         out.push({ type: "component", id: p.toolCallId, component: p.result.component, props: p.result.props });
+      } else if (!p.isError && cardOf(p.result)) {
+        out.push({ type: "adaptive-card", id: p.toolCallId, card: cardOf(p.result) });
       }
     } else if (p.type === "source") {
       if (!sources) { sources = { type: "sources", sources: [] }; out.push(sources); }

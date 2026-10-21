@@ -11,7 +11,8 @@
    list_widgets, get_widget, list_patterns, get_pattern, list_renderable, list_variants,
    list_tokens, get_token, list_icons, get_guidance; and, from @ux-builder/ui
    0.7, the interaction rules and blueprint (FEAT-008): get_rules,
-   list_recipes, get_recipe, get_blueprint_schema, check_blueprint. Resources:
+   list_recipes, get_recipe, get_blueprint_schema, check_blueprint; and
+   check_card (Adaptive Cards, ADR-029). Resources:
    ux-builder://catalogue, ux-builder://guidance. */
 
 import { readFileSync } from "node:fs";
@@ -32,6 +33,9 @@ try { blueprint = await import(pathToFileURL(require.resolve("@ux-builder/ui/blu
 // Its HELIX story reader, beside it (FEAT-012 JRN-03): journeys are checked against the stories above the server's directory.
 let storyReader = null;
 try { storyReader = await import(new URL("./helix.mjs", pathToFileURL(require.resolve("@ux-builder/ui/blueprint"))).href); } catch { /* before FEAT-012 */ }
+// The Adaptive Cards check (ADR-029), from the same copy (the minor that ships it, and later).
+let cards = null;
+try { cards = await import(pathToFileURL(require.resolve("@ux-builder/ui/adaptive-cards/check")).href); } catch { /* an older @ux-builder/ui */ }
 // The UX assessment's checks, when the app has @ux-builder/audit 0.2 or later (FEAT-009, optional wrappers).
 let assess = null;
 try {
@@ -56,7 +60,7 @@ const near = (name, names) => names.filter((n) => n.includes(name) || name.inclu
 
 const SIZE_CLASSES = ["compact", "medium", "expanded", "large", "extra-large"];
 
-export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyReader) {
+export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyReader, cc = cards) {
   const { catalogue: cat, manifest, resolved } = s;
   const server = new McpServer({ name: "ux-builder", version: cat.packages["@ux-builder/ui"] }, {
     instructions: `The AI-UI SDK (@ux-builder/ui ${cat.packages["@ux-builder/ui"]}, @ux-builder/tokens ${cat.packages["@ux-builder/tokens"]}). Before writing UI in an app that uses it, read get_guidance. Rules: ${cat.rules.join(" ")}`,
@@ -235,6 +239,18 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       const findings = bp.checkBlueprint(b, { helix });
       const notes = storied && !helix ? [hx.skippedNote(process.cwd())] : [];
       return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings, ...(notes.length ? { notes } : {}) });
+    });
+  }
+
+  // Adaptive Cards (ADR-029, FEAT-011 AIC-03): a card payload checked before an agent sends it.
+  if (cc) {
+    server.registerTool("check_card", {
+      title: "Check an Adaptive Card",
+      description: "Check an Adaptive Card payload (open-source schema 1.6) before an agent sends it: the vendored 1.6 schema, then the card.* rules (few actions, wrapping text, labelled inputs with error messages, a heading, few columns, alt text, clear action titles, no hidden validated inputs, a supported version, high-impact actions marked). Returns findings, each with its rule ID, severity, JSON Pointer path into the card, message and fix; the same as checkCard from @ux-builder/ui/adaptive-cards.",
+      inputSchema: { card: z.record(z.string(), z.unknown()).describe("The card payload (type AdaptiveCard)") },
+    }, async ({ card }) => {
+      const findings = cc.checkCard(card);
+      return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings });
     });
   }
 

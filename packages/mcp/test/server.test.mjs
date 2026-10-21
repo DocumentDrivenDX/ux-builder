@@ -14,6 +14,8 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createServer } from "../server.mjs";
+import { checkCard } from "@ux-builder/ui/adaptive-cards/check";
+import { CLEAN, PAY_INVOICE } from "../../ui/src/adaptive-cards/story-data.js";
 
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const cat = JSON.parse(readFileSync(`${ROOT}packages/ui/catalogue.json`, "utf8"));
@@ -33,7 +35,7 @@ before(async () => {
 describe("US-014-AC5: agents list the SDK over MCP", () => {
   test("the tools and resources are listed, with instructions carrying the rules", async () => {
     const { tools } = await client.listTools();
-    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_renderable", "list_themes", "list_tokens", "list_variants", "list_widgets", "validate_assessment_manifest", "validate_assessment_report"]);
+    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "check_card", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_renderable", "list_themes", "list_tokens", "list_variants", "list_widgets", "validate_assessment_manifest", "validate_assessment_report"]);
     const { resources } = await client.listResources();
     assert.deepEqual(resources.map((r) => r.uri).sort(), ["ux-builder://catalogue", "ux-builder://guidance"]);
     assert.match(client.getInstructions(), /Never hard-code colours, font families or radii/);
@@ -103,7 +105,7 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
     await c.connect(new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL("../server.mjs", import.meta.url))] }));
     try {
       const { tools } = await c.listTools();
-      assert.equal(tools.length, 22);
+      assert.equal(tools.length, 23);
     } finally { await c.close(); }
   });
 });
@@ -262,5 +264,24 @@ describe("FEAT-009: the UX assessment's checks over MCP", () => {
       const bad = (await call("validate_assessment_report", { dir: run })).data;
       assert.equal(bad.valid, false);
     } finally { rmSync(run, { recursive: true, force: true }); }
+  });
+});
+
+describe("US-084: check_card checks an Adaptive Card over MCP", () => {
+  // @covers US-084-AC6
+  test("check_card returns the same findings as checkCard", async () => {
+    const draft = {
+      type: "AdaptiveCard", version: "1.6",
+      body: [{ type: "TextBlock", text: "Order" }, { type: "Input.Text", id: "q", placeholder: "Quantity" }, { type: "ColumnSet", columns: [1, 2, 3, 4].map(() => ({ type: "Column", items: [] })) }],
+      actions: Array.from({ length: 7 }, (_, i) => ({ type: "Action.Submit", title: "Option " + (i + 1) })),
+    };
+    for (const card of [draft, CLEAN, PAY_INVOICE, { type: "NotACard" }]) {
+      const res = (await call("check_card", { card })).data;
+      assert.deepEqual(res.findings, checkCard(card));
+      assert.equal(res.warnings, checkCard(card).filter((f) => f.severity === "warning").length);
+    }
+    const rules = (await call("check_card", { card: draft })).data.findings.map((f) => f.rule);
+    for (const r of ["card.actions-few", "card.input-label", "card.columns-few"]) assert.ok(rules.includes(r), r);
+    assert.deepEqual((await call("check_card", { card: CLEAN })).data.findings, []);
   });
 });

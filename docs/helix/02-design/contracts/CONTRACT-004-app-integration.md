@@ -545,6 +545,17 @@ The renderer shows an approval with `consequence`, Approve and Deny
 
 `@ux-builder/mcp` adds `check_card` (`card`) → findings.
 
+### Build notes *[Amended 2026-10-21 — build, US-083 to US-085]*
+
+| Surface | As built |
+|---|---|
+| `@ux-builder/ui/adaptive-cards/check` | A second export: `checkCard`, `cardSchema`, `CHECKS` (the rule IDs `checkCard` reports) and `SUPPORTED_VERSION`, with no React, so Node tools (the MCP server, `tools/check-rules.mjs`) load it without a DOM. `@ux-builder/ui/adaptive-cards` exports the same functions with `AdaptiveCard`. The schema is vendored verbatim at `adaptive-cards/schema-1.6/adaptive-card.json` (MIT, recorded in `licenses/vendored.json`) |
+| `checkCard` findings | Schema problems are `severity: "error"` under `card.version` (the card is not a valid 1.6 card); every rule finding is a warning. No rule runs on an element the schema rejects, or inside it. An element outside 1.6 is a `card.version` warning only when it has no `fallback`; its fallback is checked in its place. Ordered by path, then rule |
+| `AdaptiveCard` props | Also `decision` and `onDecide({ action, decision })`, so an app records the user's choice on a high-impact action (`action` is the action's `id`, else its `verb`, else its title); `headingLevel` (default 3); `disclosure` (visible AI disclosure text, tied with `aria-describedby`). Only the user's choice in the card, or a `decision` the app passes back, decides; no field of the card is read for it |
+| Conversation (*Assistant and generative UI*) | A message part `{ type: "adaptive-card", id?, card }` renders `AdaptiveCard`, done without changing `GenerativeComponent` or the renderable catalogue. `Conversation` gains `onCardAction({ messageId, partId, action })` and `onCardDecide({ messageId, partId, action, decision })`, and keeps each card's decision by message and part. The AI SDK and assistant-ui adapters map a tool output `{ type: "adaptive-card", card }`, or an object with `type: "AdaptiveCard"`, to that part |
+| Actions | Up to four primary actions show as buttons; the rest, and `mode: "secondary"`, are in a "More actions" `MenuButton`. A high-impact action's inputs are taken when it is activated; the card's inputs are disabled while the approval is pending and after it. `Action.OpenUrl` links stay usable after a decision (they act on nothing) |
+| Text | Bold, italic, links (http, https, mailto) and bulleted and numbered lists are formatted; `DATE()` and `TIME()` are formatted for the user's locale; everything else, HTML included, shows as text. TextBlocks always wrap. Text `color` values are drawn in the strong or muted text colour, never a hue that could fail contrast; tones show on container styles |
+
 ## Flows and journeys *[Amended 2026-10-21 — planned, FEAT-012, ADR-030]*
 
 | Surface | Addition |

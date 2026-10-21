@@ -15,6 +15,9 @@ const TOOL_STATUS = {
 /* A tool part's approval, if it has one. Only approval-requested waits for
    the user: every other state makes the request not current. Its approved
    field, isAutomatic or the tool's output are never read as a decision. */
+/* A tool output that is an Adaptive Card (ADR-029): { type: "adaptive-card", card }, or the card itself. */
+const cardOf = (o) => (o && typeof o === "object" ? (o.type === "adaptive-card" && o.card && typeof o.card === "object" ? o.card : o.type === "AdaptiveCard" ? o : null) : null);
+
 function approvalOf(p, describe) {
   if (!p.approval?.id) return null;
   return {
@@ -40,6 +43,8 @@ function partsOf(message, describe) {
       if (approval) out.push(approval);
       if (p.state === "output-available" && p.output && typeof p.output === "object" && typeof p.output.component === "string") {
         out.push({ type: "component", id: p.toolCallId, component: p.output.component, props: p.output.props });
+      } else if (p.state === "output-available" && cardOf(p.output)) {
+        out.push({ type: "adaptive-card", id: p.toolCallId, card: cardOf(p.output) });
       }
     } else if (p.type === "source-url" || p.type === "source-document") {
       if (!sources) { sources = { type: "sources", sources: [] }; out.push(sources); }
