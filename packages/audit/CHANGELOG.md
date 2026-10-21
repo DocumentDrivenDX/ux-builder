@@ -1,5 +1,59 @@
 # @ux-builder/audit
 
+## 0.2.0
+
+### Minor Changes
+
+- 5dd7190: `ux-builder-audit assess` walks AI journeys in three scenarios and journeys from the app's blueprint (FEAT-011 step 6, US-082; FEAT-012 step 3, US-088):
+  
+  - A manifest journey with `ai: true` declares `scenarios.normal`, `scenarios.errorProne` and `scenarios.risky` (each `{ description, inputs?, step? }`; `risky.step` is the high-impact step). `assess validate` reports each one missing.
+  - `assess plan` gives an AI journey its rubric, `ai.heuristics`: the AI rules of the installed `@ux-builder/ui` catalogue for the journey's roles (its blueprint screens' `ai.roles`, else every AI role), `review` heuristics included. It also writes the journey's three scenario `walkthroughs`. `validate-report` requires each finding of an AI journey to name one of these rules (`rule`, a new optional finding field).
+  - `assess inspect --scenario risky`: a replay stops at the approval (`data-piq-ai="approval"`), records it (and `approval.png`), chooses Deny and takes nothing more. If no approval appears before the high-impact step (`--high-impact-step`, a step marked `highImpact: true`, or the journey's `risky.step`), it stops before that step and records a P1 `agent.approve-high-impact`. A replay step that would activate an approve control (`data-piq-ai-control="approve"`) is always refused (`blocked: restricted`).
+  - `assess inspect --scenario errorProne` records whether the error is shown in place and whether the user can recover without restarting (`agent.recover`, `ai.improve-request`).
+  - A manifest journey can be `{ blueprint: J-…, role, priority }`. Its story, criteria, entry screen and steps come from `app.blueprint.json`, or from the new optional manifest field `blueprint` (a path). A journey that gives `blueprint` together with its own `story`, `criteria` or `entry` is refused, as is a blueprint journey ID that the blueprint does not have. `assess plan` turns each alternate into a walkthrough of a journey-and-state pair.
+  - The ux-builder-assess skill describes the scenarios and the rule never to approve.
+- f02139a: AI checks (FEAT-011, US-078 to US-080), warnings for this minor release: `ai-disclose`, `ai-correct`, `ai-stop`, `ai-starters`, `ai-declared`, `agent-approval`, `agent-plan`, `agent-interrupt`, `agent-who-acts`, `agent-recover`, `agent-summary`, `genui-review-prefill`, `card-input-label` and `card-narrow-first`. They run only on elements with CONTRACT-005's AI markup (`data-piq-ai` and its companions), so an app without it gets no AI finding; each finding names its rule (`ai.disclose`, `agent.recover`, …) and its sources. New option `--blueprint <file>`: AI markup on a screen whose blueprint declares no AI role is reported; name the screen with `data-piq-screen="<screen id>"` on the page's root.
+- 7c493b0: Interaction and IA rules, a blueprint check, and audit checks for them (FEAT-008).
+  
+  - `@ux-builder/ui`: 29 interaction and IA rules (navigation by size class, modals, safeguards on destructive actions, states, emphasis, embedded views), each in the SDK's own words with links to Apple's HIG, Material 3, WCAG 2.2 and the WAI-ARIA APG, plus 8 recipes. They are in `catalogue.json` (`interaction`) and `AGENTS.md`. The new entry point `@ux-builder/ui/blueprint` exports `rulesFor`, `checkBlueprint`, `blueprintSchema`, `findRecipes` and `skeleton`. The new command `ux-builder-blueprint` has `init` and `check`, which checks an `app.blueprint.json` against the rules.
+  - `@ux-builder/audit`: five new checks, warnings for this minor release: `one-modal`, `modal-contract`, `one-primary-action`, `nav-per-breakpoint` (with `--width`) and `line-length`. Their findings carry `ruleId` and `sources`. `--write-baseline` and `--baseline` let an existing app fail only on new findings; findings that are fixed are listed as resolved.
+  - `@ux-builder/mcp`: five new tools, `get_rules`, `list_recipes`, `get_recipe`, `get_blueprint_schema` and `check_blueprint`. The guidance states the plan, check, build, lint and audit loop.
+  - `@ux-builder/create-app`: a new app gets `app.blueprint.json`, a `check:blueprint` script and a CI step for it. `--blueprint <file>` starts from your own plan, and a plan with an error is refused.
+  
+  ux-builder is not affiliated with or endorsed by Apple or Google.
+- a329b1f: A HELIX-aware UX assessment (FEAT-009).
+  
+  - `@ux-builder/audit`: `inspect(page)` runs the audit's checks on a page as it is, without reloading or resetting it, and `audit()` is now built on it with unchanged findings. New `ux-builder-audit assess` subcommands: `init` and `validate` (a `ux-assessment.yml` manifest that binds the app's HELIX marker, flow and catalogue), `collect` (every HELIX document, story and criterion, traced to the tests that cite them), `baseline` (the app's tests and the audit, recorded before any change), `browser` and `inspect` (inspect the page an agent's browser is on, over CDP, or a verified replay), and `validate-report`. Ships the `ux-builder-assess` skill and the JSON Schemas. New dependencies: `yaml`, `ajv`.
+  - `@ux-builder/mcp`: run from an app's directory, the server reads that app's installed `@ux-builder/ui` catalogue and guidance first, so it describes the version the app has.
+  - `@ux-builder/audit`, increments 2 and 3: `assess plan` (journey plans and a coverage matrix with every pair), `browser --manifest` and `inspect --manifest` (allowed origins only, redaction), `reset`, `merge` (stable finding IDs), `propose`, `check-writes` and `apply-check` (patches aimed at HELIX artifacts, never applied), `report`, `compare` and `gate`; a CI workflow example; tested with Playwright MCP as the agent's driver.
+  - `@ux-builder/mcp`: when the app has `@ux-builder/audit`, the tools `get_assessment_skill`, `validate_assessment_manifest` and `validate_assessment_report`.
+
+### Patch Changes
+
+- 72051df: `ux-builder-audit assess` now does what CONTRACT-006 says it does (AR-2026-10-21 C1 to C6):
+  
+  - `propose` also writes `proposals/improvement-backlog.patch`. This patch proposes the backlog as an entry in the app's HELIX `improvement-backlog`: new rows in an existing instance, or a new instance drafted from the catalogue type's template. `apply-check improvement-backlog` checks the patch's target.
+  - `browser --manifest` and `inspect` refuse `restrictions.excludeIntegrations`. A replay takes none of its steps if any step declares a denied action, declares an action that `restrictions.allow` does not list, or leaves the origins. Each refused step is recorded `blocked: restricted`.
+  - `limits.runMinutes`, `limits.steps` and `limits.journeyMinutes` are enforced. `inspect` refuses a step past a limit (`blocked: limit`) and records the `walkthrough` stage `partial`. `browser --run` stops when the run's time is spent.
+  - When no browser answers at `--cdp`, `inspect` records the `walkthrough` stage `blocked`. When a role's `auth.env` is not set, `plan` blocks that journey's pairs as an authentication barrier and exits 1.
+  - `inspect` writes what `evidence.capture` names (screenshot, tree or both).
+  - `compare` lists the earlier baseline's failures in `comparison.json`, and the report shows them.
+  - `schema/evidence.schema.json` is new, and `validate-report` checks `evidence.json` against it.
+  - The skill tells the agent about the excluded integrations, the denied actions and the limits.
+- 062d20f: Ship `examples/` in the package: the README and the `ux-builder-assess` skill point to `examples/ux-assessment.workflow.yml`, which was left out of the published files.
+- 524c781: A new app starts on the latest HELIX (FEAT-010).
+  
+  - `@ux-builder/create-app`: creating an app fetches the latest HELIX release's plugin package from GitHub, verifies it (GitHub's SHA-256 digest, its version, its contents; a strict tar reader that refuses links and paths outside it), and installs HELIX's skill and catalogue as the app's project skill in `.claude/skills/helix/`, with `HELIX-VERSION.json`. It writes `.helix.yml` and drafts the app's HELIX documents from that release's own templates: product vision, PRD, concerns, FEAT-001 and US-001 for the starter screen, `DESIGN.md`, the test plan and STP-001, with the starter's facts filled in and the owner's decisions left as placeholders. The app also gets `ux-assessment.yml`, a Playwright test citing US-001's criteria (`npm run test:e2e`) and guidance that puts HELIX first. Offline, the HELIX bundled at publish is used, with the reason; `--helix-version <tag>` pins a release, `--helix-offline` makes no request, `--no-helix` leaves HELIX out.
+  - `@ux-builder/audit`: the assessment also finds HELIX installed as a project skill (`.claude/skills/helix/references`).
+- Updated dependencies [56cb554]
+- Updated dependencies [b5f8a50]
+- Updated dependencies [47b71f8]
+- Updated dependencies [525f771]
+- Updated dependencies [7c493b0]
+- Updated dependencies [1777df9]
+- Updated dependencies [b51a231]
+  - @ux-builder/ui@0.7.0
+
 ## 0.1.2
 
 ### Patch Changes
