@@ -8,6 +8,8 @@ ddx:
       to: prd
     - kind: informed_by
       to: FEAT-001
+    - kind: informed_by
+      to: US-049
 ---
 
 # Feature Specification: FEAT-005 — Public distribution
@@ -39,13 +41,16 @@ still carries a gallery of every theme it contains.
 
 ## Problem Statement
 
-- **Current situation**: The repository is `DocumentDrivenDX/ux-builder`;
+- **Current situation** (2026-10-21): The repository is `DocumentDrivenDX/ux-builder`;
   `@ux-builder/tokens`, `@ux-builder/ui`, `@ux-builder/create-app`,
   `@ux-builder/audit` and `@ux-builder/mcp` are published to the npm registry
   with `"access": "public"` (`@ux-builder/engine` and the theme builder are
   private); the brands in this repository (Praxis, Plain, Synaptiq,
   Databricks) are built into the token package; versions and changelogs come
-  from Changesets.
+  from Changesets, and `.github/workflows/release.yml` publishes them with
+  Trusted Publishing after every gate. No release carries a gallery, no package
+  ships the SDK's own licence texts, a brand can be built only inside this
+  repository, and nothing stops a client brand entering the core.
 - **Pain points**: A client brand added to the token package would be
   published to everyone; consumers need a scope that does not change after
   adoption.
@@ -59,6 +64,14 @@ still carries a gallery of every theme it contains.
 | Releases | "What changed, and what does it look like?" | Versioned public releases with changelogs and a gallery |
 | Brand separation | "Can client A see client B's brand?" | Client brands released separately from the core |
 | Neutral home | "Whose SDK is this?" | Neutral scope and public repository, with a migration |
+
+### Terms
+
+- **Client brand**: a brand made for a client under an engagement, or one
+  carrying a client's logo or licensed font (operator decision, 2026-10-21).
+  The brands in this repository are first-party: `ux-builder`, `plain`,
+  `synaptiq`, `praxis`, `praxis-v2`, and `databricks`, which comes from
+  Databricks' public AppKit UI and carries no logo or font.
 
 ## Requirements
 
@@ -81,10 +94,12 @@ brand installs no other client's.
 
 DIST-04. The core lives in a neutral package scope and public repository
 (FR-24): `@ux-builder/*` and `github.com/DocumentDrivenDX/ux-builder`.
-DIST-05. Existing consumers migrate with a documented, mechanical change
-(package names, imports, and removing any private scope registry and token
-from their npm config), and the old packages point to the new ones for one
-major version.
+DIST-05. Existing consumers migrate with a documented, mechanical change:
+removing the private `@ux-builder` scope registry line and its token from
+their npm config. The packages kept their names, so no package name or import
+changes and there is no old package to point to the new one. *[Amended
+2026-10-21: the "old packages point to the new ones" clause was dropped by
+operator decision.]*
 
 ### Non-Functional Requirements
 
@@ -92,15 +107,20 @@ major version.
 - **Security**: The core packages contain no client brand, logo or licensed
   font; a client brand package is published wherever its owner chooses and is
   visible only to whom that owner allows.
-- **Licensing**: Every core package is licensed MIT OR Apache-2.0 and ships its
-  third-party notices (FR-31).
+- **Licensing**: Every core package is licensed MIT OR Apache-2.0, ships those
+  licence texts and its third-party notices (US-072-AC4), and its third-party
+  licences are checked before release (FR-31, US-049, owned by FEAT-007).
 - **Scalability**: ≥ 20 client brands without changes to the core.
 - **Reliability**: A core release runs the contrast gate against every theme
   it contains before publishing.
 
 ## User Stories
 
-Not yet written. Tracked as a bead (`phase:4`, `feat:FEAT-005`).
+- [US-072 — Publish a release with its changelog, gallery and licences](../user-stories/US-072-publish-a-release-with-its-changelog-and-gallery.md) (DIST-01)
+- [US-073 — Release a client brand outside the core](../user-stories/US-073-release-a-client-brand-outside-the-core.md) (DIST-02)
+- [US-074 — The core ships no client brand](../user-stories/US-074-the-core-ships-no-client-brand.md) (DIST-03)
+- [US-075 — Move an app off the private registry](../user-stories/US-075-move-an-app-off-the-private-registry.md) (DIST-04, DIST-05)
+- Related: [US-049 — Third-party licences are checked before release](../user-stories/US-049-third-party-licences-are-checked-before-release.md) (FEAT-007; the licensing NFR)
 
 ## Edge Cases and Error Handling
 
