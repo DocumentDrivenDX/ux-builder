@@ -76,3 +76,11 @@ CDP. `a11y-wcag-aa` is unchanged: the assessment reports that a clean audit
 is not proof of full accessibility compliance (FEAT-009 non-functional
 requirements). The manifest is YAML, parsed with `yaml` (ISC), which the
 licence check covers.
+
+## FEAT-010 (2026-10-21)
+
+No concern or slot change for ux-builder. Apps the starter creates record
+their own concerns from HELIX's library: `react-vite` and `e2e-playwright`
+as chosen slot fillers (`concerns.local.yml`), `packaged-design-system`,
+`a11y-wcag-aa` and `ux-interaction-patterns` active, and the language
+runtime as an assumption, since HELIX has no Node concern.
