@@ -1028,3 +1028,116 @@
 .piq-assistant-panel__title { margin: 0; color: var(--piq-color-text-strong); font-family: var(--piq-font-heading); font-size: var(--piq-font-size-heading); }
 .piq-assistant-panel__body { display: flex; flex: 1 1 auto; flex-direction: column; min-block-size: 0; }
 .piq-assistant-panel__sheet .piq-sheet__body { display: flex; flex-direction: column; }
+
+/* --------------------------------------------- adaptive cards (ADR-029) */
+
+/* An Adaptive Card is a Card in the theme: the card sets content and the
+   semantic styles schema 1.6 allows (spacing, separators, size, weight,
+   container and action styles); every value below is a role token. Text
+   always wraps, so nothing is cut off or scrolls sideways. */
+.piq-adaptive-card { min-inline-size: 0; font-family: var(--piq-font-body); overflow-wrap: anywhere; }
+.piq-adaptive-card__body { min-inline-size: 0; }
+.piq-adaptive-card__el { min-inline-size: 0; margin-block-start: var(--piq-space-2); }
+.piq-adaptive-card__el:first-child { margin-block-start: 0; }
+.piq-adaptive-card__el[data-spacing="none"] { margin-block-start: 0; }
+.piq-adaptive-card__el[data-spacing="small"] { margin-block-start: var(--piq-space-1); }
+.piq-adaptive-card__el[data-spacing="medium"] { margin-block-start: var(--piq-space-3); }
+.piq-adaptive-card__el[data-spacing="large"] { margin-block-start: var(--piq-space-4); }
+.piq-adaptive-card__el[data-spacing="extralarge"] { margin-block-start: var(--piq-space-6); }
+.piq-adaptive-card__el[data-spacing="padding"] { margin-block-start: var(--piq-space-4); }
+.piq-adaptive-card__el[data-separator] { padding-block-start: var(--piq-space-2); border-block-start: var(--piq-border-default); }
+.piq-adaptive-card__el[data-align="center"] { text-align: center; }
+.piq-adaptive-card__el[data-align="right"] { text-align: end; }
+.piq-adaptive-card__el[data-align="center"] > .piq-cluster { justify-content: center; }
+.piq-adaptive-card__el[data-align="right"] > .piq-cluster { justify-content: flex-end; }
+
+.piq-adaptive-card__heading,
+.piq-adaptive-card__text,
+.piq-adaptive-card__p,
+.piq-adaptive-card__list { margin: 0; color: var(--piq-color-text); font-size: var(--piq-font-size-body); line-height: var(--piq-line-height-body); }
+.piq-adaptive-card__heading { color: var(--piq-color-text-strong); font-family: var(--piq-font-heading); font-size: var(--piq-font-size-heading); font-weight: var(--piq-font-weight-strong); line-height: var(--piq-line-height-tight); }
+.piq-adaptive-card__list { padding-inline-start: var(--piq-space-5); }
+.piq-adaptive-card [data-size="small"] { font-size: var(--piq-font-size-small); }
+.piq-adaptive-card [data-size="medium"] { font-size: var(--piq-font-size-lead); }
+.piq-adaptive-card [data-size="large"] { font-size: var(--piq-font-size-heading); line-height: var(--piq-line-height-tight); }
+.piq-adaptive-card [data-size="extralarge"] { font-family: var(--piq-font-heading); font-size: var(--piq-font-size-title); line-height: var(--piq-line-height-tight); }
+.piq-adaptive-card [data-weight="bolder"] { font-weight: var(--piq-font-weight-strong); }
+.piq-adaptive-card [data-weight="lighter"] { font-weight: var(--piq-font-weight-regular); }
+.piq-adaptive-card [data-font="monospace"] { font-family: var(--piq-font-mono); }
+.piq-adaptive-card [data-italic] { font-style: italic; }
+/* Text colours stay readable in every theme: a tone is carried by text strength, never by a hue that could fail contrast. */
+.piq-adaptive-card [data-color="dark"],
+.piq-adaptive-card [data-color="accent"],
+.piq-adaptive-card [data-color="good"],
+.piq-adaptive-card [data-color="warning"],
+.piq-adaptive-card [data-color="attention"] { color: var(--piq-color-text-strong); }
+.piq-adaptive-card [data-color="light"],
+.piq-adaptive-card [data-subtle] { color: var(--piq-color-text-muted); }
+.piq-adaptive-card__text[data-lines] { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: var(--_ac-lines); }
+.piq-adaptive-card__mark { background: var(--piq-color-surface-sunken); color: var(--piq-color-text-strong); }
+.piq-adaptive-card__disclosure { display: flex; align-items: center; gap: var(--piq-space-2); margin: 0; color: var(--piq-color-text-muted); font-size: var(--piq-font-size-small); }
+
+.piq-adaptive-card__image { display: block; max-inline-size: 100%; block-size: auto; }
+.piq-adaptive-card__image[data-size="small"] { inline-size: var(--piq-space-7); }
+.piq-adaptive-card__image[data-size="medium"] { inline-size: calc(var(--piq-space-8) * 1.5); }
+.piq-adaptive-card__image[data-size="large"] { inline-size: calc(var(--piq-space-8) * 3); }
+.piq-adaptive-card__image[data-size="stretch"] { inline-size: 100%; }
+.piq-adaptive-card__image[data-style="person"] { border-radius: 50%; }
+.piq-adaptive-card__el[data-align="center"] > .piq-adaptive-card__image { margin-inline: auto; }
+.piq-adaptive-card__el[data-align="right"] > .piq-adaptive-card__image { margin-inline-start: auto; }
+.piq-adaptive-card__icon { inline-size: var(--piq-space-4); block-size: var(--piq-space-4); }
+.piq-adaptive-card__media { display: block; inline-size: 100%; max-inline-size: 100%; max-block-size: calc(var(--piq-space-8) * 6); border-radius: var(--piq-radius-control); background: var(--piq-color-surface-sunken); }
+
+/* Container styles are the theme's surface and status tokens, as a Notice draws them. */
+.piq-adaptive-card__el[data-ac-style],
+.piq-adaptive-card__column[data-ac-style] { --_tone: var(--piq-color-structure); padding: var(--piq-space-3); border-radius: var(--piq-radius-control); }
+.piq-adaptive-card__el[data-ac-style="emphasis"],
+.piq-adaptive-card__column[data-ac-style="emphasis"] { background: var(--piq-color-surface-sunken); }
+.piq-adaptive-card__el[data-ac-style="default"],
+.piq-adaptive-card__column[data-ac-style="default"] { padding: 0; }
+.piq-adaptive-card__el:is([data-ac-style="good"], [data-ac-style="attention"], [data-ac-style="warning"], [data-ac-style="accent"]),
+.piq-adaptive-card__column:is([data-ac-style="good"], [data-ac-style="attention"], [data-ac-style="warning"], [data-ac-style="accent"]) {
+  border-inline-start: var(--piq-notice-stripe-width, var(--piq-space-1)) solid var(--_tone);
+  background: color-mix(in srgb, var(--_tone) var(--piq-notice-tone-mix, 0%), var(--piq-notice-bg, var(--piq-color-surface)));
+}
+.piq-adaptive-card [data-ac-style="good"] { --_tone: var(--piq-state-live); }
+.piq-adaptive-card [data-ac-style="warning"] { --_tone: var(--piq-state-limited); }
+.piq-adaptive-card [data-ac-style="attention"] { --_tone: var(--piq-state-closed); }
+.piq-adaptive-card [data-ac-style="accent"] { --_tone: var(--piq-color-accent); }
+.piq-adaptive-card__container[data-valign="center"],
+.piq-adaptive-card__column > .piq-stack[data-valign="center"] { justify-content: center; block-size: 100%; }
+.piq-adaptive-card__container[data-valign="bottom"],
+.piq-adaptive-card__column > .piq-stack[data-valign="bottom"] { justify-content: flex-end; block-size: 100%; }
+
+/* A ColumnSet is a Grid: one column at compact, the card's own widths from medium. */
+.piq-adaptive-card__column { min-inline-size: 0; }
+@container (min-width: 600px) {
+  .piq-adaptive-card__columns > .piq-grid__items { grid-template-columns: var(--_ac-cols); }
+}
+
+.piq-adaptive-card__facts { min-inline-size: 0; }
+.piq-adaptive-card__table { min-inline-size: 0; max-inline-size: 100%; overflow-x: auto; }
+
+.piq-adaptive-card__inline { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--piq-space-2); }
+.piq-adaptive-card__inline > .piq-field { flex: 1 1 auto; min-inline-size: 0; }
+.piq-adaptive-card__toggle { display: grid; gap: var(--piq-space-1); }
+.piq-adaptive-card__choices { display: grid; gap: var(--piq-space-1); min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+
+.piq-adaptive-card__action-set { display: grid; gap: var(--piq-space-3); min-inline-size: 0; margin-block-start: var(--piq-space-3); }
+.piq-adaptive-card__el > .piq-adaptive-card__action-set { margin-block-start: 0; }
+.piq-adaptive-card__link { text-decoration: none; }
+/* The destructive emphasis: the status tone for loss, on the secondary button's own anatomy. */
+.piq-adaptive-card__actions .piq-btn[data-style="destructive"] { border-color: var(--piq-state-closed); box-shadow: inset var(--piq-space-1) 0 0 var(--piq-state-closed); }
+.piq-adaptive-card__show { display: grid; gap: var(--piq-space-2); padding-inline-start: var(--piq-space-3); border-inline-start: var(--piq-border-default); }
+.piq-adaptive-card__select { margin-block-start: var(--piq-space-2); }
+.piq-adaptive-card__select-button,
+.piq-adaptive-card__inline-action { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: inherit; cursor: pointer; }
+.piq-adaptive-card__inline-action { text-decoration: underline; }
+.piq-adaptive-card__select-button:focus-visible,
+.piq-adaptive-card__inline-action:focus-visible,
+.piq-adaptive-card__select-link:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-focus-offset); }
+.piq-adaptive-card__select-link .piq-markdown__leaves { display: none; }
+.piq-adaptive-card__notice,
+.piq-adaptive-card__status { margin: 0; color: var(--piq-color-text-muted); font-size: var(--piq-font-size-small); }
+.piq-adaptive-card__status { color: var(--piq-color-text-strong); }
+.piq-adaptive-card .piq-btn[data-stale] { cursor: not-allowed; }

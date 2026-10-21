@@ -5669,6 +5669,14 @@
           "default": null
         },
         {
+          "name": "onCardAction",
+          "default": null
+        },
+        {
+          "name": "onCardDecide",
+          "default": null
+        },
+        {
           "name": "renderArtifact",
           "default": null
         },
@@ -6063,6 +6071,79 @@
       ],
       "source": "src/assistant/adapters/assistant-ui.js",
       "import": "import { useAssistantUiConversation } from \"@ux-builder/ui/assistant/assistant-ui\";"
+    }
+  ],
+  "adaptiveCards": [
+    {
+      "name": "AdaptiveCard",
+      "type": "component",
+      "purpose": "6 and earlier) drawn with the SDK's components in the nearest theme. Execute; a high-impact action only after the user approves.",
+      "props": [
+        {
+          "name": "card",
+          "default": null
+        },
+        {
+          "name": "onAction",
+          "default": null
+        },
+        {
+          "name": "decision",
+          "default": null
+        },
+        {
+          "name": "onDecide",
+          "default": null
+        },
+        {
+          "name": "headingLevel",
+          "default": "3"
+        },
+        {
+          "name": "disclosure",
+          "default": null
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/adaptive-cards/AdaptiveCard.jsx",
+      "import": "import { AdaptiveCard } from \"@ux-builder/ui/adaptive-cards\";"
+    },
+    {
+      "name": "cardSchema",
+      "type": "constant",
+      "purpose": "6 JSON Schema (draft-06), as data.",
+      "source": "src/adaptive-cards/../../adaptive-cards/check.mjs",
+      "import": "import { cardSchema } from \"@ux-builder/ui/adaptive-cards\";"
+    },
+    {
+      "name": "checkCard",
+      "type": "function",
+      "purpose": "6 schema, then every card rule with an automatic check. Ordered by path, then rule.",
+      "props": [
+        {
+          "name": "card",
+          "default": null
+        }
+      ],
+      "source": "src/adaptive-cards/../../adaptive-cards/check.mjs",
+      "import": "import { checkCard } from \"@ux-builder/ui/adaptive-cards\";"
+    },
+    {
+      "name": "CHECKS",
+      "type": "constant",
+      "purpose": "The checks this module runs, by the rule ID each reports.",
+      "source": "src/adaptive-cards/../../adaptive-cards/check.mjs",
+      "import": "import { CHECKS } from \"@ux-builder/ui/adaptive-cards\";"
+    },
+    {
+      "name": "SUPPORTED_VERSION",
+      "type": "constant",
+      "purpose": "The highest schema version the renderer and the check support.",
+      "source": "src/adaptive-cards/../../adaptive-cards/check.mjs",
+      "import": "import { SUPPORTED_VERSION } from \"@ux-builder/ui/adaptive-cards\";"
     }
   ],
   "icons": [
@@ -22404,6 +22485,10 @@
         },
         "checks": [
           {
+            "kind": "card",
+            "id": "card.actions-few"
+          },
+          {
             "kind": "review",
             "id": "card.actions-few"
           }
@@ -22437,7 +22522,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.wrap"
           }
         ],
@@ -22472,6 +22557,10 @@
           {
             "kind": "audit",
             "id": "card-input-label"
+          },
+          {
+            "kind": "card",
+            "id": "card.input-label"
           }
         ],
         "severity": "warning",
@@ -22497,7 +22586,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.input-error"
           }
         ],
@@ -22524,7 +22613,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.heading"
           }
         ],
@@ -22557,7 +22646,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.columns-few"
           }
         ],
@@ -22642,7 +22731,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.image-alt"
           }
         ],
@@ -22702,7 +22791,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.action-titles"
           }
         ],
@@ -22729,7 +22818,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.no-hidden-inputs"
           }
         ],
@@ -22756,7 +22845,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.version"
           }
         ],
@@ -22816,7 +22905,7 @@
         },
         "checks": [
           {
-            "kind": "review",
+            "kind": "card",
             "id": "card.high-impact-marked"
           }
         ],

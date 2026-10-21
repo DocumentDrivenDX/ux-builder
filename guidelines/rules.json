@@ -1985,6 +1985,10 @@
       },
       "checks": [
         {
+          "kind": "card",
+          "id": "card.actions-few"
+        },
+        {
           "kind": "review",
           "id": "card.actions-few"
         }
@@ -2018,7 +2022,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.wrap"
         }
       ],
@@ -2053,6 +2057,10 @@
         {
           "kind": "audit",
           "id": "card-input-label"
+        },
+        {
+          "kind": "card",
+          "id": "card.input-label"
         }
       ],
       "severity": "warning",
@@ -2078,7 +2086,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.input-error"
         }
       ],
@@ -2105,7 +2113,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.heading"
         }
       ],
@@ -2138,7 +2146,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.columns-few"
         }
       ],
@@ -2223,7 +2231,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.image-alt"
         }
       ],
@@ -2283,7 +2291,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.action-titles"
         }
       ],
@@ -2310,7 +2318,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.no-hidden-inputs"
         }
       ],
@@ -2337,7 +2345,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.version"
         }
       ],
@@ -2397,7 +2405,7 @@
       },
       "checks": [
         {
-          "kind": "review",
+          "kind": "card",
           "id": "card.high-impact-marked"
         }
       ],

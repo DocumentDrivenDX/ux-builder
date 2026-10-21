@@ -11,6 +11,7 @@ package as installed; the licence texts of vendored source are in this package's
 | @fluentui/svg-icons glyphs (https://github.com/microsoft/fluentui-system-icons) | 1.1.343 | MIT | licenses/fluent.LICENSE | src/icons/glyphs.generated.js, src/icons/library.generated.js |
 | @carbon/icons glyphs (https://github.com/carbon-design-system/carbon) | 11.89.0 | Apache-2.0 | licenses/carbon.LICENSE | src/icons/glyphs.generated.js, src/icons/library.generated.js |
 | lucide-static glyphs (https://github.com/lucide-icons/lucide) | 1.52.0 | ISC | licenses/lucide.LICENSE | src/icons/glyphs.generated.js, src/icons/library.generated.js |
+| Adaptive Cards JSON Schema 1.6 (https://raw.githubusercontent.com/microsoft/AdaptiveCards/main/schemas/1.6.0/adaptive-card.json (microsoft/AdaptiveCards)) | 1.6.0, fetched 2026-10-21 (sha256 a2f263fe380066f144f01ea6226797d6f47589c27d06e2d52abd09b453c5ad2c) | MIT | licenses/adaptivecards.LICENSE | adaptive-cards/schema-1.6/adaptive-card.json |
 
 ## Dependencies
 

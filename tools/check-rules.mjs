@@ -16,8 +16,8 @@
       agent pages never stand as a rule's only source (FEAT-011 AIP-03).
    4. Every check a rule names exists: blueprint checks in
       @ux-builder/ui/blueprint, audit checks in @ux-builder/audit, lint rules
-      in the catalogue, card checks in @ux-builder/ui/adaptive-cards (none
-      yet, so a rule cannot name one until checkCard ships).
+      in the catalogue, card checks in @ux-builder/ui/adaptive-cards (CHECKS
+      of its check module, the one checkCard runs).
    5. Every pattern a rule or recipe names is a catalogue pattern, and every
       rule a recipe names exists.
 
@@ -38,12 +38,13 @@ export const MAX_QUOTE_WORDS = 25;
 export async function known() {
   const { CHECKS } = await import("../packages/ui/blueprint/index.mjs");
   const { RULES } = await import("../packages/audit/audit.mjs");
+  const { CHECKS: CARD_CHECKS } = await import("../packages/ui/adaptive-cards/check.mjs");
   const cat = read("packages/ui/catalogue.json");
   return {
     blueprint: new Set(CHECKS),
     audit: new Set(Object.keys(RULES)),
     lint: new Set(cat.lint.rules),
-    card: new Set(),
+    card: new Set(CARD_CHECKS),
     patterns: new Set(cat.patterns.filter((p) => p.type === "component").map((p) => p.name)),
   };
 }

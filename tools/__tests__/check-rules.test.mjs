@@ -76,10 +76,10 @@ describe("US-076-AC4: the AI sources' licences (FEAT-011 AIP-01, AIP-03)", () =>
     const r = s.rules.rules.find((x) => x.id === "ai.user-initiates");
     r.sources = [mslOnly];
     const c = s.rules.rules.find((x) => x.id === "card.wrap");
-    c.checks = [{ kind: "card", id: "card.wrap" }];
+    c.checks = [{ kind: "card", id: "card.wraps" }];
     const problems = checkRules(s, k);
     assert.ok(problems.includes("rule ai.user-initiates: cites only Microsoft Learn's preview agent pages; add a primary source"), problems.join("\n"));
-    assert.ok(problems.includes('rule card.wrap: names the card check "card.wrap", which does not exist'), problems.join("\n"));
+    assert.ok(problems.includes('rule card.wrap: names the card check "card.wraps", which does not exist'), problems.join("\n"));
     assert.equal(problems.length, 2, problems.join("\n"));
   });
 });
