@@ -301,7 +301,7 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `view.states` | context: view | blueprint `view.states` | Every screen of an embedded view, whatever its pattern, declares its empty, loading and error states. |
 | `view.theme-from-host` | context: view | review | Take the theme only from the host's styles and appearance, and follow the host when it changes them. |
 | `ai.disclose` | aiRole: generative, assistant, agent | review | Content made by AI is labelled as AI-made where it appears, or sits in a region whose label says so. |
-| `ai.not-a-person` | aiRole: generative, assistant, agent | review | The UI never presents the AI as a person: no first-person thinking or feeling, and no human name or face that implies a human author. |
+| `ai.not-a-person` | aiRole: generative, assistant, agent | lint `ux-builder/ai-neutral-voice`, review | The UI never presents the AI as a person: no first-person thinking or feeling, and no human name or face that implies a human author. |
 | `ai.capabilities` | aiRole: generative, assistant, agent | review | At first use, the screen says what the AI can and cannot do, and that its results may need checking. |
 | `ai.starters` | aiRole: assistant, agent | review | An open-ended prompt offers suggested starting points, and they are never the only way to start. |
 | `ai.fallback` | aiRole: generative | blueprint `ai.fallback` | Where AI adds to a task rather than being the task, the task can still be done without it. |
@@ -331,7 +331,7 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `genui.keep-input` | aiRole: assistant | review | Regenerating an answer never silently discards what the user typed into its inline UI. |
 | `genui.history` | aiRole: assistant | review | A submitted inline component stays readable in the conversation, shows what was submitted, and can no longer be changed. |
 | `ai.declared` | always | review | A screen that shows AI content declares its AI role in the blueprint. |
-| `ai.user-initiates` | aiRole: generative, assistant, agent | review | Labels keep the user as the one who starts an action ("Summarize", "Summarize with Assistant"), not the AI ("Assistant, summarize"). |
+| `ai.user-initiates` | aiRole: generative, assistant, agent | lint `ux-builder/ai-neutral-voice` | Labels keep the user as the one who starts an action ("Summarize", "Summarize with Assistant"), not the AI ("Assistant, summarize"). |
 | `card.actions-few` | aiRole: assistant, agent | review | A card offers few primary actions, usually one to three and never more than six. |
 | `card.wrap` | aiRole: assistant, agent | review | Text blocks and choice labels in a card wrap, so text is never cut off on a narrow screen. |
 | `card.input-label` | aiRole: assistant, agent | review | Every input in a card has a label of its own; a placeholder is never the only label. |

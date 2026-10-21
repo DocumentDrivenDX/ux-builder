@@ -20333,6 +20333,10 @@
         },
         "checks": [
           {
+            "kind": "lint",
+            "id": "ux-builder/ai-neutral-voice"
+          },
+          {
             "kind": "review",
             "id": "ai.not-a-person"
           }
@@ -21364,8 +21368,8 @@
         },
         "checks": [
           {
-            "kind": "review",
-            "id": "ai.user-initiates"
+            "kind": "lint",
+            "id": "ux-builder/ai-neutral-voice"
           }
         ],
         "severity": "warning",
