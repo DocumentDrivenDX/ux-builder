@@ -67,6 +67,8 @@ YAML at the app's root. Unknown keys are errors. JSON Schema:
 | `journeys[].entry` | path or URL | yes | Within `origins` |
 | `journeys[].states` | state class[] | no | Default: every class; others `not applicable` need a reason |
 | `journeys[].tests` | `{ file, title? }[]` | no | Explicit test mappings in addition to `@covers` |
+| `journeys[].ai` | boolean | no | *[Amended 2026-10-21 — planned, FEAT-011]* `true`: an AI journey; `scenarios` is then required |
+| `journeys[].scenarios` | object | if `ai` | *[Amended 2026-10-21 — planned]* `{ normal, errorProne, risky }`, each `{ description, inputs?, step? }`. `risky.step` names the high-impact step; the walkthrough stops there, chooses Deny, and never approves (ADR-028 decision 8) |
 | `tests[]` | `{ id, command, report?: { format: junit \| playwright-json \| node-tap, path } }` | no | Functional test commands |
 | `audit` | `{ urls?, widths?, themes?, appearances?, off? }` | no | As CONTRACT-004's options |
 | `evidence.out` | path | no | Default `ux-assessment/` |

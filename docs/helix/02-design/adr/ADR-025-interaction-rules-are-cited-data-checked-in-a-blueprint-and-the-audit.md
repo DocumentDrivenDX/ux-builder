@@ -129,6 +129,14 @@ review stays open: no rule quotes a source today, and a paraphrase counsel
 flags is rewritten in the next patch release, with the change in its
 changelog.
 
+*[Extended 2026-10-21 — ADR-028, FEAT-011]*: The waiver also covers the AI
+and agent experience rules, which paraphrase the following sources: the
+Microsoft Design article, Microsoft Learn's agent design guidance, the HAX
+Toolkit, Google PAIR (CC BY-NC-SA 4.0), Apple's generative AI guidance and
+Cheng et al. (IUI '26, CC BY-NC-ND 4.0), and the Adaptive Cards hub and
+Copilot Studio's card accessibility tips (ADR-029). The counsel brief lists them.
+Counsel's answer is tracked as DDx bead `ux-builder-78483e2c` until resolved.
+
 ## Concern Impact
 
 No concern slot changes. `e2e-framework` (Playwright) already covers the

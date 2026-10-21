@@ -362,6 +362,80 @@ script runs on `prepack`, and also as `npm run bundle-helix`. It writes
 `helix/`, and it sets the HELIX version in `licenses/vendored.json`. It is
 not part of the published interface.
 
+## AI and agent experience *[Amended 2026-10-21 — planned, FEAT-011, ADR-028]*
+
+Normative from the minors that ship FEAT-011. The formats are CONTRACT-005
+*AI and agent experience* and CONTRACT-006 (`journeys[].ai`, `scenarios`).
+
+| Surface | Addition |
+|---|---|
+| `@ux-builder/ui/blueprint` | `rulesFor({ aiRoles? })`; `checkBlueprint` applies the AI blueprint checks and inline patterns' rules at `ai.region` |
+| `@ux-builder/ui` components | FEAT-007's assistant and generative components emit CONTRACT-005's AI markers |
+| `@ux-builder/ui/eslint` | Rule `ux-builder/ai-neutral-voice` (warning); a `// ux-builder-ai-persona` comment on the line before a string opts it out |
+| `catalogue.json` | `interaction.rules` includes the AI rules; `interaction.aiRoles` lists the roles |
+| `AGENTS.md`, skill | An "AI and agent screens" section: declare each screen's AI role, the rule IDs by role, the markers |
+| `@ux-builder/mcp` | `get_rules` accepts `aiRoles` |
+| `ux-builder-audit` | Checks `ai-disclose`, `ai-stop`, `ai-correct`, `ai-starters`, `ai-declared`, `agent-approval`, `agent-plan`, `agent-interrupt`, `agent-who-acts`, `agent-recover`, `agent-summary`, `genui-review-prefill`, on AI-marked elements only; each finding carries its SD-005 rule ID; warnings |
+| `ux-builder-audit assess` | AI journeys and their three scenarios (CONTRACT-006) |
+
+## Adaptive Cards *[Amended 2026-10-21 — planned, ADR-029, FEAT-011, FEAT-007]*
+
+Normative from the `@ux-builder/ui` minor that ships ADR-029. It covers the
+open-source schema, version 1.6 and earlier.
+
+### Entry point `@ux-builder/ui/adaptive-cards`
+
+| Export | Signature | Behaviour |
+|---|---|---|
+| `AdaptiveCard` | `<AdaptiveCard card={object} onAction={(action) => void} />` | Renders the card with SDK components, in the nearest theme; marks it `data-piq-ai="generated"` |
+| `checkCard` | `(card: object) => Finding[]` | The vendored schema, then every `card.*` rule; CONTRACT-005 *Finding* shape, `path` a JSON Pointer into the card |
+| `cardSchema` | object | The vendored Adaptive Cards 1.6 JSON Schema (MIT) |
+
+`onAction` receives `{ type: "Action.Submit" | "Action.Execute", id?, verb?, data, inputs }`,
+where `inputs` maps each input `id` to its value. It is never called for
+an action marked high-impact until the user approves.
+
+### Element mapping
+
+| Card element | SDK component |
+|---|---|
+| `AdaptiveCard` | `Card` |
+| `TextBlock` (`style: heading` → a heading); `RichTextBlock`, `TextRun` | Text in the theme's type scale; a sanitised markdown subset, never HTML |
+| `Image`, `ImageSet` | `img` with `altText`; `Cluster` |
+| `Media` | Native `video` or `audio` with its captions |
+| `Container` (`style`: `emphasis`, `good`, `attention`, `warning`, `accent`) | `Stack` on the matching surface or status tokens |
+| `ColumnSet`, `Column` (`auto`, `stretch`, weight, px) | `Grid`, collapsing to one column at compact |
+| `FactSet` | `DescriptionList` |
+| `Table` | `DataTable` (static) |
+| `ActionSet`, card `actions` | `Button`s in a `Cluster`; beyond the visible limit, a `MenuButton` |
+| `Action.Submit`, `Action.Execute` | `Button`, calling `onAction`; `style: positive` is the primary emphasis, `destructive` is the destructive emphasis with FEAT-008's safeguard |
+| `Action.OpenUrl` | A link marked as leaving the app |
+| `Action.ShowCard`, `Action.ToggleVisibility` | Disclosures |
+| `Input.Text` (`isMultiline`) | `TextField` (`TextArea`) |
+| `Input.Number`, `Input.Time` | `TextField` (`type` number, time) |
+| `Input.Date` | `DatePicker` |
+| `Input.Toggle` | `Checkbox` |
+| `Input.ChoiceSet` (`compact`; `expanded`; `filtered`; `isMultiSelect`) | `Select`; `RadioGroup` or checkboxes; `Combobox`; checkboxes |
+| `label`, `isRequired`, `errorMessage` | The field's label, required state and error text |
+| Anything else (`Refresh`, `Authentication`, host-specific or later elements) | The element's `fallback`, else dropped with a plain notice |
+
+### High-impact actions
+
+A card author marks an action in its `data`:
+
+```json
+{ "type": "Action.Execute", "title": "Pay invoice", "verb": "pay",
+  "data": { "ux-builder": { "highImpact": true, "consequence": "Pay £120.00 to Acme Ltd" } } }
+```
+
+The renderer shows an approval with `consequence`, Approve and Deny
+(FEAT-007 AGT-T-04), and calls `onAction` only after Approve. The
+`ux-builder` key is removed from `data` before `onAction`.
+
+### MCP
+
+`@ux-builder/mcp` adds `check_card` (`card`) → findings.
+
 ## Error Semantics
 
 | Condition | Error / Outcome | Retry | Recovery Expectation |
