@@ -64,6 +64,20 @@ export function report() {
   return { total: acs.size, cited: [...acs.keys()].filter((id) => cited.has(id)).length, excepted: exceptions.length, problems };
 }
 
+/* The same counts, story by story, for the project site's traceability page
+   (apps/theme-builder/microsite-data.mjs): each criterion with the tests
+   that cite it, or the reason it is excepted. */
+export function coverage() {
+  const acs = criteria(), cited = citations();
+  const exceptions = JSON.parse(readFileSync(join(ROOT, "tools/coverage-exceptions.json"), "utf8")).exceptions;
+  const excepted = new Map(exceptions.map((e) => [e.id, e.reason]));
+  const byStory = {};
+  for (const [id, { story, text }] of acs) {
+    (byStory[story] ??= []).push({ id, text, tests: [...(cited.get(id) ?? [])].sort(), exception: excepted.get(id) ?? null });
+  }
+  return { total: acs.size, cited: [...acs.keys()].filter((id) => cited.has(id)).length, excepted: exceptions.length, byStory, exceptions };
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const r = report();
   for (const p of r.problems) console.log(p);
