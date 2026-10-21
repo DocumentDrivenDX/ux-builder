@@ -25,7 +25,7 @@ ddx:
 # Feature Specification: FEAT-011 — AI and agent experience rules
 
 **Feature ID**: FEAT-011
-**Status**: Draft (2026-10-21, with ADR-028; awaiting review)
+**Status**: Built 2026-10-21 (ADR-028 and ADR-029 accepted; every US-076..US-085 criterion cited by a passing test)
 **Priority**: P1
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: AI and agent experience
