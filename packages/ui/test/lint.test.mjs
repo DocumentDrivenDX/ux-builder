@@ -7,7 +7,8 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { Linter } from "eslint";
+import { readFileSync } from "node:fs";
+import { Linter, RuleTester } from "eslint";
 import stylelint from "stylelint";
 import eslintPlugin from "../lint/eslint.mjs";
 import { check, checkAllow, literals } from "../lint/core.mjs";
@@ -144,5 +145,74 @@ describe("US-022 lint", () => {
     const r = lint(code, { "ux-builder/no-inline-svg": ["error", { allow: ["chart"] }] });
     assert.equal(r.length, 1);
     assert.match(r[0].text, /hand-drawn <svg>.*<Icon>.*registerIcons/);
+  });
+});
+
+/* ux-builder/ai-neutral-voice (US-081, FEAT-011 AIV-01, ADR-028 decision 6). */
+describe("US-081 ai-neutral-voice", () => {
+  RuleTester.describe = describe;
+  RuleTester.it = test;
+  RuleTester.itOnly = test.only;
+  const tester = new RuleTester({ languageOptions: { ecmaVersion: "latest", sourceType: "module", parserOptions: { ecmaFeatures: { jsx: true } } } });
+  const voice = eslintPlugin.rules["ai-neutral-voice"];
+  const person = /presents the AI as a person.*\(ai\.not-a-person; ux-builder\/ai-neutral-voice\)$/;
+
+  // @covers US-081-AC1
+  tester.run("AC1: first-person mental-state phrases warn citing ai.not-a-person", voice, {
+    valid: [],
+    invalid: [
+      { code: "const A = () => <p>I think this answer is right</p>;", errors: [{ message: /^"I think" presents the AI as a person/ }] },
+      { code: "const A = () => <p>i FEEL that you will like this</p>;", errors: [{ message: person }] },
+      { code: 'const A = () => <Tooltip title="I understand your question" />;', errors: [{ message: person }] },
+      { code: "const A = () => <Banner text={'I believe the total is wrong'} />;", errors: [{ message: person }] },
+      { code: "const A = () => <Status label={`I'm thinking…`} />;", errors: [{ message: /^"I'm thinking" presents/ }] },
+      { code: "const A = () => <p>{\"Hmm, I am still thinking\"}</p>;", errors: [{ message: person }] },
+    ],
+  });
+
+  // @covers US-081-AC2
+  tester.run("AC2: a vocative label warns citing ai.user-initiates with the user's verb", voice, {
+    valid: [],
+    invalid: [
+      { code: "const A = () => <Button>Copilot, summarize</Button>;", errors: [{ message: '"Copilot, summarize" makes the AI the actor: label the user\'s action instead ("Summarize" or "Summarize with Copilot") (ai.user-initiates; ux-builder/ai-neutral-voice)' }] },
+      { code: 'const A = () => <Button label="Hey Gemini, write a reply" />;', errors: [{ message: /"Write" or "Write with Gemini".*ai\.user-initiates/ }] },
+      { code: "const A = () => <Button aria-label={`Assistant, draft an email`} />;", errors: [{ message: /ai\.user-initiates/ }] },
+    ],
+  });
+
+  // @covers US-081-AC3
+  tester.run("AC3: // ux-builder-ai-persona on the line before a string opts it out", voice, {
+    valid: [
+      "const A = () => <Button\n  // ux-builder-ai-persona\n  label=\"Copilot, summarize\"\n/>;",
+      "const A = () => <p>\n  {/* ux-builder-ai-persona */}\n  I think you'll love this\n</p>;",
+    ],
+    invalid: [
+      { code: "// ux-builder-ai-persona\nconst x = 1;\nconst A = () => <p>I think so</p>;", errors: [{ message: person }] },
+    ],
+  });
+
+  // @covers US-081-AC4
+  tester.run("AC4: ordinary copy does not warn", voice, {
+    valid: [
+      "const A = () => <p>Think about your audience</p>;",
+      "const A = () => <p>We feel strongly about privacy</p>;",
+      "const A = () => <Button>Summarize with Copilot</Button>;",
+      'const A = () => <Button label="Summarize" />;',
+      "const A = () => <p>First, write a title. Then, add a summary.</p>;",
+      "const A = () => <p>Hello, world</p>;",
+      'const A = () => <p className="I think">Generated answer — check before you use it</p>;',
+      "const A = () => <p>Did this help? Tell us what you think</p>;",
+      "const A = () => <p>{`I think ${name}`}</p>;",
+    ],
+    invalid: [],
+  });
+
+  test("the recommended config has it as a warning, and the starter template's copy passes", () => {
+    assert.equal(eslintPlugin.configs.recommended.rules["ux-builder/ai-neutral-voice"], "warn");
+    const app = readFileSync(join(ROOT, "packages/create-app/template/src/App.jsx"), "utf8");
+    const r = new Linter({ configType: "flat" }).verify(app, [{ files: ["**/*.jsx"], ...eslintPlugin.configs.recommended,
+      languageOptions: { ecmaVersion: "latest", sourceType: "module", parserOptions: { ecmaFeatures: { jsx: true } } },
+      rules: { "ux-builder/ai-neutral-voice": "warn" } }], { filename: "src/App.jsx" });
+    assert.deepEqual(r.map((m) => m.message), []);
   });
 });

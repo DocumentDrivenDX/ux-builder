@@ -21,7 +21,7 @@ import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 import { chromium } from "playwright";
 import { enrich, inspect, modalEscape, prepare, sdkRulesIn, settle } from "./inspect.mjs";
-export { inspect, STATE_AFFECTING } from "./inspect.mjs";
+export { AI_CHECKS, inspect, STATE_AFFECTING } from "./inspect.mjs";
 export { attach, checkpoint, startBrowser } from "./assess/checkpoint.mjs";
 
 const own = createRequire(import.meta.url);
@@ -47,6 +47,20 @@ export const RULES = {
   "one-primary-action": "Each page region or dialog has at most one primary button (rule emphasis.one-primary).",
   "nav-per-breakpoint": "Navigation suits the width: few destinations when narrow, standing when wide (rules nav.compact-destinations, nav.standing-at-expanded).",
   "line-length": "Lines of prose stay readable (rule text.line-length).",
+  "ai-disclose": "AI-generated content is labelled as AI-made, by itself or a labelled region (rule ai.disclose).",
+  "ai-stop": "While the AI works, a Stop or Pause control is in or beside its status (rule ai.stop).",
+  "ai-correct": "AI-generated content has a retry, regenerate, edit or undo control (rule ai.correct).",
+  "ai-starters": "An empty conversation offers suggested starting points, and the prompt stays open (rule ai.starters).",
+  "ai-declared": "With --blueprint: a screen showing AI content declares its AI role (rule ai.declared).",
+  "agent-approval": "An approval offers approve and deny, neither chosen for the user (rule agent.approve-high-impact).",
+  "agent-plan": "An agent's plan has steps, each stating its status in text (rule agent.plan-visible).",
+  "agent-interrupt": "A running agent can be paused or stopped (rule agent.interrupt).",
+  "agent-who-acts": "Where the user can take over, a live region says who is acting (rule agent.who-acts).",
+  "agent-recover": "A failed step says what went wrong and can be retried or stepped back from (rule agent.recover).",
+  "agent-summary": "A finished run shows a summary of what was done (rule agent.summary).",
+  "genui-review-prefill": "Values the AI pre-fills in inline UI are editable and submitted by the user's own control (rule genui.review-prefill).",
+  "card-input-label": "Every input in generated UI has a label of its own (rule card.input-label).",
+  "card-narrow-first": "With --width: generated UI does not scroll sideways at the compact size class (rule card.narrow-first).",
 };
 const SEVERITY = ["error", "warning", "info"];
 
@@ -99,7 +113,7 @@ async function overlayShot(page, marked, path) {
 /* Audit pages of a running app. Returns the report; writes screenshots
    under out when given. Each page is switched through every width, theme
    and appearance, and inspect() checks each state. */
-export async function audit({ urls, themes, appearances = ["light", "dark"], widths, ignore = [], rules = {}, contrast = true, out = null, wait = null, cwd = process.cwd(), viewport = { width: 1280, height: 900 }, baseline = null, log = () => {} }) {
+export async function audit({ urls, themes, appearances = ["light", "dark"], widths, ignore = [], rules = {}, contrast = true, out = null, wait = null, cwd = process.cwd(), viewport = { width: 1280, height: 900 }, baseline = null, blueprint = null, log = () => {} }) {
   if (!urls?.length) throw new Error("audit: give at least one URL");
   const sdk = prepare(cwd, { contrast });
   const { manifest, interaction } = sdk;
@@ -162,7 +176,7 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
           const applied = await page.evaluate(([t]) => { const r = document.querySelector(`[data-theme="${t}"]`); return !!r && getComputedStyle(r).getPropertyValue("--piq-color-text").trim() !== ""; }, [theme]);
           if (!applied) { add({ url, rule: "theme-applied", severity: "error", selector: null, message: `theme "${theme}" did not apply (no --piq-color-text under it)` }, run); continue; }
           // focus-obscured runs per state; modal-escape closes dialogs, so it runs once, after every state.
-          const result = await inspect(page, { sdk, sdkRules, theme, appearance, ignore, contrast, layout: !!widths?.length, stateAffecting: ["focus-obscured"], rules: mode === "attributes" ? { ...rules, brand: false } : rules });
+          const result = await inspect(page, { sdk, sdkRules, theme, appearance, ignore, contrast, layout: !!widths?.length, stateAffecting: ["focus-obscured"], blueprint, rules: mode === "attributes" ? { ...rules, brand: false } : rules });
           const numbers = result.findings.map((f) => add({ url, ...f }, run));
           let screenshot = null;
           if (out) {

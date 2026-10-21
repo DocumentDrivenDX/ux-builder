@@ -46,7 +46,8 @@ without HELIX, and the output says why.
   theme and appearance switcher, the theme's `Logo` in the header, its
   favicon on the tab, and a busy button.
 - `npm run lint`: stylelint and ESLint with `ux-builder/no-hard-coded-values`,
-  `ux-builder/no-foreign-ui` and `ux-builder/no-inline-svg`.
+  `ux-builder/no-foreign-ui`, `ux-builder/no-inline-svg` and the warning
+  `ux-builder/ai-neutral-voice`.
 - `npm run audit`: builds, serves and audits the app in every theme and
   appearance with `@ux-builder/audit` (run `npx playwright install chromium`
   once); the report is in `audit-report/`.

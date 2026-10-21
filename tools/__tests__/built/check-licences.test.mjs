@@ -57,7 +57,8 @@ test("US-049-AC1: every published SDK package's production, peer and optional tr
   const ui = packages.find((p) => p.name === "@ux-builder/ui");
   assert.ok(ui.third.some((t) => t.name === "react"), "peer dependencies are read");
   assert.ok(ui.third.some((t) => t.name === "eslint"), "the lint peers and their trees are read");
-  assert.equal(ui.vendored.length, 4, "the four bundled icon sets are recorded");
+  assert.equal(ui.vendored.length, 5, "the four bundled icon sets and the Adaptive Cards schema are recorded");
+  assert.ok(ui.vendored.some((v) => v.name === "Adaptive Cards JSON Schema 1.6" && v.licence === "MIT"), "the vendored card schema (ADR-029)");
   const audit = packages.find((p) => p.name === "@ux-builder/audit");
   assert.ok(audit.third.some((t) => t.name === "axe-core"), "production dependencies are read");
   // A dependency of a dependency, installed where that dependency is.

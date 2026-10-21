@@ -8,13 +8,16 @@
       and the blueprint schema is valid JSON Schema 2020-12.
    2. Rule and recipe IDs are unique.
    3. Provenance: every rule cites a source; a quotation comes only from an
-      openly licensed source (CC-BY-2.5, W3C, own), carries its words, and is
-      at most 25 words, and @ux-builder/ui's THIRD-PARTY-NOTICES.md credits
-      it by its title or URL. Apple's and Google's guidelines are
-      paraphrased.
+      openly licensed source (CC-BY-2.5, CC-BY-4.0, W3C, own), carries its
+      words, and is at most 25 words, and @ux-builder/ui's
+      THIRD-PARTY-NOTICES.md credits it by its title or URL. Apple's,
+      Google's and Microsoft's guidelines, Google PAIR (CC BY-NC-SA) and
+      Cheng et al. (CC BY-NC-ND) are paraphrased. Microsoft Learn's preview
+      agent pages never stand as a rule's only source (FEAT-011 AIP-03).
    4. Every check a rule names exists: blueprint checks in
       @ux-builder/ui/blueprint, audit checks in @ux-builder/audit, lint rules
-      in the catalogue.
+      in the catalogue, card checks in @ux-builder/ui/adaptive-cards (CHECKS
+      of its check module, the one checkCard runs).
    5. Every pattern a rule or recipe names is a catalogue pattern, and every
       rule a recipe names exists.
 
@@ -27,17 +30,21 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const read = (p) => JSON.parse(readFileSync(join(ROOT, p), "utf8"));
-export const OPEN = new Set(["CC-BY-2.5", "W3C", "own"]);
+export const OPEN = new Set(["CC-BY-2.5", "CC-BY-4.0", "W3C", "own"]);
+/* Supporting only: preview, AI-generated pages (FEAT-011 AIP-03). */
+export const SUPPORTING_ONLY = ["https://learn.microsoft.com/en-us/agents/"];
 export const MAX_QUOTE_WORDS = 25;
 
 export async function known() {
   const { CHECKS } = await import("../packages/ui/blueprint/index.mjs");
   const { RULES } = await import("../packages/audit/audit.mjs");
+  const { CHECKS: CARD_CHECKS } = await import("../packages/ui/adaptive-cards/check.mjs");
   const cat = read("packages/ui/catalogue.json");
   return {
     blueprint: new Set(CHECKS),
     audit: new Set(Object.keys(RULES)),
     lint: new Set(cat.lint.rules),
+    card: new Set(CARD_CHECKS),
     patterns: new Set(cat.patterns.filter((p) => p.type === "component").map((p) => p.name)),
   };
 }
@@ -62,6 +69,7 @@ export function checkRules({ rules, recipes, notices = "" }, k) {
     if (ids.has(r.id)) problems.push(`${at}: the ID is used twice`);
     ids.add(r.id);
     if (!r.sources?.length) problems.push(`${at}: cites no source`);
+    else if (r.sources.every((s) => SUPPORTING_ONLY.some((u) => s.url?.startsWith(u)))) problems.push(`${at}: cites only Microsoft Learn's preview agent pages; add a primary source`);
     for (const s of r.sources ?? []) {
       if (s.wording === "quoted") {
         if (!OPEN.has(s.licence)) problems.push(`${at}: quotes "${s.title}", whose licence (${s.licence}) does not allow it; paraphrase it`);

@@ -1,0 +1,1005 @@
+{
+  "$description": "Blueprints with no ai, actions or journeys, and the findings the check gave for each before FEAT-011 and FEAT-012 (commit 9a6e71a). The check must still give exactly these (US-077-AC5, US-086-AC5).",
+  "cases": [
+    {
+      "name": "app skeleton",
+      "blueprint": {
+        "version": 1,
+        "kind": "app",
+        "name": "My app",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded",
+            "large"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "destinations": [
+          {
+            "id": "home",
+            "label": "Home",
+            "screen": "home"
+          }
+        ],
+        "screens": [
+          {
+            "id": "home",
+            "title": "Home",
+            "pattern": "CollectionList",
+            "states": [
+              "empty",
+              "loading",
+              "error"
+            ]
+          }
+        ]
+      },
+      "findings": []
+    },
+    {
+      "name": "view skeleton",
+      "blueprint": {
+        "version": 1,
+        "kind": "view",
+        "name": "My view",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "screens": [
+          {
+            "id": "main",
+            "title": "Result",
+            "pattern": "RecordDetail",
+            "states": [
+              "empty",
+              "loading",
+              "error"
+            ]
+          }
+        ]
+      },
+      "findings": []
+    },
+    {
+      "name": "unknown pattern",
+      "blueprint": {
+        "version": 1,
+        "kind": "app",
+        "name": "My app",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded",
+            "large"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "destinations": [
+          {
+            "id": "home",
+            "label": "Home",
+            "screen": "home"
+          }
+        ],
+        "screens": [
+          {
+            "id": "home",
+            "title": "Home",
+            "pattern": "ListDetails"
+          }
+        ]
+      },
+      "findings": [
+        {
+          "rule": "pattern.exists",
+          "severity": "error",
+          "path": "/screens/0/pattern",
+          "message": "\"ListDetails\" is not a pattern in @ux-builder/ui 0.6.3.",
+          "fix": "Did you mean \"ListDetail\"? See list_patterns."
+        }
+      ]
+    },
+    {
+      "name": "four mistakes",
+      "blueprint": {
+        "version": 1,
+        "kind": "app",
+        "name": "My app",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "expanded"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "destinations": [
+          {
+            "id": "a",
+            "label": "A",
+            "screen": "home"
+          },
+          {
+            "id": "b",
+            "label": "B",
+            "screen": "home"
+          },
+          {
+            "id": "c",
+            "label": "C",
+            "screen": "home"
+          },
+          {
+            "id": "d",
+            "label": "D",
+            "screen": "home"
+          },
+          {
+            "id": "e",
+            "label": "E",
+            "screen": "home"
+          },
+          {
+            "id": "f",
+            "label": "F",
+            "screen": "home"
+          }
+        ],
+        "screens": [
+          {
+            "id": "home",
+            "title": "Matters",
+            "pattern": "CollectionList",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ],
+            "modals": [
+              {
+                "id": "edit",
+                "title": "Edit",
+                "kind": "dialog",
+                "dismiss": "cancel",
+                "modals": [
+                  {
+                    "id": "pick",
+                    "title": "Pick",
+                    "kind": "dialog",
+                    "dismiss": "close"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "findings": [
+        {
+          "rule": "nav.compact-destinations",
+          "severity": "warning",
+          "path": "/destinations",
+          "message": "6 top-level destinations; at the compact size class the bar holds 5.",
+          "fix": "Keep 5 or fewer: group related ones, or move the rest to settings or a secondary page (AppShell puts more than 5 behind \"More\")."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/0/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "modal.one-at-a-time",
+          "severity": "error",
+          "path": "/screens/0/modals/0/modals/0",
+          "message": "Modal \"Pick\" opens on top of another modal.",
+          "fix": "Close the first modal before presenting this one, or make this step part of it."
+        },
+        {
+          "rule": "screen.states",
+          "severity": "warning",
+          "path": "/screens/0/states",
+          "message": "\"Matters\" (CollectionList) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        }
+      ]
+    },
+    {
+      "name": "schema problems",
+      "blueprint": {
+        "version": 1,
+        "kind": "app",
+        "name": "My app",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded",
+            "large"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "destinations": [
+          {
+            "id": "home",
+            "label": "Home",
+            "screen": "nowhere"
+          }
+        ],
+        "screens": [
+          {
+            "id": "home",
+            "title": "Home",
+            "pattern": "SettingsPage",
+            "modals": [
+              {
+                "id": "m",
+                "title": " ",
+                "kind": "sheet",
+                "editsData": true
+              }
+            ]
+          }
+        ],
+        "extra": true
+      },
+      "findings": [
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "/destinations/0/screen",
+          "message": "Destination \"Home\" names no screen \"nowhere\".",
+          "fix": "Name one of: home."
+        },
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "/extra",
+          "message": "\"extra\" is not a blueprint field.",
+          "fix": "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005)."
+        },
+        {
+          "rule": "modal.dismiss",
+          "severity": "error",
+          "path": "/screens/0/modals/0",
+          "message": "Modal \" \" has no way out.",
+          "fix": "Set dismiss to \"cancel\", \"close\" or \"done\"."
+        },
+        {
+          "rule": "modal.unsaved-changes",
+          "severity": "error",
+          "path": "/screens/0/modals/0/guardsUnsavedChanges",
+          "message": "Closing \" \" would lose what was entered.",
+          "fix": "Set guardsUnsavedChanges and ask before discarding (useUnsavedChangesWarning)."
+        },
+        {
+          "rule": "modal.titled",
+          "severity": "error",
+          "path": "/screens/0/modals/0/title",
+          "message": "Modal \"m\" has no title.",
+          "fix": "Give it a title that names its task; it becomes the dialog's accessible name."
+        }
+      ]
+    },
+    {
+      "name": "twelve screens",
+      "blueprint": {
+        "version": 1,
+        "kind": "app",
+        "name": "My app",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded",
+            "large"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "destinations": [
+          {
+            "id": "s0",
+            "label": "S0",
+            "screen": "s0"
+          },
+          {
+            "id": "s1",
+            "label": "S1",
+            "screen": "s1"
+          },
+          {
+            "id": "s2",
+            "label": "S2",
+            "screen": "s2"
+          },
+          {
+            "id": "s3",
+            "label": "S3",
+            "screen": "s3"
+          },
+          {
+            "id": "s4",
+            "label": "S4",
+            "screen": "s4"
+          },
+          {
+            "id": "s5",
+            "label": "S5",
+            "screen": "s5"
+          },
+          {
+            "id": "s6",
+            "label": "S6",
+            "screen": "s6"
+          },
+          {
+            "id": "s7",
+            "label": "S7",
+            "screen": "s7"
+          },
+          {
+            "id": "s8",
+            "label": "S8",
+            "screen": "s8"
+          },
+          {
+            "id": "s9",
+            "label": "S9",
+            "screen": "s9"
+          },
+          {
+            "id": "s10",
+            "label": "S10",
+            "screen": "s10"
+          },
+          {
+            "id": "s11",
+            "label": "S11",
+            "screen": "s11"
+          }
+        ],
+        "screens": [
+          {
+            "id": "s0",
+            "title": "S0",
+            "pattern": "Dashbord",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s1",
+            "title": "S1",
+            "pattern": "CollectionList",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s2",
+            "title": "S2",
+            "pattern": "Dashbord",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s3",
+            "title": "S3",
+            "pattern": "CollectionList",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s4",
+            "title": "S4",
+            "pattern": "Dashbord",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s5",
+            "title": "S5",
+            "pattern": "CollectionList",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s6",
+            "title": "S6",
+            "pattern": "Dashbord",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s7",
+            "title": "S7",
+            "pattern": "CollectionList",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s8",
+            "title": "S8",
+            "pattern": "Dashbord",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s9",
+            "title": "S9",
+            "pattern": "CollectionList",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s10",
+            "title": "S10",
+            "pattern": "Dashbord",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          },
+          {
+            "id": "s11",
+            "title": "S11",
+            "pattern": "CollectionList",
+            "destructiveActions": [
+              {
+                "label": "Delete",
+                "safeguard": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "findings": [
+        {
+          "rule": "nav.compact-destinations",
+          "severity": "warning",
+          "path": "/destinations",
+          "message": "12 top-level destinations; at the compact size class the bar holds 5.",
+          "fix": "Keep 5 or fewer: group related ones, or move the rest to settings or a secondary page (AppShell puts more than 5 behind \"More\")."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/0/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "pattern.exists",
+          "severity": "error",
+          "path": "/screens/0/pattern",
+          "message": "\"Dashbord\" is not a pattern in @ux-builder/ui 0.6.3.",
+          "fix": "Did you mean \"Dashboard\"? See list_patterns."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/1/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "screen.states",
+          "severity": "warning",
+          "path": "/screens/1/states",
+          "message": "\"S1\" (CollectionList) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/10/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "pattern.exists",
+          "severity": "error",
+          "path": "/screens/10/pattern",
+          "message": "\"Dashbord\" is not a pattern in @ux-builder/ui 0.6.3.",
+          "fix": "Did you mean \"Dashboard\"? See list_patterns."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/11/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "screen.states",
+          "severity": "warning",
+          "path": "/screens/11/states",
+          "message": "\"S11\" (CollectionList) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/2/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "pattern.exists",
+          "severity": "error",
+          "path": "/screens/2/pattern",
+          "message": "\"Dashbord\" is not a pattern in @ux-builder/ui 0.6.3.",
+          "fix": "Did you mean \"Dashboard\"? See list_patterns."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/3/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "screen.states",
+          "severity": "warning",
+          "path": "/screens/3/states",
+          "message": "\"S3\" (CollectionList) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/4/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "pattern.exists",
+          "severity": "error",
+          "path": "/screens/4/pattern",
+          "message": "\"Dashbord\" is not a pattern in @ux-builder/ui 0.6.3.",
+          "fix": "Did you mean \"Dashboard\"? See list_patterns."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/5/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "screen.states",
+          "severity": "warning",
+          "path": "/screens/5/states",
+          "message": "\"S5\" (CollectionList) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/6/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "pattern.exists",
+          "severity": "error",
+          "path": "/screens/6/pattern",
+          "message": "\"Dashbord\" is not a pattern in @ux-builder/ui 0.6.3.",
+          "fix": "Did you mean \"Dashboard\"? See list_patterns."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/7/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "screen.states",
+          "severity": "warning",
+          "path": "/screens/7/states",
+          "message": "\"S7\" (CollectionList) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/8/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "pattern.exists",
+          "severity": "error",
+          "path": "/screens/8/pattern",
+          "message": "\"Dashbord\" is not a pattern in @ux-builder/ui 0.6.3.",
+          "fix": "Did you mean \"Dashboard\"? See list_patterns."
+        },
+        {
+          "rule": "action.destructive-safeguard",
+          "severity": "error",
+          "path": "/screens/9/destructiveActions/0",
+          "message": "Delete has no safeguard.",
+          "fix": "Set safeguard to \"undo\" (an Undo toast) or \"confirm\" for an unexpected, irreversible loss."
+        },
+        {
+          "rule": "screen.states",
+          "severity": "warning",
+          "path": "/screens/9/states",
+          "message": "\"S9\" (CollectionList) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        }
+      ]
+    },
+    {
+      "name": "unreached screens",
+      "blueprint": {
+        "version": 1,
+        "kind": "app",
+        "name": "My app",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded",
+            "large"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "destinations": [
+          {
+            "id": "home",
+            "label": "Home",
+            "screen": "home"
+          }
+        ],
+        "screens": [
+          {
+            "id": "home",
+            "title": "Home",
+            "pattern": "CollectionList",
+            "states": [
+              "empty",
+              "loading",
+              "error"
+            ]
+          },
+          {
+            "id": "settings",
+            "title": "Settings",
+            "pattern": "SettingsPage"
+          },
+          {
+            "id": "detail",
+            "title": "Detail",
+            "pattern": "RecordDetail"
+          }
+        ]
+      },
+      "findings": [
+        {
+          "rule": "screen.states",
+          "severity": "warning",
+          "path": "/screens/2/states",
+          "message": "\"Detail\" (RecordDetail) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        }
+      ]
+    },
+    {
+      "name": "duplicate IDs",
+      "blueprint": {
+        "version": 1,
+        "kind": "app",
+        "name": "My app",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded",
+            "large"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "destinations": [
+          {
+            "id": "home",
+            "label": "Home",
+            "screen": "home"
+          }
+        ],
+        "screens": [
+          {
+            "id": "home",
+            "title": "A",
+            "pattern": "FormPage"
+          },
+          {
+            "id": "home",
+            "title": "B",
+            "pattern": "FormPage"
+          }
+        ]
+      },
+      "findings": [
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "/screens/1/id",
+          "message": "Screen ID \"home\" is used twice.",
+          "fix": "Give each screen its own ID."
+        }
+      ]
+    },
+    {
+      "name": "view with shell",
+      "blueprint": {
+        "version": 1,
+        "kind": "view",
+        "name": "My view",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "screens": [
+          {
+            "id": "main",
+            "title": "Main",
+            "pattern": "AppShell",
+            "states": [
+              "empty",
+              "loading",
+              "error"
+            ]
+          }
+        ],
+        "destinations": [
+          {
+            "id": "a",
+            "label": "A",
+            "screen": "main"
+          }
+        ]
+      },
+      "findings": [
+        {
+          "rule": "view.no-shell",
+          "severity": "error",
+          "path": "/destinations",
+          "message": "A view has destinations; the host provides the navigation.",
+          "fix": "Remove destinations; reach other tasks through the host or modal tasks."
+        },
+        {
+          "rule": "view.no-shell",
+          "severity": "error",
+          "path": "/screens/0/pattern",
+          "message": "A view uses AppShell; the host draws the shell.",
+          "fix": "Use a screen pattern such as RecordDetail or CollectionList, without a shell."
+        }
+      ]
+    },
+    {
+      "name": "view too wide",
+      "blueprint": {
+        "version": 1,
+        "kind": "view",
+        "name": "My view",
+        "supports": {
+          "sizeClasses": [
+            "expanded"
+          ],
+          "inputs": [
+            "fine"
+          ]
+        },
+        "screens": [
+          {
+            "id": "main",
+            "title": "Result",
+            "pattern": "RecordDetail",
+            "states": [
+              "empty",
+              "loading",
+              "error"
+            ]
+          }
+        ]
+      },
+      "findings": [
+        {
+          "rule": "view.size-classes",
+          "severity": "error",
+          "path": "/supports/sizeClasses",
+          "message": "A view must support compact and medium; a host's panel is often that narrow.",
+          "fix": "Add \"compact\" and \"medium\" to supports.sizeClasses and design for them."
+        }
+      ]
+    },
+    {
+      "name": "view two screens",
+      "blueprint": {
+        "version": 1,
+        "kind": "view",
+        "name": "My view",
+        "supports": {
+          "sizeClasses": [
+            "compact",
+            "medium",
+            "expanded"
+          ],
+          "inputs": [
+            "coarse",
+            "fine"
+          ]
+        },
+        "screens": [
+          {
+            "id": "main",
+            "title": "Result",
+            "pattern": "RecordDetail",
+            "states": [
+              "empty",
+              "loading",
+              "error"
+            ]
+          },
+          {
+            "id": "b",
+            "title": "B",
+            "pattern": "FormPage"
+          }
+        ]
+      },
+      "findings": [
+        {
+          "rule": "view.one-task",
+          "severity": "warning",
+          "path": "/screens",
+          "message": "A view has 2 screens; a view does one task.",
+          "fix": "Keep one screen; put further steps in modals or sections of it."
+        },
+        {
+          "rule": "view.states",
+          "severity": "warning",
+          "path": "/screens/1/states",
+          "message": "\"B\" (FormPage, in a view) does not declare its empty, loading, error states.",
+          "fix": "Add \"empty\", \"loading\", \"error\" to states, and supply each state's content to the pattern."
+        }
+      ]
+    },
+    {
+      "name": "not an object",
+      "blueprint": [],
+      "findings": [
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "",
+          "message": "The blueprint is not a JSON object.",
+          "fix": "Start from ux-builder-blueprint init."
+        }
+      ]
+    },
+    {
+      "name": "empty",
+      "blueprint": {},
+      "findings": [
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "",
+          "message": "The blueprint needs \"version\".",
+          "fix": "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005)."
+        },
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "",
+          "message": "The blueprint needs \"kind\".",
+          "fix": "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005)."
+        },
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "",
+          "message": "The blueprint needs \"name\".",
+          "fix": "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005)."
+        },
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "",
+          "message": "The blueprint needs \"supports\".",
+          "fix": "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005)."
+        },
+        {
+          "rule": "blueprint.valid",
+          "severity": "error",
+          "path": "",
+          "message": "The blueprint needs \"screens\".",
+          "fix": "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005)."
+        }
+      ]
+    }
+  ]
+}

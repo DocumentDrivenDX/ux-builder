@@ -35,6 +35,37 @@
         "replay"
       ]
     },
+    "scenario": {
+      "description": "An AI journey's scenario (FEAT-011 AIX-02)",
+      "enum": ["normal", "errorProne", "risky"]
+    },
+    "risky": {
+      "description": "Where the risky scenario stopped: the approval it recorded and denied, or the high-impact step it did not take (US-082-AC3, AC4). Never approved",
+      "type": "object",
+      "required": ["approval", "approved"],
+      "properties": {
+        "highImpactStep": { "type": ["integer", "null"] },
+        "stoppedAt": { "type": "integer" },
+        "approval": {
+          "type": ["object", "null"],
+          "properties": { "text": { "type": "string" }, "controls": { "type": "array" }, "approve": { "type": "boolean" }, "deny": { "type": "boolean" }, "screenshot": { "type": ["string", "null"] } }
+        },
+        "denied": { "type": "boolean" },
+        "approved": { "const": false }
+      }
+    },
+    "errorProne": {
+      "description": "What the error-prone state showed (US-082-AC5; agent.recover, ai.improve-request)",
+      "type": "object",
+      "required": ["errorShownInPlace", "recoveryWithoutRestart"],
+      "properties": {
+        "errorShown": { "type": "boolean" },
+        "errorShownInPlace": { "type": "boolean" },
+        "recoveryWithoutRestart": { "type": "boolean" },
+        "requestEditable": { "type": "boolean" },
+        "controls": { "type": "array", "items": { "type": "string" } }
+      }
+    },
     "findings": {
       "type": "array",
       "items": {

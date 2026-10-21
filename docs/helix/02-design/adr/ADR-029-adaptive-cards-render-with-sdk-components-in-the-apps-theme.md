@@ -2,7 +2,7 @@
 ddx:
   id: ADR-029
   type: adr
-  status: proposed
+  status: accepted
   links:
     - kind: informed_by
       to: ADR-023
@@ -24,7 +24,7 @@ ddx:
 
 | Date | Status | Deciders | Related | Confidence |
 |------|--------|----------|---------|------------|
-| 2026-10-21 | **Proposed** (operator 2026-10-21: render and check cards now, emit later; open-source schema; both payload formats; a marker for high-impact actions) | Operator | ADR-023, ADR-028, ADR-021, FEAT-007, FEAT-011, CONTRACT-004, CONTRACT-005 | Medium |
+| 2026-10-21 | **Accepted** 2026-10-21 (operator merged PR #31 and said "now let's build and test all the new stuff"; direction: operator 2026-10-21: render and check cards now, emit later; open-source schema; both payload formats; a marker for high-impact actions) | Operator | ADR-023, ADR-028, ADR-021, FEAT-007, FEAT-011, CONTRACT-004, CONTRACT-005 | Medium |
 
 ## Context
 

@@ -209,6 +209,17 @@
         "ai/vendor/ui/textarea.tsx",
         "ai/vendor/ui/tooltip.tsx"
       ]
+    },
+    {
+      "name": "Adaptive Cards JSON Schema 1.6",
+      "source": "https://raw.githubusercontent.com/microsoft/AdaptiveCards/main/schemas/1.6.0/adaptive-card.json (microsoft/AdaptiveCards)",
+      "version": "1.6.0, fetched 2026-10-21 (sha256 a2f263fe380066f144f01ea6226797d6f47589c27d06e2d52abd09b453c5ad2c)",
+      "licence": "MIT",
+      "licenceFile": "licenses/adaptivecards.LICENSE",
+      "files": [
+        "adaptive-cards/schema-1.6/adaptive-card.json"
+      ],
+      "notice": "http://adaptivecards.io/schemas/adaptive-card.json"
     }
   ]
 }

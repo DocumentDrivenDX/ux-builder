@@ -41,6 +41,59 @@ Keep the two apart in everything you write (FEAT-009, ADR-026, CONTRACT-006).
    `browser --run` stops when the run's time is spent; both record the
    `walkthrough` stage `partial`. Do not work around them: record what is
    left as `not-assessed` with the limit as its reason, and report.
+7. **Never approve.** An AI's request for approval (`data-piq-ai="approval"`)
+   is answered with Deny (`data-piq-ai-control="deny"`), never with its
+   approve control (`data-piq-ai-control="approve"`), in every scenario, as
+   a denied action is never taken: no manifest can allow it. `inspect`
+   refuses a replay step that would activate an approve control
+   (`blocked: restricted`). If the risky step is reached with no approval on
+   screen, do not take it.
+
+## AI journeys
+
+A manifest journey with `ai: true` is an AI journey (FEAT-011). It declares
+three scenarios, and `validate` reports each one missing:
+
+    scenarios:
+      normal:     { description: "the task as intended", inputs: "…" }
+      errorProne: { description: "an ambiguous or failing request", inputs: "…" }
+      risky:      { description: "a step with a high-impact action", step: 4 }
+
+`plan` gives the journey an `ai` rubric (the catalogue's AI rules for its
+roles: the blueprint screens' `ai.roles` when the journey comes from the
+blueprint, else every AI role; `review` heuristics included) and three
+`walkthroughs`, one per scenario. Walk each one, resetting the fixture
+between them, and inspect each with `--scenario`:
+
+- **normal**: walk and inspect as for any journey.
+- **errorProne**: at the error, `inspect --scenario errorProne` records
+  whether the error is shown in place and whether the user can recover
+  without restarting (`agent.recover`, `ai.improve-request`). If there is no
+  safe way to make the agent err (no fixture or mock), record the scenario
+  `blocked` with the reason; never skip it silently.
+- **risky**: walk up to `risky.step`, the high-impact step. At the approval,
+  record it, choose Deny, and stop: take nothing more. With a replay,
+  `inspect --replay steps.json --scenario risky` does this for you (mark the
+  high-impact step `"highImpact": true`, or give `--high-impact-step n`; the
+  journey's numeric `risky.step` is the default with `--journey`). With no
+  approval before that step, it stops before the step and records a P1
+  `agent.approve-high-impact`; walking in place, do the same yourself.
+
+Every finding of an AI journey names the AI rule or heuristic it is about
+(`rule`, one of the plan's `ai.heuristics`); `validate-report` refuses one
+that does not.
+
+## Blueprint journeys
+
+A manifest journey may name a journey of the app's blueprint
+(`app.blueprint.json` beside the manifest, or the manifest's `blueprint`
+path) instead of restating it: `{ blueprint: J-review, role: reviewer, priority: critical }`.
+Its story, criteria, entry screen and steps come from the blueprint; giving
+`story`, `criteria` or `entry` as well is refused. `plan` lists its steps,
+and each alternate as a walkthrough of one journey-and-state pair (`pair`,
+with its `state`): walk the alternates too. Its `entry` is a screen
+(`entryKind: screen`); reach it through the app's navigation from
+`run.baseUrl`.
 
 ## Stages
 

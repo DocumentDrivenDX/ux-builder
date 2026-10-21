@@ -220,7 +220,7 @@ function Ci() {
       <p className="uxm-lede">Two checks keep an app on its theme: lint reads the source, the audit drives the running app. A third, the blueprint check, holds the plan of the screens to the interaction rules.</p>
       <ul className="uxm-grid">{GUARDS.map((g) => <li key={g.title} className="uxm-tile"><span className="uxm-tile__icon"><Icon icon={g.icon} /></span><h3>{g.title}</h3><p>{g.text}</p><code className="uxm-tile__code">{g.code}</code></li>)}</ul>
       <H2 id="lint">Lint</H2>
-      <Command code text={'// eslint.config.js\nimport uxBuilder from "@ux-builder/ui/eslint";\nexport default [{\n  files: ["src/**/*.{js,jsx}"],\n  plugins: { "ux-builder": uxBuilder },\n  rules: {\n    "ux-builder/no-hard-coded-values": ["error", { theme: "ux-builder-databricks" }],\n    "ux-builder/no-foreign-ui": "error",\n    "ux-builder/no-inline-svg": "error",\n  },\n}];'} />
+      <Command code text={'// eslint.config.js\nimport uxBuilder from "@ux-builder/ui/eslint";\nexport default [{\n  files: ["src/**/*.{js,jsx}"],\n  plugins: { "ux-builder": uxBuilder },\n  rules: {\n    "ux-builder/no-hard-coded-values": ["error", { theme: "ux-builder-databricks" }],\n    "ux-builder/no-foreign-ui": "error",\n    "ux-builder/no-inline-svg": "error",\n    "ux-builder/ai-neutral-voice": "warn",\n  },\n}];'} />
       <H2 id="audit">The audit</H2>
       <Command text={'npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/'} />
       <p>It writes <code>audit-report/index.html</code> with screenshots and exits 1 on an error. Each interaction finding names its rule and links its sources.</p>

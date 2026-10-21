@@ -21,7 +21,7 @@ ddx:
 # Feature Specification: FEAT-012 — Screen flows and user journeys in the blueprint
 
 **Feature ID**: FEAT-012
-**Status**: Draft (2026-10-21, with ADR-030; awaiting review)
+**Status**: Built 2026-10-21 (ADR-030 accepted; every US-086..US-090 criterion cited by a passing test)
 **Priority**: P2 (flow and journey fields and checks first; drafting and drawing after)
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: Interaction and information architecture

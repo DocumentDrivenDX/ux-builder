@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- An inline form with two primary buttons and a small target: the page's own checks apply inside generated UI. -->
+<html lang="en" data-theme="praxis-carbon" data-appearance="light" data-piq-screen="chat">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inline pattern</title>
+<link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css">
+<style>body { margin: 0; padding: 16px; font-family: var(--piq-font-body); color: var(--piq-color-text); background: var(--piq-color-ground); } p { margin: 0 0 8px; } button, input, select, textarea { font: inherit; min-block-size: 44px; min-inline-size: 44px; box-sizing: border-box; max-inline-size: 100%; }</style>
+</head>
+<body>
+<main>
+<h1>Assistant</h1>
+<section id="conversation" aria-label="Conversation" data-piq-ai-label>
+  <p id="disclosure">Answers are AI-generated and may need checking.</p>
+  <article id="answer" data-piq-ai="generated">
+    <p>Here is the expense, filled in from your receipt.</p>
+    <form id="expense" data-piq-ai="generated">
+      <label for="amount">Amount</label> <input id="amount" name="amount" value="42.50">
+      <label for="category">Category</label> <select id="category" name="category"><option value="">Choose</option><option value="travel" selected>Travel</option></select>
+      <button id="submit-expense" type="submit" class="piq-btn">Submit expense</button> <button id="save-draft" type="button" class="piq-btn">Save draft</button>
+      <button id="tiny" type="button" aria-label="Help" style="min-block-size: 0; min-inline-size: 0; inline-size: 12px; block-size: 12px; padding: 0"></button>
+    </form>
+    <button id="regenerate" type="button" data-piq-ai-control="regenerate">Regenerate</button>
+  </article>
+</section>
+<form id="composer"><textarea id="prompt" data-piq-ai="prompt" aria-label="Ask the assistant"></textarea> <button id="send">Send</button></form>
+</main>
+</body>
+</html>

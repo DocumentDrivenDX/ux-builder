@@ -16,7 +16,7 @@ to the app, as long as the app follows the rules below.
 1. Use the SDK's widgets (@ux-builder/ui) for buttons, fields, choices, tables, menus, tabs, breadcrumbs, sheets, notices, status pills, toasts, progress bars, spinners, skeletons, icons and the logo; do not build your own. Icons beyond the shared names come from @ux-builder/ui/icons, never hand-drawn.
 2. Style your own markup with --piq-* role tokens (var(--piq-color-text), var(--piq-space-4), var(--piq-radius-control)); pick tokens by role, not by how they look today.
 3. Never hard-code colours, font families or radii: no hex, rgb(), named colours, font names or pixel radii in CSS or style props.
-4. Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui and ux-builder/no-inline-svg, then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.
+4. Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui, ux-builder/no-inline-svg and ux-builder/ai-neutral-voice (a warning on copy that presents the AI as a person, "I think…", or as the actor, "Copilot, summarize"; English only), then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.
 5. Select themes with ThemeProvider (theme, appearance) or data-theme and data-appearance on <html>; never restyle per theme in app code.
 6. Compose screens from @ux-builder/ui/patterns before writing any layout CSS: AppShell for the frame, with each screen inside a Page, which gives it the page gutter and width (AppShell's content area and the screen patterns have none of their own; ErrorScreen excepted); CollectionList, ListDetail, RecordDetail, FormPage, QuickEdit, Dashboard, ReportViewer, SettingsPage and ErrorScreen for screens; the regions and the layout primitives (Stack, Cluster, Grid, Page, SplitView) for anything else. Supply content, data and actions through their slots; never fork or restyle a pattern.
 7. Plan before you build: describe the app or view in app.blueprint.json (ux-builder-blueprint init, or the MCP tool get_blueprint_schema), choose its screens from the recipes (list_recipes), and run ux-builder-blueprint check (or check_blueprint) until it reports no errors. Then build, lint and audit. Rules apply by size class, input and context (app or embedded view), never by device.
@@ -265,6 +265,31 @@ Show waiting with the SDK, never a hand-drawn loader or another library's: `<Pro
 
 The page's favicon follows the theme too: the top-level `ThemeProvider` sets it (`favicon={false}` turns that off). An app that sets `data-theme` on `<html>` without a provider renders `<Favicon />` once. Keep the app's own `<link rel="icon">` in index.html: it shows for a theme without a favicon. Never hard-code the brand's favicon.
 
+### Assistant
+
+Build an assistant from `@ux-builder/ui/assistant`, never from a chat library's components (styled by `patterns.css`). `<Conversation>` takes the messages and callbacks; it announces each finished reply once, keeps focus in the composer, offers Stop while a reply streams and Retry when one fails, shows reasoning, tool calls, numbered sources and artifacts, and asks for approval before an action changes anything. Put it beside the page with `<AssistantPanel>`. Connect a runtime with `useAiSdkConversation(chat)`, given what the AI SDK's useChat returns, from `@ux-builder/ui/assistant/ai-sdk` or `useAssistantUiConversation(thread)` from `@ux-builder/ui/assistant/assistant-ui`; neither configures a hosted service.
+
+| Export | Props | Use it for |
+|--------|-------|------------|
+| `<ApprovalCard>` | `summary, details, decision, current = true, onDecide, approveLabel = "Approve", denyLabel = "Deny", className` | A request for the user's approval before the assistant changes anything: what will happen and to what, with Approve and Deny. Nothing is passed on until the user chooses, neither button is chosen or focused for them, and once decided, or no longer current, it has no buttons and says why. |
+| `<AssistantPanel>` | `open = false, onClose, title = "Assistant", panel, closeLabel = "Close assistant", children, className` | The assistant beside the page: from the expanded size class a side panel region next to children, below it a full-screen modal sheet. Focus moves into the panel's composer when it opens. |
+| `<Conversation>` | `messages = [], onSend, onStop, onRetry, onRegenerate, suggestions = [], onDecide, decisions, onComponentSubmit, onCardAction, onCardDecide, renderArtifact, disabledReason, actor, label = "Conversation with the assistant", composerLabel = "Ask the assistant", disclosure = DISCLOSURE, strings, className` | A conversation with an assistant: the messages as a log, a composer, Stop while a reply streams, Retry when one fails, suggestions, and each reply's reasoning, tool calls, sources, approvals, artifacts and generated components. Finished replies are announced once each, never token by token. |
+| `<GenerativeComponent>` | `component, props, values, onValuesChange, onSubmit, submitted, fallback = "This content could not be shown.", className` | What an agent asked to render, as the SDK component it names, in the app's theme: only a renderable component, and only with props that pass its schema. Anything else is a plain notice; nothing from it is inserted as HTML. |
+| `<InlineForm>` | `title, fields = [], submitLabel = "Submit", values, onValuesChange, onSubmit, submitted, className` | A short form the assistant asks the user to fill in, inside the conversation: its values may be pre-filled, stay editable, and are sent only when the user submits. Once submitted it shows what was sent, read only. |
+| `<Markdown>` | `text, sources, idPrefix, className` | Markdown from a model, rendered as React elements: never as HTML. sources and idPrefix link each [n] to source n of a Sources list. |
+| `<Reasoning>` | `text, seconds, className` | What the assistant reasoned, collapsed behind a disclosure that says for how long; the answer never depends on opening it. |
+| `<Sources>` | `sources = [], idPrefix, label = "Sources", className` | The sources a reply relies on, numbered; each title is a link where it has one, leaving the app. Each item can take focus, so a citation [n] in the answer moves to it. |
+| `<ToolCall>` | `name, title, status = "running", input, output, error, className` | One tool the assistant used: its name and status (running, done, failed) in text, and on request its input and result. It is a step of the reply's plan. |
+| `<ToolCalls>` | `calls = []` | A reply's tool calls as one plan; more than three are grouped under "Used n tools". |
+| `useAiSdkConversation()` | `chat, { describeApproval } = {}` | Conversation props from the AI SDK chat that useChat returns: messages, onSend, onStop, onRetry, onRegenerate and onDecide. Spread them onto <Conversation>. |
+| `useAssistantUiConversation()` | `thread, { describeApproval } = {}` | Conversation props from an assistant-ui ThreadRuntime: messages, onSend, onStop, onRetry, onRegenerate and onDecide. Spread them onto <Conversation>. |
+
+A tool result renders UI as `{ component, props }`, with props as JSON. Only these components may be rendered, and only with props that pass their schema (`propsSchema` in `catalogue.json`, or the MCP tool `list_renderable`); anything else shows a plain notice: `Card`, `DataTable`, `DescriptionList`, `FormPage`, `InlineForm`, `Notice`, `ProgressBar`, `StatTile`, `StatusPill`, `Wizard`.
+
+### Adaptive Cards
+
+An agent built for Microsoft hosts may answer with an Adaptive Card (open-source schema 1.6) instead of a component. Render it with `<AdaptiveCard card onAction />` from `@ux-builder/ui/adaptive-cards`: each element becomes an SDK widget in the app's theme, a ColumnSet stacks at compact, and an element outside 1.6 shows its fallback or a plain notice; nothing is inserted as HTML. In a `<Conversation>`, a tool result `{ type: "adaptive-card", card }` (or the card itself) is an `"adaptive-card"` part, and `onCardAction` receives its actions. `onAction` gets `{ type, id, verb, data, inputs }` for Action.Submit and Action.Execute. Mark an action that pays, sends, deletes or publishes with `"data": { "ux-builder": { "highImpact": true, "consequence": "Pay £120.00 to Acme Ltd" } }`: the user approves it before `onAction`, and the marker is removed from `data`. Check every card before the agent sends it with `checkCard(card)` (also `@ux-builder/ui/adaptive-cards/check` for Node, or the MCP tool `check_card`), and fix what it reports: `card.actions-few`, `card.wrap`, `card.input-label`, `card.input-error`, `card.heading`, `card.columns-few`, `card.image-alt`, `card.action-titles`, `card.no-hidden-inputs`, `card.version`, `card.high-impact-marked`.
+
 ### Interaction and screen rules
 
 How screens fit together and behave: navigation by size, modals, safeguards, states and emphasis (FEAT-008). Each rule has an ID that the blueprint check and the audit report use. The loop: **plan** the app in `app.blueprint.json` (`npx ux-builder-blueprint init`) from the recipes, **check** it (`npx ux-builder-blueprint check app.blueprint.json`, or the MCP tool `check_blueprint`) until it has no errors, **build** from the patterns it names, then **lint** and **audit**. Rules apply by size class, input (`coarse` touch, `fine` pointer) and context (`app`, or an embedded `view`), never by device. Get the rules for a target with `rulesFor()` from `@ux-builder/ui/blueprint` or the MCP tool `get_rules`; the full rules, recipes and blueprint schema are in `catalogue.json` (`interaction`).
@@ -300,6 +325,61 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `view.one-task` | context: view | blueprint `view.one-task` | Keep an embedded view to one screen and one task; put further steps in modal tasks or sections of that screen. |
 | `view.states` | context: view | blueprint `view.states` | Every screen of an embedded view, whatever its pattern, declares its empty, loading and error states. |
 | `view.theme-from-host` | context: view | review | Take the theme only from the host's styles and appearance, and follow the host when it changes them. |
+| `ai.disclose` | aiRole: generative, assistant, agent | audit `ai-disclose`, review | Content made by AI is labelled as AI-made where it appears, or sits in a region whose label says so. |
+| `ai.not-a-person` | aiRole: generative, assistant, agent | lint `ux-builder/ai-neutral-voice`, review | The UI never presents the AI as a person: no first-person thinking or feeling, and no human name or face that implies a human author. |
+| `ai.capabilities` | aiRole: generative, assistant, agent | review | At first use, the screen says what the AI can and cannot do, and that its results may need checking. |
+| `ai.starters` | aiRole: assistant, agent | audit `ai-starters`, review | An open-ended prompt offers suggested starting points, and they are never the only way to start. |
+| `ai.fallback` | aiRole: generative | blueprint `ai.fallback` | Where AI adds to a task rather than being the task, the task can still be done without it. |
+| `ai.stop` | aiRole: generative, assistant, agent | audit `ai-stop` | While AI is generating or working, a Stop control is reachable and named; stopping keeps what has arrived and says that it stopped. |
+| `ai.correct` | aiRole: generative, assistant, agent | audit `ai-correct` | AI output can be edited, retried, regenerated or reverted, and the screen says when a correction has taken effect. |
+| `ai.dismiss` | aiRole: generative | review | An AI suggestion the user did not ask for can be dismissed in one action, and stays dismissed. |
+| `agent.on-off` | aiRole: agent | review | The user can turn the agent off, and its state (off, idle, working, waiting for you) is shown. |
+| `agent.declare-high-impact` | aiRole: agent | blueprint `agent.declare-high-impact` | A screen whose agent acts lists the actions it can take that are irreversible, costly or seen by other people. |
+| `agent.approve-high-impact` | aiRole: agent | blueprint `agent.approve-high-impact`, audit `agent-approval` | Each high-impact action waits for the user's approval, shows what will happen and to what, offers Deny, and is never approved on the user's behalf. |
+| `agent.plan-visible` | aiRole: agent | audit `agent-plan` | When an agent works in steps, its plan and next step are shown, each step with its status, and a change of plan is shown too. |
+| `agent.interrupt` | aiRole: agent | audit `agent-interrupt` | A working agent can be paused or stopped at any step, and the user can then give a new instruction. |
+| `agent.who-acts` | aiRole: agent | audit `agent-who-acts` | When the user can take over and hand back, the screen states who is acting now, and the agent's actions are distinguishable from the user's. |
+| `agent.recover` | aiRole: agent | audit `agent-recover` | A failed step is described at that step and in text, and the user can retry it or return to an earlier step without starting over. |
+| `agent.summary` | aiRole: agent | audit `agent-summary` | A finished run ends with a summary of what was done, with the detail available on request. |
+| `agent.status-unwatched` | aiRole: agent | review | Progress, duration and step status reach a user who is not watching (a persistent status region or a notification), above all for risky steps. |
+| `ai.sources` | aiRole: assistant, agent | review | Output that relies on documents, data or the web shows which, linked where possible. |
+| `ai.uncertainty` | aiRole: generative, assistant, agent | review | The UI says when the AI is unsure or has assumed something the user did not say, instead of presenting a guess as fact. |
+| `ai.ask-when-unclear` | aiRole: agent | review | In a high-stakes step an ambiguous request is clarified with the user; in a low-stakes one a stated default may be used. |
+| `ai.improve-request` | aiRole: generative, assistant, agent | review | A blocked or unhelpful result says why, where it can, and how to ask differently. |
+| `ai.consent` | aiRole: generative, assistant, agent | blueprint `ai.consent`, review | Before personal data or usage leaves the device for an AI feature, the user is told what is sent and why, gives permission, and can opt out later. |
+| `ai.feedback` | aiRole: generative, assistant, agent | review | Users can give feedback on a specific output; giving it is optional and never blocks the task. |
+| `ai.memory-visible` | aiRole: assistant, agent | review | What the AI remembers or has learned about the user can be seen and changed. |
+| `ai.notify-changes` | aiRole: generative, assistant, agent | review | When the AI's behaviour or model changes in a way users would notice, they are told. |
+| `ai.inclusive` | aiRole: generative, assistant, agent | review | The AI does not infer personal or cultural attributes it can ask for, and is tested with diverse people for stereotyped output. |
+| `genui.renderable` | aiRole: assistant | blueprint `genui.renderable` | An assistant renders inline only components the catalogue marks renderable. |
+| `genui.review-prefill` | aiRole: assistant, agent | audit `genui-review-prefill` | Values the AI pre-fills in an inline form or wizard are editable, and are submitted only by the user's own action. |
+| `genui.keep-input` | aiRole: assistant | review | Regenerating an answer never silently discards what the user typed into its inline UI. |
+| `genui.history` | aiRole: assistant | review | A submitted inline component stays readable in the conversation, shows what was submitted, and can no longer be changed. |
+| `ai.declared` | always | audit `ai-declared` | A screen that shows AI content declares its AI role in the blueprint. |
+| `ai.user-initiates` | aiRole: generative, assistant, agent | lint `ux-builder/ai-neutral-voice` | Labels keep the user as the one who starts an action ("Summarize", "Summarize with Assistant"), not the AI ("Assistant, summarize"). |
+| `card.actions-few` | aiRole: assistant, agent | card `card.actions-few`, review | A card offers few primary actions, usually one to three and never more than six. |
+| `card.wrap` | aiRole: assistant, agent | card `card.wrap` | Text blocks and choice labels in a card wrap, so text is never cut off on a narrow screen. |
+| `card.input-label` | aiRole: assistant, agent | audit `card-input-label`, card `card.input-label` | Every input in a card has a label of its own; a placeholder is never the only label. |
+| `card.input-error` | aiRole: assistant, agent | card `card.input-error` | An input in a card that validates (required, pattern, range) says what is wrong in an error message. |
+| `card.heading` | aiRole: assistant, agent | card `card.heading` | A card with more than its title marks the title as a heading. |
+| `card.columns-few` | aiRole: assistant, agent | card `card.columns-few` | A column layout in a card uses few columns (at most three) and no fixed widths wider than a compact screen allows. |
+| `card.narrow-first` | aiRole: assistant, agent | audit `card-narrow-first`, review | A card is laid out for the narrowest width it will show at and still works wider; it never scrolls sideways. |
+| `card.reading-order` | aiRole: assistant, agent | review | The order a card is read and tabbed in matches the order it is seen in. |
+| `card.image-alt` | aiRole: assistant, agent | card `card.image-alt` | Every informative image in a card has alternative text. |
+| `card.image-transparent` | aiRole: assistant, agent | review | Images in a card use transparent backgrounds so they suit light and dark themes, and text never sits on a colour that hurts reading. |
+| `card.action-titles` | aiRole: assistant, agent | card `card.action-titles` | Action titles in a card say what they do; never "Click here", or "Submit" alone where the outcome is unclear. |
+| `card.no-hidden-inputs` | aiRole: assistant, agent | card `card.no-hidden-inputs` | Inputs in a card, above all validated ones, are not hidden behind a toggle; if one must be, the toggle says what it shows. |
+| `card.version` | aiRole: assistant, agent | card `card.version` | A card declares a schema version the host supports (1.6 or lower) and gives a fallback for anything outside it. |
+| `card.sparingly` | aiRole: assistant, agent | review | An agent sends a card only when it helps; cards that scroll out of view lose their use. |
+| `card.high-impact-marked` | aiRole: assistant, agent | card `card.high-impact-marked` | A card action that pays, sends, deletes or publishes is marked high-impact, so the host asks for approval. |
+| `flow.reachable` | always | blueprint `flow.reachable` | Every screen is reached from a destination (or, in a view, its first screen) through actions, at every size class the app supports; leaving by external counts as a way on. |
+| `flow.no-dead-end` | always | blueprint `flow.no-dead-end` | A screen or modal that declares actions offers a way on or back: another screen, back, external, or a modal's dismiss. |
+| `flow.target-exists` | always | blueprint `flow.target-exists` | Every action's target names a screen, a modal of its screen, back, a state or external. |
+| `flow.primary-consistent` | always | blueprint `flow.primary-consistent` | A screen marks at most one action primary, and when it also gives primaryAction, that is the same action. |
+| `journey.walkable` | always | blueprint `journey.walkable` | Each step of a journey names an action its screen has, and the next step is where that action leads; the first step is on the entry, and an alternate starts where it branches. |
+| `journey.safeguarded` | always | blueprint `journey.safeguarded` | A journey step that takes a destructive action has its safeguard (undo or confirm), and one that takes a high-impact action has its approval. |
+| `journey.covers-errors` | always | blueprint `journey.covers-errors` | A journey through a screen that declares an error state has an alternate that covers that state. |
+| `journey.story-covered` | always | blueprint `journey.story-covered` | With a HELIX marker, every story a screen serves has a journey, and each journey's story and criteria exist in HELIX; the stories are read, never written. |
 
 Recipes (tested combinations of patterns for a job):
 
@@ -312,7 +392,30 @@ Recipes (tested combinations of patterns for a job):
 - `users-and-access` (app): Administrators invite people, assign roles and set permissions. `<UsersAndRoles>`, `<PermissionsMatrix>`.
 - `embedded-tool` (view): A tool's result is shown inside a host (an MCP App view, such as a Praxis plug-in) for one task. `<RecordDetail>`.
 
-The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.
+### AI and agent screens
+
+Declare each screen's AI role in the blueprint: a screen where AI generates content, converses or acts has `ai` in `app.blueprint.json`, for example `"ai": { "roles": ["agent"], "acts": true, "highImpactActions": [{ "label": "Pay", "approval": "each" }] }`. The roles are `generative`, `assistant`, `agent`: `generative` for AI output inside an ordinary screen, `assistant` for a conversation, `agent` where the AI acts for the user. The AI rules apply by declared role and combine with the others, so an embedded agent view gets the view rules and the agent rules. Get them with `rulesFor({ aiRoles })` or `get_rules` with `aiRoles`; a target with no role gets no AI rule. The AI rules by role:
+
+- **generative**: `ai.disclose`, `ai.not-a-person`, `ai.capabilities`, `ai.fallback`, `ai.stop`, `ai.correct`, `ai.dismiss`, `ai.uncertainty`, `ai.improve-request`, `ai.consent`, `ai.feedback`, `ai.notify-changes`, `ai.inclusive`, `ai.user-initiates`
+- **assistant**: `ai.disclose`, `ai.not-a-person`, `ai.capabilities`, `ai.starters`, `ai.stop`, `ai.correct`, `ai.sources`, `ai.uncertainty`, `ai.improve-request`, `ai.consent`, `ai.feedback`, `ai.memory-visible`, `ai.notify-changes`, `ai.inclusive`, `genui.renderable`, `genui.review-prefill`, `genui.keep-input`, `genui.history`, `ai.user-initiates`, `card.actions-few`, `card.wrap`, `card.input-label`, `card.input-error`, `card.heading`, `card.columns-few`, `card.narrow-first`, `card.reading-order`, `card.image-alt`, `card.image-transparent`, `card.action-titles`, `card.no-hidden-inputs`, `card.version`, `card.sparingly`, `card.high-impact-marked`
+- **agent**: `ai.disclose`, `ai.not-a-person`, `ai.capabilities`, `ai.starters`, `ai.stop`, `ai.correct`, `agent.on-off`, `agent.declare-high-impact`, `agent.approve-high-impact`, `agent.plan-visible`, `agent.interrupt`, `agent.who-acts`, `agent.recover`, `agent.summary`, `agent.status-unwatched`, `ai.sources`, `ai.uncertainty`, `ai.ask-when-unclear`, `ai.improve-request`, `ai.consent`, `ai.feedback`, `ai.memory-visible`, `ai.notify-changes`, `ai.inclusive`, `genui.review-prefill`, `ai.user-initiates`, `card.actions-few`, `card.wrap`, `card.input-label`, `card.input-error`, `card.heading`, `card.columns-few`, `card.narrow-first`, `card.reading-order`, `card.image-alt`, `card.image-transparent`, `card.action-titles`, `card.no-hidden-inputs`, `card.version`, `card.sparingly`, `card.high-impact-marked`
+- **any screen**: `ai.declared`
+
+Mark AI in the markup so the audit can check it (the SDK's assistant components do this for you):
+
+- `data-piq-ai="generated"`: content made by AI, with a visible disclosure and a correction control (data-piq-ai-control="retry", "regenerate", "edit" or "undo"); inline UI it makes has a label on each input, pre-filled values the user can edit, and a submit control of its own.
+- `data-piq-ai="status"`: the live region saying what the AI is doing (aria-live; aria-busy="true" while working), with a Stop or Pause control in or beside it.
+- `data-piq-ai="plan"`: an agent's steps, each data-piq-ai="step" with data-piq-ai-status (pending, running, done, failed or skipped) and that status in text.
+- `data-piq-ai="approval"`: a request for approval, with data-piq-ai-control="approve" and "deny", neither pre-chosen.
+- `data-piq-ai-actor="agent" | "user"`: the live region saying who is acting now, updated on takeover and hand-back.
+- `data-piq-ai-label`: an ancestor whose visible text discloses AI for everything inside it.
+- `data-piq-ai="prompt"`: the field or form where the user asks the AI; an empty conversation offers suggested starting points (data-piq-ai-control="starter").
+- `data-piq-ai-status="done"`: on the status region when a run has finished, with its summary shown (data-piq-ai="summary").
+- `data-piq-ai-takeover`: on the agent region when the user can take over; then data-piq-ai-actor says who is acting.
+- `data-piq-ai-control="previous"`: returns to the previous step, beside "retry", on a failed step.
+- `data-piq-screen="<screen id>"`: on the page's root: the blueprint screen it shows, for ux-builder-audit --blueprint.
+
+The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC. The AI rules also restate, in the SDK's own words, Microsoft's HAX Toolkit, its design and Learn guidance and the Adaptive Cards documentation, Google PAIR's People + AI Guidebook, and Cheng, Liang, Schoop and Nichols (IUI '26); ux-builder is not affiliated with or endorsed by Microsoft either.
 
 ### Themes
 
