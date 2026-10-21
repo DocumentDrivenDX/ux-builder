@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/alignment.schema.json",
+  "title": "ux-builder assessment record: alignment (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "conflicts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "alignment"
+    },
+    "version": {
+      "const": 1
+    },
+    "source": {
+      "type": "string"
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -22,6 +22,7 @@ import { join, relative } from "node:path";
 import { chromium } from "playwright";
 import { enrich, inspect, modalEscape, prepare, sdkRulesIn, settle } from "./inspect.mjs";
 export { inspect, STATE_AFFECTING } from "./inspect.mjs";
+export { attach, checkpoint, startBrowser } from "./assess/checkpoint.mjs";
 
 const own = createRequire(import.meta.url);
 export const VERSION = JSON.parse(readFileSync(own.resolve("./package.json"), "utf8")).version;

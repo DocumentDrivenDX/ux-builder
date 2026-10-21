@@ -8,6 +8,7 @@
      baseline    run the app's tests and the audit before any change
      browser     start Chromium with a CDP endpoint for the agent's driver
      inspect     inspect a checkpoint: the agent's page in place, or a replay
+     validate-report  check a run package before handing it over
 
    Exit codes: 0 done; 1 the stage could not complete (reported); 2 usage. */
 
@@ -32,9 +33,26 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
           [--journey <J-id>] [--step n] [--role id] [--state class]
           [--state-affecting] [--redact <selector>]... [--out dir] [--run R-id]
       Inspect the page in place (or a verified replay) and write
-      <out>/<run>/checkpoints/<id>/inspection.json, screenshot.png, tree.yml.`;
+      <out>/<run>/checkpoints/<id>/inspection.json, screenshot.png, tree.yml.
+  validate-report <run-dir>
+      Check every record in a run package, that its evidence resolves, and that
+      findings relying on a conflicting HELIX ID are qualified.
+
+The ux-builder-assess skill (node_modules/@ux-builder/audit/skill/) says how
+an agent runs these as one assessment.`;
 
 const SUB = {
+  async "validate-report"(args) {
+    const [dir, ...rest] = args;
+    if (!dir || rest.length) { console.error(USAGE); return 2; }
+    const { existsSync } = await import("node:fs");
+    if (!existsSync(dir)) { console.error(`${dir} does not exist`); return 2; }
+    const { validateReport } = await import("./validate-report.mjs");
+    const problems = validateReport(dir);
+    for (const p of problems) console.log(`${p.file} ${p.path}  ${p.message}`);
+    console.log(problems.length ? `${dir}: ${problems.length} problem${problems.length === 1 ? "" : "s"}` : `${dir}: valid`);
+    return problems.length ? 1 : 0;
+  },
   async baseline(args) {
     const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
     const ready = await validated(o.manifest);

@@ -378,6 +378,18 @@ Agents get the rules where they plan, over MCP: `get_rules`,
 
 ux-builder is not affiliated with or endorsed by Apple or Google. Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.
 
+### UX assessment
+
+`ux-builder-audit assess` lets a coding agent assess a HELIX-governed app's UX
+(FEAT-009). A `ux-assessment.yml` manifest binds the app's HELIX marker, flow
+and catalogue. The commands trace each journey to its HELIX stories,
+acceptance criteria and tests, record the app's tests and the audit as a
+baseline, and inspect the exact page state the agent's browser reached, over
+CDP. The skill `ux-builder-assess`, shipped in `@ux-builder/audit`, tells the
+agent how to run them and write ranked, evidence-backed recommendations. The
+assessment never changes the app's code or its HELIX documents. See
+[`packages/audit`](packages/audit/README.md#ux-assessment).
+
 ### AI coding agents
 
 - `node_modules/@ux-builder/ui/AGENTS.md`: the rules, set-up, and a

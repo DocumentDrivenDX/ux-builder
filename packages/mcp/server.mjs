@@ -16,15 +16,19 @@
 
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-const require = createRequire(import.meta.url);
-// The rules and the blueprint check, as the installed @ux-builder/ui has them (0.7 and later).
+const own = createRequire(import.meta.url);
+// The app's own @ux-builder/ui and @ux-builder/tokens when run from its directory, else ours (FEAT-009 AGW-04).
+const app = createRequire(join(process.cwd(), "package.json"));
+const require = { resolve: (spec) => { try { return app.resolve(spec); } catch { return own.resolve(spec); } } };
+// The rules and the blueprint check, from the same copy (0.7 and later).
 let blueprint = null;
-try { blueprint = await import("@ux-builder/ui/blueprint"); } catch { /* an older @ux-builder/ui */ }
+try { blueprint = await import(pathToFileURL(require.resolve("@ux-builder/ui/blueprint")).href); } catch { /* an older @ux-builder/ui */ }
 const readJson = (spec) => JSON.parse(readFileSync(require.resolve(spec), "utf8"));
 const readText = (spec) => readFileSync(require.resolve(spec), "utf8");
 

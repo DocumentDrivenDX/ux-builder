@@ -17,6 +17,10 @@ ddx:
 The project's first build plan, written for FEAT-009 increment 1 (2026-10-20).
 Increments 2 and 3 get their own slices when they are planned.
 
+**Status (2026-10-20)**: B-001 to B-006 built, each committed after the full
+local suite passed. Increment 1's criteria (US-056, US-057, US-058, US-059,
+US-062) are cited by tests and out of `tools/coverage-exceptions.json`.
+
 ## Scope
 
 **Governing Artifacts**:
@@ -61,9 +65,9 @@ external tracker is used in this repository.
 
 ## Validation Plan
 
-- [ ] Failing tests exist before implementation starts (each STP's rows)
-- [ ] All required tests pass before closing a slice
-- [ ] Each built criterion is removed from `tools/coverage-exceptions.json`
+- [x] Failing tests exist before implementation starts (each STP's rows)
+- [x] All required tests pass before closing a slice
+- [x] Each built criterion is removed from `tools/coverage-exceptions.json`
 - [ ] Behavior changes update canonical documents
 - [ ] The operator reviews locally before any commit is pushed
 

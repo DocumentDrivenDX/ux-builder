@@ -19,7 +19,7 @@ ddx:
 # Feature Specification: FEAT-009 — HELIX-aware UX assessment
 
 **Feature ID**: FEAT-009
-**Status**: Specified (ADR-026, 2026-10-20); built in increments
+**Status**: Specified (ADR-026, 2026-10-20); increment 1 built 2026-10-20 (`@ux-builder/audit` `assess`, B-001 to B-006); increments 2 and 3 planned
 **Priority**: P1 (increment 1: context, traceability, baseline, the agent workflow for those stages, and same-state inspection) / P2 (increment 2: walkthroughs, coverage, findings, document proposals) / P3 (increment 3: run comparison at scale, CI, MCP wrappers)
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: UX assessment

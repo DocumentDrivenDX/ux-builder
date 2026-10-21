@@ -2,7 +2,7 @@
   "name": "@ux-builder/audit",
   "version": "0.1.2",
   "license": "MIT OR Apache-2.0",
-  "description": "Audit a running app's use of the AI-UI SDK theme: switches it through every theme and appearance in Chromium and reports colours, fonts and radii that are not the theme's, restyled widgets, hand-drawn icons and loaders, other UI libraries, the favicon and logo, and contrast (FEAT-004 SDK-18).",
+  "description": "Audit a running app's use of the AI-UI SDK theme: switches it through every theme and appearance in Chromium and reports colours, fonts and radii that are not the theme's, restyled widgets, hand-drawn icons and loaders, other UI libraries, the favicon and logo, and contrast (FEAT-004 SDK-18); and a HELIX-aware UX assessment (FEAT-009): page-level inspection of an agent's browser state, journeys traced to HELIX documents and tests, and a recorded baseline.",
   "type": "module",
   "bin": {
     "ux-builder-audit": "./cli.mjs"
@@ -11,13 +11,15 @@
     ".": "./audit.mjs",
     "./report": "./report.mjs",
     "./package.json": "./package.json",
-    "./schema/*": "./schema/*"
+    "./schema/*": "./schema/*",
+    "./skill/*": "./skill/*"
   },
   "files": [
     "audit.mjs",
     "inspect.mjs",
     "assess",
     "schema",
+    "skill",
     "cli.mjs",
     "collect.js",
     "serve.mjs",

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/run.schema.json",
+  "title": "ux-builder assessment record: run (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "id",
+    "stages"
+  ],
+  "properties": {
+    "schema": {
+      "const": "run"
+    },
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^R-"
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stage",
+          "status"
+        ],
+        "properties": {
+          "stage": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "partial",
+              "blocked",
+              "not-run",
+              "not-available"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "manifest": {
+      "type": "object"
+    },
+    "app": {
+      "type": "object"
+    },
+    "helix": {
+      "type": "object"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "versions": {
+      "type": "object"
+    },
+    "agent": {
+      "type": "object"
+    }
+  }
+}

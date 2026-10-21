@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/coverage.schema.json",
+  "title": "ux-builder assessment record: coverage (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "entries"
+  ],
+  "properties": {
+    "schema": {
+      "const": "coverage"
+    },
+    "version": {
+      "const": 1
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "journey",
+          "state",
+          "status",
+          "reason"
+        ],
+        "properties": {
+          "journey": {
+            "type": "string",
+            "pattern": "^J-"
+          },
+          "state": {
+            "enum": [
+              "success",
+              "empty",
+              "loading",
+              "recoverable-error",
+              "system-failure",
+              "ai",
+              "responsive-keyboard"
+            ]
+          },
+          "status": {
+            "enum": [
+              "assessed",
+              "blocked",
+              "not-assessed",
+              "not-applicable"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "outcome": {
+            "enum": [
+              "pass",
+              "issue"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "status": {
+              "const": "assessed"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "outcome",
+            "evidence"
+          ],
+          "properties": {
+            "evidence": {
+              "minItems": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}
