@@ -2,7 +2,7 @@
 ddx:
   id: ADR-028
   type: adr
-  status: proposed
+  status: accepted
   links:
     - kind: informed_by
       to: ADR-025
@@ -26,7 +26,7 @@ ddx:
 
 | Date | Status | Deciders | Related | Confidence |
 |------|--------|----------|---------|------------|
-| 2026-10-21 | **Proposed** (operator's direction 2026-10-21: FEAT-011; markers yes; warnings; blueprint `ai` yes; waiver extended and counsel briefed) | Operator; legal counsel for the sources (waived for now, tracked as a bead) | ADR-025, ADR-021, ADR-023, ADR-026, FEAT-011, CONTRACT-005, SD-005 | Medium |
+| 2026-10-21 | **Accepted** 2026-10-21 (operator merged PR #31 and said "now let's build and test all the new stuff"; direction: operator's direction 2026-10-21: FEAT-011; markers yes; warnings; blueprint `ai` yes; waiver extended and counsel briefed) | Operator; legal counsel for the sources (waived for now, tracked as a bead) | ADR-025, ADR-021, ADR-023, ADR-026, FEAT-011, CONTRACT-005, SD-005 | Medium |
 
 ## Context
 
