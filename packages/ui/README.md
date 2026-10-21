@@ -172,6 +172,18 @@ counterpart. `ux-builder/no-inline-svg` reports `<svg>` written in JSX: use
 `<Icon>`, `@ux-builder/ui/icons` or `registerIcons`. Lint reads source; for
 what only the running app shows, run `@ux-builder/audit`.
 
+`ux-builder/ai-neutral-voice` (a warning, US-081) checks the copy around AI
+features in JSX text and string attributes. "I think", "I feel", "I
+understand", "I believe" and their variants present the AI as a person (rule
+`ai.not-a-person`); a label like "Copilot, summarize" makes the AI the actor
+(`ai.user-initiates`): write "Summarize" or "Summarize with Copilot". It checks
+English only, and not text the model writes at run time. A brand with a
+deliberate persona opts a string out with `// ux-builder-ai-persona` (or
+`{/* ux-builder-ai-persona */}` in JSX children) on the line before it.
+
+`uxBuilder.configs.recommended` turns on all four rules, with the voice rule
+as a warning: `export default [{ files: ["src/**/*.jsx"], ...uxBuilder.configs.recommended }]`.
+
 ### Icons
 
 ```jsx
