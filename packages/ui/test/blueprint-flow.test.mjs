@@ -199,7 +199,9 @@ describe("US-086: plan the screen flow in the blueprint", () => {
   // @covers US-086-AC5
   test("AC5: a blueprint without actions gives exactly the findings it gave before this feature", () => {
     const { cases } = JSON.parse(read("packages/ui/test/fixtures/pre-ai-findings.json"));
-    for (const c of cases) assert.equal(JSON.stringify(checkBlueprint(c.blueprint)), JSON.stringify(c.findings), c.name);
+    // The SDK's version in messages changes with every release; the findings must not.
+    const unversioned = (x) => JSON.stringify(x).replace(/@ux-builder\/ui \d+\.\d+\.\d+[^ \\"]*/g, "@ux-builder/ui <version>");
+    for (const c of cases) assert.equal(unversioned(checkBlueprint(c.blueprint)), unversioned(c.findings), c.name);
     // Removing every action from the clean flow leaves only the checks that existed before.
     const bp = clean();
     delete bp.journeys;
