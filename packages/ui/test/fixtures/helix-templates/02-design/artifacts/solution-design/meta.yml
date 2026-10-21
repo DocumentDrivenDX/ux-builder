@@ -1,0 +1,6 @@
+artifact:
+  id: solution-design
+output:
+  location: docs/helix/02-design/solution-designs/SD-{id}-{name}.md
+  format: markdown
+  naming: SD-{feature-number}-{feature-name}.md

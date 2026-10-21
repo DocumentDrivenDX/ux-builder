@@ -33,7 +33,7 @@ before(async () => {
 describe("US-014-AC5: agents list the SDK over MCP", () => {
   test("the tools and resources are listed, with instructions carrying the rules", async () => {
     const { tools } = await client.listTools();
-    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_themes", "list_tokens", "list_variants", "list_widgets", "validate_assessment_manifest", "validate_assessment_report"]);
+    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_themes", "list_tokens", "list_variants", "list_widgets", "propose_from_blueprint", "validate_assessment_manifest", "validate_assessment_report"]);
     const { resources } = await client.listResources();
     assert.deepEqual(resources.map((r) => r.uri).sort(), ["ux-builder://catalogue", "ux-builder://guidance"]);
     assert.match(client.getInstructions(), /Never hard-code colours, font families or radii/);
@@ -103,7 +103,7 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
     await c.connect(new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL("../server.mjs", import.meta.url))] }));
     try {
       const { tools } = await c.listTools();
-      assert.equal(tools.length, 21);
+      assert.equal(tools.length, 22);
     } finally { await c.close(); }
   });
 });
@@ -202,6 +202,31 @@ describe("US-087: check_blueprint checks journeys against the HELIX stories", ()
     assert.deepEqual(res.findings, checkBlueprint(plan, { helix: readStories(join(process.cwd(), "app.blueprint.json")) }));
     assert.deepEqual(res.findings.filter((f) => f.rule === "journey.story-covered").map((f) => f.path), ["/journeys/0/criteria/1", "/screens/0/stories/0"]);
     assert.equal(res.notes, undefined, "this repository has a marker");
+  });
+});
+
+describe("US-089: propose_from_blueprint returns HELIX proposals without writing them", () => {
+  // @covers US-089-AC1
+  test("the same proposals as ux-builder-blueprint propose, and no HELIX document or file is written", async () => {
+    const { makeApp, BLUEPRINT } = await import("../../ui/test/helix-app.mjs");
+    const { propose } = await import("../../ui/blueprint/propose.mjs");
+    const { readdirSync, statSync } = await import("node:fs");
+    const app = makeApp();
+    try {
+      const plan = JSON.parse(readFileSync(BLUEPRINT, "utf8"));
+      const files = () => { const out = []; const walk = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (e.isDirectory()) walk(p); else out.push([p, statSync(p).mtimeMs, readFileSync(p, "utf8")]); } }; walk(app.dir); return out; };
+      const before = files();
+      const res = (await call("propose_from_blueprint", { blueprint: plan, path: app.blueprint })).data;
+      assert.equal(res.written, false);
+      const { marker, ...expected } = propose(plan, { blueprintFile: app.blueprint });
+      assert.deepEqual(res.proposals, expected.proposals);
+      assert.ok(res.proposals.some((p) => p.id === "US-012-walkthrough" && /^\+1\. On \*\*Review queue\*\*/m.test(p.patch)));
+      assert.deepEqual(res.disagreements.map((d) => d.path), ["docs/helix/01-frame/user-stories/US-013-add-an-entry.md"]);
+      assert.deepEqual(files(), before, "nothing in the app changed");
+      const none = await call("propose_from_blueprint", { blueprint: plan, path: join(tmpdir(), "no-marker-here", "app.blueprint.json") });
+      assert.equal(none.isError, true);
+      assert.match(none.content[0].text, /\.helix\.yml/);
+    } finally { rmSync(app.dir, { recursive: true, force: true }); }
   });
 });
 

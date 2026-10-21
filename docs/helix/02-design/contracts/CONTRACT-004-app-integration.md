@@ -446,6 +446,54 @@ The renderer shows an approval with `consequence`, Approve and Deny
 | `ux-builder-blueprint wireframes [--out <dir>]` | Each screen's pattern at each supported size class, HTML and PNG, neutral theme |
 | `@ux-builder/mcp` | `check_blueprint` includes the new checks; `propose_from_blueprint` returns the proposals without writing them. *[Amended 2026-10-21 — build]* `check_blueprint` reads the stories under the HELIX marker above the server's directory; with none, its result adds `notes` saying the story checks were skipped |
 
+*[Amended 2026-10-21 — build of FEAT-012 steps 4 and 5]* What the build
+had to settle:
+- **Arguments and defaults**: each command takes an optional blueprint file
+  (default `app.blueprint.json`). `--out` defaults to `helix-proposals/`,
+  `blueprint-drawings/` and `blueprint-wireframes/`. A rerun replaces the
+  `.patch`, `.mmd`/`.svg` and `.html`/`.png` files an earlier run wrote there.
+- **`propose` output**: one `<id>.patch` per section (a unified diff,
+  paths relative to the marker's directory, so `git apply` works from the
+  repository root), `report.md` (patches, disagreements with both texts,
+  sections already current, problems) and `proposals.json` (the same, with
+  each proposal's `target`: existing `{ id, type }` or new `{ id, type }`).
+  No timestamps, so a rerun is byte-identical. Exit 0 also when there are
+  disagreements: they are reported, not failures.
+- **Where each draft goes** (HELIX v0.18.0 has no flow type): the story's
+  `## Walkthrough`; `## Screen Flow` after *System Decomposition* in the
+  solution design that links (or names as `**Feature**`) the journeys'
+  stories' feature; architecture's `## Data Flow`, from the blueprint's
+  **first** journey (the blueprint has no "primary" field); `### Destinations
+  by Size Class` under `DESIGN.md`'s *Navigation and Active State*, so the
+  person's active-state text is kept; and `## Journey Scenarios` after the
+  story test plan's *Acceptance Criteria Test Mapping*. Documents are found
+  by `ddx.type` and `ddx.id` under the marker's flow root; a story test plan
+  by its link to the story, else `STP-<n>`. A missing solution design,
+  architecture, `DESIGN.md` or story test plan is drafted from the installed
+  template (`.claude/skills/helix/references/`, else `.agents/skills/…`) at
+  its `output.location`, as a new-file patch; a missing story is a problem,
+  never drafted.
+- **Unwritten vs different**: a section that is empty, the template's own
+  text or only placeholders (`[…]`, `%%` comments, empty diagrams) is
+  drafted; one equal to the draft (ignoring whitespace and comments) is
+  "current"; anything else is a disagreement and gets no patch.
+- **`draw` output**: `ia`, `flow` and `journey-<id>`, each `.mmd` and
+  `.svg`. The SVG is drawn by the package's own small layered layout from the
+  same graph, not by Mermaid, so no Mermaid renderer or browser is a
+  dependency.
+- **`wireframes` output**: `<screen>.<size class>.html` and `.png`, drawn at
+  390, 720, 1024, 1366 and 1920 px for compact to extra-large (the
+  blueprint's supported size classes; compact, medium and expanded when it
+  names none), linking `assets/plain.css`, `ui.css` and `patterns.css`. An
+  app's screens are drawn in `AppShell` with its destinations, a view's
+  without. Exit 2 when Playwright (`playwright` or `@playwright/test`) or its
+  Chromium is missing; the HTML is still written.
+- **`propose_from_blueprint`**: `{ blueprint, path? }`, `path` being where
+  the blueprint lives (default `app.blueprint.json` in the server's
+  directory). It returns `{ flow, helix, proposals: [{ id, kind, path,
+  section, target, file, patch }], disagreements, current, problems,
+  written: false }`, or an error naming `.helix.yml` when there is no marker.
+
 ## Error Semantics
 
 | Condition | Error / Outcome | Retry | Recovery Expectation |

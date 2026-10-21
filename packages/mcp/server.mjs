@@ -11,7 +11,8 @@
    list_widgets, get_widget, list_patterns, get_pattern, list_variants,
    list_tokens, get_token, list_icons, get_guidance; and, from @ux-builder/ui
    0.7, the interaction rules and blueprint (FEAT-008): get_rules,
-   list_recipes, get_recipe, get_blueprint_schema, check_blueprint. Resources:
+   list_recipes, get_recipe, get_blueprint_schema, check_blueprint; and, with
+   FEAT-012, propose_from_blueprint (HELIX proposals, never written). Resources:
    ux-builder://catalogue, ux-builder://guidance. */
 
 import { readFileSync } from "node:fs";
@@ -32,6 +33,9 @@ try { blueprint = await import(pathToFileURL(require.resolve("@ux-builder/ui/blu
 // Its HELIX story reader, beside it (FEAT-012 JRN-03): journeys are checked against the stories above the server's directory.
 let storyReader = null;
 try { storyReader = await import(new URL("./helix.mjs", pathToFileURL(require.resolve("@ux-builder/ui/blueprint"))).href); } catch { /* before FEAT-012 */ }
+// Its HELIX proposals, beside it (FEAT-012 DRF-01): drafted from the blueprint, returned and never written.
+let proposer = null;
+try { proposer = await import(new URL("./propose.mjs", pathToFileURL(require.resolve("@ux-builder/ui/blueprint"))).href); } catch { /* before FEAT-012 step 4 */ }
 // The UX assessment's checks, when the app has @ux-builder/audit 0.2 or later (FEAT-009, optional wrappers).
 let assess = null;
 try {
@@ -56,7 +60,7 @@ const near = (name, names) => names.filter((n) => n.includes(name) || name.inclu
 
 const SIZE_CLASSES = ["compact", "medium", "expanded", "large", "extra-large"];
 
-export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyReader) {
+export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyReader, px = proposer) {
   const { catalogue: cat, manifest, resolved } = s;
   const server = new McpServer({ name: "ux-builder", version: cat.packages["@ux-builder/ui"] }, {
     instructions: `The AI-UI SDK (@ux-builder/ui ${cat.packages["@ux-builder/ui"]}, @ux-builder/tokens ${cat.packages["@ux-builder/tokens"]}). Before writing UI in an app that uses it, read get_guidance. Rules: ${cat.rules.join(" ")}`,
@@ -228,6 +232,23 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       const findings = bp.checkBlueprint(b, { helix });
       const notes = storied && !helix ? [hx.skippedNote(process.cwd())] : [];
       return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings, ...(notes.length ? { notes } : {}) });
+    });
+  }
+
+  // HELIX proposals from the blueprint (FEAT-012 DRF-01, DRF-02; ADR-030): returned, never written or applied.
+  if (px) {
+    server.registerTool("propose_from_blueprint", {
+      title: "Propose HELIX content from a blueprint",
+      description: "Draft HELIX content from the blueprint's flow and journeys, as unified-diff patches a person reviews and applies: story walkthroughs, the solution design's Mermaid screen flow, architecture's Data Flow sequence diagram, DESIGN.md's navigation table and story test plan scenarios. Reads the HELIX documents and templates under the .helix.yml marker above the blueprint's path; writes nothing and applies nothing. Where a HELIX section already says something else, it returns a disagreement with both texts instead of a patch: HELIX governs.",
+      inputSchema: {
+        blueprint: z.record(z.string(), z.unknown()).describe("The blueprint object (app.blueprint.json)"),
+        path: z.string().optional().describe("Where the blueprint lives; the HELIX marker is found walking up from it (default: app.blueprint.json in the server's directory)"),
+      },
+    }, async ({ blueprint: b, path }) => {
+      const r = px.propose(b, { blueprintFile: path ?? join(process.cwd(), "app.blueprint.json") });
+      if (!r.marker) return fail(`No HELIX marker (.helix.yml) above ${path ?? process.cwd()}: propose_from_blueprint drafts into the HELIX flow that marker names.`);
+      const { marker, ...rest } = r;
+      return ok({ ...rest, written: false });
     });
   }
 
