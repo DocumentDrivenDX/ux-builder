@@ -11,4 +11,6 @@ package as installed; the licence texts of vendored source are in this package's
 
 ## Dependencies
 
-None: this package depends on no third-party package.
+| Package | Version | Licence | Repository |
+|---|---|---|---|
+| undici | 7.30.1 | MIT | https://github.com/nodejs/undici |

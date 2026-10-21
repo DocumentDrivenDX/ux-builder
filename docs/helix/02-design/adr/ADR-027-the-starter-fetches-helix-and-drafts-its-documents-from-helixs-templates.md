@@ -37,7 +37,9 @@ ddx:
    asset's published digest when GitHub gives one, the manifest's version
    against the tag, and the presence of the skill and catalogue floor. An
    environment override of the API base (`UX_BUILDER_HELIX_API`) points tests
-   at a local release server.
+   at a local release server. When a proxy variable is set (`HTTPS_PROXY`,
+   `HTTP_PROXY` or `NO_PROXY`, in either case), the requests use undici's
+   `EnvHttpProxyAgent`, a dependency of create-app (MIT).
 2. **The plugin package is the unit.** It is HELIX's own packaging of the
    skill with its catalogue; the starter does not assemble HELIX from source.
 3. **Install it as a project skill.** `skills/helix/` from the package goes to
@@ -62,7 +64,8 @@ ddx:
    test citing US-001, and guidance that puts HELIX first in the order of work.
 8. **Extract safely; never block.** Only regular files under the package's
    root are written; any unsafe entry rejects the package. Only a pinned
-   version that cannot be had stops creation.
+   version that cannot be had stops creation. If the bundled copy is also
+   unusable, the app is created without HELIX, and the output says why.
 
 ## Alternatives Considered
 

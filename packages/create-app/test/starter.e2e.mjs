@@ -25,12 +25,13 @@ const sh = (cmd, args, cwd) => {
   assert.equal(r.status, 0, `${cmd} ${args.join(" ")}\n${r.stdout}\n${r.stderr}`);
   return r.stdout;
 };
-let server, browser;
+let server, browser, created;
 
 before(async () => {
   mkdirSync(join(tmp, "sdk"));
   for (const p of ["tokens", "ui", "audit"]) sh("npm", ["pack", "--silent", "--pack-destination", join(tmp, "sdk")], join(ROOT, "packages", p));
-  sh(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), app, "--theme", "databricks", "--sdk-from", join(tmp, "sdk")], tmp);
+  created = spawnSync(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), app, "--theme", "databricks", "--sdk-from", join(tmp, "sdk")], { cwd: tmp, encoding: "utf8" });
+  assert.equal(created.status, 0, `create-app\n${created.stdout}\n${created.stderr}`);
   sh("npm", ["install", "--no-audit", "--no-fund"], app);
 });
 after(async () => { server?.kill(); await browser?.close(); rmSync(tmp, { recursive: true, force: true }); });
@@ -172,14 +173,28 @@ async function assertAttr(locator, name, value) {
 }
 
 // @covers US-067-AC1
+// @covers US-070-AC1
 // @covers US-070-AC2
 // @covers US-070-AC3
-test("FEAT-010: the fresh app is on the latest HELIX, its manifest validates and its e2e test passes", () => {
-  const v = JSON.parse(readFileSync(join(app, ".claude/skills/helix/HELIX-VERSION.json"), "utf8"));
+test("FEAT-010: the fresh app is on the latest HELIX, its manifest validates, collect records no warning and its e2e test passes", () => {
+  // This test fetches the real latest release from GitHub. Without the network the starter
+  // falls back (to the bundled copy, or, in a checkout with no bundle, to no HELIX); say so plainly.
+  const said = `${created.stdout}${created.stderr}`;
+  const file = join(app, ".claude/skills/helix/HELIX-VERSION.json");
+  assert.ok(existsSync(file), `no HELIX was installed, so the latest release was not fetched (is GitHub reachable?):\n${said}`);
+  const v = JSON.parse(readFileSync(file, "utf8"));
+  assert.equal(v.bundled, false, `the starter used the bundled HELIX, not the latest release (${v.reason}); is GitHub reachable?`);
   assert.match(v.tag, /^v\d+\.\d+\.\d+$/);
   assert.ok(existsSync(join(app, ".claude/skills/helix/SKILL.md")) && existsSync(join(app, ".claude/skills/helix/references/graph.yml")));
   assert.ok(existsSync(join(app, "docs/helix/01-frame/user-stories/US-001-see-search-and-add-matters.md")));
   const out = sh("npm", ["run", "assess:validate"], app);
   assert.match(out, /ux-assessment\.yml: valid/);
+  const runs = join(tmp, "assess-runs");
+  const collected = sh("npx", ["ux-builder-audit", "assess", "collect", "--run", "R-20261021T000000Z", "--out", runs], app);
+  assert.match(collected, /journeys' criteria 4 explicit, 0 uncovered/);
+  const dir = /Wrote (.+)\/requirements\.json/.exec(collected)[1];
+  const req = JSON.parse(readFileSync(join(dir, "requirements.json"), "utf8"));
+  assert.deepEqual(req.problems.filter((p) => p.severity === "warning"), [], "collect records no warning");
+  assert.equal(req.documents.length, 8);
   sh("npm", ["run", "test:e2e"], app);
 });

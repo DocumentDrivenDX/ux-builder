@@ -57,6 +57,9 @@ criteria; earlier features keep their tests where they are, traced by
 |--------|--------|---------|-------------|
 | Acceptance criteria cited by a test or excepted | 100% | 100% | `npm run coverage` in `npm run check` (CI) |
 | Existing audit findings after the `inspect()` refactor | unchanged | unchanged | The existing audit suites, unchanged |
+| FEAT-010 determinism: two apps with the same HELIX and options | identical documents apart from the date | the same | `helix-docs.test.mjs` (US-069-AC5) |
+| FEAT-010 bundled HELIX size | < 1.5 MB | < 1.5 MB | `helix-fetch.test.mjs`, when the bundle is present (after `npm pack`) |
+| FEAT-010 time to fetch and install HELIX | < 10 s | — | Not measured by a test |
 
 ### Critical Paths (P0)
 
@@ -79,6 +82,9 @@ criteria; earlier features keep their tests where they are, traced by
 | Baseline records (US-059) | [[STP-059]] | Integration | Real commands and the audit on fixture pages |
 | In-place inspection and the state proof (US-062) | [[STP-062]] | Integration (Chromium) | The page state is the thing under test |
 | Walkthroughs, coverage, findings, proposals, runs (US-060, US-061, US-063 to US-065) | written with increments 2 and 3 | Contract and Integration | Records validated by `validate-report`; excepted until built |
+| FEAT-010: fetch, fallback, proxy, safe extraction, pins (US-067, US-068) | [[STP-067]], [[STP-068]] | Integration | The CLI against a local release server and proxy; the starter e2e against GitHub |
+| FEAT-010: the starter set, heading merge, determinism (US-069) | [[STP-069]] | Integration | Documents drafted from fixture templates |
+| FEAT-010: manifest, traceability, guidance (US-070, US-071) | [[STP-070]], [[STP-071]] | Integration | The assessment's own `validate` and `collect` on a created app |
 
 Every P0 criterion of an in-scope story maps to one layer here and to
 tests in its STP.

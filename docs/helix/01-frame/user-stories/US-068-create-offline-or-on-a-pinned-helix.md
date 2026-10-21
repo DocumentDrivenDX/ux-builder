@@ -38,7 +38,9 @@ ADR-027 decision 4: create-app ships the HELIX release that was latest when it w
 - [ ] **US-068-AC1** — Given no network, when the starter runs, then the app is created with the bundled HELIX, and the output and `HELIX-VERSION.json` say which version and why.
 - [ ] **US-068-AC2** — Given `--helix-offline`, when the starter runs, then it makes no network request and uses the bundled HELIX.
 - [ ] **US-068-AC3** — Given `--helix-version <tag>`, when that release can be fetched and verified, then it is installed; when it cannot, then the starter exits 1, names the reason and creates no directory.
-- [ ] **US-068-AC4** — Given `--no-helix`, when the starter runs, then it writes no marker, HELIX documents or skill, and the app is otherwise as before.
+- [ ] **US-068-AC4** — Given `--no-helix`, when the starter runs, then it writes no marker, HELIX documents, skill or `ux-assessment.yml`, and the app is otherwise as before. It still gets `e2e/starter.spec.js` and `test:e2e`, with no `@covers` lines.
+- [ ] **US-068-AC5** — Given the bundled HELIX is missing or fails its check when the starter needs it, when the starter runs, then the app is created without HELIX, as with `--no-helix`, and the output gives the reason and says no `HELIX-VERSION.json` was written.
+- [ ] **US-068-AC6** — Given `--helix-offline` with `--helix-version`, when the starter runs, then it exits 1, says the two cannot be combined, and creates no directory.
 
 ## Test Scenarios
 
@@ -47,7 +49,9 @@ ADR-027 decision 4: create-app ships the HELIX release that was latest when it w
 | Offline | US-068-AC1 | Release server down | create | Bundled; reason recorded |
 | Forced | US-068-AC2 | --helix-offline; server counting requests | create | 0 requests |
 | Pinned | US-068-AC3 | --helix-version v1 present / v2 missing | create | Installed / exit 1, no dir |
-| None | US-068-AC4 | --no-helix | create | No marker, docs or skill |
+| None | US-068-AC4 | --no-helix | create | No marker, docs, skill or manifest; the e2e test without `@covers` |
+| No bundle | US-068-AC5 | Release server down; bundled copy missing or corrupt | create | Created without HELIX; reason printed |
+| Both | US-068-AC6 | --helix-offline --helix-version v9.9.0 | create | Exit 1, no dir |
 
 ## Dependencies
 

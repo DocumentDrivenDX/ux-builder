@@ -17,7 +17,9 @@
      --sdk-from <dir>   install @ux-builder/* from .tgz files in <dir> (testing)
      --helix-version <tag>  start on this HELIX release instead of the latest (FEAT-010)
      --helix-offline    use the HELIX bundled with this starter; no network
-     --no-helix         no HELIX marker, documents or skill
+                        (not with --helix-version)
+     --no-helix         no HELIX marker, documents, skill or ux-assessment.yml;
+                        e2e/starter.spec.js has no @covers lines
 
    By default the app also starts on the latest HELIX release: its skill and
    catalogue in .claude/skills/helix/, the .helix.yml marker and the starter
@@ -104,18 +106,33 @@ flows:
     version: "${version}"
 `;
 
-/* Create the app: HELIX first, so a pinned HELIX that cannot be had writes
-   nothing (HLF-04); then the app; then HELIX into it. */
+/* Without HELIX there is no US-001: the starter's test keeps its tests but
+   cites no criteria (FEAT-010 HLF-04). */
+export function uncite(spec) {
+  return spec
+    .replace(/^\/\/ The starter screen \(docs\/helix\/[^\n]*\n(?:\/\/[^\n]*\n)*?(?=import )/, "// The starter screen. Replace these tests with your own as the screen changes.\n")
+    .replace(/^\/\/ @covers [^\n]*\n/gm, "");
+}
+
+/* Create the app: HELIX first, so a pinned HELIX that cannot be had, or the
+   refused combination, writes nothing (HLF-04); then the app; then HELIX
+   into it. If no HELIX can be had, the app is made without it (HLS-02). */
 export async function create(dir, { helix: h = {}, log = () => {}, ...opts } = {}) {
-  const helix = h.skip ? null : await getHelix({ tag: h.tag, offline: h.offline, log });
+  let helix = h.skip ? null : await getHelix({ tag: h.tag, offline: h.offline, log });
+  const unavailable = helix?.unavailable ?? null;
+  if (unavailable) helix = null;
   const r = scaffold(dir, opts);
   if (helix) {
     const installed = installHelix(helix, r.dir);
     writeFileSync(join(r.dir, ".helix.yml"), marker(helix.manifest.version));
     const docs = await import("./helix-docs.mjs");
-    const written = docs.writeStarterSet(helix, r);
+    const written = docs.writeStarterSet(helix, r, { log });
     docs.wire(helix, r);
     r.helix = { ...helix.provenance, skillFiles: installed.files, documents: written };
+  } else {
+    const spec = join(r.dir, "e2e/starter.spec.js");
+    if (existsSync(spec)) writeFileSync(spec, uncite(readFileSync(spec, "utf8")));
+    if (unavailable) r.helixUnavailable = unavailable;
   }
   return r;
 }
@@ -140,4 +157,6 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   npm run lint     # no hard-coded colours, fonts or radii`);
   if (r.helix) console.log(`
 HELIX ${r.helix.tag}${r.helix.bundled ? ` (bundled with this starter: ${r.helix.reason})` : " (latest release, verified)"}: the helix skill in .claude/skills/helix/, the marker and ${r.helix.documents.length} documents in docs/helix/.`);
+  if (r.helixUnavailable) console.log(`
+HELIX: not installed: ${r.helixUnavailable}. The app was created without HELIX (as with --no-helix): no marker, documents or skill, and no HELIX-VERSION.json was written.`);
 }

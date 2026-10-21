@@ -13,8 +13,16 @@ cd my-app && npm install && npm run dev
 | `--name <name>` | The package name. Default: the directory's name |
 | `--blueprint <file>` | Start from this plan of the app's screens instead of the starter's. A plan with an error (`ux-builder-blueprint check`) is refused, with each error, and nothing is written |
 | `--helix-version <tag>` | Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written |
-| `--helix-offline` | Use the HELIX bundled with this starter; no network request |
-| `--no-helix` | Leave HELIX out: no marker, documents or skill |
+| `--helix-offline` | Use the HELIX bundled with this starter; no network request. Not with `--helix-version` (refused, nothing written) |
+| `--no-helix` | Leave HELIX out: no marker, documents, skill or `ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines |
+
+The HELIX request reads `GITHUB_TOKEN` (sent to GitHub's API as a bearer
+token, never written) and honours `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY`
+in either case. `UX_BUILDER_HELIX_API` replaces the release API's base
+(default `https://api.github.com`), for a mirror or a test server. If the
+latest release cannot be fetched, the bundled HELIX is used, and the app
+records why. If the bundled copy is also unusable, the app is created
+without HELIX, and the output says why.
 
 ## What the app has
 
@@ -55,3 +63,19 @@ newest within the starter's ranges (`@ux-builder/tokens` ^1.6.0, `@ux-builder/ui
 ^0.6.2, `@ux-builder/audit` ^0.1.1). Upgrade them together afterwards. If
 `npm create` gives an older version than expected, npx has reused a cached
 starter: `npm create @ux-builder/app@latest`.
+
+## Maintainer notes
+
+- `helix/` holds the bundled HELIX. It is not in the repository. `npm pack`
+  and `npm publish` write it through the `prepack` script, and you can write
+  it by hand with `npm run bundle-helix [-- --tag vX.Y.Z]`
+  (`scripts/bundle-helix.mjs`). The script fetches and verifies the latest
+  release as a new app would, writes the package and `bundled.json`, and sets
+  the HELIX version in `licenses/vendored.json`. The publish fails if the
+  release cannot be fetched.
+- Two surfaces are for tests and maintenance only, not supported options:
+  `UX_BUILDER_HELIX_BUNDLE`, a directory read as the bundled HELIX, and
+  `fetchRelease({ keepArchive })`.
+- `npm test` never touches GitHub; it uses a local release server and proxy.
+  `npm run test:e2e` fetches the real latest release and fails, saying so,
+  when GitHub cannot be reached.

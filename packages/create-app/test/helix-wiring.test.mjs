@@ -41,6 +41,7 @@ describe("US-070: the new app's documents pass HELIX's reading and are traced", 
     assert.deepEqual(checked.problems, []);
     assert.equal(checked.helix.flow.id, "helix");
     assert.deepEqual(checked.resolved.journeys.map((j) => j.story), ["US-001"]);
+    assert.deepEqual(checked.resolved.tests.map((t) => [t.id, t.command]), [["lint", "npm run lint"], ["audit", "npm run audit"], ["e2e", "npm run test:e2e"]], "the lint, audit and e2e commands");
     assert.equal(JSON.parse(readFileSync(join(app.dir, "package.json"), "utf8")).scripts["assess:validate"], "ux-builder-audit assess validate");
   });
 
