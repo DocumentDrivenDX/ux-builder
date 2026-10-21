@@ -479,6 +479,101 @@ describe("US-048 the assistant shows its answer as SDK components", () => {
     await page.close();
   });
 
+  // A wizard and a form page an agent renders inline (FEAT-011 AIB-03, US-080): the SDK's own patterns, from JSON props.
+  const WIZARD = (prefill) => ({ id: "a2", role: "assistant", parts: [{ type: "component", id: "intake", component: "Wizard", props: {
+    title: "Open a matter", submitLabel: "Open matter",
+    steps: [
+      { id: "client", title: "Client", fields: [{ name: "client", label: "Client name", value: prefill, required: true }] },
+      { id: "matter", title: "Matter", fields: [{ name: "kind", label: "Kind", type: "select", required: true, options: [{ value: "lit", label: "Litigation" }, { value: "adv", label: "Advisory" }] }, { name: "urgent", label: "Urgent", type: "checkbox" }] },
+    ] } }] });
+  const FORMPAGE = (prefill) => ({ id: "a3", role: "assistant", parts: [{ type: "component", id: "bill", component: "FormPage", props: {
+    title: "Bill details", submitLabel: "Use these details",
+    sections: [
+      { title: "Recipient", fields: [{ name: "name", label: "Name", value: prefill }, { name: "email", label: "Email", required: true }] },
+      { title: "Terms", fields: [{ name: "due", label: "Due date", type: "date" }] },
+    ] } }] });
+
+  // @covers US-048-AC2
+  // @covers US-080-AC4
+  // @covers US-080-AC5
+  test("AIB-03: a Wizard renders inline as the SDK's Wizard, keeps edits when regenerated, sends only on the user's submit, then is read only", async () => {
+    const page = await open("harness", { initial: [WIZARD("Acme Ltd")] });
+    const frame = page.locator('.piq-generative[data-component="Wizard"]');
+    assert.equal(await frame.getAttribute("data-piq-ai"), "generated");
+    assert.equal(await frame.locator(".piq-wizard").count(), 1, "the SDK's own Wizard");
+    assert.deepEqual(await frame.locator(".piq-wizard__step").allTextContents(), ["Client", "Matter"]);
+    const client = page.getByRole("textbox", { name: "Client name" });
+    assert.equal(await client.inputValue(), "Acme Ltd", "pre-filled and editable");
+    await client.fill("");
+    await page.getByRole("button", { name: "Continue" }).click();
+    assert.match(await frame.locator(".piq-error-summary").textContent(), /Enter Client name/, "the pattern's own step validation");
+    await client.fill("Acme Holdings");
+    await page.getByRole("button", { name: "Continue" }).click();
+    assert.match(await frame.locator(".piq-wizard__heading").textContent(), /Step 2 of 2: Matter/);
+    await page.getByRole("combobox", { name: "Kind" }).selectOption("adv");
+    await setMessages(page, [WIZARD("Acme plc")]);
+    assert.equal(await frame.locator('input[name="client"]').inputValue(), "Acme Holdings", "the edit on the earlier step survives regeneration");
+    assert.equal(await page.getByRole("combobox", { name: "Kind" }).inputValue(), "adv");
+    assert.match(await frame.locator(".piq-wizard__heading").textContent(), /Step 2 of 2/, "and so does the step");
+    assert.deepEqual(await calls(page, "submit"), [], "nothing is sent until the user submits");
+    await page.getByRole("checkbox", { name: "Urgent" }).check();
+    await page.getByRole("button", { name: "Open matter" }).click();
+    assert.deepEqual(await calls(page, "submit"), [[{ messageId: "a2", partId: "intake", component: "Wizard", values: { client: "Acme Holdings", kind: "adv", urgent: true } }]]);
+    const done = frame.locator(".piq-inline-form[data-submitted]");
+    await done.waitFor();
+    assert.equal(await done.locator("input, select, button").count(), 0, "read only in history");
+    assert.match(await done.textContent(), /Open a matterClientClient nameAcme HoldingsMatterKindAdvisoryUrgentYesSubmitted/);
+    await page.close();
+  });
+
+  // @covers US-048-AC2
+  // @covers US-080-AC4
+  // @covers US-080-AC5
+  test("AIB-03: a FormPage renders inline as the SDK's FormPage, keeps edits when regenerated, sends only on the user's submit, then is read only", async () => {
+    const page = await open("harness", { initial: [FORMPAGE("R. Lee")] });
+    const frame = page.locator('.piq-generative[data-component="FormPage"]');
+    assert.equal(await frame.getAttribute("data-piq-ai"), "generated");
+    assert.equal(await frame.locator("form.piq-form-page").count(), 1, "the SDK's own FormPage");
+    assert.deepEqual(await frame.locator("fieldset.piq-form-section legend").allTextContents(), ["Recipient", "Terms"], "its sections as FormSections");
+    const name = page.getByRole("textbox", { name: "Name" }), email = page.getByRole("textbox", { name: "Email" });
+    assert.equal(await name.inputValue(), "R. Lee", "pre-filled");
+    await page.getByRole("button", { name: "Use these details" }).click();
+    const summary = frame.locator(".piq-error-summary");
+    await summary.waitFor();
+    assert.ok(await summary.evaluate((el) => el === document.activeElement), "the pattern's error summary takes focus");
+    assert.deepEqual(await calls(page, "submit"), [], "an invalid form sends nothing");
+    await email.fill("billing@acme.example");
+    await setMessages(page, [FORMPAGE("S. Patel")]);
+    assert.equal(await email.inputValue(), "billing@acme.example", "the edit survives regeneration");
+    assert.equal(await name.inputValue(), "S. Patel", "an untouched pre-fill follows the new reply");
+    assert.deepEqual(await calls(page, "submit"), []);
+    await page.getByRole("button", { name: "Use these details" }).click();
+    assert.deepEqual(await calls(page, "submit"), [[{ messageId: "a3", partId: "bill", component: "FormPage", values: { name: "S. Patel", email: "billing@acme.example", due: "" } }]]);
+    const done = frame.locator(".piq-inline-form[data-submitted]");
+    await done.waitFor();
+    assert.equal(await done.locator("input, select, button").count(), 0, "read only in history");
+    assert.match(await done.textContent(), /Bill detailsRecipientNameS\. PatelEmailbilling@acme\.exampleTermsDue date—Submitted/);
+    await page.close();
+  });
+
+  // @covers US-048-AC3
+  test("AIB-03: a Wizard or FormPage with props that fail its schema renders the plain fallback", async () => {
+    const step = { id: "s", title: "S", fields: [{ name: "a", label: "A" }] };
+    const parts = [
+      { type: "component", component: "Wizard", props: { title: "T", steps: [] } },
+      { type: "component", component: "Wizard", props: { title: "T", steps: [{ ...step, content: "<b>x</b>" }] } },
+      { type: "component", component: "Wizard", props: { title: "T", steps: [step], onFinish: "alert(1)" } },
+      { type: "component", component: "FormPage", props: { title: "T", sections: [{ title: "S", fields: [{ name: "a", label: "A", type: "html" }] }] } },
+      { type: "component", component: "FormPage", props: { sections: [{ title: "S", fields: [{ name: "a", label: "A" }] }] } },
+    ];
+    const page = await open("harness", { initial: [{ id: "a1", role: "assistant", parts }] });
+    const frames = page.locator(".piq-generative");
+    assert.equal(await frames.count(), 5);
+    assert.deepEqual(await frames.allTextContents(), Array(5).fill("This content could not be shown."));
+    assert.equal(await page.locator('[role="log"] form, [role="log"] input, [role="log"] b').count(), 0, "not a partial render either");
+    await page.close();
+  });
+
   test("AIM-01: every part carries CONTRACT-005's AI markers", async () => {
     const page = await open("harness", { initial: [{ id: "u", role: "user", text: "Hi" }, { ...(await import("../src/assistant/story-data.js")).SAMPLE[1], status: "streaming" }] });
     const r = await page.evaluate(() => {

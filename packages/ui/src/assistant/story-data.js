@@ -36,6 +36,41 @@ export const GENERATED = [
   },
 ];
 
+/* A reply that walks the user through opening a matter in an inline Wizard,
+   and one that asks for a bill's details in an inline FormPage (FEAT-011
+   AIB-03): JSON props only, sent when the user submits. */
+export const GENERATED_WIZARD = [
+  { id: "u1", role: "user", text: "Open a new matter for Acme" },
+  {
+    id: "a1", role: "assistant", parts: [
+      { type: "text", text: "I have filled in what I know. Check each step, then open the matter." },
+      { type: "component", id: "intake", component: "Wizard", props: {
+        title: "Open a matter", submitLabel: "Open matter",
+        steps: [
+          { id: "client", title: "Client", fields: [{ name: "client", label: "Client name", value: "Acme Ltd", required: true }, { name: "contact", label: "Contact email" }] },
+          { id: "matter", title: "Matter", fields: [{ name: "kind", label: "Kind", type: "select", required: true, options: [{ value: "lit", label: "Litigation" }, { value: "adv", label: "Advisory" }] }, { name: "opened", label: "Opened on", type: "date" }, { name: "urgent", label: "Urgent", type: "checkbox" }] },
+          { id: "fees", title: "Fees", fields: [{ name: "estimate", label: "Fee estimate (£)", type: "number" }] },
+        ],
+      } },
+    ],
+  },
+];
+export const GENERATED_FORM_PAGE = [
+  { id: "u1", role: "user", text: "Draft a bill for Acme v Beta" },
+  {
+    id: "a1", role: "assistant", parts: [
+      { type: "text", text: "These are the bill's details. Change anything that is wrong." },
+      { type: "component", id: "bill", component: "FormPage", props: {
+        title: "Bill details", submitLabel: "Use these details",
+        sections: [
+          { title: "Recipient", fields: [{ name: "name", label: "Name", value: "R. Lee" }, { name: "email", label: "Email", required: true }] },
+          { title: "Terms", fields: [{ name: "due", label: "Due date", type: "date" }, { name: "copy", label: "Copy the partner", type: "checkbox" }] },
+        ],
+      } },
+    ],
+  },
+];
+
 const REPLIES = [
   "The last three filings are the **defence** (2 October), the **reply** (9 October) and a **witness statement** (16 October). Each is on the matter's documents tab.",
   "The hearing is listed for 14 November. The court asked for the bundle a week before, by 7 November, and the skeleton argument two days before.",

@@ -450,6 +450,27 @@ as HTML.
 | Inline input (GEN-04) | Values the user typed into an inline component are kept by message `id` and part `id` (or the component's position), so they survive the message being regenerated. After `onComponentSubmit` the component shows the submitted values, read only. Pre-filled values are editable and are sent only when the user submits |
 | No requests | Nothing in `assistant` or an adapter makes a network request, configures a hosted service, or reports usage (ADP-03) |
 
+#### Renderable components *[Amended 2026-10-21 — build, FEAT-011 AIB-03, US-080]*
+
+`RENDERABLE` (and the catalogue's `renderable: true`) is: `Card`, `DataTable`,
+`DescriptionList`, `FormPage`, `InlineForm`, `Notice`, `ProgressBar`,
+`StatTile`, `StatusPill`, `Wizard`. `Wizard` and `FormPage` were added on
+2026-10-21 so a chat can embed a task in steps or a longer form (FEAT-011
+AIB-03; ADR-028 decision 4). Their props are JSON only and reuse
+`InlineForm`'s field schema (*field* below); field names are unique across
+steps or sections, and the values reach `onComponentSubmit` as one object.
+
+| Component | Props (JSON; required marked) | Renders |
+|---|---|---|
+| `Wizard` | `title` (required), `steps` (required: `{ id, title, fields: field[] }[]`, 1 to 8), `submitLabel` | The SDK's `Wizard` pattern, each step's fields as SDK widgets: its step list, progress and error summary; a step's `required` fields are checked before Continue; the last step's button (`submitLabel`) submits |
+| `FormPage` | `title` (required), `sections` (required: `{ title, fields: field[] }[]`, 1 to 10), `submitLabel` | The SDK's `FormPage` pattern with a `FormSection` per section: its error summary (which takes focus) and its action bar; no Cancel |
+
+*field* is `{ name, label, type: text | number | date | select | checkbox, options?, value?, required? }`.
+Both follow *Inline input (GEN-04)* as `InlineForm` does: edits survive
+regeneration, pre-filled values are editable, values are sent only on the
+user's submit, and once submitted the component shows what was sent, by step
+or section, read only. Both sit in the `data-piq-ai="generated"` frame.
+
 ### AI markup (CONTRACT-005 *AI markup*, FEAT-011 AIM-01)
 
 | Element | Markers |

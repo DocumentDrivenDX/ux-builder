@@ -79,3 +79,14 @@ test("the audit reports no errors on the assistant's stories, in every theme and
   }
   assert.deepEqual(found, []);
 });
+
+// FEAT-011's success metric: the SDK's own conversation passes every AI audit check with no app markup.
+// @covers US-078-AC7
+test("the AI audit checks report nothing on the assistant's conversation stories", async () => {
+  const ids = ["full-conversation", "empty", "streaming", "failed", "unavailable", "generated-components", "generated-wizard", "generated-form-page", "on-the-ai-sdk", "on-assistant-ui"].map((s) => `patterns-assistant--${s}`);
+  const all = stories();
+  for (const id of ids) assert.ok(all.some((s) => s.id === id), id);
+  const r = await audit({ urls: ids.map((id) => story(id, "praxis-carbon", "light")), themes: ["praxis-carbon"], appearances: ["light"], wait: ".piq-conversation", rules: { brand: false }, cwd: PKG });
+  const ai = r.findings.filter((f) => /^(ai|agent|genui|card)[-.]/.test(f.rule));
+  assert.deepEqual(ai.map((f) => `${f.rule} ${f.url.replace(/.*id=([^&]+).*/, "$1")}: ${f.message}`), []);
+});

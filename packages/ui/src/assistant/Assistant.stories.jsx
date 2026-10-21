@@ -6,7 +6,7 @@ import { ApprovalCard, Reasoning, Sources, ToolCall, ToolCalls } from "./Parts.j
 import { GenerativeComponent, InlineForm } from "./Generative.jsx";
 import { useAiSdkConversation } from "./adapters/ai-sdk.js";
 import { useAssistantUiConversation } from "./adapters/assistant-ui.js";
-import { AI_SDK_SAMPLE, ASSISTANT_UI_SAMPLE, GENERATED, SAMPLE, fakeThread, useDemoConversation, useFakeChat } from "./story-data.js";
+import { AI_SDK_SAMPLE, ASSISTANT_UI_SAMPLE, GENERATED, GENERATED_FORM_PAGE, GENERATED_WIZARD, SAMPLE, fakeThread, useDemoConversation, useFakeChat } from "./story-data.js";
 
 /* The SDK's own assistant (US-046 to US-048, ADR-023): a conversation with
    its work shown and its actions approved, generated UI from the catalogue,
@@ -27,8 +27,11 @@ export const Empty = { render: () => <Demo initial={[]} /> };
 
 export const Streaming = { render: () => <Frame><Conversation messages={[{ id: "u", role: "user", text: "Summarise the last three filings" }, { id: "a", role: "assistant", status: "streaming", text: "The last three filings are the defence" }]} onStop={() => {}} /></Frame> };
 export const Failed = { render: () => <Frame><Conversation messages={[{ id: "u", role: "user", text: "When is the hearing?" }, { id: "a", role: "assistant", status: "error", error: "The assistant could not reply. Try again." }]} onRetry={() => {}} /></Frame> };
-export const Unavailable = { render: () => <Frame><Conversation messages={SAMPLE} disabledReason="The assistant is offline. Your message is kept; send it when it is back." /></Frame> };
-export const GeneratedComponents = { render: () => <Frame><Conversation messages={GENERATED} onComponentSubmit={() => {}} /></Frame> };
+export const Unavailable = { render: () => <Frame><Conversation messages={SAMPLE} onRegenerate={() => {}} disabledReason="The assistant is offline. Your message is kept; send it when it is back." /></Frame> };
+export const GeneratedComponents = { render: () => <Frame><Conversation messages={GENERATED} onRegenerate={() => {}} onComponentSubmit={() => {}} /></Frame> };
+/* A Wizard and a FormPage rendered inline (FEAT-011 AIB-03): the SDK's own patterns, pre-filled, sent only on submit, then read only. */
+export const GeneratedWizard = { render: () => <Frame><Conversation messages={GENERATED_WIZARD} onRegenerate={() => {}} onComponentSubmit={() => {}} /></Frame> };
+export const GeneratedFormPage = { render: () => <Frame><Conversation messages={GENERATED_FORM_PAGE} onRegenerate={() => {}} onComponentSubmit={() => {}} /></Frame> };
 
 function PanelDemo() {
   const [open, setOpen] = useState(false);
