@@ -404,11 +404,15 @@ finding severity.
 
 ENV-01. Assessments run against local or staging environments with
 disposable users and fixtures. Payments, outbound messages, production
-approvals and destructive changes to real data are refused unless the
-manifest authorizes them separately.
+approvals and destructive changes to real data are always refused: the
+manifest's `restrictions.allow` permits only test-data actions, and a
+manifest that tries to allow a denied action fails validation
+(CONTRACT-006 `restrictions`).
 
 ENV-02. Navigation and actions stay within the manifest's origins and
-integrations. Test data is reset between scenarios.
+integrations: the commands refuse a host outside `run.origins` or named in
+`restrictions.excludeIntegrations`, and a replayed step that takes a denied
+or unpermitted action. Test data is reset between scenarios.
 
 ENV-03. Secrets never enter the manifest, logs or reports. Evidence is
 masked per the manifest's redaction policy before it is written, and only
@@ -421,7 +425,9 @@ the evidence a finding needs is kept.
 - **Honesty**: no coverage, result or user claim without evidence; a clean
   audit is never reported as proof of usability or of full accessibility
   compliance.
-- **Bounded**: every run respects the manifest's time and step limits.
+- **Bounded**: every run respects the manifest's time and step limits
+  (`limits` in CONTRACT-006); the commands that take browser steps refuse
+  the step that would pass one and record the stage `partial`.
 - **No new runtime**: no agent runtime and no MCP server is required for
   V1; the deterministic commands run on their own.
 - **Compatibility**: `audit()`'s options and report stay as CONTRACT-004

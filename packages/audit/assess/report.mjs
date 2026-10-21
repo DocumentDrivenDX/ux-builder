@@ -96,9 +96,11 @@ function markdown(dir, r) {
   };
   section("Findings against the app's requirements", obligations);
   section("Recommendations (UX heuristics, not existing obligations)", heur);
-  if (r.proposals?.proposals?.length) {
+  const bl = r.proposals?.backlog;
+  if (r.proposals?.proposals?.length || bl) {
     L.push("## Proposed HELIX changes", "", "Patches for review in `proposals/`. None has been applied: an accepted proposal goes through HELIX, after `assess apply-check` confirms its target is unchanged.", "");
-    for (const p of r.proposals.proposals) L.push(`- **${p.id}** (${p.change}${p.decision_needed ? `; needs a ${p.decision_needed.toUpperCase()} decision` : ""}) → ${p.target.kind === "existing" ? `${p.target.id} \`${p.target.path}\`` : `new ${p.target.type} ${p.target.id} \`${p.target.path}\``}${p.criterion ? `, criterion ${p.criterion}` : ""}; for ${p.findings.join(", ")}. Test: ${p.test_change.description}. Patch: \`${p.patch}\`.`);
+    if (bl) L.push(bl.target ? `- **improvement-backlog** → ${bl.target.kind === "existing" ? `${bl.target.id} \`${bl.target.path}\`` : `new ${bl.target.type} \`${bl.target.path}\``}: the backlog's ${bl.findings.length} finding(s) as backlog items. Patch: \`${bl.patch}\`.` : `- **improvement-backlog**: not proposed — ${bl.reason}`);
+    for (const p of r.proposals.proposals ?? []) L.push(`- **${p.id}** (${p.change}${p.decision_needed ? `; needs a ${p.decision_needed.toUpperCase()} decision` : ""}) → ${p.target.kind === "existing" ? `${p.target.id} \`${p.target.path}\`` : `new ${p.target.type} ${p.target.id} \`${p.target.path}\``}${p.criterion ? `, criterion ${p.criterion}` : ""}; for ${p.findings.join(", ")}. Test: ${p.test_change.description}. Patch: \`${p.patch}\`.`);
     L.push("");
   }
   L.push("## Needs representative users", "", "The assessment makes none of these claims; each needs people from the app's audience.", "");
@@ -108,6 +110,7 @@ function markdown(dir, r) {
   if (r.comparison) {
     L.push(`## Compared with ${r.comparison.from}`, "");
     for (const s of ["new", "persistent", "regressed", "resolved", "not-rechecked"]) { const x = r.comparison.findings.filter((f) => f.status === s); if (x.length) L.push(`- ${s}: ${x.map((f) => f.id).join(", ")}`); }
+    for (const f of r.comparison.baseline?.failures ?? []) L.push(`- Baseline failure from ${f.run}: \`${f.command}\` ${f.status}${f.reason ? ` (${f.reason})` : ""}; in this run's baseline: ${f.later}`);
     L.push("");
   }
   if (r.baseline) {
@@ -161,7 +164,12 @@ export function compare(fromDir, toDir) {
   const out = [];
   for (const [id] of after) out.push({ id, status: before.has(id) ? "persistent" : wasResolved.has(id) ? "regressed" : "new" });
   for (const [id, f] of before) if (!after.has(id)) out.push({ id, status: assessed(b, f) ? "resolved" : "not-rechecked", ...(assessed(b, f) ? {} : { reason: `${f.state_id} was not assessed in ${b.run?.id}` }) });
-  const record = { schema: "comparison", version: 1, from: a.run?.id, to: b.run?.id, findings: out };
+  // The earlier baseline's failures stay visible (BAS-04): its own, or, without one, those its comparison carried.
+  const failures = a.baseline
+    ? a.baseline.tests.filter((t) => t.status !== "passed").map((t) => ({ run: a.run?.id ?? a.baseline.run, test: t.id, command: t.command, status: t.status, ...(t.reason ? { reason: t.reason } : {}) }))
+    : (a.comparison?.baseline?.failures ?? []).map(({ later, ...f }) => f);
+  const laterStatus = (f) => b.baseline?.tests.find((t) => t.id === f.test)?.status ?? "not-run";
+  const record = { schema: "comparison", version: 1, from: a.run?.id, to: b.run?.id, findings: out, baseline: { run: a.baseline ? a.run?.id ?? a.baseline.run : a.comparison?.baseline?.run ?? null, failures: failures.map((f) => ({ ...f, later: laterStatus(f) })) } };
   writeFileSync(join(toDir, "comparison.json"), JSON.stringify(record, null, 2) + "\n");
   return record;
 }

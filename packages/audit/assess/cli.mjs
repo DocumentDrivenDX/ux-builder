@@ -41,29 +41,35 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       Merge backlog.json's findings of one problem, keeping every evidence reference.
   reset --fixture id [--manifest f]
       Run the fixture's reset command.
-  browser [--port n] [--headed] [--manifest f]
+  browser [--port n] [--headed] [--manifest f] [--run R-id]
       Start Chromium with a CDP endpoint and print it; connect the agent's
       browser driver to it (Playwright MCP: --cdp-endpoint <url>). Ctrl-C stops it.
+      With the manifest, only run.origins resolve and excluded integrations do
+      not; with --run as well, it stops when limits.runMinutes are spent.
   inspect (--cdp <url> --page <url-match> | --replay <steps.json>) --checkpoint <C-id>
           [--journey <J-id>] [--step n] [--role id] [--state class]
           [--state-affecting] [--redact <selector>]... [--manifest f] [--out dir] [--run R-id]
       Inspect the page in place (or a verified replay) and write
       <out>/<run>/checkpoints/<id>/inspection.json, screenshot.png, tree.yml.
+      With the manifest: its origins, excluded integrations, denied and
+      allowed actions, evidence.capture and limits apply.
   validate-report <run-dir>
       Check every record in a run package, that its evidence resolves, and that
       findings relying on a conflicting HELIX ID are qualified.
 
   propose --run R-id --finding F-id (--target <HELIX ID> | --new <type> [--title t])
-          --kind new-requirement|unmet-criterion|scope --criterion "Given…" --test "…" [--test-file f]
-      Write a patch in proposals/ for one finding; nothing is applied.
+          --kind new-requirement|unmet-criterion|scope --criterion "Given…" --test "…" [--test-file f] [--keeps text]
+      Write a patch in proposals/ for one finding, and the backlog proposed as
+      the app's improvement-backlog entry; nothing is applied.
   check-writes --run R-id
       List files under the HELIX root or the app that changed during the run.
-  apply-check P-n --run R-id
+  apply-check (P-n | improvement-backlog) --run R-id
       Check a proposal's target is unchanged since the proposal was written.
   report <run-dir> [--self-contained]
       Write report.html, report.md and evidence.json; --self-contained embeds the screenshots.
   compare <earlier-run-dir> <later-run-dir>
-      Classify findings: new, persistent, resolved, regressed, not rechecked.
+      Classify findings: new, persistent, resolved, regressed, not rechecked;
+      and list the earlier baseline's failures.
   gate <run-dir> [--fail-on P0|P1|P2|P3]
       For CI: exit 1 on an open finding at that priority or above, or a blocked stage.
 
@@ -200,9 +206,10 @@ const SUB = {
     if (typeof ready === "number") return ready;
     const { plan } = await import("./plan.mjs");
     try {
-      const { dir, journeys, entries } = plan({ ...ready, out: o.out, run: o.run, agent: o.agent, model: o.model });
-      console.log(`${o.run}: ${journeys.length} journeys, ${entries.filter((e) => e.status === "not-assessed").length} pairs to walk, ${entries.filter((e) => e.status === "not-applicable").length} not applicable\nWrote ${dir}/plan.json, coverage.json`);
-      return 0;
+      const { dir, journeys, entries, stage } = plan({ ...ready, out: o.out, run: o.run, agent: o.agent, model: o.model });
+      console.log(`${o.run}: ${journeys.length} journeys, ${entries.filter((e) => e.status === "not-assessed").length} pairs to walk, ${entries.filter((e) => e.status === "blocked").length} blocked, ${entries.filter((e) => e.status === "not-applicable").length} not applicable\nWrote ${dir}/plan.json, coverage.json`);
+      if (stage.status !== "completed") console.error(`plan ${stage.status}: ${stage.reason}`);
+      return stage.status === "completed" ? 0 : 1;
     } catch (e) { console.error(e.message); return e.code === "blocked" ? 1 : 2; }
   },
   async merge(args) {
@@ -233,17 +240,40 @@ const SUB = {
     return r.status === 0 ? 0 : 1;
   },
   async browser(args) {
-    const { values: o } = parseArgs({ args, options: { port: { type: "string" }, headed: { type: "boolean" }, manifest: { type: "string" } } });
-    let origins = [];
-    if (o.manifest) { const ready = await validated(o.manifest); if (typeof ready === "number") return ready; origins = ready.resolved.run.origins; }
-    const { startBrowser } = await import("./checkpoint.mjs");
-    const { cdp, browser } = await startBrowser({ port: o.port ? Number(o.port) : undefined, headed: o.headed, origins });
-    if (origins.length) console.error(`Only ${origins.join(", ")} can load in this browser.`);
+    const { values: o } = parseArgs({ args, options: { port: { type: "string" }, headed: { type: "boolean" }, manifest: { type: "string" }, run: { type: "string" }, out: { type: "string" } } });
+    let origins = [], exclude = [], runRoot = null, limits = null;
+    if (o.manifest) {
+      const ready = await validated(o.manifest); if (typeof ready === "number") return ready;
+      origins = ready.resolved.run.origins; exclude = ready.resolved.restrictions.excludeIntegrations;
+      if (o.run) { const { runDir } = await import("./plan.mjs"); runRoot = runDir(ready.manifest, ready.resolved, o.out, o.run); limits = ready.resolved.limits; }
+    }
+    const { startBrowser, limitReached, recordStage } = await import("./checkpoint.mjs");
+    const { readFileSync } = await import("node:fs");
+    // The run's time (limits.runMinutes): none left, the browser does not start (AGW-02).
+    const spent = runRoot && limitReached({ runRoot, steps: 0, limits: { runMinutes: limits.runMinutes } });
+    if (spent) { recordStage(runRoot, { stage: "walkthrough", status: "partial", reason: `limit reached: ${spent}` }); console.error(`blocked: limit — ${spent}; the browser was not started`); return 1; }
+    let started;
+    try { started = await startBrowser({ port: o.port ? Number(o.port) : undefined, headed: o.headed, origins, exclude }); } catch (e) {
+      if (runRoot) recordStage(runRoot, { stage: "walkthrough", status: "blocked", reason: `no browser: Chromium did not start (${e.message.split("\n")[0]})` });
+      console.error(`Chromium did not start: ${e.message.split("\n")[0]}`);
+      return 1;
+    }
+    const { cdp, browser } = started;
+    if (origins.length) console.error(`Only ${origins.join(", ")} can load in this browser${exclude.length ? `; never ${exclude.join(", ")}` : ""}.`);
     console.log(JSON.stringify({ cdp }));
     console.error(`Chromium is listening at ${cdp}. Connect the browser driver to it, e.g.\n  npx @playwright/mcp --cdp-endpoint ${cdp}\nCtrl-C stops it.`);
-    await new Promise((resolve) => { for (const s of ["SIGINT", "SIGTERM"]) process.once(s, resolve); });
+    let timer, code = 0;
+    await new Promise((resolve) => {
+      for (const s of ["SIGINT", "SIGTERM"]) process.once(s, resolve);
+      if (runRoot) {
+        let startedAt = Date.now();
+        try { startedAt = Date.parse(JSON.parse(readFileSync(`${runRoot}/run.json`, "utf8")).startedAt) || startedAt; } catch { /* no run record yet */ }
+        timer = setTimeout(() => { code = 1; const why = `the run's ${limits.runMinutes} minutes (limits.runMinutes) are spent`; recordStage(runRoot, { stage: "walkthrough", status: "partial", reason: `limit reached: ${why}` }); console.error(`blocked: limit — ${why}; stopping the browser`); resolve(); }, Math.max(0, startedAt + limits.runMinutes * 60_000 - Date.now()));
+      }
+    });
+    clearTimeout(timer);
     await browser.close();
-    return 0;
+    return code;
   },
   async inspect(args) {
     const { values: o } = parseArgs({ args, options: {
@@ -259,7 +289,7 @@ const SUB = {
       if (typeof ready === "number") return ready;
       const { runDir } = await import("./plan.mjs");
       const r = ready.resolved;
-      extra = { out: o.out ?? runDir(ready.manifest, r, undefined, ".").replace(/\/\.$/, ""), origins: r.run.origins, redactText: r.evidence?.redact?.text ?? [], cwd: r.run.cwd, redactSelectors: r.evidence?.redact?.selectors ?? [] };
+      extra = { out: o.out ?? runDir(ready.manifest, r, undefined, ".").replace(/\/\.$/, ""), origins: r.run.origins, exclude: r.restrictions.excludeIntegrations, allow: r.restrictions.allow, deny: r.restrictions.deny, capture: r.evidence?.capture ?? "both", limits: r.limits, redactText: r.evidence?.redact?.text ?? [], cwd: r.run.cwd, redactSelectors: r.evidence?.redact?.selectors ?? [] };
     }
     const { checkpoint, runId } = await import("./checkpoint.mjs");
     const { code, record } = await checkpoint({ ...o, ...extra, run: o.run ?? runId(), stateAffecting: !!o["state-affecting"], redact: [...(o.redact ?? []), ...(extra.redactSelectors ?? [])] });

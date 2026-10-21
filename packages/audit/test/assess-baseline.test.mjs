@@ -4,8 +4,8 @@
      npm run build && npm test --workspace @ux-builder/audit */
 
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { spawn, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join } from "node:path";
 import { after, before, describe, test } from "node:test";
@@ -118,5 +118,24 @@ describe("US-059: tell old failures from redesign regressions", () => {
     assert.equal(NOTE, "Passing functional tests do not show that usability criteria are met.");
     const run = JSON.parse(readFileSync(join(dir, "run.json"), "utf8"));
     assert.deepEqual(run.stages.map((s) => [s.stage, s.status]), [["baseline", "completed"]]);
+  });
+
+  // @covers US-059-AC4
+  test("AC4: compared with a later run, every failure of the earlier baseline is still listed, with its later status", async () => {
+    const later = join(repo.dir, "ux-assessment", "R-20261021T130000Z");
+    mkdirSync(later, { recursive: true });
+    writeFileSync(join(later, "run.json"), JSON.stringify({ schema: "run", version: 1, id: "R-20261021T130000Z", stages: [] }));
+    // In the later run, "failing" now passes and "missing" was not declared.
+    writeFileSync(join(later, "baseline.json"), JSON.stringify({ schema: "baseline", version: 1, tests: [{ id: "passing", command: "x", status: "passed", counts: "unknown", log: "logs/passing.log" }, { id: "failing", command: `node -e "process.exit(3)"`, status: "passed", counts: "unknown", log: "logs/failing.log" }], audit: null, note: NOTE }));
+    const c = spawnSync(process.execPath, [CLI, "assess", "compare", dir, later], { cwd: repo.dir, encoding: "utf8" });
+    assert.equal(c.status, 0, c.stderr);
+    const cmp = JSON.parse(readFileSync(join(later, "comparison.json"), "utf8"));
+    assert.equal(cmp.baseline.run, "R-20261020T130000Z");
+    const earlier = record.tests.filter((t) => t.status !== "passed");
+    assert.deepEqual(cmp.baseline.failures.map((f) => [f.test, f.status, f.later]), earlier.map((t) => [t.id, t.status, t.id === "failing" ? "passed" : "not-run"]), "every earlier failure, with its status now");
+    assert.equal(spawnSync(process.execPath, [CLI, "assess", "report", later], { cwd: repo.dir }).status, 0);
+    const md = readFileSync(join(later, "report.md"), "utf8");
+    assert.match(md, /Baseline failure from R-20261020T130000Z: `node -e "process\.exit\(3\)"` failed; in this run's baseline: passed/);
+    assert.match(md, /Passing functional tests do not show that usability criteria are met\./);
   });
 });

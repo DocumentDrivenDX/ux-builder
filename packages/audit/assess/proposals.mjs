@@ -5,7 +5,10 @@
    added acceptance criterion on an existing story (by ddx.id), a proposed
    section on any other existing artifact, or a new instance of a catalogue
    type, named by its naming rule, numbered by its ID format and drafted from
-   its template. checkWrites() lists anything changed under the flow's root
+   its template. Every propose() also rewrites the backlog's proposal as the
+   app's HELIX improvement-backlog (HLX-06; ADR-026 decision 6): its
+   findings as rows of the existing instance's backlog items, or a new
+   instance drafted from the type's template. checkWrites() lists anything changed under the flow's root
    or the app since the run began; applyCheck() tells whether a proposal's
    target still has the revision it was written against. */
 
@@ -58,6 +61,58 @@ function withCriterion(text, storyId, criterion, finding) {
   return { text: lines.join("\n"), id };
 }
 
+const RANK = ["P0", "P1", "P2", "P3"];
+const cell = (v) => String(v ?? "").replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ");
+const TABLE_HEAD = ["| Rank | Priority | Item | Evidence | Tracker or Follow-Up Target | Why Now | Confidence | Effort | Status |", "|------|----------|------|----------|-----------------------------|---------|------------|--------|--------|"];
+
+/* One improvement-backlog row per finding not rejected, ranked P0 to P3. */
+function backlogRows(findings, { start, runRel, proposals }) {
+  return findings.filter((f) => f.status !== "rejected").sort((a, b) => RANK.indexOf(a.priority) - RANK.indexOf(b.priority)).map((f, i) => {
+    const refs = f.evidence_refs ?? [];
+    const evidence = refs.length ? `\`${runRel}/${refs[0]}\`${refs.length > 1 ? ` (+${refs.length - 1} more)` : ""}` : `uncertain: ${f.uncertainty ?? "no evidence"}`;
+    const ps = proposals.filter((p) => p.findings.includes(f.id)).map((p) => p.id);
+    const target = `${f.id}${ps.length ? `; ${ps.join(", ")} in \`${runRel}/proposals.json\`` : ""}`;
+    return `| ${start + i} | ${cell(f.priority)} | ${cell(f.title)} | ${cell(evidence)} | ${cell(target)} | ${cell(`${f.journey_id} · ${f.state_id}; ${f.finding_type}`)} | ${cell(f.confidence?.level ?? "unknown")} | ${cell(f.effort ?? "unknown")} | ${cell(f.status ?? "open")} |`;
+  });
+}
+
+/* The backlog proposed as the app's improvement-backlog: { target, patch, findings, reason? }. */
+function backlogProposal({ helix, docs, dir, run, backlog, proposals }) {
+  const repo = helix.marker.repo;
+  const ids = (backlog.findings ?? []).filter((f) => f.status !== "rejected").map((f) => f.id);
+  const type = helix.types.find((t) => t.id === "improvement-backlog");
+  if (!type) return { target: null, patch: null, findings: ids, reason: `the bound catalogue (${helix.catalog.source}) has no improvement-backlog type` };
+  const runRel = relative(repo, dir).split(sep).join("/");
+  const doc = docs.find((d) => d.type === "improvement-backlog");
+  const file = join(dir, "proposals", "improvement-backlog.patch");
+  if (doc) {
+    // Rows go after the last row of its backlog-items table; findings it already lists are left out.
+    const lines = doc.text.replace(/\n*$/, "").split("\n");
+    const fresh = (backlog.findings ?? []).filter((f) => !doc.text.includes(f.id));
+    const h = lines.findIndex((l) => /^#{2,3}\s+Backlog Items\b/i.test(l));
+    let end = -1;
+    if (h >= 0) for (let i = h + 1; i < lines.length && !/^#{1,3}\s/.test(lines[i]); i++) if (/^\|/.test(lines[i])) end = i;
+    const ranks = h >= 0 && end > h ? lines.slice(h + 1, end + 1).map((l) => Number(/^\|\s*(\d+)\s*\|/.exec(l)?.[1])).filter(Number.isFinite) : [];
+    const rows = backlogRows(fresh, { start: (ranks.length ? Math.max(...ranks) : 0) + 1, runRel, proposals });
+    if (end > h && h >= 0) lines.splice(end + 1, 0, ...rows);
+    else lines.push("", `## Backlog Items (proposed by the UX assessment, ${run})`, "", ...TABLE_HEAD, ...rows);
+    writeFileSync(file, diff(doc.path, doc.text, lines.join("\n") + "\n"));
+    return { target: { kind: "existing", id: doc.id ?? "improvement-backlog", type: "improvement-backlog", path: doc.path, revision: revisionOf(doc.abs), hash: doc.hash }, patch: "proposals/improvement-backlog.patch", findings: ids };
+  }
+  // A new instance at the type's location, drafted from its template.
+  const path = relative(repo, join(helix.flow.root, type.dir, type.naming ?? "improvement-backlog.md")).split(sep).join("/");
+  const rows = backlogRows(backlog.findings ?? [], { start: 1, runRel, proposals });
+  let text = (type.template ? readFileSync(type.template, "utf8") : `# Improvement Backlog\n\n## Backlog Items\n\n${TABLE_HEAD.join("\n")}\n`).replace(/^---\n[\s\S]*?\n---\n\n?/, "");
+  text = text.replace(/\[iteration or release\]/, `the UX assessment ${run}`).replace(/\[metrics, feedback, retrospective, incident review\]/, `UX assessment findings (\`${runRel}/backlog.json\`)`);
+  const placeholder = /^\|\s*\d+\s*\|.*\[item\].*\|\s*$/m;
+  if (placeholder.test(text)) text = text.replace(placeholder, rows.join("\n"));
+  else if (/^\|[-| ]+\|\s*$/m.test(text)) text = text.replace(/^(\|[-| ]+\|)\s*$/m, `$1\n${rows.join("\n")}`);
+  else text = `${text.replace(/\n*$/, "\n")}\n## Backlog Items\n\n${[...TABLE_HEAD, ...rows].join("\n")}\n`;
+  const draft = `---\nddx:\n  id: improvement-backlog\n  type: improvement-backlog\n  status: draft\n---\n\n${text}`;
+  writeFileSync(file, diff(path, null, draft));
+  return { target: { kind: "new", id: "improvement-backlog", type: "improvement-backlog", path, template: { source: type.template ? relative(repo, type.template).split(sep).join("/") : null, catalog: helix.catalog.source, version: helix.catalog.version } }, patch: "proposals/improvement-backlog.patch", findings: ids };
+}
+
 export function propose({ manifest, resolved, helix, out, run, finding: fid, target, newType, kind, criterion, test, testFile, keeps, title }) {
   const dir = runDir(manifest, resolved, out, run);
   const backlog = existsSync(join(dir, "backlog.json")) ? read(join(dir, "backlog.json")) : null;
@@ -101,9 +156,10 @@ export function propose({ manifest, resolved, helix, out, run, finding: fid, tar
     evidence_refs: finding.evidence_refs ?? [],
   };
   all.proposals.push(proposal);
-  writeFileSync(file, JSON.stringify(all, null, 2) + "\n");
   // The finding points at its proposal.
   finding.proposed_doc_changes = [...new Set([...(finding.proposed_doc_changes ?? []), id])];
+  all.backlog = backlogProposal({ helix, docs, dir, run, backlog, proposals: all.proposals });
+  writeFileSync(file, JSON.stringify(all, null, 2) + "\n");
   writeFileSync(join(dir, "backlog.json"), JSON.stringify(backlog, null, 2) + "\n");
   return { dir, proposal };
 }
@@ -128,8 +184,10 @@ export function checkWrites({ manifest, resolved, helix, out, run }) {
 /* Whether a proposal's target is as it was when the proposal was written. */
 export function applyCheck({ manifest, resolved, helix, out, run, proposal }) {
   const dir = runDir(manifest, resolved, out, run);
-  const p = read(join(dir, "proposals.json")).proposals.find((x) => x.id === proposal);
+  const all = read(join(dir, "proposals.json"));
+  const p = proposal === "improvement-backlog" ? all.backlog : all.proposals.find((x) => x.id === proposal);
   if (!p) return { ok: false, message: `no proposal ${proposal}` };
+  if (!p.target) return { ok: false, message: `${proposal} has no target: ${p.reason ?? "none recorded"}` };
   const abs = join(helix.marker.repo, p.target.path);
   if (p.target.kind === "new") return existsSync(abs) ? { ok: false, message: `${p.target.path} already exists: another change created it; renumber the proposal` } : { ok: true, message: `${p.target.path} is still free` };
   if (!existsSync(abs)) return { ok: false, message: `${p.target.path} no longer exists` };

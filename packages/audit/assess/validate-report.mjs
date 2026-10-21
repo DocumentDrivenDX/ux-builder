@@ -19,7 +19,7 @@ import { join, resolve } from "node:path";
 import { findingId } from "./plan.mjs";
 
 const own = createRequire(import.meta.url);
-const RECORDS = ["run", "requirements", "traceability", "alignment", "baseline", "plan", "coverage", "walkthrough", "backlog", "proposals", "comparison"];
+const RECORDS = ["run", "requirements", "traceability", "alignment", "baseline", "plan", "coverage", "walkthrough", "backlog", "proposals", "comparison", "evidence"];
 const json = (f) => JSON.parse(readFileSync(f, "utf8"));
 
 /* The app's installed catalogue, for component names (FND-02). */
@@ -102,5 +102,12 @@ export function validateReport(dir) {
     for (const fid of p.findings ?? []) if (!findings.some((f) => f.id === fid)) add("proposals.json", `${at}/findings`, `${fid} is not a finding in the backlog`);
     for (const k of ["writes", "keeps", "dependencies", "verification"]) if (!p.plan || !(k in p.plan)) add("proposals.json", `${at}/plan`, `${p.id}'s implementation plan needs "${k}"`);
   }
+  // The backlog proposed as the app's improvement-backlog (HLX-06).
+  const bl = got.proposals?.backlog;
+  if (bl?.patch && !resolves(bl.patch)) add("proposals.json", "/backlog/patch", `${bl.patch} is not in the package`);
+  for (const [k, fid] of (bl?.findings ?? []).entries()) if (!findings.some((f) => f.id === fid)) add("proposals.json", `/backlog/findings/${k}`, `${fid} is not a finding in the backlog`);
+
+  // The evidence index lists only what is in the package (RUN-01).
+  for (const [i, f] of (got.evidence?.files ?? []).entries()) if (f?.path && !existsSync(join(dir, f.path))) add("evidence.json", `/files/${i}`, `${f.path} is not in the package`);
   return problems;
 }

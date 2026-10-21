@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/evidence.schema.json",
+  "title": "ux-builder assessment record: evidence (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "files"
+  ],
+  "properties": {
+    "schema": {
+      "const": "evidence"
+    },
+    "version": {
+      "const": 1
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "kind",
+          "bytes",
+          "referencedBy"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "screenshot",
+              "accessibility-tree",
+              "test-log",
+              "audit",
+              "proposal",
+              "real-user",
+              "record",
+              "other"
+            ]
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "referencedBy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

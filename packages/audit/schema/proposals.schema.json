@@ -73,6 +73,58 @@
           }
         }
       }
+    },
+    "backlog": {
+      "type": "object",
+      "required": [
+        "target",
+        "patch",
+        "findings"
+      ],
+      "properties": {
+        "target": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "id",
+                "type",
+                "path"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "existing",
+                    "new"
+                  ]
+                },
+                "type": {
+                  "const": "improvement-backlog"
+                }
+              }
+            }
+          ]
+        },
+        "patch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
     }
   }
 }

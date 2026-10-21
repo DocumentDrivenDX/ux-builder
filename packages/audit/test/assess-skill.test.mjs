@@ -5,7 +5,7 @@
 
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join } from "node:path";
 import { after, before, describe, test } from "node:test";
@@ -41,7 +41,7 @@ const cli = (cwd, args) => new Promise((resolve) => {
   c.stdout.on("data", (d) => { stdout += d; }); c.stderr.on("data", (d) => { stderr += d; });
   c.on("close", (code) => resolve({ code, stdout, stderr }));
 });
-function app(run = {}) {
+function app(run = {}, extra = {}) {
   const r = makeRepo({ files: {
     // The app's own installed @ux-builder/ui, a different version from this package's.
     "node_modules/@ux-builder/ui/package.json": JSON.stringify({ name: "@ux-builder/ui", version: "9.8.7" }),
@@ -55,9 +55,11 @@ function app(run = {}) {
     tests: [{ id: "unit", command: `node -e "process.exit(0)"` }],
     audit: { urls: ["/queue"], themes: ["praxis-carbon"], appearances: ["light"] },
     restrictions: { writes: "report-only" },
+    ...extra,
   }));
   return r;
 }
+const stage = (r, run, name) => read(r, run, "run.json").stages.find((s) => s.stage === name);
 const read = (r, run, f) => JSON.parse(readFileSync(join(r.dir, "ux-assessment", run, f), "utf8"));
 
 describe("US-057: one complete assessment from a coding agent", () => {
@@ -93,6 +95,78 @@ describe("US-057: one complete assessment from a coding agent", () => {
     assert.equal(b.audit, null, "no audit result is claimed");
     assert.deepEqual(b.tests.map((t) => t.status), ["passed"], "the tests that did run are still recorded");
     assert.ok(!existsSync(join(r.dir, "ux-assessment", run, "coverage.json")));
+  });
+
+  // @covers US-057-AC2
+  test("AC2: no browser at the endpoint blocks the walkthrough, with its reason; no pair counts as assessed and the gate fails", async () => {
+    const r = app();
+    const run = "R-20261020T151000Z";
+    for (const args of [["collect", "--run", run], ["plan", "--run", run]]) assert.equal((await cli(r.dir, args)).code, 0);
+    const out = await cli(r.dir, ["inspect", "--manifest", "ux-assessment.yml", "--run", run, "--cdp", "http://127.0.0.1:9", "--page", "/queue", "--checkpoint", "C-review-1"]);
+    assert.equal(out.code, 1);
+    assert.equal(read(r, run, "checkpoints/C-review-1/inspection.json").error, "no-browser");
+    const s = stage(r, run, "walkthrough");
+    assert.equal(s.status, "blocked");
+    assert.match(s.reason, /^no browser at http:\/\/127\.0\.0\.1:9/);
+    assert.ok(!read(r, run, "coverage.json").entries.some((e) => e.status === "assessed"));
+    const g = await cli(r.dir, ["gate", join("ux-assessment", run)]);
+    assert.equal(g.code, 1);
+    assert.match(g.stdout, /blocked stage walkthrough: no browser/);
+  });
+
+  // @covers US-057-AC2
+  test("AC2: an authentication barrier blocks the journey's pairs, with the reason; the plan stage is partial", async () => {
+    const r = app({}, { roles: [{ id: "reviewer", auth: { env: "UX_BUILDER_TEST_UNSET_SESSION" } }] });
+    const run = "R-20261020T152000Z";
+    assert.equal((await cli(r.dir, ["collect", "--run", run])).code, 0);
+    const out = await cli(r.dir, ["plan", "--run", run]);
+    assert.equal(out.code, 1, "the stage could not complete");
+    assert.match(out.stderr, /plan partial: J-review: authentication barrier: role reviewer's credential variable UX_BUILDER_TEST_UNSET_SESSION is not set/);
+    const entries = read(r, run, "coverage.json").entries;
+    assert.ok(entries.filter((e) => e.status !== "not-applicable").every((e) => e.status === "blocked" && /authentication barrier/.test(e.reason)));
+    assert.ok(!entries.some((e) => e.status === "assessed"));
+    assert.equal(stage(r, run, "plan").status, "partial");
+    assert.equal((await cli(r.dir, ["validate-report", join("ux-assessment", run)])).code, 0);
+  });
+
+  // @covers US-057-AC2
+  test("AC2: a time or step limit reached stops the step, with its reason; the walkthrough is partial", async () => {
+    const steps = (r) => { writeFileSync(join(r.dir, "steps.json"), JSON.stringify({ baseUrl: base, steps: [{ goto: "/queue" }], expect: { selector: "#who", text: "Signed in" } })); return "steps.json"; };
+    // The run's minutes: spent before the first checkpoint.
+    const t = app({}, { limits: { runMinutes: 0.0001 } });
+    const runT = "R-20261020T153000Z";
+    assert.equal((await cli(t.dir, ["collect", "--run", runT])).code, 0);
+    await new Promise((res) => setTimeout(res, 20));
+    const late = await cli(t.dir, ["inspect", "--manifest", "ux-assessment.yml", "--run", runT, "--replay", steps(t), "--checkpoint", "C-review-1"]);
+    assert.equal(late.code, 1);
+    const rec = read(t, runT, "checkpoints/C-review-1/inspection.json");
+    assert.deepEqual([rec.error, rec.findings], ["limit", []]);
+    assert.match(rec.message, /^blocked: limit — the run's 0\.0001 minutes \(limits\.runMinutes\) are spent; not taken/);
+    assert.equal(stage(t, runT, "walkthrough").status, "partial");
+    const b = await cli(t.dir, ["browser", "--manifest", "ux-assessment.yml", "--run", runT]);
+    assert.equal(b.code, 1, "the browser does not start once the run's time is spent");
+    assert.match(b.stderr, /blocked: limit/);
+    // Steps: a replay of one action and its inspection take two; the next checkpoint would pass the limit of two.
+    const s = app({}, { limits: { steps: 2 } });
+    const runS = "R-20261020T154000Z";
+    assert.equal((await cli(s.dir, ["collect", "--run", runS])).code, 0);
+    const first = await cli(s.dir, ["inspect", "--manifest", "ux-assessment.yml", "--run", runS, "--replay", steps(s), "--checkpoint", "C-review-1", "--journey", "J-review"]);
+    assert.equal(first.code, 0, first.stderr);
+    assert.equal(read(s, runS, "checkpoints/C-review-1/inspection.json").steps, 2);
+    const next = await cli(s.dir, ["inspect", "--manifest", "ux-assessment.yml", "--run", runS, "--replay", steps(s), "--checkpoint", "C-review-2", "--journey", "J-review"]);
+    assert.equal(next.code, 1);
+    assert.match(read(s, runS, "checkpoints/C-review-2/inspection.json").message, /blocked: limit — 2 of the run's 2 steps \(limits\.steps\) are taken/);
+    assert.equal(stage(s, runS, "walkthrough").status, "partial");
+    // A journey's minutes run from its first checkpoint.
+    const j = app({}, { limits: { journeyMinutes: 1 } });
+    const runJ = "R-20261020T155000Z";
+    assert.equal((await cli(j.dir, ["collect", "--run", runJ])).code, 0);
+    const old = join(j.dir, "ux-assessment", runJ, "checkpoints", "C-review-1");
+    mkdirSync(old, { recursive: true });
+    writeFileSync(join(old, "inspection.json"), JSON.stringify({ schema: "inspection", version: 1, checkpoint: { id: "C-review-1", journey: "J-review" }, inspectedAt: new Date(Date.now() - 120_000).toISOString(), steps: 1, mode: "in-place", findings: [] }));
+    const over = await cli(j.dir, ["inspect", "--manifest", "ux-assessment.yml", "--run", runJ, "--replay", steps(j), "--checkpoint", "C-review-2", "--journey", "J-review"]);
+    assert.equal(over.code, 1);
+    assert.match(read(j, runJ, "checkpoints/C-review-2/inspection.json").message, /J-review's 1 minutes \(limits\.journeyMinutes\) are spent/);
   });
 
   // @covers US-057-AC3

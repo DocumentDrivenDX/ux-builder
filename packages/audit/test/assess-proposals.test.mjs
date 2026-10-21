@@ -10,13 +10,19 @@ import { after, describe, test } from "node:test";
 import { prepared } from "./fixtures/run-package.mjs";
 
 const made = [];
-const pkg = () => { const p = prepared(); made.push(p); p.checkpointAt("C-review-1"); p.write("backlog.json", { schema: "backlog", version: 1, findings: [p.finding()], user_validation: [] }); return p; };
+const pkg = (o) => { const p = prepared(o); made.push(p); p.checkpointAt("C-review-1"); p.write("backlog.json", { schema: "backlog", version: 1, findings: [p.finding()], user_validation: [] }); return p; };
+// HELIX's improvement-backlog type (iterate activity), as its catalogue ships it: one file, drafted from its template.
+const BACKLOG_TYPE = {
+  "workflows/activities/06-iterate/artifacts/improvement-backlog/meta.yml": "artifact:\n  name: Improvement Backlog\n  id: improvement-backlog\n  type: document\n  activity: iterate\ndescription: x\noutput:\n  location: docs/helix/06-iterate/improvement-backlog.md\n  format: markdown\n  naming: improvement-backlog.md\n",
+  "workflows/activities/06-iterate/artifacts/improvement-backlog/template.md": "---\nddx:\n  id: improvement-backlog\n---\n\n# Improvement Backlog\n\n**Iteration**: [iteration or release]\n**Source Learnings**: [metrics, feedback, retrospective, incident review]\n\n## Backlog Items\n\n| Rank | Priority | Item | Evidence | Tracker or Follow-Up Target | Why Now | Confidence | Effort | Status |\n|------|----------|------|----------|-----------------------------|---------|------------|--------|--------|\n| 1 | P1 | [item] | [metric or finding] | [work item ID or explicit target] | [reason] | [high/med/low] | [S/M/L] | [open/blocked] |\n\n## Selection for Next Iteration\n\n- [Chosen item]\n",
+};
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 after(() => { for (const p of made) p.remove(); });
 
 describe("US-064: review exact requirement changes before implementation", () => {
   // @covers US-064-AC1
-  test("AC1: a proposal targets an existing story by ddx.id, or a new instance named, numbered and drafted by the catalogue", () => {
-    const p = pkg();
+  test("AC1: a proposal targets an existing story by ddx.id, or a new instance named, numbered and drafted by the catalogue; the backlog is proposed as an improvement-backlog entry", () => {
+    const p = pkg({ files: BACKLOG_TYPE });
     const F = p.read("backlog.json").findings[0].id;
     const a = p.cli("propose", "--run", p.run, "--finding", F, "--target", "US-001", "--kind", "unmet-criterion", "--criterion", "Given an approval, when it is made, then a message names the entry and offers Undo.", "--test", "Approve an entry; the message names it and Undo returns it.");
     assert.equal(a.status, 0, a.stderr);
@@ -36,6 +42,43 @@ describe("US-064: review exact requirement changes before implementation", () =>
     assert.match(draft, /^\+# US-004: Undo an approval quickly$/m, "drafted from the catalogue's template");
     assert.deepEqual(p.read("backlog.json").findings[0].proposed_doc_changes, ["P-1", "P-2"]);
     assert.equal(p.cli("propose", "--run", p.run, "--finding", F, "--target", "US-099", "--criterion", "x", "--test", "y").status, 1);
+    // The backlog, proposed as a new improvement-backlog drafted from the type's template (HLX-06).
+    const bl = p.read("proposals.json").backlog;
+    assert.deepEqual([bl.target.kind, bl.target.id, bl.target.type, bl.target.path, bl.patch, bl.findings], ["new", "improvement-backlog", "improvement-backlog", "docs/helix/06-iterate/improvement-backlog.md", "proposals/improvement-backlog.patch", [F]]);
+    assert.equal(bl.target.template.source, "workflows/activities/06-iterate/artifacts/improvement-backlog/template.md");
+    const entry = readFileSync(join(p.dir, "proposals/improvement-backlog.patch"), "utf8");
+    assert.match(entry, /^\+\+\+ b\/docs\/helix\/06-iterate\/improvement-backlog\.md/m);
+    assert.match(entry, /^\+  type: improvement-backlog$/m);
+    const row = `+| 1 | P2 | Approving gives no confirmation | \`ux-assessment/${p.run}/checkpoints/C-review-1/screenshot.png\` | ${F}; P-1, P-2 in`;
+    assert.match(entry, new RegExp(`^${esc(row)}`, "m"), "one ranked row per finding, with its evidence and proposals");
+    assert.doesNotMatch(entry, /\[item\]/, "the template's placeholder row is replaced");
+    assert.match(entry, /^\+## Selection for Next Iteration$/m, "the rest of the template is kept");
+    assert.equal(p.cli("apply-check", "improvement-backlog", "--run", p.run).status, 0, "its path is still free");
+    const v = p.cli("validate-report", p.dir);
+    assert.equal(v.status, 0, v.stdout);
+  });
+
+  // @covers US-064-AC1
+  test("AC1: an existing improvement-backlog gains rows after its own; without the type in the catalogue, nothing is assumed", () => {
+    const existing = "---\nddx:\n  id: improvement-backlog\n  type: improvement-backlog\n---\n\n# Improvement Backlog\n\n## Backlog Items\n\n| Rank | Priority | Item | Evidence | Tracker or Follow-Up Target | Why Now | Confidence | Effort | Status |\n|---|---|---|---|---|---|---|---|---|\n| 1 | P1 | Faster prebill | metrics | ISSUE-7 | close | high | M | open |\n\n## Selection for Next Iteration\n\n- Faster prebill\n";
+    const p = pkg({ files: { ...BACKLOG_TYPE, "docs/helix/06-iterate/improvement-backlog.md": existing } });
+    const F = p.read("backlog.json").findings[0].id;
+    assert.equal(p.cli("propose", "--run", p.run, "--finding", F, "--target", "US-001", "--criterion", "c", "--test", "t").status, 0);
+    const bl = p.read("proposals.json").backlog;
+    assert.deepEqual([bl.target.kind, bl.target.id, bl.target.path], ["existing", "improvement-backlog", "docs/helix/06-iterate/improvement-backlog.md"]);
+    assert.match(bl.target.revision, /^[0-9a-f]{40}$/);
+    const entry = readFileSync(join(p.dir, "proposals/improvement-backlog.patch"), "utf8");
+    assert.match(entry, /^ \| 1 \| P1 \| Faster prebill/m, "its own rows stay");
+    assert.match(entry, new RegExp(`^${esc("+| 2 | P2 | Approving gives no confirmation |")}.*${esc(`| ${F}; P-1 in`)}`, "m"), "ranked after them");
+    assert.doesNotMatch(entry, /^[-+](?:ddx:|  id:|  type:)/m, "its frontmatter is left alone");
+    assert.equal(p.cli("apply-check", "improvement-backlog", "--run", p.run).status, 0);
+    const none = pkg();
+    const G = none.read("backlog.json").findings[0].id;
+    assert.equal(none.cli("propose", "--run", none.run, "--finding", G, "--target", "US-001", "--criterion", "c", "--test", "t").status, 0);
+    const nb = none.read("proposals.json").backlog;
+    assert.deepEqual([nb.target, nb.patch], [null, null]);
+    assert.match(nb.reason, /has no improvement-backlog type/);
+    assert.equal(none.cli("validate-report", none.dir).status, 0);
   });
 
   test("a type with a naming rule but no ID format is numbered from its naming rule and the IDs in use", () => {
