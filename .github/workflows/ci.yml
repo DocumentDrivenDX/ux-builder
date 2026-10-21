@@ -47,7 +47,6 @@ jobs:
       # The GitHub Pages site, as pages.yml builds it on main, so a broken
       # site shows here before it merges.
       - run: node tools/build-pages.mjs _site
-      - run: node tools/build-microsite-draft.mjs _site
       # AI Elements and assistant-ui in every theme, audited (US-045-AC4).
       - run: npm run test:storybook --workspace @ux-builder/ui
       - uses: actions/upload-artifact@v4
