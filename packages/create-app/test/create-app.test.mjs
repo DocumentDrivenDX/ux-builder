@@ -24,7 +24,7 @@ const run = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding:
 describe("scaffold", () => {
   test("writes a React + Vite app on the SDK, on the chosen theme", () => {
     const r = scaffold(join(tmp, "acme"), { theme: "databricks" });
-    assert.deepEqual(r.files, [".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "app.blueprint.json", "eslint.config.js", "index.html", "package.json", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/main.jsx", "vite.config.js"]);
+    assert.deepEqual(r.files, [".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "app.blueprint.json", "e2e/starter.spec.js", "eslint.config.js", "index.html", "package.json", "playwright.config.js", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/main.jsx", "vite.config.js"]);
     const pkg = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
     assert.equal(pkg.name, "acme");
     assert.match(readFileSync(join(r.dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="databricks" appearance="system"/);

@@ -9,7 +9,7 @@
    wrote it. A heading the starter fills that a template no longer has is
    added at the end, so a later HELIX's templates never break creation. */
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { ref } from "./helix.mjs";
 
@@ -208,3 +208,35 @@ export function writeStarterSet(helix, r) {
   written.push("docs/helix/01-frame/concerns.local.yml");
   return written;
 }
+
+/* The rest of the toolchain sees HELIX (HLW-01, HLW-03): the assessment's
+   manifest bound to the marker, the script to check it, and the guidance. */
+export function wire(helix, r) {
+  writeFileSync(join(r.dir, "ux-assessment.yml"), MANIFEST.replaceAll("__APP_NAME__", r.name));
+  const pkgFile = join(r.dir, "package.json");
+  const pkg = JSON.parse(readFileSync(pkgFile, "utf8"));
+  pkg.scripts = { ...pkg.scripts, "assess:validate": "ux-builder-audit assess validate" };
+  writeFileSync(pkgFile, JSON.stringify(pkg, null, 2) + "\n");
+  const guide = `
+## HELIX
+
+This app is governed by HELIX ${helix.manifest.version}: the \`helix\` skill is installed in
+\`.claude/skills/helix/\` (see its \`HELIX-VERSION.json\`), the marker is \`.helix.yml\`, and the
+documents are in \`docs/helix/\` (vision, PRD, concerns, FEAT-001 and US-001 for the starter
+screen, DESIGN.md, the test plans). Work in this order:
+
+1. Frame or evolve the requirement in HELIX first (\`/helix frame\`, \`/helix evolve\`): a story with
+   acceptance criteria, before any code.
+2. Plan its screens in \`app.blueprint.json\` and run \`npm run check:blueprint\`.
+3. Build each screen from its pattern inside a \`Page\`, within the app's \`AppShell\`.
+4. Cite the story's criteria in its tests (\`// @covers US-<n>-AC<m>\`), then \`npm run lint\`,
+   \`npm run test:e2e\` and \`npm run audit\`.
+5. Assess the UX: \`npm run assess:validate\`, then the \`ux-builder-assess\` skill in
+   \`node_modules/@ux-builder/audit/skill/\`.
+
+Other agent hosts install HELIX from https://github.com/DocumentDrivenDX/helix/blob/main/docs/install/README.md.
+`;
+  for (const f of ["AGENTS.md", "CLAUDE.md"]) appendFileSync(join(r.dir, f), guide);
+}
+
+const MANIFEST = "# UX assessment manifest (FEAT-009, CONTRACT-006), written by @ux-builder/create-app.\n# It binds this app's HELIX documents through .helix.yml; the journeys name\n# stories by ID. Check it with: npx ux-builder-audit assess validate\nversion: 1\napp:\n  name: __APP_NAME__\nhelix:\n  flow: helix\nrun:\n  start: npm run build && npx vite preview --port 4173 --strictPort --host 127.0.0.1\n  baseUrl: http://127.0.0.1:4173/\n  environment: local\nroles:\n  - id: member\n    description: A member of the team using the app\n    auth: none\njourneys:\n  - id: J-matters\n    story: US-001\n    priority: critical\n    role: member\n    entry: /\n    states: [success, empty, responsive-keyboard]\n    notApplicable:\n      loading: the starter's data is local\n      recoverable-error: the starter screen has no form that can fail\n      system-failure: the starter has no server\n      ai: the starter has no AI feature\ntests:\n  - id: e2e\n    command: npm run test:e2e\naudit:\n  widths: [390, 1280]\nrestrictions:\n  writes: report-only\n";

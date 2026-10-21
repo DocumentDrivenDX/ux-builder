@@ -10,7 +10,7 @@
 
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, test } from "node:test";
@@ -170,3 +170,16 @@ async function assertAttr(locator, name, value) {
   for (let i = 0; i < 40; i++) { if ((await locator.getAttribute(name)) === value) return; await new Promise((r) => setTimeout(r, 100)); }
   assert.equal(await locator.getAttribute(name), value);
 }
+
+// @covers US-067-AC1
+// @covers US-070-AC2
+// @covers US-070-AC3
+test("FEAT-010: the fresh app is on the latest HELIX, its manifest validates and its e2e test passes", () => {
+  const v = JSON.parse(readFileSync(join(app, ".claude/skills/helix/HELIX-VERSION.json"), "utf8"));
+  assert.match(v.tag, /^v\d+\.\d+\.\d+$/);
+  assert.ok(existsSync(join(app, ".claude/skills/helix/SKILL.md")) && existsSync(join(app, ".claude/skills/helix/references/graph.yml")));
+  assert.ok(existsSync(join(app, "docs/helix/01-frame/user-stories/US-001-see-search-and-add-matters.md")));
+  const out = sh("npm", ["run", "assess:validate"], app);
+  assert.match(out, /ux-assessment\.yml: valid/);
+  sh("npm", ["run", "test:e2e"], app);
+});

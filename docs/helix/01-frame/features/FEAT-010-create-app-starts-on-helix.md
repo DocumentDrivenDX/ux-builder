@@ -19,7 +19,7 @@ ddx:
 # Feature Specification: FEAT-010 — A new app starts on HELIX
 
 **Feature ID**: FEAT-010
-**Status**: Specified (ADR-027, 2026-10-21)
+**Status**: Specified (ADR-027, 2026-10-21); built 2026-10-21 (B-013 to B-016)
 **Priority**: P1
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: App SDK (the starter)

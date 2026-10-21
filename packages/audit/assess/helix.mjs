@@ -71,7 +71,7 @@ export function resolveFlow(marker, wanted) {
 }
 
 const versionOf = (root) => {
-  for (const p of [join(root, "../.claude-plugin/plugin.json"), join(root, "../package.json"), join(root, "../VERSION")]) {
+  for (const p of [join(root, "../HELIX-VERSION.json"), join(root, "../.claude-plugin/plugin.json"), join(root, "../package.json"), join(root, "../VERSION")]) {
     try { const t = readFileSync(p, "utf8"); return p.endsWith("VERSION") ? t.trim() : JSON.parse(t).version ?? null; } catch { /* next */ }
   }
   return null;
@@ -94,6 +94,8 @@ export function bindCatalog(marker, setting = "auto", { env = process.env, home 
     if (ok(r)) return at("marker", r);
   }
   if (ok(join(marker.repo, "workflows"))) return at("repository", join(marker.repo, "workflows"));
+  // A HELIX skill installed in the project (as @ux-builder/create-app does): its references/ floor.
+  for (const dir of [join(dirname(marker.file), ".claude/skills/helix/references"), join(marker.repo, ".claude/skills/helix/references")]) if (ok(dir)) return at("project-skill", dir);
   if (env.CLAUDE_PLUGIN_ROOT && ok(join(env.CLAUDE_PLUGIN_ROOT, "workflows"))) return at("plugin", join(env.CLAUDE_PLUGIN_ROOT, "workflows"));
   if (ok(join(home, ".ddx/plugins/helix/workflows"))) return at("plugin", join(home, ".ddx/plugins/helix/workflows"));
   for (const base of [join(home, ".claude/plugins/cache"), join(home, ".claude/plugins/marketplaces")]) {

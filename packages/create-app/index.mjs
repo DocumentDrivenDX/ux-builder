@@ -112,8 +112,9 @@ export async function create(dir, { helix: h = {}, log = () => {}, ...opts } = {
   if (helix) {
     const installed = installHelix(helix, r.dir);
     writeFileSync(join(r.dir, ".helix.yml"), marker(helix.manifest.version));
-    const docs = await import("./helix-docs.mjs").catch(() => null);
-    const written = docs ? docs.writeStarterSet(helix, r) : [];
+    const docs = await import("./helix-docs.mjs");
+    const written = docs.writeStarterSet(helix, r);
+    docs.wire(helix, r);
     r.helix = { ...helix.provenance, skillFiles: installed.files, documents: written };
   }
   return r;
