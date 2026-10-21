@@ -53,7 +53,10 @@ kind: product
 > from the planning brief of that date): the "UX assessment" subsystem,
 > FR-37 to FR-42, P1-7 and the P1-7 acceptance sketch added. Evolved
 > 2026-10-21 with ADR-027 and FEAT-010 (the starter on HELIX): FR-43 to
-> FR-45 under the App SDK, P1-8 and its sketch added.
+> FR-45 under the App SDK, P1-8 and its sketch added. Evolved 2026-10-21
+> with ADR-028 and FEAT-011 (AI and agent experience rules, at the operator's
+> request): the "AI and agent experience" subsystem, FR-46 to FR-50, P1-9 and
+> its sketch added.
 
 ## Summary
 
@@ -214,6 +217,13 @@ rules, so it invents colours and components.
 8. A new app starts on the latest HELIX: the starter installs HELIX's skill
    and catalogue and drafts the app's HELIX documents from HELIX's templates
    (operator, 2026-10-21; FR-43 to FR-45, FEAT-010).
+9. AI and agent experience rules: what generative features, assistants,
+   agents that act for the user, and embedded agent views must do, cited
+   from Microsoft's agent guidance and HAX guidelines, Google PAIR, Apple's
+   generative AI guidance and Cheng et al. (IUI '26); applied by a screen's
+   declared AI role in the blueprint, in marked markup by the audit, in the
+   lint, and in the UX assessment (operator, 2026-10-21; FR-46 to FR-50,
+   FEAT-011).
 
 ### Nice to Have (P2)
 
@@ -360,6 +370,34 @@ rules, so it invents colours and components.
   whose licence does not allow it; a release is blocked otherwise.
   *(Added 2026-10-20.)*
 
+### Subsystem: AI and agent experience
+
+- **FR-46** — The rule catalogue covers AI and agent experience. It includes
+  AI disclosure and expectations, control and correction of AI output, agent
+  plans, approvals, interruption and takeover, explanation and status,
+  failure and recovery, privacy and consent, and feedback. Each rule applies
+  by the AI role a screen declares (`generative`, `assistant`, `agent`),
+  alone or with the existing context, size class and input; never by
+  product or device. Each rule is cited and paraphrased (ADR-028).
+  *(Added 2026-10-21.)*
+- **FR-47** — A blueprint declares each screen's AI role: whether it acts
+  for the user, the patterns it may render inline, its high-impact actions
+  with their approval, and whether data leaves the device. It is checked
+  against the AI rules before code exists, including a chat that renders
+  SDK patterns inline. *(Added 2026-10-21.)*
+- **FR-48** — AI-generated content, agent status, plans and approvals are
+  marked in the markup the SDK's components emit, and apps can mark their
+  own. The audit checks marked content against the AI rules, and reports AI
+  content on a screen whose blueprint declares no AI role.
+  *(Added 2026-10-21.)*
+- **FR-49** — The lint warns when UI text presents an AI as a person (first-
+  person thinking or feeling) or puts the AI, not the user, as the one who
+  starts an action. *(Added 2026-10-21.)*
+- **FR-50** — The UX assessment evaluates AI journeys against the AI rules
+  and heuristics, in normal, error-prone and risky scenarios, and never lets
+  an agent under assessment complete an irreversible action.
+  *(Added 2026-10-21.)*
+
 ### Subsystem: UX assessment
 
 - **FR-37** — An app owner commits an assessment manifest that binds the
@@ -402,6 +440,7 @@ rules, so it invents colours and components.
 | P1-6 (FR-32–FR-35) | Plan, check and audit an app | A blueprint with seven destinations at compact, a nested modal and an unguarded delete; the built app with two primary buttons | Three blueprint findings and one audit finding, each with its rule ID and source |
 | P1-7 (FR-37–FR-40) | Assess the theme builder, increment 1 | Its manifest; the builder running on the mock model; three checkpoints (a signed-in fixture screen, an open dialog, a form with a validation error and its input kept) | The manifest validates against the repository's HELIX marker and catalogue; every journey traces to its stories, criteria and tests; the baseline records the e2e suite and the audit; each checkpoint is inspected in place with linked findings and the task continues |
 | P1-8 (FR-43–FR-45) | Create an app on HELIX | `npm create @ux-builder/app acme` online, then with `--helix-offline` | HELIX installed in `.claude/skills/helix/` with its version recorded; 8 HELIX documents typed and linked, plus `concerns.local.yml`; `assess validate` passes and `assess collect` reports 0 warnings with US-001's criteria explicit |
+| P1-9 (FR-46–FR-50) | Plan, check and assess an agent screen | A blueprint with an `agent` screen whose "Submit payment" action has no approval and which renders a `Wizard` inline at a 400 px column; the built screen streaming an unmarked answer with no Stop control; UI copy "I think this is right" | Blueprint findings for the missing approval and for the inline wizard's compact rules; audit findings for the missing disclosure and Stop control; one lint warning; the assessment's risky scenario stops at the approval |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context

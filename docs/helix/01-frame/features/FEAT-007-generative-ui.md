@@ -165,6 +165,13 @@ GEN-03. A tool result naming anything else, or with invalid props, renders a
 plain fallback that says the content could not be shown; nothing from the
 result is inserted as HTML or script.
 
+GEN-04. *[Amended 2026-10-21 — FEAT-011]* The assistant and generative
+components emit CONTRACT-005's AI markers (generated content, status, plan,
+steps, approvals). An inline component keeps its user's edits when its
+message is regenerated, and shows its submitted values, read-only, in the
+history (`genui.keep-input`, `genui.history`). US-046 to US-048 are checked
+against FEAT-011's rules when they are built.
+
 #### Adapters
 
 ADP-01. `@ux-builder/ui/assistant` imports no AI library.
@@ -231,6 +238,7 @@ reviewed exception.
 - [US-046 — Hold a conversation with an assistant](../user-stories/US-046-hold-a-conversation-with-an-assistant.md) (CONV-01–07; ADP-01–03; BLD-01)
 - [US-047 — See what the assistant did and approve its actions](../user-stories/US-047-see-what-the-assistant-did-and-approve-its-actions.md) (AGT-T-01–05)
 - [US-048 — The assistant shows its answer as SDK components](../user-stories/US-048-the-assistant-shows-its-answer-as-sdk-components.md) (GEN-01–03)
+- Governed also by FEAT-011 (AI and agent experience rules): US-078, US-079 and US-080 check what these components render.
 - [US-049 — Third-party licences are checked before release](../user-stories/US-049-third-party-licences-are-checked-before-release.md) (LIC-01–05)
 
 ## Edge Cases and Error Handling

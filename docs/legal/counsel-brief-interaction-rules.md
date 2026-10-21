@@ -23,6 +23,31 @@ The rules restate guidance from four sources:
 
 **Names and marks**: source titles name the guidelines ("Apple HIG: Modality", "Material 3: Breakpoints") and link to them. The README, `AGENTS.md`, the skill and the site carry: "ux-builder is not affiliated with or endorsed by Apple or Google. Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC." No logo, image or asset of either is used.
 
+### Added 2026-10-21: AI and agent experience rules (FEAT-011, ADR-028)
+
+32 further rules (SD-005 *Rule catalogue*) restate guidance on generative AI,
+assistants and agents from these sources. All are paraphrased; 0 are quoted.
+
+| Source | Terms as we read them (2026-10-21) | How the rules use it |
+|---|---|---|
+| Microsoft Design: UX design for agents | © Microsoft; Microsoft Terms of Use; no open licence shown | Paraphrase and link |
+| Microsoft Learn: Design for agents (human-centered design) | Microsoft terms; the source repository is private, so no open licence could be confirmed; pages marked preview and AI-generated | Paraphrase and link; never a rule's only source |
+| Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (CHI 2019) | Microsoft terms | Paraphrase and link; guideline numbers cited (G1–G18) |
+| Google PAIR: People + AI Guidebook | CC BY-NC-SA 4.0 | Paraphrase and link; no text, since NonCommercial and ShareAlike terms do not suit MIT/Apache packages |
+| Apple HIG: Generative AI | Apple Website Terms of Use | Paraphrase and link, as for the other Apple rules |
+| Cheng, Liang, Schoop, Nichols: Mapping the Design Space of UX for Computer Use Agents (IUI '26, arXiv 2602.07283) | CC BY-NC-ND 4.0 | Cite the taxonomy and findings in our own words; no text or figures |
+
+The operator waived counsel's review for these too (ADR-025 *Amendment*,
+extended 2026-10-21). They may ship before counsel answers, and anything
+counsel flags is rewritten in a patch.
+
+Questions 1, 2 and 4 below apply to these sources as well. One more:
+
+7. Does restating a research paper's taxonomy (its categories and findings,
+   not its text) under CC BY-NC-ND, or the PAIR Guidebook's patterns under CC
+   BY-NC-SA, in an MIT/Apache package, create any obligation beyond citing
+   them?
+
 ## Questions for counsel
 
 1. Are the statements below far enough from Apple's and Google's text that they are our own expression, given that they restate the same ideas? Which, if any, are too close?

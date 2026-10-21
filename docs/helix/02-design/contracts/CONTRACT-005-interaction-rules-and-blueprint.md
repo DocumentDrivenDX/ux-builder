@@ -14,6 +14,8 @@ ddx:
       to: ADR-024
     - kind: informs
       to: CONTRACT-004
+    - kind: informed_by
+      to: ADR-028
 ---
 
 # Contract
@@ -135,6 +137,56 @@ not part of this contract, and they may change in any release.
 | `check <file> [--json]` | Prints findings (or JSON) | 0 no errors; 1 an error finding; 2 usage or unreadable file |
 | `init [--kind app\|view] [--out <file>]` | Writes `skeleton(kind)` to `app.blueprint.json` (or `--out`); refuses to overwrite | 0 written; 1 exists; 2 usage |
 
+## AI and agent experience *[Amended 2026-10-21 — planned, FEAT-011, ADR-028]*
+
+Planned for the `@ux-builder/ui` minor that ships FEAT-011. Until then, a
+name here may change only by amending this section. Everything is optional:
+a rule, blueprint or page without these fields behaves as before.
+
+### Rule additions
+
+| Field | Type | Rules |
+|---|---|---|
+| `when.aiRole` | (`"generative"`, `"assistant"`, `"agent"`)[] | Matches a target with any listed role. A target with no AI role matches no rule that has `aiRole` |
+| `sources[].licence` | adds `"microsoft-terms"`, `"CC-BY-NC-SA-4.0"`, `"CC-BY-NC-ND-4.0"` | None is open: `wording` MUST be `paraphrased` |
+
+`rulesFor` takes `aiRoles?` beside `context`, `sizeClasses` and `inputs`.
+
+### Blueprint additions: `screens[].ai`
+
+| Field | Type | Required | Rules |
+|---|---|---|---|
+| `roles` | (`"generative"`, `"assistant"`, `"agent"`)[] | yes | Non-empty |
+| `acts` | boolean | no | `true`: the AI changes something outside the conversation. Default `false` |
+| `highImpactActions` | array | no | Each `{ "label", "approval": "each" \| "plan" \| "none" }`. `plan` needs the screen to show its plan |
+| `renders` | string[] | no | Catalogue patterns or widgets the AI may render inline; each MUST be `renderable` (FEAT-007 GEN-01) |
+| `region` | size-class[] | no | Size classes of the region the AI's content renders in. Default `["compact", "medium"]` |
+| `essential` | boolean | no | `true`: the AI is the task. Default `false` |
+| `fallback` | string | no | A screen `id` that does the job without AI |
+| `dataLeavesDevice` | boolean | no | Default `false` |
+| `consent` | string | no | The screen or modal `id` where the user consents |
+| `takeover` | boolean | no | `true`: the user can take over from the agent and hand back |
+
+### AI markup
+
+Attributes the audit reads. SDK components emit them, and apps with their
+own AI UI MUST add them to get audit coverage.
+
+| Marker | On | Companions the audit looks for |
+|---|---|---|
+| `data-piq-ai="generated"` | Content made by AI: text, an image, an inline component | A visible disclosure: the element, an ancestor with `data-piq-ai-label`, or an element it references with `aria-describedby`; a correction control (`data-piq-ai-control="retry" \| "regenerate" \| "edit" \| "undo"`) |
+| `data-piq-ai="status"` | The live region that says what the AI is doing | `aria-live`; `aria-busy="true"` while working; then a control with accessible name "Stop" or "Pause" in or beside it |
+| `data-piq-ai="plan"` | A list of an agent's steps | Children `data-piq-ai="step"`, each with `data-piq-ai-status="pending" \| "running" \| "done" \| "failed" \| "skipped"` and that status in text |
+| `data-piq-ai="approval"` | A request for the user's approval | An approve and a deny control (`data-piq-ai-control="approve"`, `"deny"`); neither focused by default to submit, nor pre-checked |
+| `data-piq-ai-actor="agent" \| "user"` | The region stating who is acting now (takeover) | A live region; the value changes on takeover and hand-back |
+| `data-piq-ai-label` | An ancestor whose visible text discloses AI for everything inside | — |
+
+### Findings and checks
+
+The blueprint checks and audit checks of these rules are warnings
+(ADR-028 decision 5). Their IDs are SD-005's rule IDs. Their findings use
+the *Finding* shape above.
+
 ## Error Semantics
 
 | Case | Result |
@@ -142,6 +194,7 @@ not part of this contract, and they may change in any release.
 | Blueprint is not JSON | `check` exits 2 with the parse error |
 | Blueprint fails the schema | One `blueprint.valid` error per problem, with its path |
 | Unknown pattern | `pattern.exists` error naming the nearest catalogue pattern |
+| `screens[].ai` fails the schema, or an AI rule quotes a source *[Amended 2026-10-21]* | `blueprint.valid` error; `npm run check` fails |
 | Rule source breaks the licence rules, or a quoted source is not credited in `@ux-builder/ui`'s `THIRD-PARTY-NOTICES.md` | `npm run check` fails (FEAT-008 PRV-02, PRV-03) |
 
 ## Examples

@@ -499,7 +499,9 @@ the evidence a finding needs is kept.
 ## Dependencies
 
 - **Other features**: FEAT-004 (audit, MCP, catalogue), FEAT-008 (rule IDs,
-  baseline, interaction checks).
+  baseline, interaction checks), FEAT-011 (AI rules and heuristics; AI
+  journeys in normal, error-prone and risky scenarios: AIX-01 to AIX-03,
+  US-082) *[Amended 2026-10-21]*.
 - **ADRs**: ADR-025, ADR-026.
 - **HELIX**: the marker, artifact schema and catalogue (verified against
   HELIX `e8a8c7d`, 2026-10-20).

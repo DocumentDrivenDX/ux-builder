@@ -362,6 +362,22 @@ script runs on `prepack`, and also as `npm run bundle-helix`. It writes
 `helix/`, and it sets the HELIX version in `licenses/vendored.json`. It is
 not part of the published interface.
 
+## AI and agent experience *[Amended 2026-10-21 — planned, FEAT-011, ADR-028]*
+
+Normative from the minors that ship FEAT-011. The formats are CONTRACT-005
+*AI and agent experience* and CONTRACT-006 (`journeys[].ai`, `scenarios`).
+
+| Surface | Addition |
+|---|---|
+| `@ux-builder/ui/blueprint` | `rulesFor({ aiRoles? })`; `checkBlueprint` applies the AI blueprint checks and inline patterns' rules at `ai.region` |
+| `@ux-builder/ui` components | FEAT-007's assistant and generative components emit CONTRACT-005's AI markers |
+| `@ux-builder/ui/eslint` | Rule `ux-builder/ai-neutral-voice` (warning); a `// ux-builder-ai-persona` comment on the line before a string opts it out |
+| `catalogue.json` | `interaction.rules` includes the AI rules; `interaction.aiRoles` lists the roles |
+| `AGENTS.md`, skill | An "AI and agent screens" section: declare each screen's AI role, the rule IDs by role, the markers |
+| `@ux-builder/mcp` | `get_rules` accepts `aiRoles` |
+| `ux-builder-audit` | Checks `ai-disclose`, `ai-stop`, `ai-correct`, `ai-starters`, `ai-declared`, `agent-approval`, `agent-plan`, `agent-interrupt`, `agent-who-acts`, `agent-recover`, `agent-summary`, `genui-review-prefill`, on AI-marked elements only; each finding carries its SD-005 rule ID; warnings |
+| `ux-builder-audit assess` | AI journeys and their three scenarios (CONTRACT-006) |
+
 ## Error Semantics
 
 | Condition | Error / Outcome | Retry | Recovery Expectation |
