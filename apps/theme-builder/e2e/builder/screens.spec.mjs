@@ -98,6 +98,33 @@ test.describe("Compare on screens", () => {
     await expect(page.locator("main section").first().getByRole("radiogroup")).toHaveText([/Widgets.*Dashboard/, /Light \+ dark.*Dark/]);
   });
 
+  // @covers US-046-AC10
+  test("the Assistant screen shows a conversation with a tool call, sources and an approval in every palette and design system", async ({ page }) => {
+    const errors = watch(page);
+    await toCompare(page, { palettes: [0, 1], systems: ["Carbon", "Fluent 2"] });
+    await screenRadio(page, "Assistant").click();
+    const cells = page.locator(".tb-cell");
+    await expect(cells).toHaveCount(4);
+    for (let i = 0; i < 4; i++) {
+      for (const screen of await cells.nth(i).locator(".tb-screen").all()) {
+        for (const frame of [screen.locator(".tb-screen__frame--phone"), screen.locator(".tb-screen__frame--desktop")]) {
+          const conv = frame.locator(".piq-conversation");
+          await expect(conv).toHaveCount(1);
+          await expect(conv.locator('[data-piq-ai="step"]')).toContainText("Looked up time entries");
+          await expect(conv.locator(".piq-sources li")).toHaveCount(2);
+          await expect(conv.locator('[data-piq-ai="approval"]').getByRole("button")).toHaveText(["Approve", "Deny"]);
+        }
+        expect(await screen.evaluate((el) => el.style.getPropertyValue("--piq-color-accent"))).toMatch(/^#/);
+      }
+    }
+    // Each cell in its own design system: two shapes.
+    const radius = (i) => cells.nth(i).locator(".tb-screen .piq-approval .piq-btn").first().evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
+    expect(await radius(0)).not.toBe(await radius(1));
+    const spills = await page.locator(".tb-cell").evaluateAll((all) => all.filter((c) => [...c.querySelectorAll(".tb-screen")].some((f) => f.getBoundingClientRect().right > c.getBoundingClientRect().right + 0.5)).length);
+    expect(spills).toBe(0);
+    expect(errors).toEqual([]);
+  });
+
   // @covers US-032-AC5
   test("changing the screen keeps the palettes, design systems, appearance and the chosen combination", async ({ page }) => {
     await toCompare(page, { systems: ["Carbon", "Fluent 2"] });
