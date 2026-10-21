@@ -3328,7 +3328,110 @@
           "name": "QuickEdit",
           "when": "the form is short (about six fields or fewer) and users should stay on the page"
         }
-      ]
+      ],
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "title",
+          "sections"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "submitLabel": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "sections": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "required": [
+                "title",
+                "fields"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "fields": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "label"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "maxLength": 64
+                      },
+                      "label": {
+                        "type": "string",
+                        "maxLength": 120
+                      },
+                      "type": {
+                        "enum": [
+                          "text",
+                          "number",
+                          "date",
+                          "select",
+                          "checkbox"
+                        ]
+                      },
+                      "options": {
+                        "type": "array",
+                        "maxItems": 50,
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "value",
+                            "label"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "maxLength": 120
+                            },
+                            "label": {
+                              "type": "string",
+                              "maxLength": 120
+                            }
+                          }
+                        }
+                      },
+                      "value": {
+                        "type": [
+                          "string",
+                          "number",
+                          "boolean"
+                        ],
+                        "maxLength": 2000
+                      },
+                      "required": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     {
       "name": "FormSection",
@@ -5199,7 +5302,115 @@
           "name": "FormPage",
           "when": "it fits on one page"
         }
-      ]
+      ],
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "title",
+          "steps"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "submitLabel": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title",
+                "fields"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "title": {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "fields": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "label"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "maxLength": 64
+                      },
+                      "label": {
+                        "type": "string",
+                        "maxLength": 120
+                      },
+                      "type": {
+                        "enum": [
+                          "text",
+                          "number",
+                          "date",
+                          "select",
+                          "checkbox"
+                        ]
+                      },
+                      "options": {
+                        "type": "array",
+                        "maxItems": 50,
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "value",
+                            "label"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "value": {
+                              "type": "string",
+                              "maxLength": 120
+                            },
+                            "label": {
+                              "type": "string",
+                              "maxLength": 120
+                            }
+                          }
+                        }
+                      },
+                      "value": {
+                        "type": [
+                          "string",
+                          "number",
+                          "boolean"
+                        ],
+                        "maxLength": 2000
+                      },
+                      "required": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     {
       "name": "WorkQueue",

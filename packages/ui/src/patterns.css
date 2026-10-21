@@ -1003,6 +1003,13 @@
 .piq-inline-form__title { margin: 0; color: var(--piq-color-text-strong); font-weight: var(--piq-font-weight-strong); }
 .piq-inline-form__actions { display: flex; justify-content: flex-start; }
 .piq-inline-form__status { margin: 0; color: var(--piq-color-text-muted); font-size: var(--piq-font-size-small); }
+.piq-inline-form__group { display: grid; gap: var(--piq-space-2); }
+.piq-inline-form__group-title { margin: 0; color: var(--piq-color-text-strong); font-weight: var(--piq-font-weight-strong); font-size: var(--piq-font-size-small); }
+/* A Wizard or FormPage an agent rendered inline: framed like an inline form;
+   a FormPage's actions keep their sticky bar, on the frame's surface. */
+.piq-generative > .piq-wizard,
+.piq-generative > .piq-form-page { padding: var(--piq-space-4); border: var(--piq-border-default); border-radius: var(--piq-radius-card); background: var(--piq-color-surface); }
+.piq-generative > .piq-form-page .piq-form-page__actions { background: var(--piq-color-surface); }
 
 .piq-artifact-link { display: flex; flex-wrap: wrap; align-items: center; gap: var(--piq-space-2); padding: var(--piq-space-2) var(--piq-space-3); border: var(--piq-border-default); border-radius: var(--piq-radius-control); }
 .piq-artifact-link__title { flex: 1 1 auto; min-inline-size: 0; color: var(--piq-color-text-strong); font-weight: var(--piq-font-weight-strong); }

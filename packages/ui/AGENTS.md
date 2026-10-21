@@ -279,7 +279,7 @@ Build an assistant from `@ux-builder/ui/assistant`, never from a chat library's 
 | `useAiSdkConversation()` | `chat, { describeApproval } = {}` | Conversation props from the AI SDK chat that useChat returns: messages, onSend, onStop, onRetry, onRegenerate and onDecide. Spread them onto <Conversation>. |
 | `useAssistantUiConversation()` | `thread, { describeApproval } = {}` | Conversation props from an assistant-ui ThreadRuntime: messages, onSend, onStop, onRetry, onRegenerate and onDecide. Spread them onto <Conversation>. |
 
-A tool result renders UI as `{ component, props }`, with props as JSON. Only these components may be rendered, and only with props that pass their schema (`propsSchema` in `catalogue.json`, or the MCP tool `list_renderable`); anything else shows a plain notice: `Card`, `DataTable`, `DescriptionList`, `InlineForm`, `Notice`, `ProgressBar`, `StatTile`, `StatusPill`.
+A tool result renders UI as `{ component, props }`, with props as JSON. Only these components may be rendered, and only with props that pass their schema (`propsSchema` in `catalogue.json`, or the MCP tool `list_renderable`); anything else shows a plain notice: `Card`, `DataTable`, `DescriptionList`, `FormPage`, `InlineForm`, `Notice`, `ProgressBar`, `StatTile`, `StatusPill`, `Wizard`.
 
 ### Interaction and screen rules
 
