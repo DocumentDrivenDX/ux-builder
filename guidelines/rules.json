@@ -844,6 +844,1780 @@
           "wording": "paraphrased"
         }
       ]
+    },
+    {
+      "id": "ai.disclose",
+      "title": "AI-made content is labelled",
+      "statement": "Content made by AI is labelled as AI-made where it appears, or sits in a region whose label says so.",
+      "rationale": "People judge and check content differently when they know a model wrote it; an unlabelled answer borrows trust it has not earned.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.disclose"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (transparency)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G1)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Design: UX design for agents (core principles)",
+          "url": "https://microsoft.design/articles/ux-design-for-agents/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Google PAIR: People + AI Guidebook (explainability and trust)",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "licence": "CC-BY-NC-SA-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.not-a-person",
+      "title": "The AI is not presented as a person",
+      "statement": "The UI never presents the AI as a person: no first-person thinking or feeling, and no human name or face that implies a human author.",
+      "rationale": "Human cues make people over-trust a model and misjudge what it can do or who is accountable for its output.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.not-a-person"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (transparency)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Learn: Human-centered design for agents (differentiated from humans)",
+          "url": "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.capabilities",
+      "title": "Say what the AI can and cannot do",
+      "statement": "At first use, the screen says what the AI can and cannot do, and that its results may need checking.",
+      "rationale": "A correct mental model at the start prevents both over-reliance and abandonment after the first wrong answer.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.capabilities"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G1, G2)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Generative AI (set clear expectations)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Google PAIR: People + AI Guidebook (mental models)",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "licence": "CC-BY-NC-SA-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Learn: Human-centered design for agents (first run)",
+          "url": "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.starters",
+      "title": "Offer starting points",
+      "statement": "An open-ended prompt offers suggested starting points, and they are never the only way to start.",
+      "rationale": "A blank prompt gives no clue what to ask; suggestions teach the scope without boxing the user in.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.starters"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (curated suggestions)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Learn: Human-centered design for agents (example prompts)",
+          "url": "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-007: generative UI (CONV-05)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-007-generative-ui.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.fallback",
+      "title": "The task works without the AI",
+      "statement": "Where AI adds to a task rather than being the task, the task can still be done without it.",
+      "rationale": "Models fail, are unavailable, or are declined by the user; an add-on must not take the underlying job hostage.",
+      "when": {
+        "aiRole": [
+          "generative"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "ai.fallback"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (non-AI fallback)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.stop",
+      "title": "Generation can be stopped",
+      "statement": "While AI is generating or working, a Stop control is reachable and named; stopping keeps what has arrived and says that it stopped.",
+      "rationale": "A wrong or runaway answer wastes time and can do harm; the user needs to end it at once without losing what is useful.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.stop"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (intervention during execution)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G9)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-007: generative UI (CONV-03)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-007-generative-ui.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.correct",
+      "title": "Output can be corrected",
+      "statement": "AI output can be edited, retried, regenerated or reverted, and the screen says when a correction has taken effect.",
+      "rationale": "Model output is often nearly right; fixing it must be cheaper than starting again, and the user must see that the fix landed.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.correct"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (refine or revert; acknowledge corrections)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G9)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Learn: Human-centered design for agents (correction pathways)",
+          "url": "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Google PAIR: People + AI Guidebook (feedback and control)",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "licence": "CC-BY-NC-SA-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.dismiss",
+      "title": "Suggestions can be dismissed",
+      "statement": "An AI suggestion the user did not ask for can be dismissed in one action, and stays dismissed.",
+      "rationale": "Unrequested suggestions that cannot be put away, or that come back, turn help into noise.",
+      "when": {
+        "aiRole": [
+          "generative"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.dismiss"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G8)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Generative AI (dismiss unwanted content)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.on-off",
+      "title": "The agent can be turned off, and shows its state",
+      "statement": "The user can turn the agent off, and its state (off, idle, working, waiting for you) is shown.",
+      "rationale": "People need to know whether something is acting for them, and to stop it entirely when they choose.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "agent.on-off"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Design: UX design for agents (core principles: on, off and status)",
+          "url": "https://microsoft.design/articles/ux-design-for-agents/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G17)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.declare-high-impact",
+      "title": "List the agent's high-impact actions",
+      "statement": "A screen whose agent acts lists the actions it can take that are irreversible, costly or seen by other people.",
+      "rationale": "Only actions that are named can be given an approval; an undeclared payment or message is approved by nobody.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "agent.declare-high-impact"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (high-impact scenarios)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Generative AI (confirm significant actions)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.approve-high-impact",
+      "title": "High-impact actions wait for approval",
+      "statement": "Each high-impact action waits for the user's approval, shows what will happen and to what, offers Deny, and is never approved on the user's behalf.",
+      "rationale": "An agent that pays, sends or deletes on its own reading of a request can do damage that no undo repairs.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "agent.approve-high-impact"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (confirm significant actions)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (permission to proceed)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G16)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-007: generative UI (AGT-T-04)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-007-generative-ui.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.plan-visible",
+      "title": "The plan and next step are shown",
+      "statement": "When an agent works in steps, its plan and next step are shown, each step with its status, and a change of plan is shown too.",
+      "rationale": "A visible plan lets the user catch a wrong direction before it is acted on, and know where the agent is.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "agent.plan-visible"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (presentation of plan; preview of next steps)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.interrupt",
+      "title": "A working agent can be interrupted",
+      "statement": "A working agent can be paused or stopped at any step, and the user can then give a new instruction.",
+      "rationale": "Users often see a mistake mid-run; they need to steer then, not after the agent finishes.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "agent.interrupt"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (intervention; interrupting then following up)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Design: UX design for agents (control)",
+          "url": "https://microsoft.design/articles/ux-design-for-agents/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.who-acts",
+      "title": "Say who is acting",
+      "statement": "When the user can take over and hand back, the screen states who is acting now, and the agent's actions are distinguishable from the user's.",
+      "rationale": "Two actors on one UI collide unless each knows who has control and which changes the other made.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "agent.who-acts"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (UI context; takeover cues; distinct agent visuals)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.recover",
+      "title": "Failed steps can be recovered",
+      "statement": "A failed step is described at that step and in text, and the user can retry it or return to an earlier step without starting over.",
+      "rationale": "Restarting a long run for one failed step wastes the work done and discourages using the agent at all.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "agent.recover"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (agent errors; reverting to a prior step)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Learn: Human-centered design for agents (avoid forcing restarts)",
+          "url": "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G9)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.summary",
+      "title": "A finished run is summarised",
+      "statement": "A finished run ends with a summary of what was done, with the detail available on request.",
+      "rationale": "The user must be able to check what an agent did on their behalf without replaying every step.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "agent.summary"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (concise summary; progressive disclosure)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "agent.status-unwatched",
+      "title": "Status reaches a user who is not watching",
+      "statement": "Progress, duration and step status reach a user who is not watching (a persistent status region or a notification), above all for risky steps.",
+      "rationale": "People hand work to agents so they can look away; status shown only in a transient view is missed.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "agent.status-unwatched"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (users rarely monitor)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Design: UX design for agents (nudging more than notifying)",
+          "url": "https://microsoft.design/articles/ux-design-for-agents/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.sources",
+      "title": "Show what the output relies on",
+      "statement": "Output that relies on documents, data or the web shows which, linked where possible.",
+      "rationale": "Sources let the user check an answer and judge how far to trust it.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.sources"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G11)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Learn: Human-centered design for agents (surface contextual signals)",
+          "url": "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Google PAIR: People + AI Guidebook (explainability and trust)",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "licence": "CC-BY-NC-SA-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-007: generative UI (AGT-T-03)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-007-generative-ui.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.uncertainty",
+      "title": "State uncertainty and assumptions",
+      "statement": "The UI says when the AI is unsure or has assumed something the user did not say, instead of presenting a guess as fact.",
+      "rationale": "Confident presentation of a guess leads people to act on it; stated uncertainty sets appropriate trust.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.uncertainty"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Design: UX design for agents (embrace uncertainty; appropriate trust)",
+          "url": "https://microsoft.design/articles/ux-design-for-agents/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (seamfulness; ambiguity)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G2)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Google PAIR: People + AI Guidebook (explainability and trust)",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "licence": "CC-BY-NC-SA-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.ask-when-unclear",
+      "title": "Clarify ambiguous high-stakes requests",
+      "statement": "In a high-stakes step an ambiguous request is clarified with the user; in a low-stakes one a stated default may be used.",
+      "rationale": "Guessing is cheap when a wrong guess is cheap; on a costly step a question is cheaper than a mistake.",
+      "when": {
+        "aiRole": [
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.ask-when-unclear"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (ambiguity)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G10)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.improve-request",
+      "title": "Help the user ask differently",
+      "statement": "A blocked or unhelpful result says why, where it can, and how to ask differently.",
+      "rationale": "Without a hint, people repeat the same request or give up; a reason and a suggestion turn a dead end into a retry.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.improve-request"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (help people improve requests)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Google PAIR: People + AI Guidebook (errors and graceful failure)",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "licence": "CC-BY-NC-SA-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.consent",
+      "title": "Ask before data leaves the device",
+      "statement": "Before personal data or usage leaves the device for an AI feature, the user is told what is sent and why, gives permission, and can opt out later.",
+      "rationale": "People cannot weigh a feature's benefit against a privacy cost they were never told about.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "ai.consent"
+        },
+        {
+          "kind": "review",
+          "id": "ai.consent"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (privacy)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.feedback",
+      "title": "Feedback on output is optional and specific",
+      "statement": "Users can give feedback on a specific output; giving it is optional and never blocks the task.",
+      "rationale": "Specific feedback improves the system; compulsory feedback interrupts the work it is meant to improve.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.feedback"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (continuous improvement)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G15)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Google PAIR: People + AI Guidebook (feedback and control)",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "licence": "CC-BY-NC-SA-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.memory-visible",
+      "title": "What the AI remembers is visible",
+      "statement": "What the AI remembers or has learned about the user can be seen and changed.",
+      "rationale": "Hidden memory surprises people and makes wrong assumptions impossible to correct.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.memory-visible"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Design: UX design for agents (the past; transparency of knowledge)",
+          "url": "https://microsoft.design/articles/ux-design-for-agents/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G12, G13)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.notify-changes",
+      "title": "Tell users when the AI changes",
+      "statement": "When the AI's behaviour or model changes in a way users would notice, they are told.",
+      "rationale": "A silent change breaks the habits and trust people built on the old behaviour.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.notify-changes"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G14, G18)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Generative AI (test model updates)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.inclusive",
+      "title": "Do not infer or stereotype people",
+      "statement": "The AI does not infer personal or cultural attributes it can ask for, and is tested with diverse people for stereotyped output.",
+      "rationale": "Inferred attributes are often wrong and can offend; stereotyped output excludes the people it misrepresents.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.inclusive"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (inclusion)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft HAX Toolkit: Guidelines for Human-AI Interaction (G6)",
+          "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Google PAIR: People + AI Guidebook (fairness)",
+          "url": "https://pair.withgoogle.com/guidebook",
+          "licence": "CC-BY-NC-SA-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "genui.renderable",
+      "title": "Inline UI comes from renderable components",
+      "statement": "An assistant renders inline only components the catalogue marks renderable.",
+      "rationale": "Renderable components have validated props and work inside a message; anything else may break the conversation or carry unsafe markup.",
+      "when": {
+        "aiRole": [
+          "assistant"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "genui.renderable"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder FEAT-007: generative UI (GEN-01)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-007-generative-ui.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder ADR-023: generative UI libraries are bridged",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-023-generative-ui-libraries-are-bridged-not-design-systems.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "genui.review-prefill",
+      "title": "Pre-filled values are the user's to submit",
+      "statement": "Values the AI pre-fills in an inline form or wizard are editable, and are submitted only by the user's own action.",
+      "rationale": "A form filled and sent by the model is an action taken without consent, however helpful the values.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "genui.review-prefill"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (keep people in control)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Cheng, Liang, Schoop and Nichols: Mapping the Design Space of User Experience for Computer Use Agents (IUI '26) (permission to proceed)",
+          "url": "https://arxiv.org/abs/2602.07283",
+          "licence": "CC-BY-NC-ND-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "genui.keep-input",
+      "title": "Regeneration keeps what the user typed",
+      "statement": "Regenerating an answer never silently discards what the user typed into its inline UI.",
+      "rationale": "Losing typed input to a regenerate click punishes the user for asking for a better answer.",
+      "when": {
+        "aiRole": [
+          "assistant"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "genui.keep-input"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Generative AI (refine without losing work)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-007: generative UI (GEN-04)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-007-generative-ui.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "genui.history",
+      "title": "Submitted inline UI stays readable",
+      "statement": "A submitted inline component stays readable in the conversation, shows what was submitted, and can no longer be changed.",
+      "rationale": "The history is the record of what the user agreed to; it must not be editable or disappear.",
+      "when": {
+        "aiRole": [
+          "assistant"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "genui.history"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder FEAT-007: generative UI (AGT-T-04, GEN-04)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-007-generative-ui.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.declared",
+      "title": "AI screens declare their role",
+      "statement": "A screen that shows AI content declares its AI role in the blueprint.",
+      "rationale": "The AI rules apply by declared role; an undeclared AI screen escapes every rule meant for it.",
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.declared"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-028: AI experience rules apply by declared role and marked markup",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-028-ai-experience-rules-apply-by-declared-role-and-marked-markup.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "ai.user-initiates",
+      "title": "The user starts the action",
+      "statement": "Labels keep the user as the one who starts an action (\"Summarize\", \"Summarize with Assistant\"), not the AI (\"Assistant, summarize\").",
+      "rationale": "Labels that make the AI the actor blur who is responsible and read as the AI acting on its own.",
+      "when": {
+        "aiRole": [
+          "generative",
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "ai.user-initiates"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Learn: Human-centered design for agents (built for intent)",
+          "url": "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder ADR-028: AI experience rules apply by declared role and marked markup",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-028-ai-experience-rules-apply-by-declared-role-and-marked-markup.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.actions-few",
+      "title": "A card has few primary actions",
+      "statement": "A card offers few primary actions, usually one to three and never more than six.",
+      "rationale": "Many actions crowd a small card and make the main next step hard to find.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.actions-few"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Teams: Designing Adaptive Cards (anatomy; actions)",
+          "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards",
+          "licence": "CC-BY-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Adaptive Cards documentation: design best practices",
+          "url": "https://adaptivecards.microsoft.com/?topic=design-best-practices",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.wrap",
+      "title": "Card text wraps",
+      "statement": "Text blocks and choice labels in a card wrap, so text is never cut off on a narrow screen.",
+      "rationale": "Cards are shown in narrow chat columns and phones, where unwrapped text is truncated.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.wrap"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Teams: Designing Adaptive Cards (text)",
+          "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards",
+          "licence": "CC-BY-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Adaptive Cards documentation: design best practices",
+          "url": "https://adaptivecards.microsoft.com/?topic=design-best-practices",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.input-label",
+      "title": "Every card input has a label",
+      "statement": "Every input in a card has a label of its own; a placeholder is never the only label.",
+      "rationale": "A placeholder disappears as the user types and is not reliably read by assistive technology.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.input-label"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Copilot Studio: Accessibility tips for Adaptive Cards (label property)",
+          "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/adaptive-card-accessibility-tips",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.input-error",
+      "title": "Validated card inputs explain errors",
+      "statement": "An input in a card that validates (required, pattern, range) says what is wrong in an error message.",
+      "rationale": "Without a message, the user sees only that submission failed, not what to fix.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.input-error"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Copilot Studio: Accessibility tips for Adaptive Cards (error messages)",
+          "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/adaptive-card-accessibility-tips",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.heading",
+      "title": "A card's title is a heading",
+      "statement": "A card with more than its title marks the title as a heading.",
+      "rationale": "Screen-reader users navigate by headings; an unmarked title hides the card's structure.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.heading"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Copilot Studio: Accessibility tips for Adaptive Cards (heading style)",
+          "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/adaptive-card-accessibility-tips",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Microsoft Teams: Designing Adaptive Cards (anatomy: header)",
+          "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards",
+          "licence": "CC-BY-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.columns-few",
+      "title": "A card uses few columns",
+      "statement": "A column layout in a card uses few columns (at most three) and no fixed widths wider than a compact screen allows.",
+      "rationale": "Columns squeeze content on narrow hosts until it is unreadable or overflows.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.columns-few"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Teams: Designing Adaptive Cards (column layouts)",
+          "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards",
+          "licence": "CC-BY-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.narrow-first",
+      "title": "A card is laid out narrow first",
+      "statement": "A card is laid out for the narrowest width it will show at and still works wider; it never scrolls sideways.",
+      "rationale": "The same card appears in a phone, a side panel and a wide window; designing for the widest breaks the others.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.narrow-first"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Teams: Designing Adaptive Cards (best practices)",
+          "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards",
+          "licence": "CC-BY-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.reading-order",
+      "title": "Reading order matches visual order",
+      "statement": "The order a card is read and tabbed in matches the order it is seen in.",
+      "rationale": "A mismatch confuses keyboard and screen-reader users, who meet the content in a different order from everyone else.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.reading-order"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Copilot Studio: Accessibility tips for Adaptive Cards (logical tab order)",
+          "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/adaptive-card-accessibility-tips",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.image-alt",
+      "title": "Card images have alternative text",
+      "statement": "Every informative image in a card has alternative text.",
+      "rationale": "Without it, people who cannot see the image lose what it says.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.image-alt"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "WCAG 2.2: 1.1.1 Non-text Content",
+          "url": "https://www.w3.org/TR/WCAG22/#non-text-content",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Copilot Studio: Accessibility tips for Adaptive Cards (alternative text)",
+          "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/adaptive-card-accessibility-tips",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.image-transparent",
+      "title": "Card images suit light and dark themes",
+      "statement": "Images in a card use transparent backgrounds so they suit light and dark themes, and text never sits on a colour that hurts reading.",
+      "rationale": "The host chooses the theme; an image with a baked-in background clashes with one of them.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.image-transparent"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Teams: Designing Adaptive Cards (images)",
+          "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards",
+          "licence": "CC-BY-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.action-titles",
+      "title": "Card action titles say what they do",
+      "statement": "Action titles in a card say what they do; never \"Click here\", or \"Submit\" alone where the outcome is unclear.",
+      "rationale": "An action read out of context must still tell the user what will happen.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.action-titles"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Copilot Studio: Accessibility tips for Adaptive Cards (descriptive action titles)",
+          "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/adaptive-card-accessibility-tips",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.no-hidden-inputs",
+      "title": "Card inputs are not hidden",
+      "statement": "Inputs in a card, above all validated ones, are not hidden behind a toggle; if one must be, the toggle says what it shows.",
+      "rationale": "A hidden required input blocks submission with an error the user cannot see.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.no-hidden-inputs"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Copilot Studio: Accessibility tips for Adaptive Cards (visibility caution)",
+          "url": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/adaptive-card-accessibility-tips",
+          "licence": "microsoft-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.version",
+      "title": "A card declares a supported version",
+      "statement": "A card declares a schema version the host supports (1.6 or lower) and gives a fallback for anything outside it.",
+      "rationale": "Hosts differ in what they render; a declared version and a fallback keep a card working across them.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.version"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Adaptive Cards: Motivations and Principles (interoperability)",
+          "url": "https://learn.microsoft.com/en-us/adaptive-cards/resources/principles",
+          "licence": "CC-BY-4.0",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder ADR-029: Adaptive Cards render with SDK components in the app's theme",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-029-adaptive-cards-render-with-sdk-components-in-the-apps-theme.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.sparingly",
+      "title": "Cards are sent sparingly",
+      "statement": "An agent sends a card only when it helps; cards that scroll out of view lose their use.",
+      "rationale": "A conversation full of cards buries the ones that matter and the actions on them.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.sparingly"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Microsoft Teams: Designing Adaptive Cards (frequency)",
+          "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards",
+          "licence": "CC-BY-4.0",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "card.high-impact-marked",
+      "title": "High-impact card actions are marked",
+      "statement": "A card action that pays, sends, deletes or publishes is marked high-impact, so the host asks for approval.",
+      "rationale": "The host can ask for approval only for actions it knows are high-impact.",
+      "when": {
+        "aiRole": [
+          "assistant",
+          "agent"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "card.high-impact-marked"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-029: Adaptive Cards render with SDK components in the app's theme",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-029-adaptive-cards-render-with-sdk-components-in-the-apps-theme.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Generative AI (confirm significant actions)",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "flow.reachable",
+      "title": "Every screen can be reached",
+      "statement": "Every screen is reached from a destination (or, in a view, its first screen) through actions, at every size class the app supports; leaving by external counts as a way on.",
+      "rationale": "A screen no one can reach is dead code at best, and at worst the only place a task can be done.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "flow.reachable"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "flow.no-dead-end",
+      "title": "No screen or modal is a dead end",
+      "statement": "A screen or modal that declares actions offers a way on or back: another screen, back, external, or a modal's dismiss.",
+      "rationale": "A user who cannot leave a screen must abandon the app or the task.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "flow.no-dead-end"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Modality",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "flow.target-exists",
+      "title": "Actions lead somewhere that exists",
+      "statement": "Every action's target names a screen, a modal of its screen, back, a state or external.",
+      "rationale": "A target that names nothing is a broken link in the plan; every check of the flow depends on targets that exist.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "flow.target-exists"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "flow.primary-consistent",
+      "title": "One primary action, stated once",
+      "statement": "A screen marks at most one action primary, and when it also gives primaryAction, that is the same action.",
+      "rationale": "Two answers to which action leads make the screen's emphasis, and the checks of it, ambiguous.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "flow.primary-consistent"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "journey.walkable",
+      "title": "A journey can be walked",
+      "statement": "Each step of a journey names an action its screen has, and the next step is where that action leads; the first step is on the entry, and an alternate starts where it branches.",
+      "rationale": "A journey that cannot be walked over the flow describes an app that does not exist.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "journey.walkable"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "journey.safeguarded",
+      "title": "Risky steps are safeguarded",
+      "statement": "A journey step that takes a destructive action has its safeguard (undo or confirm), and one that takes a high-impact action has its approval.",
+      "rationale": "The journey is the path users actually take; a missing safeguard on it is a loss users will meet.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "journey.safeguarded"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "WCAG 2.2: 3.3.4 Error Prevention (Legal, Financial, Data)",
+          "url": "https://www.w3.org/TR/WCAG22/#error-prevention-legal-financial-data",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "journey.covers-errors",
+      "title": "Journeys cover their error states",
+      "statement": "A journey through a screen that declares an error state has an alternate that covers that state.",
+      "rationale": "The error path is where users most need a planned way to recover, and is the one most often left unplanned.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "journey.covers-errors"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Feedback",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/feedback",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "journey.story-covered",
+      "title": "Journeys follow the HELIX stories",
+      "statement": "With a HELIX marker, every story a screen serves has a journey, and each journey's story and criteria exist in HELIX; the stories are read, never written.",
+      "rationale": "HELIX governs and the blueprint projects it; a story with no journey, or a criterion HELIX lacks, is drift between them.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "journey.story-covered"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
     }
   ]
 }

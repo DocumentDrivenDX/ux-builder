@@ -2,15 +2,16 @@
    app's or view's plan against them (FEAT-008, ADR-025, CONTRACT-005).
 
      import { rulesFor, checkBlueprint } from "@ux-builder/ui/blueprint";
-     rulesFor({ context: "view", sizeClasses: ["compact"], inputs: ["coarse"] });
+     rulesFor({ context: "view", sizeClasses: ["compact"], inputs: ["coarse"], aiRoles: ["agent"] });
      checkBlueprint(JSON.parse(readFileSync("app.blueprint.json", "utf8")));
 
    Reads only the installed catalogue.json, so it runs in Node or a browser
    with no network and no dependency. */
 
 import catalogue from "../catalogue.json" with { type: "json" };
+import { checkFlow } from "./flow.mjs";
 
-const { rules: RULES, recipes: RECIPES, limits: LIMITS, blueprintSchema } = catalogue.interaction;
+const { rules: RULES, recipes: RECIPES, limits: LIMITS, blueprintSchema, aiRoles: AI_ROLES } = catalogue.interaction;
 const PATTERNS = catalogue.patterns.filter((p) => p.type === "component").map((p) => p.name);
 const byId = new Map(RULES.map((r) => [r.id, r]));
 
@@ -21,16 +22,40 @@ export const CHECKS = [
   "blueprint.valid", "pattern.exists", "nav.compact-destinations", "screen.states", "action.destructive-safeguard",
   "modal.titled", "modal.dismiss", "modal.one-at-a-time", "modal.unsaved-changes",
   "view.no-shell", "view.size-classes", "view.one-task", "view.states",
+  // AI and agent screens (FEAT-011 AIB-02): warnings, as ADR-028 decision 5.
+  "agent.declare-high-impact", "agent.approve-high-impact", "ai.fallback", "ai.consent", "genui.renderable",
+  // Flows and journeys (FEAT-012 FLW-02, JRN-02, JRN-03; flow.mjs): warnings, but flow.target-exists.
+  "flow.reachable", "flow.no-dead-end", "flow.target-exists", "flow.primary-consistent",
+  "journey.walkable", "journey.safeguarded", "journey.covers-errors", "journey.story-covered",
 ];
 const STATES = ["empty", "loading", "error"];
 
+/* What an assistant may render inline (FEAT-007 GEN-01). The catalogue's
+   `renderable` flags decide once FEAT-007 ships them; until then, this list:
+   the widgets and regions that fit inside a message and carry one small
+   task (US-048: tables, cards and forms; FEAT-011: Wizard and FormPage).
+   Shells, navigation, multi-pane screens and modals are left out; open those
+   as an artifact pane instead (FEAT-007 AGT-T-05). SD-005 records the choice. */
+const INLINE = [
+  "Button", "Card", "Checkbox", "ChoicePicker", "Combobox", "DataTable", "DatePicker", "DateRangePicker", "Notice", "ProgressBar",
+  "RadioGroup", "Select", "StatusPill", "Switch", "TextArea", "TextField",
+  "ChartFrame", "DescriptionList", "ErrorSummary", "FormPage", "FormSection", "PeriodComparison", "ReviewConfirm", "StatePanel",
+  "StatTile", "TaskList", "Timeline", "Wizard",
+];
+const COMPONENTS = [...catalogue.patterns, ...catalogue.widgets].filter((c) => c.type === "component");
+const RENDERABLE = new Set(COMPONENTS.some((c) => "renderable" in c) ? COMPONENTS.filter((c) => c.renderable).map((c) => c.name) : INLINE);
+const REGION = ["compact", "medium"];
+
 /* ------------------------------------------------------------ rulesFor */
 const meets = (axis, values) => !axis || values == null || axis.some((v) => [].concat(values).includes(v));
+/* AI roles are the exception: a target with no role matches no AI rule (FEAT-011 AIO-02). */
+const meetsRole = (axis, roles) => !axis || axis.some((v) => [].concat(roles ?? []).includes(v));
 
 /* Rules whose `when` matches the target on every axis the rule names; an
-   axis the target leaves out matches every value. */
-export function rulesFor({ context, sizeClasses, inputs } = {}) {
-  return RULES.filter((r) => meets(r.when?.context, context) && meets(r.when?.sizeClass, sizeClasses) && meets(r.when?.input, inputs));
+   axis the target leaves out matches every value, except `aiRoles`: a rule
+   for an AI role applies only to a target with that role. */
+export function rulesFor({ context, sizeClasses, inputs, aiRoles } = {}) {
+  return RULES.filter((r) => meets(r.when?.context, context) && meets(r.when?.sizeClass, sizeClasses) && meets(r.when?.input, inputs) && meetsRole(r.when?.aiRole, aiRoles));
 }
 
 /* ----------------------------------------------------------- recipes */
@@ -77,6 +102,8 @@ function validate(schema, value, path, out, root = schema) {
   if (schema.enum && !schema.enum.includes(value)) return out.push([path, `must be one of ${schema.enum.map((e) => JSON.stringify(e)).join(", ")}`]);
   if (schema.type && !(schema.type === t || (schema.type === "number" && t === "integer"))) return out.push([path, `must be ${schema.type === "array" || schema.type === "object" ? "an" : "a"} ${schema.type}`]);
   if (t === "string" && schema.minLength && value.length < schema.minLength) out.push([path, "must not be empty"]);
+  if (t === "string" && schema.pattern && !new RegExp(schema.pattern).test(value)) out.push([path, `is ${JSON.stringify(value)}; it must match ${schema.pattern}`]);
+  if ((t === "integer" || t === "number") && "minimum" in schema && value < schema.minimum) out.push([path, `must be at least ${schema.minimum}`]);
   if (t === "array") {
     if (schema.minItems && value.length < schema.minItems) out.push([path, `must have at least ${schema.minItems} item${schema.minItems > 1 ? "s" : ""}`]);
     if (schema.uniqueItems && new Set(value.map((v) => JSON.stringify(v))).size !== value.length) out.push([path, "must not repeat an item"]);
@@ -119,10 +146,30 @@ function* modalsOf(modals, path, depth = 0) {
   }
 }
 
+/* A pattern an AI renders inline is checked with its own rules at the size
+   classes of the region it renders in, not the window's (FEAT-011 AIB-03,
+   ADR-021). Each entry checks one pattern rule for an inline pattern and
+   returns [message, fix], or nothing when it passes. */
+const INLINE_CHECKS = {
+  "screen.states": ({ s, name, region }) => {
+    const missing = STATES.filter((x) => !(Array.isArray(s.states) && s.states.includes(x)));
+    if (missing.length) return [`${name}, rendered inline on "${s.title ?? s.id}" at ${region.join(" and ")}, has no ${missing.join(", ")} state${missing.length > 1 ? "s" : ""}; the screen does not declare ${missing.length > 1 ? "them" : "it"}.`, `Add ${missing.map((x) => JSON.stringify(x)).join(", ")} to the screen's states, and supply each state's content to the inline ${name}.`];
+  },
+  "view.no-shell": ({ name }) => [`A view renders ${name} inline; the host draws the shell.`, "Render a screen pattern without a shell, or a widget."],
+};
+const inlineRules = (name, bp, region) => RULES.filter((r) => INLINE_CHECKS[r.id] && r.appliesTo?.patterns?.includes(name) && !r.when?.aiRole
+  && meets(r.when?.context, bp.kind) && meets(r.when?.sizeClass, region) && meets(r.when?.input, bp.supports?.inputs));
+
+/* The value at a path in the blueprint. */
+const valueAt = (bp, path) => path.reduce((v, k) => (v && typeof v === "object" ? v[k] : undefined), bp);
+
 /* Findings for the blueprint: the schema, then every blueprint check whose
    rule applies to its kind, size classes and inputs. Ordered by path, then
-   rule, in plain string order, not locale order (CONTRACT-005). */
-export function checkBlueprint(bp) {
+   rule, in plain string order, not locale order (CONTRACT-005). With
+   `helix` ({ stories: { "US-12": { criteria: [...] } } }, as the command
+   reads them under a HELIX marker), the journeys are also checked against
+   the stories; without it those checks are skipped. */
+export function checkBlueprint(bp, { helix } = {}) {
   const findings = [];
   const add = (id, path, message, fix, severity) => findings.push({ rule: id, severity: severity ?? byId.get(id)?.severity ?? "error", path: ptr(path), message, fix });
   if (!bp || typeof bp !== "object" || Array.isArray(bp)) {
@@ -134,7 +181,9 @@ export function checkBlueprint(bp) {
   // A modal's missing title or dismiss is reported by its own rule.
   const own = (path, msg) => path.includes("modals") && /^needs "(title|dismiss)"$/.test(msg);
   schemaErrors.splice(0, Infinity, ...schemaErrors.filter(([path, msg]) => !own(path, msg)));
-  for (const [path, msg] of schemaErrors) add("blueprint.valid", path, msg.startsWith('"') ? `${msg}.` : `${ptr(path) || "The blueprint"} ${msg}.`, "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005).");
+  // Inside a screen's ai, a value outside its enum is named (US-077-AC6); elsewhere the message is as before.
+  const named = (path, msg) => (path[2] === "ai" && msg.startsWith("must be one of") ? `is ${JSON.stringify(valueAt(bp, path))}; it ${msg}` : msg);
+  for (const [path, msg] of schemaErrors) add("blueprint.valid", path, msg.startsWith('"') ? `${msg}.` : `${ptr(path) || "The blueprint"} ${named(path, msg)}.`, "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005).");
 
   const screens = Array.isArray(bp.screens) ? bp.screens.filter((s) => s && typeof s === "object") : [];
   const ids = new Map();
@@ -146,6 +195,26 @@ export function checkBlueprint(bp) {
   const dests = Array.isArray(bp.destinations) ? bp.destinations : [];
   dests.forEach((d, i) => {
     if (d && typeof d.screen === "string" && !ids.has(d.screen)) add("blueprint.valid", ["destinations", i, "screen"], `Destination "${d.label ?? d.id}" names no screen "${d.screen}".`, `Name one of: ${[...ids.keys()].join(", ")}.`);
+  });
+  // Action IDs are unique within their screen or modal, journey IDs in the blueprint (CONTRACT-005 Flows and journeys).
+  const once = (list, path, what) => {
+    const seen = new Set();
+    (Array.isArray(list) ? list : []).forEach((x, j) => {
+      if (!x || typeof x.id !== "string") return;
+      if (seen.has(x.id)) add("blueprint.valid", [...path, j, "id"], `${what} ID "${x.id}" is used twice.`, `Give each ${what.toLowerCase()} its own ID.`);
+      seen.add(x.id);
+    });
+  };
+  screens.forEach((s) => {
+    const at = ["screens", bp.screens.indexOf(s)];
+    once(s.actions, [...at, "actions"], "Action");
+    for (const { m, path } of modalsOf(s.modals, [...at, "modals"])) once(m.actions, [...path, "actions"], "Action");
+  });
+  once(bp.journeys, ["journeys"], "Journey");
+  // A journey's criteria are its own story's (CONTRACT-005).
+  (Array.isArray(bp.journeys) ? bp.journeys : []).forEach((j, i) => {
+    if (!j || typeof j.story !== "string" || !Array.isArray(j.criteria)) return;
+    j.criteria.forEach((c, k) => { if (typeof c === "string" && /^US-\d+-AC\d+$/.test(c) && !c.startsWith(`${j.story}-AC`)) add("blueprint.valid", ["journeys", i, "criteria", k], `${c} is not a criterion of ${j.story}, the journey's story.`, `Name ${j.story}'s criteria (${j.story}-AC<m>), or put this one in a journey for its own story.`); });
   });
 
   const on = (id) => byId.has(id) && applies(byId.get(id), bp);
@@ -166,6 +235,12 @@ export function checkBlueprint(bp) {
     if (on("action.destructive-safeguard")) (Array.isArray(s.destructiveActions) ? s.destructiveActions : []).forEach((a, j) => {
       if (a && a.safeguard === "none") add("action.destructive-safeguard", [...at, "destructiveActions", j], `${a.label} has no safeguard.`, 'Set safeguard to "undo" (an Undo toast) or "confirm" for an unexpected, irreversible loss.');
     });
+    // actions[] is the same list (FEAT-012 FLW-03): a destructive action there needs its safeguard too, on the screen or a modal.
+    if (on("action.destructive-safeguard")) for (const [list, path] of [[s.actions, [...at, "actions"]], ...[...modalsOf(s.modals, [...at, "modals"])].map(({ m, path: mp }) => [m.actions, [...mp, "actions"]])]) {
+      (Array.isArray(list) ? list : []).forEach((a, j) => {
+        if (a && a.destructive === "none") add("action.destructive-safeguard", [...path, j, "destructive"], `${a.label} has no safeguard.`, 'Set destructive to "undo" (an Undo toast) or "confirm" for an unexpected, irreversible loss.');
+      });
+    }
     for (const { m, path, depth } of modalsOf(s.modals, [...at, "modals"])) {
       const name = m.title || m.id;
       if (on("modal.titled") && !(typeof m.title === "string" && m.title.trim())) add("modal.titled", [...path, "title"], `Modal "${m.id}" has no title.`, "Give it a title that names its task; it becomes the dialog's accessible name.");
@@ -173,7 +248,59 @@ export function checkBlueprint(bp) {
       if (on("modal.one-at-a-time") && depth > 0) add("modal.one-at-a-time", path, `Modal "${name}" opens on top of another modal.`, "Close the first modal before presenting this one, or make this step part of it.");
       if (on("modal.unsaved-changes") && m.editsData && !m.guardsUnsavedChanges) add("modal.unsaved-changes", [...path, "guardsUnsavedChanges"], `Closing "${name}" would lose what was entered.`, "Set guardsUnsavedChanges and ask before discarding (useUnsavedChangesWarning).");
     }
+    if (s.ai && typeof s.ai === "object" && !Array.isArray(s.ai)) aiChecks(s, at);
   });
+
+  /* The AI checks of one screen (FEAT-011 AIB-02, AIB-03): each applies when
+     its rule's roles meet the screen's declared ai.roles. All are warnings. */
+  function aiChecks(s, at) {
+    const ai = s.ai, roles = Array.isArray(ai.roles) ? ai.roles : [];
+    const onAi = (id) => on(id) && meetsRole(byId.get(id).when?.aiRole, roles);
+    const title = s.title ?? s.id;
+    const hia = Array.isArray(ai.highImpactActions) ? ai.highImpactActions : [];
+    // An action marked highImpact declares one too (actions[] and highImpactActions are views of one list).
+    const marked = (Array.isArray(s.actions) ? s.actions : []).filter((a) => a && typeof a === "object" && "highImpact" in a);
+    if (onAi("agent.declare-high-impact") && ai.acts === true && !hia.length && !marked.length) {
+      add("agent.declare-high-impact", [...at, "ai"], `The agent on "${title}" acts, but no high-impact action is listed.`, 'List each action it can take that is irreversible, costly or seen by others in ai.highImpactActions, each with its approval; or set acts to false if it changes nothing outside the conversation.');
+    }
+    // "plan" is approval as part of a plan the user reviews. The blueprint has
+    // no field saying a plan is shown, so on an agent screen (the only one this
+    // rule applies to) "plan" is accepted, and the audit's agent.plan-visible
+    // check confirms the plan in the markup.
+    if (onAi("agent.approve-high-impact")) hia.forEach((a, j) => {
+      if (a && typeof a === "object" && (a.approval === "none" || !("approval" in a))) {
+        add("agent.approve-high-impact", [...at, "ai", "highImpactActions", j], `${a.label ?? "A high-impact action"} on "${title}" ${a.approval === "none" ? "has no approval" : "declares no approval"}.`, 'Set approval to "each" (the user approves it every time) or "plan" (approved as part of a plan the user reviews); the agent never approves it for the user.');
+      }
+    });
+    if (onAi("agent.approve-high-impact")) marked.forEach((a) => {
+      if (a.highImpact === "none") add("agent.approve-high-impact", [...at, "actions", s.actions.indexOf(a), "highImpact"], `${a.label ?? a.id} on "${title}" has no approval.`, 'Set highImpact to "each" (the user approves it every time) or "plan" (approved as part of a plan the user reviews).');
+    });
+    // A fallback names a screen or a destination; consent a screen or a modal.
+    const destIds = new Set(dests.filter((d) => d && typeof d === "object").map((d) => d.id));
+    if (onAi("ai.fallback") && ai.essential !== true) {
+      if (!ai.fallback) add("ai.fallback", [...at, "ai"], `The AI on "${title}" adds to the task, but nothing does the task without it.`, "Set ai.fallback to the screen or destination that does the job without AI, or set ai.essential to true if the AI is the task.");
+      else if (typeof ai.fallback === "string" && !ids.has(ai.fallback) && !destIds.has(ai.fallback)) add("ai.fallback", [...at, "ai", "fallback"], `The fallback "${ai.fallback}" names no screen or destination.`, `Name one of: ${[...ids.keys()].join(", ")}.`);
+    }
+    if (onAi("ai.consent") && ai.dataLeavesDevice === true) {
+      const modalIds = new Set(screens.flatMap((x) => [...modalsOf(x.modals, [])].map(({ m }) => m.id)));
+      if (!ai.consent) add("ai.consent", [...at, "ai"], `Data leaves the device for the AI on "${title}", but no consent is declared.`, "Set ai.consent to the screen or modal where the user is told what is sent and why, and agrees; it must also let them opt out later.");
+      else if (typeof ai.consent === "string" && !ids.has(ai.consent) && !modalIds.has(ai.consent)) add("ai.consent", [...at, "ai", "consent"], `The consent "${ai.consent}" names no screen or modal.`, "Name the screen or modal where the user consents.");
+    }
+    const renders = Array.isArray(ai.renders) ? ai.renders : [];
+    const region = Array.isArray(ai.region) && ai.region.length ? ai.region : REGION;
+    renders.forEach((name, j) => {
+      if (typeof name !== "string") return;
+      const path = [...at, "ai", "renders", j];
+      if (onAi("genui.renderable") && !RENDERABLE.has(name)) {
+        const known = COMPONENTS.some((c) => c.name === name);
+        add("genui.renderable", path, known ? `${name} is not renderable inline in "${title}".` : `"${name}" is not a component in @ux-builder/ui ${catalogue.packages["@ux-builder/ui"]}.`, known ? `Render one of: ${[...RENDERABLE].sort().join(", ")}; or open ${name} as an artifact pane beside the conversation.` : `Did you mean "${nearestPattern(name)}"? Render one of: ${[...RENDERABLE].sort().join(", ")}.`);
+      }
+      for (const r of PATTERNS.includes(name) ? inlineRules(name, bp, region) : []) {
+        const hit = INLINE_CHECKS[r.id]({ s, name, region });
+        if (hit) add(r.id, path, hit[0], hit[1], "warning");
+      }
+    });
+  }
 
   if (bp.kind === "app" && on("nav.compact-destinations") && dests.length > LIMITS.compactDestinations) {
     add("nav.compact-destinations", ["destinations"], `${dests.length} top-level destinations; at the compact size class the bar holds ${LIMITS.compactDestinations}.`, `Keep ${LIMITS.compactDestinations} or fewer: group related ones, or move the rest to settings or a secondary page (AppShell puts more than ${LIMITS.compactDestinations} behind "More").`);
@@ -190,6 +317,7 @@ export function checkBlueprint(bp) {
     }
     if (on("view.one-task") && screens.length > 1) add("view.one-task", ["screens"], `A view has ${screens.length} screens; a view does one task.`, "Keep one screen; put further steps in modals or sections of it.");
   }
+  checkFlow(bp, { add, on, helix });
   const order = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
   return findings.sort((a, b) => order(a.path, b.path) || order(a.rule, b.rule));
 }
