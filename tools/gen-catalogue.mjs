@@ -350,12 +350,17 @@ function reference(cat) {
    by role, how to declare a screen's role, and the markers the audit reads
    (CONTRACT-005 AI markup). */
 const AI_MARKERS = [
-  ['data-piq-ai="generated"', 'content made by AI, with a visible disclosure and a correction control (data-piq-ai-control="retry", "regenerate", "edit" or "undo")'],
+  ['data-piq-ai="generated"', 'content made by AI, with a visible disclosure and a correction control (data-piq-ai-control="retry", "regenerate", "edit" or "undo"); inline UI it makes has a label on each input, pre-filled values the user can edit, and a submit control of its own'],
   ['data-piq-ai="status"', 'the live region saying what the AI is doing (aria-live; aria-busy="true" while working), with a Stop or Pause control in or beside it'],
   ['data-piq-ai="plan"', 'an agent\'s steps, each data-piq-ai="step" with data-piq-ai-status (pending, running, done, failed or skipped) and that status in text'],
   ['data-piq-ai="approval"', 'a request for approval, with data-piq-ai-control="approve" and "deny", neither pre-chosen'],
   ['data-piq-ai-actor="agent" | "user"', "the live region saying who is acting now, updated on takeover and hand-back"],
   ["data-piq-ai-label", "an ancestor whose visible text discloses AI for everything inside it"],
+  ['data-piq-ai="prompt"', 'the field or form where the user asks the AI; an empty conversation offers suggested starting points (data-piq-ai-control="starter")'],
+  ['data-piq-ai-status="done"', 'on the status region when a run has finished, with its summary shown (data-piq-ai="summary")'],
+  ['data-piq-ai-takeover', 'on the agent region when the user can take over; then data-piq-ai-actor says who is acting'],
+  ['data-piq-ai-control="previous"', 'returns to the previous step, beside "retry", on a failed step'],
+  ['data-piq-screen="<screen id>"', "on the page's root: the blueprint screen it shows, for ux-builder-audit --blueprint"],
 ];
 function aiSection(cat) {
   const ai = cat.interaction.rules.filter((r) => r.when?.aiRole);

@@ -23,6 +23,9 @@
      --write-baseline <f>  write every finding to this file, to adopt the audit in an existing app
      --baseline <f>        leave out the findings in this file: they neither show as new nor fail the
                            build; those no longer found are listed as resolved
+     --blueprint <f>       the app's blueprint (app.blueprint.json): AI-marked content on a screen
+                           (data-piq-screen="<screen id>") whose blueprint declares no AI role is
+                           reported (ai-declared), and the screen's ai.roles and ai.takeover apply
 
    A URL that starts with "/" is taken relative to the first full URL. The
    browser is Playwright's Chromium: install it once with
@@ -47,7 +50,7 @@ const { values: o, positionals } = parseArgs({
     serve: { type: "string" }, wait: { type: "string" }, ignore: { type: "string", multiple: true },
     off: { type: "string", multiple: true }, "no-contrast": { type: "boolean" },
     out: { type: "string", default: "audit-report" }, "fail-on": { type: "string", default: "error" },
-    json: { type: "boolean" }, "write-baseline": { type: "string" }, baseline: { type: "string" }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
+    json: { type: "boolean" }, "write-baseline": { type: "string" }, baseline: { type: "string" }, blueprint: { type: "string" }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
   },
 });
 if (o.version) { console.log(VERSION); process.exit(0); }
@@ -64,6 +67,12 @@ if (o.baseline && o["write-baseline"]) { console.error("ux-builder-audit: give -
 let baseline = null;
 if (o.baseline) {
   try { baseline = JSON.parse(readFileSync(o.baseline, "utf8")); } catch (e) { console.error(`ux-builder-audit: --baseline ${o.baseline}: ${e.message}`); process.exit(2); }
+}
+
+let blueprint = null;
+if (o.blueprint) {
+  try { blueprint = JSON.parse(readFileSync(o.blueprint, "utf8")); } catch (e) { console.error(`ux-builder-audit: --blueprint ${o.blueprint}: ${e.message}`); process.exit(2); }
+  if (!Array.isArray(blueprint?.screens)) { console.error(`ux-builder-audit: --blueprint ${o.blueprint}: no screens (a blueprint has "screens": [...])`); process.exit(2); }
 }
 
 const base = positionals.find((u) => /^https?:/.test(u));
@@ -84,7 +93,7 @@ try {
   if (!o.json) console.error(`Auditing ${urls.join(", ")} …`);
   const report = await audit({
     urls, themes: o.theme, appearances: o.appearance ?? ["light", "dark"], widths, wait: o.wait, ignore: o.ignore ?? [],
-    rules: Object.fromEntries((o.off ?? []).map((c) => [c, false])), contrast: !o["no-contrast"], out, baseline,
+    rules: Object.fromEntries((o.off ?? []).map((c) => [c, false])), contrast: !o["no-contrast"], out, baseline, blueprint,
     log: o.json ? () => {} : (m) => console.error(m),
   });
   writeReports(report, out);

@@ -380,6 +380,7 @@ Normative from the minors that ship FEAT-011. The formats are CONTRACT-005
 | `AGENTS.md`, skill | An "AI and agent screens" section: declare each screen's AI role, the rule IDs by role, the markers |
 | `@ux-builder/mcp` | `get_rules` accepts `aiRoles` |
 | `ux-builder-audit` | Checks `ai-disclose`, `ai-stop`, `ai-correct`, `ai-starters`, `ai-declared`, `agent-approval`, `agent-plan`, `agent-interrupt`, `agent-who-acts`, `agent-recover`, `agent-summary`, `genui-review-prefill`, on AI-marked elements only; each finding carries its SD-005 rule ID; warnings |
+| `ux-builder-audit` *[Amended 2026-10-21 — build of FEAT-011 step 3]* | Also `card-input-label` and `card-narrow-first` (rules `card.input-label`, `card.narrow-first`: an Adaptive Card or other generated UI as rendered; the second with `--width`, below 600px). Option `--blueprint <file>`: the app's blueprint, for `ai-declared` and the screens' `ai.roles` and `ai.takeover`, mapped by `data-piq-screen` (CONTRACT-005 *AI markup*). `inspect(page, { blueprint })` and `audit({ blueprint })` take it parsed; `AI_CHECKS` lists the AI checks |
 | `ux-builder-audit assess` | AI journeys and their three scenarios (CONTRACT-006) |
 
 ## Assistant and generative UI *[Amended 2026-10-21 — FEAT-007, ADR-023, ADR-028; US-046 to US-048]*

@@ -189,6 +189,61 @@ own AI UI MUST add them to get audit coverage.
 | `data-piq-ai-actor="agent" \| "user"` | The region stating who is acting now (takeover) | A live region; the value changes on takeover and hand-back |
 | `data-piq-ai-label` | An ancestor whose visible text discloses AI for everything inside | — |
 
+*[Amended 2026-10-21 — build of FEAT-011 step 3]* The audit checks
+(`ux-builder-audit`, CONTRACT-004) needed markers the table above lacks, and
+details it left open. The additions, all optional:
+
+| Marker | On | Companions the audit looks for |
+|---|---|---|
+| `data-piq-screen="<screen id>"` | The page's root (or any ancestor of the AI markup): the blueprint screen it shows | With `--blueprint`, a marked element belongs to the screen its nearest `data-piq-screen` names; that screen's `ai.roles` and `ai.takeover` apply. AI markup with no `data-piq-screen`, or naming a screen the blueprint lacks, is reported by `ai.declared` |
+| `data-piq-ai-takeover` | The agent's region, when the user can take over and hand back (as `ai.takeover: true` in the blueprint); `="false"` turns it off | A `data-piq-ai-actor` element with text, in a live region (it or an ancestor has `aria-live` other than `off`, or `role` `status`, `log` or `alert`) |
+| `data-piq-ai-status="done"` on `data-piq-ai="status"` | The status region of a run that has finished | A visible `data-piq-ai="summary"` with text |
+| `data-piq-ai="summary"` | What a finished run did | — |
+| `data-piq-ai="prompt"` | The field, or the element holding it, where the user asks the AI | With no generated content on the page (an empty conversation), at least one visible `data-piq-ai-control="starter"`; with starters, the field can be typed in (not `disabled`, `readonly` or `aria-disabled`) |
+| `data-piq-ai-control="starter"` | A suggested starting point | — |
+| `data-piq-ai-control="previous"` | Returns a failed run to the previous step | — |
+
+How the audit decides each companion:
+- **Disclosure** (`ai.disclose`): the outermost `generated` element, or an
+  ancestor, has `data-piq-ai-label` and is visible with text (its own or the
+  attribute's value); or a visible descendant has `data-piq-ai-label` (a
+  badge); or `aria-describedby` names a visible element with text.
+  Generated content inside generated content shares the outer one's
+  disclosure and correction.
+- **In or beside**: inside the element, or inside its parent. A control is
+  **reachable** when it is visible, not `disabled` or `aria-disabled`, and
+  not `tabindex="-1"`. Controls are named by `aria-label`,
+  `aria-labelledby`, text, `value` or `title`; besides
+  `data-piq-ai-control`, a control named "Retry", "Try again",
+  "Regenerate", "Edit" or "Undo" corrects, and one named "Previous", "Go
+  back", "Back to …" or "Return to …" returns.
+- **A running agent** (`agent.interrupt`): a busy status region on a page
+  with agent markup (`plan`, `step`, `approval`, `data-piq-ai-actor` or
+  `data-piq-ai-takeover`), or on a screen whose blueprint `ai.roles`
+  includes `agent`. Any reachable control on the page named "Stop" or
+  "Pause" satisfies it; `ai.stop` still wants one in or beside the status.
+- **Chosen for the user** (approval): `checked`, a `selected` option,
+  `aria-pressed`, `aria-checked` or `aria-selected` `"true"`, or
+  `autofocus`.
+- **Status in text**: the step's text or an `aria-label` in it says the
+  status or a plain synonym (for example done: complete, finished; running: in
+  progress, working; pending: waiting, queued, not started, next; failed:
+  error, could not; skipped).
+- **A failure described** (`agent.recover`): text at a `failed` step beyond
+  its title (its heading, else its first text) and its status word, or an
+  `aria-describedby` description; and a `retry` or `previous` control in
+  the step or its plan.
+- **Pre-filled inline UI** (`genui.review-prefill`): a `generated` element's
+  inputs with a value (a `checked` box, a `selected` option) are not
+  `disabled`, `readonly`, `aria-readonly` or `aria-disabled`, and the
+  element has a visible submit control of its own, in a form that is not
+  the conversation's (`data-piq-ai="prompt"`) form.
+- **Rendered cards** (ADR-029): every visible input in a `generated` element
+  has a label of its own (`aria-label`, `aria-labelledby`, a `label`, or
+  `title`; a placeholder is not one) (`card.input-label`); with `--width`
+  below 600px, an outermost `generated` element neither overflows itself
+  nor reaches past the viewport (`card.narrow-first`).
+
 ### Findings and checks
 
 The blueprint checks and audit checks of these rules are warnings

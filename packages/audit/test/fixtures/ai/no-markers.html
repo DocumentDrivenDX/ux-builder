@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- No AI markers: a busy upload, a failed item, a read-only pre-filled field, an unlabelled input, a lone Yes; none of it AI. -->
+<html lang="en" data-theme="praxis-carbon" data-appearance="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plain</title>
+<link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css">
+<style>body { margin: 0; padding: 16px; font-family: var(--piq-font-body); color: var(--piq-color-text); background: var(--piq-color-ground); } p { margin: 0 0 8px; } button, input, select, textarea { font: inherit; min-block-size: 44px; min-inline-size: 44px; box-sizing: border-box; max-inline-size: 100%; }</style>
+</head>
+<body>
+<main>
+<h1>Uploads</h1>
+<p id="busy" aria-live="polite" aria-busy="true">Uploading 3 files</p>
+<ol><li>Upload one <span>Failed</span></li></ol>
+<form><label for="n">Name</label> <input id="n" value="Ada"> <input id="bare" placeholder="Unlabelled" readonly> <button type="button">Save</button></form>
+<div role="group" aria-label="Confirm"><button autofocus>Yes</button></div>
+<div style="inline-size: 900px">A wide strip</div>
+</main>
+</body>
+</html>
