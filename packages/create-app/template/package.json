@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "check:blueprint": "ux-builder-blueprint check app.blueprint.json",
     "lint": "stylelint \"src/**/*.css\" && eslint src",
     "audit": "vite build && ux-builder-audit --serve \"vite preview --port 4173 --strictPort --host 127.0.0.1\" http://127.0.0.1:4173/",
     "postinstall": "node scripts/install-skill.mjs"

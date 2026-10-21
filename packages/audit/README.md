@@ -35,9 +35,17 @@ and `audit-report/report.json`, and exits 1 if it found an error.
 | `reflow` | warning | With `--width`: the page does not scroll sideways at the audited width, naming the widest element (WCAG 1.4.10 at 320px). A region that scrolls by itself is fine. |
 | `target-size` | warning | With `--width`: pointer targets are at least the theme's minimum target size (WCAG 2.5.8); inline links in a sentence are exempt, and a checkbox counts its label. |
 | `focus-obscured` | warning | With `--width`: no control, once focused, is entirely hidden behind sticky or fixed content (WCAG 2.4.11). |
+| `one-modal` | warning | At most one modal dialog is open at once (rule `modal.one-at-a-time`). |
+| `modal-contract` | warning | An open modal has an accessible name, a Close, Cancel or Done control, and closes on Escape (rules `modal.titled`, `modal.dismiss`). Escape is tried last, once per page. |
+| `one-primary-action` | warning | At most one primary button per dialog, or in `main` (rule `emphasis.one-primary`). |
+| `nav-per-breakpoint` | warning | With `--width`: below 600px, primary navigation shows no more than five destinations; from 840px it is not hidden behind a menu button (rules `nav.compact-destinations`, `nav.standing-at-expanded`). Breadcrumbs and navigation inside `main` are left out. |
+| `line-length` | warning | Paragraphs and list items average no more than 80 characters per line (rule `text.line-length`). |
 
-The three `--width` checks are warnings for their first minor release, then
-can fail a build like the rest. A finding inside a theme-builder preview
+The `--width` checks and the interaction checks are warnings for their first
+minor release, then can fail a build like the rest. A finding from an
+interaction check carries `ruleId`, the rule in `@ux-builder/ui`'s catalogue
+it enforces, and `sources`, the guidelines that rule restates; the HTML report
+links them. A finding inside a theme-builder preview
 (`data-preview`) names that preview's option and design system.
 
 SDK widgets (anything inside a `.piq-*` element) are trusted: their colours,
@@ -72,6 +80,8 @@ the report says so, and the favicon check is skipped.
 | `--out <dir>` | Where the report goes. Default `audit-report`. |
 | `--fail-on <error\|warning\|never>` | What makes the exit code 1. Default `error`. |
 | `--json` | Print the report as JSON. |
+| `--write-baseline <file>` | Write every finding (not notes) to this file, in a stable order. Run it once when adopting the audit in an existing app, and commit the file. |
+| `--baseline <file>` | Leave out the findings in this file: they are not reported and do not affect the exit code. New findings are reported as usual; baselined ones no longer found are listed as resolved, so the file can shrink. A check the file names that this version lacks is ignored with a note. |
 
 A URL that starts with `/` is relative to the first full URL. The SDK's CSS
 and theme list are read from the app's own `@ux-builder/ui` and

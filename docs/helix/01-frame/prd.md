@@ -19,6 +19,8 @@ ddx:
     - kind: informs
       to: FEAT-005
     - kind: informs
+      to: FEAT-008
+    - kind: informs
       to: FEAT-006
     - kind: informed_by
       to: ADR-020
@@ -44,7 +46,9 @@ kind: product
 > ADR-022; `00-discover/screen-pattern-inventory.md`): FR-2, FR-14 and FR-21
 > amended, FR-25 to FR-27 added, P0-6 added, the component non-goal reworded.
 > Evolved 2026-10-19 with ADR-023 and FEAT-007 (generative UI): FR-28 to
-> FR-31 added.
+> FR-31 added. Evolved 2026-10-20 with ADR-025 and FEAT-008 (interaction and
+> information architecture): the "Interaction and information architecture"
+> subsystem, FR-32 to FR-36, P1-6 and the P1-6 acceptance sketch added.
 
 ## Summary
 
@@ -192,6 +196,10 @@ rules, so it invents colours and components.
 4. Brand font overrides, with font sourcing and licensing recorded.
 5. Icons shipped per design system (raised from P2 by the operator,
    2026-10-06).
+6. Interaction and information-architecture rules, cited from Apple's Human
+   Interface Guidelines, Material 3 and W3C guidance, applied to a blueprint
+   before code and by the audit after, for new and existing apps and for
+   embedded views (operator, 2026-10-20; FR-32 to FR-36, FEAT-008).
 
 ### Nice to Have (P2)
 
@@ -301,6 +309,28 @@ rules, so it invents colours and components.
   ships its third-party notices; nothing the SDK ships reports usage
   (ADR-023). *(Added 2026-10-19.)*
 
+### Subsystem: Interaction and information architecture
+
+- **FR-32** — The SDK ships a catalogue of interaction and information
+  architecture rules (navigation by size class, panes, modality, feedback,
+  loading, states, emphasis, input, line length, embedded views), each with
+  an ID, the conditions it applies under (context, size class, input; never
+  the device), how it is checked and its sources, and returns the rules that
+  apply to a given target (ADR-025). *(Added 2026-10-20.)*
+- **FR-33** — An app or view can be planned in a blueprint of its
+  destinations, screens, patterns, actions, states and modal tasks, checked
+  against the rules before code exists, for a new app (from the starter) and
+  for an existing one. *(Added 2026-10-20.)*
+- **FR-34** — AI coding agents get the applicable rules, recipes and blueprint
+  checks from the installed SDK, over MCP and in the generated guidance, with
+  the loop to follow. *(Added 2026-10-20.)*
+- **FR-35** — The audit checks a running app's structure and interaction by
+  rule ID, and an existing app can adopt new checks against a baseline of its
+  current findings. *(Added 2026-10-20.)*
+- **FR-36** — Every rule cites its source, and no rule reproduces a source
+  whose licence does not allow it; a release is blocked otherwise.
+  *(Added 2026-10-20.)*
+
 ## Acceptance Test Sketches
 
 | Requirement | Scenario | Input | Expected Output |
@@ -310,6 +340,7 @@ rules, so it invents colours and components.
 | P0-3 (FR-9, FR-10) | Generate options from a logo | `navy-wordmark.svg` reference logo | ≥ 4 options, each with light and dark palettes, each passing the gate |
 | P0-4 (FR-13–FR-16) | Create a theme end to end | Upload a logo, give feedback "more conservative", pick option 2, pick Carbon and Fluent, choose Carbon light | A brand file and a theme file are saved on a branch and a review PR is opened |
 | P0-5 (FR-17, FR-18) | Switch theme in an app | App built from the starter; user picks Carbon dark | Every widget and font changes; no app file was edited |
+| P1-6 (FR-32–FR-35) | Plan, check and audit an app | A blueprint with seven destinations at compact, a nested modal and an unguarded delete; the built app with two primary buttons | Three blueprint findings and one audit finding, each with its rule ID and source |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context

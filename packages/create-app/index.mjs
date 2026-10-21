@@ -11,6 +11,9 @@
 
      --theme <name>     the theme to start on (default: the first listed)
      --name <name>      the package name (default: the directory's name)
+     --blueprint <file> start from this plan of the app's screens instead of the
+                        starter's (FEAT-008 ADP-01); refused, with each error, if
+                        ux-builder-blueprint check finds one
      --sdk-from <dir>   install @ux-builder/* from .tgz files in <dir> (testing) */
 
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, writeFileSync } from "node:fs";
@@ -18,6 +21,7 @@ import { createRequire } from "node:module";
 import { basename, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { checkBlueprint } from "@ux-builder/ui/blueprint";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
@@ -34,9 +38,21 @@ export function themes() {
 }
 
 /* Write the app. Returns the files written, relative to dir. */
-export function scaffold(dir, { theme, name, sdkFrom } = {}) {
+/* A blueprint given with --blueprint: its text, or an exit naming each error
+   before anything is written. */
+export function readBlueprint(file) {
+  let text, bp;
+  try { text = readFileSync(file, "utf8"); bp = JSON.parse(text); } catch (e) { die(`--blueprint ${file}: ${e.message}`); }
+  if (bp?.kind === "view") die(`--blueprint ${file} is a view's blueprint; the starter makes apps`);
+  const errors = checkBlueprint(bp).filter((f) => f.severity === "error");
+  if (errors.length) die(`--blueprint ${file} has ${errors.length} error${errors.length === 1 ? "" : "s"}; no app was created:\n${errors.map((f) => `  ${f.rule}  ${f.path || "/"}: ${f.message} Fix: ${f.fix}`).join("\n")}`);
+  return text.endsWith("\n") ? text : text + "\n";
+}
+
+export function scaffold(dir, { theme, name, sdkFrom, blueprint } = {}) {
   const target = resolve(dir);
   if (existsSync(target) && readdirSync(target).length) die(`${dir} exists and is not empty`);
+  const plan = blueprint ? readBlueprint(blueprint) : null;
   const known = themes();
   theme ??= known.includes("plain") ? "plain" : known[0];
   if (!known.includes(theme)) die(`unknown theme "${theme}"; choose one of ${known.join(", ")}`);
@@ -67,21 +83,23 @@ export function scaffold(dir, { theme, name, sdkFrom } = {}) {
     }
   };
   walk(target);
+  if (plan) writeFileSync(join(target, "app.blueprint.json"), plan);
   return { dir: target, theme, name, versions, files: written.sort() };
 }
 
 // npm create runs the bin through a symlink in node_modules/.bin, so compare real paths.
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { values, positionals } = parseArgs({ allowPositionals: true, options: { theme: { type: "string" }, name: { type: "string" }, "sdk-from": { type: "string" }, help: { type: "boolean", short: "h" } } });
+  const { values, positionals } = parseArgs({ allowPositionals: true, options: { theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, help: { type: "boolean", short: "h" } } });
   if (values.help || !positionals[0]) {
-    console.log(`npm create @ux-builder/app <dir> -- [--theme <name>] [--name <package>]\n\nThemes: ${themes().join(", ")}`);
+    console.log(`npm create @ux-builder/app <dir> -- [--theme <name>] [--name <package>] [--blueprint <file>]\n\nThemes: ${themes().join(", ")}`);
     process.exit(values.help ? 0 : 1);
   }
-  const r = scaffold(positionals[0], { theme: values.theme, name: values.name, sdkFrom: values["sdk-from"] });
+  const r = scaffold(positionals[0], { theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint });
   console.log(`Created ${r.name} on the ${r.theme} theme (@ux-builder/tokens ${r.versions["@ux-builder/tokens"]}, @ux-builder/ui ${r.versions["@ux-builder/ui"]}).
 
   cd ${relative(process.cwd(), r.dir).startsWith("..") ? r.dir : relative(process.cwd(), r.dir) || "."}
   npm install
   npm run dev      # http://localhost:5173
+  npm run check:blueprint  # the plan of the screens, app.blueprint.json
   npm run lint     # no hard-coded colours, fonts or radii`);
 }

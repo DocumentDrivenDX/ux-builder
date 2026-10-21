@@ -5,6 +5,7 @@ A React app on the AI-UI SDK, theme `__THEME__`.
 ```sh
 npm install
 npm run dev     # http://localhost:5173
+npm run check:blueprint  # the plan of the screens (app.blueprint.json) against the interaction rules
 npm run lint    # no literal colours, fonts or radii; no other UI kits; no hand-drawn <svg>
 npm run audit   # builds, then checks the running app in every theme (audit-report/index.html)
 npm run build
@@ -20,5 +21,7 @@ each finding on a screenshot of the theme it was found in. CI
   every theme `@ux-builder/tokens` ships. To fix one theme, import only
   `@ux-builder/tokens/themes/<theme>.css` and `@ux-builder/tokens/fonts/<theme>.css`.
 - Style your own markup with `--piq-*` role tokens (`src/App.css`).
+- `app.blueprint.json` plans the app's destinations and screens; CI checks it
+  with `ux-builder-blueprint check`. Add a screen there before building it.
 - Coding agents: see `CLAUDE.md`; the SDK's skill is installed in
   `.claude/skills/ux-builder-ui` by `npm install`.

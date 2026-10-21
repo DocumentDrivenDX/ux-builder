@@ -60,3 +60,10 @@ operator decided it in conversation), `shipped-default` (HELIX `slots.yml`),
 | Conflict | Resolution |
 |----------|------------|
 | `a11y-wcag-aa` vs. brand fidelity in palette generation | Accessibility wins: a brand colour is moved along its lightness until it passes, and the distance moved is reported for human review (FR-10, ADR-014) |
+
+## FEAT-008 (2026-10-20)
+
+Interaction and IA rules, blueprint and audit (ADR-025) select no new concern
+and fill no slot: the audit checks run on the existing `e2e-framework`
+(`e2e-playwright`), and the rules extend `a11y-wcag-aa` with platform
+guidance from Apple's HIG and Material 3, restated in the SDK's own words.

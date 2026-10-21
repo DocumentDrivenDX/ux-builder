@@ -24,6 +24,10 @@ ddx:
       to: ADR-022
     - kind: informs
       to: FEAT-006
+    - kind: informed_by
+      to: CONTRACT-005
+    - kind: informed_by
+      to: ADR-025
 ---
 
 # Contract
@@ -265,6 +269,22 @@ these conventions:
 - Precedence: the nearest `ThemeProvider` wins; an app's own CSS loads after
   `ui.css` but MUST NOT target `.piq-*` classes or set `--piq-*` tokens
   (`widget-overrides`, `token-overrides`).
+
+## Interaction rules and blueprint *[Amended 2026-10-20 — FEAT-008, ADR-025]*
+
+The formats are CONTRACT-005; this section lists where an app meets them.
+
+| Surface | Addition |
+|---|---|
+| `@ux-builder/ui` entry points | `@ux-builder/ui/blueprint`: `rulesFor`, `checkBlueprint`, `blueprintSchema`, `findRecipes`, `skeleton` (CONTRACT-005) |
+| `@ux-builder/ui` command | `ux-builder-blueprint check <file> [--json]`, `ux-builder-blueprint init [--kind app\|view] [--out <file>]` (CONTRACT-005) |
+| `catalogue.json` | `interaction`: `{ version, limits, rules[], recipes[] }` (CONTRACT-005) |
+| `AGENTS.md`, skill | An "Interaction and screen rules" section: every rule's ID and statement, and the plan → check → build → lint → audit loop |
+| `@ux-builder/mcp` | Tools `get_rules` (`context?`, `sizeClasses?`, `inputs?`), `list_recipes` (`job?`, `kind?`), `get_recipe` (`id`), `get_blueprint_schema`, `check_blueprint` (`blueprint`); `get_guidance` includes the loop |
+| `ux-builder-audit` | Checks `one-modal`, `modal-contract`, `one-primary-action`, `nav-per-breakpoint` (with `--width`), `line-length`: warnings for their first minor release. Options `--write-baseline <file>` and `--baseline <file>` |
+| `report.json` | A finding from these checks adds `ruleId` (the rule catalogue ID) and `sources[]` (`{ title, url }`); with `--baseline`, `summary` adds `baselined` and `resolved` (counts) and the report lists `resolved[]` |
+| Baseline file | `{ tool: "ux-builder-audit", version, findings: [{ rule, url, selector, runs }] }`, sorted by `rule`, `url`, `selector` |
+| `@ux-builder/create-app` | Writes `app.blueprint.json`, a `check:blueprint` script and a CI step; option `--blueprint <file>` |
 
 ## Error Semantics
 

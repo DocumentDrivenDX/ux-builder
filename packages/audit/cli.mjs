@@ -20,15 +20,19 @@
      --out <dir>           where the report goes (default: audit-report)
      --fail-on <level>     error (default), warning or never: what makes the exit code 1
      --json                print the report as JSON instead of the summary
+     --write-baseline <f>  write every finding to this file, to adopt the audit in an existing app
+     --baseline <f>        leave out the findings in this file: they neither show as new nor fail the
+                           build; those no longer found are listed as resolved
 
    A URL that starts with "/" is taken relative to the first full URL. The
    browser is Playwright's Chromium: install it once with
    npx playwright install chromium. */
 
 import { spawn } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { RULES, VERSION, audit } from "./audit.mjs";
+import { RULES, VERSION, audit, toBaseline } from "./audit.mjs";
 import { summaryText, writeReports } from "./report.mjs";
 
 const { values: o, positionals } = parseArgs({
@@ -38,7 +42,7 @@ const { values: o, positionals } = parseArgs({
     serve: { type: "string" }, wait: { type: "string" }, ignore: { type: "string", multiple: true },
     off: { type: "string", multiple: true }, "no-contrast": { type: "boolean" },
     out: { type: "string", default: "audit-report" }, "fail-on": { type: "string", default: "error" },
-    json: { type: "boolean" }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
+    json: { type: "boolean" }, "write-baseline": { type: "string" }, baseline: { type: "string" }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
   },
 });
 if (o.version) { console.log(VERSION); process.exit(0); }
@@ -50,6 +54,12 @@ for (const c of o.off ?? []) if (!RULES[c]) { console.error(`ux-builder-audit: n
 const widths = (o.width ?? []).map(Number);
 if (widths.some((w) => !Number.isInteger(w) || w < 200 || w > 4000)) { console.error("ux-builder-audit: --width is a whole number of CSS pixels between 200 and 4000"); process.exit(2); }
 if (!["error", "warning", "never"].includes(o["fail-on"])) { console.error("ux-builder-audit: --fail-on is error, warning or never"); process.exit(2); }
+
+if (o.baseline && o["write-baseline"]) { console.error("ux-builder-audit: give --baseline or --write-baseline, not both"); process.exit(2); }
+let baseline = null;
+if (o.baseline) {
+  try { baseline = JSON.parse(readFileSync(o.baseline, "utf8")); } catch (e) { console.error(`ux-builder-audit: --baseline ${o.baseline}: ${e.message}`); process.exit(2); }
+}
 
 const base = positionals.find((u) => /^https?:/.test(u));
 const urls = positionals.map((u) => (u.startsWith("/") && base ? new URL(u, base).href : u));
@@ -74,10 +84,14 @@ try {
   if (!o.json) console.error(`Auditing ${urls.join(", ")} …`);
   const report = await audit({
     urls, themes: o.theme, appearances: o.appearance ?? ["light", "dark"], widths, wait: o.wait, ignore: o.ignore ?? [],
-    rules: Object.fromEntries((o.off ?? []).map((c) => [c, false])), contrast: !o["no-contrast"], out,
+    rules: Object.fromEntries((o.off ?? []).map((c) => [c, false])), contrast: !o["no-contrast"], out, baseline,
     log: o.json ? () => {} : (m) => console.error(m),
   });
   writeReports(report, out);
+  if (o["write-baseline"]) {
+    writeFileSync(o["write-baseline"], JSON.stringify(toBaseline(report), null, 2) + "\n");
+    if (!o.json) console.error(`Baseline: ${toBaseline(report).findings.length} findings written to ${o["write-baseline"]}`);
+  }
   if (o.json) console.log(JSON.stringify(report, null, 2));
   else console.log(`${summaryText(report)}\n\nReport: ${resolve(out, "index.html")}`);
   const fail = o["fail-on"] === "never" ? false : o["fail-on"] === "warning" ? report.summary.error + report.summary.warning > 0 : report.summary.error > 0;

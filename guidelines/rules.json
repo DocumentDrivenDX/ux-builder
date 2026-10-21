@@ -1,0 +1,818 @@
+{
+  "$schema": "./schema/rules.schema.json",
+  "$description": "Interaction and information-architecture rules (FEAT-008, ADR-025). Each rule is in the SDK's own words and cites its sources (CONTRACT-005). Generated into @ux-builder/ui/catalogue.json by tools/gen-catalogue.mjs; checked by tools/check-rules.mjs.",
+  "version": 1,
+  "limits": {
+    "compactDestinations": 5,
+    "lineLength": 80
+  },
+  "rules": [
+    {
+      "id": "blueprint.valid",
+      "title": "The blueprint follows its contract",
+      "statement": "A blueprint has the fields CONTRACT-005 requires, no unknown fields, unique screen IDs, and destinations that name existing screens.",
+      "rationale": "Every other check reads the blueprint; a malformed one would make their findings meaningless.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "blueprint.valid"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "ux-builder CONTRACT-005: blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-005-interaction-rules-and-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "pattern.exists",
+      "title": "Screens are built from catalogue patterns",
+      "statement": "Every screen names a pattern the installed SDK ships.",
+      "rationale": "A screen from a pattern inherits its layout, states and adaptation; an invented one inherits none of them.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "pattern.exists"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "ux-builder CONTRACT-005: blueprint",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-005-interaction-rules-and-blueprint.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "nav.compact-destinations",
+      "title": "A phone-width bar holds at most five destinations",
+      "statement": "In an app that supports the compact or medium size class, keep the top-level destinations to five; group the rest or move them to a drawer.",
+      "rationale": "A bottom bar or tab bar has room for only a few equal targets; more makes each too small to read and tap.",
+      "when": {
+        "context": [
+          "app"
+        ],
+        "sizeClass": [
+          "compact",
+          "medium"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "nav.compact-destinations"
+        },
+        {
+          "kind": "audit",
+          "id": "nav-per-breakpoint"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Material 3: Breakpoints",
+          "url": "https://m3.material.io/foundations/layout/breakpoints/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Tab bars",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "nav.standing-at-expanded",
+      "title": "Navigation stays visible on wide screens",
+      "statement": "From the expanded size class, show primary navigation as a standing rail or side navigation, not behind a menu button.",
+      "rationale": "Wide windows have room for it, and hiding destinations makes people hunt for them.",
+      "when": {
+        "context": [
+          "app"
+        ],
+        "sizeClass": [
+          "expanded",
+          "large",
+          "extra-large"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "audit",
+          "id": "nav-per-breakpoint"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Material 3: Breakpoints",
+          "url": "https://m3.material.io/foundations/layout/breakpoints/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Android Developers: Design for large screens",
+          "url": "https://developer.android.com/design/ui/large-screens",
+          "licence": "CC-BY-2.5",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "nav.links-not-menus",
+      "title": "Destinations are links; menus are for actions",
+      "statement": "Move between top-level destinations with navigation links; keep menu buttons for actions on the current page or item.",
+      "rationale": "People expect navigation to be visible, bookmarkable and announced as navigation; a menu hides it and changes its semantics.",
+      "when": {
+        "context": [
+          "app"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "nav.links-not-menus"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "WAI-ARIA APG: Landmark regions",
+          "url": "https://www.w3.org/WAI/ARIA/apg/practices/landmark-regions/",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "layout.panes-by-size",
+      "title": "Show one pane until there is room for two",
+      "statement": "Use one pane in compact and medium windows, two from expanded (a list beside its detail), and three only in extra-large ones.",
+      "rationale": "Splitting a narrow window makes both panes cramped; a wide one wastes space with a single pane.",
+      "appliesTo": {
+        "patterns": [
+          "ListDetail",
+          "SplitView"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "layout.panes-by-size"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Material 3: Breakpoints",
+          "url": "https://m3.material.io/foundations/layout/breakpoints/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Material 3: Canonical layout examples",
+          "url": "https://m3.material.io/foundations/layout/canonical-examples/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Android Developers: Design for large screens",
+          "url": "https://developer.android.com/design/ui/large-screens",
+          "licence": "CC-BY-2.5",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "layout.dense-medium-single-pane",
+      "title": "Keep dense content in one pane at medium",
+      "statement": "At the medium size class, use two panes only for sparse content with clear actions, such as settings; keep dense lists and tables in one.",
+      "rationale": "Two dense panes in a tablet-width window reduce usability.",
+      "when": {
+        "sizeClass": [
+          "medium"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "layout.dense-medium-single-pane"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Material 3: Breakpoints",
+          "url": "https://m3.material.io/foundations/layout/breakpoints/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "modal.only-when-needed",
+      "title": "Use a modal only when it clearly helps",
+      "statement": "Present a task modally only when it needs focus or a decision before the person continues; otherwise keep it in the page.",
+      "rationale": "A modal takes people out of their context and must be dismissed before they can return.",
+      "checks": [
+        {
+          "kind": "review",
+          "id": "modal.only-when-needed"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Modality",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "modal.one-at-a-time",
+      "title": "One modal at a time",
+      "statement": "Never open a modal on top of another, and never show more than one alert at once; close one before presenting the next.",
+      "rationale": "Stacked modals add clutter and make people lose track of the context they came from.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "modal.one-at-a-time"
+        },
+        {
+          "kind": "audit",
+          "id": "one-modal"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "Apple HIG: Modality",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "WAI-ARIA APG: Dialog (Modal) pattern",
+          "url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "modal.titled",
+      "title": "A modal names its task",
+      "statement": "Give every modal a title that says what the task is, as its accessible name.",
+      "rationale": "People who enter a modal may not return to it straight away; the title keeps their place, and assistive technology announces it.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "modal.titled"
+        },
+        {
+          "kind": "audit",
+          "id": "modal-contract"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "Apple HIG: Modality",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "WAI-ARIA APG: Dialog (Modal) pattern",
+          "url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "modal.dismiss",
+      "title": "A modal can always be dismissed",
+      "statement": "Give every modal an obvious way out (Cancel, Close or Done), and let Escape close it.",
+      "rationale": "A modal that is hard to leave traps people; keyboard users rely on Escape.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "modal.dismiss"
+        },
+        {
+          "kind": "audit",
+          "id": "modal-contract"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "Apple HIG: Modality",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "WAI-ARIA APG: Dialog (Modal) pattern",
+          "url": "https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "modal.unsaved-changes",
+      "title": "Ask before discarding someone's work",
+      "statement": "When closing a modal would lose what the person entered, explain that and let them save, discard or keep editing.",
+      "rationale": "Losing typed work to a stray tap or swipe is a failure people remember.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "modal.unsaved-changes"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "Apple HIG: Modality",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "modal.short-task",
+      "title": "Keep modal tasks short, with one path",
+      "statement": "Keep a modal task brief; if it needs several steps, give them a single path and no buttons that could be mistaken for dismissing it.",
+      "rationale": "A long or branching task inside a modal feels like an app within the app and makes people forget how they got there.",
+      "checks": [
+        {
+          "kind": "review",
+          "id": "modal.short-task"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Modality",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "action.destructive-safeguard",
+      "title": "Destructive actions are safeguarded",
+      "statement": "Give every destructive action a safeguard: Undo when the loss is expected and reversible, a confirmation only when it is unexpected or irreversible; never neither, and not both.",
+      "rationale": "Warning about expected deletions trains people to dismiss warnings; no safeguard at all loses data.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "action.destructive-safeguard"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "Apple HIG: Feedback",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/feedback",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "WCAG 2.2: 3.3.4 Error Prevention (Legal, Financial, Data)",
+          "url": "https://www.w3.org/TR/WCAG22/#error-prevention-legal-financial-data",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "feedback.status-in-place",
+      "title": "Show status where it belongs",
+      "statement": "Show the status of something next to it, passively; interrupt with an alert only for critical, actionable information.",
+      "rationale": "Interruptions lose their effect when they are used for unimportant news.",
+      "checks": [
+        {
+          "kind": "review",
+          "id": "feedback.status-in-place"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Feedback",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/feedback",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "feedback.explain-failure",
+      "title": "Say why a command cannot run",
+      "statement": "When an action cannot be carried out, say why and what to do, in text next to it.",
+      "rationale": "A control that silently does nothing looks broken.",
+      "checks": [
+        {
+          "kind": "review",
+          "id": "feedback.explain-failure"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Feedback",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/feedback",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "loading.show-something",
+      "title": "Show something while content loads",
+      "statement": "Show placeholder content, such as a skeleton, as soon as a region starts loading; never leave it blank.",
+      "rationale": "An empty region reads as a broken app.",
+      "checks": [
+        {
+          "kind": "review",
+          "id": "loading.show-something"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Loading",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/loading",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "loading.progress-kind",
+      "title": "Match the progress indicator to what is known",
+      "statement": "Use a determinate progress indicator when the duration is known and an indeterminate one when it is not.",
+      "rationale": "A bar that moves honestly helps people decide whether to wait.",
+      "checks": [
+        {
+          "kind": "review",
+          "id": "loading.progress-kind"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Loading",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/loading",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "screen.states",
+      "title": "Screens of data handle empty, loading and error",
+      "statement": "A screen that shows a collection, a record or figures declares its empty, loading and error states.",
+      "rationale": "These states are where most data screens fail; a pattern supports them only when the screen supplies them.",
+      "appliesTo": {
+        "patterns": [
+          "CollectionList",
+          "ListDetail",
+          "WorkQueue",
+          "Dashboard",
+          "ReportViewer",
+          "RecordDetail",
+          "Board",
+          "Calendar",
+          "AuditLog",
+          "NotificationCentre",
+          "UsersAndRoles",
+          "ApiKeys",
+          "Attachments",
+          "Integrations",
+          "Subscriptions",
+          "PivotTable",
+          "EditableGrid",
+          "Timeline",
+          "HomeScreen"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "screen.states"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Loading",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/loading",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Feedback",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/feedback",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "emphasis.one-primary",
+      "title": "One primary action per page or dialog",
+      "statement": "Give each page region or dialog at most one primary (filled) button; make the others secondary or text buttons.",
+      "rationale": "When everything is emphasised, nothing is, and people hesitate over which action is the main one.",
+      "checks": [
+        {
+          "kind": "audit",
+          "id": "one-primary-action"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Material 3: Buttons",
+          "url": "https://m3.material.io/components/buttons/guidelines",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Buttons",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "input.touch-targets",
+      "title": "Touch targets are finger-sized",
+      "statement": "Under touch input, make every control at least the theme's touch-target size (44 points on Apple platforms, 48 dp in Material).",
+      "rationale": "Small targets cause mis-taps, especially for people with limited dexterity.",
+      "when": {
+        "input": [
+          "coarse"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "audit",
+          "id": "target-size"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Apple HIG: Layout",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Material 3: States",
+          "url": "https://m3.material.io/foundations/interaction/states/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "WCAG 2.2: 2.5.8 Target Size (Minimum)",
+          "url": "https://www.w3.org/TR/WCAG22/#target-size-minimum",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "input.no-hover-only",
+      "title": "Nothing is reachable only by hovering",
+      "statement": "Under touch input, never put content or actions where only hovering reveals them.",
+      "rationale": "Touch screens have no hover; what hover reveals is unreachable.",
+      "when": {
+        "input": [
+          "coarse"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "input.no-hover-only"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "WCAG 2.2: 1.4.13 Content on Hover or Focus",
+          "url": "https://www.w3.org/TR/WCAG22/#content-on-hover-or-focus",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Material 3: States",
+          "url": "https://m3.material.io/foundations/interaction/states/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "input.focus-visible",
+      "title": "Keyboard focus is always visible",
+      "statement": "Show a visible focus indicator on every focusable control, distinct from hover and selection.",
+      "rationale": "Keyboard users need to see where they are; state is shown in more than one way so it does not rely on colour alone.",
+      "when": {
+        "input": [
+          "fine"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "input.focus-visible"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "WCAG 2.2: 2.4.7 Focus Visible",
+          "url": "https://www.w3.org/TR/WCAG22/#focus-visible",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Material 3: States",
+          "url": "https://m3.material.io/foundations/interaction/states/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "text.line-length",
+      "title": "Keep lines of prose readable",
+      "statement": "Keep running text to at most 80 characters per line, 40 to 60 where possible, by limiting the measure rather than shrinking the type.",
+      "rationale": "Long lines make it hard to find the start of the next one.",
+      "checks": [
+        {
+          "kind": "audit",
+          "id": "line-length"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "WCAG 2.2: 1.4.8 Visual Presentation",
+          "url": "https://www.w3.org/TR/WCAG22/#visual-presentation",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Material 3: Breakpoints",
+          "url": "https://m3.material.io/foundations/layout/breakpoints/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "view.no-shell",
+      "title": "An embedded view has no shell of its own",
+      "statement": "An embedded view draws no app shell, primary navigation or brand; the host provides its chrome, title and pins.",
+      "rationale": "Two sets of chrome nested inside each other confuse people and waste a small panel.",
+      "when": {
+        "context": [
+          "view"
+        ]
+      },
+      "appliesTo": {
+        "patterns": [
+          "AppShell",
+          "PrimaryNav",
+          "WorkspaceSwitcher",
+          "HomeScreen"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "view.no-shell"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "ux-builder ADR-012 and ADR-024: embedded views",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/tree/main/docs/helix/02-design/adr",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "view.size-classes",
+      "title": "An embedded view works in a narrow panel",
+      "statement": "An embedded view supports the compact and medium size classes, since a host's panel is often that narrow even on a desktop.",
+      "rationale": "Hosts place views in side panels and inline frames, not full windows.",
+      "when": {
+        "context": [
+          "view"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "view.size-classes"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "ux-builder ADR-012 and ADR-024: embedded views",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/tree/main/docs/helix/02-design/adr",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Material 3: Breakpoints",
+          "url": "https://m3.material.io/foundations/layout/breakpoints/overview",
+          "licence": "google-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "view.one-task",
+      "title": "An embedded view does one task",
+      "statement": "Keep an embedded view to one screen and one task; put further steps in modal tasks or sections of that screen.",
+      "rationale": "A view is reached from one tool call; a second level of navigation inside it has nowhere to live in the host.",
+      "when": {
+        "context": [
+          "view"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "view.one-task"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-012 and ADR-024: embedded views",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/tree/main/docs/helix/02-design/adr",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Apple HIG: Modality",
+          "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+          "licence": "apple-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "view.theme-from-host",
+      "title": "An embedded view wears the host's theme",
+      "statement": "Take the theme only from the host's styles and appearance, and follow the host when it changes them.",
+      "rationale": "A view that brings its own theme stands out from every other view in the host.",
+      "when": {
+        "context": [
+          "view"
+        ]
+      },
+      "checks": [
+        {
+          "kind": "review",
+          "id": "view.theme-from-host"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder ADR-012 and ADR-024: embedded views",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/tree/main/docs/helix/02-design/adr",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    }
+  ]
+}

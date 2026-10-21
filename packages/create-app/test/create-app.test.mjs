@@ -4,11 +4,12 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { checkBlueprint, skeleton } from "@ux-builder/ui/blueprint";
 import { scaffold, sdkVersions, themes } from "../index.mjs";
 
 const CLI = fileURLToPath(new URL("../index.mjs", import.meta.url));
@@ -20,7 +21,7 @@ const run = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding:
 describe("scaffold", () => {
   test("writes a React + Vite app on the SDK, on the chosen theme", () => {
     const r = scaffold(join(tmp, "acme"), { theme: "databricks" });
-    assert.deepEqual(r.files, [".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "eslint.config.js", "index.html", "package.json", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/main.jsx", "vite.config.js"]);
+    assert.deepEqual(r.files, [".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "app.blueprint.json", "eslint.config.js", "index.html", "package.json", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/main.jsx", "vite.config.js"]);
     const pkg = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
     assert.equal(pkg.name, "acme");
     assert.match(readFileSync(join(r.dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="databricks" appearance="system"/);
@@ -74,5 +75,54 @@ describe("scaffold", () => {
     const r = run("--help");
     assert.equal(r.status, 0);
     assert.match(r.stdout, /Themes: .*databricks/);
+  });
+});
+
+describe("US-051: a new app starts from a blueprint", () => {
+  // @covers US-051-AC1
+  test("AC1: the app has a blueprint that passes, a check:blueprint script and a CI step", () => {
+    const r = scaffold(join(tmp, "planned"), {});
+    const bp = JSON.parse(readFileSync(join(r.dir, "app.blueprint.json"), "utf8"));
+    assert.equal(bp.name, "planned");
+    assert.deepEqual(checkBlueprint(bp).filter((f) => f.severity === "error"), []);
+    assert.deepEqual(checkBlueprint(bp), [], "and no warnings");
+    const pkg = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
+    assert.equal(pkg.scripts["check:blueprint"], "ux-builder-blueprint check app.blueprint.json");
+    assert.match(readFileSync(join(r.dir, ".github/workflows/ci.yml"), "utf8"), /- run: npm run check:blueprint/);
+  });
+
+  // @covers US-051-AC2
+  test("AC2: --blueprint with a valid plan copies it", () => {
+    const plan = { ...skeleton("app"), name: "Time review", screens: [{ id: "home", title: "Review", pattern: "WorkQueue", states: ["empty", "loading", "error"] }] };
+    writeFileSync(join(tmp, "plan.json"), JSON.stringify(plan, null, 2));
+    const r = run("from-plan", "--blueprint", "plan.json");
+    assert.equal(r.status, 0, r.stderr);
+    assert.deepEqual(JSON.parse(readFileSync(join(tmp, "from-plan/app.blueprint.json"), "utf8")), plan);
+  });
+
+  // @covers US-051-AC3
+  test("AC3: --blueprint with an error prints each error with its rule ID, exits 1 and creates nothing", () => {
+    const bad = { ...skeleton("app"), screens: [{ id: "home", title: "Home", pattern: "SettingsPage", modals: [{ id: "a", title: "A", kind: "dialog", dismiss: "cancel", modals: [{ id: "b", title: "B", kind: "dialog", dismiss: "close" }] }] }] };
+    writeFileSync(join(tmp, "bad.json"), JSON.stringify(bad));
+    const r = run("from-bad", "--blueprint", "bad.json");
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /modal\.one-at-a-time\s+\/screens\/0\/modals\/0\/modals\/0/);
+    assert.equal(existsSync(join(tmp, "from-bad")), false);
+    writeFileSync(join(tmp, "view.json"), JSON.stringify(skeleton("view")));
+    const v = run("from-view", "--blueprint", "view.json");
+    assert.equal(v.status, 1);
+    assert.match(v.stderr, /view's blueprint/);
+    assert.equal(existsSync(join(tmp, "from-view")), false);
+  });
+
+  // @covers US-051-AC4
+  test("AC4: AGENTS.md and CLAUDE.md name the blueprint loop", () => {
+    const r = scaffold(join(tmp, "guided"), {});
+    for (const f of ["AGENTS.md", "CLAUDE.md"]) {
+      const text = readFileSync(join(r.dir, f), "utf8").replace(/\s+/g, " ");
+      assert.match(text, /app\.blueprint\.json/, f);
+      assert.match(text, /npm run check:blueprint/, f);
+      assert.match(text, /inside a `Page`, within the app's `AppShell`/, f);
+    }
   });
 });

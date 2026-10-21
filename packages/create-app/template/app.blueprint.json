@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "kind": "app",
+  "name": "__APP_NAME__",
+  "supports": {
+    "sizeClasses": ["compact", "medium", "expanded", "large"],
+    "inputs": ["coarse", "fine"]
+  },
+  "destinations": [
+    { "id": "matters", "label": "Matters", "screen": "matters" }
+  ],
+  "screens": [
+    {
+      "id": "matters",
+      "title": "Matters",
+      "pattern": "CollectionList",
+      "primaryAction": { "label": "Add matter" },
+      "states": ["empty", "loading", "error"]
+    }
+  ]
+}

@@ -334,9 +334,49 @@ dark. It reports colours, fonts and radii that aren't the theme's,
 hand-drawn icons and loaders, other UI kits, a favicon that doesn't follow the
 theme, and text contrast. With `--width` (one per size class, for example
 `--width 360 --width 1366`) it also checks reflow, target size and focus that
-is hidden behind sticky content. It writes `audit-report/index.html` with screenshots
+is hidden behind sticky content. It checks the interaction rules too: one
+modal at a time, that a modal has a name, a way out and closes on Escape, one
+primary button per region, navigation that suits the width, and readable line
+lengths; each finding names its rule and sources. It writes `audit-report/index.html` with screenshots
 and `audit-report/report.json`, and exits 1 on an error. See
 [`packages/audit`](packages/audit/README.md) for the options.
+
+### Interaction and screen rules
+
+How an app's screens fit together and behave: navigation for the space
+available, modals, safeguards on destructive actions, empty, loading and
+error states, one primary action. The rules restate Apple's Human Interface
+Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices
+in ux-builder's own words, each with an ID and a link to its sources
+(`guidelines/rules.json`). They apply by size class, input (touch or
+pointer) and context (a whole app, or a view embedded in a host), never by
+device.
+
+An app describes its destinations and screens in `app.blueprint.json`, and
+`ux-builder-blueprint check` (from `@ux-builder/ui`) checks the plan against
+the rules before any screen is built. The audit checks the running app
+against the same rules by ID. The loop, for a person or an agent: **plan**
+the blueprint from the recipes, **check** it, **build** each screen from its
+pattern, then **lint** and **audit**.
+
+**A new app** starts with a blueprint, a `check:blueprint` script and a CI
+step. Pass your own plan with
+`npm create @ux-builder/app my-app -- --blueprint plan.json`; one with an
+error is refused before anything is written.
+
+**An existing app** adopts the rules in three steps:
+
+```sh
+npx ux-builder-blueprint init                     # writes app.blueprint.json: describe your screens
+npx ux-builder-blueprint check app.blueprint.json # exits 1 on an error; add it to CI
+npx ux-builder-audit --write-baseline audit-baseline.json http://localhost:4173/   # once
+npx ux-builder-audit --baseline audit-baseline.json http://localhost:4173/         # in CI: only new findings count
+```
+
+Agents get the rules where they plan, over MCP: `get_rules`,
+`list_recipes`, `get_recipe`, `get_blueprint_schema` and `check_blueprint`.
+
+ux-builder is not affiliated with or endorsed by Apple or Google. Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.
 
 ### AI coding agents
 
