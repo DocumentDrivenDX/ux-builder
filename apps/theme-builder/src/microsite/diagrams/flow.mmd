@@ -1,0 +1,28 @@
+---
+title: Screen flow
+---
+flowchart LR
+    nav(["Navigation"])
+    queue["Review queue<br/><small>WorkQueue</small>"]
+    entry["Entry<br/><small>RecordDetail</small>"]
+    entry__reject_reason[["Reject entry<br/><small>dialog</small>"]]
+    list["Entries<br/><small>CollectionList</small>"]
+    form["New entry<br/><small>FormPage</small>"]
+    settings["Settings<br/><small>SettingsPage</small>"]
+    external(["External"])
+    back(["Back"])
+    nav -->|"Review"| queue
+    nav -->|"Entries"| list
+    nav -->|"Settings"| settings
+    queue -->|"Open entry"| entry
+    queue -->|"Try again (loading)"| queue
+    queue -.->|"Help"| external
+    entry -->|"Approve"| queue
+    entry -->|"Reject"| entry__reject_reason
+    entry -->|"Try again (loading)"| entry
+    entry -.->|"Back"| back
+    entry__reject_reason -.->|"Reject"| entry
+    list -->|"New entry"| form
+    list -->|"Open"| entry
+    form -->|"Save"| list
+    form -.->|"Cancel"| back
