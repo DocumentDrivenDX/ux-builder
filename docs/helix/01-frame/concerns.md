@@ -67,3 +67,12 @@ Interaction and IA rules, blueprint and audit (ADR-025) select no new concern
 and fill no slot: the audit checks run on the existing `e2e-framework`
 (`e2e-playwright`), and the rules extend `a11y-wcag-aa` with platform
 guidance from Apple's HIG and Material 3, restated in the SDK's own words.
+
+## FEAT-009 (2026-10-20)
+
+No new concern and no slot change. `e2e-playwright` remains the e2e
+framework: the state-inspection proof uses Playwright in process and over
+CDP. `a11y-wcag-aa` is unchanged: the assessment reports that a clean audit
+is not proof of full accessibility compliance (FEAT-009 non-functional
+requirements). The manifest is YAML, parsed with `yaml` (ISC), which the
+licence check covers.
