@@ -190,6 +190,21 @@ describe("US-076: an agent reads the AI rules for a screen's role through MCP", 
   });
 });
 
+describe("US-087: check_blueprint checks journeys against the HELIX stories", () => {
+  // @covers US-087-AC4
+  test("journeys are checked against the stories under the marker above the server's directory", async () => {
+    const { checkBlueprint } = await import("@ux-builder/ui/blueprint");
+    const { readStories } = await import(new URL("../../ui/blueprint/helix.mjs", import.meta.url).href);
+    const plan = { version: 1, kind: "app", name: "x", supports: { sizeClasses: ["compact"], inputs: ["coarse"] }, destinations: [{ id: "a", label: "A", screen: "a" }],
+      screens: [{ id: "a", title: "A", pattern: "FormPage", stories: ["US-086"], actions: [{ id: "on", label: "On", to: "external" }] }],
+      journeys: [{ id: "J-a", story: "US-087", criteria: ["US-087-AC1", "US-087-AC99"], entry: "a", steps: [{ screen: "a" }] }] };
+    const res = (await call("check_blueprint", { blueprint: plan })).data;
+    assert.deepEqual(res.findings, checkBlueprint(plan, { helix: readStories(join(process.cwd(), "app.blueprint.json")) }));
+    assert.deepEqual(res.findings.filter((f) => f.rule === "journey.story-covered").map((f) => f.path), ["/journeys/0/criteria/1", "/screens/0/stories/0"]);
+    assert.equal(res.notes, undefined, "this repository has a marker");
+  });
+});
+
 describe("FEAT-009 AGW-04: the SDK as the app has it", () => {
   // @covers US-057-AC4
   test("run from an app's directory, the server serves that app's installed @ux-builder/ui catalogue and guidance", async () => {

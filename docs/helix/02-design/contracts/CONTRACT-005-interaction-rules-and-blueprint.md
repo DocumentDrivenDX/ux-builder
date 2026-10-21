@@ -253,6 +253,44 @@ Modals gain the same `actions[]`; `back` from a modal returns to its screen.
 `journey.story-covered` are warnings. `flow.target-exists` is an error.
 Findings use the *Finding* shape.
 
+*[Amended 2026-10-21 — build of FEAT-012 step 2]* Details the build had to
+settle; the smallest additions that make the checks decidable:
+- **`screens[].stories`** (`US-<n>`[], optional): the HELIX stories a screen
+  serves. US-087-AC4 needs to know which stories "an app screen serves",
+  and nothing above said. With a HELIX marker, each needs a journey.
+- **`checkBlueprint(blueprint, { helix }?)`**: `helix` is
+  `{ stories: { "US-<n>": { criteria: ["US-<n>-AC<m>", …] } } }`. The library
+  reads no files; `ux-builder-blueprint check` reads the stories under the
+  `.helix.yml` found walking up from the blueprint file (to the git root),
+  never writing. Without stories the story checks are skipped, and the
+  command says so (a `note` line; with `--json`, on stderr, so stdout stays
+  the findings array).
+- **Story findings** (a story a screen serves with no journey, a story or
+  criterion HELIX lacks) all report `journey.story-covered`. A criterion
+  that is not of the journey's own story (`US-13-AC1` in a `US-12` journey)
+  is a `blueprint.valid` error, as the field's rule says.
+- **A step on a modal** names it `"screen": "modal:<id>"`, a modal of the
+  screen the journey is on.
+- **Targets**: `state:<s>` exists when `s` is `empty`, `loading`, `error`,
+  a state the screen declares, or a status of its pattern. An action in a
+  modal opens (`modal:`) a modal of the same screen.
+- **Reachability** starts at the destinations (a view: its first screen) and
+  follows every action of a reached screen and of its modals. The blueprint
+  has no per-size-class navigation yet, so a finding names every supported
+  size class.
+- **Dead ends**: only screens and modals that declare `actions` are
+  checked; an entry screen (a destination, or a view's first screen) is
+  never one, since the app's navigation or the host leads on, and a modal's
+  `dismiss` is a way back.
+- **Error coverage**: a screen on the journey's steps that declares
+  `error` needs an alternate with a step on it whose `state` or `expect` is
+  `error`.
+- **Views of one list** (FLW-03): an action whose label is in
+  `destructiveActions` or `ai.highImpactActions` takes its safeguard or
+  approval from there; `actions[].destructive: "none"` is reported by
+  `action.destructive-safeguard` as `destructiveActions` is, and
+  `actions[].highImpact` counts as a declared high-impact action.
+
 ## Error Semantics
 
 | Case | Result |

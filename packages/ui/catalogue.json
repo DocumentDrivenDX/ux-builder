@@ -21823,6 +21823,228 @@
             "wording": "paraphrased"
           }
         ]
+      },
+      {
+        "id": "flow.reachable",
+        "title": "Every screen can be reached",
+        "statement": "Every screen is reached from a destination (or, in a view, its first screen) through actions, at every size class the app supports; leaving by external counts as a way on.",
+        "rationale": "A screen no one can reach is dead code at best, and at worst the only place a task can be done.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "flow.reachable"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "flow.no-dead-end",
+        "title": "No screen or modal is a dead end",
+        "statement": "A screen or modal that declares actions offers a way on or back: another screen, back, external, or a modal's dismiss.",
+        "rationale": "A user who cannot leave a screen must abandon the app or the task.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "flow.no-dead-end"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "Apple HIG: Modality",
+            "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+            "licence": "apple-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "flow.target-exists",
+        "title": "Actions lead somewhere that exists",
+        "statement": "Every action's target names a screen, a modal of its screen, back, a state or external.",
+        "rationale": "A target that names nothing is a broken link in the plan; every check of the flow depends on targets that exist.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "flow.target-exists"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "flow.primary-consistent",
+        "title": "One primary action, stated once",
+        "statement": "A screen marks at most one action primary, and when it also gives primaryAction, that is the same action.",
+        "rationale": "Two answers to which action leads make the screen's emphasis, and the checks of it, ambiguous.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "flow.primary-consistent"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "journey.walkable",
+        "title": "A journey can be walked",
+        "statement": "Each step of a journey names an action its screen has, and the next step is where that action leads; the first step is on the entry, and an alternate starts where it branches.",
+        "rationale": "A journey that cannot be walked over the flow describes an app that does not exist.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "journey.walkable"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "journey.safeguarded",
+        "title": "Risky steps are safeguarded",
+        "statement": "A journey step that takes a destructive action has its safeguard (undo or confirm), and one that takes a high-impact action has its approval.",
+        "rationale": "The journey is the path users actually take; a missing safeguard on it is a loss users will meet.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "journey.safeguarded"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "WCAG 2.2: 3.3.4 Error Prevention (Legal, Financial, Data)",
+            "url": "https://www.w3.org/TR/WCAG22/#error-prevention-legal-financial-data",
+            "licence": "W3C",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "journey.covers-errors",
+        "title": "Journeys cover their error states",
+        "statement": "A journey through a screen that declares an error state has an alternate that covers that state.",
+        "rationale": "The error path is where users most need a planned way to recover, and is the one most often left unplanned.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "journey.covers-errors"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "Apple HIG: Feedback",
+            "url": "https://developer.apple.com/design/human-interface-guidelines/feedback",
+            "licence": "apple-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "journey.story-covered",
+        "title": "Journeys follow the HELIX stories",
+        "statement": "With a HELIX marker, every story a screen serves has a journey, and each journey's story and criteria exist in HELIX; the stories are read, never written.",
+        "rationale": "HELIX governs and the blueprint projects it; a story with no journey, or a criterion HELIX lacks, is drift between them.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "journey.story-covered"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder ADR-030: the blueprint holds screen flows and journeys",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/adr/ADR-030-the-blueprint-holds-flows-and-journeys-and-projects-helix.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
       }
     ],
     "recipes": [
@@ -22263,6 +22485,15 @@
                 "type": "array",
                 "items": {
                   "$ref": "#/$defs/action"
+                }
+              },
+              "stories": {
+                "description": "The HELIX stories this screen serves (US-<n>); with a HELIX marker, each needs a journey (journey.story-covered).",
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^US-[0-9]+$"
                 }
               }
             }

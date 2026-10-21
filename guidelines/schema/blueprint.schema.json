@@ -176,6 +176,15 @@
             "items": {
               "$ref": "#/$defs/action"
             }
+          },
+          "stories": {
+            "description": "The HELIX stories this screen serves (US-<n>); with a HELIX marker, each needs a journey (journey.story-covered).",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^US-[0-9]+$"
+            }
           }
         }
       }

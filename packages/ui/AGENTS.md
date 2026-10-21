@@ -342,6 +342,14 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `card.version` | aiRole: assistant, agent | review | A card declares a schema version the host supports (1.6 or lower) and gives a fallback for anything outside it. |
 | `card.sparingly` | aiRole: assistant, agent | review | An agent sends a card only when it helps; cards that scroll out of view lose their use. |
 | `card.high-impact-marked` | aiRole: assistant, agent | review | A card action that pays, sends, deletes or publishes is marked high-impact, so the host asks for approval. |
+| `flow.reachable` | always | blueprint `flow.reachable` | Every screen is reached from a destination (or, in a view, its first screen) through actions, at every size class the app supports; leaving by external counts as a way on. |
+| `flow.no-dead-end` | always | blueprint `flow.no-dead-end` | A screen or modal that declares actions offers a way on or back: another screen, back, external, or a modal's dismiss. |
+| `flow.target-exists` | always | blueprint `flow.target-exists` | Every action's target names a screen, a modal of its screen, back, a state or external. |
+| `flow.primary-consistent` | always | blueprint `flow.primary-consistent` | A screen marks at most one action primary, and when it also gives primaryAction, that is the same action. |
+| `journey.walkable` | always | blueprint `journey.walkable` | Each step of a journey names an action its screen has, and the next step is where that action leads; the first step is on the entry, and an alternate starts where it branches. |
+| `journey.safeguarded` | always | blueprint `journey.safeguarded` | A journey step that takes a destructive action has its safeguard (undo or confirm), and one that takes a high-impact action has its approval. |
+| `journey.covers-errors` | always | blueprint `journey.covers-errors` | A journey through a screen that declares an error state has an alternate that covers that state. |
+| `journey.story-covered` | always | blueprint `journey.story-covered` | With a HELIX marker, every story a screen serves has a journey, and each journey's story and criteria exist in HELIX; the stories are read, never written. |
 
 Recipes (tested combinations of patterns for a job):
 

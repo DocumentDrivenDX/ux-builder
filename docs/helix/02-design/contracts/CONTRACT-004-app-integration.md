@@ -444,7 +444,7 @@ The renderer shows an approval with `consequence`, Approve and Deny
 | `ux-builder-blueprint propose [--out <dir>]` | Writes HELIX proposals as patches (walkthroughs, solution design flowchart, architecture *Data Flow*, `DESIGN.md` navigation, story test plan scenarios) and a disagreement report; applies nothing. Exit 0 written; 2 no marker or usage |
 | `ux-builder-blueprint draw [--out <dir>]` | IA map, flow and journey diagrams as Mermaid and SVG |
 | `ux-builder-blueprint wireframes [--out <dir>]` | Each screen's pattern at each supported size class, HTML and PNG, neutral theme |
-| `@ux-builder/mcp` | `check_blueprint` includes the new checks; `propose_from_blueprint` returns the proposals without writing them |
+| `@ux-builder/mcp` | `check_blueprint` includes the new checks; `propose_from_blueprint` returns the proposals without writing them. *[Amended 2026-10-21 — build]* `check_blueprint` reads the stories under the HELIX marker above the server's directory; with none, its result adds `notes` saying the story checks were skipped |
 
 ## Error Semantics
 

@@ -9,6 +9,7 @@
    with no network and no dependency. */
 
 import catalogue from "../catalogue.json" with { type: "json" };
+import { checkFlow } from "./flow.mjs";
 
 const { rules: RULES, recipes: RECIPES, limits: LIMITS, blueprintSchema, aiRoles: AI_ROLES } = catalogue.interaction;
 const PATTERNS = catalogue.patterns.filter((p) => p.type === "component").map((p) => p.name);
@@ -23,6 +24,9 @@ export const CHECKS = [
   "view.no-shell", "view.size-classes", "view.one-task", "view.states",
   // AI and agent screens (FEAT-011 AIB-02): warnings, as ADR-028 decision 5.
   "agent.declare-high-impact", "agent.approve-high-impact", "ai.fallback", "ai.consent", "genui.renderable",
+  // Flows and journeys (FEAT-012 FLW-02, JRN-02, JRN-03; flow.mjs): warnings, but flow.target-exists.
+  "flow.reachable", "flow.no-dead-end", "flow.target-exists", "flow.primary-consistent",
+  "journey.walkable", "journey.safeguarded", "journey.covers-errors", "journey.story-covered",
 ];
 const STATES = ["empty", "loading", "error"];
 
@@ -161,8 +165,11 @@ const valueAt = (bp, path) => path.reduce((v, k) => (v && typeof v === "object" 
 
 /* Findings for the blueprint: the schema, then every blueprint check whose
    rule applies to its kind, size classes and inputs. Ordered by path, then
-   rule, in plain string order, not locale order (CONTRACT-005). */
-export function checkBlueprint(bp) {
+   rule, in plain string order, not locale order (CONTRACT-005). With
+   `helix` ({ stories: { "US-12": { criteria: [...] } } }, as the command
+   reads them under a HELIX marker), the journeys are also checked against
+   the stories; without it those checks are skipped. */
+export function checkBlueprint(bp, { helix } = {}) {
   const findings = [];
   const add = (id, path, message, fix, severity) => findings.push({ rule: id, severity: severity ?? byId.get(id)?.severity ?? "error", path: ptr(path), message, fix });
   if (!bp || typeof bp !== "object" || Array.isArray(bp)) {
@@ -204,6 +211,11 @@ export function checkBlueprint(bp) {
     for (const { m, path } of modalsOf(s.modals, [...at, "modals"])) once(m.actions, [...path, "actions"], "Action");
   });
   once(bp.journeys, ["journeys"], "Journey");
+  // A journey's criteria are its own story's (CONTRACT-005).
+  (Array.isArray(bp.journeys) ? bp.journeys : []).forEach((j, i) => {
+    if (!j || typeof j.story !== "string" || !Array.isArray(j.criteria)) return;
+    j.criteria.forEach((c, k) => { if (typeof c === "string" && /^US-\d+-AC\d+$/.test(c) && !c.startsWith(`${j.story}-AC`)) add("blueprint.valid", ["journeys", i, "criteria", k], `${c} is not a criterion of ${j.story}, the journey's story.`, `Name ${j.story}'s criteria (${j.story}-AC<m>), or put this one in a journey for its own story.`); });
+  });
 
   const on = (id) => byId.has(id) && applies(byId.get(id), bp);
   screens.forEach((s, i) => {
@@ -223,6 +235,12 @@ export function checkBlueprint(bp) {
     if (on("action.destructive-safeguard")) (Array.isArray(s.destructiveActions) ? s.destructiveActions : []).forEach((a, j) => {
       if (a && a.safeguard === "none") add("action.destructive-safeguard", [...at, "destructiveActions", j], `${a.label} has no safeguard.`, 'Set safeguard to "undo" (an Undo toast) or "confirm" for an unexpected, irreversible loss.');
     });
+    // actions[] is the same list (FEAT-012 FLW-03): a destructive action there needs its safeguard too, on the screen or a modal.
+    if (on("action.destructive-safeguard")) for (const [list, path] of [[s.actions, [...at, "actions"]], ...[...modalsOf(s.modals, [...at, "modals"])].map(({ m, path: mp }) => [m.actions, [...mp, "actions"]])]) {
+      (Array.isArray(list) ? list : []).forEach((a, j) => {
+        if (a && a.destructive === "none") add("action.destructive-safeguard", [...path, j, "destructive"], `${a.label} has no safeguard.`, 'Set destructive to "undo" (an Undo toast) or "confirm" for an unexpected, irreversible loss.');
+      });
+    }
     for (const { m, path, depth } of modalsOf(s.modals, [...at, "modals"])) {
       const name = m.title || m.id;
       if (on("modal.titled") && !(typeof m.title === "string" && m.title.trim())) add("modal.titled", [...path, "title"], `Modal "${m.id}" has no title.`, "Give it a title that names its task; it becomes the dialog's accessible name.");
@@ -240,7 +258,9 @@ export function checkBlueprint(bp) {
     const onAi = (id) => on(id) && meetsRole(byId.get(id).when?.aiRole, roles);
     const title = s.title ?? s.id;
     const hia = Array.isArray(ai.highImpactActions) ? ai.highImpactActions : [];
-    if (onAi("agent.declare-high-impact") && ai.acts === true && !hia.length) {
+    // An action marked highImpact declares one too (actions[] and highImpactActions are views of one list).
+    const marked = (Array.isArray(s.actions) ? s.actions : []).filter((a) => a && typeof a === "object" && "highImpact" in a);
+    if (onAi("agent.declare-high-impact") && ai.acts === true && !hia.length && !marked.length) {
       add("agent.declare-high-impact", [...at, "ai"], `The agent on "${title}" acts, but no high-impact action is listed.`, 'List each action it can take that is irreversible, costly or seen by others in ai.highImpactActions, each with its approval; or set acts to false if it changes nothing outside the conversation.');
     }
     // "plan" is approval as part of a plan the user reviews. The blueprint has
@@ -251,6 +271,9 @@ export function checkBlueprint(bp) {
       if (a && typeof a === "object" && (a.approval === "none" || !("approval" in a))) {
         add("agent.approve-high-impact", [...at, "ai", "highImpactActions", j], `${a.label ?? "A high-impact action"} on "${title}" ${a.approval === "none" ? "has no approval" : "declares no approval"}.`, 'Set approval to "each" (the user approves it every time) or "plan" (approved as part of a plan the user reviews); the agent never approves it for the user.');
       }
+    });
+    if (onAi("agent.approve-high-impact")) marked.forEach((a) => {
+      if (a.highImpact === "none") add("agent.approve-high-impact", [...at, "actions", s.actions.indexOf(a), "highImpact"], `${a.label ?? a.id} on "${title}" has no approval.`, 'Set highImpact to "each" (the user approves it every time) or "plan" (approved as part of a plan the user reviews).');
     });
     // A fallback names a screen or a destination; consent a screen or a modal.
     const destIds = new Set(dests.filter((d) => d && typeof d === "object").map((d) => d.id));
@@ -294,6 +317,7 @@ export function checkBlueprint(bp) {
     }
     if (on("view.one-task") && screens.length > 1) add("view.one-task", ["screens"], `A view has ${screens.length} screens; a view does one task.`, "Keep one screen; put further steps in modals or sections of it.");
   }
+  checkFlow(bp, { add, on, helix });
   const order = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
   return findings.sort((a, b) => order(a.path, b.path) || order(a.rule, b.rule));
 }
