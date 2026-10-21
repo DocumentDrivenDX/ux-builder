@@ -43,6 +43,51 @@
           }
         }
       }
+    },
+    "baseline": {
+      "type": "object",
+      "required": [
+        "run",
+        "failures"
+      ],
+      "properties": {
+        "run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "failures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "run",
+              "test",
+              "command",
+              "status",
+              "later"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "failed",
+                  "not-run",
+                  "error"
+                ]
+              },
+              "later": {
+                "enum": [
+                  "passed",
+                  "failed",
+                  "not-run",
+                  "error"
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

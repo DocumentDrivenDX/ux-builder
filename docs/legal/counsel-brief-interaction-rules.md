@@ -7,7 +7,7 @@
 
 ## What ships
 
-ux-builder is an open-source UI SDK (MIT OR Apache-2.0). FEAT-008 adds 28 rules about how an app's screens fit together and behave: navigation for the space available, modals, safeguards on destructive actions, empty and error states, emphasis, and views embedded in a host. Each rule is one or two sentences in our own words, a one-sentence rationale, the conditions it applies under, how it is checked, and links to the guidance it restates. The SDK checks a plan of an app's screens against them, and its audit checks the running app.
+ux-builder is an open-source UI SDK (MIT OR Apache-2.0). FEAT-008 adds 29 rules (28 when this brief was first written; `view.states`, paraphrasing Apple HIG: Loading, was added 2026-10-21) about how an app's screens fit together and behave: navigation for the space available, modals, safeguards on destructive actions, empty and error states, emphasis, and views embedded in a host. Each rule is one or two sentences in our own words, a one-sentence rationale, the conditions it applies under, how it is checked, and links to the guidance it restates. The SDK checks a plan of an app's screens against them, and its audit checks the running app.
 
 The rules restate guidance from four sources:
 

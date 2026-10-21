@@ -25,7 +25,8 @@
   "dependencies": {
     "@ux-builder/tokens": "^1.6.0",
     "@ux-builder/ui": "^0.6.2",
-    "@ux-builder/audit": "^0.1.1"
+    "@ux-builder/audit": "^0.1.1",
+    "undici": "^7.30.1"
   },
   "publishConfig": {
     "access": "public"

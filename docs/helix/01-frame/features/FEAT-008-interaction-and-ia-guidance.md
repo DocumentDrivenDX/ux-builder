@@ -203,7 +203,8 @@ through the adapter's rules (ADR-024); it takes its theme only from the host.
 
 VEW-02. A blueprint of kind `view` is checked against the view profile;
 destinations, or an app-shell or primary-navigation pattern, in a view are
-errors.
+errors. Each of a view's screens declares its empty, loading and error
+states whatever its pattern (`view.states`).
 
 #### Provenance
 
@@ -266,6 +267,10 @@ step.
 
 - **A blueprint supports only expanded and wider**: compact-only rules do not
   apply and produce no findings.
+- **An app supports medium but not compact**: the destination limit
+  (`nav.compact-destinations`) applies at the compact size class only, so it
+  produces no finding (the blueprint check and the audit's below-600 px check
+  agree).
 - **Mixed input** (a touch laptop): `inputs: ["coarse", "fine"]` applies both
   sets of rules.
 - **A pattern renamed in a later SDK version**: BLU-04 names the nearest

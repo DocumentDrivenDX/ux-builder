@@ -4,8 +4,10 @@
    Fetches the latest HELIX release's plugin package from GitHub (or the tag
    asked for), verifies it, and installs its skill and catalogue into the app
    as a project skill. Falls back to the package bundled with this starter
-   when the network or the package fails, and says why. Nothing downloaded is
-   run; only regular files under the package's helix/ root are written.
+   when the network or the package fails, and says why; when that copy is
+   missing or bad too, the app is created without HELIX (getHelix returns
+   { unavailable: reason }). Requests honour the standard proxy variables.
+   Nothing downloaded is run; only regular files under the package's helix/ root are written.
 
      const helix = await getHelix({ tag, offline });   // { files, manifest, provenance }
      install(helix, appDir);                            // .claude/skills/helix/ */
@@ -20,7 +22,7 @@ const HERE = fileURLToPath(new URL(".", import.meta.url));
 export const REPO = "DocumentDrivenDX/helix";
 export const ASSET = (tag) => `helix-plugin-package-${tag}.tar.gz`;
 export const BUNDLED = join(HERE, "helix");
-const TIMEOUT = 20_000;
+export const TIMEOUT = 20_000;
 
 /* ------------------------------------------------------------- tar (read only) */
 const str = (b, o, n) => { const s = b.subarray(o, o + n); const z = s.indexOf(0); return (z < 0 ? s : s.subarray(0, z)).toString("utf8"); };
@@ -65,8 +67,24 @@ export function check(files, tag) {
 }
 
 /* ------------------------------------------------------------- fetch */
+/* The standard proxy variables (HLF-03), in either case. When one is set, the
+   requests go through undici's EnvHttpProxyAgent, which reads them (with
+   NO_PROXY); otherwise Node's own fetch, with no proxy. */
+const PROXY_VARS = ["HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY"];
+export const proxied = (env = process.env) => PROXY_VARS.some((v) => env[v] || env[v.toLowerCase()]);
+let viaProxy = null;
+async function proxyFetch() {
+  if (!viaProxy) {
+    const { fetch: undiciFetch, EnvHttpProxyAgent } = await import("undici");
+    const dispatcher = new EnvHttpProxyAgent();
+    viaProxy = (url, init) => undiciFetch(url, { ...init, dispatcher });
+  }
+  return viaProxy;
+}
+
 async function get(url, { token, accept, timeoutMs }) {
-  const r = await fetch(url, { headers: { "user-agent": "ux-builder-create-app", accept, ...(token ? { authorization: `Bearer ${token}` } : {}) }, redirect: "follow", signal: AbortSignal.timeout(timeoutMs) });
+  const go = proxied() ? await proxyFetch() : fetch;
+  const r = await go(url, { headers: { "user-agent": "ux-builder-create-app", accept, ...(token ? { authorization: `Bearer ${token}` } : {}) }, redirect: "follow", signal: AbortSignal.timeout(timeoutMs) });
   if (!r.ok) throw new Error(r.status === 403 || r.status === 429 ? `GitHub rate-limited the request (${r.status})` : r.status === 404 ? "no such release" : `GitHub answered ${r.status}`);
   return r;
 }
@@ -98,19 +116,26 @@ export function bundled({ dir = process.env.UX_BUILDER_HELIX_BUNDLE ?? BUNDLED }
   return { files, manifest, provenance: { version: manifest.version, tag: b.tag, source: b.source, digest: b.digest ?? null, fetchedAt: b.fetchedAt, bundled: true } };
 }
 
+/* The bundled copy with the reason it is used, or, when it is missing or
+   fails its check, { unavailable } with both reasons (HLS-02). */
+function fallback(reason) {
+  try { const h = bundled(); h.provenance.reason = reason; return h; }
+  catch (e) { return { unavailable: `${reason === "--helix-offline" ? "--helix-offline" : `the latest release could not be used (${reason})`}, and the bundled copy could not be used (${e.message})` }; }
+}
+
 /* HELIX for a new app: the latest (or tag), else the bundled copy with the
-   reason; a tag that cannot be had is an error (HLF-04, HLS-02). */
+   reason, else { unavailable: reason }; a tag that cannot be had is an
+   error (HLF-04, HLS-02). */
 export async function getHelix({ tag, offline = false, log = () => {} } = {}) {
-  if (offline) { const h = bundled(); h.provenance.reason = "--helix-offline"; return h; }
+  if (offline && tag) { const err = new Error("--helix-offline and --helix-version cannot be combined: the bundled HELIX is one release, --helix-version asks for another"); err.code = "usage"; throw err; }
+  if (offline) return fallback("--helix-offline");
   try { return await fetchRelease({ tag }); }
   catch (e) {
     const code = e.cause?.code ?? e.cause?.errors?.[0]?.code;
-    const reason = e.name === "TimeoutError" || e.name === "AbortError" ? "GitHub did not answer within 20 seconds" : code || e.message === "fetch failed" ? `no network (${code ?? "unreachable"})` : e.message;
+    const reason = e.name === "TimeoutError" || e.name === "AbortError" ? `GitHub did not answer within ${TIMEOUT / 1000} seconds` : code || e.message === "fetch failed" ? `no network (${code ?? "unreachable"})` : e.message;
     if (tag) { const err = new Error(`HELIX ${tag} could not be fetched and verified: ${reason}`); err.code = "pinned"; throw err; }
     log(`HELIX: the latest release could not be used (${reason}); using the bundled copy`);
-    const h = bundled();
-    h.provenance.reason = reason;
-    return h;
+    return fallback(reason);
   }
 }
 

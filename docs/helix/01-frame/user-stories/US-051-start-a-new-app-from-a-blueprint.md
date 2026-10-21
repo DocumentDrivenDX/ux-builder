@@ -41,10 +41,11 @@ ADR-025 decision 8: a new app gets a blueprint, a `check:blueprint` script and a
 - [ ] **US-051-AC2** — Given `--blueprint <file>` naming a blueprint with no error finding, when the starter runs, then the app's `app.blueprint.json` is that blueprint.
 - [ ] **US-051-AC3** — Given `--blueprint <file>` naming a blueprint with an error finding, when the starter runs, then it prints each error with its rule ID, exits 1 and creates no app directory.
 - [ ] **US-051-AC4** — Given the new app, when its `AGENTS.md` and `CLAUDE.md` are read, then they tell an agent to plan screens in `app.blueprint.json`, check it, and build each screen from its pattern inside `Page` within `AppShell`.
+- [ ] **US-051-AC5** — Given `--blueprint <file>` naming a blueprint of kind `view`, when the starter runs, then it refuses it, saying the starter makes apps, exits 1 and creates no app directory.
 
 ## Edge Cases
 
-- A blueprint of kind `view` passed to the app starter is refused: the starter makes apps.
+- A blueprint of kind `view` passed to the app starter is refused: the starter makes apps (US-051-AC5).
 
 ## Test Scenarios
 
@@ -54,6 +55,7 @@ ADR-025 decision 8: a new app gets a blueprint, a `check:blueprint` script and a
 | Given plan | US-051-AC2 | Valid plan.json | --blueprint plan.json | Copied |
 | Bad plan | US-051-AC3 | Plan nesting a modal | --blueprint | Errors printed; exit 1; no directory |
 | Guidance | US-051-AC4 | New app | Read AGENTS.md, CLAUDE.md | Blueprint loop named |
+| View plan | US-051-AC5 | plan.json of kind view | --blueprint | Refused; exit 1; no directory |
 
 ## Dependencies
 

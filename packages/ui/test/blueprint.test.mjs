@@ -63,9 +63,51 @@ describe("US-050: cited rules for a target", () => {
 });
 
 describe("US-053: checking a blueprint", () => {
-  test("the skeletons and the contract's example pass", () => {
+  // @covers US-052-AC1
+  test("the app and view skeletons pass", () => {
     assert.deepEqual(checkBlueprint(skeleton("app")), []);
     assert.deepEqual(checkBlueprint(skeleton("view")), []);
+  });
+
+  // @covers US-053-AC9
+  test("AC9: CONTRACT-005's example blueprint passes", () => {
+    const contract = read("docs/helix/02-design/contracts/CONTRACT-005-interaction-rules-and-blueprint.md");
+    const examples = [...contract.split("## Examples")[1].matchAll(/```json\n([\s\S]*?)```/g)].map((m) => JSON.parse(m[1]));
+    const example = examples.find((x) => !Array.isArray(x) && x.version === 1);
+    assert.ok(example, "the contract has an example blueprint");
+    assert.equal(example.name, "Time review");
+    assert.deepEqual(checkBlueprint(example), []);
+  });
+
+  // @covers US-053-AC7
+  test("AC7: the same blueprint gives the same findings in the same order, by path then rule in plain string order", () => {
+    const screens = Array.from({ length: 12 }, (_, i) => ({ id: `s${i}`, title: `S${i}`, pattern: i % 2 ? "CollectionList" : "Dashbord", destructiveActions: [{ label: "Delete", safeguard: "none" }] }));
+    const bp = app({ destinations: screens.map((s) => ({ id: s.id, label: s.title, screen: s.id })), screens });
+    const first = checkBlueprint(bp), second = checkBlueprint(structuredClone(bp));
+    assert.ok(first.length > 20, "enough findings to show an order");
+    assert.deepEqual(second, first);
+    assert.equal(JSON.stringify(second), JSON.stringify(first));
+    const key = (f) => [f.path, f.rule];
+    for (let i = 1; i < first.length; i++) {
+      const [pa, ra] = key(first[i - 1]), [pb, rb] = key(first[i]);
+      assert.ok(pa < pb || (pa === pb && ra <= rb), `${pa} ${ra} before ${pb} ${rb}`);
+    }
+    assert.ok(first.findIndex((f) => f.path.startsWith("/screens/10/")) < first.findIndex((f) => f.path.startsWith("/screens/2/")), "string order: /screens/10 before /screens/2");
+  });
+
+  // @covers US-053-AC8
+  test("AC8: a 50-screen blueprint is checked in under one second", () => {
+    const screens = Array.from({ length: 50 }, (_, i) => ({
+      id: `screen-${i}`, title: `Screen ${i}`, pattern: ["CollectionList", "RecordDetail", "WorkQueue", "SettingsPage", "FormPage"][i % 5],
+      primaryAction: { label: "Save" }, destructiveActions: [{ label: "Delete", safeguard: "undo" }], states: ["empty", "loading", "error"],
+      modals: [{ id: `edit-${i}`, title: "Edit", kind: "dialog", dismiss: "cancel", editsData: true, guardsUnsavedChanges: true }],
+    }));
+    const bp = app({ destinations: screens.slice(0, 5).map((s) => ({ id: s.id, label: s.title, screen: s.id })), screens });
+    const start = performance.now();
+    const f = checkBlueprint(bp);
+    const ms = performance.now() - start;
+    assert.deepEqual(f, [], "the 50-screen blueprint is valid");
+    assert.ok(ms < 1000, `took ${ms.toFixed(1)} ms`);
   });
 
   // @covers US-053-AC4
@@ -110,9 +152,22 @@ describe("US-053: checking a blueprint", () => {
     assert.deepEqual(ids(checkBlueprint(noDest)), ["blueprint.valid"], "an app needs destinations");
   });
 
+  // @covers US-053-AC5
   test("a rule applies only where the blueprint's support meets its conditions", () => {
     const wide = app({ supports: { sizeClasses: ["expanded", "large"], inputs: ["fine"] }, destinations: ["a", "b", "c", "d", "e", "f"].map((id) => ({ id, label: id, screen: "home" })) });
-    assert.deepEqual(checkBlueprint(wide), [], "seven destinations are fine when compact and medium are not supported");
+    assert.deepEqual(checkBlueprint(wide), [], "six destinations are fine when compact is not supported");
+  });
+
+  // @covers US-053-AC5
+  test("AC5: the destination limit is for the compact size class only; a medium-only app may have six", () => {
+    const six = ["a", "b", "c", "d", "e", "f"].map((id) => ({ id, label: id, screen: "home" }));
+    assert.deepEqual(source.rules.find((r) => r.id === "nav.compact-destinations").when.sizeClass, ["compact"]);
+    assert.deepEqual(checkBlueprint(app({ supports: { sizeClasses: ["medium"], inputs: ["coarse"] }, destinations: six })), []);
+    assert.deepEqual(checkBlueprint(app({ supports: { sizeClasses: ["medium", "expanded"], inputs: ["fine"] }, destinations: six })), []);
+    const compact = checkBlueprint(app({ supports: { sizeClasses: ["compact", "medium"], inputs: ["coarse"] }, destinations: six }));
+    assert.deepEqual(ids(compact), ["nav.compact-destinations"]);
+    assert.match(compact[0].message, /at the compact size class/);
+    assert.ok(!rulesFor({ context: "app", sizeClasses: ["medium"] }).some((r) => r.id === "nav.compact-destinations"));
   });
 
   test("findRecipes: best match first; every recipe for no job", () => {
@@ -126,7 +181,7 @@ describe("US-053: checking a blueprint", () => {
 describe("US-055: an embedded view", () => {
   // @covers US-055-AC1
   test("AC1: destinations or a shell pattern in a view are errors", () => {
-    const f = checkBlueprint(view({ destinations: [{ id: "a", label: "A", screen: "main" }], screens: [{ id: "main", title: "Main", pattern: "AppShell" }] }));
+    const f = checkBlueprint(view({ destinations: [{ id: "a", label: "A", screen: "main" }], screens: [{ id: "main", title: "Main", pattern: "AppShell", states: ["empty", "loading", "error"] }] }));
     assert.deepEqual(f.map((x) => [x.rule, x.severity, x.path]), [["view.no-shell", "error", "/destinations"], ["view.no-shell", "error", "/screens/0/pattern"]]);
   });
 
@@ -140,7 +195,7 @@ describe("US-055: an embedded view", () => {
 
   // @covers US-055-AC3
   test("AC3: more than one screen is a warning; modal tasks are not screens", () => {
-    const two = checkBlueprint(view({ screens: [...skeleton("view").screens, { id: "b", title: "B", pattern: "FormPage" }] }));
+    const two = checkBlueprint(view({ screens: [...skeleton("view").screens, { id: "b", title: "B", pattern: "FormPage", states: ["empty", "loading", "error"] }] }));
     assert.deepEqual(two.map((x) => [x.rule, x.severity]), [["view.one-task", "warning"]]);
     const modal = view(); modal.screens = [{ ...modal.screens[0], modals: [{ id: "m", title: "Edit", kind: "sheet", dismiss: "cancel" }] }];
     assert.deepEqual(checkBlueprint(modal), []);
@@ -149,8 +204,20 @@ describe("US-055: an embedded view", () => {
   // @covers US-055-AC4
   test("AC4: rulesFor a view gives the view profile and no app-only rule", () => {
     const got = rulesFor({ context: "view" });
-    for (const id of ["view.no-shell", "view.size-classes", "view.one-task", "view.theme-from-host"]) assert.ok(got.some((r) => r.id === id), id);
+    for (const id of ["view.no-shell", "view.size-classes", "view.one-task", "view.states", "view.theme-from-host"]) assert.ok(got.some((r) => r.id === id), id);
     assert.ok(got.every((r) => !r.when?.context || r.when.context.includes("view")));
     assert.ok(!got.some((r) => r.id === "nav.compact-destinations"));
+  });
+
+  // @covers US-055-AC5
+  test("AC5: every screen of a view declares its states, whatever its pattern", () => {
+    const form = checkBlueprint(view({ screens: [{ id: "main", title: "Request", pattern: "FormPage" }] }));
+    assert.deepEqual(form.map((x) => [x.rule, x.severity, x.path]), [["view.states", "warning", "/screens/0/states"]]);
+    assert.match(form[0].message, /empty, loading, error states/);
+    const partial = checkBlueprint(view({ screens: [{ id: "main", title: "Result", pattern: "RecordDetail", states: ["empty"] }] }));
+    assert.deepEqual(ids(partial), ["view.states"], "one finding, not a second screen.states for a data pattern");
+    assert.match(partial[0].message, /loading, error states/);
+    assert.deepEqual(checkBlueprint(view({ screens: [{ id: "main", title: "Request", pattern: "FormPage", states: ["empty", "loading", "error"] }] })), []);
+    assert.deepEqual(checkBlueprint(app({ screens: [{ id: "home", title: "Request", pattern: "FormPage" }] })), [], "in an app, a form screen needs no declared states");
   });
 });

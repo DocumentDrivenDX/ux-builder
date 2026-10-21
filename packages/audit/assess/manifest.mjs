@@ -20,6 +20,21 @@ export const STATES = ["success", "empty", "loading", "recoverable-error", "syst
 export const ALLOW = ["create-test-data", "edit-test-data", "delete-test-data"];
 export const DENY = ["payment", "send-message", "production-approval", "delete-real-data"];
 export const PLACEHOLDER = /^<fill-in\b/;
+export const LIMITS = { runMinutes: 60, steps: 200, journeyMinutes: 15 };
+
+/* restrictions.excludeIntegrations as a test on URLs (ENV-02): an origin
+   (https://host:port) matches that origin; a host matches it and its
+   subdomains; a name without a dot (stripe) matches any host with that label.
+   hostLevel(entry) says whether the entry can be refused by host name alone. */
+export function excluded(list = []) {
+  const entries = list.filter((e) => typeof e === "string" && e && !PLACEHOLDER.test(e)).map((e) => {
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(e)) { try { return { entry: e, origin: new URL(e).origin }; } catch { return null; } }
+    return { entry: e, host: e.toLowerCase().replace(/\.$/, "") };
+  }).filter(Boolean);
+  const hostMatch = (h, x) => x.host.includes(".") || x.host === "localhost" ? h === x.host || h.endsWith(`.${x.host}`) : h.split(".").includes(x.host);
+  const by = (u) => { let url; try { url = new URL(u); } catch { return null; } return entries.find((x) => (x.origin ? url.origin === x.origin : hostMatch(url.hostname.toLowerCase(), x))) ?? null; };
+  return { entries, by, host: (h) => entries.some((x) => x.host && hostMatch(h.toLowerCase(), x)) };
+}
 
 // Values that look like credentials (FEAT-009 CTX-04): never in a manifest.
 export const SECRETS = [
@@ -110,6 +125,8 @@ export function validate(m) {
   const base = d.run?.baseUrl && !PLACEHOLDER.test(d.run.baseUrl) ? d.run.baseUrl : null;
   const origins = (d.run?.origins?.length ? d.run.origins : base ? [base] : []).map((u) => origin(u)).filter(Boolean);
   if (base && !origin(base)) add("/run/baseUrl", "is not a URL");
+  const ex = excluded(Array.isArray(d.restrictions?.excludeIntegrations) ? d.restrictions.excludeIntegrations : []);
+  if (base && origin(base)) for (const [i, e] of (d.restrictions?.excludeIntegrations ?? []).entries()) if (ex.entries.some((x) => x.entry === e) && excluded([e]).by(base)) add(["restrictions", "excludeIntegrations", i], `${e} excludes the app's own origin (${origin(base)}); nothing could be assessed`);
   for (const [i, j] of (d.journeys ?? []).entries()) {
     if (!j?.entry || PLACEHOLDER.test(j.entry) || !base) continue;
     const o = origin(j.entry, base);
@@ -150,7 +167,7 @@ export function validate(m) {
     if (!(e instanceof HelixError)) throw e;
     add("/helix", e.code === "ambiguous" ? e.message : `HELIX ${e.code}: ${e.message}`);
   }
-  const resolved = { ...d, run: { ...d.run, cwd, origins }, restrictions: { ...d.restrictions, deny: [...new Set([...DENY, ...(d.restrictions?.deny ?? [])])] } };
+  const resolved = { ...d, run: { ...d.run, cwd, origins }, limits: { ...LIMITS, ...d.limits }, restrictions: { ...d.restrictions, allow: (d.restrictions?.allow ?? []).filter((a) => !DENY.includes(a)), deny: [...new Set([...DENY, ...(d.restrictions?.deny ?? [])])], excludeIntegrations: d.restrictions?.excludeIntegrations ?? [] } };
   problems.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
   return { problems, helix, resolved };
 }

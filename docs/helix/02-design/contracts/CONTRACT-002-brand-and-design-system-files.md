@@ -108,7 +108,7 @@ A theme is one brand plus an anatomy. Files live at
 | `anatomy` | object | exactly one of `designSystem`, `anatomy` | The same shape and rules as a design system file's `source`, `fonts`, `tokens`, `appearances` and, since 2026-10-18, `variants` (no literal colours; references as for a design system) | The theme's own anatomy, e.g. `praxis`, `plain`, `synaptiq` |
 | `default` | `light` \| `dark` | no | MUST be an appearance the brand defines | The appearance used when `data-appearance` is absent; if omitted, `dark` when the brand has it, else `light` |
 
-**Shared design systems** are only `material`, `fluent` and `carbon`. Praxis
+**Shared design systems** are only `material`, `fluent`, `carbon` and `databricks`. Praxis
 and Plain are themes with their own anatomy; their brands stay brands.
 
 **Composition** (below) applies unchanged with *S* = the named shared design
@@ -210,7 +210,7 @@ changes; `--badge-fg` still maps to `badge.fg`.
 
 The real files are full, valid examples: `tokens/brands/*.brand.json` (Praxis,
 Plain, Synaptiq, Databricks), `tokens/design-systems/*.design-system.json`
-(Material, Fluent, Carbon) and `tokens/themes/*.theme.json` (the 0.x
+(Material, Fluent, Carbon, Databricks) and `tokens/themes/*.theme.json` (the 0.x
 themes, Synaptiq and others) *[Amended — ADR-018]*.
 `tokens/schema/examples/acme.brand.json` is an invented light-only brand with a
 font override and generation settings, exercising the optional parts.

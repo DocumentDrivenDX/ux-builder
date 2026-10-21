@@ -283,14 +283,14 @@ and `@ux-builder/create-app` 0.5.0. The formats are CONTRACT-005; this section l
 
 | Surface | Addition |
 |---|---|
-| `@ux-builder/ui` entry points | `@ux-builder/ui/blueprint`: `rulesFor`, `checkBlueprint`, `blueprintSchema`, `findRecipes`, `skeleton` (CONTRACT-005) |
+| `@ux-builder/ui` entry points | `@ux-builder/ui/blueprint`: `rulesFor`, `checkBlueprint`, `blueprintSchema`, `findRecipes`, `getRecipe`, `skeleton`, `rules`, `recipes`, `limits` (CONTRACT-005; its `CHECKS` and `nearestPattern` are internal) |
 | `@ux-builder/ui` command | `ux-builder-blueprint check <file> [--json]`, `ux-builder-blueprint init [--kind app\|view] [--out <file>]` (CONTRACT-005) |
-| `catalogue.json` | `interaction`: `{ version, limits, rules[], recipes[] }` (CONTRACT-005) |
+| `catalogue.json` | `interaction`: `{ version, limits, rules[], recipes[], blueprintSchema }` (CONTRACT-005) |
 | `AGENTS.md`, skill | An "Interaction and screen rules" section: every rule's ID and statement, and the plan → check → build → lint → audit loop |
-| `@ux-builder/mcp` | Tools `get_rules` (`context?`, `sizeClasses?`, `inputs?`), `list_recipes` (`job?`, `kind?`), `get_recipe` (`id`), `get_blueprint_schema`, `check_blueprint` (`blueprint`); `get_guidance` includes the loop |
+| `@ux-builder/mcp` | Tools `get_rules` (`context?`, `sizeClasses?`, `inputs?`), `list_recipes` (`job?`, `kind?`), `get_recipe` (`id`), `get_blueprint_schema`, `check_blueprint` (`blueprint`); `get_guidance` includes the loop. `get_blueprint_schema` returns `{ schema, skeleton: { app, view } }`: the blueprint's JSON Schema and `skeleton("app")` and `skeleton("view")` |
 | `ux-builder-audit` | Checks `one-modal`, `modal-contract`, `one-primary-action`, `nav-per-breakpoint` (with `--width`), `line-length`: warnings for their first minor release. Options `--write-baseline <file>` and `--baseline <file>` |
 | `report.json` | A finding from these checks adds `ruleId` (the rule catalogue ID) and `sources[]` (`{ title, url }`); with `--baseline`, `summary` adds `baselined` and `resolved` (counts) and the report lists `resolved[]` |
-| Baseline file | `{ tool: "ux-builder-audit", version, findings: [{ rule, url, selector, runs }] }`, sorted by `rule`, `url`, `selector` |
+| Baseline file | `{ tool: "ux-builder-audit", version, findings: [{ rule, url, selector, message?, runs }] }`, sorted by `rule`, `url`, `selector`, `message`. `selector` is `null` for a finding with no element; such a finding carries `message`, and a later finding matches it by `rule`, `url` and `message`. A finding with a selector carries no `message` and matches by `rule`, `url` and `selector` |
 | `@ux-builder/create-app` | Writes `app.blueprint.json`, a `check:blueprint` script and a CI step; option `--blueprint <file>` |
 
 ## UX assessment *[Amended 2026-10-20 — FEAT-009, ADR-026]*
@@ -302,12 +302,26 @@ Normative from `@ux-builder/audit` 0.2.0 and `@ux-builder/mcp` 0.4.0. The format
   report and exit behaviour; it is implemented on `inspect()`, and its
   findings for the same pages are unchanged.
 - The command gains `ux-builder-audit assess <subcommand>`: `init`,
-  `validate`, `collect`, `baseline`, `browser`, `inspect`, `validate-report`.
+  `validate`, `collect`, `baseline`, `plan`, `browser`, `reset`, `merge`,
+  `inspect`, `validate-report`, `propose`, `check-writes`, `apply-check`,
+  `report`, `compare` and `gate` (their options, records and exit codes are
+  CONTRACT-006 "Command" and "Increments 2 and 3").
 - The package ships the skill `skill/ux-builder-assess/SKILL.md` and the
   JSON Schemas under `schema/`.
 - `@ux-builder/mcp`, run from an app's directory, reads that app's
   installed `@ux-builder/ui` catalogue before its own and names the version
   it served in its instructions.
+- `@ux-builder/mcp` registers three tools when it can load the app's
+  `@ux-builder/audit` (0.2.0 or later; without it, none of them):
+
+  | Tool | Input | Returns |
+  |---|---|---|
+  | `get_assessment_skill` | none | The text of `skill/ux-builder-assess/SKILL.md` |
+  | `validate_assessment_manifest` | `path`: the manifest | `{ valid, problems: [{ path, message }], helix: { flow, root, catalog, documents } \| null }`, as `assess validate`; a manifest that cannot be read is a tool error |
+  | `validate_assessment_report` | `dir`: a run's directory | `{ valid, problems: [{ file, path, message }] }`, as `assess validate-report` |
+
+  The tools only read and check; every stage that writes a record runs
+  through the commands above.
 
 ## The starter on HELIX *[Amended 2026-10-21 — FEAT-010, ADR-027]*
 
@@ -318,13 +332,35 @@ Normative from `@ux-builder/create-app` 0.5.0.
 | (default) | Fetches the latest HELIX release's plugin package from GitHub, verifies it, installs `skills/helix/` at `.claude/skills/helix/`, and writes `.helix.yml` and the starter set (FEAT-010 HLA-01) |
 | `--helix-version <tag>` | That release; exit 1 and nothing written if it cannot be fetched and verified |
 | `--helix-offline` | The bundled HELIX; no network request |
-| `--no-helix` | No marker, documents or skill |
+| `--helix-offline` with `--helix-version` | Refused: exit 1, nothing written |
+| `--no-helix` | No marker, documents, skill, `ux-assessment.yml` or `assess:validate` |
 
-The app also gets `ux-assessment.yml`, `e2e/starter.spec.js` (citing US-001)
-and the scripts `test:e2e` and `assess:validate`. `HELIX-VERSION.json`:
-`{ version, tag, source, digest, fetchedAt, bundled, reason? }`.
-`UX_BUILDER_HELIX_API` (default `https://api.github.com`) and
-`GITHUB_TOKEN` are read from the environment.
+Every app gets `e2e/starter.spec.js` and the `test:e2e` script. On HELIX,
+the test cites US-001's criteria with `@covers`, and the app also gets
+`ux-assessment.yml` and the `assess:validate` script. Without HELIX
+(`--no-helix`, or the fallback below), the test has no `@covers` lines,
+since there is no US-001.
+
+`HELIX-VERSION.json`: `{ version, tag, source, digest, fetchedAt, bundled,
+reason? }`. When the fetch fails, the bundled HELIX is used and `reason`
+says why. When the bundled HELIX is missing or fails its check as well, the
+app is created without HELIX and exits 0. The output gives the reason and
+says that no `HELIX-VERSION.json` was written.
+
+Environment:
+
+| Variable | Use |
+|---|---|
+| `GITHUB_TOKEN` | Sent as a bearer token to the API only; never written |
+| `HTTPS_PROXY`, `HTTP_PROXY`, `NO_PROXY` (either case) | The requests go through the proxy (undici's `EnvHttpProxyAgent`) |
+| `UX_BUILDER_HELIX_API` | The release API's base, default `https://api.github.com`. For tests and mirrors |
+| `UX_BUILDER_HELIX_BUNDLE` | Test and maintenance only, not a supported option: the directory read as the bundled HELIX instead of the package's `helix/` |
+
+`fetchRelease({ keepArchive })` in `helix.mjs` is also test and maintenance
+only: `scripts/bundle-helix.mjs` uses it to keep the downloaded archive. That
+script runs on `prepack`, and also as `npm run bundle-helix`. It writes
+`helix/`, and it sets the HELIX version in `licenses/vendored.json`. It is
+not part of the published interface.
 
 ## Error Semantics
 

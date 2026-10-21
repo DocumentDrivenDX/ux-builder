@@ -35,8 +35,8 @@ the findings of a blueprint check or an audit by rule ID.
 - In scope: `guidelines/rules.json` and `guidelines/recipes.json` (sources)
   and their copies in `@ux-builder/ui/catalogue.json` (`interaction`); the
   blueprint file; the findings shape; `rulesFor`, `checkBlueprint`,
-  `blueprintSchema`, `findRecipes` and `skeleton`; the `ux-builder-blueprint`
-  command.
+  `blueprintSchema`, `findRecipes`, `getRecipe`, `skeleton`, `rules`,
+  `recipes` and `limits`; the `ux-builder-blueprint` command.
 - Out of scope: which rules exist (the catalogue is normative for that); the
   audit's command and report (CONTRACT-004), except the fields this contract
   adds; Praxis-specific rules (the Praxis adapter, ADR-024).
@@ -105,7 +105,9 @@ Unknown fields are errors (`blueprint.valid`).
 
 `{ "rule": string, "severity": "error" | "warning", "path": string, "message": string, "fix": string }`
 — `path` is a JSON Pointer into the blueprint (`/screens/2/modals/0`).
-Findings are ordered by `path`, then `rule`.
+Findings are ordered by `path`, then `rule`, each in plain string order
+(UTF-16 code units, as JavaScript's `<` compares them; not a locale or
+numeric order), so `/screens/10` comes before `/screens/2`.
 
 ### Library (`@ux-builder/ui/blueprint`, Node or browser, no network)
 
@@ -116,6 +118,15 @@ Findings are ordered by `path`, then `rule`.
 | `blueprintSchema` | object | The blueprint's JSON Schema (draft 2020-12) |
 | `findRecipes` | `(job: string, kind?: "app" \| "view") => Recipe[]` | Best keyword match first; all recipes when `job` is empty |
 | `skeleton` | `(kind: "app" \| "view") => object` | A minimal valid blueprint |
+| `getRecipe` | `(id: string) => Recipe \| null` | The recipe with that ID, or `null` |
+| `rules` | Rule[] | Every rule, in catalogue order (`catalogue.json` `interaction.rules`) |
+| `recipes` | Recipe[] | Every recipe, in catalogue order (`interaction.recipes`) |
+| `limits` | `{ compactDestinations, lineLength }` | The numbers the rules refer to (`interaction.limits`) |
+
+The module also exports `CHECKS` (the IDs of the blueprint checks it runs,
+read by `tools/check-rules.mjs`) and `nearestPattern` (the edit-distance
+match behind `pattern.exists`). They are internal to the SDK's own tools:
+not part of this contract, and they may change in any release.
 
 ### Command (`ux-builder-blueprint`, bin of `@ux-builder/ui`)
 
@@ -131,7 +142,7 @@ Findings are ordered by `path`, then `rule`.
 | Blueprint is not JSON | `check` exits 2 with the parse error |
 | Blueprint fails the schema | One `blueprint.valid` error per problem, with its path |
 | Unknown pattern | `pattern.exists` error naming the nearest catalogue pattern |
-| Rule source breaks the licence rules | `npm run check` fails (FEAT-008 PRV-03) |
+| Rule source breaks the licence rules, or a quoted source is not credited in `@ux-builder/ui`'s `THIRD-PARTY-NOTICES.md` | `npm run check` fails (FEAT-008 PRV-02, PRV-03) |
 
 ## Examples
 

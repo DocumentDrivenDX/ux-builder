@@ -78,8 +78,12 @@ ddx:
    proposals are applied through HELIX, after rechecking revisions.
 7. **Safety is configuration, enforced by the commands.** Local or staging
    only; origins and integrations allow-listed; consequential actions
-   refused unless authorized; secrets referenced, never stored; evidence
-   masked before it is written.
+   always refused (no manifest can allow them in v1); secrets referenced,
+   never stored; evidence masked before it is written. *[Amended
+   2026-10-21: "refused unless authorized" read as allowing them; the
+   contract and the commands never do. `browser` and `inspect` enforce the
+   origins, the excluded integrations, the denied actions and the limits
+   (CONTRACT-006).]*
 8. **Pilot: the theme builder in this repository.** Its mock model,
    throwaway repository, AI feedback states, validation and server refusal
    make it a safe, deterministic target. It has no sign-in, so the

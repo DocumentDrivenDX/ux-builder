@@ -7,7 +7,10 @@
    expected outcomes and the E2E tests it can reuse; and every state class,
    applicable or not, with the manifest's reason. Every pair starts in
    coverage.json as not-assessed or not-applicable, so nothing can pass by
-   being left out. Also merges findings and gives them stable IDs (FND-03). */
+   being left out. A journey whose role's credential variable (auth.env) is
+   not set meets an authentication barrier: its pairs start blocked, with
+   the reason, and the plan stage is partial (AGW-02). Also merges findings
+   and gives them stable IDs (FND-03). */
 
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -18,7 +21,7 @@ const read = (dir, f) => JSON.parse(readFileSync(join(dir, f), "utf8"));
 const write = (dir, f, d) => writeFileSync(join(dir, f), JSON.stringify(d, null, 2) + "\n");
 export const runDir = (manifest, resolved, out, run) => resolve(manifest.dir, out ?? resolved.evidence?.out ?? "ux-assessment", run);
 
-export function plan({ manifest, resolved, out, run, agent, model }) {
+export function plan({ manifest, resolved, out, run, agent, model, env = process.env }) {
   const dir = runDir(manifest, resolved, out, run);
   if (!existsSync(join(dir, "traceability.json"))) { const e = new Error(`no traceability.json in ${dir}: run assess collect --run ${run} first`); e.code = "blocked"; throw e; }
   const req = read(dir, "requirements.json"), trace = read(dir, "traceability.json");
@@ -36,19 +39,29 @@ export function plan({ manifest, resolved, out, run, agent, model }) {
     };
   });
   write(dir, "plan.json", { schema: "plan", version: 1, run, journeys });
+  // An authentication barrier: the role's credential is referenced but not set.
+  const barrier = new Map();
+  for (const j of journeys) {
+    const auth = (resolved.roles ?? []).find((r) => r.id === j.role)?.auth;
+    if (auth?.env && !env[auth.env]) barrier.set(j.id, `authentication barrier: role ${j.role}'s credential variable ${auth.env} is not set`);
+  }
   // The matrix starts complete: every pair is accounted for before anything is walked (COV-01).
   const prior = existsSync(join(dir, "coverage.json")) ? read(dir, "coverage.json").entries : [];
-  const entries = journeys.flatMap((j) => j.states.map((s) => prior.find((e) => e.journey === j.id && e.state === s.state)
-    ?? (s.applies ? { journey: j.id, state: s.state, status: "not-assessed", reason: "planned; not walked yet" } : { journey: j.id, state: s.state, status: "not-applicable", reason: s.reason })));
+  const entries = journeys.flatMap((j) => j.states.map((s) => {
+    const was = prior.find((e) => e.journey === j.id && e.state === s.state);
+    if (s.applies && barrier.has(j.id) && (!was || ["not-assessed", "blocked"].includes(was.status))) return { journey: j.id, state: s.state, status: "blocked", reason: barrier.get(j.id) };
+    return was ?? (s.applies ? { journey: j.id, state: s.state, status: "not-assessed", reason: "planned; not walked yet" } : { journey: j.id, state: s.state, status: "not-applicable", reason: s.reason });
+  }));
   write(dir, "coverage.json", { schema: "coverage", version: 1, entries });
   // The run record: the agent and model when known (RUN-02), and where the app is, for later checks.
   const runFile = join(dir, "run.json");
   const rec = existsSync(runFile) ? read(dir, "run.json") : { schema: "run", version: 1, id: run, startedAt: new Date().toISOString(), stages: [] };
   if (agent) rec.agent = { name: agent, ...(model ? { model } : {}) };
   rec.config = { ...rec.config, appDir: relative(dir, resolved.run.cwd) || ".", scope: scopeOf(resolved) };
-  rec.stages = [...(rec.stages ?? []).filter((s) => s.stage !== "plan"), { stage: "plan", status: "completed", finishedAt: new Date().toISOString() }];
+  const stage = barrier.size ? { stage: "plan", status: "partial", reason: [...barrier].map(([id, why]) => `${id}: ${why}`).join("; ") } : { stage: "plan", status: "completed" };
+  rec.stages = [...(rec.stages ?? []).filter((s) => s.stage !== "plan"), { ...stage, finishedAt: new Date().toISOString() }];
   write(dir, "run.json", rec);
-  return { dir, journeys, entries };
+  return { dir, journeys, entries, stage };
 }
 
 /* What makes two runs comparable (RUN-03): the app, its flow and its journeys. */

@@ -43,7 +43,8 @@ and an optional, resolved `data-appearance` (`light` | `dark`):
   `tokens/themes/<name>.theme.json` (schema `tokens/schema/theme.schema.json`).
 - **praxis and plain stop being design systems.** Their anatomy moves
   into their theme files; their brands stay brands. Only material, fluent and
-  carbon remain shared design systems.
+  carbon remain shared design systems. *[Note 2026-10-21: `databricks` was
+  later added as a fourth shared design system; the decision is unchanged.]*
 - **The 0.x names are real themes**, not aliases: `praxis`,
   `plain` (own anatomy) and `praxis-material`, `praxis-fluentui`,
   `praxis-carbon` (the praxis brand on a shared design system).

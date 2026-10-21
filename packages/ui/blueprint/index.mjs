@@ -20,8 +20,9 @@ export { blueprintSchema, LIMITS as limits, RULES as rules, RECIPES as recipes }
 export const CHECKS = [
   "blueprint.valid", "pattern.exists", "nav.compact-destinations", "screen.states", "action.destructive-safeguard",
   "modal.titled", "modal.dismiss", "modal.one-at-a-time", "modal.unsaved-changes",
-  "view.no-shell", "view.size-classes", "view.one-task",
+  "view.no-shell", "view.size-classes", "view.one-task", "view.states",
 ];
+const STATES = ["empty", "loading", "error"];
 
 /* ------------------------------------------------------------ rulesFor */
 const meets = (axis, values) => !axis || values == null || axis.some((v) => [].concat(values).includes(v));
@@ -120,7 +121,7 @@ function* modalsOf(modals, path, depth = 0) {
 
 /* Findings for the blueprint: the schema, then every blueprint check whose
    rule applies to its kind, size classes and inputs. Ordered by path, then
-   rule (CONTRACT-005). */
+   rule, in plain string order, not locale order (CONTRACT-005). */
 export function checkBlueprint(bp) {
   const findings = [];
   const add = (id, path, message, fix, severity) => findings.push({ rule: id, severity: severity ?? byId.get(id)?.severity ?? "error", path: ptr(path), message, fix });
@@ -154,9 +155,13 @@ export function checkBlueprint(bp) {
       const near = nearestPattern(s.pattern);
       add("pattern.exists", [...at, "pattern"], `"${s.pattern}" is not a pattern in @ux-builder/ui ${catalogue.packages["@ux-builder/ui"]}.`, `Did you mean "${near}"? See list_patterns.`);
     }
-    if (on("screen.states") && byId.get("screen.states").appliesTo.patterns.includes(s.pattern)) {
-      const missing = ["empty", "loading", "error"].filter((x) => !(Array.isArray(s.states) && s.states.includes(x)));
-      if (missing.length) add("screen.states", [...at, "states"], `"${s.title ?? s.id}" (${s.pattern}) does not declare its ${missing.join(", ")} state${missing.length > 1 ? "s" : ""}.`, `Add ${missing.map((x) => JSON.stringify(x)).join(", ")} to states, and supply each state's content to the pattern.`);
+    // In a view every screen declares its states (view.states, VEW-01), whatever
+    // its pattern; screen.states covers the data patterns elsewhere.
+    const statesRule = bp.kind === "view" && on("view.states") ? "view.states"
+      : on("screen.states") && byId.get("screen.states").appliesTo.patterns.includes(s.pattern) ? "screen.states" : null;
+    if (statesRule) {
+      const missing = STATES.filter((x) => !(Array.isArray(s.states) && s.states.includes(x)));
+      if (missing.length) add(statesRule, [...at, "states"], `"${s.title ?? s.id}" (${s.pattern}${statesRule === "view.states" ? ", in a view" : ""}) does not declare its ${missing.join(", ")} state${missing.length > 1 ? "s" : ""}.`, `Add ${missing.map((x) => JSON.stringify(x)).join(", ")} to states, and supply each state's content to the pattern.`);
     }
     if (on("action.destructive-safeguard")) (Array.isArray(s.destructiveActions) ? s.destructiveActions : []).forEach((a, j) => {
       if (a && a.safeguard === "none") add("action.destructive-safeguard", [...at, "destructiveActions", j], `${a.label} has no safeguard.`, 'Set safeguard to "undo" (an Undo toast) or "confirm" for an unexpected, irreversible loss.');
@@ -171,7 +176,7 @@ export function checkBlueprint(bp) {
   });
 
   if (bp.kind === "app" && on("nav.compact-destinations") && dests.length > LIMITS.compactDestinations) {
-    add("nav.compact-destinations", ["destinations"], `${dests.length} top-level destinations; at the compact and medium size classes the bar holds ${LIMITS.compactDestinations}.`, `Keep ${LIMITS.compactDestinations} or fewer: group related ones, or move the rest to settings or a secondary page (AppShell puts more than ${LIMITS.compactDestinations} behind "More").`);
+    add("nav.compact-destinations", ["destinations"], `${dests.length} top-level destinations; at the compact size class the bar holds ${LIMITS.compactDestinations}.`, `Keep ${LIMITS.compactDestinations} or fewer: group related ones, or move the rest to settings or a secondary page (AppShell puts more than ${LIMITS.compactDestinations} behind "More").`);
   }
   if (bp.kind === "view") {
     if (on("view.no-shell")) {
@@ -185,5 +190,6 @@ export function checkBlueprint(bp) {
     }
     if (on("view.one-task") && screens.length > 1) add("view.one-task", ["screens"], `A view has ${screens.length} screens; a view does one task.`, "Keep one screen; put further steps in modals or sections of it.");
   }
-  return findings.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : a.rule.localeCompare(b.rule)));
+  const order = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
+  return findings.sort((a, b) => order(a.path, b.path) || order(a.rule, b.rule));
 }

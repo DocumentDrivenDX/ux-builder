@@ -13,7 +13,7 @@ ddx:
 # US-053: An agent plans and checks screens through MCP
 
 **Feature**: FEAT-008 — Interaction and information architecture: rules, blueprint and audit
-**Feature Requirements**: AGT-01, AGT-02, RUL-05, BLU-01, BLU-02, BLU-04
+**Feature Requirements**: AGT-01, AGT-02, RUL-05, BLU-01, BLU-02, BLU-04; the Determinism and Performance NFRs
 **PRD Requirements**: FR-33, FR-34
 **Priority**: P1
 **Status**: Draft
@@ -43,10 +43,14 @@ ADR-025 decision 5. The MCP server describes the installed SDK (FEAT-004 SDK-14)
 - [ ] **US-053-AC4** — Given a blueprint whose screen names a pattern not in the catalogue, when it is checked, then the finding is an error naming the nearest pattern.
 - [ ] **US-053-AC5** — Given a blueprint for an app supporting the compact size class with more top-level destinations than the rule allows, a modal containing another modal, a destructive action with no safeguard, and a collection screen without empty, loading and error states, when it is checked, then each produces a finding with its rule ID, path and fix.
 - [ ] **US-053-AC6** — Given `get_guidance`, when called, then it includes the plan, check, build, lint and audit loop.
+- [ ] **US-053-AC7** — Given the same blueprint and SDK version, when it is checked twice, then the two results are identical: the same findings in the same order, by `path` then `rule`, in plain string order (FEAT-008 NFR Determinism).
+- [ ] **US-053-AC8** — Given a valid app blueprint of 50 screens, when it is checked, then the check finishes in under one second (FEAT-008 NFR Performance).
+- [ ] **US-053-AC9** — Given CONTRACT-005's example blueprint, when it is checked, then it gives no finding.
 
 ## Edge Cases
 
 - An empty job description: every recipe, in catalogue order.
+- An app that supports medium but not compact, with six destinations: no destination finding; the limit is for the compact size class (US-053-AC5).
 
 ## Test Scenarios
 
@@ -58,6 +62,9 @@ ADR-025 decision 5. The MCP server describes the installed SDK (FEAT-004 SDK-14)
 | Unknown pattern | US-053-AC4 | Pattern 'ListDetails' | check | Error naming ListDetail |
 | Findings | US-053-AC5 | Four mistakes | check | Four findings |
 | Guidance | US-053-AC6 | Server | get_guidance | Loop present |
+| Determinism | US-053-AC7 | One blueprint with several findings | check twice | Identical results |
+| Performance | US-053-AC8 | 50 screens | check | Under 1 s |
+| Contract example | US-053-AC9 | CONTRACT-005's example | check | No findings |
 
 ## Dependencies
 

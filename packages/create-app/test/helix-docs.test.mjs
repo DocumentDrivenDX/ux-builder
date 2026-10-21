@@ -4,10 +4,10 @@
      npm test --workspace @ux-builder/create-app */
 
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { after, describe, test } from "node:test";
+import { after, describe, mock, test } from "node:test";
 import { create } from "../index.mjs";
 import { bundle, packHelix, releaseServer } from "./fixtures/helix-release.mjs";
 
@@ -16,7 +16,7 @@ const BUNDLE = bundle("8.8.0");
 process.env.UX_BUILDER_HELIX_BUNDLE = BUNDLE;
 after(() => { rmSync(tmp, { recursive: true, force: true }); rmSync(BUNDLE, { recursive: true, force: true }); });
 let n = 0;
-const make = async (helix = { offline: true }) => { const r = await create(join(tmp, `app-${++n}`), { theme: "databricks", name: "acme", helix }); return { r, read: (p) => readFileSync(join(r.dir, "docs/helix", p), "utf8") }; };
+const make = async (helix = { offline: true }, log) => { const r = await create(join(tmp, `app-${++n}`), { theme: "databricks", name: "acme", helix, log }); return { r, read: (p) => readFileSync(join(r.dir, "docs/helix", p), "utf8") }; };
 const fm = (text) => /^---\n([\s\S]*?)\n---/.exec(text)[1];
 const SET = {
   "00-discover/product-vision.md": ["product-vision", "product-vision"],
@@ -85,5 +85,35 @@ describe("US-069: start with the HELIX documents drafted", () => {
       assert.match(text, /## Technical Notes\n\n\[renamed from Technical Context\]/);
       assert.match(text, /## Technical Context\n\n- \*\*App\*\*: acme/, "a heading the template lost is added at the end");
     } finally { delete process.env.UX_BUILDER_HELIX_API; await s.close(); }
+  });
+
+  // @covers US-069-AC4
+  test("AC4: a type whose template is missing is drafted from the starter's sections, the type is named, and creation succeeds", async () => {
+    const s = await releaseServer({ "v9.9.0": { gz: packHelix({ version: "9.9.0", files: { "helix/skills/helix/references/activities/01-frame/artifacts/prd/template.md": null } }) } });
+    process.env.UX_BUILDER_HELIX_API = s.api;
+    try {
+      const said = [];
+      const { r, read } = await make({}, (m) => said.push(m));
+      assert.equal(r.helix.tag, "v9.9.0");
+      assert.deepEqual(said.filter((m) => /no template/.test(m)), ["HELIX 9.9.0 has no template (activities/01-frame/artifacts/prd/template.md) for the prd type; docs/helix/01-frame/prd.md was drafted from the starter's own sections"]);
+      const text = read("01-frame/prd.md");
+      assert.match(fm(text), /^ {2}id: prd\n {2}type: prd\n {2}status: draft$/m);
+      assert.match(text, /## Technical Context\n\n- \*\*App\*\*: acme/);
+      assert.equal(r.helix.documents.length, 9, "every document is still written");
+    } finally { delete process.env.UX_BUILDER_HELIX_API; await s.close(); }
+  });
+
+  // @covers US-069-AC5
+  test("AC5: the same HELIX and options give the same documents, apart from the date", async () => {
+    const a = await make();
+    mock.timers.enable({ apis: ["Date"], now: Date.parse("2031-02-03T12:00:00Z") });
+    let b;
+    try { b = await make(); } finally { mock.timers.reset(); }
+    const files = (r) => readdirSync(join(r.dir, "docs/helix"), { recursive: true }).filter((f) => /\.(md|yml)$/.test(f)).sort();
+    assert.deepEqual(files(b.r), files(a.r));
+    assert.equal(files(a.r).length, 9);
+    assert.match(b.read("01-frame/prd.md"), /on 2031-02-03 from HELIX/, "the second app was drafted on another day");
+    const mask = (t) => t.replace(/\b\d{4}-\d{2}-\d{2}\b/g, "YYYY-MM-DD");
+    for (const f of files(a.r)) assert.equal(mask(b.read(f)), mask(a.read(f)), f);
   });
 });

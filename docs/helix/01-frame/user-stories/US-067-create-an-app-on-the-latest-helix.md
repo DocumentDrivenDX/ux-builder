@@ -40,6 +40,7 @@ ADR-027 decisions 1 to 3. Tests use a local release server (`UX_BUILDER_HELIX_AP
 - [ ] **US-067-AC3** — Given `GITHUB_TOKEN` in the environment, when the starter calls GitHub, then it sends it as a bearer token and never writes it anywhere; without it, no credential is sent; a release server that does not answer within 20 seconds counts as unreachable.
 - [ ] **US-067-AC4** — Given a package entry with an absolute path, `..`, a link or a device file, when it is extracted, then nothing from the package is installed and the starter falls back; nothing downloaded is ever executed.
 - [ ] **US-067-AC5** — Given a created app, when `.claude/skills/helix/HELIX-VERSION.json` and `.helix.yml` are read, then they record the version, tag, source URL, digest, time and whether the bundled copy was used, and the flow's advisory `version`.
+- [ ] **US-067-AC6** — Given `HTTPS_PROXY` or `HTTP_PROXY` (in upper or lower case) in the environment, when the starter calls GitHub, then the API call and the download go through that proxy, unless `NO_PROXY` names the host.
 
 ## Test Scenarios
 
@@ -48,8 +49,9 @@ ADR-027 decisions 1 to 3. Tests use a local release server (`UX_BUILDER_HELIX_AP
 | Latest | US-067-AC1 | Local release server with v9.9.0 | create | Installed; version printed |
 | Bad package | US-067-AC2 | Wrong digest; wrong version; no SKILL.md | create | Bundled HELIX; reason |
 | Token | US-067-AC3 | GITHUB_TOKEN set; slow server | create | Bearer sent, not written; timeout falls back |
-| Unsafe tar | US-067-AC4 | Entry ../x; symlink | create | Refused; fallback |
+| Unsafe tar | US-067-AC4 | Entry ../x; absolute path; symlink; hard link; device | create | Refused; fallback |
 | Provenance | US-067-AC5 | Created app | read | Fields present |
+| Proxy | US-067-AC6 | `HTTP_PROXY` at a local proxy; then `NO_PROXY` naming the host | create | Both requests through the proxy; none with `NO_PROXY` |
 
 ## Dependencies
 

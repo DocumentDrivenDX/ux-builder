@@ -268,7 +268,7 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 |------|---------|------------|-----------|
 | `blueprint.valid` | always | blueprint `blueprint.valid` | A blueprint has the fields CONTRACT-005 requires, no unknown fields, unique screen IDs, and destinations that name existing screens. |
 | `pattern.exists` | always | blueprint `pattern.exists` | Every screen names a pattern the installed SDK ships. |
-| `nav.compact-destinations` | context: app; sizeClass: compact, medium | blueprint `nav.compact-destinations`, audit `nav-per-breakpoint` | In an app that supports the compact or medium size class, keep the top-level destinations to five; group the rest or move them to a drawer. |
+| `nav.compact-destinations` | context: app; sizeClass: compact | blueprint `nav.compact-destinations`, audit `nav-per-breakpoint` | In an app that supports the compact size class, keep the top-level destinations to five; group the rest or move them to a drawer. |
 | `nav.standing-at-expanded` | context: app; sizeClass: expanded, large, extra-large | audit `nav-per-breakpoint` | From the expanded size class, show primary navigation as a standing rail or side navigation, not behind a menu button. |
 | `nav.links-not-menus` | context: app | review | Move between top-level destinations with navigation links; keep menu buttons for actions on the current page or item. |
 | `layout.panes-by-size` | always | review | Use one pane in compact and medium windows, two from expanded (a list beside its detail), and three only in extra-large ones. |
@@ -293,6 +293,7 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `view.no-shell` | context: view | blueprint `view.no-shell` | An embedded view draws no app shell, primary navigation or brand; the host provides its chrome, title and pins. |
 | `view.size-classes` | context: view | blueprint `view.size-classes` | An embedded view supports the compact and medium size classes, since a host's panel is often that narrow even on a desktop. |
 | `view.one-task` | context: view | blueprint `view.one-task` | Keep an embedded view to one screen and one task; put further steps in modal tasks or sections of that screen. |
+| `view.states` | context: view | blueprint `view.states` | Every screen of an embedded view, whatever its pattern, declares its empty, loading and error states. |
 | `view.theme-from-host` | context: view | review | Take the theme only from the host's styles and appearance, and follow the host when it changes them. |
 
 Recipes (tested combinations of patterns for a job):

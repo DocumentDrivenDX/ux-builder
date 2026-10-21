@@ -401,7 +401,7 @@ rules, so it invents colours and components.
 | P0-5 (FR-17, FR-18) | Switch theme in an app | App built from the starter; user picks Carbon dark | Every widget and font changes; no app file was edited |
 | P1-6 (FR-32–FR-35) | Plan, check and audit an app | A blueprint with seven destinations at compact, a nested modal and an unguarded delete; the built app with two primary buttons | Three blueprint findings and one audit finding, each with its rule ID and source |
 | P1-7 (FR-37–FR-40) | Assess the theme builder, increment 1 | Its manifest; the builder running on the mock model; three checkpoints (a signed-in fixture screen, an open dialog, a form with a validation error and its input kept) | The manifest validates against the repository's HELIX marker and catalogue; every journey traces to its stories, criteria and tests; the baseline records the e2e suite and the audit; each checkpoint is inspected in place with linked findings and the task continues |
-| P1-8 (FR-43–FR-45) | Create an app on HELIX | `npm create @ux-builder/app acme` online, then with `--helix-offline` | HELIX installed in `.claude/skills/helix/` with its version recorded; nine HELIX documents typed and linked; `assess validate` passes and `assess collect` reports 0 warnings with US-001's criteria explicit |
+| P1-8 (FR-43–FR-45) | Create an app on HELIX | `npm create @ux-builder/app acme` online, then with `--helix-offline` | HELIX installed in `.claude/skills/helix/` with its version recorded; 8 HELIX documents typed and linked, plus `concerns.local.yml`; `assess validate` passes and `assess collect` reports 0 warnings with US-001's criteria explicit |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context
@@ -409,7 +409,8 @@ rules, so it invents colours and components.
 - **Language/Runtime**: JavaScript (ES modules) on Node 20+. The palette engine
   (`@ux-builder/engine`) replaced `tools/theme_accent.py`, which stays as its
   extraction reference.
-- **Key Libraries**: Style Dictionary 5 (token build), React 19 and Vite 8
+- **Key Libraries**: a hand-written token build (`packages/tokens/build.mjs`; no
+  Style Dictionary), React 19 and Vite 8
   (`@ux-builder/ui`), Storybook 10 (workbench), Changesets 3 (releases).
 - **Packages**: `@ux-builder/tokens` 1.6.0, `@ux-builder/ui` 0.6.3,
   `@ux-builder/create-app` 0.4.2, `@ux-builder/audit` 0.1.2 and `@ux-builder/mcp`

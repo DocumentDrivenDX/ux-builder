@@ -41,6 +41,7 @@ ADR-024 makes MCP App views a generic SDK target; ADR-025 decision 6 gives them 
 - [ ] **US-055-AC2** — Given a view blueprint that does not support both the compact and medium size classes, when it is checked, then it reports an error naming the missing classes.
 - [ ] **US-055-AC3** — Given a view blueprint with more than one screen, when it is checked, then it reports a warning that a view does one task.
 - [ ] **US-055-AC4** — Given a target with context `view`, when `rulesFor` runs, then it returns the view-profile rules and no rule whose context is only `app`.
+- [ ] **US-055-AC5** — Given a view blueprint whose screen does not declare its empty, loading and error states, whatever the screen's pattern (a `FormPage` too), when it is checked, then it reports one `view.states` finding naming the missing states, and no second `screen.states` finding for the same screen.
 
 ## Edge Cases
 
@@ -54,6 +55,7 @@ ADR-024 makes MCP App views a generic SDK target; ADR-025 decision 6 gives them 
 | Sizes | US-055-AC2 | View supporting expanded only | check | Error naming compact and medium |
 | One task | US-055-AC3 | View with two screens | check | Warning |
 | Profile | US-055-AC4 | context view | rulesFor | View rules only |
+| States | US-055-AC5 | View on FormPage with no states | check | One view.states finding |
 
 ## Dependencies
 

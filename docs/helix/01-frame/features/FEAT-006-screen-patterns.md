@@ -57,7 +57,7 @@ disappears or breaks. The billing-review app deletes its own table and navigatio
 
 ## Problem Statement
 
-- **Current situation**: `@ux-builder/ui` 0.6.0 provides basic widgets only. Each
+- **Current situation** (before `@ux-builder/ui` 0.6.0, which shipped this feature): the SDK provided basic widgets only. Each
   app builds its own layout, navigation, list, form and dashboard structure;
   there are no breakpoints or layout tokens; the billing-review app maintains a private table
   and navigation layer (ADR-011).

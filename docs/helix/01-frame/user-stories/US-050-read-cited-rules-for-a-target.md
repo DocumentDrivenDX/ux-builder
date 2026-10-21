@@ -42,6 +42,7 @@ Operator, 2026-10-20: drive and audit full-screen IA and interactions from Apple
 - [ ] **US-050-AC3** — Given the generated `AGENTS.md` and skill, when read, then each lists every rule ID with its statement and states the plan, check, build, lint and audit loop.
 - [ ] **US-050-AC4** — Given a rule with no source, a quotation from a source whose licence is not open, a quotation over 25 words, or a check ID that names no existing check, when the rules check runs, then it fails naming the rule and the problem.
 - [ ] **US-050-AC5** — Given the README and the generated guidance, when read, then each states that ux-builder is not affiliated with or endorsed by Apple or Google and that Human Interface Guidelines and Material Design are their trademarks.
+- [ ] **US-050-AC6** — Given a rule that quotes an openly licensed source, when the rules check runs, then it passes only if `@ux-builder/ui`'s `THIRD-PARTY-NOTICES.md` credits that source by its title or URL, and otherwise fails naming the rule and the source.
 
 ## Edge Cases
 
@@ -57,6 +58,7 @@ Operator, 2026-10-20: drive and audit full-screen IA and interactions from Apple
 | Guidance | US-050-AC3 | Generated AGENTS.md | Read | Every rule ID and the loop |
 | Provenance | US-050-AC4 | Four bad rules | Run the check | Four named failures |
 | Disclaimer | US-050-AC5 | README, AGENTS.md | Read | Disclaimer present |
+| Quote credited | US-050-AC6 | A short Android quote; notices with and without the credit | Run the check | Passes with it; fails naming the rule without it |
 
 ## Dependencies
 

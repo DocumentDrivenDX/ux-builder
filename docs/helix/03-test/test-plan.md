@@ -22,7 +22,7 @@ criteria; earlier features keep their tests where they are, traced by
 ## Testing Strategy
 
 **Goals**: every acceptance criterion is cited by a test or excepted with a reason (`npm run coverage`) | `npm run check`, the builder and starter e2e suites, the Storybook build and tests and the site build pass before a change merges.
-**Out of Scope**: graded agent-run samples and representative-user studies (excepted with reasons); FEAT-009 increments 2 and 3 until they are built.
+**Out of Scope**: graded agent-run samples and representative-user studies (excepted with reasons). FEAT-009 increments 2 and 3 were built 2026-10-21 and are in scope; none of their criteria is excepted.
 **Traceability Source**: the PRD, FEAT-001 to FEAT-009 and their user stories; for FEAT-009, SD-004 and the story test plans below.
 
 ### Test Levels
@@ -57,6 +57,9 @@ criteria; earlier features keep their tests where they are, traced by
 |--------|--------|---------|-------------|
 | Acceptance criteria cited by a test or excepted | 100% | 100% | `npm run coverage` in `npm run check` (CI) |
 | Existing audit findings after the `inspect()` refactor | unchanged | unchanged | The existing audit suites, unchanged |
+| FEAT-010 determinism: two apps with the same HELIX and options | identical documents apart from the date | the same | `helix-docs.test.mjs` (US-069-AC5) |
+| FEAT-010 bundled HELIX size | < 1.5 MB | < 1.5 MB | `helix-fetch.test.mjs`, when the bundle is present (after `npm pack`) |
+| FEAT-010 time to fetch and install HELIX | < 10 s | — | Not measured by a test |
 
 ### Critical Paths (P0)
 
@@ -78,7 +81,14 @@ criteria; earlier features keep their tests where they are, traced by
 | Documents, criteria, test links, IDs (US-058) | [[STP-058]] | Integration | `collect` over fixture HELIX trees |
 | Baseline records (US-059) | [[STP-059]] | Integration | Real commands and the audit on fixture pages |
 | In-place inspection and the state proof (US-062) | [[STP-062]] | Integration (Chromium) | The page state is the thing under test |
-| Walkthroughs, coverage, findings, proposals, runs (US-060, US-061, US-063 to US-065) | written with increments 2 and 3 | Contract and Integration | Records validated by `validate-report`; excepted until built |
+| Journey plans, walkthroughs and the browser's restrictions and limits (US-060) | [[STP-060]] | Integration (Chromium) | Records validated by `validate-report`; `browser` and `inspect` against fixture pages |
+| Coverage matrix, heuristics, user claims (US-061) | [[STP-061]] | Contract | `plan` and `validate-report` over fixture run packages |
+| Ranking, merging, stable IDs (US-063) | [[STP-063]] | Contract | `merge` and `validate-report` over fixture backlogs |
+| Proposals and the `improvement-backlog` entry (US-064) | [[STP-064]] | Integration | `propose`, `check-writes`, `apply-check` against fixture HELIX repositories |
+| Report, comparison, gate (US-065) | [[STP-065]] | Integration | `report`, `compare`, `gate` over two or more fixture runs |
+| FEAT-010: fetch, fallback, proxy, safe extraction, pins (US-067, US-068) | [[STP-067]], [[STP-068]] | Integration | The CLI against a local release server and proxy; the starter e2e against GitHub |
+| FEAT-010: the starter set, heading merge, determinism (US-069) | [[STP-069]] | Integration | Documents drafted from fixture templates |
+| FEAT-010: manifest, traceability, guidance (US-070, US-071) | [[STP-070]], [[STP-071]] | Integration | The assessment's own `validate` and `collect` on a created app |
 
 Every P0 criterion of an in-scope story maps to one layer here and to
 tests in its STP.
@@ -90,6 +100,7 @@ tests in its STP.
 3. US-056: manifest and HELIX binding, which `collect` and `baseline` read.
 4. US-058, then US-059.
 5. US-057: the skill and the MCP version fix, once the commands exist.
+6. Increments 2 and 3 (2026-10-21): US-060 and US-061, then US-063, US-064 and US-065, as the implementation plan's B-007 to B-012 order them.
 
 ## Infrastructure
 
@@ -114,7 +125,7 @@ tests in its STP.
 **Commands**: `npm run check` | `npm run coverage`
 **Priority**: the implementation order above.
 
-**Blocking Gate**: `npm run check`, the builder and starter e2e suites, the Storybook build and tests and the site build all pass; the FEAT-009 increment-1 criteria are cited by tests and removed from `tools/coverage-exceptions.json`.
+**Blocking Gate**: `npm run check`, the builder and starter e2e suites, the Storybook build and tests and the site build all pass; every FEAT-009 criterion (increments 1 to 3) is cited by a test and none is in `tools/coverage-exceptions.json`.
 
 ## Review Checklist
 
