@@ -411,8 +411,8 @@ rules, so it invents colours and components.
   extraction reference.
 - **Key Libraries**: Style Dictionary 5 (token build), React 19 and Vite 8
   (`@ux-builder/ui`), Storybook 10 (workbench), Changesets 3 (releases).
-- **Packages**: `@ux-builder/tokens` 1.4.1, `@ux-builder/ui` 0.6.0,
-  `@ux-builder/create-app` 0.4.1, `@ux-builder/audit` 0.1.0 and `@ux-builder/mcp`
+- **Packages**: `@ux-builder/tokens` 1.6.0, `@ux-builder/ui` 0.6.3,
+  `@ux-builder/create-app` 0.4.2, `@ux-builder/audit` 0.1.2 and `@ux-builder/mcp`
   0.3.1 on the public npm registry (first released as
   tokens 1.0.0, ui, create-app and mcp 0.2.0); `@ux-builder/engine` and the
   theme builder are private. What a consuming app relies on is CONTRACT-004.

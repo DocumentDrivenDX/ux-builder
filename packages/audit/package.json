@@ -20,6 +20,7 @@
     "inspect.mjs",
     "assess",
     "schema",
+    "examples",
     "skill",
     "cli.mjs",
     "collect.js",

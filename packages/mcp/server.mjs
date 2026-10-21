@@ -29,7 +29,7 @@ const require = { resolve: (spec) => { try { return app.resolve(spec); } catch {
 // The rules and the blueprint check, from the same copy (0.7 and later).
 let blueprint = null;
 try { blueprint = await import(pathToFileURL(require.resolve("@ux-builder/ui/blueprint")).href); } catch { /* an older @ux-builder/ui */ }
-// The UX assessment's checks, when the app has @ux-builder/audit 0.3 or later (FEAT-009, optional wrappers).
+// The UX assessment's checks, when the app has @ux-builder/audit 0.2 or later (FEAT-009, optional wrappers).
 let assess = null;
 try {
   const at = (m) => pathToFileURL(require.resolve(`@ux-builder/audit/assess/${m}`)).href;
