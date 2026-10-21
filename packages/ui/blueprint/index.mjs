@@ -98,6 +98,8 @@ function validate(schema, value, path, out, root = schema) {
   if (schema.enum && !schema.enum.includes(value)) return out.push([path, `must be one of ${schema.enum.map((e) => JSON.stringify(e)).join(", ")}`]);
   if (schema.type && !(schema.type === t || (schema.type === "number" && t === "integer"))) return out.push([path, `must be ${schema.type === "array" || schema.type === "object" ? "an" : "a"} ${schema.type}`]);
   if (t === "string" && schema.minLength && value.length < schema.minLength) out.push([path, "must not be empty"]);
+  if (t === "string" && schema.pattern && !new RegExp(schema.pattern).test(value)) out.push([path, `is ${JSON.stringify(value)}; it must match ${schema.pattern}`]);
+  if ((t === "integer" || t === "number") && "minimum" in schema && value < schema.minimum) out.push([path, `must be at least ${schema.minimum}`]);
   if (t === "array") {
     if (schema.minItems && value.length < schema.minItems) out.push([path, `must have at least ${schema.minItems} item${schema.minItems > 1 ? "s" : ""}`]);
     if (schema.uniqueItems && new Set(value.map((v) => JSON.stringify(v))).size !== value.length) out.push([path, "must not repeat an item"]);
@@ -187,6 +189,21 @@ export function checkBlueprint(bp) {
   dests.forEach((d, i) => {
     if (d && typeof d.screen === "string" && !ids.has(d.screen)) add("blueprint.valid", ["destinations", i, "screen"], `Destination "${d.label ?? d.id}" names no screen "${d.screen}".`, `Name one of: ${[...ids.keys()].join(", ")}.`);
   });
+  // Action IDs are unique within their screen or modal, journey IDs in the blueprint (CONTRACT-005 Flows and journeys).
+  const once = (list, path, what) => {
+    const seen = new Set();
+    (Array.isArray(list) ? list : []).forEach((x, j) => {
+      if (!x || typeof x.id !== "string") return;
+      if (seen.has(x.id)) add("blueprint.valid", [...path, j, "id"], `${what} ID "${x.id}" is used twice.`, `Give each ${what.toLowerCase()} its own ID.`);
+      seen.add(x.id);
+    });
+  };
+  screens.forEach((s) => {
+    const at = ["screens", bp.screens.indexOf(s)];
+    once(s.actions, [...at, "actions"], "Action");
+    for (const { m, path } of modalsOf(s.modals, [...at, "modals"])) once(m.actions, [...path, "actions"], "Action");
+  });
+  once(bp.journeys, ["journeys"], "Journey");
 
   const on = (id) => byId.has(id) && applies(byId.get(id), bp);
   screens.forEach((s, i) => {
