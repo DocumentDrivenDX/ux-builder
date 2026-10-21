@@ -9,7 +9,9 @@
    2. Rule and recipe IDs are unique.
    3. Provenance: every rule cites a source; a quotation comes only from an
       openly licensed source (CC-BY-2.5, W3C, own), carries its words, and is
-      at most 25 words. Apple's and Google's guidelines are paraphrased.
+      at most 25 words, and @ux-builder/ui's THIRD-PARTY-NOTICES.md credits
+      it by its title or URL. Apple's and Google's guidelines are
+      paraphrased.
    4. Every check a rule names exists: blueprint checks in
       @ux-builder/ui/blueprint, audit checks in @ux-builder/audit, lint rules
       in the catalogue.
@@ -40,8 +42,12 @@ export async function known() {
   };
 }
 
-/* Problems with the rules and recipes, as "rule <id>: <problem>" lines. */
-export function checkRules({ rules, recipes }, k) {
+/* The notices that must credit a quoted source (FEAT-008 PRV-02). */
+export const NOTICES = "packages/ui/THIRD-PARTY-NOTICES.md";
+
+/* Problems with the rules and recipes, as "rule <id>: <problem>" lines.
+   `notices` is the text of the shipped third-party notices. */
+export function checkRules({ rules, recipes, notices = "" }, k) {
   const problems = [];
   const ajv = new Ajv2020({ strict: true, allErrors: true });
   for (const [name, data] of [["rules", rules], ["recipes", recipes]]) {
@@ -61,6 +67,7 @@ export function checkRules({ rules, recipes }, k) {
         if (!OPEN.has(s.licence)) problems.push(`${at}: quotes "${s.title}", whose licence (${s.licence}) does not allow it; paraphrase it`);
         if (!s.quote) problems.push(`${at}: marks "${s.title}" quoted but gives no quote`);
         else if (s.quote.trim().split(/\s+/).length > MAX_QUOTE_WORDS) problems.push(`${at}: quotes ${s.quote.trim().split(/\s+/).length} words of "${s.title}"; at most ${MAX_QUOTE_WORDS}`);
+        if (!(s.title && notices.includes(s.title)) && !(s.url && notices.includes(s.url))) problems.push(`${at}: quotes "${s.title}", which ${NOTICES} does not credit; add it to the notices`);
       } else if (s.quote) problems.push(`${at}: gives a quote from "${s.title}" but marks it paraphrased`);
     }
     for (const c of r.checks ?? []) {
@@ -80,7 +87,7 @@ export function checkRules({ rules, recipes }, k) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const problems = checkRules({ rules: read("guidelines/rules.json"), recipes: read("guidelines/recipes.json") }, await known());
+  const problems = checkRules({ rules: read("guidelines/rules.json"), recipes: read("guidelines/recipes.json"), notices: readFileSync(join(ROOT, NOTICES), "utf8") }, await known());
   if (problems.length) { for (const p of problems) console.error(`✗ ${p}`); process.exit(1); }
   console.log(`interaction rules and recipes: ok (${read("guidelines/rules.json").rules.length} rules, ${read("guidelines/recipes.json").recipes.length} recipes)`);
 }

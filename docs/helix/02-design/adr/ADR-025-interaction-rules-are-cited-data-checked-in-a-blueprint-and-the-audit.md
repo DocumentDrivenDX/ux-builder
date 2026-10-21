@@ -74,7 +74,8 @@ ddx:
    audit loop. The SDK does not plan from free text; the agent does.
 6. **The view profile is generic.** Rules with `context: view` describe any
    MCP App view (ADR-024): no shell, navigation or brand of its own; compact
-   and medium supported; one task; declared states; theme from the host.
+   and medium supported; one task; declared states, on every screen whatever
+   its pattern; theme from the host.
    Praxis-specific rules live in the Praxis adapter.
 7. **Provenance is checked.** Each rule cites at least one source with its
    licence and whether it is paraphrased or quoted. A quotation is allowed

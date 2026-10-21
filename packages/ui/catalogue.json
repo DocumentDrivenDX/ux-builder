@@ -19474,15 +19474,14 @@
       {
         "id": "nav.compact-destinations",
         "title": "A phone-width bar holds at most five destinations",
-        "statement": "In an app that supports the compact or medium size class, keep the top-level destinations to five; group the rest or move them to a drawer.",
+        "statement": "In an app that supports the compact size class, keep the top-level destinations to five; group the rest or move them to a drawer.",
         "rationale": "A bottom bar or tab bar has room for only a few equal targets; more makes each too small to read and tap.",
         "when": {
           "context": [
             "app"
           ],
           "sizeClass": [
-            "compact",
-            "medium"
+            "compact"
           ]
         },
         "checks": [
@@ -20205,6 +20204,38 @@
           {
             "title": "Apple HIG: Modality",
             "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+            "licence": "apple-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "view.states",
+        "title": "An embedded view declares its states",
+        "statement": "Every screen of an embedded view, whatever its pattern, declares its empty, loading and error states.",
+        "rationale": "A view is opened by a tool call that may return nothing, still be running or fail; the host has no page of its own to show for any of them.",
+        "when": {
+          "context": [
+            "view"
+          ]
+        },
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "view.states"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder ADR-012 and ADR-024: embedded views",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/tree/main/docs/helix/02-design/adr",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "Apple HIG: Loading",
+            "url": "https://developer.apple.com/design/human-interface-guidelines/loading",
             "licence": "apple-terms",
             "wording": "paraphrased"
           }

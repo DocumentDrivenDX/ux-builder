@@ -8,13 +8,16 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { checkRules, known } from "../check-rules.mjs";
+import { checkRules, known, NOTICES } from "../check-rules.mjs";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const read = (p) => JSON.parse(readFileSync(join(ROOT, p), "utf8"));
 let k;
 before(async () => { k = await known(); });
-const sources = () => ({ rules: read("guidelines/rules.json"), recipes: read("guidelines/recipes.json") });
+const text = (p) => readFileSync(join(ROOT, p), "utf8");
+const sources = () => ({ rules: read("guidelines/rules.json"), recipes: read("guidelines/recipes.json"), notices: text(NOTICES) });
+const CREDITED = text("tools/__tests__/fixtures/notices-crediting-android.md");
+const androidQuote = { title: "Android Developers", url: "https://developer.android.com/", licence: "CC-BY-2.5", wording: "quoted", quote: "A short attributed line." };
 
 describe("US-050-AC4: the rules check enforces provenance", () => {
   test("the shipped rules and recipes pass", () => {
@@ -38,13 +41,34 @@ describe("US-050-AC4: the rules check enforces provenance", () => {
     assert.ok(problems.some((p) => p.includes(`rule ${d.id}: names the audit check "no-such-check"`)), problems.join("\n"));
   });
 
-  test("a short quote from an open source is allowed; recipes must name real patterns and rules", () => {
-    const s = sources();
-    s.rules.rules[0].sources.push({ title: "Android Developers", url: "https://developer.android.com/", licence: "CC-BY-2.5", wording: "quoted", quote: "A short attributed line." });
+  // @covers US-050-AC6
+  test("a short, credited quote from an open source is allowed; recipes must name real patterns and rules", () => {
+    const s = { ...sources(), notices: CREDITED };
+    s.rules.rules[0].sources.push({ ...androidQuote });
     assert.deepEqual(checkRules(s, k), []);
     s.recipes.recipes[0].screens.push({ pattern: "Nope", role: "x" });
     s.recipes.recipes[0].rules.push("no.such-rule");
     const problems = checkRules(s, k);
     assert.equal(problems.length, 2, problems.join("\n"));
+  });
+});
+
+describe("US-050-AC6: a quoted source is credited in the shipped notices", () => {
+  // @covers US-050-AC6
+  test("a quote the notices do not credit fails, naming the rule and the source", () => {
+    const s = sources();
+    const r = s.rules.rules[1];
+    r.sources.push({ ...androidQuote });
+    const problems = checkRules(s, k);
+    assert.deepEqual(problems, [`rule ${r.id}: quotes "Android Developers", which ${NOTICES} does not credit; add it to the notices`]);
+  });
+
+  // @covers US-050-AC6
+  test("a credit by URL alone, or by title alone, is enough; a paraphrased source needs none", () => {
+    const s = sources();
+    s.rules.rules[1].sources.push({ ...androidQuote });
+    assert.deepEqual(checkRules({ ...s, notices: "Credits: https://developer.android.com/ (CC BY 2.5)" }, k), []);
+    assert.deepEqual(checkRules({ ...s, notices: "Credits: Android Developers (CC BY 2.5)" }, k), []);
+    assert.deepEqual(checkRules({ ...sources(), notices: "" }, k), [], "no rule quotes today, so empty notices pass");
   });
 });
