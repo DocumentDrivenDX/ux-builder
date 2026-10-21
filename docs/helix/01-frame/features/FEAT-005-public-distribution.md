@@ -120,6 +120,10 @@ operator decision.]*
 - [US-073 — Release a client brand outside the core](../user-stories/US-073-release-a-client-brand-outside-the-core.md) (DIST-02)
 - [US-074 — The core ships no client brand](../user-stories/US-074-the-core-ships-no-client-brand.md) (DIST-03)
 - [US-075 — Move an app off the private registry](../user-stories/US-075-move-an-app-off-the-private-registry.md) (DIST-04, DIST-05)
+Tracked as DDx beads, not yet built: epic `ux-builder-31fd7955`. Its beads are:
+`ux-builder-fd8c4cbe` (US-072), `ux-builder-8138a129` (US-073, after US-072),
+`ux-builder-4f17b083` (US-074, after US-073) and `ux-builder-c08dd68c` (US-075).
+
 - Related: [US-049 — Third-party licences are checked before release](../user-stories/US-049-third-party-licences-are-checked-before-release.md) (FEAT-007; the licensing NFR)
 
 ## Edge Cases and Error Handling
