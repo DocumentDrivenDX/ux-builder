@@ -34,6 +34,10 @@ ddx:
       to: ADR-026
     - kind: informed_by
       to: ADR-027
+    - kind: informed_by
+      to: FEAT-007
+    - kind: informed_by
+      to: ADR-023
 ---
 
 # Contract
@@ -376,7 +380,134 @@ Normative from the minors that ship FEAT-011. The formats are CONTRACT-005
 | `AGENTS.md`, skill | An "AI and agent screens" section: declare each screen's AI role, the rule IDs by role, the markers |
 | `@ux-builder/mcp` | `get_rules` accepts `aiRoles` |
 | `ux-builder-audit` | Checks `ai-disclose`, `ai-stop`, `ai-correct`, `ai-starters`, `ai-declared`, `agent-approval`, `agent-plan`, `agent-interrupt`, `agent-who-acts`, `agent-recover`, `agent-summary`, `genui-review-prefill`, on AI-marked elements only; each finding carries its SD-005 rule ID; warnings |
+| `ux-builder-audit` *[Amended 2026-10-21 — build of FEAT-011 step 3]* | Also `card-input-label` and `card-narrow-first` (rules `card.input-label`, `card.narrow-first`: an Adaptive Card or other generated UI as rendered; the second with `--width`, below 600px). Option `--blueprint <file>`: the app's blueprint, for `ai-declared` and the screens' `ai.roles` and `ai.takeover`, mapped by `data-piq-screen` (CONTRACT-005 *AI markup*). `inspect(page, { blueprint })` and `audit({ blueprint })` take it parsed; `AI_CHECKS` lists the AI checks |
 | `ux-builder-audit assess` | AI journeys and their three scenarios (CONTRACT-006) |
+
+## Assistant and generative UI *[Amended 2026-10-21 — FEAT-007, ADR-023, ADR-028; US-046 to US-048]*
+
+Normative from the `@ux-builder/ui` minor that ships US-046 to US-048, and
+from `@ux-builder/mcp`'s next minor for `list_renderable`. This is the
+revision FEAT-007 *Dependencies* asks for: the `@ux-builder/ui/assistant`
+entry, the adapters and their optional peer dependencies, and the
+catalogue's `renderable` field. The components are the SDK's own (ADR-023
+rule 4). No chat library's components or styles are part of them.
+
+### Entry points
+
+| Package | Import | Contents |
+|---|---|---|
+| `@ux-builder/ui` | `assistant` | The assistant React API below. It MUST import no AI library (FEAT-007 ADP-01) and depends on `react` only |
+| | `assistant/ai-sdk` | `useAiSdkConversation`, `fromAiSdk`: the AI SDK adapter |
+| | `assistant/assistant-ui` | `useAssistantUiConversation`, `fromAssistantUi`: the assistant-ui adapter |
+| | `patterns.css` | Also styles the assistant (`.piq-conversation*`, `.piq-assistant-*`); no other stylesheet is needed |
+
+Set-up order: as *Screen patterns*. An app that uses no assistant component
+MUST NOT need `assistant`, and no assistant code reaches its bundle.
+
+### Assistant React API (`@ux-builder/ui/assistant`)
+
+| Export | Kind | Props (optional unless marked) |
+|---|---|---|
+| `Conversation` | component | `messages` (required, below), `onSend(text)`, `onStop()`, `onRetry(messageId)`, `onRegenerate(messageId)`, `suggestions` (`string[]` or `{ label, prompt }[]`), `onDecide({ id, action, decision, messageId })`, `decisions` (`{ [approvalId]: "approved" \| "denied" }`), `onComponentSubmit({ messageId, partId, component, values })`, `renderArtifact(artifact)`, `disabledReason`, `actor` (`"agent" \| "user"`), `label`, `composerLabel` (default "Ask the assistant"), `disclosure`, `strings` |
+| `AssistantPanel` | component | `open`, `onClose()`, `title` (default "Assistant"), `panel` (required: the `Conversation`), `children` (the page beside it) |
+| `Markdown` | component | `text` (required), `sources`, `idPrefix` (link each `[n]` to source *n* of a `Sources` with the same `idPrefix`) |
+| `Reasoning` | component | `text` (required), `seconds` |
+| `ToolCalls` | component | `calls` (required: `tool` parts): one plan, grouped under "Used *n* tools" when there are more than three |
+| `ToolCall` | component | `name` (required), `title`, `status` (`running` \| `done` \| `failed`), `input`, `output`, `error`; a list item, inside `ToolCalls` or an `ol` |
+| `Sources` | component | `sources` (required: `{ id?, title, href? }[]`), `idPrefix` |
+| `ApprovalCard` | component | `summary` (required), `details`, `decision`, `current` (default `true`), `onDecide(decision)` |
+| `GenerativeComponent` | component | `component` (required), `props`, `values`, `onValuesChange(values)`, `onSubmit(values)`, `submitted` |
+| `InlineForm` | component | `title`, `fields` (required: `{ name, label, type: text \| number \| date \| select \| checkbox, options?, value?, required? }[]`), `submitLabel`, `values`, `onValuesChange`, `onSubmit(values)`, `submitted` |
+| `RENDERABLE` | constant | `{ [component]: propsSchema }`: the allow-list, the same data as the catalogue's `renderable` |
+| `checkRenderable` | function | `(component, props) → { ok, problems: string[] }` |
+
+A **message** is `{ id, role: "user" \| "assistant", status?, error?, text?, parts? }`.
+`status` is `streaming`, `done` (default), `stopped` or `error`; `error` is the
+text shown for a failure; `text` is markdown, the same as one `text` part.
+
+| Part `type` | Fields | Renders |
+|---|---|---|
+| `text` | `text` | `Markdown` |
+| `reasoning` | `text`, `seconds?` | `Reasoning` |
+| `tool` | `id`, `name`, `title?`, `status`, `input?`, `output?`, `error?` | `ToolCall`. A message's tool calls form one plan; more than three are grouped under "Used *n* tools" |
+| `sources` | `sources` | `Sources`; `[n]` in the message's text links to source *n* |
+| `approval` | `id` (the request), `action` (the action it is for; default `id`), `summary`, `details?`, `current?` | `ApprovalCard` |
+| `component` | `id?`, `component`, `props` | `GenerativeComponent` |
+| `artifact` | `id`, `title`, `kind?`, `content` (markdown) | An Open button, and the artifact pane |
+
+Unknown part types render nothing. No field of a message is ever inserted
+as HTML.
+
+| Area | Rule |
+|---|---|
+| Log and announcements | The message list is `role="log"` with `aria-live="off"`. A separate polite live region announces each finished assistant reply once, an approval request when it appears, and the user's choice. A streaming message is `aria-busy="true"` and says "Replying…" in text |
+| Composer | A labelled `TextArea`. Enter sends (`onSend`), Shift+Enter adds a line, focus stays in it. While a reply streams or `disabledReason` is set, Send is disabled, the reason is in text and tied to the field with `aria-describedby`, and the draft is kept |
+| Stop | While a message streams, a "Stop" button beside the status region calls `onStop`, and focus returns to the composer. The app keeps what arrived and sets `status: "stopped"`; the message then says "Stopped" |
+| Failure | `status: "error"` shows `error` (default "The assistant could not reply.") and Retry, which calls `onRetry`. Earlier messages are untouched |
+| Markdown | Paragraphs, headings, lists, emphasis, inline code, fenced code and links only. HTML tags are dropped, with the content of `script` and `style`. Links other than `http:`, `https:` and `mailto:` are text. Links open in a new tab, show the external-link icon and say "(opens in a new tab)". A code block scrolls within itself and has a Copy button |
+| Size class (ADR-021, by the component's own width) | `Conversation`: an artifact opens beside the log from expanded, and in a full-screen modal sheet below it; focus moves to it and back to its Open button. `AssistantPanel`: below expanded, the conversation is a full-screen modal sheet; from expanded, a side panel region beside `children`. The newest message stays in view unless the user has scrolled up, when "Jump to latest" appears |
+| Approvals | Nothing reaches `onDecide` until the user presses Approve or Deny; neither is focused or chosen by default. Only the user's choice in this component, or one the app passes back in `decisions`, decides a request: no other field (`approved`, `status`, a tool's output, `isAutomatic`) is read. Of several requests with the same `action`, only the latest is current; an earlier undecided one, or one with `current: false`, says "This request is no longer current." and has no buttons. A decided card says "Approved by you" or "Denied by you" and has no buttons |
+| Generative UI | A `component` part renders only a component in `RENDERABLE`, and only when its `props` pass that component's schema (required props, types, no unknown props). Otherwise it renders a plain notice: "This content could not be shown." Nothing from the part is inserted as HTML |
+| Inline input (GEN-04) | Values the user typed into an inline component are kept by message `id` and part `id` (or the component's position), so they survive the message being regenerated. After `onComponentSubmit` the component shows the submitted values, read only. Pre-filled values are editable and are sent only when the user submits |
+| No requests | Nothing in `assistant` or an adapter makes a network request, configures a hosted service, or reports usage (ADP-03) |
+
+#### Renderable components *[Amended 2026-10-21 — build, FEAT-011 AIB-03, US-080]*
+
+`RENDERABLE` (and the catalogue's `renderable: true`) is: `Card`, `DataTable`,
+`DescriptionList`, `FormPage`, `InlineForm`, `Notice`, `ProgressBar`,
+`StatTile`, `StatusPill`, `Wizard`. `Wizard` and `FormPage` were added on
+2026-10-21 so a chat can embed a task in steps or a longer form (FEAT-011
+AIB-03; ADR-028 decision 4). Their props are JSON only and reuse
+`InlineForm`'s field schema (*field* below); field names are unique across
+steps or sections, and the values reach `onComponentSubmit` as one object.
+
+| Component | Props (JSON; required marked) | Renders |
+|---|---|---|
+| `Wizard` | `title` (required), `steps` (required: `{ id, title, fields: field[] }[]`, 1 to 8), `submitLabel` | The SDK's `Wizard` pattern, each step's fields as SDK widgets: its step list, progress and error summary; a step's `required` fields are checked before Continue; the last step's button (`submitLabel`) submits |
+| `FormPage` | `title` (required), `sections` (required: `{ title, fields: field[] }[]`, 1 to 10), `submitLabel` | The SDK's `FormPage` pattern with a `FormSection` per section: its error summary (which takes focus) and its action bar; no Cancel |
+
+*field* is `{ name, label, type: text | number | date | select | checkbox, options?, value?, required? }`.
+Both follow *Inline input (GEN-04)* as `InlineForm` does: edits survive
+regeneration, pre-filled values are editable, values are sent only on the
+user's submit, and once submitted the component shows what was sent, by step
+or section, read only. Both sit in the `data-piq-ai="generated"` frame.
+
+### AI markup (CONTRACT-005 *AI markup*, FEAT-011 AIM-01)
+
+| Element | Markers |
+|---|---|
+| `Conversation` root | `data-piq-ai-label`; its disclosure line (`disclosure`) is visible text |
+| Each assistant message's content | `data-piq-ai="generated"`, `aria-describedby` the disclosure; Retry and Regenerate carry `data-piq-ai-control="retry"` and `"regenerate"` |
+| The status region | `data-piq-ai="status"`, `role="status"`, `aria-live="polite"`, `aria-busy="true"` while a message streams; the Stop button beside it |
+| A message's tool calls | `data-piq-ai="plan"`; each call `data-piq-ai="step"` with `data-piq-ai-status` `running`, `done` or `failed`, and that status in text |
+| `ApprovalCard` | `data-piq-ai="approval"`; Approve and Deny carry `data-piq-ai-control="approve"` and `"deny"` |
+| `GenerativeComponent` | `data-piq-ai="generated"` on its frame |
+| `actor` | A polite region with `data-piq-ai-actor="agent"` or `"user"` saying who is acting |
+
+### Adapters (FEAT-007 ADP-02)
+
+Each adapter is a hook that reads a runtime object the app already created
+and returns `Conversation` props. It imports neither the runtime's package
+nor any other AI library, so it adds no dependency.
+
+| Import | Export | Input | Mapping |
+|---|---|---|---|
+| `assistant/ai-sdk` | `useAiSdkConversation(chat, options?)` | The object `useChat()` returns (`@ai-sdk/react`, AI SDK 5 or later), or an `AbstractChat` from `ai`: `messages`, `status`, `error`, `sendMessage`, `stop`, `regenerate`, `addToolApprovalResponse` | `text`, `reasoning`, `tool-*` and `dynamic-tool` (state → `running`, `done`, `failed`), and `source-url` and `source-document` (→ `sources`). A tool part in `approval-requested` → an `approval` with its `approval.id` (`options.describeApproval(part)` gives the summary); any later state makes it not current. A tool output `{ component, props }` → a `component` part. `status` `submitted` or `streaming` → the last reply streams; `error` → `status: "error"`; Stop records the reply as stopped |
+| | `fromAiSdk(messages, { status, error, stopped, describeApproval })` | The same, without React | A pure function, for tests and servers |
+| `assistant/assistant-ui` | `useAssistantUiConversation(thread, options?)` | assistant-ui's `ThreadRuntime` (`runtime.thread` of the app's runtime, rendered inside its `AssistantRuntimeProvider`; 0.15) | Subscribes to it, reading it in an effect, never while rendering. `text`, `reasoning`, `tool-call` (`result` → done, `isError` → failed) and `source` → parts; a tool call with `approval` and no `approved` → an `approval`; message status `running` → streaming, `incomplete` `cancelled` → stopped, `incomplete` `error` → error. `onSend` appends, `onStop` cancels the run, Retry and Regenerate reload the message, `onDecide` calls the part's `respondToToolApproval` |
+| | `fromAssistantUi(messages, options?)` | The thread's messages | A pure function |
+
+`package.json`: `ai` (`>=5 <8`) and `@assistant-ui/react` (`>=0.15 <0.16`)
+are peer dependencies marked optional in `peerDependenciesMeta`, and never
+`dependencies`. An app that imports no adapter installs neither.
+
+### Catalogue and MCP (FEAT-007 GEN-01)
+
+| Surface | Addition |
+|---|---|
+| `catalogue.json` | `assistant[]`: the `assistant` entry's exports, shaped as `widgets[]`, with `import` from `@ux-builder/ui/assistant`. Each entry of `widgets[]`, `patterns[]` or `assistant[]` that an agent may render gains `renderable: true` and `propsSchema`: a JSON Schema using only `type`, `enum`, `properties`, `required`, `additionalProperties`, `items`, `minItems`, `maxItems`, `maxLength`, `minimum` and `maximum`. The source is `packages/ui/src/assistant/renderable.json`; generation fails if it names a component the catalogue lacks |
+| `AGENTS.md`, skill | An "Assistant" section: the components, the renderable list, and that a tool result renders UI as `{ component, props }` |
+| `@ux-builder/mcp` | Tool `list_renderable` (no input) → `[{ name, import, purpose, propsSchema }]`. `get_widget` and `get_pattern` return `renderable` and `propsSchema` with the entry |
 
 ## Adaptive Cards *[Amended 2026-10-21 — planned, ADR-029, FEAT-011, FEAT-007]*
 
@@ -436,6 +567,17 @@ The renderer shows an approval with `consequence`, Approve and Deny
 
 `@ux-builder/mcp` adds `check_card` (`card`) → findings.
 
+### Build notes *[Amended 2026-10-21 — build, US-083 to US-085]*
+
+| Surface | As built |
+|---|---|
+| `@ux-builder/ui/adaptive-cards/check` | A second export: `checkCard`, `cardSchema`, `CHECKS` (the rule IDs `checkCard` reports) and `SUPPORTED_VERSION`, with no React, so Node tools (the MCP server, `tools/check-rules.mjs`) load it without a DOM. `@ux-builder/ui/adaptive-cards` exports the same functions with `AdaptiveCard`. The schema is vendored verbatim at `adaptive-cards/schema-1.6/adaptive-card.json` (MIT, recorded in `licenses/vendored.json`) |
+| `checkCard` findings | Schema problems are `severity: "error"` under `card.version` (the card is not a valid 1.6 card); every rule finding is a warning. No rule runs on an element the schema rejects, or inside it. An element outside 1.6 is a `card.version` warning only when it has no `fallback`; its fallback is checked in its place. Ordered by path, then rule |
+| `AdaptiveCard` props | Also `decision` and `onDecide({ action, decision })`, so an app records the user's choice on a high-impact action (`action` is the action's `id`, else its `verb`, else its title); `headingLevel` (default 3); `disclosure` (visible AI disclosure text, tied with `aria-describedby`). Only the user's choice in the card, or a `decision` the app passes back, decides; no field of the card is read for it |
+| Conversation (*Assistant and generative UI*) | A message part `{ type: "adaptive-card", id?, card }` renders `AdaptiveCard`, done without changing `GenerativeComponent` or the renderable catalogue. `Conversation` gains `onCardAction({ messageId, partId, action })` and `onCardDecide({ messageId, partId, action, decision })`, and keeps each card's decision by message and part. The AI SDK and assistant-ui adapters map a tool output `{ type: "adaptive-card", card }`, or an object with `type: "AdaptiveCard"`, to that part |
+| Actions | Up to four primary actions show as buttons; the rest, and `mode: "secondary"`, are in a "More actions" `MenuButton`. A high-impact action's inputs are taken when it is activated; the card's inputs are disabled while the approval is pending and after it. `Action.OpenUrl` links stay usable after a decision (they act on nothing) |
+| Text | Bold, italic, links (http, https, mailto) and bulleted and numbered lists are formatted; `DATE()` and `TIME()` are formatted for the user's locale; everything else, HTML included, shows as text. TextBlocks always wrap. Text `color` values are drawn in the strong or muted text colour, never a hue that could fail contrast; tones show on container styles |
+
 ## Flows and journeys *[Amended 2026-10-21 — planned, FEAT-012, ADR-030]*
 
 | Surface | Addition |
@@ -444,7 +586,55 @@ The renderer shows an approval with `consequence`, Approve and Deny
 | `ux-builder-blueprint propose [--out <dir>]` | Writes HELIX proposals as patches (walkthroughs, solution design flowchart, architecture *Data Flow*, `DESIGN.md` navigation, story test plan scenarios) and a disagreement report; applies nothing. Exit 0 written; 2 no marker or usage |
 | `ux-builder-blueprint draw [--out <dir>]` | IA map, flow and journey diagrams as Mermaid and SVG |
 | `ux-builder-blueprint wireframes [--out <dir>]` | Each screen's pattern at each supported size class, HTML and PNG, neutral theme |
-| `@ux-builder/mcp` | `check_blueprint` includes the new checks; `propose_from_blueprint` returns the proposals without writing them |
+| `@ux-builder/mcp` | `check_blueprint` includes the new checks; `propose_from_blueprint` returns the proposals without writing them. *[Amended 2026-10-21 — build]* `check_blueprint` reads the stories under the HELIX marker above the server's directory; with none, its result adds `notes` saying the story checks were skipped |
+
+*[Amended 2026-10-21 — build of FEAT-012 steps 4 and 5]* What the build
+had to settle:
+- **Arguments and defaults**: each command takes an optional blueprint file
+  (default `app.blueprint.json`). `--out` defaults to `helix-proposals/`,
+  `blueprint-drawings/` and `blueprint-wireframes/`. A rerun replaces the
+  `.patch`, `.mmd`/`.svg` and `.html`/`.png` files an earlier run wrote there.
+- **`propose` output**: one `<id>.patch` per section (a unified diff,
+  paths relative to the marker's directory, so `git apply` works from the
+  repository root), `report.md` (patches, disagreements with both texts,
+  sections already current, problems) and `proposals.json` (the same, with
+  each proposal's `target`: existing `{ id, type }` or new `{ id, type }`).
+  No timestamps, so a rerun is byte-identical. Exit 0 also when there are
+  disagreements: they are reported, not failures.
+- **Where each draft goes** (HELIX v0.18.0 has no flow type): the story's
+  `## Walkthrough`; `## Screen Flow` after *System Decomposition* in the
+  solution design that links (or names as `**Feature**`) the journeys'
+  stories' feature; architecture's `## Data Flow`, from the blueprint's
+  **first** journey (the blueprint has no "primary" field); `### Destinations
+  by Size Class` under `DESIGN.md`'s *Navigation and Active State*, so the
+  person's active-state text is kept; and `## Journey Scenarios` after the
+  story test plan's *Acceptance Criteria Test Mapping*. Documents are found
+  by `ddx.type` and `ddx.id` under the marker's flow root; a story test plan
+  by its link to the story, else `STP-<n>`. A missing solution design,
+  architecture, `DESIGN.md` or story test plan is drafted from the installed
+  template (`.claude/skills/helix/references/`, else `.agents/skills/…`) at
+  its `output.location`, as a new-file patch; a missing story is a problem,
+  never drafted.
+- **Unwritten vs different**: a section that is empty, the template's own
+  text or only placeholders (`[…]`, `%%` comments, empty diagrams) is
+  drafted; one equal to the draft (ignoring whitespace and comments) is
+  "current"; anything else is a disagreement and gets no patch.
+- **`draw` output**: `ia`, `flow` and `journey-<id>`, each `.mmd` and
+  `.svg`. The SVG is drawn by the package's own small layered layout from the
+  same graph, not by Mermaid, so no Mermaid renderer or browser is a
+  dependency.
+- **`wireframes` output**: `<screen>.<size class>.html` and `.png`, drawn at
+  390, 720, 1024, 1366 and 1920 px for compact to extra-large (the
+  blueprint's supported size classes; compact, medium and expanded when it
+  names none), linking `assets/plain.css`, `ui.css` and `patterns.css`. An
+  app's screens are drawn in `AppShell` with its destinations, a view's
+  without. Exit 2 when Playwright (`playwright` or `@playwright/test`) or its
+  Chromium is missing; the HTML is still written.
+- **`propose_from_blueprint`**: `{ blueprint, path? }`, `path` being where
+  the blueprint lives (default `app.blueprint.json` in the server's
+  directory). It returns `{ flow, helix, proposals: [{ id, kind, path,
+  section, target, file, patch }], disagreements, current, problems,
+  written: false }`, or an error naming `.helix.yml` when there is no marker.
 
 ## Error Semantics
 

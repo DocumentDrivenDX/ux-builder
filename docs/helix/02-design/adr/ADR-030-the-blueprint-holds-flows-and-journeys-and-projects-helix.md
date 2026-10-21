@@ -2,7 +2,7 @@
 ddx:
   id: ADR-030
   type: adr
-  status: proposed
+  status: accepted
   links:
     - kind: informed_by
       to: ADR-025
@@ -22,7 +22,7 @@ ddx:
 
 | Date | Status | Deciders | Related | Confidence |
 |------|--------|----------|---------|------------|
-| 2026-10-21 | **Proposed** (operator 2026-10-21: "can the blueprint be extended to include screen flow and user journey data so that can be used, in the future, to generate helix artifacts?") | Operator | ADR-025, ADR-026, ADR-027, FEAT-012, CONTRACT-005, CONTRACT-006 | Medium |
+| 2026-10-21 | **Accepted** 2026-10-21 (operator merged PR #32 and said "now let's build and test all the new stuff"; direction: operator 2026-10-21: "can the blueprint be extended to include screen flow and user journey data so that can be used, in the future, to generate helix artifacts?") | Operator | ADR-025, ADR-026, ADR-027, FEAT-012, CONTRACT-005, CONTRACT-006 | Medium |
 
 ## Context
 

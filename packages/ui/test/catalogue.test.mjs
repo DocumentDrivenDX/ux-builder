@@ -57,7 +57,7 @@ describe("US-014", () => {
   // @covers US-014-AC2
   test("AC2: every token, widget, hook and icon the guidance names exists", () => {
     const tokens = new Set(cat.tokens.map((t) => t.name));
-    const widgets = new Set([...cat.widgets, ...cat.patterns].map((w) => w.name));
+    const widgets = new Set([...cat.widgets, ...cat.patterns, ...(cat.assistant ?? []), ...(cat.adaptiveCards ?? [])].map((w) => w.name));
     const icons = new Set(cat.icons);
     const library = new Set(cat.iconLibrary.icons.map((i) => i.name)), exports = new Set(cat.iconLibrary.icons.map((i) => i.export));
     for (const g of GUIDES) {

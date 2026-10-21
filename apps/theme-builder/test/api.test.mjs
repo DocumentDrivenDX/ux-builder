@@ -130,7 +130,7 @@ describe("save (US-019)", async () => {
     // A copy with the generator and what it reads, inside the repository so its modules resolve.
     const d = mkdtempSync(join(ROOT, "node_modules", ".builder-catalogue-"));
     try {
-      for (const p of ["tokens", "brand", "guidelines", "tools/gen-catalogue.mjs", "packages/tokens/compose.mjs", "packages/tokens/compose-core.mjs", "packages/tokens/package.json", "packages/ui/src", "packages/ui/scripts", "packages/ui/package.json", "packages/ui/AGENTS.md", "packages/ui/catalogue.json", "packages/ui/skill", "docs/helix/02-design/contracts/CONTRACT-001-token-names.md"]) cpSync(join(ROOT, p), join(d, p), { recursive: true });
+      for (const p of ["tokens", "brand", "guidelines", "tools/gen-catalogue.mjs", "packages/tokens/compose.mjs", "packages/tokens/compose-core.mjs", "packages/tokens/package.json", "packages/ui/src", "packages/ui/adaptive-cards", "packages/ui/scripts", "packages/ui/lint", "packages/ui/package.json", "packages/ui/AGENTS.md", "packages/ui/catalogue.json", "packages/ui/skill", "docs/helix/02-design/contracts/CONTRACT-001-token-names.md"]) cpSync(join(ROOT, p), join(d, p), { recursive: true });
       const r = save({ body: body({ name: "regen-carbon" }), root: d, designSystems: DS, review: "files" });
       assert.deepEqual(r.files.filter((f) => f.startsWith("packages/")).sort(), ["packages/ui/AGENTS.md", "packages/ui/catalogue.json", "packages/ui/skill/ux-builder-ui/SKILL.md"]);
       assert.ok(JSON.parse(readFileSync(join(d, "packages/ui/catalogue.json"), "utf8")).themes.some((t) => t.name === "regen-carbon"));

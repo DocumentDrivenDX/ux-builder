@@ -40,6 +40,25 @@ and `audit-report/report.json`, and exits 1 if it found an error.
 | `one-primary-action` | warning | At most one primary button per dialog, or in `main` (rule `emphasis.one-primary`). |
 | `nav-per-breakpoint` | warning | With `--width`: below 600px, primary navigation shows no more than five destinations; from 840px it is not hidden behind a menu button (rules `nav.compact-destinations`, `nav.standing-at-expanded`). Breadcrumbs and navigation inside `main` are left out. |
 | `line-length` | warning | Paragraphs and list items average no more than 80 characters per line (rule `text.line-length`). |
+| `ai-disclose` | warning | AI-generated content (`data-piq-ai="generated"`) has a visible disclosure: its own, an ancestor's `data-piq-ai-label`, or an `aria-describedby` label (rule `ai.disclose`). |
+| `ai-correct` | warning | Generated content has a retry, regenerate, edit or undo control in or beside it (rule `ai.correct`). |
+| `ai-stop` | warning | A busy AI status region (`data-piq-ai="status"`, `aria-busy="true"`) has a reachable Stop or Pause control in or beside it (rule `ai.stop`). |
+| `ai-starters` | warning | An empty conversation's prompt (`data-piq-ai="prompt"`) offers suggested starting points, and stays open to typing (rule `ai.starters`). |
+| `ai-declared` | warning | With `--blueprint`: a screen showing AI markup declares an AI role; the page names its screen with `data-piq-screen` (rule `ai.declared`). |
+| `agent-approval` | warning | An approval (`data-piq-ai="approval"`) offers approve and deny controls, neither pre-selected nor `autofocus` (rule `agent.approve-high-impact`). |
+| `agent-plan` | warning | An agent's plan has steps, each with `data-piq-ai-status` and that status in text (rule `agent.plan-visible`). |
+| `agent-interrupt` | warning | A running agent has a reachable Pause or Stop control somewhere on the page (rule `agent.interrupt`). |
+| `agent-who-acts` | warning | Where the user can take over (`data-piq-ai-takeover`, or `ai.takeover` with `--blueprint`), a live region says who is acting (`data-piq-ai-actor`) (rule `agent.who-acts`). |
+| `agent-recover` | warning | A failed step says in text what went wrong and has a retry or previous-step control (rule `agent.recover`). |
+| `agent-summary` | warning | A finished run (`data-piq-ai-status="done"` on its status) shows a summary (`data-piq-ai="summary"`) (rule `agent.summary`). |
+| `genui-review-prefill` | warning | Values the AI pre-fills in inline UI are editable, and the inline UI has a submit control of its own, apart from the conversation's (rule `genui.review-prefill`). |
+| `card-input-label` | warning | Every input in generated UI, such as a rendered Adaptive Card, has a label of its own; a placeholder is not one (rule `card.input-label`). |
+| `card-narrow-first` | warning | With `--width`: below 600px, generated UI does not scroll sideways (rule `card.narrow-first`). |
+
+The AI checks look only at the AI markup in CONTRACT-005 (`data-piq-ai` and
+its companions), which `@ux-builder/ui`'s assistant components emit and an
+app's own AI UI adds: a page without it gets no AI finding. The page's other
+checks apply inside generated UI as anywhere else.
 
 The `--width` checks and the interaction checks are warnings for their first
 minor release, then can fail a build like the rest. A finding from an
@@ -82,6 +101,7 @@ the report says so, and the favicon check is skipped.
 | `--json` | Print the report as JSON. |
 | `--write-baseline <file>` | Write every finding (not notes) to this file, in a stable order. Run it once when adopting the audit in an existing app, and commit the file. |
 | `--baseline <file>` | Leave out the findings in this file: they are not reported and do not affect the exit code. New findings are reported as usual; baselined ones no longer found are listed as resolved, so the file can shrink. A check the file names that this version lacks is ignored with a note. |
+| `--blueprint <file>` | The app's blueprint (`app.blueprint.json`). AI markup on a screen whose blueprint declares no AI role is reported (`ai-declared`); the screen's `ai.roles` and `ai.takeover` apply to the agent checks. A page names its screen with `data-piq-screen="<screen id>"` on its root. |
 
 A URL that starts with `/` is relative to the first full URL. The SDK's CSS
 and theme list are read from the app's own `@ux-builder/ui` and
@@ -148,6 +168,17 @@ journeys:
 tests: [{ id: e2e, command: npm run test:e2e }]
 restrictions: { writes: report-only }
 ```
+
+A journey can come from the app's blueprint (`app.blueprint.json`, or the
+manifest's `blueprint` path) instead: `{ blueprint: J-review, role: reviewer, priority: critical }`
+takes its story, criteria, entry screen, steps and alternates from there, and
+`assess plan` turns each alternate into a walkthrough of its journey-and-state
+pair. A journey through an assistant or agent is marked `ai: true` and
+declares three scenarios, `normal`, `errorProne` and `risky` (with `step`, the
+high-impact step); its plan carries the catalogue's AI rules for its roles as
+heuristics, and `assess inspect --scenario risky` stops at the approval,
+records it and chooses Deny. No step that would activate an approve control
+(`data-piq-ai-control="approve"`) is ever taken.
 
 From code, `inspect(page)` runs the audit's checks on a Playwright page as it
 is; `audit()` is built on it. Checks that change the page (`focus-obscured`,

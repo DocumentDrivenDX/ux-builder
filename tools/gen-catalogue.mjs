@@ -9,7 +9,7 @@
    Sources: tokens/names.json and CONTRACT-001 (every token, its path, tier
    and purpose); packages/ui/src (every export: components with their props
    and defaults, hooks, helpers, read from the code and the comment above it);
-   the themes and design systems (tokens/); the icon names; the lint rule.
+   the themes and design systems (tokens/); the icon names; the lint rules (packages/ui/lint/eslint.mjs).
    Nothing here is typed by hand except the rules in AGENTS.md. */
 
 import { exportName, libraryMap } from "../packages/ui/scripts/gen-icons.mjs";
@@ -17,6 +17,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load } from "../packages/tokens/compose.mjs";
+import eslintPlugin from "../packages/ui/lint/eslint.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const UI = join(ROOT, "packages/ui");
@@ -147,6 +148,32 @@ function widgets() {
   return all.sort((a, b) => ["component", "hook", "function", "constant"].indexOf(a.type) - ["component", "hook", "function", "constant"].indexOf(b.type) || a.name.localeCompare(b.name));
 }
 
+/* The assistant (@ux-builder/ui/assistant, ADR-023 rule 4) and its two
+   adapters, each export with its import line, as for widgets. */
+function assistant() {
+  const main = exportedFrom("packages/ui/src/assistant/index.js", "@ux-builder/ui/assistant");
+  const adapters = [["ai-sdk", "packages/ui/src/assistant/adapters/ai-sdk.js"], ["assistant-ui", "packages/ui/src/assistant/adapters/assistant-ui.js"]]
+    .flatMap(([entry, file]) => exportsOf(file).map((e) => ({ ...e, import: `import { ${e.name} } from "@ux-builder/ui/assistant/${entry}";` })));
+  return [...main.sort((a, b) => a.name.localeCompare(b.name)), ...adapters];
+}
+
+/* Adaptive Cards (@ux-builder/ui/adaptive-cards, ADR-029): each export with its import line. */
+function adaptiveCards() {
+  return exportedFrom("packages/ui/src/adaptive-cards/index.js", "@ux-builder/ui/adaptive-cards")
+    .map((e) => ({ ...e, import: `import { ${e.name} } from "@ux-builder/ui/adaptive-cards";` }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/* Which components an agent may render, with their props schemas
+   (FEAT-007 GEN-01, ADR-023 rule 5): renderable.json marks catalogue entries,
+   and must name only components the catalogue has. */
+export function markRenderable(lists, components = json("packages/ui/src/assistant/renderable.json").components) {
+  const entries = new Map(lists.flat().filter((e) => e.type === "component").map((e) => [e.name, e]));
+  const missing = Object.keys(components).filter((n) => !entries.has(n));
+  if (missing.length) throw new Error(`renderable.json names components the catalogue lacks: ${missing.join(", ")}`);
+  for (const [name, propsSchema] of Object.entries(components)) Object.assign(entries.get(name), { renderable: true, propsSchema });
+}
+
 /* ------------------------------------------------------- themes, icons */
 function themesAndSystems() {
   const src = load(join(ROOT, "tokens"), join(ROOT, "brand"));
@@ -183,7 +210,7 @@ export const RULES = [
   "Use the SDK's widgets (@ux-builder/ui) for buttons, fields, choices, tables, menus, tabs, breadcrumbs, sheets, notices, status pills, toasts, progress bars, spinners, skeletons, icons and the logo; do not build your own. Icons beyond the shared names come from @ux-builder/ui/icons, never hand-drawn.",
   "Style your own markup with --piq-* role tokens (var(--piq-color-text), var(--piq-space-4), var(--piq-radius-control)); pick tokens by role, not by how they look today.",
   "Never hard-code colours, font families or radii: no hex, rgb(), named colours, font names or pixel radii in CSS or style props.",
-  "Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui and ux-builder/no-inline-svg, then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.",
+  "Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui, ux-builder/no-inline-svg and ux-builder/ai-neutral-voice (a warning on copy that presents the AI as a person, \"I think…\", or as the actor, \"Copilot, summarize\"; English only), then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.",
   "Select themes with ThemeProvider (theme, appearance) or data-theme and data-appearance on <html>; never restyle per theme in app code.",
   "Compose screens from @ux-builder/ui/patterns before writing any layout CSS: AppShell for the frame, with each screen inside a Page, which gives it the page gutter and width (AppShell's content area and the screen patterns have none of their own; ErrorScreen excepted); CollectionList, ListDetail, RecordDetail, FormPage, QuickEdit, Dashboard, ReportViewer, SettingsPage and ErrorScreen for screens; the regions and the layout primitives (Stack, Cluster, Grid, Page, SplitView) for anything else. Supply content, data and actions through their slots; never fork or restyle a pattern.",
   "Plan before you build: describe the app or view in app.blueprint.json (ux-builder-blueprint init, or the MCP tool get_blueprint_schema), choose its screens from the recipes (list_recipes), and run ux-builder-blueprint check (or check_blueprint) until it reports no errors. Then build, lint and audit. Rules apply by size class, input and context (app or embedded view), never by device.",
@@ -193,22 +220,28 @@ export const RULES = [
 export function interaction() {
   const rules = json("guidelines/rules.json"), recipes = json("guidelines/recipes.json");
   const blueprintSchema = json("guidelines/schema/blueprint.schema.json");
-  return { version: rules.version, limits: rules.limits, rules: rules.rules, recipes: recipes.recipes, blueprintSchema };
+  // The AI roles a rule or a screen may name (FEAT-011, CONTRACT-005), from the rule schema.
+  const aiRoles = json("guidelines/schema/rules.schema.json").$defs.rule.properties.when.properties.aiRole.items.enum;
+  return { version: rules.version, limits: rules.limits, aiRoles, rules: rules.rules, recipes: recipes.recipes, blueprintSchema };
 }
 
 export function catalogue() {
   const systems = themesAndSystems();
   const { version } = json("packages/ui/package.json");
   const tokensVersion = json("packages/tokens/package.json").version;
+  const w = widgets(), p = patterns(new Set(systems.variants.map((v) => v.point))), a = assistant();
+  markRenderable([w, p, a]);
   return {
     $description: "Generated by tools/gen-catalogue.mjs from source (FEAT-004 SDK-13). Do not edit; run npm run catalogue.",
     packages: { "@ux-builder/ui": version, "@ux-builder/tokens": tokensVersion },
     rules: RULES,
-    lint: { rule: "ux-builder/no-hard-coded-values", rules: ["ux-builder/no-hard-coded-values", "ux-builder/no-foreign-ui", "ux-builder/no-inline-svg"], stylelint: "@ux-builder/ui/stylelint", eslint: "@ux-builder/ui/eslint" },
+    lint: { rule: "ux-builder/no-hard-coded-values", rules: Object.keys(eslintPlugin.rules).map((r) => `ux-builder/${r}`), stylelint: "@ux-builder/ui/stylelint", eslint: "@ux-builder/ui/eslint" },
     audit: { package: "@ux-builder/audit", command: "npx ux-builder-audit <url>", report: "audit-report/index.html" },
     ...systems,
-    widgets: widgets(),
-    patterns: patterns(new Set(systems.variants.map((v) => v.point))),
+    widgets: w,
+    patterns: p,
+    assistant: a,
+    adaptiveCards: adaptiveCards(),
     icons: icons(),
     iconLibrary: iconLibrary(),
     tokens: tokens(),
@@ -287,6 +320,20 @@ function reference(cat) {
     "",
     `The page's favicon follows the theme too: the top-level ${code("ThemeProvider")} sets it (${code("favicon={false}")} turns that off). An app that sets ${code("data-theme")} on ${code("<html>")} without a provider renders ${code("<Favicon />")} once. Keep the app's own ${code('<link rel="icon">')} in index.html: it shows for a theme without a favicon. Never hard-code the brand's favicon.`,
     "",
+    "### Assistant",
+    "",
+    `Build an assistant from ${code("@ux-builder/ui/assistant")}, never from a chat library's components (styled by ${code("patterns.css")}). ${code("<Conversation>")} takes the messages and callbacks; it announces each finished reply once, keeps focus in the composer, offers Stop while a reply streams and Retry when one fails, shows reasoning, tool calls, numbered sources and artifacts, and asks for approval before an action changes anything. Put it beside the page with ${code("<AssistantPanel>")}. Connect a runtime with ${code("useAiSdkConversation(chat)")}, given what the AI SDK's useChat returns, from ${code("@ux-builder/ui/assistant/ai-sdk")} or ${code("useAssistantUiConversation(thread)")} from ${code("@ux-builder/ui/assistant/assistant-ui")}; neither configures a hosted service.`,
+    "",
+    "| Export | Props | Use it for |",
+    "|--------|-------|------------|",
+    ...cat.assistant.filter((w) => w.type === "component" || w.type === "hook").map((w) => `| ${code(w.type === "hook" ? `${w.name}()` : `<${w.name}>`)} | ${code(sig(w) || "—")} | ${w.purpose.replace(/\|/g, "\\|")} |`),
+    "",
+    `A tool result renders UI as ${code("{ component, props }")}, with props as JSON. Only these components may be rendered, and only with props that pass their schema (${code("propsSchema")} in ${code("catalogue.json")}, or the MCP tool ${code("list_renderable")}); anything else shows a plain notice: ${[...cat.widgets, ...cat.patterns, ...cat.assistant].filter((x) => x.renderable).map((x) => code(x.name)).sort().join(", ")}.`,
+    "",
+    "### Adaptive Cards",
+    "",
+    `An agent built for Microsoft hosts may answer with an Adaptive Card (open-source schema 1.6) instead of a component. Render it with ${code("<AdaptiveCard card onAction />")} from ${code("@ux-builder/ui/adaptive-cards")}: each element becomes an SDK widget in the app's theme, a ColumnSet stacks at compact, and an element outside 1.6 shows its fallback or a plain notice; nothing is inserted as HTML. In a ${code("<Conversation>")}, a tool result ${code('{ type: "adaptive-card", card }')} (or the card itself) is an ${code('"adaptive-card"')} part, and ${code("onCardAction")} receives its actions. ${code("onAction")} gets ${code("{ type, id, verb, data, inputs }")} for Action.Submit and Action.Execute. Mark an action that pays, sends, deletes or publishes with ${code('"data": { "ux-builder": { "highImpact": true, "consequence": "Pay £120.00 to Acme Ltd" } }')}: the user approves it before ${code("onAction")}, and the marker is removed from ${code("data")}. Check every card before the agent sends it with ${code("checkCard(card)")} (also ${code("@ux-builder/ui/adaptive-cards/check")} for Node, or the MCP tool ${code("check_card")}), and fix what it reports: ${cat.interaction.rules.filter((r) => r.checks.some((c) => c.kind === "card")).map((r) => code(r.id)).join(", ")}.`,
+    "",
     "### Interaction and screen rules",
     "",
     `How screens fit together and behave: navigation by size, modals, safeguards, states and emphasis (FEAT-008). Each rule has an ID that the blueprint check and the audit report use. The loop: **plan** the app in ${code("app.blueprint.json")} (${code("npx ux-builder-blueprint init")}) from the recipes, **check** it (${code("npx ux-builder-blueprint check app.blueprint.json")}, or the MCP tool ${code("check_blueprint")}) until it has no errors, **build** from the patterns it names, then **lint** and **audit**. Rules apply by size class, input (${code("coarse")} touch, ${code("fine")} pointer) and context (${code("app")}, or an embedded ${code("view")}), never by device. Get the rules for a target with ${code("rulesFor()")} from ${code("@ux-builder/ui/blueprint")} or the MCP tool ${code("get_rules")}; the full rules, recipes and blueprint schema are in ${code("catalogue.json")} (${code("interaction")}).`,
@@ -299,7 +346,9 @@ function reference(cat) {
     "",
     ...cat.interaction.recipes.map((r) => `- ${code(r.id)} (${r.kind}): ${r.job} ${r.screens.map((x) => code(`<${x.pattern}>`)).join(", ")}.`),
     "",
-    "The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC.",
+    ...aiSection(cat),
+    "",
+    "The rules restate guidance from Apple's Human Interface Guidelines, Material Design 3, WCAG 2.2 and the WAI-ARIA Authoring Practices in this SDK's own words, with a link to each source. They are not those guidelines. ux-builder is not affiliated with or endorsed by Apple or Google; Human Interface Guidelines is a trademark of Apple Inc., and Material Design is a trademark of Google LLC. The AI rules also restate, in the SDK's own words, Microsoft's HAX Toolkit, its design and Learn guidance and the Adaptive Cards documentation, Google PAIR's People + AI Guidebook, and Cheng, Liang, Schoop and Nichols (IUI '26); ux-builder is not affiliated with or endorsed by Microsoft either.",
     "",
     "### Themes",
     "",
@@ -307,6 +356,39 @@ function reference(cat) {
     "|-------|---------------|-------------|",
     ...cat.themes.map((t) => `| ${code(t.name)} | ${t.designSystem ?? "own anatomy"} | ${t.appearances.join(", ")} (default ${t.default}) |`),
   ].join("\n");
+}
+
+/* The AI and agent section (FEAT-011 AIO-01, US-076-AC5): the AI rule IDs
+   by role, how to declare a screen's role, and the markers the audit reads
+   (CONTRACT-005 AI markup). */
+const AI_MARKERS = [
+  ['data-piq-ai="generated"', 'content made by AI, with a visible disclosure and a correction control (data-piq-ai-control="retry", "regenerate", "edit" or "undo"); inline UI it makes has a label on each input, pre-filled values the user can edit, and a submit control of its own'],
+  ['data-piq-ai="status"', 'the live region saying what the AI is doing (aria-live; aria-busy="true" while working), with a Stop or Pause control in or beside it'],
+  ['data-piq-ai="plan"', 'an agent\'s steps, each data-piq-ai="step" with data-piq-ai-status (pending, running, done, failed or skipped) and that status in text'],
+  ['data-piq-ai="approval"', 'a request for approval, with data-piq-ai-control="approve" and "deny", neither pre-chosen'],
+  ['data-piq-ai-actor="agent" | "user"', "the live region saying who is acting now, updated on takeover and hand-back"],
+  ["data-piq-ai-label", "an ancestor whose visible text discloses AI for everything inside it"],
+  ['data-piq-ai="prompt"', 'the field or form where the user asks the AI; an empty conversation offers suggested starting points (data-piq-ai-control="starter")'],
+  ['data-piq-ai-status="done"', 'on the status region when a run has finished, with its summary shown (data-piq-ai="summary")'],
+  ['data-piq-ai-takeover', 'on the agent region when the user can take over; then data-piq-ai-actor says who is acting'],
+  ['data-piq-ai-control="previous"', 'returns to the previous step, beside "retry", on a failed step'],
+  ['data-piq-screen="<screen id>"', "on the page's root: the blueprint screen it shows, for ux-builder-audit --blueprint"],
+];
+function aiSection(cat) {
+  const ai = cat.interaction.rules.filter((r) => r.when?.aiRole);
+  const any = cat.interaction.rules.filter((r) => /^(ai|agent|genui|card)\./.test(r.id) && !r.when?.aiRole);
+  return [
+    "### AI and agent screens",
+    "",
+    `Declare each screen's AI role in the blueprint: a screen where AI generates content, converses or acts has ${code("ai")} in ${code("app.blueprint.json")}, for example ${code('"ai": { "roles": ["agent"], "acts": true, "highImpactActions": [{ "label": "Pay", "approval": "each" }] }')}. The roles are ${cat.interaction.aiRoles.map(code).join(", ")}: ${code("generative")} for AI output inside an ordinary screen, ${code("assistant")} for a conversation, ${code("agent")} where the AI acts for the user. The AI rules apply by declared role and combine with the others, so an embedded agent view gets the view rules and the agent rules. Get them with ${code("rulesFor({ aiRoles })")} or ${code("get_rules")} with ${code("aiRoles")}; a target with no role gets no AI rule. The AI rules by role:`,
+    "",
+    ...cat.interaction.aiRoles.map((role) => `- **${role}**: ${ai.filter((r) => r.when.aiRole.includes(role)).map((r) => code(r.id)).join(", ")}`),
+    ...(any.length ? [`- **any screen**: ${any.map((r) => code(r.id)).join(", ")}`] : []),
+    "",
+    "Mark AI in the markup so the audit can check it (the SDK's assistant components do this for you):",
+    "",
+    ...AI_MARKERS.map(([m, what]) => `- ${code(m)}: ${what}.`),
+  ];
 }
 
 const START = "<!-- catalogue:start -->", END = "<!-- catalogue:end -->";

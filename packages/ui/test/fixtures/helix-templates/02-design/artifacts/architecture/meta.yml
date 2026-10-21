@@ -1,0 +1,6 @@
+artifact:
+  id: architecture
+output:
+  location: docs/helix/02-design/architecture.md
+  format: markdown
+  naming: architecture.md

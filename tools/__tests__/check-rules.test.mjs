@@ -53,6 +53,37 @@ describe("US-050-AC4: the rules check enforces provenance", () => {
   });
 });
 
+describe("US-076-AC4: the AI sources' licences (FEAT-011 AIP-01, AIP-03)", () => {
+  const mslOnly = { title: "Microsoft Learn: Human-centered design for agents", url: "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design", licence: "microsoft-terms", wording: "paraphrased" };
+
+  // @covers US-076-AC4
+  test("only CC-BY-4.0 of the new licences may be quoted; Microsoft terms, PAIR and the paper are paraphrased", () => {
+    const s = { ...sources(), notices: "Credits: Microsoft Teams: Designing Adaptive Cards (CC BY 4.0)" };
+    const r = s.rules.rules.find((x) => x.id === "card.wrap");
+    r.sources.push({ title: "Microsoft Teams: Designing Adaptive Cards", url: "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards", licence: "CC-BY-4.0", wording: "quoted", quote: "A short attributed line." });
+    assert.deepEqual(checkRules(s, k), []);
+    for (const licence of ["microsoft-terms", "CC-BY-NC-SA-4.0", "CC-BY-NC-ND-4.0"]) {
+      const t = sources();
+      const x = t.rules.rules.find((y) => y.id === "ai.disclose");
+      x.sources = [{ title: "Some source", url: "https://example.com/", licence, wording: "quoted", quote: "Some words." }];
+      assert.ok(checkRules(t, k).some((p) => p.startsWith("rule ai.disclose: quotes") && /does not allow it/.test(p)), licence);
+    }
+  });
+
+  // @covers US-076-AC4
+  test("Microsoft Learn's preview agent pages are never a rule's only source; a card check must exist", () => {
+    const s = sources();
+    const r = s.rules.rules.find((x) => x.id === "ai.user-initiates");
+    r.sources = [mslOnly];
+    const c = s.rules.rules.find((x) => x.id === "card.wrap");
+    c.checks = [{ kind: "card", id: "card.wraps" }];
+    const problems = checkRules(s, k);
+    assert.ok(problems.includes("rule ai.user-initiates: cites only Microsoft Learn's preview agent pages; add a primary source"), problems.join("\n"));
+    assert.ok(problems.includes('rule card.wrap: names the card check "card.wraps", which does not exist'), problems.join("\n"));
+    assert.equal(problems.length, 2, problems.join("\n"));
+  });
+});
+
 describe("US-050-AC6: a quoted source is credited in the shipped notices", () => {
   // @covers US-050-AC6
   test("a quote the notices do not credit fails, naming the rule and the source", () => {

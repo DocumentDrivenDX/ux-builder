@@ -115,6 +115,18 @@
                   "fine"
                 ]
               }
+            },
+            "aiRole": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "generative",
+                  "assistant",
+                  "agent"
+                ]
+              }
             }
           }
         },
@@ -155,6 +167,7 @@
                   "blueprint",
                   "audit",
                   "lint",
+                  "card",
                   "review"
                 ]
               },
@@ -202,7 +215,11 @@
           "enum": [
             "apple-terms",
             "google-terms",
+            "microsoft-terms",
             "CC-BY-2.5",
+            "CC-BY-4.0",
+            "CC-BY-NC-SA-4.0",
+            "CC-BY-NC-ND-4.0",
             "W3C",
             "own"
           ]

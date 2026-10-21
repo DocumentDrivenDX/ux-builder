@@ -47,8 +47,8 @@ test.describe("A theme's page", () => {
     await expect(nav.getByRole("link", { name: "Logos and palette" })).toBeVisible();
     const links = await nav.getByRole("link").allTextContents();
     const ai = JSON.parse(readFileSync(join(REPO, "packages/ui/ai/vendor/components.json"), "utf8")).components;
-    expect(links).toEqual(["Logos and palette", "Light", "Dark", "Auto", "Generative UI bridges", ...names("widgets"), "About these", ...ai.map((c) => `${c.name}, ${c.library}`), ...names("patterns")]);
-    await expect(nav.locator(".tp-nav__group")).toHaveText(["Brand", "CSS", "UI Components", "AI Components", "Screen patterns"]);
+    expect(links).toEqual(["Logos and palette", "Light", "Dark", "Auto", "Generative UI bridges", ...names("widgets"), "About these", ...ai.map((c) => `${c.name}, ${c.library}`), ...names("patterns"), "Conversation", ...names("assistant").filter((n) => n !== "Conversation")]);
+    await expect(nav.locator(".tp-nav__group")).toHaveText(["Brand", "CSS", "UI Components", "AI Components", "Screen patterns", "Assistant"]);
 
     await nav.getByRole("link", { name: "Dark", exact: true }).click();
     await expect(page).toHaveURL(/#css-dark$/);
@@ -68,6 +68,29 @@ test.describe("A theme's page", () => {
   });
 
   // @covers US-020-AC9
+  // @covers US-046-AC10
+  test("the Assistant section shows a conversation with a tool call, sources and an approval in the theme, and each assistant component from its story", async ({ page }) => {
+    const errors = watch(page);
+    for (const [theme, ap] of [["praxis-carbon", "light"], ["databricks", "dark"]]) {
+      await page.emulateMedia({ colorScheme: ap });
+      await page.goto(`/?theme=${theme}`);
+      await expect(page.getByRole("navigation", { name: "Theme contents" }).getByRole("link", { name: "Conversation", exact: true })).toBeVisible();
+      const conv = page.locator("#assistant-Conversation .tp-sample .piq-conversation");
+      await expect(conv).toHaveCount(1);
+      await expect(conv.locator('[data-piq-ai="step"]').first()).toContainText("Looked up time entries");
+      await expect(conv.locator(".piq-sources li")).toHaveCount(2);
+      await expect(conv.locator('[data-piq-ai="approval"]').getByRole("button")).toHaveText(["Approve", "Deny"]);
+      for (const name of names("assistant")) {
+        await expect(page.locator(`#assistant-${name} .tp-sample`), `${name} has a sample`).toHaveCount(1);
+        await expect(page.locator(`#assistant-${name} .tp-sample`)).not.toContainText("did not render here");
+      }
+      const tokens = resolved(theme, ap);
+      expect((await conv.locator(".piq-approval").evaluate((el) => getComputedStyle(el).borderInlineStartColor))).toBeTruthy();
+      expect(await page.locator(".tp").evaluate((el) => getComputedStyle(el).getPropertyValue("--piq-color-accent").trim().toUpperCase())).toBe(tokens["piq-color-accent"].toUpperCase());
+    }
+    expect(errors).toEqual([]);
+  });
+
   test("every widget and pattern renders from its own story, linked to that story in Storybook in this theme", async ({ page }) => {
     const errors = watch(page);
     await page.emulateMedia({ colorScheme: "light" });

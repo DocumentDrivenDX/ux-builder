@@ -14,6 +14,8 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createServer } from "../server.mjs";
+import { checkCard } from "@ux-builder/ui/adaptive-cards/check";
+import { CLEAN, PAY_INVOICE } from "../../ui/src/adaptive-cards/story-data.js";
 
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const cat = JSON.parse(readFileSync(`${ROOT}packages/ui/catalogue.json`, "utf8"));
@@ -33,7 +35,7 @@ before(async () => {
 describe("US-014-AC5: agents list the SDK over MCP", () => {
   test("the tools and resources are listed, with instructions carrying the rules", async () => {
     const { tools } = await client.listTools();
-    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_themes", "list_tokens", "list_variants", "list_widgets", "validate_assessment_manifest", "validate_assessment_report"]);
+    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "check_card", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_renderable", "list_themes", "list_tokens", "list_variants", "list_widgets", "propose_from_blueprint", "validate_assessment_manifest", "validate_assessment_report"]);
     const { resources } = await client.listResources();
     assert.deepEqual(resources.map((r) => r.uri).sort(), ["ux-builder://catalogue", "ux-builder://guidance"]);
     assert.match(client.getInstructions(), /Never hard-code colours, font families or radii/);
@@ -103,7 +105,7 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
     await c.connect(new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL("../server.mjs", import.meta.url))] }));
     try {
       const { tools } = await c.listTools();
-      assert.equal(tools.length, 21);
+      assert.equal(tools.length, 24);
     } finally { await c.close(); }
   });
 });
@@ -122,6 +124,27 @@ describe("US-031: agents find the screen patterns over MCP", () => {
     assert.equal(miss.isError, true);
     assert.match(miss.content[0].text, /Did you mean: CollectionList/);
     assert.deepEqual((await call("list_variants")).data, cat.variants);
+  });
+});
+
+describe("US-048: agents find the renderable components over MCP", () => {
+  // @covers US-048-AC1
+  test("list_renderable serves every component the catalogue marks renderable, with its props schema", async () => {
+    const marked = [...cat.widgets, ...cat.patterns, ...cat.assistant].filter((e) => e.renderable);
+    assert.ok(marked.length >= 5);
+    const served = (await call("list_renderable")).data;
+    assert.deepEqual(served.map((e) => e.name), marked.map((e) => e.name));
+    for (const e of served) {
+      const own = marked.find((m) => m.name === e.name);
+      assert.deepEqual(e.propsSchema, own.propsSchema, e.name);
+      assert.equal(e.import, own.import, e.name);
+      assert.equal(e.propsSchema.type, "object", e.name);
+    }
+    assert.ok(served.some((e) => e.name === "DataTable" && e.propsSchema.required.includes("rows")));
+    assert.ok(!served.some((e) => e.name === "Conversation"), "the conversation itself is not renderable");
+    const table = (await call("get_widget", { name: "DataTable" })).data;
+    assert.equal(table.renderable, true);
+    assert.deepEqual(table.propsSchema, served.find((e) => e.name === "DataTable").propsSchema);
   });
 });
 
@@ -169,6 +192,67 @@ describe("US-053: an agent plans and checks screens through MCP", () => {
   });
 });
 
+describe("US-076: an agent reads the AI rules for a screen's role through MCP", () => {
+  // @covers US-076-AC1
+  test("AC1: get_rules with role agent returns what rulesFor does: the agent rules and the rules with no AI condition", async () => {
+    const { rulesFor } = await import("@ux-builder/ui/blueprint");
+    for (const target of [{ aiRoles: ["agent"] }, { context: "view", aiRoles: ["agent"] }, { aiRoles: ["assistant", "generative"], sizeClasses: ["compact"] }]) {
+      assert.deepEqual((await call("get_rules", target)).data, rulesFor(target));
+    }
+    const got = (await call("get_rules", { aiRoles: ["agent"] })).data;
+    assert.ok(got.some((r) => r.id === "agent.approve-high-impact") && got.some((r) => r.id === "modal.one-at-a-time"));
+    assert.ok(!got.some((r) => r.when?.aiRole && !r.when.aiRole.includes("agent")));
+  });
+
+  // @covers US-076-AC2
+  test("AC2: without a role, no AI rule; an unknown role is refused, naming the roles", async () => {
+    assert.ok((await call("get_rules", {})).data.every((r) => !r.when?.aiRole));
+    const miss = await call("get_rules", { aiRoles: ["chatbot"] });
+    assert.equal(miss.isError, true);
+    assert.match(miss.content[0].text, /"chatbot"[\s\S]*generative, assistant, agent/);
+  });
+});
+
+describe("US-087: check_blueprint checks journeys against the HELIX stories", () => {
+  // @covers US-087-AC4
+  test("journeys are checked against the stories under the marker above the server's directory", async () => {
+    const { checkBlueprint } = await import("@ux-builder/ui/blueprint");
+    const { readStories } = await import(new URL("../../ui/blueprint/helix.mjs", import.meta.url).href);
+    const plan = { version: 1, kind: "app", name: "x", supports: { sizeClasses: ["compact"], inputs: ["coarse"] }, destinations: [{ id: "a", label: "A", screen: "a" }],
+      screens: [{ id: "a", title: "A", pattern: "FormPage", stories: ["US-086"], actions: [{ id: "on", label: "On", to: "external" }] }],
+      journeys: [{ id: "J-a", story: "US-087", criteria: ["US-087-AC1", "US-087-AC99"], entry: "a", steps: [{ screen: "a" }] }] };
+    const res = (await call("check_blueprint", { blueprint: plan })).data;
+    assert.deepEqual(res.findings, checkBlueprint(plan, { helix: readStories(join(process.cwd(), "app.blueprint.json")) }));
+    assert.deepEqual(res.findings.filter((f) => f.rule === "journey.story-covered").map((f) => f.path), ["/journeys/0/criteria/1", "/screens/0/stories/0"]);
+    assert.equal(res.notes, undefined, "this repository has a marker");
+  });
+});
+
+describe("US-089: propose_from_blueprint returns HELIX proposals without writing them", () => {
+  // @covers US-089-AC1
+  test("the same proposals as ux-builder-blueprint propose, and no HELIX document or file is written", async () => {
+    const { makeApp, BLUEPRINT } = await import("../../ui/test/helix-app.mjs");
+    const { propose } = await import("../../ui/blueprint/propose.mjs");
+    const { readdirSync, statSync } = await import("node:fs");
+    const app = makeApp();
+    try {
+      const plan = JSON.parse(readFileSync(BLUEPRINT, "utf8"));
+      const files = () => { const out = []; const walk = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (e.isDirectory()) walk(p); else out.push([p, statSync(p).mtimeMs, readFileSync(p, "utf8")]); } }; walk(app.dir); return out; };
+      const before = files();
+      const res = (await call("propose_from_blueprint", { blueprint: plan, path: app.blueprint })).data;
+      assert.equal(res.written, false);
+      const { marker, ...expected } = propose(plan, { blueprintFile: app.blueprint });
+      assert.deepEqual(res.proposals, expected.proposals);
+      assert.ok(res.proposals.some((p) => p.id === "US-012-walkthrough" && /^\+1\. On \*\*Review queue\*\*/m.test(p.patch)));
+      assert.deepEqual(res.disagreements.map((d) => d.path), ["docs/helix/01-frame/user-stories/US-013-add-an-entry.md"]);
+      assert.deepEqual(files(), before, "nothing in the app changed");
+      const none = await call("propose_from_blueprint", { blueprint: plan, path: join(tmpdir(), "no-marker-here", "app.blueprint.json") });
+      assert.equal(none.isError, true);
+      assert.match(none.content[0].text, /\.helix\.yml/);
+    } finally { rmSync(app.dir, { recursive: true, force: true }); }
+  });
+});
+
 describe("FEAT-009 AGW-04: the SDK as the app has it", () => {
   // @covers US-057-AC4
   test("run from an app's directory, the server serves that app's installed @ux-builder/ui catalogue and guidance", async () => {
@@ -205,5 +289,24 @@ describe("FEAT-009: the UX assessment's checks over MCP", () => {
       const bad = (await call("validate_assessment_report", { dir: run })).data;
       assert.equal(bad.valid, false);
     } finally { rmSync(run, { recursive: true, force: true }); }
+  });
+});
+
+describe("US-084: check_card checks an Adaptive Card over MCP", () => {
+  // @covers US-084-AC6
+  test("check_card returns the same findings as checkCard", async () => {
+    const draft = {
+      type: "AdaptiveCard", version: "1.6",
+      body: [{ type: "TextBlock", text: "Order" }, { type: "Input.Text", id: "q", placeholder: "Quantity" }, { type: "ColumnSet", columns: [1, 2, 3, 4].map(() => ({ type: "Column", items: [] })) }],
+      actions: Array.from({ length: 7 }, (_, i) => ({ type: "Action.Submit", title: "Option " + (i + 1) })),
+    };
+    for (const card of [draft, CLEAN, PAY_INVOICE, { type: "NotACard" }]) {
+      const res = (await call("check_card", { card })).data;
+      assert.deepEqual(res.findings, checkCard(card));
+      assert.equal(res.warnings, checkCard(card).filter((f) => f.severity === "warning").length);
+    }
+    const rules = (await call("check_card", { card: draft })).data.findings.map((f) => f.rule);
+    for (const r of ["card.actions-few", "card.input-label", "card.columns-few"]) assert.ok(rules.includes(r), r);
+    assert.deepEqual((await call("check_card", { card: CLEAN })).data.findings, []);
   });
 });

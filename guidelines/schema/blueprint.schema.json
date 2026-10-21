@@ -167,8 +167,32 @@
             "items": {
               "$ref": "#/$defs/modal"
             }
+          },
+          "ai": {
+            "$ref": "#/$defs/ai"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/action"
+            }
+          },
+          "stories": {
+            "description": "The HELIX stories this screen serves (US-<n>); with a HELIX marker, each needs a journey (journey.story-covered).",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^US-[0-9]+$"
+            }
           }
         }
+      }
+    },
+    "journeys": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/journey"
       }
     }
   },
@@ -228,6 +252,254 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/modal"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action"
+          }
+        }
+      }
+    },
+    "ai": {
+      "description": "What AI does on this screen (FEAT-011, CONTRACT-005 AI and agent experience).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roles"
+      ],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "generative",
+              "assistant",
+              "agent"
+            ]
+          }
+        },
+        "acts": {
+          "type": "boolean"
+        },
+        "highImpactActions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approval": {
+                "enum": [
+                  "each",
+                  "plan",
+                  "none"
+                ]
+              }
+            }
+          }
+        },
+        "renders": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "region": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "compact",
+              "medium",
+              "expanded",
+              "large",
+              "extra-large"
+            ]
+          }
+        },
+        "essential": {
+          "type": "boolean"
+        },
+        "fallback": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dataLeavesDevice": {
+          "type": "boolean"
+        },
+        "consent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "takeover": {
+          "type": "boolean"
+        }
+      }
+    },
+    "action": {
+      "description": "Something a user does on a screen or modal, and where it leads (FEAT-012, CONTRACT-005 Flows and journeys).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "to"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to": {
+          "description": "A screen id, modal:<modal id>, back, state:<state> or external.",
+          "type": "string",
+          "minLength": 1
+        },
+        "primary": {
+          "type": "boolean"
+        },
+        "destructive": {
+          "enum": [
+            "undo",
+            "confirm",
+            "none"
+          ]
+        },
+        "highImpact": {
+          "enum": [
+            "each",
+            "plan",
+            "none"
+          ]
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "screen"
+      ],
+      "properties": {
+        "screen": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "enum": [
+            "empty",
+            "loading",
+            "error"
+          ]
+        },
+        "expect": {
+          "enum": [
+            "empty",
+            "loading",
+            "error"
+          ]
+        },
+        "scenario": {
+          "enum": [
+            "normal",
+            "errorProne",
+            "risky"
+          ]
+        }
+      }
+    },
+    "journey": {
+      "description": "A story's path through the flow, with alternates (FEAT-012, CONTRACT-005 Flows and journeys).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "story",
+        "entry",
+        "steps"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^J-[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "story": {
+          "type": "string",
+          "pattern": "^US-[0-9]+$"
+        },
+        "criteria": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^US-[0-9]+-AC[0-9]+$"
+          }
+        },
+        "entry": {
+          "type": "string",
+          "minLength": 1
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "alternates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "steps"
+            ],
+            "properties": {
+              "from": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/step"
+                }
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scenario": {
+                "enum": [
+                  "normal",
+                  "errorProne",
+                  "risky"
+                ]
+              }
+            }
           }
         }
       }

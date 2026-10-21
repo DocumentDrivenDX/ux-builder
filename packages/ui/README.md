@@ -115,7 +115,12 @@ checkBlueprint(JSON.parse(readFileSync("app.blueprint.json", "utf8")));         
 The command `ux-builder-blueprint` does the same from a shell:
 `ux-builder-blueprint init [--kind app|view]` writes a starting
 `app.blueprint.json`, and `ux-builder-blueprint check app.blueprint.json`
-prints each finding and exits 1 on an error. The rules, recipes and the
+prints each finding and exits 1 on an error. From a blueprint's actions
+and journeys (FEAT-012), `ux-builder-blueprint propose` drafts HELIX
+content as patches it never applies, `draw` writes the IA map, flow and
+journey diagrams as Mermaid and SVG, and `wireframes` renders each screen's
+pattern at each supported size class as HTML and PNG (PNG needs
+`playwright` and its Chromium); see the repository README. The rules, recipes and the
 blueprint schema are also in `catalogue.json` (`interaction`) and in
 `AGENTS.md`.
 
@@ -171,6 +176,18 @@ Phosphor, Tabler, Font Awesome) and loader libraries, naming the SDK's
 counterpart. `ux-builder/no-inline-svg` reports `<svg>` written in JSX: use
 `<Icon>`, `@ux-builder/ui/icons` or `registerIcons`. Lint reads source; for
 what only the running app shows, run `@ux-builder/audit`.
+
+`ux-builder/ai-neutral-voice` (a warning, US-081) checks the copy around AI
+features in JSX text and string attributes. "I think", "I feel", "I
+understand", "I believe" and their variants present the AI as a person (rule
+`ai.not-a-person`); a label like "Copilot, summarize" makes the AI the actor
+(`ai.user-initiates`): write "Summarize" or "Summarize with Copilot". It checks
+English only, and not text the model writes at run time. A brand with a
+deliberate persona opts a string out with `// ux-builder-ai-persona` (or
+`{/* ux-builder-ai-persona */}` in JSX children) on the line before it.
+
+`uxBuilder.configs.recommended` turns on all four rules, with the voice rule
+as a warning: `export default [{ files: ["src/**/*.jsx"], ...uxBuilder.configs.recommended }]`.
 
 ### Icons
 

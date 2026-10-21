@@ -9,12 +9,17 @@
    coverage.json as not-assessed or not-applicable, so nothing can pass by
    being left out. A journey whose role's credential variable (auth.env) is
    not set meets an authentication barrier: its pairs start blocked, with
-   the reason, and the plan stage is partial (AGW-02). Also merges findings
-   and gives them stable IDs (FND-03). */
+   the reason, and the plan stage is partial (AGW-02). A blueprint journey
+   (FEAT-012 ASM-01) also lists its steps, and each alternate as a
+   walkthrough of one journey-and-state pair (US-088-AC4); an AI journey
+   (FEAT-011 AIX-01, AIX-02) its rubric of AI heuristics and its three
+   scenario walkthroughs (US-082-AC2). Also merges findings and gives them
+   stable IDs (FND-03). */
 
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { aiHeuristics, catalogueRules, rolesOf, walkthroughs } from "./ai.mjs";
 import { STATES } from "./manifest.mjs";
 
 const read = (dir, f) => JSON.parse(readFileSync(join(dir, f), "utf8"));
@@ -26,6 +31,7 @@ export function plan({ manifest, resolved, out, run, agent, model, env = process
   if (!existsSync(join(dir, "traceability.json"))) { const e = new Error(`no traceability.json in ${dir}: run assess collect --run ${run} first`); e.code = "blocked"; throw e; }
   const req = read(dir, "requirements.json"), trace = read(dir, "traceability.json");
   const stories = new Map(req.stories.map((s) => [s.id, s])), criteria = new Map(req.criteria.map((c) => [c.id, c]));
+  const rules = (resolved.journeys ?? []).some((j) => j.ai === true) ? catalogueRules(resolved.run.cwd) : null;
   const journeys = (resolved.journeys ?? []).map((j) => {
     const t = trace.journeys.find((x) => x.id === j.id) ?? { criteria: [] };
     const applies = j.states?.length ? j.states : STATES;
@@ -36,6 +42,8 @@ export function plan({ manifest, resolved, out, run, agent, model, env = process
       expected: t.criteria.map((c) => criteria.get(c.id)?.text).filter(Boolean),
       reuses: [...new Set(t.criteria.flatMap((c) => c.tests.map((x) => x.file)))],
       states: STATES.map((state) => applies.includes(state) ? { state, applies: true } : { state, applies: false, reason: j.notApplicable?.[state] ?? "not listed in the manifest's states" }),
+      ...blueprintPart(j, applies),
+      ...(j.ai === true ? aiPart(j, rules) : {}),
     };
   });
   write(dir, "plan.json", { schema: "plan", version: 1, run, journeys });
@@ -62,6 +70,38 @@ export function plan({ manifest, resolved, out, run, agent, model, env = process
   rec.stages = [...(rec.stages ?? []).filter((s) => s.stage !== "plan"), { ...stage, finishedAt: new Date().toISOString() }];
   write(dir, "run.json", rec);
   return { dir, journeys, entries, stage };
+}
+
+/* A blueprint state (CONTRACT-005 steps' state and expect) as the assessment's state class. */
+const STATE_CLASS = { empty: "empty", loading: "loading", error: "recoverable-error" };
+const pairId = (journey, state) => `S-${journey.replace(/^J-/, "")}-${state}`;
+
+/* A blueprint journey's steps, and each alternate as a walkthrough of one
+   journey-and-state pair (FEAT-012 ASM-01; US-088-AC4). An alternate's state
+   is the first state class its steps reach (state or expect); an error-prone
+   alternate without one is recoverable-error; otherwise success. */
+function blueprintPart(j, applies) {
+  if (j.entryKind !== "screen") return {};
+  const steps = (j.steps ?? []).map((s, i) => ({ n: i + 1, ...s }));
+  const alternates = (j.alternates ?? []).map((a, k) => {
+    const reached = (a.steps ?? []).map((s) => STATE_CLASS[s.state] ?? STATE_CLASS[s.expect]).find(Boolean);
+    const state = reached ?? (a.scenario === "errorProne" ? "recoverable-error" : "success");
+    return {
+      n: k + 1, from: a.from, fromStep: a.from + 1, ...(a.reason ? { reason: a.reason } : {}), ...(a.scenario ? { scenario: a.scenario } : {}),
+      steps: (a.steps ?? []).map((s, i) => ({ n: i + 1, ...s })), state, pair: pairId(j.id, state), applies: applies.includes(state),
+    };
+  });
+  return { blueprint: j.blueprint, entryKind: "screen", steps, alternates };
+}
+
+/* An AI journey's rubric and its three scenario walkthroughs (FEAT-011
+   AIX-01 to AIX-03; US-082-AC2). */
+function aiPart(j, catalogue) {
+  const { roles, source } = j.aiRoles ?? rolesOf(null, null);
+  return {
+    ai: { roles, roleSource: source, catalogue: catalogue?.version ?? null, heuristics: aiHeuristics(catalogue?.rules ?? [], roles), findings: "each finding of this journey names one of these rules (rule)" },
+    walkthroughs: walkthroughs(j).map((w) => ({ ...w, pair: pairId(j.id, w.state) })),
+  };
 }
 
 /* What makes two runs comparable (RUN-03): the app, its flow and its journeys. */

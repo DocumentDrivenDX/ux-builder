@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "kind": "app",
+  "name": "Time review",
+  "supports": { "sizeClasses": ["compact", "expanded"], "inputs": ["coarse", "fine"] },
+  "destinations": [
+    { "id": "review", "label": "Review", "screen": "queue" },
+    { "id": "entries", "label": "Entries", "screen": "list" },
+    { "id": "settings", "label": "Settings", "screen": "settings" }
+  ],
+  "screens": [
+    { "id": "queue", "title": "Review queue", "pattern": "WorkQueue", "states": ["empty", "loading", "error"], "stories": ["US-012"],
+      "actions": [
+        { "id": "open", "label": "Open entry", "to": "entry" },
+        { "id": "help", "label": "Help", "to": "external" }
+      ] },
+    { "id": "entry", "title": "Entry", "pattern": "RecordDetail", "states": ["empty", "loading", "error"], "stories": ["US-012"],
+      "actions": [
+        { "id": "approve", "label": "Approve", "to": "queue", "primary": true },
+        { "id": "reject", "label": "Reject", "to": "modal:reject-reason", "destructive": "undo" },
+        { "id": "retry", "label": "Try again", "to": "state:loading" },
+        { "id": "back", "label": "Back", "to": "back" }
+      ],
+      "modals": [
+        { "id": "reject-reason", "title": "Reject entry", "kind": "dialog", "dismiss": "cancel",
+          "actions": [{ "id": "send", "label": "Reject", "to": "back", "destructive": "undo" }] }
+      ] },
+    { "id": "list", "title": "Entries", "pattern": "CollectionList", "states": ["empty", "loading", "error"], "stories": ["US-013"],
+      "actions": [{ "id": "new", "label": "New entry", "to": "form", "primary": true }, { "id": "open", "label": "Open", "to": "entry" }] },
+    { "id": "form", "title": "New entry", "pattern": "FormPage", "actions": [{ "id": "save", "label": "Save", "to": "list" }, { "id": "cancel", "label": "Cancel", "to": "back" }] },
+    { "id": "settings", "title": "Settings", "pattern": "SettingsPage" },
+    { "id": "legacy", "title": "Legacy report", "pattern": "OldReportScreen", "actions": [{ "id": "back", "label": "Back", "to": "back" }] }
+  ],
+  "journeys": [
+    { "id": "J-review", "story": "US-012", "criteria": ["US-012-AC1", "US-012-AC2"], "entry": "queue",
+      "steps": [
+        { "screen": "queue", "action": "open" },
+        { "screen": "entry", "action": "approve" },
+        { "screen": "queue", "expect": "empty" }
+      ],
+      "alternates": [
+        { "from": 1, "reason": "The entry is wrong", "steps": [{ "screen": "entry", "action": "reject" }, { "screen": "modal:reject-reason", "action": "send" }, { "screen": "entry" }] },
+        { "from": 1, "reason": "Saving fails", "scenario": "errorProne", "steps": [{ "screen": "entry", "state": "error", "action": "retry" }] }
+      ] },
+    { "id": "J-add", "story": "US-013", "criteria": ["US-013-AC1"], "entry": "list",
+      "steps": [
+        { "screen": "list", "action": "new" },
+        { "screen": "form", "action": "save" },
+        { "screen": "list" }
+      ] }
+  ]
+}

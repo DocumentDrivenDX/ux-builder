@@ -168,6 +168,13 @@ a rule, blueprint or page without these fields behaves as before.
 | `consent` | string | no | The screen or modal `id` where the user consents |
 | `takeover` | boolean | no | `true`: the user can take over from the agent and hand back |
 
+*[Amended 2026-10-21 — build of FEAT-011 step 2]* `highImpactActions[].approval`
+may be omitted; it is then treated as `"none"` and warned on
+(`agent.approve-high-impact`, US-077-AC2), not a schema error. `fallback`
+may also name a destination `id` (FEAT-011 AIB-01: "the screen or
+destination"). Inside `ai`, a `blueprint.valid` message for a value outside
+its enum names the value.
+
 ### AI markup
 
 Attributes the audit reads. SDK components emit them, and apps with their
@@ -181,6 +188,65 @@ own AI UI MUST add them to get audit coverage.
 | `data-piq-ai="approval"` | A request for the user's approval | An approve and a deny control (`data-piq-ai-control="approve"`, `"deny"`); neither focused by default to submit, nor pre-checked |
 | `data-piq-ai-actor="agent" \| "user"` | The region stating who is acting now (takeover) | A live region; the value changes on takeover and hand-back |
 | `data-piq-ai-label` | An ancestor whose visible text discloses AI for everything inside | — |
+
+*[Amended 2026-10-21 — build of FEAT-011 step 3]* The audit checks
+(`ux-builder-audit`, CONTRACT-004) needed markers the table above lacks, and
+details it left open. The additions, all optional:
+
+| Marker | On | Companions the audit looks for |
+|---|---|---|
+| `data-piq-screen="<screen id>"` | The page's root (or any ancestor of the AI markup): the blueprint screen it shows | With `--blueprint`, a marked element belongs to the screen its nearest `data-piq-screen` names; that screen's `ai.roles` and `ai.takeover` apply. AI markup with no `data-piq-screen`, or naming a screen the blueprint lacks, is reported by `ai.declared` |
+| `data-piq-ai-takeover` | The agent's region, when the user can take over and hand back (as `ai.takeover: true` in the blueprint); `="false"` turns it off | A `data-piq-ai-actor` element with text, in a live region (it or an ancestor has `aria-live` other than `off`, or `role` `status`, `log` or `alert`) |
+| `data-piq-ai-status="done"` on `data-piq-ai="status"` | The status region of a run that has finished | A visible `data-piq-ai="summary"` with text |
+| `data-piq-ai="summary"` | What a finished run did | — |
+| `data-piq-ai="prompt"` | The field, or the element holding it, where the user asks the AI | With no generated content on the page (an empty conversation), at least one visible `data-piq-ai-control="starter"`; with starters, the field can be typed in (not `disabled`, `readonly` or `aria-disabled`) |
+| `data-piq-ai-control="starter"` | A suggested starting point | — |
+| `data-piq-ai-control="previous"` | Returns a failed run to the previous step | — |
+
+How the audit decides each companion:
+- **Disclosure** (`ai.disclose`): the outermost `generated` element, or an
+  ancestor, has `data-piq-ai-label` and is visible with text (its own or the
+  attribute's value); or a visible descendant has `data-piq-ai-label` (a
+  badge); or `aria-describedby` names a visible element with text.
+  Generated content inside generated content shares the outer one's
+  disclosure and correction.
+- **In or beside**: inside the element, or inside its parent. A control is
+  **reachable** when it is visible, not `disabled` or `aria-disabled`, and
+  not `tabindex="-1"`. Controls are named by `aria-label`,
+  `aria-labelledby`, text, `value` or `title`; besides
+  `data-piq-ai-control`, a control named "Retry", "Try again",
+  "Regenerate", "Edit" or "Undo" corrects, and one named "Previous", "Go
+  back", "Back to …" or "Return to …" returns.
+- **A running agent** (`agent.interrupt`): a busy status region on a page
+  with agent markup (`plan`, `step`, `approval`, `data-piq-ai-actor` or
+  `data-piq-ai-takeover`), or on a screen whose blueprint `ai.roles`
+  includes `agent`. Any reachable control on the page named "Stop" or
+  "Pause" satisfies it; `ai.stop` still wants one in or beside the status.
+- **Chosen for the user** (approval): `checked`, a `selected` option,
+  `aria-pressed`, `aria-checked` or `aria-selected` `"true"`, or
+  `autofocus`.
+- **Status in text**: the step's text or an `aria-label` in it says the
+  status or a plain synonym (for example done: complete, finished; running: in
+  progress, working; pending: waiting, queued, not started, next; failed:
+  error, could not; skipped).
+- **A failure described** (`agent.recover`): text at a `failed` step beyond
+  its title (its heading, else its first text) and its status word, or an
+  `aria-describedby` description; and a `retry` or `previous` control in
+  the step or its plan.
+- **Pre-filled inline UI** (`genui.review-prefill`): a `generated` element's
+  inputs with a value (a `checked` box, a `selected` option) are not
+  `disabled`, `readonly`, `aria-readonly` or `aria-disabled`, and the
+  element has a visible submit control of its own, in a form that is not
+  the conversation's (`data-piq-ai="prompt"`) form.
+- **Rendered cards** (ADR-029): every visible input in a `generated` element
+  has a label of its own (`aria-label`, `aria-labelledby`, a `label`, or
+  `title`; a placeholder is not one) (`card.input-label`); with `--width`
+  below 600px, an outermost `generated` element neither overflows itself
+  nor reaches past the viewport (`card.narrow-first`).
+
+*[Amended 2026-10-21 — integration of FEAT-007 and the AI audit checks]*:
+- Generated content inside an element with `aria-busy="true"` is still arriving. It is not checked for a correction control until it ends, and Stop is its control meanwhile (`ai.stop`).
+- A step's status may be stated in any text node within the step, for example a separate `<span>`.
 
 ### Findings and checks
 
@@ -245,6 +311,44 @@ Modals gain the same `actions[]`; `back` from a modal returns to its screen.
 `journey.walkable`, `journey.safeguarded`, `journey.covers-errors` and
 `journey.story-covered` are warnings. `flow.target-exists` is an error.
 Findings use the *Finding* shape.
+
+*[Amended 2026-10-21 — build of FEAT-012 step 2]* Details the build had to
+settle; the smallest additions that make the checks decidable:
+- **`screens[].stories`** (`US-<n>`[], optional): the HELIX stories a screen
+  serves. US-087-AC4 needs to know which stories "an app screen serves",
+  and nothing above said. With a HELIX marker, each needs a journey.
+- **`checkBlueprint(blueprint, { helix }?)`**: `helix` is
+  `{ stories: { "US-<n>": { criteria: ["US-<n>-AC<m>", …] } } }`. The library
+  reads no files; `ux-builder-blueprint check` reads the stories under the
+  `.helix.yml` found walking up from the blueprint file (to the git root),
+  never writing. Without stories the story checks are skipped, and the
+  command says so (a `note` line; with `--json`, on stderr, so stdout stays
+  the findings array).
+- **Story findings** (a story a screen serves with no journey, a story or
+  criterion HELIX lacks) all report `journey.story-covered`. A criterion
+  that is not of the journey's own story (`US-13-AC1` in a `US-12` journey)
+  is a `blueprint.valid` error, as the field's rule says.
+- **A step on a modal** names it `"screen": "modal:<id>"`, a modal of the
+  screen the journey is on.
+- **Targets**: `state:<s>` exists when `s` is `empty`, `loading`, `error`,
+  a state the screen declares, or a status of its pattern. An action in a
+  modal opens (`modal:`) a modal of the same screen.
+- **Reachability** starts at the destinations (a view: its first screen) and
+  follows every action of a reached screen and of its modals. The blueprint
+  has no per-size-class navigation yet, so a finding names every supported
+  size class.
+- **Dead ends**: only screens and modals that declare `actions` are
+  checked; an entry screen (a destination, or a view's first screen) is
+  never one, since the app's navigation or the host leads on, and a modal's
+  `dismiss` is a way back.
+- **Error coverage**: a screen on the journey's steps that declares
+  `error` needs an alternate with a step on it whose `state` or `expect` is
+  `error`.
+- **Views of one list** (FLW-03): an action whose label is in
+  `destructiveActions` or `ai.highImpactActions` takes its safeguard or
+  approval from there; `actions[].destructive: "none"` is reported by
+  `action.destructive-safeguard` as `destructiveActions` is, and
+  `actions[].highImpact` counts as a declared high-impact action.
 
 ## Error Semantics
 

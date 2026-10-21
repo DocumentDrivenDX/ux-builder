@@ -17,7 +17,7 @@ ddx:
 **Contract ID**: CONTRACT-006 — UX assessment
 **Type**: data formats, library API and command (the manifest, the run package and its records, `inspect()`, and `ux-builder-audit assess`)
 **Version**: v1 (from `@ux-builder/audit` 0.2.0)
-**Status**: draft — 2026-10-20, with ADR-026; amended 2026-10-21 to match the shipped `assess` commands and records (AR-2026-10-21 C1–C6)
+**Status**: draft — 2026-10-20, with ADR-026; amended 2026-10-21 to match the shipped `assess` commands and records (AR-2026-10-21 C1–C6); amended 2026-10-21 with the build of AI journeys (FEAT-011 step 6) and blueprint journeys (FEAT-012 step 3), see *AI and blueprint journeys*
 **Related**: FEAT-009, ADR-026, CONTRACT-004 (the audit's library and command), CONTRACT-005 (rule IDs), HELIX's artifact schema and marker
 
 ## Purpose
@@ -46,6 +46,7 @@ YAML at the app's root. Unknown keys are errors. JSON Schema:
 | `version` | `1` | yes | Manifest schema version |
 | `app.name` | string | yes | |
 | `app.repository` | string | no | URL; recorded, not fetched |
+| `blueprint` | path | no | *[Amended 2026-10-21 — FEAT-012 step 3]* The app's blueprint (CONTRACT-005), where `journeys[].blueprint` is resolved. Default: `app.blueprint.json` beside the manifest. A path that does not exist fails validation |
 | `helix.marker` | path | no | Default: the first `.helix.yml` walking up from the manifest to the git root, as HELIX discovers it |
 | `helix.flow` | string | when the marker lists two or more flows and has no `defaults.flow` | A flow `id` in the marker |
 | `helix.catalog` | `auto` or path | no | Default `auto`: HELIX's order (marker `graph:`/`catalog:`, vendored `workflows/`, a HELIX skill installed in the project at `.claude/skills/helix/references/` — next to the marker, then at the repository root — then an installed plugin); a path names a catalogue root holding `graph.yml`. `run.json` records which bound: `manifest`, `marker`, `repository`, `project-skill`, `plugin` or `none` |
@@ -59,17 +60,17 @@ YAML at the app's root. Unknown keys are errors. JSON Schema:
 | `roles[]` | `{ id, description?, auth? }` | yes (≥ 1) | `auth`: `{ env: NAME }` or `{ storageState: path }` or `none` |
 | `fixtures[]` | `{ id, setup?, reset? }` | no | Commands; `reset` runs between scenarios |
 | `journeys[]` | object | yes (≥ 1) | Below |
-| `journeys[].id` | string | yes | `J-` + kebab-case |
-| `journeys[].story` | HELIX ID | yes | A `US-<n>` that exists in the flow |
+| `journeys[].id` | string | yes (no, with `blueprint`) | `J-` + kebab-case; with `blueprint`, default the blueprint journey's `id` |
+| `journeys[].story` | HELIX ID | yes (not with `blueprint`) | A `US-<n>` that exists in the flow |
 | `journeys[].criteria` | HELIX AC ID[] | no | Each `US-<n>-AC<m>` of that story; default all |
 | `journeys[].priority` | `critical`, `important`, `secondary` | yes | Feeds ranking |
 | `journeys[].role`, `.fixture` | id | yes, no | Defined above |
-| `journeys[].entry` | path or URL | yes | Within `origins` |
+| `journeys[].entry` | path or URL | yes (not with `blueprint`) | Within `origins` |
 | `journeys[].states` | state class[] | no | Default: every class; others `not applicable` need a reason |
 | `journeys[].tests` | `{ file, title? }[]` | no | Explicit test mappings in addition to `@covers` |
-| `journeys[].blueprint` | string | no | *[Amended 2026-10-21 — planned, FEAT-012, ADR-030]* A blueprint journey `id`. The story, criteria, entry and steps then come from the app's blueprint. Given with `story` or `entry`, the manifest is refused |
-| `journeys[].ai` | boolean | no | *[Amended 2026-10-21 — planned, FEAT-011]* `true`: an AI journey; `scenarios` is then required |
-| `journeys[].scenarios` | object | if `ai` | *[Amended 2026-10-21 — planned]* `{ normal, errorProne, risky }`, each `{ description, inputs?, step? }`. `risky.step` names the high-impact step; the walkthrough stops there, chooses Deny, and never approves (ADR-028 decision 8) |
+| `journeys[].blueprint` | string | no | *[Amended 2026-10-21 — FEAT-012, ADR-030; built in step 3]* A blueprint journey `id`. The story, criteria, entry and steps then come from the app's blueprint. Given with `story`, `criteria` or `entry`, the manifest is refused naming both definitions; an `id` the blueprint lacks, or no blueprint, is refused naming the ID |
+| `journeys[].ai` | boolean | no | *[Amended 2026-10-21 — FEAT-011; built in step 6]* `true`: an AI journey; `scenarios` is then required |
+| `journeys[].scenarios` | object | if `ai` | *[Amended 2026-10-21 — built in FEAT-011 step 6]* `{ normal, errorProne, risky }`, each `{ description, inputs?, step? }`; each one missing is reported. `risky.step` names the high-impact step (a 1-based walkthrough step number, or the action's label), and is required unless a blueprint step has `scenario: "risky"`; the walkthrough stops there, chooses Deny, and never approves (ADR-028 decision 8) |
 | `tests[]` | `{ id, command, report?: { format: junit \| playwright-json \| node-tap, path } }` | no | Functional test commands |
 | `audit` | `{ urls?, widths?, themes?, appearances?, off? }` | no | As CONTRACT-004's options |
 | `evidence.out` | path | no | Default `ux-assessment/` |
@@ -134,11 +135,11 @@ against `@ux-builder/audit/schema/<name>.schema.json`.
 
 **`baseline.json`**: `{ tests: [{ id, command, status: passed | failed | not-run | error, exitCode?, durationMs?, counts: { passed, failed, skipped } | "unknown", log: path }], audit: { report: path, versions, off: [check], unsupported: [check], findings: { usability: n, sdkAdoption: n } }, note: "Passing functional tests do not show that usability criteria are met." }`.
 
-**`inspection.json`**: `{ checkpoint: { id, journey?, step?, role?, state? }, inspectedAt, steps, url, viewport: { width, height }, theme?, appearance?, mode: in-place | replay, verified?: { assertion, passed }, skipped: [check], stateAffecting: { ran: [check], restored: boolean }, findings: [audit finding + { checkpoint }], screenshot: path | null, tree: path | null }`. `steps` counts toward `limits.steps` (1, plus a replay's actions). A checkpoint not inspected has `error: lost | ambiguous | no-browser | restricted | limit | error`, a `message`, and no findings; `restricted` and `limit` messages start `blocked: restricted` and `blocked: limit`.
+**`inspection.json`**: `{ checkpoint: { id, journey?, step?, role?, state?, scenario? }, inspectedAt, steps, url, viewport: { width, height }, theme?, appearance?, mode: in-place | replay, scenario?: normal | errorProne | risky, verified?: { assertion, passed }, skipped: [check], stateAffecting: { ran: [check], restored: boolean }, risky?: { highImpactStep, stoppedAt, approval: { text, controls, approve, deny, focused, screenshot } | null, denied, approved: false }, errorProne?: { errorShown, errorShownInPlace, error, recoveryWithoutRestart, controls, requestEditable, rules }, findings: [audit finding + { checkpoint }], screenshot: path | null, tree: path | null }`. *[Amended 2026-10-21 — FEAT-011 step 6]* `scenario`, `risky` and `errorProne` are written for an AI scenario (`inspect --scenario`); their findings carry the AI `rule`. `steps` counts toward `limits.steps` (1, plus a replay's actions). A checkpoint not inspected has `error: lost | ambiguous | no-browser | restricted | limit | error`, a `message`, and no findings; `restricted` and `limit` messages start `blocked: restricted` and `blocked: limit`.
 
 **Coverage entry**: `{ journey, state, status: assessed | blocked | not-assessed | not-applicable, reason, outcome?: pass | issue, checkpoints: [id], evidence: [ref] }`. `assessed` requires `outcome` and at least one evidence reference.
 
-**Finding** (`backlog.json` `findings[]`): `{ id, run_id, title, finding_type: deterministic | observed | heuristic | sdk-adoption | real-user, journey_id, state_id, role, source_refs: [HELIX ID], test_refs: [ref], evidence_refs: [ref], observed_behavior, expected_behavior_or_proposed_requirement, recommendation, component_mapping: [{ name, kind: pattern | widget, version, catalogue_ref, work: composition | custom-gap | sdk-defect }], priority: P0 | P1 | P2 | P3, confidence: { level: high | medium | low, reason }, effort: S | M | L | unknown, dependencies: [id], verification, proposed_doc_changes: [proposal id], status: open | accepted | rejected | deferred, uncertainty?, qualified?: [alignment] }`. A finding with no `evidence_refs` must have `uncertainty`; one citing a HELIX ID that `alignment.json` lists in a conflict must have `qualified: [alignment]`.
+**Finding** (`backlog.json` `findings[]`): `{ id, run_id, title, finding_type: deterministic | observed | heuristic | sdk-adoption | real-user, journey_id, state_id, role, source_refs: [HELIX ID], test_refs: [ref], evidence_refs: [ref], observed_behavior, expected_behavior_or_proposed_requirement, recommendation, component_mapping: [{ name, kind: pattern | widget, version, catalogue_ref, work: composition | custom-gap | sdk-defect }], priority: P0 | P1 | P2 | P3, confidence: { level: high | medium | low, reason }, effort: S | M | L | unknown, dependencies: [id], verification, proposed_doc_changes: [proposal id], status: open | accepted | rejected | deferred, uncertainty?, qualified?: [alignment], rule? }`. *[Amended 2026-10-21 — FEAT-011 AIX-03]* `rule`: the interaction rule or heuristic the finding is about (a CONTRACT-005 rule ID); required for a finding of an AI journey, and one of that journey's `plan.json` `ai.heuristics`. A finding with no `evidence_refs` must have `uncertainty`; one citing a HELIX ID that `alignment.json` lists in a conflict must have `qualified: [alignment]`.
 
 **Proposal** (`proposals.json` `proposals[]`): `{ id, findings: [id], target: { kind: existing, id, type, path, revision, hash } | { kind: new, type, id, path, template: { source, catalog, version } }, change: new-requirement | unmet-criterion | scope, decision_needed?: prd | vision, patch: path, test_change: { path?, description }, plan: { writes, keeps, dependencies, verification }, evidence_refs }`.
 
@@ -185,11 +186,17 @@ The default manifest path is `ux-assessment.yml` in the current directory.
 Every command that takes `--out` reads the run package from `<out>/<run>/`
 (default the manifest's `evidence.out`).
 
-A replay file is `{ baseUrl, viewport?, steps: [{ goto } | { click } | { fill, value } | { press } | { waitFor }, each with an optional action?: <action class>], expect: { selector, text? } }`.
+A replay file is `{ baseUrl, viewport?, steps: [{ goto } | { click } | { fill, value } | { press } | { waitFor }, each with an optional action?: <action class> and highImpact?: true], expect: { selector, text? } }` (`expect` optional with `--scenario risky`).
 Before a replay takes any step, it refuses (`blocked: restricted`, nothing
 taken) a step whose `action` is denied or not in `restrictions.allow`, and a
 `goto` outside `run.origins` or to an excluded integration; while it runs,
-requests to such hosts are aborted.
+requests to such hosts are aborted. *[Amended 2026-10-21 — FEAT-011 step 6]*
+An approve control is never activated, as a denied action is never taken:
+a step that names one (a `click` selector on `data-piq-ai-control="approve"`,
+or `action: approve`) is refused before any step is taken, and a `click` or
+`press` that would activate one as the page then is (the element, or the
+focused one, inside `[data-piq-ai-control="approve"]`) is refused when the
+replay reaches it, taking it and nothing after it.
 
 ### Increments 2 and 3 *[Added 2026-10-21]*
 
@@ -244,6 +251,62 @@ Finding IDs are stable: `F-` and a hash of its type, journey, state and
 the problem's key (`key`, or its title), so the same problem in a rerun has
 the same ID.
 
+### AI and blueprint journeys *[Amended 2026-10-21 — build of FEAT-011 step 6 and FEAT-012 step 3]*
+
+`plan.json` journeys gain, for an AI journey (`ai: true`):
+`ai: { roles, roleSource: blueprint | all, catalogue, heuristics: [{ rule, title, statement, roles, review, checks }] }`
+and `walkthroughs: [{ scenario, description, inputs?, state, pair, … }]`, one
+per scenario (`risky` adds `step`, `stop` and `never: "approve"`;
+`errorProne` adds `rules: [agent.recover, ai.improve-request]`). For a
+blueprint journey: `blueprint`, `entryKind: "screen"`, `steps: [{ n, screen, action?, state?, expect?, scenario? }]`
+and `alternates: [{ n, from, fromStep, reason?, scenario?, steps, state, pair, applies }]`.
+
+`inspect` takes `--scenario normal|errorProne|risky` and
+`--high-impact-step n`. With `--scenario risky`, a replay checks for a visible
+approval (`data-piq-ai="approval"`) before each step and after the last; at
+one it saves `approval.png` (per `evidence.capture`), records it, clicks its
+Deny control (`data-piq-ai-control="deny"`) and takes no further step. Reaching
+the high-impact step with no approval, it stops before taking it and records
+a P1 finding `agent.approve-high-impact`; an approval with no Deny control is
+also a P1 `agent.approve-high-impact`, and nothing is chosen. In place, the
+approval on screen is recorded and the agent chooses Deny itself. With
+`--scenario errorProne`, it records what the state shows (`errorProne`) and
+an `agent.recover` or `ai.improve-request` finding for each gap.
+
+Decisions the build had to make, the smallest that make the criteria testable:
+- **Where the blueprint is**: the contract named none; the optional manifest
+  field `blueprint` (path) was added, defaulting to `app.blueprint.json`
+  beside the manifest.
+- **`id` and `criteria` with `blueprint`**: `id` defaults to the blueprint
+  journey's (US-088's example has none); `criteria` restates the blueprint as
+  `story` and `entry` do, so it is refused with them.
+- **The entry is a screen**: a blueprint journey's `entry` is a screen `id`,
+  and the blueprint has no routes, so the `run.origins` check does not apply
+  and `plan.json` marks it `entryKind: "screen"`; the agent reaches it
+  through the app's navigation from `run.baseUrl`.
+- **An alternate's state** is the first state class its steps reach
+  (`state` or `expect`; the blueprint's `error` read as `recoverable-error`);
+  an `errorProne` alternate without one is `recoverable-error`; otherwise
+  `success`. Its pair is `S-<journey>-<state>` and is in the starting
+  coverage matrix like every pair.
+- **`risky.step`** is a 1-based walkthrough step number or the action's
+  label. A replay needs a number (`--high-impact-step`, a step marked
+  `highImpact: true`, or a numeric `risky.step` with `--journey` and the
+  manifest); without one a risky replay is refused (`blocked: restricted`)
+  and takes nothing, since it could not stop before the step.
+- **The journey's AI roles** are its blueprint screens' `ai.roles` (entry,
+  steps and alternates) when it comes from the blueprint and they have any,
+  else every AI role. The heuristics are read from the app's installed
+  `@ux-builder/ui` `catalogue.json` (`interaction.rules` by `when.aiRole`),
+  else this package's.
+- **Error shown in place** is a visible failure inside the AI's markup (a
+  step `data-piq-ai-status="failed"`, or an alert or failure text in a
+  `data-piq-ai` region or under `data-piq-ai-label`); **recovery without
+  restarting** is a visible, enabled `retry`, `edit`, `regenerate` or `undo`
+  control there; **a better request** is possible with an `edit` control or
+  the request kept in its field. These are deterministic proxies; the agent's
+  own observation in `walkthrough.json` stays the judgment.
+
 ### Walkthrough videos *[Amended 2026-10-21 — planned, FEAT-013, ADR-031]*
 
 Field and record changes:
@@ -288,6 +351,9 @@ and lists the videos in `evidence.json`.
 | Replay assertion fails | `inspection.json` `verified.passed: false`, no findings |
 | No browser at `--cdp` | `inspect` exit 1, `error: no-browser`; `walkthrough` stage `blocked` |
 | A step outside the origins, to an excluded integration, or a denied action | Not taken; `inspect` exit 1, `error: restricted` |
+| A replay step that would activate an approve control | Not taken, nor any after it; `inspect` exit 1, `error: restricted` |
+| A risky replay with no high-impact step number | Nothing taken; `inspect` exit 1, `error: restricted` |
+| An AI journey missing a scenario; a blueprint journey with its own story, criteria or entry, or naming an ID the blueprint lacks | `validate` exit 1, each with its path |
 | `runMinutes`, `steps` or `journeyMinutes` spent | Not taken; `inspect` exit 1, `error: limit`; `walkthrough` stage `partial` |
 | A role's `auth.env` not set | `plan` exit 1; that journey's pairs `blocked`; `plan` stage `partial` |
 | A secret in the manifest | `validate` exit 1 naming the field, not the value |

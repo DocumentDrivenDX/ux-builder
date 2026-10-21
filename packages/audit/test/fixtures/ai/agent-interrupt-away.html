@@ -1,0 +1,36 @@
+<!doctype html>
+<!-- A Pause control is reachable, in the header: agent-interrupt passes; ai-stop still wants it beside the status. -->
+<html lang="en" data-theme="praxis-carbon" data-appearance="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Defect</title>
+<link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css">
+<style>body { margin: 0; padding: 16px; font-family: var(--piq-font-body); color: var(--piq-color-text); background: var(--piq-color-ground); } p { margin: 0 0 8px; } button, input, select, textarea { font: inherit; min-block-size: 44px; min-inline-size: 44px; box-sizing: border-box; max-inline-size: 100%; }</style>
+</head>
+<body>
+<header><button id="pause">Pause</button></header>
+<main>
+<h1>Invoice reminders</h1>
+<section id="run" aria-label="Agent run" data-piq-ai-takeover>
+  <p id="actor" data-piq-ai-actor="agent" aria-live="polite">The agent is acting now.</p>
+  <button id="take-over">Take over</button>
+  <div id="status-row">
+    <p id="status" data-piq-ai="status" aria-live="polite" aria-busy="true">Working on step 2 of 3</p>
+    
+  </div>
+  <ol id="plan" data-piq-ai="plan" aria-label="Plan">
+    <li id="step-1" data-piq-ai="step" data-piq-ai-status="done"><span>Find the overdue invoices</span> <span>Done</span></li>
+    <li id="step-2" data-piq-ai="step" data-piq-ai-status="failed"><span>Send the reminders</span> <span>Failed</span>
+      <p>The mail server refused the attachment.</p>
+      <button data-piq-ai-control="retry">Retry</button> <button data-piq-ai-control="previous">Back to the previous step</button></li>
+    <li id="step-3" data-piq-ai="step" data-piq-ai-status="pending"><span>Record what was sent</span> <span>Pending</span></li>
+  </ol>
+  <div id="approval" data-piq-ai="approval" role="group" aria-label="Approve payment">
+    <p>Pay £1,200 to Acme Ltd?</p>
+    <button data-piq-ai-control="approve">Approve</button> <button data-piq-ai-control="deny">Deny</button>
+  </div>
+</section>
+</main>
+</body>
+</html>

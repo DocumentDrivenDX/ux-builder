@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/ui",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "license": "MIT OR Apache-2.0",
   "description": "Widgets for the harness and embedded products: prefixed CSS and React 19 components on @ux-builder/tokens, shaped by whichever theme is on.",
   "type": "module",
@@ -12,6 +12,7 @@
     "licenses",
     "lint",
     "blueprint",
+    "adaptive-cards",
     "catalogue.json",
     "AGENTS.md",
     "skill",
@@ -21,6 +22,11 @@
     ".": "./dist/index.js",
     "./icons": "./dist/icons.js",
     "./patterns": "./dist/patterns.js",
+    "./assistant": "./dist/assistant.js",
+    "./assistant/ai-sdk": "./dist/assistant-ai-sdk.js",
+    "./assistant/assistant-ui": "./dist/assistant-assistant-ui.js",
+    "./adaptive-cards": "./dist/adaptive-cards.js",
+    "./adaptive-cards/check": "./adaptive-cards/check.mjs",
     "./ui.css": "./dist/ui.css",
     "./patterns.css": "./dist/patterns.css",
     "./stylelint": "./lint/stylelint.mjs",
@@ -44,6 +50,8 @@
     "@ux-builder/tokens": "^1.6.0"
   },
   "peerDependencies": {
+    "@assistant-ui/react": ">=0.15 <0.16",
+    "ai": ">=5 <8",
     "eslint": ">=9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -98,6 +106,12 @@
     "directory": "packages/ui"
   },
   "peerDependenciesMeta": {
+    "@assistant-ui/react": {
+      "optional": true
+    },
+    "ai": {
+      "optional": true
+    },
     "stylelint": {
       "optional": true
     },

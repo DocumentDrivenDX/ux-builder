@@ -1,0 +1,16 @@
+/* The generated Reference and Proof pages (reference.jsx), on top of
+   microsite.css. Role tokens only. */
+
+.uxr-package { display: flex; flex-direction: column; gap: var(--piq-space-2); }
+.uxr-package h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--piq-space-3); scroll-margin-block-start: 5rem; }
+.uxr-pre { margin: 0; padding: var(--piq-space-3) var(--piq-space-4); overflow-x: auto; border-radius: var(--piq-radius-card); background: var(--piq-color-surface-sunken); border: var(--piq-border-default); font-family: var(--piq-font-mono); font-size: var(--piq-font-size-small); white-space: pre-wrap; overflow-wrap: anywhere; }
+.uxm-prose .uxr-pre code { padding: 0; background: none; }
+.uxm-prose .uxr-list { margin: 0; padding-inline-start: var(--piq-space-4); gap: var(--piq-space-1); }
+.uxm-prose .uxr-list li { max-inline-size: none; }
+.uxm-prose .uxr-chips { display: flex; flex-wrap: wrap; gap: var(--piq-space-2); padding: 0; list-style: none; flex-direction: row; }
+.uxr-chips li { padding: var(--piq-space-1) var(--piq-space-3); border-radius: var(--piq-radius-control); border: var(--piq-border-default); background: var(--piq-color-surface); }
+.uxr-chips li[data-mapped="no"] { border-color: var(--piq-state-closed); }
+.uxr-demo { display: flex; flex-direction: column; gap: var(--piq-space-3); max-inline-size: 32rem; }
+.uxr-disclaimer { padding: var(--piq-space-4) var(--piq-space-5); border-radius: var(--piq-radius-card); border: var(--piq-border-default); background: var(--piq-color-surface); }
+.uxm-prose .piq-filter-bar .piq-field { min-inline-size: 10rem; }
+.uxm-prose .piq-filter-bar__row { flex-wrap: wrap; align-items: end; }

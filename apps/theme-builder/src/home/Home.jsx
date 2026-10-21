@@ -1,7 +1,12 @@
 import { Button, Card, ChoicePicker, DataTable, Icon, Notice, ProgressBar, Select, StatusPill, Switch, TextField, ThemeProvider } from "@ux-builder/ui";
-import { iconBell, iconBot, iconCheck, iconCopy, iconPalette, iconPlug, iconScanEye, iconShieldCheck, iconSparkles, iconTerminal, iconWand2 } from "@ux-builder/ui/icons";
+import { iconArrowRight, iconBell, iconBot, iconCheck, iconCopy, iconPackage, iconPalette, iconPlug, iconScanEye, iconShieldCheck, iconSparkles, iconTerminal, iconWand2 } from "@ux-builder/ui/icons";
+import catalogue from "@ux-builder/ui/catalogue.json";
 import { useState } from "react";
 import { ROOT } from "../site-root.js";
+import { href } from "../microsite/nav.js";
+import { Conversation } from "../../../../packages/ui/src/assistant/index.js";
+import { useDemoConversation } from "../../../../packages/ui/src/assistant/story-data.js";
+import { PAY_INVOICE } from "../../../../packages/ui/src/adaptive-cards/story-data.js";
 import { AiFrame } from "../../../../packages/ui/ai/stories/frame.jsx";
 import { CodeBlock, CodeBlockCopyButton } from "../../../../packages/ui/ai/vendor/ai-elements/code-block";
 import { Message, MessageContent, MessageResponse } from "../../../../packages/ui/ai/vendor/ai-elements/message";
@@ -20,10 +25,15 @@ import mcpPkg from "../../../../packages/mcp/package.json";
 /* The GitHub Pages home page's sections (tools/build-pages.mjs), shown by the
    site's shell (microsite/Site.jsx). They wear the SDK's own
    ux-builder-databricks theme and are built only from the SDK: its widgets,
-   its AI Components (AI Elements, through the theme's shadcn bridge) and its
-   role tokens. The intro video before the page is in home.html. */
+   its own assistant and Adaptive Cards renderer, the AI Components (AI
+   Elements, through the theme's shadcn bridge) and its role tokens. Counts
+   come from the catalogue. The intro video before the page is in home.html. */
 
 const REPO = "https://github.com/DocumentDrivenDX/ux-builder";
+const count = (kind) => catalogue[kind].filter((x) => x.type === "component").length;
+const ICONS = catalogue.iconLibrary.count.toLocaleString("en");
+// The audit's AI checks: those the AI, agent, generated-UI and card rules name.
+const AI_CHECKS = new Set(catalogue.interaction.rules.filter((r) => /^(ai|agent|genui|card)\./.test(r.id)).flatMap((r) => r.checks.filter((c) => c.kind === "audit").map((c) => c.id))).size;
 
 // The UX Builder brand on each shared design system, light and dark: the build's own resolved tokens.
 const RESOLVED = import.meta.glob("../../../../packages/tokens/dist/resolved/ux-builder.*.json", { eager: true, import: "default" });
@@ -42,10 +52,10 @@ function previewTokens(system, appearance) {
 
 export const PACKAGES = [
   { pkg: tokensPkg, icon: iconPalette, what: "Every theme as CSS, every token's value as JSON, the fonts and brand artwork." },
-  { pkg: uiPkg, icon: iconWand2, what: "React 19 widgets and screen patterns, ThemeProvider, 2,130 icons, lint rules and agent guidance." },
-  { pkg: createPkg, icon: iconSparkles, what: "A new React + Vite app on the SDK from its first commit, with lint, the audit and CI." },
-  { pkg: auditPkg, icon: iconScanEye, what: "Drives the running app through every theme in light and dark and reports anything off-theme." },
-  { pkg: mcpPkg, icon: iconPlug, what: "The SDK over MCP: themes, widgets and props, tokens and icons for any coding agent." },
+  { pkg: uiPkg, icon: iconWand2, what: `React 19 widgets, screen patterns, the assistant and Adaptive Cards, ThemeProvider, ${ICONS} icons, the blueprint, lint rules and agent guidance.` },
+  { pkg: createPkg, icon: iconSparkles, what: "A new React + Vite app on the SDK and on HELIX from its first commit, with lint, the audit, a browser test and CI." },
+  { pkg: auditPkg, icon: iconScanEye, what: "Drives the running app through every theme in light and dark and reports anything off-theme; assesses a HELIX app's journeys." },
+  { pkg: mcpPkg, icon: iconPlug, what: "The SDK over MCP: themes, widgets, tokens, icons and rules, and checks of blueprints and cards, for any coding agent." },
 ];
 
 export function Copy({ text, label = "Copy" }) {
@@ -73,10 +83,10 @@ export function Hero() {
             <a className="uxh-btn" href={REPO}>Star on GitHub</a>
           </div>
           <ul className="uxh-stats" aria-label="In the box">
-            <li><b>32</b><span>widgets</span></li>
-            <li><b>56</b><span>screen patterns</span></li>
-            <li><b>16</b><span>AI components</span></li>
-            <li><b>2,130</b><span>icons</span></li>
+            <li><b>{count("widgets")}</b><span>widgets</span></li>
+            <li><b>{count("patterns")}</b><span>screen patterns</span></li>
+            <li><b>{count("assistant")}</b><span>assistant components</span></li>
+            <li><b>{ICONS}</b><span>icons</span></li>
           </ul>
         </div>
         <HeroApp />
@@ -160,54 +170,87 @@ export function Settings() {
   );
 }`;
 
-/* A coding agent at work, drawn with AI Elements in the page's theme. */
+/* A reply that asks to pay an invoice with an Adaptive Card, as an agent built for Microsoft hosts sends one. */
+const HOME_CHAT = [
+  { id: "u1", role: "user", text: "Pay Acme's October invoice" },
+  { id: "a1", role: "assistant", parts: [
+    { type: "text", text: "Here is the invoice. Check the amount: paying asks for your approval first." },
+    { type: "adaptive-card", id: "invoice", card: PAY_INVOICE },
+  ] },
+];
+const SHOWS = [{ value: "sdk", label: "The SDK's assistant" }, { value: "bridge", label: "AI Elements, bridged" }];
+
+/* AI both ways: the SDK's own assistant with an Adaptive Card in a reply,
+   or a coding agent at work drawn with AI Elements, in the page's theme. */
 export function AiSection() {
+  const [show, setShow] = useState("sdk");
   return (
     <section className="uxh-section uxh-section--ai" aria-labelledby="ai-h">
       <div className="uxh-wrap uxh-ai">
         <div className="uxh-col uxh-gap">
           <span className="uxh-eyebrow"><Icon icon={iconBot} />Built for AI, both ways</span>
           <h2 id="ai-h">Your agent knows the SDK. Your users see your brand.</h2>
-          <p className="uxh-lede">Coding agents read the SDK's generated <code>AGENTS.md</code>, a Claude Code skill and an MCP server that describes the exact version you installed, so what they write follows the rules. And the chat UI you ship (AI Elements or assistant-ui) wears your theme through one stylesheet.</p>
+          <p className="uxh-lede">Coding agents read the SDK's generated <code>AGENTS.md</code>, Claude Code skills and an MCP server that describes the exact version you installed, so what they write follows the rules. The assistant you ship is the SDK's own, with approvals, and Adaptive Cards from Microsoft agents drawn in your theme; or AI Elements and assistant-ui, dressed by one stylesheet.</p>
           <ul className="uxh-checks">
-            <li><Icon icon={iconCheck} />The MCP server answers with real widgets, props and tokens</li>
+            <li><Icon icon={iconCheck} />A conversation that streams, stops, retries and never acts without approval</li>
+            <li><Icon icon={iconCheck} />Adaptive Cards drawn with SDK widgets, checked before they are sent</li>
             <li><Icon icon={iconCheck} />AI Elements and assistant-ui, contrast-checked in every theme</li>
-            <li><Icon icon={iconCheck} />Lint flags any colour, font or radius an agent hard-codes</li>
+            <li><Icon icon={iconCheck} />{AI_CHECKS} audit checks for AI screens, and lint that flags hard-coded values</li>
           </ul>
           <Command text="claude mcp add ux-builder -- npx @ux-builder/mcp" />
-        </div>
-        <AiFrame width="100%">
-          <div className="uxh-chat">
-            {/* A fixed exchange, laid out in full: Conversation would scroll it to its last message. */}
-            <div className="uxh-chat__log">
-                <Message from="user"><MessageContent>Add a settings page to the app, in our brand.</MessageContent></Message>
-                <Message from="assistant">
-                  <MessageContent>
-                    <Reasoning duration={3} defaultOpen={false}>
-                      <ReasoningTrigger />
-                      <ReasoningContent>{"The app is on ux-builder-databricks. The SDK has a SettingsPage pattern, so I should use it with SDK fields rather than writing CSS."}</ReasoningContent>
-                    </Reasoning>
-                    <Tool defaultOpen={false}>
-                      <ToolHeader type="tool-ux-builder.get_widget" state="output-available" />
-                      <ToolContent>
-                        <ToolInput input={{ name: "SettingsPage" }} />
-                        <ToolOutput output={<p className="p-2 text-sm">sections, current, onChange · import from @ux-builder/ui/patterns</p>} errorText={undefined} />
-                      </ToolContent>
-                    </Tool>
-                    <MessageResponse>{"Here it is. It uses only SDK widgets, so it follows the theme in light and dark and passes `ux-builder/no-hard-coded-values`:"}</MessageResponse>
-                    <CodeBlock code={SETTINGS_CODE} language="jsx"><CodeBlockCopyButton /></CodeBlock>
-                  </MessageContent>
-                </Message>
-            </div>
-            <Suggestions>{["Add an API keys section", "Make dark mode the default", "Run the audit"].map((s) => <Suggestion key={s} suggestion={s} onClick={() => {}} />)}</Suggestions>
-            <PromptInput onSubmit={() => {}}>
-              <PromptInputBody><PromptInputTextarea placeholder="Ask your agent to build something" aria-label="Message the agent" /></PromptInputBody>
-              <PromptInputFooter><PromptInputTools /><PromptInputSubmit status="ready" /></PromptInputFooter>
-            </PromptInput>
+          <div className="uxh-row">
+            <a className="uxh-btn" href={href("concepts", "ai-agent-experience")}>AI and agent experience<Icon icon={iconArrowRight} /></a>
+            <a className="uxh-btn" href={href("start", "microsoft-agents")}>Cards from Microsoft agents</a>
           </div>
-        </AiFrame>
+        </div>
+        <div className="uxh-col uxh-gap">
+          <ChoicePicker label="Show" options={SHOWS} value={show} onChange={setShow} />
+          {show === "sdk" ? <SdkChat /> : <BridgeChat />}
+        </div>
       </div>
     </section>
+  );
+}
+
+/* @ux-builder/ui/assistant's Conversation, on a stand-in runtime that streams canned replies; the card's Pay action asks for approval. */
+function SdkChat() {
+  const chat = useDemoConversation(HOME_CHAT);
+  return <div className="uxh-assistant" data-demo="home-assistant"><Conversation {...chat} suggestions={["When is the hearing?"]} /></div>;
+}
+
+/* A coding agent at work, drawn with AI Elements through the theme's shadcn bridge. */
+function BridgeChat() {
+  return (
+    <AiFrame width="100%">
+      <div className="uxh-chat">
+        {/* A fixed exchange, laid out in full: Conversation would scroll it to its last message. */}
+        <div className="uxh-chat__log">
+            <Message from="user"><MessageContent>Add a settings page to the app, in our brand.</MessageContent></Message>
+            <Message from="assistant">
+              <MessageContent>
+                <Reasoning duration={3} defaultOpen={false}>
+                  <ReasoningTrigger />
+                  <ReasoningContent>{"The app is on ux-builder-databricks. The SDK has a SettingsPage pattern, so I should use it with SDK fields rather than writing CSS."}</ReasoningContent>
+                </Reasoning>
+                <Tool defaultOpen={false}>
+                  <ToolHeader type="tool-ux-builder.get_widget" state="output-available" />
+                  <ToolContent>
+                    <ToolInput input={{ name: "SettingsPage" }} />
+                    <ToolOutput output={<p className="p-2 text-sm">sections, current, onChange · import from @ux-builder/ui/patterns</p>} errorText={undefined} />
+                  </ToolContent>
+                </Tool>
+                <MessageResponse>{"Here it is. It uses only SDK widgets, so it follows the theme in light and dark and passes `ux-builder/no-hard-coded-values`:"}</MessageResponse>
+                <CodeBlock code={SETTINGS_CODE} language="jsx"><CodeBlockCopyButton /></CodeBlock>
+              </MessageContent>
+            </Message>
+        </div>
+        <Suggestions>{["Add an API keys section", "Make dark mode the default", "Run the audit"].map((s) => <Suggestion key={s} suggestion={s} onClick={() => {}} />)}</Suggestions>
+        <PromptInput onSubmit={() => {}}>
+          <PromptInputBody><PromptInputTextarea placeholder="Ask your agent to build something" aria-label="Message the agent" /></PromptInputBody>
+          <PromptInputFooter><PromptInputTools /><PromptInputSubmit status="ready" /></PromptInputFooter>
+        </PromptInput>
+      </div>
+    </AiFrame>
   );
 }
 
@@ -215,6 +258,7 @@ export const GUARDS = [
   { icon: iconShieldCheck, title: "Lint that knows your theme", text: "ESLint and Stylelint rules catch literal colours, fonts and radii, and suggest the role token to use instead.", code: `"ux-builder/no-hard-coded-values": ["error", { theme: "ux-builder-databricks" }]` },
   { icon: iconScanEye, title: "An audit of the running app", text: "Switches your app through every theme, light and dark, and reports anything that isn't the theme's: colours, fonts, icons, favicon, contrast.", code: "npx ux-builder-audit http://localhost:5173/" },
   { icon: iconTerminal, title: "A starter that begins on-theme", text: "A React + Vite app with ThemeProvider, an appearance switch, lint, the audit and CI, wired up from the first commit.", code: "npm create @ux-builder/app my-app -- --theme plain" },
+  { icon: iconBot, title: "AI checks on AI screens", text: `${AI_CHECKS} audit checks read the markers the SDK's assistant emits: a disclosure, Stop while busy, approvals that can be denied, plans with step status, recovery. The blueprint check holds each AI role to its rules first.`, code: "npx ux-builder-audit --blueprint app.blueprint.json http://localhost:5173/" },
 ];
 
 export function Guardrails() {
@@ -240,12 +284,44 @@ export function Guardrails() {
   );
 }
 
+/* How an app is made on the SDK, each step linked to where it is explained. */
+const LOOP = [
+  { step: "Plan", what: "Describe the screens, how they connect, the journeys and any AI roles in the blueprint.", to: href("concepts", "flows-journeys"), link: "Flows and journeys" },
+  { step: "Check", what: "Hold the plan to cited interaction and AI rules, before any code exists.", to: `${href("start", "ci")}#blueprint`, link: "The blueprint check" },
+  { step: "Build", what: "Build each screen from its pattern; lint and the audit check what was built.", to: href("start", "ci"), link: "Lint and the audit" },
+  { step: "Assess", what: "Walk the journeys against the HELIX stories, and get a report with proposals.", to: href("start", "assess"), link: "The UX assessment" },
+];
+export function Loop() {
+  return (
+    <section className="uxh-section" aria-labelledby="loop-h">
+      <div className="uxh-wrap uxh-col uxh-gap">
+        <div className="uxh-head">
+          <span className="uxh-eyebrow"><Icon icon={iconSparkles} />How it fits together</span>
+          <h2 id="loop-h">Plan, check, build, assess.</h2>
+        </div>
+        <ol className="uxh-loop" aria-label="Plan, check, build, assess">
+          {LOOP.map((l, i) => (
+            <li key={l.step}>
+              <a className="uxh-card uxh-card--link" href={l.to}>
+                <span className="uxh-loop__n" aria-hidden="true">{i + 1}</span>
+                <h3>{l.step}</h3>
+                <p>{l.what}</p>
+                <span className="uxh-loop__go">{l.link}<Icon icon={iconArrowRight} /></span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
 export function Packages() {
   return (
     <section className="uxh-section" aria-labelledby="pkg-h">
       <div className="uxh-wrap uxh-col uxh-gap">
         <div className="uxh-head">
-          <span className="uxh-eyebrow"><Icon name="package" />On npm, no token needed</span>
+          <span className="uxh-eyebrow"><Icon icon={iconPackage} />On npm, no token needed</span>
           <h2 id="pkg-h">Five packages. Take what you need.</h2>
         </div>
         <ul className="uxh-cards uxh-cards--five">

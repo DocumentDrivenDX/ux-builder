@@ -34,7 +34,8 @@ verification. HELIX documents stay the authority, and a bead points to them.
 The store started 2026-10-21. Beads cited in older documents were in an
 earlier store that this repository does not carry.
 
-Open epics: FEAT-005 `ux-builder-31fd7955`, FEAT-011 `ux-builder-8234c40f`,
-FEAT-012 `ux-builder-b7859050` and FEAT-013 `ux-builder-c4bdb16c`.
+Open epics: FEAT-005 `ux-builder-31fd7955` and FEAT-013 `ux-builder-c4bdb16c`.
+FEAT-011 (`ux-builder-8234c40f`) and FEAT-012 (`ux-builder-b7859050`) were
+built and closed 2026-10-21.
 Other open items: counsel's review of the rule sources (`ux-builder-78483e2c`)
 and the follow-ups from AR-2026-10-21. `ddx bead ready` lists what can start.
