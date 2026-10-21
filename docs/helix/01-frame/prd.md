@@ -51,7 +51,9 @@ kind: product
 > subsystem, FR-32 to FR-36, P1-6 and the P1-6 acceptance sketch added.
 > Evolved 2026-10-20 with ADR-026 and FEAT-009 (HELIX-aware UX assessment,
 > from the planning brief of that date): the "UX assessment" subsystem,
-> FR-37 to FR-42, P1-7 and the P1-7 acceptance sketch added.
+> FR-37 to FR-42, P1-7 and the P1-7 acceptance sketch added. Evolved
+> 2026-10-21 with ADR-027 and FEAT-010 (the starter on HELIX): FR-43 to
+> FR-45 under the App SDK, P1-8 and its sketch added.
 
 ## Summary
 
@@ -209,6 +211,9 @@ rules, so it invents colours and components.
    with proposed HELIX changes (operator, 2026-10-20; FR-37 to FR-42,
    FEAT-009). Increment 1 (context, traceability, baseline, same-state
    inspection) is P1; walkthroughs and proposals follow.
+8. A new app starts on the latest HELIX: the starter installs HELIX's skill
+   and catalogue and drafts the app's HELIX documents from HELIX's templates
+   (operator, 2026-10-21; FR-43 to FR-45, FEAT-010).
 
 ### Nice to Have (P2)
 
@@ -304,6 +309,21 @@ rules, so it invents colours and components.
   marked renderable, with validated props; anything else renders a plain
   fallback (ADR-023). *(Added 2026-10-19.)*
 
+- **FR-43** — A new app gets the HELIX release that is latest when it is
+  created, verified and installed into the app as a project skill with its
+  catalogue and provenance; offline, it gets the HELIX bundled with the
+  starter, and a version can be pinned or HELIX left out (ADR-027).
+  *(Added 2026-10-21.)*
+- **FR-44** — A new app's HELIX documents (vision, PRD, concerns, a feature
+  and story for the starter screen, the design system, the test plans) are
+  drafted from the installed HELIX's templates, with the starter's facts
+  filled in and the owner's decisions left as placeholders.
+  *(Added 2026-10-21.)*
+- **FR-45** — A new app's documents pass the assessment's HELIX reading, its
+  assessment manifest validates, a test cites its story's criteria, and its
+  agent guidance puts HELIX first in the order of work.
+  *(Added 2026-10-21.)*
+
 ### Subsystem: Distribution and tenancy
 
 - **FR-22** — SDK packages are versioned and released with changelogs, and a
@@ -381,6 +401,7 @@ rules, so it invents colours and components.
 | P0-5 (FR-17, FR-18) | Switch theme in an app | App built from the starter; user picks Carbon dark | Every widget and font changes; no app file was edited |
 | P1-6 (FR-32–FR-35) | Plan, check and audit an app | A blueprint with seven destinations at compact, a nested modal and an unguarded delete; the built app with two primary buttons | Three blueprint findings and one audit finding, each with its rule ID and source |
 | P1-7 (FR-37–FR-40) | Assess the theme builder, increment 1 | Its manifest; the builder running on the mock model; three checkpoints (a signed-in fixture screen, an open dialog, a form with a validation error and its input kept) | The manifest validates against the repository's HELIX marker and catalogue; every journey traces to its stories, criteria and tests; the baseline records the e2e suite and the audit; each checkpoint is inspected in place with linked findings and the task continues |
+| P1-8 (FR-43–FR-45) | Create an app on HELIX | `npm create @ux-builder/app acme` online, then with `--helix-offline` | HELIX installed in `.claude/skills/helix/` with its version recorded; nine HELIX documents typed and linked; `assess validate` passes and `assess collect` reports 0 warnings with US-001's criteria explicit |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context

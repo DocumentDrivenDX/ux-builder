@@ -173,6 +173,56 @@ No assessment identifier matches a HELIX ID pattern.
 
 The default manifest path is `ux-assessment.yml` in the current directory.
 
+### Increments 2 and 3 *[Added 2026-10-21]*
+
+Further records in the run package:
+
+| File | Written by | Holds |
+|---|---|---|
+| `plan.json` | `plan` | Each journey's role, fixture, entry, goal, criteria and expected outcomes, the E2E tests it reuses, and every state class with whether it applies |
+| `walkthrough.json` | the agent | Per journey, its steps: `{ n, action, url, checkpoint?, observation?: { text, basis: [screenshot \| tree \| dom-text], visual: boolean }, judgment?, status: done \| blocked \| not-assessed, reason? }` |
+| `evidence.json` | `report` | Every evidence file in the package with its kind and what refers to it |
+| `comparison.json` | `compare` | Each finding of the later run, and each of the earlier one, classified |
+| `report.html`, `report.md` | `report` | The readable report |
+
+`coverage.json` is `{ entries: [...] }` and starts from `plan`: every journey-and-state
+pair is present, `not-assessed` or `not-applicable` until the agent records it.
+`backlog.json` is `{ findings: [...], user_validation: [{ claim, why, method }] }`.
+
+Further rules `validate-report` enforces:
+
+| Rule | Source |
+|---|---|
+| Every pair in `plan.json` is in `coverage.json`; `assessed` has an outcome and evidence | COV-01 |
+| An observation with `visual: true` has `screenshot` in its basis | JRN-02 |
+| A blocked or not-assessed step has a reason and no observation | JRN-05 |
+| A heuristic finding's expected behaviour is a proposed criterion and cites no criterion as an obligation | COV-02 |
+| No finding is `real-user` without evidence under `evidence/real-user/`; `user_validation` lists what needs people | COV-03 |
+| Component names exist in the app's installed catalogue, with its version; `custom-gap` may name none | FND-02 |
+| No two findings share an ID; a low-confidence P0 or P1 has `validation_work: true` | FND-03, FND-04 |
+| A proposal's target exists with the recorded revision, its patch leaves `ddx:` frontmatter alone, and it has a test change and a plan (`writes`, `keeps`, `dependencies`, `verification`) | DOC-01 to DOC-04 |
+
+Further subcommands:
+
+| Subcommand | Behaviour | Exit |
+|---|---|---|
+| `plan [--run id] [--agent name] [--model id]` | Writes `plan.json` and the starting `coverage.json` | 0; 1 blocked |
+| `browser --manifest f` | As `browser`, and refuses every host outside `run.origins` at the browser | 0; 2 |
+| `reset --fixture id` | Runs the fixture's `reset` command | 0; 1 failed |
+| `inspect ... --manifest f` | Also masks `evidence.redact` selectors and text in the screenshot and tree | as `inspect` |
+| `merge [--run id]` | Merges findings of one user problem in `backlog.json`, keeping every evidence reference; gives each a stable `F-` ID | 0 |
+| `propose --finding F --target <HELIX ID> \| --new <type> --kind k --criterion text --test text [--run id]` | Writes `proposals/P-<n>.patch` and its `proposals.json` entry | 0; 1 target missing |
+| `check-writes [--run id]` | Lists files under the flow's root or the app that changed since the run began | 0 none; 1 some |
+| `apply-check P-<n> [--run id]` | Checks a proposal's target still has the recorded revision | 0; 1 conflict |
+| `report [--run id]` | Writes `report.html`, `report.md` and `evidence.json` | 0 |
+| `compare <earlier-run-dir> <later-run-dir>` | Writes `comparison.json` in the later run; refuses runs of different scopes | 0; 1 scope differs |
+| `gate [--run id] [--fail-on P0\|P1\|P2]` | For CI: exit 1 when an open finding is at or above the level, or a stage is blocked | 0; 1 |
+
+A run's scope is its app name, HELIX flow and the set of journey IDs.
+Finding IDs are stable: `F-` and a hash of its type, journey, state and
+the problem's key (`key`, or its title), so the same problem in a rerun has
+the same ID.
+
 ## Error Semantics
 
 | Case | Result |

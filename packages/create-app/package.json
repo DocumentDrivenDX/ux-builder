@@ -9,12 +9,18 @@
   },
   "files": [
     "index.mjs",
+    "helix.mjs",
+    "helix-docs.mjs",
+    "helix",
+    "licenses",
     "template",
     "THIRD-PARTY-NOTICES.md"
   ],
   "scripts": {
     "test": "node --test 'test/*.test.mjs'",
-    "test:e2e": "node --test test/starter.e2e.mjs"
+    "test:e2e": "node --test test/starter.e2e.mjs",
+    "prepack": "node scripts/bundle-helix.mjs",
+    "bundle-helix": "node scripts/bundle-helix.mjs"
   },
   "dependencies": {
     "@ux-builder/tokens": "^1.6.0",

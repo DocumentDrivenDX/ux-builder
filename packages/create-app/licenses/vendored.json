@@ -1,0 +1,13 @@
+{
+  "$description": "Third-party content shipped inside @ux-builder/create-app (ADR-023 rule 6, ADR-027 decision 4), read by tools/check-licences.mjs. The HELIX plugin package is fetched and verified by scripts/bundle-helix.mjs when the starter is packed, which also updates the version here; new apps get the latest HELIX at create time, with HELIX's licence in its package.",
+  "vendored": [
+    {
+      "name": "HELIX plugin package (skill and catalogue)",
+      "source": "https://github.com/DocumentDrivenDX/helix",
+      "version": "0.18.0",
+      "licence": "MIT",
+      "licenceFile": "licenses/helix.LICENSE",
+      "files": []
+    }
+  ]
+}

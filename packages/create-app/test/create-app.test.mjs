@@ -11,17 +11,20 @@ import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { checkBlueprint, skeleton } from "@ux-builder/ui/blueprint";
 import { scaffold, sdkVersions, themes } from "../index.mjs";
+import { bundle } from "./fixtures/helix-release.mjs";
 
 const CLI = fileURLToPath(new URL("../index.mjs", import.meta.url));
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const tmp = mkdtempSync(join(tmpdir(), "create-app-"));
 after(() => rmSync(tmp, { recursive: true, force: true }));
-const run = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", cwd: tmp });
+// The starter's CLI gets HELIX from a test bundle; no test here touches GitHub (helix-fetch.test.mjs covers fetching).
+const HELIX_ENV = { ...process.env, UX_BUILDER_HELIX_API: "http://127.0.0.1:9", UX_BUILDER_HELIX_BUNDLE: bundle("8.8.0") };
+const run = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", cwd: tmp, env: HELIX_ENV });
 
 describe("scaffold", () => {
   test("writes a React + Vite app on the SDK, on the chosen theme", () => {
     const r = scaffold(join(tmp, "acme"), { theme: "databricks" });
-    assert.deepEqual(r.files, [".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "app.blueprint.json", "eslint.config.js", "index.html", "package.json", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/main.jsx", "vite.config.js"]);
+    assert.deepEqual(r.files, [".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "app.blueprint.json", "e2e/starter.spec.js", "eslint.config.js", "index.html", "package.json", "playwright.config.js", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/main.jsx", "vite.config.js"]);
     const pkg = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
     assert.equal(pkg.name, "acme");
     assert.match(readFileSync(join(r.dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="databricks" appearance="system"/);
@@ -65,7 +68,7 @@ describe("scaffold", () => {
   test("runs through a symlinked bin, as npm create does", () => {
     mkdirSync(join(tmp, "bin"));
     symlinkSync(CLI, join(tmp, "bin", "create-app"));
-    const r = spawnSync(process.execPath, [join(tmp, "bin", "create-app"), join(tmp, "linked"), "--theme", "databricks"], { encoding: "utf8", cwd: tmp });
+    const r = spawnSync(process.execPath, [join(tmp, "bin", "create-app"), join(tmp, "linked"), "--theme", "databricks"], { encoding: "utf8", cwd: tmp, env: HELIX_ENV });
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /Created linked on the databricks theme/);
     assert.match(readFileSync(join(tmp, "linked", "package.json"), "utf8"), /"name": "linked"/);

@@ -32,6 +32,8 @@ ddx:
       to: CONTRACT-006
     - kind: informed_by
       to: ADR-026
+    - kind: informed_by
+      to: ADR-027
 ---
 
 # Contract
@@ -305,6 +307,23 @@ Normative from `@ux-builder/audit` 0.3.0. The formats are CONTRACT-006.
 - `@ux-builder/mcp`, run from an app's directory, reads that app's
   installed `@ux-builder/ui` catalogue before its own and names the version
   it served in its instructions.
+
+## The starter on HELIX *[Amended 2026-10-21 — planned, FEAT-010, ADR-027]*
+
+Normative from `@ux-builder/create-app` 0.6.0.
+
+| Option | Behaviour |
+|---|---|
+| (default) | Fetches the latest HELIX release's plugin package from GitHub, verifies it, installs `skills/helix/` at `.claude/skills/helix/`, and writes `.helix.yml` and the starter set (FEAT-010 HLA-01) |
+| `--helix-version <tag>` | That release; exit 1 and nothing written if it cannot be fetched and verified |
+| `--helix-offline` | The bundled HELIX; no network request |
+| `--no-helix` | No marker, documents or skill |
+
+The app also gets `ux-assessment.yml`, `e2e/starter.spec.js` (citing US-001)
+and the scripts `test:e2e` and `assess:validate`. `HELIX-VERSION.json`:
+`{ version, tag, source, digest, fetchedAt, bundled, reason? }`.
+`UX_BUILDER_HELIX_API` (default `https://api.github.com`) and
+`GITHUB_TOKEN` are read from the environment.
 
 ## Error Semantics
 

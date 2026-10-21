@@ -1,0 +1,129 @@
+# Metadata for Test Plan (Project-Level)
+
+artifact:
+  name: Test Plan
+  id: test-plan
+  type: document
+  activity: test
+  level: project
+
+voice: artifact-signal
+
+id_format:
+  prefix: TP
+  pattern: "TP-[0-9]{3}"
+  example: TP-001
+  description: |
+    Sequential three-digit number. Test plans use TP-XXX identifiers.
+    Each test plan number is unique across the project and is never reused.
+
+description: |
+  The project-level test plan defines the testing strategy for the full
+  project: test levels and scope, framework choices, coverage targets,
+  critical paths, test data strategy, infrastructure requirements, and
+  sequencing. It selects meaningful new or existing verification and
+  provides traceability from requirements to test execution.
+
+output:
+  location: docs/helix/03-test/test-plan.md
+  format: markdown
+  naming: test-plan.md
+  examples:
+    - test-plan.md
+
+reuse_policy: |
+  One project-level test plan per project. It is updated in place as the
+  project evolves. Each update should preserve prior decisions unless they
+  are explicitly superseded.
+
+validation:
+  required_sections:
+    - strategy
+    - framework_selection_cost
+    - critical_paths_p0
+    - acceptance_criteria_layer_allocation
+
+  pattern_checks:
+    - pattern: "P0|P1|P2|Critical"
+      expected: ">=1"
+      message: Must identify test priority levels
+
+  quality_checks:
+    - check: diagnostic_test_strategy_allocated
+      description: For applicable o11y-otel practices, allocate receiver and correlation proof, privacy and bounded failure tests plus project-owned diagnostic pilot budgets
+      severity: warning
+
+    - check: requirements_traced
+      description: Every critical path traces to a requirement or user story
+      severity: blocking
+
+    - check: frameworks_justified_with_cost
+      description: Each framework choice states why, CI time impact, and maintenance burden, and fits project concerns
+      severity: blocking
+
+    - check: p0_criteria_allocated
+      description: Every P0 acceptance criterion from an in-scope story maps to exactly one primary layer, without duplicating the per-AC matrix owned by the story test plans
+      severity: blocking
+    - check: baseline_pinned
+      description: Any cited measurement names the commit it was taken at; no hand-maintained counts
+      severity: warning
+
+    - check: known_gaps_accepted
+      description: Known gaps state the accepted risk and why
+      severity: warning
+
+    - check: build_commands_runnable
+      description: Build commands are concrete and runnable, and the blocking gate is stated
+      severity: warning
+    - check: review_no_untested_p0_requirement_p0
+      description: >-
+        No untested P0 requirement — every P0 acceptance criterion has a test
+      severity: warning
+
+prompts:
+  generation: prompt.md
+  review: |
+    Review this test plan for:
+    1. Traceability from requirements to tests
+    2. Framework choices justified with CI cost and maintenance burden
+    3. Every P0 acceptance criterion allocated to one primary layer
+    4. Known gaps stated with accepted risk
+
+template:
+  file: template.md
+
+example:
+  file: example.md
+
+references:
+  - title: "Google Testing Blog: Test Sizes"
+    file: docs/resources/google-test-sizes.md
+    relationship: "Grounds test levels by scope, isolation, dependencies, and CI enforcement"
+  - title: "The Practical Test Pyramid"
+    file: docs/resources/fowler-practical-test-pyramid.md
+    relationship: "Grounds balanced coverage across fast focused tests and fewer broad end-to-end tests"
+
+workflow:
+  creation_order: 1
+  review_cycles: 1-2
+
+relationships:
+  informed_by:
+    - feature-specification
+    - solution-design
+    - user-stories
+
+  informs:
+    - implementation-plan
+
+  referenced_by:
+    - prd
+
+tags:
+  - test
+  - quality
+  - coverage
+  - project-level
+
+version: 1.0.0
+last_updated: 2026-04-05

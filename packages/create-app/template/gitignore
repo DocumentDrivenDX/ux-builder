@@ -2,3 +2,6 @@ node_modules
 dist
 .claude/skills/ux-builder-ui
 audit-report
+test-results
+playwright-report
+ux-assessment/

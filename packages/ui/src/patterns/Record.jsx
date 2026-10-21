@@ -169,7 +169,10 @@ export function ListDetail({ items = [], selected, onSelect, renderItem = (it) =
   }
   const back = () => { setView("list"); requestAnimationFrame(() => focusOption(selected ?? focusId)); };
   // Wherever focus is, that pane is the one a single-pane layout keeps (AC4).
-  const track = (pane) => () => { if (wide) setView(pane); };
+  // Recorded in every layout: in one pane only the visible pane can take focus,
+  // and the size state lags the CSS layout just after a resize, so a guard on
+  // it would drop a focus made in that moment and lose it on the next narrowing.
+  const track = (pane) => () => setView(pane);
 
   useEffect(() => { if (selected != null) setFocusId(selected); }, [selected]);
 

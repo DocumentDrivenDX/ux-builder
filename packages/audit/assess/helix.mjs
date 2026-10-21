@@ -71,7 +71,7 @@ export function resolveFlow(marker, wanted) {
 }
 
 const versionOf = (root) => {
-  for (const p of [join(root, "../.claude-plugin/plugin.json"), join(root, "../package.json"), join(root, "../VERSION")]) {
+  for (const p of [join(root, "../HELIX-VERSION.json"), join(root, "../.claude-plugin/plugin.json"), join(root, "../package.json"), join(root, "../VERSION")]) {
     try { const t = readFileSync(p, "utf8"); return p.endsWith("VERSION") ? t.trim() : JSON.parse(t).version ?? null; } catch { /* next */ }
   }
   return null;
@@ -94,6 +94,8 @@ export function bindCatalog(marker, setting = "auto", { env = process.env, home 
     if (ok(r)) return at("marker", r);
   }
   if (ok(join(marker.repo, "workflows"))) return at("repository", join(marker.repo, "workflows"));
+  // A HELIX skill installed in the project (as @ux-builder/create-app does): its references/ floor.
+  for (const dir of [join(dirname(marker.file), ".claude/skills/helix/references"), join(marker.repo, ".claude/skills/helix/references")]) if (ok(dir)) return at("project-skill", dir);
   if (env.CLAUDE_PLUGIN_ROOT && ok(join(env.CLAUDE_PLUGIN_ROOT, "workflows"))) return at("plugin", join(env.CLAUDE_PLUGIN_ROOT, "workflows"));
   if (ok(join(home, ".ddx/plugins/helix/workflows"))) return at("plugin", join(home, ".ddx/plugins/helix/workflows"));
   for (const base of [join(home, ".claude/plugins/cache"), join(home, ".claude/plugins/marketplaces")]) {
@@ -134,7 +136,7 @@ export function loadTypes(catalog) {
       const naming = m?.output?.naming ?? null;
       const dir = loc.endsWith("/") || !/\.[a-z]+$/.test(loc) ? loc.replace(/\/?$/, "/") : dirname(loc) === "." ? "" : dirname(loc) + "/";
       const file = loc.endsWith("/") ? null : loc.split("/").pop();
-      types.push({ id: m?.artifact?.id ?? t, activity: m?.artifact?.activity ?? a.replace(/^\d+-/, ""), dir, re: namingRe(file && !/[{[]/.test(file) ? file : (naming ?? file ?? "")), pattern: m?.id_format?.pattern ? new RegExp(`^${m.id_format.pattern}$`) : null, template: existsSync(join(arts, t, "template.md")) ? join(arts, t, "template.md") : null });
+      types.push({ id: m?.artifact?.id ?? t, activity: m?.artifact?.activity ?? a.replace(/^\d+-/, ""), dir, naming: file && !/[{[]/.test(file) ? file : naming ?? file, re: namingRe(file && !/[{[]/.test(file) ? file : (naming ?? file ?? "")), pattern: m?.id_format?.pattern ? new RegExp(`^${m.id_format.pattern}$`) : null, template: existsSync(join(arts, t, "template.md")) ? join(arts, t, "template.md") : null });
     }
   }
   return types;

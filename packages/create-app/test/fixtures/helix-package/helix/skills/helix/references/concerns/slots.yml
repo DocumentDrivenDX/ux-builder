@@ -1,0 +1,33 @@
+# Concern slots — single source of truth (shipped with the HELIX library).
+#
+# A slot is a functional position a concern can fill (e.g. the one frontend
+# framework, the one language runtime). Membership is DERIVED, never listed
+# here: a concern is a candidate for slot X iff its own concern.md `## Slot`
+# section names X. Adding a concern therefore carries zero registry sync burden.
+#
+# `defaults` is a map keyed by slot (one default per slot). YAML keeps the LAST
+# of duplicate keys silently, so the keyed shape alone is not a guarantee — the
+# Slot Registry Integrity check (reconcile-alignment) rejects duplicate keys,
+# which is what makes "two defaults for one slot" actually impossible. Defaults
+# are declared only for exclusive slots.
+#
+# Operators override a default per-project in
+# docs/helix/01-frame/concerns.local.yml (read during high-autonomy concern
+# selection, before concerns.md exists). Resolution order per needed exclusive
+# slot: operator override -> shipped default below -> recorded assumption.
+slots:
+  frontend-framework: { exclusive: true }
+  language-runtime:    { exclusive: true }
+  datastore:           { exclusive: true }   # no members in the library yet — slot defined, no default
+  deploy-target:       { exclusive: true }
+  e2e-framework:       { exclusive: true }   # the one browser-e2e tool a UI web app runs its core flows through
+  auth-provider:       { exclusive: true }   # the one authentication/identity backend (local sessions, Auth0/OIDC, …)
+  architecture-style:  { exclusive: true }   # the one macro layering/dependency style (onion, hexagonal, clean, classic-layered); no default — select on signal
+  # composable positions (compose freely, no single winner) need no slot entry:
+  # a11y, security, testing, o11y, i18n, verification, admin-console, auth (the product surface). (e2e-kind is
+  # composable infra e2e — NOT the e2e-framework slot.)
+defaults:
+  frontend-framework: react-nextjs
+  language-runtime:   typescript-bun
+  e2e-framework:      e2e-playwright
+  auth-provider:      auth-local-sessions

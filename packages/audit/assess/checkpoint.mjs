@@ -26,10 +26,15 @@ const ID = /^C-[a-z0-9][a-z0-9-]*$/;
 /* A free local port, for the CDP endpoint. */
 const freePort = () => new Promise((res, rej) => { const s = createServer(); s.on("error", rej); s.listen(0, "127.0.0.1", () => { const { port } = s.address(); s.close(() => res(port)); }); });
 
-/* Start Chromium with a CDP endpoint. Resolves with { cdp, browser }. */
-export async function startBrowser({ port, headed = false } = {}) {
+/* Start Chromium with a CDP endpoint. Resolves with { cdp, browser }. With
+   origins, every other host name fails to resolve in this browser, so a step
+   that would leave the allowed origins cannot load (FEAT-009 ENV-02). */
+export async function startBrowser({ port, headed = false, origins = [] } = {}) {
   port ??= await freePort();
-  const browser = await chromium.launch({ headless: !headed, args: [`--remote-debugging-port=${port}`, "--remote-debugging-address=127.0.0.1"] });
+  const hosts = [...new Set(origins.map((o) => { try { return new URL(o).hostname; } catch { return null; } }).filter(Boolean))];
+  const args = [`--remote-debugging-port=${port}`, "--remote-debugging-address=127.0.0.1"];
+  if (hosts.length) args.push(`--host-resolver-rules=MAP * ~NOTFOUND, ${hosts.map((h) => `EXCLUDE ${h}`).join(", ")}`);
+  const browser = await chromium.launch({ headless: !headed, args });
   const cdp = `http://127.0.0.1:${port}`;
   // Ready when the endpoint answers.
   for (let i = 0; i < 100; i++) { try { if ((await fetch(`${cdp}/json/version`)).ok) break; } catch { /* starting */ } await new Promise((r) => setTimeout(r, 100)); }
@@ -77,7 +82,7 @@ async function replay(file) {
 
 /* Inspect one checkpoint and write its record. Returns { record, code }:
    code 0 inspected, 1 lost, ambiguous or unverified. */
-export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: id, journey, step, role, state, stateAffecting = false, redact = [], out = "ux-assessment", run = runId(), cwd = process.cwd(), ignore = [], rules = {} }) {
+export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: id, journey, step, role, state, stateAffecting = false, redact = [], redactText = [], origins = null, out = "ux-assessment", run = runId(), cwd = process.cwd(), ignore = [], rules = {} }) {
   if (!ID.test(id ?? "")) throw new Error(`--checkpoint must look like C-<journey>-<n>, got "${id}"`);
   const dir = resolve(out, run, "checkpoints", id);
   mkdirSync(dir, { recursive: true });
@@ -93,13 +98,16 @@ export async function checkpoint({ cdp, page: match, replay: steps, checkpoint: 
     const mode = steps ? "replay" : "in-place";
     if (steps && !session.passed) return { code: 1, record: write({ ...base, mode, url: session.page.url(), verified: { assertion: session.assertion, passed: false }, findings: [], message: "the replayed state does not match the expected state; nothing was inspected" }) };
     const { page } = session;
+    // A page outside the allowed origins is not evidence this assessment may collect (ENV-02).
+    if (origins?.length && !origins.includes(new URL(page.url()).origin)) return { code: 1, record: write({ ...base, mode, url: page.url(), error: "restricted", message: `blocked: restricted — ${new URL(page.url()).origin} is outside run.origins (${origins.join(", ")}); not inspected`, findings: [] }) };
     const sdk = prepare(cwd);
     const result = await inspect(page, { sdk, ignore, rules, stateAffecting });
     const shown = await page.evaluate(() => { const r = [...document.querySelectorAll("[data-theme]")].find((e) => !e.parentElement?.closest("[data-theme]")); return { theme: r?.dataset.theme ?? null, appearance: r?.dataset.appearance ?? null, viewport: { width: innerWidth, height: innerHeight } }; });
     // Evidence of the state inspected, masked where the manifest says (FEAT-009 ENV-03).
     const shot = join(dir, "screenshot.png");
     await page.screenshot({ path: shot, mask: redact.map((s) => page.locator(s)), animations: "disabled" });
-    const tree = await page.locator("body").ariaSnapshot();
+    let tree = await page.locator("body").ariaSnapshot();
+    for (const re of redactText) tree = tree.replace(new RegExp(re, "g"), "***");
     writeFileSync(join(dir, "tree.yml"), tree + "\n");
     const findings = enrich(result.findings, sdk.interaction).map((f) => ({ ...f, finding_type: "deterministic", checkpoint: base.checkpoint, viewport: shown.viewport, theme: shown.theme }));
     return { code: 0, record: write({ ...base, mode, url: page.url(), viewport: shown.viewport, theme: shown.theme, appearance: shown.appearance, ...(steps ? { verified: { assertion: session.assertion, passed: true } } : {}), skipped: result.skipped, stateAffecting: result.stateAffecting, findings, screenshot: relative(dir, shot), tree: "tree.yml" }) };

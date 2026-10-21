@@ -1,0 +1,186 @@
+# Metadata for Product Requirements Document (PRD)
+
+artifact:
+  name: Product Requirements Document
+  id: prd
+  type: document
+  activity: frame
+
+voice: artifact-signal
+
+description: |
+  Product-scope authority document that translates vision into prioritized,
+  measurable requirements, success metrics, non-goals, assumptions, and
+  acceptance sketches. The `kind` field selects the framing variant: the
+  default `product` variant frames general product requirements; the `data`
+  variant frames a data product (pipeline, warehouse, data platform, or data
+  service) with data sources, consumers, quality contracts, and platform
+  context. The shape of the artifact is unified; the framing is parameterized.
+
+kind:
+  enum:
+    - product
+    - data
+  default: product
+  description: |
+    Framing variant for this PRD. `product` (default) frames general product
+    requirements. `data` frames a data product with data-source, consumer,
+    quality-contract, and platform-context guidance. New variants require an
+    ADR (see ADR-008).
+
+output:
+  location: docs/helix/01-frame/prd.md
+  format: markdown
+  naming: prd.md
+
+validation:
+  # Aligned to prd/template.md section headings (2026-05-24: fixed pre-existing template↔meta drift).
+  required_sections:
+    - summary
+    - problem_and_goals
+    - users_and_scope
+    - requirements
+    - functional_requirements
+    - acceptance_test_sketches
+    - risks
+    - success_criteria
+
+  quality_checks:
+    - check: metrics_quantified
+      description: Success metrics have numeric targets and named measurement methods
+      severity: blocking
+
+    - check: personas_validated
+      description: Personas are research-based and describe specific pains and switching triggers
+      severity: warning
+
+    - check: requirements_prioritized
+      description: Requirements use P0/P1/P2 priorities; every P0 is necessary for launch, and P1/P2 priorities are ordered consistently
+      severity: blocking
+
+    - check: no_surface_leak
+      description: PRD functional requirements must not define exact API, CLI, event, schema, config, telemetry, or adapter surfaces; use Contract artifacts for normative interface detail
+      severity: blocking
+
+    - check: risks_mitigated
+      description: Each risk has a concrete mitigation action, not a general monitoring strategy
+      severity: warning
+
+    - check: summary_stands_alone
+      description: Summary helps a reader decide whether to read the full PRD
+      severity: warning
+
+    - check: problem_and_goals_specific
+      description: Problem names a specific failure and cost; goals state user outcomes
+      severity: blocking
+
+    - check: non_goals_bound_scope
+      description: Non-goals exclude plausible assumptions about product scope
+      severity: warning
+
+    - check: p0_test_sketches
+      description: Every P0 requirement has an acceptance test sketch
+      severity: blocking
+
+    - check: requirements_traceable
+      description: Requirements trace to the Product Vision and downstream artifacts
+      severity: blocking
+
+    - check: functional_requirements_testable
+      description: Each functional requirement is testable and carries a stable FR ID
+      severity: blocking
+
+    - check: requirements_grouped_by_subsystem
+      description: Functional requirements use canonical subsystem headings, appear under one subsystem, and each subsystem maps to one feature specification
+      severity: blocking
+
+    - check: technical_context_specific
+      description: Technical context names relevant versions and interfaces
+      severity: warning
+
+    - check: open_questions_actionable
+      description: Each open question names who can answer it and what is blocked
+      severity: warning
+
+    - check: requirements_consistent
+      description: PRD sections do not contradict one another or the governing Product Vision
+      severity: blocking
+
+  pattern_checks:
+    - pattern: "\\[NEEDS CLARIFICATION"
+      expected: 0
+      message: Resolve uncertainty that materially affects the scoped work
+
+    - pattern: "P0|Must Have"
+      expected: ">=1"
+      message: PRD must define at least one P0 requirement
+
+variables:
+  - name: product_name
+    description: Name of the product being developed
+    required: true
+
+  - name: target_launch_date
+    description: Target date for product launch
+    required: false
+
+  - name: primary_stakeholder
+    description: Primary stakeholder or product owner
+    required: true
+
+prompts:
+  generation: prompt.md
+  review: |
+    Review this PRD for:
+    1. Clarity of problem statement
+    2. Measurability of success metrics
+    3. Completeness of requirements
+    4. Identification of risks
+    5. Alignment with business goals
+
+template:
+  file: template.md
+  sections:
+    - executive_summary: "Write this last"
+    - problem_statement: "Start here"
+    - success_metrics: "Make specific and measurable"
+
+examples:
+  - file: example.md
+    description: Sample PRD for DepositMatch, derived from the product vision example
+
+workflow:
+  creation_order: 1
+  review_cycles: 2-3
+
+relationships:
+  informs:
+    - principles
+    - feature-specification
+    - user-stories
+    - feature-registry
+    - roadmap
+
+  referenced_by:
+    - solution-design
+    - test-plan
+
+references:
+  - title: "Atlassian Product Requirements Document"
+    file: docs/resources/atlassian-prd.md
+    relationship: "Grounds agile PRD scope, shared understanding, assumptions, and out-of-scope guidance"
+  - title: "Aha! Product Requirements Document Template"
+    file: docs/resources/aha-prd-template.md
+    relationship: "Grounds concise cross-functional PRD structure and scope guidance"
+  - title: "IBM Requirements Management"
+    file: docs/resources/ibm-requirements-management.md
+    relationship: "Grounds measurable, prioritized, traceable requirements and verification discipline"
+
+tags:
+  - business
+  - requirements
+  - product-scope
+  - traceability
+
+version: 1.0.0
+last_updated: 2024-01-14

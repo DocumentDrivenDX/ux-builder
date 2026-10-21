@@ -12,8 +12,25 @@ cd my-app && npm install && npm run dev
 | `--theme <name>` | The theme to start on: any theme in `@ux-builder/tokens` (`databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `ux-builder-databricks`, `plain`). Default `plain` |
 | `--name <name>` | The package name. Default: the directory's name |
 | `--blueprint <file>` | Start from this plan of the app's screens instead of the starter's. A plan with an error (`ux-builder-blueprint check`) is refused, with each error, and nothing is written |
+| `--helix-version <tag>` | Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written |
+| `--helix-offline` | Use the HELIX bundled with this starter; no network request |
+| `--no-helix` | Leave HELIX out: no marker, documents or skill |
 
 ## What the app has
+
+- **HELIX**, the latest release when the app is created: its skill and
+  catalogue in `.claude/skills/helix/` (with `HELIX-VERSION.json`: version,
+  source, digest), the `.helix.yml` marker, and the starter set of HELIX
+  documents in `docs/helix/`, drafted from that release's templates: product
+  vision, PRD, concerns, FEAT-001 and US-001 for the starter screen,
+  `DESIGN.md`, the test plan and STP-001. What the starter knows (name,
+  theme, stack, the screen's criteria, design choices, checks) is filled in;
+  the product's purpose, users, goals and metrics are yours to write. The
+  package is verified against GitHub's SHA-256 digest; offline, the HELIX
+  bundled with the starter is used, and the app records why.
+- `ux-assessment.yml` for the UX assessment (`npm run assess:validate`), and
+  `e2e/starter.spec.js`, a Playwright test of the starter screen that cites
+  US-001's criteria (`npm run test:e2e`).
 
 - `src/main.jsx`: every theme's CSS and fonts and `@ux-builder/ui/ui.css`,
   imported once; `ThemeProvider` (`appearance="system"`) and `ToastProvider`.

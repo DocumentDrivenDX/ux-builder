@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/proposals.schema.json",
+  "title": "ux-builder assessment record: proposals (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "proposals"
+  ],
+  "properties": {
+    "schema": {
+      "const": "proposals"
+    },
+    "version": {
+      "const": 1
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "findings",
+          "target",
+          "change",
+          "patch",
+          "test_change",
+          "plan"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^P-"
+          },
+          "change": {
+            "enum": [
+              "new-requirement",
+              "unmet-criterion",
+              "scope"
+            ]
+          },
+          "decision_needed": {
+            "enum": [
+              "prd",
+              "vision"
+            ]
+          },
+          "target": {
+            "type": "object",
+            "required": [
+              "kind",
+              "type",
+              "path"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "existing",
+                  "new"
+                ]
+              }
+            }
+          },
+          "test_change": {
+            "type": "object",
+            "required": [
+              "description"
+            ]
+          },
+          "plan": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

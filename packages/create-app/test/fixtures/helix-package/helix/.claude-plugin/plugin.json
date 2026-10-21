@@ -1,0 +1,13 @@
+{
+  "name": "helix",
+  "version": "0.18.0",
+  "description": "HELIX methodology, artifact catalog, and routing skill for AI-assisted development.",
+  "author": {
+    "name": "DocumentDrivenDX",
+    "url": "https://github.com/DocumentDrivenDX"
+  },
+  "homepage": "https://github.com/DocumentDrivenDX/helix",
+  "repository": "https://github.com/DocumentDrivenDX/helix",
+  "license": "MIT",
+  "skills": "./skills/"
+}

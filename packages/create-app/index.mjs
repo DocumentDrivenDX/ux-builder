@@ -14,7 +14,14 @@
      --blueprint <file> start from this plan of the app's screens instead of the
                         starter's (FEAT-008 ADP-01); refused, with each error, if
                         ux-builder-blueprint check finds one
-     --sdk-from <dir>   install @ux-builder/* from .tgz files in <dir> (testing) */
+     --sdk-from <dir>   install @ux-builder/* from .tgz files in <dir> (testing)
+     --helix-version <tag>  start on this HELIX release instead of the latest (FEAT-010)
+     --helix-offline    use the HELIX bundled with this starter; no network
+     --no-helix         no HELIX marker, documents or skill
+
+   By default the app also starts on the latest HELIX release: its skill and
+   catalogue in .claude/skills/helix/, the .helix.yml marker and the starter
+   set of HELIX documents (FEAT-010, ADR-027). */
 
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -22,6 +29,7 @@ import { basename, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { checkBlueprint } from "@ux-builder/ui/blueprint";
+import { getHelix, install as installHelix } from "./helix.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
@@ -87,14 +95,42 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint } = {}) {
   return { dir: target, theme, name, versions, files: written.sort() };
 }
 
+/* The .helix.yml marker: the app's one flow and the HELIX it started on (HLA-01, HLI-02). */
+export const marker = (version) => `# HELIX marker: the flows active in this app and where their documents live.
+# Started on HELIX ${version} (see .claude/skills/helix/HELIX-VERSION.json).
+flows:
+  - id: helix
+    root: docs/helix/
+    version: "${version}"
+`;
+
+/* Create the app: HELIX first, so a pinned HELIX that cannot be had writes
+   nothing (HLF-04); then the app; then HELIX into it. */
+export async function create(dir, { helix: h = {}, log = () => {}, ...opts } = {}) {
+  const helix = h.skip ? null : await getHelix({ tag: h.tag, offline: h.offline, log });
+  const r = scaffold(dir, opts);
+  if (helix) {
+    const installed = installHelix(helix, r.dir);
+    writeFileSync(join(r.dir, ".helix.yml"), marker(helix.manifest.version));
+    const docs = await import("./helix-docs.mjs");
+    const written = docs.writeStarterSet(helix, r);
+    docs.wire(helix, r);
+    r.helix = { ...helix.provenance, skillFiles: installed.files, documents: written };
+  }
+  return r;
+}
+
 // npm create runs the bin through a symlink in node_modules/.bin, so compare real paths.
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { values, positionals } = parseArgs({ allowPositionals: true, options: { theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, help: { type: "boolean", short: "h" } } });
+  const { values, positionals } = parseArgs({ allowPositionals: true, options: { theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, help: { type: "boolean", short: "h" } } });
   if (values.help || !positionals[0]) {
-    console.log(`npm create @ux-builder/app <dir> -- [--theme <name>] [--name <package>] [--blueprint <file>]\n\nThemes: ${themes().join(", ")}`);
+    console.log(`npm create @ux-builder/app <dir> -- [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix]\n\nThemes: ${themes().join(", ")}`);
     process.exit(values.help ? 0 : 1);
   }
-  const r = scaffold(positionals[0], { theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint });
+  let r;
+  try {
+    r = await create(positionals[0], { theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] }, log: (m) => console.error(m) });
+  } catch (e) { die(e.message); }
   console.log(`Created ${r.name} on the ${r.theme} theme (@ux-builder/tokens ${r.versions["@ux-builder/tokens"]}, @ux-builder/ui ${r.versions["@ux-builder/ui"]}).
 
   cd ${relative(process.cwd(), r.dir).startsWith("..") ? r.dir : relative(process.cwd(), r.dir) || "."}
@@ -102,4 +138,6 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   npm run dev      # http://localhost:5173
   npm run check:blueprint  # the plan of the screens, app.blueprint.json
   npm run lint     # no hard-coded colours, fonts or radii`);
+  if (r.helix) console.log(`
+HELIX ${r.helix.tag}${r.helix.bundled ? ` (bundled with this starter: ${r.helix.reason})` : " (latest release, verified)"}: the helix skill in .claude/skills/helix/, the marker and ${r.helix.documents.length} documents in docs/helix/.`);
 }

@@ -33,7 +33,7 @@ before(async () => {
 describe("US-014-AC5: agents list the SDK over MCP", () => {
   test("the tools and resources are listed, with instructions carrying the rules", async () => {
     const { tools } = await client.listTools();
-    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_themes", "list_tokens", "list_variants", "list_widgets"]);
+    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_themes", "list_tokens", "list_variants", "list_widgets", "validate_assessment_manifest", "validate_assessment_report"]);
     const { resources } = await client.listResources();
     assert.deepEqual(resources.map((r) => r.uri).sort(), ["ux-builder://catalogue", "ux-builder://guidance"]);
     assert.match(client.getInstructions(), /Never hard-code colours, font families or radii/);
@@ -103,7 +103,7 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
     await c.connect(new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL("../server.mjs", import.meta.url))] }));
     try {
       const { tools } = await c.listTools();
-      assert.equal(tools.length, 18);
+      assert.equal(tools.length, 21);
     } finally { await c.close(); }
   });
 });
@@ -188,5 +188,22 @@ describe("FEAT-009 AGW-04: the SDK as the app has it", () => {
         assert.match(g.content[0].text, /The app's own guidance, version 9\.8\.7/);
       } finally { await c.close(); }
     } finally { rmSync(app, { recursive: true, force: true }); }
+  });
+});
+
+describe("FEAT-009: the UX assessment's checks over MCP", () => {
+  test("the skill, the manifest check and the run check, from the installed @ux-builder/audit", async () => {
+    assert.match((await client.callTool({ name: "get_assessment_skill", arguments: {} })).content[0].text, /# Assessing an app's UX with ux-builder/);
+    const m = (await call("validate_assessment_manifest", { path: `${ROOT}apps/theme-builder/ux-assessment.yml` })).data;
+    assert.deepEqual(m.problems, []);
+    assert.equal(m.helix.flow, "helix");
+    const run = mkdtempSync(join(tmpdir(), "mcp-run-"));
+    try {
+      writeFileSync(join(run, "run.json"), JSON.stringify({ schema: "run", version: 1, id: "R-20261021T000000Z", stages: [] }));
+      assert.equal((await call("validate_assessment_report", { dir: run })).data.valid, true);
+      writeFileSync(join(run, "coverage.json"), JSON.stringify({ schema: "coverage", version: 1, entries: [{ journey: "J-a", state: "success", status: "assessed", reason: "walked" }] }));
+      const bad = (await call("validate_assessment_report", { dir: run })).data;
+      assert.equal(bad.valid, false);
+    } finally { rmSync(run, { recursive: true, force: true }); }
   });
 });

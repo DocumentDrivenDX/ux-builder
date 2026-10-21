@@ -1,0 +1,45 @@
+# A GitHub Actions workflow for the UX assessment's deterministic stages
+# (FEAT-009 increment 3). Copy it to .github/workflows/ in an app that has a
+# ux-assessment.yml. It never changes the app or its HELIX documents.
+#
+# On every pull request it validates the manifest, traces the journeys to
+# their HELIX stories and tests, records the baseline, writes the report
+# and uploads the run package. When the repository keeps an agent's last
+# assessment (ASSESSMENT_RUN below), it compares this run with it and fails
+# on any open finding at P1 or above, or a blocked stage.
+name: ux-assessment
+
+on:
+  pull_request:
+
+jobs:
+  assess:
+    runs-on: ubuntu-latest
+    env:
+      RUN: R-ci-${{ github.run_id }}
+      # The directory of the agent's latest assessment, if one is committed.
+      ASSESSMENT_RUN: ux-assessment/latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # document revisions come from git history
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx ux-builder-audit assess validate
+      - run: npx ux-builder-audit assess collect --run "$RUN"
+      - run: npx ux-builder-audit assess plan --run "$RUN" --agent ci
+      - run: npx ux-builder-audit assess baseline --run "$RUN"
+      - run: npx ux-builder-audit assess report "ux-assessment/$RUN"
+      - run: npx ux-builder-audit assess validate-report "ux-assessment/$RUN"
+      - name: Gate on the agent's latest assessment
+        if: hashFiles('ux-assessment/latest/backlog.json') != ''
+        run: npx ux-builder-audit assess gate "$ASSESSMENT_RUN" --fail-on P1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ux-assessment
+          path: ux-assessment/${{ env.RUN }}

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/plan.schema.json",
+  "title": "ux-builder assessment record: plan (CONTRACT-006)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "journeys"
+  ],
+  "properties": {
+    "schema": {
+      "const": "plan"
+    },
+    "version": {
+      "const": 1
+    },
+    "run": {
+      "type": "string"
+    },
+    "journeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "story",
+          "role",
+          "entry",
+          "criteria",
+          "states"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^J-"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "states": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "state",
+                "applies"
+              ],
+              "properties": {
+                "state": {
+                  "enum": [
+                    "success",
+                    "empty",
+                    "loading",
+                    "recoverable-error",
+                    "system-failure",
+                    "ai",
+                    "responsive-keyboard"
+                  ]
+                },
+                "applies": {
+                  "type": "boolean"
+                }
+              },
+              "if": {
+                "properties": {
+                  "applies": {
+                    "const": false
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

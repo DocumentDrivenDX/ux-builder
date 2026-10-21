@@ -1,0 +1,105 @@
+# Metadata for Product Vision
+
+artifact:
+  name: Product Vision
+  id: product-vision
+  type: document
+  activity: discover
+
+voice: artifact-signal
+
+description: |
+  North star document defining the product's target customer, current
+  alternative, desired future state, and strategic success measures. First
+  artifact in Discover activity.
+
+output:
+  location: docs/helix/00-discover/product-vision.md
+  format: markdown
+
+validation:
+  required_sections:
+    - mission_statement
+    - positioning
+    - vision
+    - user_experience
+    - target_market
+    - key_value_propositions
+    - success_definition
+    - why_now
+
+  quality_checks:
+    - check: mission_concise
+      description: Mission names the user, problem, and approach in under 50 words
+      severity: warning
+
+    - check: positioning_specific
+      description: Positioning names a specific customer segment and differentiates from a specific alternative
+      severity: blocking
+
+    - check: market_specific
+      description: Target market names a specific segment, its pain points, and switching triggers
+      severity: blocking
+
+    - check: metrics_measurable
+      description: Success metrics are measurable and time-bound, with numeric targets or named measurement methods
+      severity: blocking
+
+    - check: ux_concrete
+      description: User experience describes a concrete scenario, not abstract benefits
+      severity: blocking
+
+    - check: why_now_grounded
+      description: Why Now cites an observable change, not a general trend
+      severity: warning
+
+    - check: vision_is_end_state
+      description: Vision describes the desired end state, not a feature list
+      severity: blocking
+
+    - check: north_star_single_measure
+      description: North Star is one measurable sentence
+      severity: warning
+
+    - check: value_propositions_customer_focused
+      description: Value propositions state customer benefits, not internal capabilities
+      severity: warning
+
+    - check: why_now_specific
+      description: Why Now names an observable change, not a vague opportunity
+      severity: warning
+
+    - check: boundaries_respected
+      description: Business cases, competitor comparisons, requirements, and technical choices stay in their own artifacts
+      severity: warning
+
+    - check: no_implementation_details
+      description: Vision avoids implementation choices owned by design artifacts
+      severity: warning
+
+workflow:
+  creation_order: 1
+  review_cycles: 1-2
+
+relationships:
+  informs:
+    - business-case
+    - competitive-analysis
+    - opportunity-canvas
+    - prd
+
+references:
+  - title: "Roman Pichler Product Vision Board"
+    file: docs/resources/product-vision-board.md
+    relationship: "Grounds target group, needs, product direction, and business-goal coverage"
+  - title: "Geoffrey Moore Positioning Statement"
+    file: docs/resources/geoffrey-moore-positioning.md
+    relationship: "Grounds the positioning sentence structure for target customer, need, category, benefit, and alternative"
+  - title: "Atlassian Vision Creation Play"
+    file: docs/resources/atlassian-vision-creation.md
+    relationship: "Supports vision as a shared picture of the future that aligns stakeholders before strategy and execution"
+
+tags:
+  - strategy
+  - vision
+  - alignment

@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "check:blueprint": "ux-builder-blueprint check app.blueprint.json",
+    "test:e2e": "playwright test",
     "lint": "stylelint \"src/**/*.css\" && eslint src",
     "audit": "vite build && ux-builder-audit --serve \"vite preview --port 4173 --strictPort --host 127.0.0.1\" http://127.0.0.1:4173/",
     "postinstall": "node scripts/install-skill.mjs"
@@ -19,6 +20,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "~1.63.0",
     "@ux-builder/audit": "__AUDIT__",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^10.12.0",

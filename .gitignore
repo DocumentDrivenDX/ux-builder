@@ -9,3 +9,8 @@ _site/
 
 # UX assessment runs (FEAT-009); evidence stays local unless shared on purpose.
 ux-assessment/
+# Playwright MCP snapshots from local runs.
+.playwright-mcp/
+
+# The HELIX package bundled at pack time (scripts/bundle-helix.mjs).
+packages/create-app/helix/
