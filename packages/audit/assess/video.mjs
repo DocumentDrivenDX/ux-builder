@@ -23,8 +23,9 @@
    discarded and listed as not recorded.
 
    Writes, under <run>/video/: <J>[@WxH].clean.webm, .annotations.json,
-   .vtt, .chapters.vtt, and video.json. The MP4 and the player are made from
-   these (video-render.mjs, video-player.mjs). Writes nothing else. */
+   .vtt, .chapters.vtt, video.json, and the player, index.html
+   (video-player.mjs). The MP4 is made from these (video-render.mjs).
+   Writes nothing else. */
 
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -34,6 +35,7 @@ import { wouldApprove } from "./ai.mjs";
 import { guardContext, recordStage, refusal } from "./checkpoint.mjs";
 import { runDir } from "./plan.mjs";
 import { layer } from "./video-layer.mjs";
+import { writePlayer } from "./video-player.mjs";
 
 export const DEFAULT_VIEWPORT = { width: 1440, height: 900 };
 export const HOLD = { min: 4, perWord: 0.3 };
@@ -306,6 +308,7 @@ export async function video({ manifest, resolved, out, run, journeys: only = [],
     }
   } finally { await browser.close(); }
   writeFileSync(join(vdir, "video.json"), JSON.stringify(record, null, 2) + "\n");
+  writePlayer(dir, { autoPause: resolved.video?.autoPause ?? true, appName: resolved.app?.name ?? null });
   const stopped = record.videos.flatMap((v) => v.chapters.filter((c) => c.status === "stopped").map((c) => `${v.journey} ${c.title}: ${c.reason}`));
   const partial = record.notRecorded.length || stopped.length;
   const stage = { stage: "video", status: partial ? "partial" : "completed", ...(partial ? { reason: [...record.notRecorded.map((n) => `${n.journey} not recorded: ${n.reason}`), ...stopped].join("; ") } : {}), startedAt };

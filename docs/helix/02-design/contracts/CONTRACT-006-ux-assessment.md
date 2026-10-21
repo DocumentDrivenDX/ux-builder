@@ -361,6 +361,15 @@ Decisions the build had to make *(FEAT-013 step 3, 2026-10-21)*:
   above each modal or popover the app opens.
 - **Element boxes** are measured after scrolling the first element into
   view, in viewport pixels, while the page holds still.
+- **The player** (`index.html`, written by `video` after `video.json`)
+  inlines the `ux-builder-databricks` theme, its fonts (SIL OFL 1.1), its
+  logo and favicon, and the SDK's widget CSS, and answers `piq:set-theme`;
+  it passes the audit with no error or warning. Lists are links to moments,
+  `index.html#<video name>@<seconds>` (the video name is the journey, with
+  `@WxH` for a viewport other than 1440 × 900), which the page opens at.
+  Below 640 px the pop-up sits under the video instead of over it. Keys: `n`
+  and `p` next and previous finding, `k` (or Space) play and pause, `m`
+  More, Escape dismiss.
 - **Pacing** (ms): 450 before a step, 650 for the cursor to move, 55 a
   character typed, 900 to settle, 3200 for the title card, 4500 for the end
   card; network waits are cut off at 1 s. A missing element fails its step
@@ -370,7 +379,7 @@ Further rules `validate-report` enforces when `video/` exists: every
 annotation's `finding` is in `backlog.json` and cites its `checkpoint`; a
 chapter `stopped` shows no annotation after its stop; every finding shown
 has `plain`; `annotations.json` and `video.json` validate against their
-schemas; `report` links each shown finding to `index.html#<J-id>@<start>`
+schemas; `report` links each shown finding to `video/index.html#<video name>@<start>`
 and lists the videos in `evidence.json`.
 
 ## Error Semantics
