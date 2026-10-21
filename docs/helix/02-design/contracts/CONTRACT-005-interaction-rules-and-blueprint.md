@@ -188,6 +188,64 @@ The blueprint checks and audit checks of these rules are warnings
 (ADR-028 decision 5). Their IDs are SD-005's rule IDs. Their findings use
 the *Finding* shape above.
 
+## Flows and journeys *[Amended 2026-10-21 — planned, FEAT-012, ADR-030]*
+
+Planned for the `@ux-builder/ui` minor that ships FEAT-012. All fields are
+optional, and a blueprint without them is unchanged.
+
+### `screens[].actions[]`
+
+| Field | Type | Required | Rules |
+|---|---|---|---|
+| `id` | string | yes | Unique within the screen |
+| `label` | string | yes | As the user sees it |
+| `to` | string | yes | A screen `id`; `modal:<modal id>` (a modal of this screen); `back`; `state:<empty\|loading\|error\|…>`; or `external` |
+| `primary` | boolean | no | At most one per screen; if `primaryAction` is also given, its label MUST match |
+| `destructive` | `"undo"` \| `"confirm"` \| `"none"` | no | The safeguard, as `destructiveActions[].safeguard` |
+| `highImpact` | `"each"` \| `"plan"` \| `"none"` | no | The approval, as FEAT-011's `ai.highImpactActions[].approval` |
+
+Modals gain the same `actions[]`; `back` from a modal returns to its screen.
+
+```json
+{ "id": "queue", "title": "Entries", "pattern": "WorkQueue",
+  "actions": [
+    { "id": "open",    "label": "Open entry", "to": "entry" },
+    { "id": "approve", "label": "Approve",    "to": "queue", "primary": true },
+    { "id": "reject",  "label": "Reject",     "to": "modal:reject-reason", "destructive": "undo" },
+    { "id": "help",    "label": "Help",       "to": "external" }
+  ] }
+```
+
+### `journeys[]`
+
+| Field | Type | Required | Rules |
+|---|---|---|---|
+| `id` | string | yes | `J-` + kebab-case; unique |
+| `story` | HELIX ID | yes | `US-<n>` |
+| `criteria` | HELIX AC ID[] | no | `US-<n>-AC<m>` of that story |
+| `entry` | screen `id` | yes | |
+| `steps[]` | array | yes | Each `{ "screen", "action"?, "state"?, "expect"?, "scenario"? }`; `action` names an action of `screen`; the next step's screen is where it leads; `state` and `expect` are states (`empty`, `loading`, `error`) |
+| `alternates[]` | array | no | Each `{ "from": <step index>, "steps", "reason"?, "scenario"? }` |
+| `scenario` (step or alternate) | `"normal"` \| `"errorProne"` \| `"risky"` | no | FEAT-011's scenarios, so the assessment walks it as one |
+
+```json
+{ "id": "J-review-entry", "story": "US-012", "criteria": ["US-012-AC1", "US-012-AC3"],
+  "entry": "queue",
+  "steps": [
+    { "screen": "queue", "action": "open" },
+    { "screen": "entry", "action": "approve", "state": "loading" },
+    { "screen": "queue", "expect": "empty" }
+  ],
+  "alternates": [ { "from": 1, "steps": [ { "screen": "entry", "action": "reject" } ] } ] }
+```
+
+### Checks
+
+`flow.reachable`, `flow.no-dead-end`, `flow.primary-consistent`,
+`journey.walkable`, `journey.safeguarded`, `journey.covers-errors` and
+`journey.story-covered` are warnings. `flow.target-exists` is an error.
+Findings use the *Finding* shape.
+
 ## Error Semantics
 
 | Case | Result |

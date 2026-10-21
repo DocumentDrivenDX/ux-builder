@@ -436,6 +436,16 @@ The renderer shows an approval with `consequence`, Approve and Deny
 
 `@ux-builder/mcp` adds `check_card` (`card`) → findings.
 
+## Flows and journeys *[Amended 2026-10-21 — planned, FEAT-012, ADR-030]*
+
+| Surface | Addition |
+|---|---|
+| `ux-builder-blueprint check` | The `flow.*` and `journey.*` checks (CONTRACT-005 *Flows and journeys*); with a HELIX marker, reads, never writes, the stories |
+| `ux-builder-blueprint propose [--out <dir>]` | Writes HELIX proposals as patches (walkthroughs, solution design flowchart, architecture *Data Flow*, `DESIGN.md` navigation, story test plan scenarios) and a disagreement report; applies nothing. Exit 0 written; 2 no marker or usage |
+| `ux-builder-blueprint draw [--out <dir>]` | IA map, flow and journey diagrams as Mermaid and SVG |
+| `ux-builder-blueprint wireframes [--out <dir>]` | Each screen's pattern at each supported size class, HTML and PNG, neutral theme |
+| `@ux-builder/mcp` | `check_blueprint` includes the new checks; `propose_from_blueprint` returns the proposals without writing them |
+
 ## Error Semantics
 
 | Condition | Error / Outcome | Retry | Recovery Expectation |
