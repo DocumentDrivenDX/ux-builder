@@ -54,15 +54,20 @@ describe("US-026 in Chromium", () => {
     await page.locator("#edit").waitFor();
     await page.locator("#edit").focus();
     await page.locator("#box").evaluate((b) => { b.style.inlineSize = "800px"; });
-    await page.waitForTimeout(100);
+    // Wait for the layout to become one pane, not a fixed time (slow CI runners).
+    await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-pane="primary"]')).display === "none" && document.querySelector(".piq-list-detail").dataset.size !== "expanded");
     const after = await page.evaluate(() => ({ id: document.activeElement?.id, visible: !!document.activeElement?.offsetParent, list: getComputedStyle(document.querySelector('[data-pane="primary"]')).display, back: getComputedStyle(document.querySelector(".piq-list-detail__back")).display !== "none" }));
     assert.deepEqual(after, { id: "edit", visible: true, list: "none", back: true });
 
     // Back to two panes, focus in the list this time: narrowing keeps the list.
     await page.locator("#box").evaluate((b) => { b.style.inlineSize = "1000px"; });
+    // The list shows again before it can take focus.
+    await page.locator('[role="option"]').first().waitFor({ state: "visible" });
     await page.locator('[role="option"]').first().focus();
+    await page.waitForFunction(() => document.activeElement?.getAttribute("role") === "option");
     await page.locator("#box").evaluate((b) => { b.style.inlineSize = "800px"; });
-    await page.waitForTimeout(100);
+    await page.waitForFunction(() => document.querySelector(".piq-list-detail").dataset.size !== "expanded");
+    await page.waitForTimeout(50);
     const list = await page.evaluate(() => ({ role: document.activeElement?.getAttribute("role"), visible: !!document.activeElement?.offsetParent }));
     assert.deepEqual(list, { role: "option", visible: true });
     await page.close();
