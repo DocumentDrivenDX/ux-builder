@@ -29,8 +29,8 @@ test("every story's id is Storybook's own", () => {
   assert.equal(storyId("Patterns/Extended screens", "ComboboxAndTooltip"), "patterns-extended-screens--combobox-and-tooltip");
 });
 
-test("every widget and screen pattern has a story, its own file's first", () => {
-  for (const kind of ["widgets", "patterns"]) {
+test("every widget, screen pattern and assistant component has a story, its own file's first", () => {
+  for (const kind of ["widgets", "patterns", "assistant"]) {
     for (const w of catalogue[kind].filter((x) => x.type === "component")) assert.ok(byComponent.get(w.name)?.length, `${w.name} has a story`);
   }
   assert.equal(byComponent.get("Button")[0].title, "UI Components/Button");

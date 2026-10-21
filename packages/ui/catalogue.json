@@ -481,7 +481,25 @@
         }
       ],
       "source": "src/widgets/Card.jsx",
-      "import": "import { Card } from \"@ux-builder/ui\";"
+      "import": "import { Card } from \"@ux-builder/ui\";",
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        }
+      }
     },
     {
       "name": "Checkbox",
@@ -614,7 +632,76 @@
         }
       ],
       "source": "src/widgets/DataTable.jsx",
-      "import": "import { DataTable } from \"@ux-builder/ui\";"
+      "import": "import { DataTable } from \"@ux-builder/ui\";",
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "columns",
+          "rows"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "columns": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "type": "object",
+              "required": [
+                "key",
+                "label"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "numeric": {
+                  "type": "boolean"
+                },
+                "sortable": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "rows": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean",
+                  "null"
+                ],
+                "maxLength": 2000
+              }
+            }
+          },
+          "rowKey": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      }
     },
     {
       "name": "DatePicker",
@@ -906,7 +993,34 @@
         }
       ],
       "source": "src/widgets/Notice.jsx",
-      "import": "import { Notice } from \"@ux-builder/ui\";"
+      "import": "import { Notice } from \"@ux-builder/ui\";",
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tone": {
+            "enum": [
+              "info",
+              "accent",
+              "success",
+              "warning",
+              "error"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      }
     },
     {
       "name": "Pagination",
@@ -1005,7 +1119,32 @@
         }
       ],
       "source": "src/widgets/Loading.jsx",
-      "import": "import { ProgressBar } from \"@ux-builder/ui\";"
+      "import": "import { ProgressBar } from \"@ux-builder/ui\";",
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "value": {
+            "type": "number",
+            "minimum": 0
+          },
+          "max": {
+            "type": "number",
+            "minimum": 0
+          },
+          "showValue": {
+            "type": "boolean"
+          }
+        }
+      }
     },
     {
       "name": "RadioGroup",
@@ -1219,7 +1358,30 @@
         }
       ],
       "source": "src/widgets/StatusPill.jsx",
-      "import": "import { StatusPill } from \"@ux-builder/ui\";"
+      "import": "import { StatusPill } from \"@ux-builder/ui\";",
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "state"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "enum": [
+              "live",
+              "limited",
+              "purchasing",
+              "evaluation",
+              "closed"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 60
+          }
+        }
+      }
     },
     {
       "name": "Switch",
@@ -2589,7 +2751,46 @@
           "name": "FormPage",
           "when": "the fields are edited"
         }
-      ]
+      ],
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "required": [
+                "label",
+                "value"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "number"
+                  ],
+                  "maxLength": 2000
+                },
+                "wide": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     {
       "name": "DrillDown",
@@ -4551,7 +4752,53 @@
       },
       "variantPoints": [],
       "chooseWhen": "One figure that matters, with its change in words.",
-      "insteadOf": []
+      "insteadOf": [],
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "label",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "value": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "maxLength": 60
+          },
+          "change": {
+            "type": "object",
+            "required": [
+              "direction"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "direction": {
+                "enum": [
+                  "up",
+                  "down",
+                  "flat"
+                ]
+              },
+              "amount": {
+                "type": "string",
+                "maxLength": 30
+              },
+              "comparison": {
+                "type": "string",
+                "maxLength": 60
+              }
+            }
+          }
+        }
+      }
     },
     {
       "name": "Subscriptions",
@@ -5072,6 +5319,539 @@
       "variantPoints": [],
       "chooseWhen": "Switching workspace or tenant in the top bar.",
       "insteadOf": []
+    }
+  ],
+  "assistant": [
+    {
+      "name": "ApprovalCard",
+      "type": "component",
+      "purpose": "A request for the user's approval before the assistant changes anything: what will happen and to what, with Approve and Deny. Nothing is passed on until the user chooses, neither button is chosen or focused for them, and once decided, or no longer current, it has no buttons and says why.",
+      "props": [
+        {
+          "name": "summary",
+          "default": null
+        },
+        {
+          "name": "details",
+          "default": null
+        },
+        {
+          "name": "decision",
+          "default": null
+        },
+        {
+          "name": "current",
+          "default": "true"
+        },
+        {
+          "name": "onDecide",
+          "default": null
+        },
+        {
+          "name": "approveLabel",
+          "default": "\"Approve\""
+        },
+        {
+          "name": "denyLabel",
+          "default": "\"Deny\""
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Parts.jsx",
+      "import": "import { ApprovalCard } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "AssistantPanel",
+      "type": "component",
+      "purpose": "The assistant beside the page: from the expanded size class a side panel region next to children, below it a full-screen modal sheet. Focus moves into the panel's composer when it opens.",
+      "props": [
+        {
+          "name": "open",
+          "default": "false"
+        },
+        {
+          "name": "onClose",
+          "default": null
+        },
+        {
+          "name": "title",
+          "default": "\"Assistant\""
+        },
+        {
+          "name": "panel",
+          "default": null
+        },
+        {
+          "name": "closeLabel",
+          "default": "\"Close assistant\""
+        },
+        {
+          "name": "children",
+          "default": null
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Conversation.jsx",
+      "import": "import { AssistantPanel } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "checkRenderable",
+      "type": "function",
+      "purpose": "Whether an agent may render a component with these props: { ok, problems }. Only components in RENDERABLE, with props that pass its schema, are ok.",
+      "props": [
+        {
+          "name": "component",
+          "default": null
+        },
+        {
+          "name": "props",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/schema.js"
+    },
+    {
+      "name": "Conversation",
+      "type": "component",
+      "purpose": "A conversation with an assistant: the messages as a log, a composer, Stop while a reply streams, Retry when one fails, suggestions, and each reply's reasoning, tool calls, sources, approvals, artifacts and generated components. Finished replies are announced once each, never token by token.",
+      "props": [
+        {
+          "name": "messages",
+          "default": "[]"
+        },
+        {
+          "name": "onSend",
+          "default": null
+        },
+        {
+          "name": "onStop",
+          "default": null
+        },
+        {
+          "name": "onRetry",
+          "default": null
+        },
+        {
+          "name": "onRegenerate",
+          "default": null
+        },
+        {
+          "name": "suggestions",
+          "default": "[]"
+        },
+        {
+          "name": "onDecide",
+          "default": null
+        },
+        {
+          "name": "decisions",
+          "default": null
+        },
+        {
+          "name": "onComponentSubmit",
+          "default": null
+        },
+        {
+          "name": "renderArtifact",
+          "default": null
+        },
+        {
+          "name": "disabledReason",
+          "default": null
+        },
+        {
+          "name": "actor",
+          "default": null
+        },
+        {
+          "name": "label",
+          "default": "\"Conversation with the assistant\""
+        },
+        {
+          "name": "composerLabel",
+          "default": "\"Ask the assistant\""
+        },
+        {
+          "name": "disclosure",
+          "default": "DISCLOSURE"
+        },
+        {
+          "name": "strings",
+          "default": null
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Conversation.jsx",
+      "import": "import { Conversation } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "GenerativeComponent",
+      "type": "component",
+      "purpose": "What an agent asked to render, as the SDK component it names, in the app's theme: only a renderable component, and only with props that pass its schema. Anything else is a plain notice; nothing from it is inserted as HTML.",
+      "props": [
+        {
+          "name": "component",
+          "default": null
+        },
+        {
+          "name": "props",
+          "default": null
+        },
+        {
+          "name": "values",
+          "default": null
+        },
+        {
+          "name": "onValuesChange",
+          "default": null
+        },
+        {
+          "name": "onSubmit",
+          "default": null
+        },
+        {
+          "name": "submitted",
+          "default": null
+        },
+        {
+          "name": "fallback",
+          "default": "\"This content could not be shown.\""
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Generative.jsx",
+      "import": "import { GenerativeComponent } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "InlineForm",
+      "type": "component",
+      "purpose": "A short form the assistant asks the user to fill in, inside the conversation: its values may be pre-filled, stay editable, and are sent only when the user submits. Once submitted it shows what was sent, read only.",
+      "props": [
+        {
+          "name": "title",
+          "default": null
+        },
+        {
+          "name": "fields",
+          "default": "[]"
+        },
+        {
+          "name": "submitLabel",
+          "default": "\"Submit\""
+        },
+        {
+          "name": "values",
+          "default": null
+        },
+        {
+          "name": "onValuesChange",
+          "default": null
+        },
+        {
+          "name": "onSubmit",
+          "default": null
+        },
+        {
+          "name": "submitted",
+          "default": null
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Generative.jsx",
+      "import": "import { InlineForm } from \"@ux-builder/ui/assistant\";",
+      "renderable": true,
+      "propsSchema": {
+        "type": "object",
+        "required": [
+          "fields"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "submitLabel": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "fields": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "label"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "label": {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "type": {
+                  "enum": [
+                    "text",
+                    "number",
+                    "date",
+                    "select",
+                    "checkbox"
+                  ]
+                },
+                "options": {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "value",
+                      "label"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "maxLength": 120
+                      },
+                      "label": {
+                        "type": "string",
+                        "maxLength": 120
+                      }
+                    }
+                  }
+                },
+                "value": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ],
+                  "maxLength": 2000
+                },
+                "required": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Markdown",
+      "type": "component",
+      "purpose": "Markdown from a model, rendered as React elements: never as HTML. sources and idPrefix link each [n] to source n of a Sources list.",
+      "props": [
+        {
+          "name": "text",
+          "default": null
+        },
+        {
+          "name": "sources",
+          "default": null
+        },
+        {
+          "name": "idPrefix",
+          "default": null
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Markdown.jsx",
+      "import": "import { Markdown } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "Reasoning",
+      "type": "component",
+      "purpose": "What the assistant reasoned, collapsed behind a disclosure that says for how long; the answer never depends on opening it.",
+      "props": [
+        {
+          "name": "text",
+          "default": null
+        },
+        {
+          "name": "seconds",
+          "default": null
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Parts.jsx",
+      "import": "import { Reasoning } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "RENDERABLE",
+      "type": "constant",
+      "purpose": "The components an agent may render, each with the JSON Schema its props must pass: the allow-list generated UI is limited to.",
+      "source": "src/assistant/schema.js"
+    },
+    {
+      "name": "Sources",
+      "type": "component",
+      "purpose": "The sources a reply relies on, numbered; each title is a link where it has one, leaving the app. Each item can take focus, so a citation [n] in the answer moves to it.",
+      "props": [
+        {
+          "name": "sources",
+          "default": "[]"
+        },
+        {
+          "name": "idPrefix",
+          "default": null
+        },
+        {
+          "name": "label",
+          "default": "\"Sources\""
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Parts.jsx",
+      "import": "import { Sources } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "ToolCall",
+      "type": "component",
+      "purpose": "One tool the assistant used: its name and status (running, done, failed) in text, and on request its input and result. It is a step of the reply's plan.",
+      "props": [
+        {
+          "name": "name",
+          "default": null
+        },
+        {
+          "name": "title",
+          "default": null
+        },
+        {
+          "name": "status",
+          "default": "\"running\""
+        },
+        {
+          "name": "input",
+          "default": null
+        },
+        {
+          "name": "output",
+          "default": null
+        },
+        {
+          "name": "error",
+          "default": null
+        },
+        {
+          "name": "className",
+          "default": null
+        }
+      ],
+      "source": "src/assistant/Parts.jsx",
+      "import": "import { ToolCall } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "ToolCalls",
+      "type": "component",
+      "purpose": "A reply's tool calls as one plan; more than three are grouped under \"Used n tools\".",
+      "props": [
+        {
+          "name": "calls",
+          "default": "[]"
+        }
+      ],
+      "source": "src/assistant/Parts.jsx",
+      "import": "import { ToolCalls } from \"@ux-builder/ui/assistant\";"
+    },
+    {
+      "name": "fromAiSdk",
+      "type": "function",
+      "purpose": "The AI SDK's UI messages as Conversation messages. status and error are the chat's; stopped is the set of message ids the user stopped.",
+      "props": [
+        {
+          "name": "messages",
+          "default": "[]"
+        },
+        {
+          "name": "{ status",
+          "default": "\"ready\", error, stopped = new Set(), describeApproval } = {}"
+        }
+      ],
+      "source": "src/assistant/adapters/ai-sdk.js",
+      "import": "import { fromAiSdk } from \"@ux-builder/ui/assistant/ai-sdk\";"
+    },
+    {
+      "name": "useAiSdkConversation",
+      "type": "hook",
+      "purpose": "Conversation props from the AI SDK chat that useChat returns: messages, onSend, onStop, onRetry, onRegenerate and onDecide. Spread them onto <Conversation>.",
+      "props": [
+        {
+          "name": "chat",
+          "default": null
+        },
+        {
+          "name": "{ describeApproval }",
+          "default": "{}"
+        }
+      ],
+      "source": "src/assistant/adapters/ai-sdk.js",
+      "import": "import { useAiSdkConversation } from \"@ux-builder/ui/assistant/ai-sdk\";"
+    },
+    {
+      "name": "fromAssistantUi",
+      "type": "function",
+      "purpose": "assistant-ui's thread messages as Conversation messages.",
+      "props": [
+        {
+          "name": "messages",
+          "default": "[]"
+        },
+        {
+          "name": "{ describeApproval }",
+          "default": "{}"
+        }
+      ],
+      "source": "src/assistant/adapters/assistant-ui.js",
+      "import": "import { fromAssistantUi } from \"@ux-builder/ui/assistant/assistant-ui\";"
+    },
+    {
+      "name": "useAssistantUiConversation",
+      "type": "hook",
+      "purpose": "Conversation props from an assistant-ui ThreadRuntime: messages, onSend, onStop, onRetry, onRegenerate and onDecide. Spread them onto <Conversation>.",
+      "props": [
+        {
+          "name": "thread",
+          "default": null
+        },
+        {
+          "name": "{ describeApproval }",
+          "default": "{}"
+        }
+      ],
+      "source": "src/assistant/adapters/assistant-ui.js",
+      "import": "import { useAssistantUiConversation } from \"@ux-builder/ui/assistant/assistant-ui\";"
     }
   ],
   "icons": [
