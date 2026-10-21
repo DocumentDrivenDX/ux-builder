@@ -1,14 +1,14 @@
 /* The project site's generated Reference and Proof data (microsite-data.mjs):
    nothing that ships is missing from it, so the site cannot drift from the
    source. Fails when an option, command, MCP tool, export, rule, licence or
-   card element is left out. */
+   card element is left out. Needs the built packages: runs in npm run test:built. */
 
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { NOTES, micrositeData } from "../microsite-data.mjs";
+import { NOTES, micrositeData } from "../../../apps/theme-builder/microsite-data.mjs";
 
 const REPO = fileURLToPath(new URL("../../../", import.meta.url));
 const read = (p) => readFileSync(join(REPO, p), "utf8");

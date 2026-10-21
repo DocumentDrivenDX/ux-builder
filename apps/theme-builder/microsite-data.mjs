@@ -19,7 +19,7 @@
                 alignment reviews
      notices    ADR-025's counsel waiver and the guidance's disclaimer
 
-   apps/theme-builder/test/microsite-data.test.mjs fails when an option,
+   tools/__tests__/built/microsite-data.test.mjs fails when an option,
    command, tool, export or licence is missing from it. */
 
 import { execFileSync } from "node:child_process";

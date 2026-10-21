@@ -237,7 +237,7 @@ which `vite.shared.mjs` serves as the virtual module
 | `proof/sources` | Every distinct source the rules cite with its licence (`LICENCES` says what each allows); ADR-025's *Amendment* (counsel's review waived for release, bead `ux-builder-78483e2c`); the disclaimer from `AGENTS.md` |
 | `proof/live` | Links to the theme pages and Storybook |
 
-`test/microsite-data.test.mjs` fails when an option, command, MCP tool,
+`tools/__tests__/built/microsite-data.test.mjs` (after the build) fails when an option, command, MCP tool,
 export, licence or card element is missing from the generated data;
 `e2e/builder/microsite-reference.spec.mjs` visits the pages and checks
 their counts against the source.
