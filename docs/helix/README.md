@@ -26,5 +26,12 @@ are not part of this repository.
 
 ## Work items
 
-Phases 0–4 of the PRD are tracked as DDx beads, labelled `phase:0` … `phase:4`
-and `feat:FEAT-00n`.
+Work items are DDx beads in `.ddx/beads.jsonl`, committed with the repository
+(`ddx bead list`, `ddx bead ready`). Bead IDs take the prefix `ux-builder`
+(`.ddx/config.yaml`). Beads are labelled `feat:FEAT-0nn` and `story:US-0nn`;
+each one references its governing story and names its acceptance and
+verification. HELIX documents stay the authority, and a bead points to them.
+The store started 2026-10-21. Beads cited in older documents were in an
+earlier store that this repository does not carry.
+
+Open: the FEAT-005 epic `ux-builder-31fd7955`.
