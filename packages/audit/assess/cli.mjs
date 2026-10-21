@@ -48,11 +48,18 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       not; with --run as well, it stops when limits.runMinutes are spent.
   inspect (--cdp <url> --page <url-match> | --replay <steps.json>) --checkpoint <C-id>
           [--journey <J-id>] [--step n] [--role id] [--state class]
+          [--scenario normal|errorProne|risky] [--high-impact-step n]
           [--state-affecting] [--redact <selector>]... [--manifest f] [--out dir] [--run R-id]
       Inspect the page in place (or a verified replay) and write
       <out>/<run>/checkpoints/<id>/inspection.json, screenshot.png, tree.yml.
       With the manifest: its origins, excluded integrations, denied and
-      allowed actions, evidence.capture and limits apply.
+      allowed actions, evidence.capture and limits apply. An approve control
+      (data-piq-ai-control="approve") is never activated. --scenario risky:
+      a replay stops at the approval, records it, chooses Deny and takes
+      nothing more; with no approval before the high-impact step (--high-impact-step,
+      a step marked highImpact, or the journey's scenarios.risky.step) it stops
+      before that step. --scenario errorProne records whether the error is
+      shown in place and whether recovery needs no restart.
   validate-report <run-dir>
       Check every record in a run package, that its evidence resolves, and that
       findings relying on a conflicting HELIX ID are qualified.
@@ -280,8 +287,11 @@ const SUB = {
       cdp: { type: "string" }, page: { type: "string" }, replay: { type: "string" }, checkpoint: { type: "string" },
       journey: { type: "string" }, step: { type: "string" }, role: { type: "string" }, state: { type: "string" },
       "state-affecting": { type: "boolean" }, redact: { type: "string", multiple: true }, manifest: { type: "string" }, out: { type: "string" }, run: { type: "string" },
+      scenario: { type: "string" }, "high-impact-step": { type: "string" },
     } });
     if (!o.checkpoint || !(o.replay || (o.cdp && o.page))) { console.error(USAGE); return 2; }
+    if (o.scenario && !["normal", "errorProne", "risky"].includes(o.scenario)) { console.error(`--scenario must be normal, errorProne or risky\n${USAGE}`); return 2; }
+    if (o["high-impact-step"] && !/^[1-9]\d*$/.test(o["high-impact-step"])) { console.error("--high-impact-step must be a step number (1-based)"); return 2; }
     // With the manifest: its output path, origins and redaction apply (ENV-02, ENV-03).
     let extra = { out: o.out ?? "ux-assessment" };
     if (o.manifest) {
@@ -289,10 +299,14 @@ const SUB = {
       if (typeof ready === "number") return ready;
       const { runDir } = await import("./plan.mjs");
       const r = ready.resolved;
-      extra = { out: o.out ?? runDir(ready.manifest, r, undefined, ".").replace(/\/\.$/, ""), origins: r.run.origins, exclude: r.restrictions.excludeIntegrations, allow: r.restrictions.allow, deny: r.restrictions.deny, capture: r.evidence?.capture ?? "both", limits: r.limits, redactText: r.evidence?.redact?.text ?? [], cwd: r.run.cwd, redactSelectors: r.evidence?.redact?.selectors ?? [] };
+      // The journey's risky step, when the manifest gives it as a number.
+      const j = (r.journeys ?? []).find((x) => x.id === o.journey);
+      const { riskyStep } = await import("./ai.mjs");
+      const step = j && o.scenario === "risky" ? riskyStep(j) : null;
+      extra = { highImpactStep: Number.isInteger(step) ? step : undefined, out: o.out ?? runDir(ready.manifest, r, undefined, ".").replace(/\/\.$/, ""), origins: r.run.origins, exclude: r.restrictions.excludeIntegrations, allow: r.restrictions.allow, deny: r.restrictions.deny, capture: r.evidence?.capture ?? "both", limits: r.limits, redactText: r.evidence?.redact?.text ?? [], cwd: r.run.cwd, redactSelectors: r.evidence?.redact?.selectors ?? [] };
     }
     const { checkpoint, runId } = await import("./checkpoint.mjs");
-    const { code, record } = await checkpoint({ ...o, ...extra, run: o.run ?? runId(), stateAffecting: !!o["state-affecting"], redact: [...(o.redact ?? []), ...(extra.redactSelectors ?? [])] });
+    const { code, record } = await checkpoint({ ...o, ...extra, highImpactStep: o["high-impact-step"] ?? extra.highImpactStep, run: o.run ?? runId(), stateAffecting: !!o["state-affecting"], redact: [...(o.redact ?? []), ...(extra.redactSelectors ?? [])] });
     console.log(code ? `${record.checkpoint.id}: ${record.message}` : `${record.checkpoint.id}: ${record.findings.length} finding${record.findings.length === 1 ? "" : "s"} at ${record.url} (${record.mode})`);
     return code;
   },

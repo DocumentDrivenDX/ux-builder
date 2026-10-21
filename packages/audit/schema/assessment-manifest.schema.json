@@ -6,12 +6,23 @@
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "app", "run", "roles", "journeys", "restrictions"],
+  "$defs": {
+    "scenario": {
+      "type": "object", "additionalProperties": false, "required": ["description"],
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "inputs": { "description": "What the scenario types or asks: a string, a list or a mapping" },
+        "step": { "description": "risky: the high-impact step, as a 1-based walkthrough step number or the action's label", "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "string", "minLength": 1 }] }
+      }
+    }
+  },
   "properties": {
     "version": { "const": 1 },
     "app": {
       "type": "object", "additionalProperties": false, "required": ["name"],
       "properties": { "name": { "type": "string", "minLength": 1 }, "repository": { "type": "string" } }
     },
+    "blueprint": { "type": "string", "minLength": 1, "description": "The app's blueprint (CONTRACT-005), where journeys[].blueprint is resolved. Default: app.blueprint.json beside the manifest" },
     "helix": {
       "type": "object", "additionalProperties": false,
       "properties": {
@@ -60,9 +71,23 @@
     "journeys": {
       "type": "array", "minItems": 1,
       "items": {
-        "type": "object", "additionalProperties": false, "required": ["id", "story", "priority", "role", "entry"],
+        "type": "object", "additionalProperties": false, "required": ["priority", "role"],
+        "allOf": [
+          { "if": { "required": ["blueprint"] }, "else": { "required": ["id", "story", "entry"] } },
+          { "if": { "required": ["ai"], "properties": { "ai": { "const": true } } }, "then": { "required": ["scenarios"] } }
+        ],
         "properties": {
           "id": { "type": "string" },
+          "blueprint": { "type": "string", "pattern": "^J-[a-z0-9]+(-[a-z0-9]+)*$", "description": "A journey id in the app's blueprint: its story, criteria, entry and steps come from there, and the manifest gives none of them; id defaults to it (FEAT-012 ASM-01)" },
+          "ai": { "type": "boolean", "description": "An AI journey: walked in three scenarios, with the AI rules for its roles as heuristics (FEAT-011 AIX-01, AIX-02)" },
+          "scenarios": {
+            "type": "object", "additionalProperties": false, "required": ["normal", "errorProne", "risky"],
+            "properties": {
+              "normal": { "$ref": "#/$defs/scenario" },
+              "errorProne": { "$ref": "#/$defs/scenario" },
+              "risky": { "$ref": "#/$defs/scenario" }
+            }
+          },
           "story": { "type": "string" },
           "criteria": { "type": "array", "items": { "type": "string" } },
           "priority": { "type": "string" },

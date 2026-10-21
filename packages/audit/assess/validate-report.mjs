@@ -10,7 +10,9 @@
    components that exist in the app's installed catalogue, no duplicate
    findings, validation work for uncertain severe concerns, proposals aimed
    at HELIX artifacts that still exist, and qualified findings where the
-   alignment review found a conflict. Returns the problems; writes nothing. */
+   alignment review found a conflict, and an AI journey's findings each
+   naming the AI rule or heuristic they are about (FEAT-011 AIX-03).
+   Returns the problems; writes nothing. */
 
 import Ajv2020 from "ajv/dist/2020.js";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -72,6 +74,7 @@ export function validateReport(dir) {
   const conflicted = new Set((got.alignment?.conflicts ?? []).flatMap((c) => c.ids ?? []));
   const catalogue = findings.some((f) => f.component_mapping?.length) ? catalogueFor(dir, got.run) : null;
   const seen = new Set();
+  const aiJourneys = new Map((got.plan?.journeys ?? []).filter((j) => j.ai).map((j) => [j.id, (j.ai.heuristics ?? []).map((h) => h.rule)]));
   if (got.backlog && !Array.isArray(got.backlog.user_validation)) add("backlog.json", "/", 'needs "user_validation": the claims only representative users can confirm (an empty list if none)');
   for (const [i, f] of findings.entries()) {
     const at = `/findings/${i}`;
@@ -86,6 +89,10 @@ export function validateReport(dir) {
     if (!f.source_refs?.length && !proposed) add("backlog.json", at, `${f.id} cites no requirement and proposes no criterion`);
     if (f.finding_type === "heuristic" && !proposed) add("backlog.json", `${at}/expected_behavior_or_proposed_requirement`, `${f.id} is a heuristic concern: state it as "Proposed criterion: …", a recommendation, not an existing obligation`);
     if (f.finding_type === "real-user" && !(f.evidence_refs ?? []).some((r) => r.startsWith("evidence/real-user/"))) add("backlog.json", at, `${f.id} is typed real-user without evidence from real users (evidence/real-user/…)`);
+    // A finding of an AI journey names the AI rule or heuristic it is about (FEAT-011 AIX-03; US-082-AC2).
+    const ai = aiJourneys.get(f.journey_id);
+    if (ai && !f.rule) add("backlog.json", at, `${f.id} is a finding of the AI journey ${f.journey_id}: name the AI rule or heuristic it is about (rule), one of ${ai.slice(0, 6).join(", ")}${ai.length > 6 ? ", …" : ""}`);
+    else if (ai && !ai.includes(f.rule)) add("backlog.json", `${at}/rule`, `${f.rule} is not one of ${f.journey_id}'s AI heuristics in plan.json (the AI rules for its roles)`);
     if (["P0", "P1"].includes(f.priority) && f.confidence?.level === "low" && f.validation_work !== true) add("backlog.json", at, `${f.id} is a low-confidence ${f.priority}: mark validation_work: true; neither downgrade it nor state it as proven`);
     for (const [k, c] of (f.component_mapping ?? []).entries()) {
       if (!catalogue || c.work === "custom-gap") continue;
