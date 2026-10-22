@@ -1,0 +1,2 @@
+{"v":1,"episode":"E-20261012-quick-edit","seq":1,"at":"2026-10-12T16:00:00Z","kind":"start","by":"@ux-builder/trace@0.1.0","trigger":"change","goal":{"stories":[],"screens":["pipeline"],"journeys":[],"text":"Quick edit of a Globex deal"},"agent":{"name":"codex","model":"gpt-x"},"sdk":{"@ux-builder/ui":"0.8.0"},"helix":"0.9.0","commit":"base0012"}
+{"v":1,"episode":"E-20261012-quick-edit","seq":2,"at":"2026-10-12T16:05:00Z","kind":"end","by":"@ux-builder/trace@0.1.0","status":"abandoned"}

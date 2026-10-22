@@ -51,6 +51,7 @@ public themes; any other opens by its name. The site is rebuilt from `main` by
 | [`@ux-builder/create-app`](packages/create-app) | `npm create` | A new React + Vite app already on the SDK, with lint, the audit and CI |
 | [`@ux-builder/audit`](packages/audit) | devDependency | `ux-builder-audit`: checks the running app in every theme and appearance |
 | [`@ux-builder/mcp`](packages/mcp) | `npx` | The SDK for AI coding agents over MCP |
+| [`@ux-builder/trace`](packages/trace) | devDependency | `ux-builder-trace`: the episode trace an app keeps while it is built, and the export its owner shares by choice |
 
 `@ux-builder/engine` (the palette engine) and the theme builder app are
 private to this repository and are used to make new themes.
@@ -493,6 +494,44 @@ name (`--piq-color-structure`) comes from `tokens/names.json`.
 Releases use [Changesets](https://github.com/changesets/changesets). Run
 `npx changeset` in any pull request that changes what a consumer gets (see
 `.changeset/README.md`).
+
+### Learning from builds
+
+Apps built with ux-builder keep an episode trace (FEAT-016, CONTRACT-007),
+and their owners can export episodes as bundles (`ux-builder-trace export`).
+Maintainers learn from those bundles with `tools/learn.mjs`
+(`ux-builder-learn`):
+
+1. **Collect bundles in the private learning store.** Put every `.tgz` an
+   owner sends you, or the same unpacked, in a folder or private repository
+   that Synaptiq controls, in any layout (by client is fine). The store must
+   never be inside this repository: the tool refuses a store, or an output
+   folder, under this checkout (ADR-035 rule 6). To honour a removal request,
+   delete that client's bundles; the next report leaves them out.
+2. **Write the report.**
+   `npm run learn -- --store ~/ux-learning --out ~/ux-learning-out` writes
+   `learn.md` and `learn.json`: each TRC-09 signal (a rule fetched and still
+   broken, attempts to green, workarounds and hand-built UI, assessment
+   findings the audit missed, regressions, repeated guidance) with counts,
+   the episodes behind it, and its breakdown by modality and pattern. Apps
+   appear only as hashes.
+3. **File beads.** Add `--beads` to file one DDx bead (labels
+   `feat:FEAT-016,learned`) per signal seen in at least 3 episodes across 2
+   apps (`--threshold-episodes`, `--threshold-apps`). Beads carry only rule
+   IDs, catalogue names, counts and a paraphrased lesson; `--dry-run` prints
+   them instead. A signal already filed is not filed again.
+4. **Make evaluation tasks.** `--evals` writes `evals/<episode>.json` for
+   each finished episode with a recorded starting commit (goal, commit,
+   modality, outcome to beat) and lists the ones skipped. Replay a task with
+   an agent on the new SDK, record its result, then
+   `node tools/learn.mjs replay-result --task <t> --result <r>` writes the
+   two outcomes side by side, and
+   `node tools/learn.mjs grade --tasks <dir> --results <dir>` reports each
+   replay's share of components on SDK widgets and role tokens (US-014-AC4)
+   and its matching patterns (US-031-AC5).
+
+The header of `tools/learn.mjs` defines each signal, the result file and
+the grade exactly.
 
 ### Publishing a release
 

@@ -5,3 +5,6 @@ audit-report
 test-results
 playwright-report
 ux-assessment/
+
+# The episode trace (.ux-builder/) is committed, but for the open episode's marker.
+__TRACE_IGNORE__

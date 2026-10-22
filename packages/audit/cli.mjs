@@ -45,7 +45,7 @@ if (process.argv[2] === "assess") {
 }
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { RULES, VERSION, audit, toBaseline } from "./audit.mjs";
 import { summaryText, writeReports } from "./report.mjs";
@@ -115,6 +115,9 @@ try {
     log: o.json ? () => {} : (m) => console.error(m),
   });
   writeReports(report, out);
+  // The run, as a check event in the app's episode trace (FEAT-016), when it keeps one.
+  const { recordAudit } = await import("./trace.mjs");
+  await recordAudit(report, { out, start: o.blueprint ? dirname(resolve(o.blueprint)) : process.cwd() });
   if (o["write-baseline"]) {
     writeFileSync(o["write-baseline"], JSON.stringify(toBaseline(report), null, 2) + "\n");
     if (!o.json) console.error(`Baseline: ${toBaseline(report).findings.length} findings written to ${o["write-baseline"]}`);

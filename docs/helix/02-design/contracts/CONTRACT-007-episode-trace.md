@@ -17,7 +17,7 @@ ddx:
 **Contract ID**: CONTRACT-007 — Episode trace
 **Type**: data formats and command (the trace in an app, the export bundle, `ux-builder-trace`, the MCP tools that write to it)
 **Version**: v1 (planned, `@ux-builder/trace` 0.1.0)
-**Status**: draft — 2026-10-22, with ADR-035
+**Status**: draft — 2026-10-22, with ADR-035; amended 2026-10-22 with the build (`start.commit`, `change.parent`, the `outcome` shapes)
 **Related**: FEAT-016, ADR-035, ADR-023 rule 8, CONTRACT-004 (the MCP server and the audit), CONTRACT-006 (the assessment's run package and redaction)
 
 ## Purpose
@@ -71,14 +71,14 @@ Each kind adds its own fields:
 
 | `kind` | Written by | Fields |
 |---|---|---|
-| `start` | create-app, `trace start`, MCP `start_episode` | `trigger` (`create` or `change`), `goal` (`{ stories[], screens[], journeys[], text }`), `agent` (`{ name, model }`), `sdk` (package versions), `helix` (version or null) |
+| `start` | create-app, `trace start`, MCP `start_episode` | `trigger` (`create` or `change`), `goal` (`{ stories[], screens[], journeys[], text }`), `agent` (`{ name, model }`), `sdk` (package versions), `helix` (version or null), `commit` (HEAD's SHA when the episode opened, or null before the first commit) |
 | `created` | create-app | `modalities`, `theme`, `options`, `files` (count), `blueprint` (hash) |
 | `guidance` | MCP server | `tool`, `input` (its arguments), `answer` (`{ ruleIds[], components[], recipes[], guidanceHash, bytes }`) |
 | `check` | lint, `check:blueprint`, `checkCard`, audit | `check` (`lint`, `blueprint`, `card` or `audit`), `attempt` (counts this check's runs in the episode), `status` (`pass`, `warn` or `fail`), `findings` (`[{ ruleId, severity, count }]`), `report` (path, for the audit) |
 | `decision` | agent, through MCP `record_decision` | `chose`, `considered[]`, `why`, `relied` (rule IDs and story IDs), `departs` (bool: departs from guidance), `workaround` (bool: a missing component worked around), `screen` |
 | `transcript` | `trace attach-transcript` | `file` (path under `transcripts/`), `agent`, `bytes`, `sha256`, `masked` (count) |
-| `change` | `trace end`, or MCP `end_episode` | `commits[]` (SHAs with the trailer), `files` (count changed), `screens[]` |
-| `outcome` | `trace end`, or MCP `end_episode` | `audit` (the verdicts and a count of findings per rule), `assessment` (run ID and the `compare` classes, if one ran), `checksToGreen` (attempts per check before its first pass) |
+| `change` | `trace end`, or MCP `end_episode` | `commits[]` (SHAs with the trailer), `parent` (the first of them's parent, when `start.commit` is null), `files` (count changed), `screens[]` |
+| `outcome` | `trace end`, or MCP `end_episode` | `audit`: `{ verdicts: { theme, modality: [{ modality, status }] } \| null, findings: { <ruleId>: count } }`; `assessment`: null or `{ run, compare: [{ rule, finding, status }] }`, status being `new`, `persistent`, `resolved`, `regressed` or `not-rechecked`; `checksToGreen`: `{ <check>: attempt }`, the attempt on which the check first passed (1 when it passed first time), null for a check that never passed. A check is green at its first `pass` or `warn` |
 | `end` | `trace end`, or MCP `end_episode` | `status` (`done`, `abandoned` or `unscoped`) |
 
 An event never contains source code, or a file's contents. `input` and
@@ -116,7 +116,9 @@ for confirmation (`--yes` to skip). It makes no network request.
 `ux-builder-trace` has these subcommands:
 - `start --goal <text> [--story US-n]... [--screen id]... [--journey J-x]... [--agent name --model id] [--no-transcripts]`
 - `attach-transcript [--file f]`: reads a Claude Code hook's JSON on stdin when no `--file` is given.
-- `end [--status done|abandoned]`
+- `end [--status done|abandoned] [--assessment <run-dir>]`
+- `decide --chose <what> --why <why> [...]`: a `decision`, for agents without MCP. *[Amended 2026-10-22 — integration]*
+- `lint [--stylelint <glob>]... [--eslint <path>]...`: runs both linters and writes one `lint` check; a created app's `npm run lint`. *[Amended 2026-10-22 — integration]*
 - `status`
 - `export …`
 - `validate`
@@ -129,6 +131,11 @@ for confirmation (`--yes` to skip). It makes no network request.
 - `end_episode`.
 
 Every other tool writes a `guidance` event to the open episode.
+*[Amended 2026-10-22 — integration]* The server's app is its working
+directory, or `UX_BUILDER_APP`; the trace is the nearest `.ux-builder/` at or
+above it, and with none, nothing is written until `start_episode`. An object
+argument (a blueprint, a card) is recorded by its `sha256` and size only.
+`check_blueprint` and `check_card` also write a `check` event.
 
 ## Error Semantics
 

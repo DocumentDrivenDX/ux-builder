@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "npx ux-builder-trace attach-transcript" }
+        ]
+      }
+    ]
+  }
+}

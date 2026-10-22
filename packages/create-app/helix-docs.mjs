@@ -246,6 +246,10 @@ shell, DESIGN.md, the test plans). Work in this order:
 5. Assess the UX: \`npm run assess:validate\`, then the \`ux-builder-assess\` skill in
    \`node_modules/@ux-builder/audit/skill/\`.
 
+Each change is an episode in the trace (see "Recording the build" above): start it with the
+story it serves (\`--story US-<n>\`), record its decisions, end its commits with the
+\`UX-Episode:\` trailer, and end it once they are made.
+
 Other agent hosts install HELIX from https://github.com/DocumentDrivenDX/helix/blob/main/docs/install/README.md.
 `;
   for (const f of ["AGENTS.md", "CLAUDE.md"]) appendFileSync(join(r.dir, f), guide);

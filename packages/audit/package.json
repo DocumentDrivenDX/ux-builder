@@ -27,6 +27,7 @@
     "collect.js",
     "serve.mjs",
     "report.mjs",
+    "trace.mjs",
     "README.md",
     "THIRD-PARTY-NOTICES.md"
   ],

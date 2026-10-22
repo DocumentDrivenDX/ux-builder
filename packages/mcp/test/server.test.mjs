@@ -19,6 +19,8 @@ import { CLEAN, PAY_INVOICE } from "../../ui/src/adaptive-cards/story-data.js";
 
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const cat = JSON.parse(readFileSync(`${ROOT}packages/ui/catalogue.json`, "utf8"));
+// Every tool the server registers, read from its source (as the project site counts them).
+const REGISTERED = [...readFileSync(`${ROOT}packages/mcp/server.mjs`, "utf8").matchAll(/registerTool\("([a-z_]+)"/g)].map((m) => m[1]).sort();
 let client;
 const call = async (name, args = {}) => {
   const r = await client.callTool({ name, arguments: args });
@@ -35,7 +37,8 @@ before(async () => {
 describe("US-014-AC5: agents list the SDK over MCP", () => {
   test("the tools and resources are listed, with instructions carrying the rules", async () => {
     const { tools } = await client.listTools();
-    assert.deepEqual(tools.map((t) => t.name).sort(), ["check_blueprint", "check_card", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_renderable", "list_themes", "list_tokens", "list_variants", "list_widgets", "propose_from_blueprint", "validate_assessment_manifest", "validate_assessment_report"]);
+    assert.deepEqual(tools.map((t) => t.name).sort(), REGISTERED);
+    assert.deepEqual(REGISTERED, ["check_blueprint", "check_card", "end_episode", "get_assessment_skill", "get_blueprint_schema", "get_guidance", "get_pattern", "get_recipe", "get_rules", "get_theme", "get_token", "get_widget", "list_brands", "list_design_systems", "list_icons", "list_patterns", "list_recipes", "list_renderable", "list_themes", "list_tokens", "list_variants", "list_widgets", "propose_from_blueprint", "record_decision", "start_episode", "validate_assessment_manifest", "validate_assessment_report"]);
     const { resources } = await client.listResources();
     assert.deepEqual(resources.map((r) => r.uri).sort(), ["ux-builder://catalogue", "ux-builder://guidance"]);
     assert.match(client.getInstructions(), /Never hard-code colours, font families or radii/);
@@ -105,7 +108,7 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
     await c.connect(new StdioClientTransport({ command: process.execPath, args: [fileURLToPath(new URL("../server.mjs", import.meta.url))] }));
     try {
       const { tools } = await c.listTools();
-      assert.equal(tools.length, 24);
+      assert.equal(tools.length, REGISTERED.length);
     } finally { await c.close(); }
   });
 });

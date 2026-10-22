@@ -28,6 +28,7 @@
     "@ux-builder/tokens": "^1.6.0",
     "@ux-builder/ui": "^0.8.0",
     "@ux-builder/audit": "^0.3.0",
+    "@ux-builder/trace": "^0.1.0",
     "undici": "^7.30.1"
   },
   "publishConfig": {

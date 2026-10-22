@@ -11,6 +11,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@ux-builder/tokens": "^1.4.0",
+    "@ux-builder/trace": "^0.1.0",
     "@ux-builder/ui": "^0.8.0",
     "zod": "^4.6.5"
   },

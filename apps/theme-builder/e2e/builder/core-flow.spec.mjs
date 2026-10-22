@@ -12,7 +12,9 @@ test("logo to a saved theme, as in the prototype", async ({ page }) => {
 
   // 1 (@covers US-016-AC1 @covers US-016-AC2)
   await page.getByRole("button", { name: "Use the sample logo" }).click();
-  await expect(page.getByLabel("Brand colours we found").locator("li").first()).toContainText("Navy");
+  // The suite's first logo analysis: a fresh server loads the engine for it, which on a slow CI runner
+  // takes longer than expect's 5 s default (the same analysis later in the suite takes under 2 s).
+  await expect(page.getByLabel("Brand colours we found").locator("li").first()).toContainText("Navy", { timeout: 30_000 });
   await page.getByRole("button", { name: "Suggest palettes" }).click();
 
   // 2 (@covers US-015-AC1 @covers US-015-AC3)

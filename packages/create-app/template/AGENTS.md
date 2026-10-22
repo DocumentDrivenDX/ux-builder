@@ -22,3 +22,5 @@ pattern from the recipes in the guidance (or the MCP tool `list_recipes`),
 and run `npm run check:blueprint` until it reports no errors. Then build each
 screen from its pattern (`@ux-builder/ui/patterns`) inside a `Page`, within
 the app's `AppShell`, and run lint and the audit.
+
+__EPISODE_GUIDE__

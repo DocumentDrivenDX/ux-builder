@@ -1,0 +1,1 @@
+{ "v": 1, "app": { "name": "globex-crm", "repoHash": "5e77a0c3d2b91f48" }, "sdk": { "@ux-builder/ui": "0.8.0", "@ux-builder/tokens": "1.6.0" }, "episodes": ["E-20261003-pipeline-dashboard", "E-20261012-quick-edit"], "exportedAt": "2026-10-20T11:00:00Z", "masked": 0 }

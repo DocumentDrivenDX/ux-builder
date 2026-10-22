@@ -67,7 +67,21 @@ without HELIX, and the output says why.
   theme's `Logo` in the header (its favicon is on the tab).
 - `npm run lint`: stylelint and ESLint with `ux-builder/no-hard-coded-values`,
   `ux-builder/no-foreign-ui`, `ux-builder/no-inline-svg` and the warning
-  `ux-builder/ai-neutral-voice`.
+  `ux-builder/ai-neutral-voice`, run by `ux-builder-trace lint`, which
+  records each run in the episode trace.
+- **The episode trace** (`@ux-builder/trace`, FEAT-016): creating the app is
+  its first episode, `.ux-builder/trace/E-<date>-create.jsonl`: `start`
+  (trigger `create`; the agent and model from `--agent` and `--model`, else
+  `UX_BUILDER_AGENT` and `UX_BUILDER_MODEL`, else Claude Code's; the SDK and
+  HELIX versions), `created` (modalities, theme, options, files written, the
+  blueprint's hash), the guidance written to `AGENTS.md`, the blueprint's
+  check, then `change`, `outcome` and `end`. The app is not a git
+  repository yet, so the change counts the files and names no commit.
+  `.gitignore` ignores only `.ux-builder/trace/current`, and
+  `.claude/settings.json` has a Claude Code session-end hook that attaches
+  each session's transcript (`npx ux-builder-trace attach-transcript`).
+  `AGENTS.md` asks the agent to open an episode for each change, record its
+  decisions, add the `UX-Episode:` trailer to its commits and end it.
 - `npm run audit`: builds, serves and audits the app in every theme and
   appearance with `@ux-builder/audit` (run `npx playwright install chromium`
   once); the report is in `audit-report/`.

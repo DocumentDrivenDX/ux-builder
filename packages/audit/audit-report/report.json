@@ -1,9 +1,9 @@
 {
   "tool": "@ux-builder/audit",
-  "version": "0.2.0",
-  "generatedAt": "2026-10-22T00:20:44.679Z",
+  "version": "0.3.0",
+  "generatedAt": "2026-10-22T19:01:38.664Z",
   "urls": [
-    "http://127.0.0.1:55907/only-layout.html"
+    "http://127.0.0.1:64028/only-layout.html"
   ],
   "rules": {
     "theme-applied": "The theme's CSS is on the page and applies.",
@@ -41,9 +41,240 @@
     "card-input-label": "Every input in generated UI has a label of its own (rule card.input-label).",
     "card-narrow-first": "With --width: generated UI does not scroll sideways at the compact size class (rule card.narrow-first)."
   },
+  "modalities": {
+    "names": [
+      "responsive-web"
+    ],
+    "source": "assumed",
+    "assumed": true,
+    "widths": [
+      320
+    ],
+    "ruleFamilies": [
+      "nav",
+      "layout",
+      "modal",
+      "action",
+      "feedback",
+      "loading",
+      "screen",
+      "emphasis",
+      "input",
+      "text",
+      "view",
+      "pattern",
+      "flow",
+      "journey",
+      "theme"
+    ],
+    "off": []
+  },
+  "verdicts": {
+    "theme": {
+      "status": "warn",
+      "theme": "praxis-carbon",
+      "designSystem": "carbon",
+      "applied": true,
+      "sdkOnly": true,
+      "contrast": {
+        "light": "pass",
+        "dark": "not-checked"
+      },
+      "items": [
+        {
+          "item": "applied",
+          "label": "The declared theme is applied",
+          "status": "pass",
+          "rules": [],
+          "findings": []
+        },
+        {
+          "item": "designSystem",
+          "label": "The theme's design system is the one in use: its tokens, fonts and brand, nothing restyled",
+          "status": "pass",
+          "rules": [],
+          "findings": []
+        },
+        {
+          "item": "sdkOnly",
+          "label": "Every component is the SDK's",
+          "status": "pass",
+          "rules": [],
+          "findings": []
+        },
+        {
+          "item": "contrast",
+          "label": "The palette passes contrast in every appearance",
+          "status": "pass",
+          "rules": [],
+          "findings": []
+        },
+        {
+          "item": "layout",
+          "label": "Pages reflow, pointer targets are large enough and focus is never hidden",
+          "status": "warn",
+          "rules": [
+            "theme.focus-obscured",
+            "theme.reflow"
+          ],
+          "findings": [
+            2,
+            1
+          ],
+          "fix": "Give the page scroll-padding for its sticky header and bars, so a focused control scrolls clear of them (the SDK's AppShell does)."
+        }
+      ],
+      "findings": [
+        2,
+        1
+      ]
+    },
+    "modality": [
+      {
+        "modality": "responsive-web",
+        "status": "fail",
+        "assumed": true,
+        "note": "No blueprint modalities and no --modality: responsive-web was assumed.",
+        "components": [
+          {
+            "name": "AppShell",
+            "present": false,
+            "required": true
+          }
+        ],
+        "ruleFamilies": [
+          {
+            "family": "nav",
+            "checked": true,
+            "checks": [
+              "nav-per-breakpoint"
+            ]
+          },
+          {
+            "family": "layout",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "modal",
+            "checked": true,
+            "checks": [
+              "one-modal",
+              "modal-contract"
+            ]
+          },
+          {
+            "family": "action",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "feedback",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "loading",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "screen",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "emphasis",
+            "checked": true,
+            "checks": [
+              "one-primary-action"
+            ]
+          },
+          {
+            "family": "input",
+            "checked": true,
+            "checks": [
+              "target-size"
+            ]
+          },
+          {
+            "family": "text",
+            "checked": true,
+            "checks": [
+              "line-length"
+            ]
+          },
+          {
+            "family": "view",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "pattern",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "flow",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "journey",
+            "checked": null,
+            "by": "blueprint check or review"
+          },
+          {
+            "family": "theme",
+            "checked": true,
+            "checks": [
+              "theme-applied",
+              "token-colors",
+              "token-fonts",
+              "token-radii",
+              "token-overrides",
+              "widget-overrides",
+              "sdk-widgets",
+              "foreign-components",
+              "outside-theme",
+              "fonts",
+              "contrast",
+              "reflow",
+              "target-size",
+              "focus-obscured"
+            ]
+          }
+        ],
+        "fixes": [
+          "AppShell is missing: Build the app in the SDK's AppShell (@ux-builder/ui/patterns), whose navigation adapts by size class: a bottom bar when compact, a rail at medium, a side navigation from expanded."
+        ],
+        "evidence": [
+          "AppShell on none of the 1 audited page"
+        ],
+        "findings": []
+      }
+    ]
+  },
+  "pages": [
+    {
+      "url": "http://127.0.0.1:64028/only-layout.html",
+      "theme": "praxis-carbon",
+      "screen": null,
+      "widths": [
+        {
+          "width": 320,
+          "conversation": false,
+          "adaptiveCard": false,
+          "appShell": null
+        }
+      ],
+      "screenVia": null,
+      "screenTitle": null
+    }
+  ],
   "runs": [
     {
-      "url": "http://127.0.0.1:55907/only-layout.html",
+      "url": "http://127.0.0.1:64028/only-layout.html",
       "theme": "praxis-carbon",
       "appearance": "light",
       "mode": "event",
@@ -54,20 +285,57 @@
   "findings": [
     {
       "id": 2,
-      "url": "http://127.0.0.1:55907/only-layout.html",
-      "rule": "focus-obscured",
+      "check": "focus-obscured",
+      "ruleId": "theme.focus-obscured",
+      "rule": {
+        "id": "theme.focus-obscured",
+        "title": "A focused control is never hidden",
+        "statement": "A control that receives keyboard focus is never entirely hidden behind sticky or fixed content.",
+        "sources": [
+          {
+            "title": "WCAG 2.2: 2.4.11 Focus Not Obscured (Minimum)",
+            "url": "https://www.w3.org/TR/WCAG22/#focus-not-obscured-minimum"
+          }
+        ]
+      },
+      "sources": [
+        {
+          "title": "WCAG 2.2: 2.4.11 Focus Not Obscured (Minimum)",
+          "url": "https://www.w3.org/TR/WCAG22/#focus-not-obscured-minimum"
+        }
+      ],
+      "url": "http://127.0.0.1:64028/only-layout.html",
       "severity": "warning",
       "selector": "#under",
       "message": "focused, it is hidden behind html > body > div > div",
       "preview": null,
       "runs": [
         "praxis-carbon/light@320"
-      ]
+      ],
+      "fix": "Give the page scroll-padding for its sticky header and bars, so a focused control scrolls clear of them (the SDK's AppShell does)."
     },
     {
       "id": 1,
-      "url": "http://127.0.0.1:55907/only-layout.html",
-      "rule": "reflow",
+      "check": "reflow",
+      "ruleId": "theme.reflow",
+      "rule": {
+        "id": "theme.reflow",
+        "title": "Content reflows without sideways scrolling",
+        "statement": "The page does not scroll sideways at the audited width, down to 320 CSS pixels.",
+        "sources": [
+          {
+            "title": "WCAG 2.2: 1.4.10 Reflow",
+            "url": "https://www.w3.org/TR/WCAG22/#reflow"
+          }
+        ]
+      },
+      "sources": [
+        {
+          "title": "WCAG 2.2: 1.4.10 Reflow",
+          "url": "https://www.w3.org/TR/WCAG22/#reflow"
+        }
+      ],
+      "url": "http://127.0.0.1:64028/only-layout.html",
       "severity": "warning",
       "selector": "html > body > div > div",
       "message": "the page scrolls sideways at 320px (content 916px wide; widest: html > body > div > div)",
@@ -75,7 +343,8 @@
       "value": "916px",
       "runs": [
         "praxis-carbon/light@320"
-      ]
+      ],
+      "fix": "Let the content wrap at narrow widths: no fixed width wider than the window, and wide content (tables, code) scrolling in a region of its own."
     }
   ],
   "summary": {
@@ -85,6 +354,10 @@
     "byRule": {
       "focus-obscured": 1,
       "reflow": 1
+    },
+    "byRuleId": {
+      "theme.focus-obscured": 1,
+      "theme.reflow": 1
     }
   }
 }
