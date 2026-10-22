@@ -44,6 +44,8 @@ describe("US-090-AC3: a wireframe passes its pattern's audit checks", () => {
   test("each known pattern's wireframe, at the width of the size class it was drawn for, in the plain theme", async () => {
     const known = pages.filter((p) => p.known);
     assert.deepEqual([...new Set(known.map((p) => p.pattern))], ["WorkQueue", "RecordDetail", "CollectionList", "FormPage", "SettingsPage"]);
+    // Each declared state's wireframe too (US-104-AC2): the empty, loading and error pages are audited with the ideal ones.
+    assert.deepEqual([...new Set(known.filter((p) => p.screen === "list").map((p) => p.state))], ["ideal", "loading", "empty", "error"]);
     for (const width of [...new Set(known.map((p) => p.width))]) {
       const urls = known.filter((p) => p.width === width).map((p) => `${base}/${p.file}`);
       const r = await audit({ urls, themes: ["plain"], appearances: ["light"], widths: [width] });

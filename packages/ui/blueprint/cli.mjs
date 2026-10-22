@@ -17,11 +17,15 @@
    file (FEAT-012 JRN-03); with no marker it skips those checks and says so.
 
    propose, draw and wireframes read app.blueprint.json when no file is
-   given (FEAT-012 DRF-01, DRW-01, DRW-02). propose writes HELIX proposals
-   as patches, a report and proposals.json, and applies nothing: exit 0 when
-   written, 2 with no .helix.yml marker above the file, on bad usage or an
-   unreadable file. draw writes Mermaid and SVG (exit 0). wireframes writes
-   HTML and PNG; it exits 2 when the PNGs cannot be drawn (no Playwright or
+   given (FEAT-012 DRF-01, DRW-01, DRW-02; FEAT-015 RPT-09). propose writes
+   HELIX proposals as patches, a report and proposals.json, and applies
+   nothing; for HELIX UX types the installed HELIX does not define, it names
+   them and writes drafts under <out>/drafts/ instead: exit 0 when written, 2
+   with no .helix.yml marker above the file, on bad usage or an unreadable
+   file. draw writes Mermaid and SVG, and per screen a state diagram with its
+   state table (states-<screen>.md), noting the states a screen does not
+   declare (exit 0). wireframes writes HTML and PNG per screen, size class and
+   state; it exits 2 when the PNGs cannot be drawn (no Playwright or
    Chromium), with the HTML still written. */
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -69,19 +73,24 @@ async function main(argv) {
       writeProposals(r, out);
       for (const p of r.proposals) console.log(`patch    ${out}/${p.file}  ${p.path} (${p.section})`);
       for (const d of r.disagreements) console.log(`differs  ${d.path} (${d.section}): HELIX already says something else; no patch, see ${out}/report.md`);
+      if (r.uxTypes.missing.length) console.log(`missing  ${r.uxTypes.missing.join(", ")}: not defined by the installed HELIX; drafted under ${out}/drafts/ instead of patched`);
+      for (const d of r.drafts) console.log(`draft    ${out}/drafts/${d.path}  (${d.type})`);
       for (const p of r.problems) console.log(`note     ${p}`);
-      console.log(`${out}: ${plural(r.proposals.length, "patch", "patches")}, ${plural(r.disagreements.length, "disagreement")}; nothing applied. Review report.md, then apply the patches you accept.`);
+      console.log(`${out}: ${plural(r.proposals.length, "patch", "patches")}, ${plural(r.drafts.length, "draft")}, ${plural(r.disagreements.length, "disagreement")}; nothing applied. Review report.md, then apply the patches you accept.`);
       return 0;
     }
     if (command === "draw") {
-      const files = writeDrawings(drawings(bp), out);
+      const list = drawings(bp);
+      const files = writeDrawings(list, out);
       console.log(`${out}: ${files.join(", ")}`);
+      for (const d of list) if (d.missing?.length) console.log(`note     ${d.name}.md: ${d.notes[0]}`);
       return 0;
     }
     const { wireframes, writeWireframes } = await import("./wireframes.mjs");
     const w = await writeWireframes(await wireframes(bp), out);
     const count = (ext) => w.files.filter((f) => f.endsWith(ext)).length;
-    console.log(`${out}: ${count(".html")} HTML${w.png ? `, ${count(".png")} PNG` : ""}`);
+    const states = new Set(w.pages.map((p) => `${p.screen} ${p.state}`)).size;
+    console.log(`${out}: ${count(".html")} HTML${w.png ? `, ${count(".png")} PNG` : ""} (${plural(states, "screen state")})`);
     if (!w.png) { console.error(w.reason); return 2; }
     return 0;
   }

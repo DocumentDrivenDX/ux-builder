@@ -54,10 +54,6 @@
     { "id": "US-103-AC1", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." },
     { "id": "US-103-AC2", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." },
     { "id": "US-103-AC3", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." },
-    { "id": "US-103-AC4", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." },
-    { "id": "US-104-AC1", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." },
-    { "id": "US-104-AC2", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." },
-    { "id": "US-104-AC3", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." },
-    { "id": "US-104-AC4", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." }
+    { "id": "US-103-AC4", "reason": "Planned: FEAT-015, framed 2026-10-21; not built yet." }
   ]
 }

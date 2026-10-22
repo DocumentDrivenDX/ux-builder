@@ -386,8 +386,8 @@ draw; each reads `app.blueprint.json` unless given a file:
 
 ```sh
 npx ux-builder-blueprint propose      # HELIX proposals as patches, in helix-proposals/; applies nothing
-npx ux-builder-blueprint draw         # IA map, flow and journey diagrams: .mmd and .svg, in blueprint-drawings/
-npx ux-builder-blueprint wireframes   # each screen at each size class: .html and .png, in blueprint-wireframes/
+npx ux-builder-blueprint draw         # IA map, flow, journey and per-screen state diagrams: .mmd, .svg (and states-*.md), in blueprint-drawings/
+npx ux-builder-blueprint wireframes   # each screen in each declared state at each size class: .html and .png, in blueprint-wireframes/
 ```
 
 - **`propose`** needs the `.helix.yml` marker above the blueprint (exit 2
@@ -399,15 +399,34 @@ npx ux-builder-blueprint wireframes   # each screen at each size class: .html an
   story test plan. A document that does not exist yet is drafted from its
   template as a new file. HELIX governs: where a section already says
   something else, there is no patch, and `report.md` shows both texts.
-  Review the patches, then `git apply` the ones you accept.
+  Review the patches, then `git apply` the ones you accept. It also drafts
+  HELIX's UX types (FEAT-015 RPT-09): an *interaction-state-diagram* and a
+  *wireframe* per screen, a *screen-flow* for the feature and a
+  *user-journey-map* per journey. When the installed HELIX defines a type,
+  each document is a patch like the rest; when it does not, `propose` says
+  which types are missing and writes the documents under
+  `helix-proposals/drafts/`, at the path HELIX would give them, from the
+  templates proposed in `docs/proposals/helix-ux-artifact-types`.
 - **`draw`** writes each diagram as Mermaid and as SVG. The SVG comes from
   the SDK's own small layered layout, so no Mermaid renderer or browser is
-  needed; render the `.mmd` with Mermaid for its layout.
+  needed; render the `.mmd` with Mermaid for its layout. Each screen also
+  gets `states-<screen>.mmd`, a `stateDiagram-v2` with every state it
+  declares (and any an action or journey step names) and the transitions
+  between them: `state:` actions and journey steps first, then the SDK's
+  defaults (opens loading; loading settles into ideal, empty or error;
+  error retries), each listed in `states-<screen>.md` beside the state
+  table of what the user sees, the action available and the announcement.
+  A screen that declares no states is drawn in its ideal state only, and
+  the notes (and the command's output) name the states it is missing.
 - **`wireframes`** server-renders each screen's pattern with placeholder
   content in the neutral `plain` theme, inside `AppShell` with the app's
   destinations, and screenshots it at each supported size class with
   Playwright's Chromium (exit 2, HTML still written, without it). A pattern
-  the catalogue lacks is a labelled box.
+  the catalogue lacks is a labelled box. Each declared state gets its own
+  page, `<screen>.<state>.<size>.html`: the pattern draws the state itself
+  where it can (its `status`, or no items); otherwise the page shows the
+  pattern's heading with the SDK's `StatePanel` or `Skeleton`
+  (`data-drawn-by="StatePanel"`).
 
 The same blueprint and documents give the same files. Over MCP,
 `propose_from_blueprint` returns the proposals and writes nothing.

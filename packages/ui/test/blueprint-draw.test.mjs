@@ -30,7 +30,8 @@ describe("US-090: ux-builder-blueprint draw", () => {
     const r = cli("draw", BLUEPRINT, "--out", "drawings");
     assert.equal(r.status, 0, r.stderr);
     const out = join(tmp, "drawings");
-    assert.deepEqual(readdirSync(out).sort(), ["flow.mmd", "flow.svg", "ia.mmd", "ia.svg", "journey-J-add.mmd", "journey-J-add.svg", "journey-J-review.mmd", "journey-J-review.svg"]);
+    const states = ["entry", "form", "legacy", "list", "queue", "settings"].flatMap((id) => [`states-${id}.md`, `states-${id}.mmd`, `states-${id}.svg`]);
+    assert.deepEqual(readdirSync(out).sort(), ["flow.mmd", "flow.svg", "ia.mmd", "ia.svg", "journey-J-add.mmd", "journey-J-add.svg", "journey-J-review.mmd", "journey-J-review.svg", ...states].sort());
     const read = (f) => readFileSync(join(out, f), "utf8");
 
     // The IA map: each supported size class, its destinations where AppShell puts them, their screens and modals.
@@ -69,7 +70,8 @@ describe("US-090: ux-builder-blueprint draw", () => {
 
   test("a view: the host leads to its first screen; a blueprint without actions or journeys still draws", () => {
     const view = { version: 1, kind: "view", name: "Result", supports: { sizeClasses: ["compact", "medium"] }, screens: [{ id: "main", title: "Result", pattern: "RecordDetail" }] };
-    const [ia, flow, ...journeys] = drawings(view);
+    const [ia, flow, ...rest] = drawings(view);
+    const journeys = rest.filter((d) => d.name.startsWith("journey-"));
     assert.match(ia.mermaid, /app --> main/);
     assert.match(flow.mermaid, /main\["Result<br\/><small>RecordDetail<\/small>"\]/);
     assert.deepEqual(journeys, []);
@@ -81,7 +83,7 @@ describe("US-090: ux-builder-blueprint wireframes", () => {
   test("AC2: each screen by its catalogue pattern with placeholder content, at each supported size class, as HTML and PNG, in the plain theme", async () => {
     const r = cli("wireframes", BLUEPRINT, "--out", "wireframes");
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /12 HTML, 12 PNG/);
+    assert.match(r.stdout, /30 HTML, 30 PNG \(15 screen states\)/);
     const out = join(tmp, "wireframes");
     const plan = bp();
     for (const s of plan.screens) for (const size of plan.supports.sizeClasses) {
@@ -108,5 +110,99 @@ describe("US-090: ux-builder-blueprint wireframes", () => {
     // Deterministic too: the same blueprint gives the same HTML.
     const again = await wireframes(plan);
     for (const p of again) assert.equal(p.html, html(p.file), p.file);
+  });
+});
+
+describe("US-104: every declared state, drawn", () => {
+  // @covers US-104-AC1
+  test("AC1: draw writes a stateDiagram-v2 per screen with every declared state and the transitions between them, and a state table", () => {
+    const r = cli("draw", BLUEPRINT, "--out", "states");
+    assert.equal(r.status, 0, r.stderr);
+    const read = (f) => readFileSync(join(tmp, "states", f), "utf8");
+
+    // Every state the screen declares, after ideal, as Mermaid stateDiagram-v2.
+    const entry = read("states-entry.mmd");
+    assert.match(entry, /^---\ntitle: States of Entry\n---\nstateDiagram-v2\n {4}ideal\n {4}loading\n {4}empty\n {4}error\n/);
+    // The transitions: the journey's retry in the error state (state:loading), the SDK's defaults, and the exits.
+    for (const line of ["[*] --> loading: OPENED", "error --> loading: Try again", "loading --> ideal: LOADED [items]", "loading --> empty: LOADED [no items]", "loading --> error: FAILED",
+      "ideal --> [*]: Approve (to Review queue)", "ideal --> [*]: Reject (opens Reject entry)", "error --> [*]: Back (back)"]) assert.ok(entry.includes(`    ${line}\n`), line);
+    assert.ok(!entry.includes("error --> loading: RETRY"), "the blueprint's own retry replaces the default");
+    // With no action of its own into loading, a screen retries by the default, as StatePanel offers.
+    assert.ok(read("states-list.mmd").includes("    error --> loading: RETRY\n"));
+
+    // The state table: what the user sees, the action available, the announcement.
+    const md = read("states-entry.md");
+    assert.match(md, /```mermaid\nstateDiagram-v2\n/);
+    assert.match(md, /\| State \| Entered when \| What the user sees \| Action available \| Announcement \|/);
+    assert.match(md, /\| loading \| the screen opens; Try again from error \| Skeleton placeholders where the content goes \| None: the content is on its way \| aria-busy="true" on the region while it loads \(polite\) \|/);
+    assert.match(md, /\| error \| FAILED from loading \| "This didn't load" — Something went wrong on our side\. Try again\. Button: Try again\. \| Try again; Back \| "This didn't load" \(assertive, role="alert"\) \|/);
+    assert.match(md, /\| empty \| LOADED \[no items\] from loading \| "Choose a record" — Select a record in the list to see it here\. \| Back \| "Choose a record" \(polite, role="status"\) \|/);
+    // A journey's expected state says when it is entered.
+    assert.match(read("states-queue.md"), /\| empty \| LOADED \[no items\] from loading; J-review step 3: after "Approve" on Entry \| "Nothing to review" — New items will appear here\. \|/);
+    // The defaults are documented in the output.
+    assert.match(md, /- Default transitions \(the SDK's, not in the blueprint\): start → loading on OPENED; loading → ideal on LOADED \[items\]/);
+
+    // The SVG draws the same states, with start and leave.
+    const svg = read("states-entry.svg");
+    assert.deepEqual([...svg.matchAll(/<g class="node" data-id="(\w+)">/g)].map((m) => m[1]), ["start", "ideal", "loading", "empty", "error", "leave"]);
+    assert.equal((svg.match(/class="edge"/g) ?? []).length, (entry.match(/ --> /g) ?? []).length);
+
+    // A screen with no declared states: ideal only, and the output notes the missing states.
+    assert.equal(read("states-settings.mmd"), "---\ntitle: States of Settings\n---\nstateDiagram-v2\n    ideal\n    [*] --> ideal: OPENED\n");
+    assert.match(read("states-settings.md"), /- "Settings" declares no states: the diagram has the ideal state only\. Missing: empty, loading, error\./);
+    assert.match(r.stdout, /note {5}states-settings\.md: "Settings" declares no states/);
+    assert.ok(!/states-entry\.md:/.test(r.stdout), "a screen declaring its states gets no note");
+  });
+
+  test("states an action or journey names but the screen does not declare are drawn, and noted", () => {
+    const plan = { version: 1, kind: "view", name: "R", screens: [{ id: "main", title: "Report", pattern: "ReportViewer", states: ["loading"], actions: [{ id: "deny", label: "Deny", to: "state:forbidden" }] }],
+      journeys: [{ id: "J", steps: [{ screen: "main", expect: "error" }] }] };
+    const d = drawings(plan).find((x) => x.name === "states-main");
+    assert.match(d.mermaid, /stateDiagram-v2\n {4}ideal\n {4}loading\n {4}error\n {4}forbidden\n/);
+    assert.ok(d.mermaid.includes("    ideal --> forbidden: Deny\n"));
+    assert.match(d.markdown, /- "Report" does not declare empty, error\./);
+    assert.match(d.markdown, /- forbidden is not declared, but "Deny" leads to it\./);
+    assert.match(d.markdown, /- error is not declared, but J step 1\./);
+    assert.match(d.markdown, /\| forbidden \| Deny from ideal; DENIED from loading \| "You don't have access to this"/);
+  });
+
+  // @covers US-104-AC4
+  test("AC4: the same blueprint draws the same state diagrams and tables, byte for byte", () => {
+    assert.equal(cli("draw", BLUEPRINT, "--out", "states-once").status, 0);
+    assert.equal(cli("draw", BLUEPRINT, "--out", "states-twice").status, 0);
+    const once = files(join(tmp, "states-once")), twice = files(join(tmp, "states-twice"));
+    assert.equal(Object.keys(once).filter((f) => f.startsWith("states-")).length, 18);
+    assert.deepEqual(twice, once);
+    assert.deepEqual(drawings(bp()), drawings(bp()));
+  });
+
+  // @covers US-104-AC2
+  test("AC2: wireframes writes one per supported size class for each declared state, from the real pattern in that state", async () => {
+    const r = cli("wireframes", BLUEPRINT, "--out", "state-wireframes");
+    assert.equal(r.status, 0, r.stderr);
+    const out = join(tmp, "state-wireframes");
+    const html = (f) => readFileSync(join(out, f), "utf8");
+    for (const s of bp().screens.filter((x) => x.states)) for (const state of ["loading", "empty", "error"]) for (const size of ["compact", "expanded"]) {
+      const page = html(`${s.id}.${state}.${size}.html`);
+      assert.ok(page.includes(`<title>${s.title} (${state}) — ${size} wireframe</title>`), `${s.id} ${state} ${size}`);
+      assert.ok(page.includes(`data-state="${state}"`));
+      assert.equal(pngSize(readFileSync(join(out, `${s.id}.${state}.${size}.png`))).width, { compact: 390, expanded: 1024 }[size]);
+    }
+    // No state wireframes for a screen that declares none.
+    assert.ok(!readdirSync(out).some((f) => /^settings\.(loading|empty|error)\./.test(f)));
+    // The pattern draws its own states: the list's skeleton rows and state panel, the record's alert, the queue's empty panel.
+    assert.match(html("list.loading.compact.html"), /data-drawn-by="pattern"[\s\S]*class="piq-collection[\s\S]*class="piq-collection__results" aria-busy="true"/);
+    assert.match(html("list.empty.expanded.html"), /class="piq-state-panel" data-kind="empty" role="status"[\s\S]*Nothing here yet/);
+    assert.match(html("entry.error.compact.html"), /class="piq-record" data-status="error"><div class="piq-state-panel" data-kind="error" role="alert">/);
+    assert.match(html("queue.empty.compact.html"), /class="piq-queue"[^>]*>[\s\S]*Nothing to review/);
+    // A pattern without a loading or error state of its own: its page heading, and the SDK's Skeleton or StatePanel.
+    assert.match(html("queue.loading.compact.html"), /data-drawn-by="StatePanel"[\s\S]*<h1 class="piq-page-header__title">Review queue<\/h1>[\s\S]*aria-busy="true"[\s\S]*piq-skeleton/);
+    assert.match(html("queue.error.compact.html"), /data-drawn-by="StatePanel"[\s\S]*role="alert"[\s\S]*Try again/);
+    // In error, Try again is the one primary action: the list's own (New entry) is left out.
+    assert.ok(!html("list.error.compact.html").includes(">New entry<"));
+
+    const pages = await wireframes(bp());
+    assert.deepEqual([...new Set(pages.filter((p) => p.screen === "entry").map((p) => p.state))], ["ideal", "loading", "empty", "error"]);
+    for (const p of pages) assert.equal(p.html, html(p.file), p.file);
   });
 });
