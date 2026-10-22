@@ -1,0 +1,209 @@
+# Metadata for Usability Evaluation Report (PROPOSED)
+
+artifact:
+  name: Usability Evaluation Report
+  id: usability-evaluation-report
+  type: report
+  activity: iterate
+  level: feature
+  optional: true
+
+voice: artifact-signal
+
+description: |
+  The record of one usability evaluation of a built product or a working
+  prototype: what was evaluated, for which goals, by which method and with
+  which participants or evaluators, on which tasks, with which measures, and
+  what was found. Findings are organised by user journey and then by step or
+  screen; each states the rule or guideline broken (ID, statement, source),
+  the evidence, a 0-4 severity, the recommended fix and an owner, and links the
+  stories and acceptance criteria it affects. It also reports state coverage
+  per journey, conformance to the theme and design system, and whether the
+  components and guidelines fit the app's modality. Structure follows the
+  Common Industry Format for usability reports (ISO/IEC 25062); severity
+  follows the NN/g 0-4 scale.
+
+output:
+  location: docs/helix/06-iterate/usability-evaluations/UER-{id}-{name}.md
+  format: markdown
+  naming: UER-{number}-{scope-name}.md
+  examples:
+    - UER-002-invoice-review-heuristic.md
+    - UER-003-invoice-review-moderated.md
+  assets: docs/helix/06-iterate/usability-evaluations/assets/UER-{id}/
+
+id_format:
+  prefix: UER
+  pattern: "UER-[0-9]{3}"
+  example: UER-002
+  description: |
+    Usability evaluation reports use UER-XXX identifiers, one per evaluation
+    run, unique across the project. Findings inside a report use F-XX IDs that
+    stay stable when the same problem is re-evaluated in a later report.
+
+reuse_policy: |
+  Write-once per evaluation run. A re-evaluation is a new UER that names the
+  earlier one and marks each finding new, persistent, resolved or regressed.
+
+validation:
+  required_sections:
+    - executive_summary
+    - product_and_goals
+    - method
+    - tasks_and_journeys
+    - measures
+    - findings_by_journey
+    - state_coverage
+    - design_system_conformance
+    - modality_fit
+    - recommendations
+
+  required_fields:
+    - "Finding fields: ID, Journey, Step/Screen, Rule (ID, statement, source), Evidence, Severity (0-4) with frequency/impact/persistence/market impact, Recommended fix, Owner, Stories/ACs, Status"
+    - "State coverage columns: Journey, then one column per state, cells assessed / not-assessed / not-applicable"
+
+  quality_checks:
+    - check: cif_core_present
+      description: Product, evaluation goals, method (approach, participants or evaluators, environment), tasks, measures and results are all reported
+      severity: blocking
+
+    - check: approach_named
+      description: The evaluation approach is named (moderated test, unmoderated test, expert/heuristic review, automated assessment, or a mix) and its limits stated
+      severity: blocking
+
+    - check: findings_grouped_by_journey
+      description: Findings are grouped by user journey, then by step or screen; findings outside any journey are grouped under "Cross-journey"
+      severity: blocking
+
+    - check: rule_cited
+      description: Every finding cites the rule or guideline broken with its ID, its statement (quoted in full or paraphrased) and its source
+      severity: blocking
+
+    - check: evidence_attached
+      description: Every finding has at least one evidence reference (screenshot path, video timestamp, accessibility-tree excerpt, session note)
+      severity: blocking
+
+    - check: severity_rated
+      description: Every finding has a 0-4 severity and the frequency, impact and persistence behind it; market impact where judged
+      severity: blocking
+
+    - check: fix_and_owner
+      description: Every finding with severity 2 or higher has a recommended fix and one owner
+      severity: blocking
+
+    - check: acs_linked
+      description: Every finding in a journey links the stories and US-<n>-AC<m> IDs it affects, or says no AC covers the behavior
+      severity: warning
+
+    - check: coverage_honest
+      description: The state coverage matrix marks unassessed journey x state pairs as not-assessed; nothing passes by omission
+      severity: blocking
+
+    - check: claims_scoped
+      description: Results claim only what the method supports (an expert review does not report task success rates; small samples are not generalised)
+      severity: warning
+
+  pattern_checks:
+    - pattern: "UER-[0-9]{3}"
+      expected: ">=1"
+      message: Must use numbered UER naming
+
+    - pattern: "F-[0-9]{2,}"
+      expected: ">=1"
+      message: Findings must carry stable F- IDs
+
+    - pattern: "Severity\\*\\*: [0-4]"
+      expected: ">=1"
+      message: Findings must use the 0-4 severity scale
+
+    - pattern: "US-[0-9]+-AC[0-9]+"
+      expected: ">=1"
+      message: Findings should trace to stable acceptance-criterion IDs
+
+variables:
+  - name: scope
+    description: Feature(s) and journeys evaluated
+    required: true
+
+  - name: approach
+    description: moderated | unmoderated | expert-review | automated-assessment | mixed
+    required: true
+
+  - name: run_id
+    description: Evaluation run identifier (for example an assessment run ID)
+    required: false
+
+prompts:
+  generation: prompt.md
+  review: |
+    Review this usability evaluation report for:
+    1. CIF core: product, goals, method, participants or evaluators, tasks, measures, results
+    2. Findings grouped by journey then step or screen
+    3. Each finding: rule ID + statement + source, evidence, 0-4 severity with factors, fix, owner, ACs
+    4. Honest state coverage: unassessed pairs marked not-assessed
+    5. Design-system conformance and modality fit reported
+    6. Claims limited to what the method supports
+    7. Recommendations routed to the improvement backlog or a governing artifact
+
+template:
+  file: template.md
+  sections:
+    - executive_summary: "What was evaluated, how, the top findings and the decision they call for."
+    - product_and_goals: "Product, version, scope and evaluation goals."
+    - method: "Approach, participants or evaluators, environment, procedure, limits."
+    - tasks_and_journeys: "Tasks given, mapped to journeys, stories and ACs."
+    - measures: "Effectiveness, efficiency, satisfaction, or the inspection measures used."
+    - findings_by_journey: "Findings per journey, then per step or screen."
+    - state_coverage: "Journey x state matrix."
+    - design_system_conformance: "Theme, tokens and design-system rules checked."
+    - modality_fit: "Whether components and guidelines fit the app's modality."
+    - recommendations: "Fixes ranked and routed."
+
+example:
+  file: example.md
+
+references:
+  - title: "ISO/IEC 25062 Common Industry Format for usability reports"
+    file: docs/resources/iso-25062-cif.md
+    relationship: "Grounds the report structure: product, goals, participants and method, tasks, measures, results"
+  - title: "NN/g severity ratings for usability problems"
+    file: docs/resources/nng-severity-ratings.md
+    relationship: "Grounds the 0-4 severity scale and its factors: frequency, impact, persistence, market impact"
+
+workflow:
+  creation_order: 2
+  review_cycles: 1
+  update_triggers:
+    - Never updated after the run except to correct errors; re-evaluate in a new UER
+
+relationships:
+  informed_by:
+    - user-journey-map
+    - screen-flow
+    - wireframe
+    - interaction-state-diagram
+    - design-system
+    - user-stories
+    - story-test-plan
+
+  informs:
+    - improvement-backlog
+    - user-journey-map
+    - user-stories
+    - design-system
+    - iteration-plan
+
+  references:
+    - metric-definition
+    - metrics-dashboard
+
+tags:
+  - iterate
+  - ux
+  - usability
+  - evaluation
+  - findings
+  - proposed
+
+version: 0.1.0
+last_updated: 2026-10-21
