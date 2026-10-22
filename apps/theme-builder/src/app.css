@@ -178,13 +178,14 @@ body { margin: 0; }
 .tp-top__title code { color: var(--piq-color-text-muted); }
 .tp-back, .tp-ext { display: inline-flex; align-items: center; gap: var(--piq-space-1); min-block-size: var(--piq-size-target-minimum, 24px); color: var(--piq-color-link, var(--piq-color-text)); }
 .tp-body { display: grid; grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr); align-items: start; }
-.tp-nav { position: sticky; inset-block-start: var(--tp-top, 4.5rem); max-block-size: calc(100vh - var(--tp-top, 4.5rem)); overflow-y: auto; padding: var(--piq-space-4) var(--piq-space-3); border-inline-end: var(--piq-border-default); background: var(--piq-color-surface); }
+.tp-nav { box-sizing: border-box; position: sticky; inset-block-start: var(--tp-top, 4.5rem); max-block-size: calc(100vh - var(--tp-top, 4.5rem)); overflow-y: auto; padding: var(--piq-space-4) var(--piq-space-3); border-inline-end: var(--piq-border-default); background: var(--piq-color-surface); }
 .tp-nav__group { margin: var(--piq-space-4) 0 var(--piq-space-1); font-size: var(--piq-font-size-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--piq-color-text-muted); }
 .tp-nav__group:first-child { margin-block-start: 0; }
 .tp-nav ul { list-style: none; margin: 0; padding: 0; }
 .tp-nav a { display: flex; align-items: center; min-block-size: var(--piq-size-target-minimum, 24px); padding: var(--piq-space-1) var(--piq-space-2); border-radius: var(--piq-radius-control); color: var(--piq-color-text); text-decoration: none; font-size: var(--piq-font-size-small); }
 .tp-nav a:hover { background: var(--piq-color-surface-sunken); }
 .tp-nav a[aria-current] { background: var(--piq-color-surface-sunken); color: var(--piq-color-text-strong); font-weight: var(--piq-font-weight-strong); box-shadow: inset 3px 0 0 var(--piq-color-structure); }
+.tp-nav__stories a { padding-inline-start: var(--piq-space-5); font-size: var(--piq-font-size-label); color: var(--piq-color-text-muted); }
 .tp-nav a:focus-visible { outline: var(--piq-focus-ring); outline-offset: var(--piq-focus-offset); }
 .tp-main { display: grid; gap: var(--piq-space-6); padding: var(--piq-space-5); min-inline-size: 0; }
 .tp-section { display: grid; gap: var(--piq-space-3); scroll-margin-block-start: var(--tp-top, 4.5rem); }
@@ -202,7 +203,8 @@ body { margin: 0; }
 .tp-entry__import { font-size: var(--piq-font-size-small); color: var(--piq-color-text-muted); }
 .tp-entry__more { margin: 0; font-size: var(--piq-font-size-small); color: var(--piq-color-text-muted); }
 .tp-sample { margin: 0; border: var(--piq-border-default); border-radius: var(--piq-radius-card); overflow: hidden; }
-.tp-sample figcaption { padding: var(--piq-space-1) var(--piq-space-3); font-size: var(--piq-font-size-label); color: var(--piq-color-text-muted); background: var(--piq-color-surface-sunken); border-block-end: var(--piq-border-default); }
+.tp-sample { scroll-margin-block-start: var(--tp-top, 4.5rem); }
+.tp-sample figcaption { display: flex; justify-content: space-between; align-items: center; gap: var(--piq-space-3); padding: var(--piq-space-1) var(--piq-space-3); font-size: var(--piq-font-size-label); color: var(--piq-color-text-muted); background: var(--piq-color-surface-sunken); border-block-end: var(--piq-border-default); }
 /* The sample's own frame: a transform keeps fixed-position parts (an app shell's bars, a bulk bar) inside it, and its width is the pattern's container. */
 .tp-sample__canvas { min-block-size: 6rem; max-block-size: 44rem; overflow: auto; padding: var(--piq-space-4); background: var(--piq-color-ground); transform: translateZ(0); container-type: inline-size; }
 @media (max-width: 840px) {
@@ -216,7 +218,7 @@ body { margin: 0; }
   .tp-top > .piq-appearance { grid-column: 2; grid-row: 1; }
   .tp-top__title { grid-column: 1 / -1; flex-wrap: wrap; }
   .tp-top > .tp-ext { grid-column: 1 / -1; justify-self: start; }
-  .tp-section, .tp-entry { scroll-margin-block-start: var(--piq-space-3); }
+  .tp-section, .tp-entry, .tp-sample { scroll-margin-block-start: var(--piq-space-3); }
 }
 /* The builder's steps, kept mounted while "Your themes" is shown in their place. */
 .tb-contents { display: contents; }
