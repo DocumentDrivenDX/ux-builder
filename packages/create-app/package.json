@@ -2,17 +2,19 @@
   "name": "@ux-builder/create-app",
   "version": "0.5.0",
   "license": "MIT OR Apache-2.0",
-  "description": "Scaffold a React + Vite app that is on the AI-UI SDK from its first commit: npm create @ux-builder/app my-app -- --theme databricks (FEAT-004 SDK-08, SDK-09).",
+  "description": "Scaffold a React + Vite app that is on the AI-UI SDK from its first commit, as the empty shell for its modalities: npm create @ux-builder/app my-app -- --modality responsive-web --theme databricks (FEAT-004 SDK-08, SDK-09; FEAT-014).",
   "type": "module",
   "bin": {
     "create-app": "./index.mjs"
   },
   "files": [
     "index.mjs",
+    "shell.mjs",
     "helix.mjs",
     "helix-docs.mjs",
     "helix",
     "licenses",
+    "shells",
     "template",
     "THIRD-PARTY-NOTICES.md"
   ],

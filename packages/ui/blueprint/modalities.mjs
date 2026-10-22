@@ -70,3 +70,7 @@ export function expandModalities(names = DEFAULT_MODALITIES) {
     widths: union(ms.map((m) => m.widths)).sort((a, b) => a - b),
   };
 }
+
+/* Rule families that apply whatever the modality: the blueprint's own
+   validity (rulesFor with modalities keeps them; FEAT-014 MOD-06). */
+export const SHARED_FAMILIES = ["blueprint"];

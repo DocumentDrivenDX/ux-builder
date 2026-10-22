@@ -1981,6 +1981,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2018,6 +2021,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2051,6 +2057,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2082,6 +2091,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2109,6 +2121,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2142,6 +2157,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2169,6 +2187,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2200,6 +2221,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2227,6 +2251,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2260,6 +2287,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2287,6 +2317,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2314,6 +2347,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2341,6 +2377,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2374,6 +2413,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [
@@ -2401,6 +2443,9 @@
         "aiRole": [
           "assistant",
           "agent"
+        ],
+        "modality": [
+          "hybrid-chat"
         ]
       },
       "checks": [

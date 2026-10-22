@@ -3,15 +3,17 @@
 
    Each document is the installed HELIX's template for its type, written at
    the type's output location and naming, with ddx: frontmatter. What the
-   starter knows (the app's name and theme, its stack, the starter screen,
-   its checks) replaces the placeholder text under the matching heading;
+   starter knows (the app's name and theme, its stack, the shell for its
+   modalities (FEAT-014 MOD-05), its checks) replaces the placeholder text under the matching heading;
    everything only the product's owner can decide stays as the template
    wrote it. A heading the starter fills that a template no longer has is
    added at the end, so a later HELIX's templates never break creation. */
 
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { MODALITIES } from "@ux-builder/ui/blueprint/modalities";
 import { ref } from "./helix.mjs";
+import { assistantPath, criteria as shellCriteria } from "./shell.mjs";
 
 const TYPES = { "product-vision": "00-discover", prd: "01-frame", concerns: "01-frame", "feature-specification": "01-frame", "user-stories": "01-frame", "design-system": "02-design", "test-plan": "03-test", "story-test-plan": "03-test" };
 
@@ -86,12 +88,12 @@ const today = () => new Date().toISOString().slice(0, 10);
 function content(r, helix) {
   const app = r.name, theme = r.theme, ui = r.versions["@ux-builder/ui"], helixVersion = helix.manifest.version;
   const note = (what) => `> Drafted by \`@ux-builder/create-app\` on ${today()} from HELIX ${helixVersion}'s template. ${what}`;
-  const criteria = [
-    ["US-001-AC1", "Given the app opens, when the Matters card loads, then a table lists each matter with its partner, hours and status."],
-    ["US-001-AC2", "Given text in Search, when it is typed, then only matters whose name contains it are listed."],
-    ["US-001-AC3", "Given Add matter is pressed, when the request runs, then the button shows it is busy and a toast confirms the matter was added, with Undo."],
-    ["US-001-AC4", "Given the Theme or Appearance control, when another is chosen, then every widget, the logo and the colours follow it without a reload."],
-  ];
+  const ms = r.modalities;
+  const criteria = shellCriteria(ms).map((c) => [c.id, c.text]);
+  const both = ms.includes("responsive-web") && ms.length > 1;
+  const chat = ms.some((m) => m !== "responsive-web");
+  const kinds = ms.map((m) => `\`${m}\``).join(" and ");
+  const shell = ms.map((m) => `- **\`${m}\`**: ${MODALITIES[m].shell}, built with ${MODALITIES[m].components.map((c) => `\`${c}\``).join(", ")}.`).join("\n");
   return {
     vision: { intro: note("Every section is the product owner's to write; nothing here is decided yet.") },
     prd: {
@@ -126,25 +128,29 @@ function content(r, helix) {
       },
     },
     feat: {
-      title: "Feature Specification: FEAT-001 — The starter's matters screen",
-      intro: note("It describes the screen the starter created, so the app is traced from its first commit. Replace it with your first real feature."),
+      title: "Feature Specification: FEAT-001 — The app's shell for its modalities",
+      intro: note("It describes the empty shell the starter created for the app's modalities, so the app is traced from its first commit. Frame your first real feature next."),
       sections: {
-        Overview: `${app} opens on a page of matters: a notice, a card with a search field, an Add matter action and a table of matters, under a header with the theme's logo and a theme and appearance switcher. It is built only from \`@ux-builder/ui\` widgets and role tokens.`,
-        "Functional Requirements by Area": "#### Matters\n\nMAT-01. The screen lists the matters with partner, hours and status, and a search narrows them.\n\nMAT-02. Add matter shows it is busy and confirms with an Undo toast.\n\n#### Theme\n\nTHM-01. The theme and appearance can be switched, and every widget follows.",
-        "Functional Areas": "| Area | User question or job | Feature responsibility |\n|------|----------------------|------------------------|\n| Matters | \"Which matters are there?\" | List and search the matters |\n| Theme | \"Can I see it in another theme?\" | Switch theme and appearance |",
-        "User Stories": "- [US-001 — See, search and add matters](../user-stories/US-001-see-search-and-add-matters.md)",
-        Dependencies: `- \`@ux-builder/ui\` ${ui}; the plan of the screen in \`app.blueprint.json\`; DESIGN.md.`,
+        Overview: `${app} is a ${kinds} app (\`supports.modalities\` in \`app.blueprint.json\`). It starts as the empty shell for ${ms.length > 1 ? "those modalities" : "that modality"}, with no sample data, under a header with the theme's logo and a theme and appearance switcher:\n\n${shell}${both ? "\n\nWith several modalities the shell is an `AppShell` whose destinations are Home and Assistant, each built for its modality." : ""}\n\nIt is built only from \`@ux-builder/ui\` components and role tokens.`,
+        "Functional Requirements by Area": `#### Shell\n\n${ms.map((m, i) => `SHL-0${i + 1}. The \`${m}\` shell: ${MODALITIES[m].shell}${m === "responsive-web" ? ", whose empty state says to frame the first feature in HELIX and plan its screens in the blueprint" : ", empty until a runtime is connected"}.`).join("\n\n")}\n\n#### Theme\n\nTHM-01. The theme and appearance can be switched, and every widget follows.`,
+        "Functional Areas": `| Area | User question or job | Feature responsibility |\n|------|----------------------|------------------------|\n| Shell | "Where do I start?" | ${chat ? "Open on the shell for each modality" : "Open on the Home screen"} |\n| Theme | "Can I see it in another theme?" | Switch theme and appearance |`,
+        "User Stories": "- [US-001 — Open the app and see where to start](../user-stories/US-001-open-the-app-and-see-where-to-start.md)",
+        Dependencies: `- \`@ux-builder/ui\` ${ui}; the plan of the shell in \`app.blueprint.json\`; DESIGN.md.`,
       },
     },
     story: {
-      title: "US-001: See, search and add matters",
-      intro: note("It describes the starter's sample screen; rewrite it for your users when the screen changes."),
-      fields: { Feature: "FEAT-001 — The starter's matters screen", "Feature Requirements": "MAT-01, MAT-02, THM-01" },
+      title: "US-001: Open the app and see where to start",
+      intro: note("It describes the starter's empty shell; rewrite it for your users as the app grows."),
+      fields: { Feature: "FEAT-001 — The app's shell for its modalities", "Feature Requirements": `${ms.map((_, i) => `SHL-0${i + 1}`).join(", ")}, THM-01` },
       sections: {
-        Walkthrough: "1. The user opens the app; the Matters card lists the matters.\n2. The user types in Search; the table keeps only the matching matters.\n3. The user presses Add matter; the button is busy, then a toast confirms with Undo.\n4. The user picks another theme or appearance; the whole page follows.",
-        Story: `**As a** member of the team using ${app}\n**I want** to see and search the matters, and add one\n**So that** I can find the matter I need`,
+        Walkthrough: [
+          ...(ms.includes("responsive-web") ? [`The user opens the app; ${both ? "an AppShell with Home and Assistant shows Home" : "the Home screen"} says to frame the first feature in HELIX and plan its screens in the blueprint.`] : []),
+          ...(chat ? [`The user ${both ? "opens Assistant" : "opens the app"}; an empty conversation offers its composer and says replies are generated by AI${ms.includes("hybrid-chat") ? "; a reply can carry an Adaptive Card" : ""}.`] : []),
+          "The user picks another theme or appearance; the whole app follows.",
+        ].map((x, i) => `${i + 1}. ${x}`).join("\n"),
+        Story: `**As a** member of the team building ${app}\n**I want** to open the app and see where to start\n**So that** I can build its first feature in the shell for its modalities`,
         "Acceptance Criteria": criteria.map(([id, t]) => `- [ ] **${id}** — ${t}`).join("\n"),
-        "Test Scenarios": "| Scenario | AC ID | Input / State | Action | Expected Result |\n|----------|-------|---------------|--------|-----------------|\n" + criteria.map(([id]) => `| ${id.slice(-3)} | ${id} | The starter's sample matters | See \`e2e/starter.spec.js\` | As the criterion says |`).join("\n"),
+        "Test Scenarios": "| Scenario | AC ID | Input / State | Action | Expected Result |\n|----------|-------|---------------|--------|-----------------|\n" + criteria.map(([id]) => `| ${id.slice(-3)} | ${id} | The starter's empty shell | See \`e2e/starter.spec.js\` | As the criterion says |`).join("\n"),
         Dependencies: "- **Feature Spec**: FEAT-001",
       },
     },
@@ -152,9 +158,11 @@ function content(r, helix) {
       title: `DESIGN.md — ${app}`,
       intro: note(`The interface decisions the starter made with ux-builder; the plan of every screen is \`app.blueprint.json\`.`),
       sections: {
-        "Navigation and Active State": "One destination today (Matters, in `app.blueprint.json`). Add destinations to the blueprint before building them; with more than one, frame the app with the SDK's `AppShell`, which places navigation for the space available (a bottom bar or drawer when compact, a rail or side navigation when wide) and marks the current destination.",
-        "Visual Hierarchy": "The page title, then a `Notice`, then the Matters `Card` with its one primary action (Add matter), its search `TextField` and its `DataTable`. One primary action per region (the SDK's `emphasis.one-primary` rule).",
-        "Interaction States": "A busy `Button` while Add matter runs; a toast with Undo when it is done (`ToastProvider`). The table's empty and no-results states come from the SDK. Every screen in the blueprint declares its empty, loading and error states.",
+        "Navigation and Active State": ms.includes("responsive-web")
+          ? `${both ? "Two destinations today, Home and Assistant" : "One destination today, Home"} (in \`app.blueprint.json\`), framed by the SDK's \`AppShell\`, which places navigation for the space available (a bottom bar or drawer when compact, a rail or side navigation when wide) and marks the current destination. Add destinations to the blueprint before building them.`
+          : "One screen today, the conversation (in `app.blueprint.json`), filling the window under the header. Add screens to the blueprint before building them.",
+        "Visual Hierarchy": `${ms.includes("responsive-web") ? "Home's page title, then its empty state (`StatePanel`) saying where to start" : "The header, then the `Conversation`: its AI disclosure, its log and its composer"}. One primary action per region (the SDK's \`emphasis.one-primary\` rule).`,
+        "Interaction States": `${ms.includes("responsive-web") ? "Home's empty state comes from the SDK's `StatePanel`; every screen in the blueprint declares its empty, loading and error states." : ""}${chat ? `${ms.includes("responsive-web") ? " " : ""}The conversation's streaming, stopped and failed replies, Stop and Retry come from the SDK's \`Conversation\`.` : ""}`,
         Tokens: `From the theme \`${theme}\` (\`@ux-builder/tokens\`); the app styles its own markup only with \`--piq-*\` role tokens, which the lint rule enforces.`,
         Color: "`--piq-color-*` role tokens; no literal colours.",
         Spacing: "`--piq-space-*` steps 0 to 8.",
@@ -165,15 +173,15 @@ function content(r, helix) {
       intro: note("The checks the starter set up; add the product's own."),
       sections: {
         Strategy: "Every acceptance criterion is cited by a test (`@covers US-<n>-AC<m>`). Lint and the blueprint check run on every change; the audit and the Playwright e2e run in CI (`.github/workflows/ci.yml`).",
-        "Critical Paths (P0)": "1. The starter screen (US-001): `e2e/starter.spec.js`.",
+        "Critical Paths (P0)": "1. The starter's shell (US-001): `e2e/starter.spec.js`.",
         "Build Commands": "```bash\nnpm run lint\nnpm run check:blueprint\nnpm run test:e2e\nnpm run audit\nnpx ux-builder-audit assess validate\n```",
       },
     },
     stp: {
-      title: "Story Test Plan: STP-001-see-search-and-add-matters",
+      title: "Story Test Plan: STP-001-open-the-app-and-see-where-to-start",
       intro: note("Maps US-001 to the starter's Playwright test."),
       sections: {
-        "Story Reference": "**User Story**: [[US-001-see-search-and-add-matters]]\n**Project Test Plan**: [[test-plan]]",
+        "Story Reference": "**User Story**: [[US-001-open-the-app-and-see-where-to-start]]\n**Project Test Plan**: [[test-plan]]",
         "Acceptance Criteria Test Mapping": "| AC ID | Acceptance Criterion | Test | Asserted Behavior | AC-ID Citation | Level | File |\n|-------|----------------------|------|-------------------|----------------|-------|------|\n" + criteria.map(([id, t]) => `| ${id} | ${t} | \`${id.toLowerCase()}\` | As the criterion says | \`@covers ${id}\` | E2E | \`e2e/starter.spec.js\` |`).join("\n"),
         "Primary Commands": "```bash\nnpm run test:e2e\n```",
       },
@@ -190,11 +198,11 @@ export function writeStarterSet(helix, r, { log = () => {} } = {}) {
     ["product-vision", { id: "product-vision", ...c.vision }],
     ["prd", { id: "prd", links: [["informed_by", "product-vision"]], ...c.prd }],
     ["concerns", { id: "concerns", links: [["informed_by", "prd"]], ...c.concerns }],
-    ["feature-specification", { id: "FEAT-001", number: "001", slug: "starter-matters-screen", links: [["informed_by", "prd"]], ...c.feat }],
-    ["user-stories", { id: "US-001", number: "001", slug: "see-search-and-add-matters", links: [["informed_by", "FEAT-001"]], ...c.story }],
+    ["feature-specification", { id: "FEAT-001", number: "001", slug: "app-shell", links: [["informed_by", "prd"]], ...c.feat }],
+    ["user-stories", { id: "US-001", number: "001", slug: "open-the-app-and-see-where-to-start", links: [["informed_by", "FEAT-001"]], ...c.story }],
     ["design-system", { id: "design-system", links: [["informed_by", "prd"], ["informed_by", "FEAT-001"]], ...c.design }],
     ["test-plan", { id: "TP-001", links: [["informed_by", "prd"], ["informed_by", "FEAT-001"]], ...c.tp }],
-    ["story-test-plan", { id: "STP-001", number: "001", slug: "see-search-and-add-matters", links: [["informed_by", "US-001"], ["informed_by", "TP-001"]], ...c.stp }],
+    ["story-test-plan", { id: "STP-001", number: "001", slug: "open-the-app-and-see-where-to-start", links: [["informed_by", "US-001"], ["informed_by", "TP-001"]], ...c.stp }],
   ];
   const written = [];
   for (const [type, d] of docs) {
@@ -216,7 +224,7 @@ export function writeStarterSet(helix, r, { log = () => {} } = {}) {
 /* The rest of the toolchain sees HELIX (HLW-01, HLW-03): the assessment's
    manifest bound to the marker, the script to check it, and the guidance. */
 export function wire(helix, r) {
-  writeFileSync(join(r.dir, "ux-assessment.yml"), MANIFEST.replaceAll("__APP_NAME__", r.name));
+  writeFileSync(join(r.dir, "ux-assessment.yml"), manifest(r));
   const pkgFile = join(r.dir, "package.json");
   const pkg = JSON.parse(readFileSync(pkgFile, "utf8"));
   pkg.scripts = { ...pkg.scripts, "assess:validate": "ux-builder-audit assess validate" };
@@ -226,8 +234,8 @@ export function wire(helix, r) {
 
 This app is governed by HELIX ${helix.manifest.version}: the \`helix\` skill is installed in
 \`.claude/skills/helix/\` (see its \`HELIX-VERSION.json\`), the marker is \`.helix.yml\`, and the
-documents are in \`docs/helix/\` (vision, PRD, concerns, FEAT-001 and US-001 for the starter
-screen, DESIGN.md, the test plans). Work in this order:
+documents are in \`docs/helix/\` (vision, PRD, concerns, FEAT-001 and US-001 for the starter's
+shell, DESIGN.md, the test plans). Work in this order:
 
 1. Frame or evolve the requirement in HELIX first (\`/helix frame\`, \`/helix evolve\`): a story with
    acceptance criteria, before any code.
@@ -243,4 +251,47 @@ Other agent hosts install HELIX from https://github.com/DocumentDrivenDX/helix/b
   for (const f of ["AGENTS.md", "CLAUDE.md"]) appendFileSync(join(r.dir, f), guide);
 }
 
-const MANIFEST = "# UX assessment manifest (FEAT-009, CONTRACT-006), written by @ux-builder/create-app.\n# It binds this app's HELIX documents through .helix.yml; the journeys name\n# stories by ID. Check it with: npx ux-builder-audit assess validate\nversion: 1\napp:\n  name: __APP_NAME__\nhelix:\n  flow: helix\nrun:\n  start: npm run build && npx vite preview --port 4173 --strictPort --host 127.0.0.1\n  baseUrl: http://127.0.0.1:4173/\n  environment: local\nroles:\n  - id: member\n    description: A member of the team using the app\n    auth: none\njourneys:\n  - id: J-matters\n    story: US-001\n    priority: critical\n    role: member\n    entry: /\n    states: [success, empty, responsive-keyboard]\n    notApplicable:\n      loading: the starter's data is local\n      recoverable-error: the starter screen has no form that can fail\n      system-failure: the starter has no server\n      ai: the starter has no AI feature\ntests:\n  - id: lint\n    command: npm run lint\n  - id: audit\n    command: npm run audit\n  - id: e2e\n    command: npm run test:e2e\naudit:\n  widths: [390, 1280]\nrestrictions:\n  writes: report-only\n";
+/* The UX assessment's manifest: one journey, the shell's (US-001), from where
+   the app opens; the AI state applies when a modality has a conversation. */
+function manifest(r) {
+  const ai = r.modalities.some((m) => m !== "responsive-web");
+  return `# UX assessment manifest (FEAT-009, CONTRACT-006), written by @ux-builder/create-app.
+# It binds this app's HELIX documents through .helix.yml; the journeys name
+# stories by ID. Check it with: npx ux-builder-audit assess validate
+version: 1
+app:
+  name: ${r.name}
+helix:
+  flow: helix
+run:
+  start: npm run build && npx vite preview --port 4173 --strictPort --host 127.0.0.1
+  baseUrl: http://127.0.0.1:4173/
+  environment: local
+roles:
+  - id: member
+    description: A member of the team using the app
+    auth: none
+journeys:
+  - id: J-start
+    story: US-001
+    priority: critical
+    role: member
+    entry: ${r.modalities.includes("responsive-web") ? "/" : assistantPath(r.modalities)}
+    states: [success, empty, ${ai ? "ai, " : ""}responsive-keyboard]
+    notApplicable:
+      loading: the starter's shell loads no data
+      recoverable-error: the starter's shell has no form that can fail
+      system-failure: the starter has no server${ai ? "" : "\n      ai: the starter has no AI feature"}
+tests:
+  - id: lint
+    command: npm run lint
+  - id: audit
+    command: npm run audit
+  - id: e2e
+    command: npm run test:e2e
+audit:
+  widths: [390, 1280]
+restrictions:
+  writes: report-only
+`;
+}

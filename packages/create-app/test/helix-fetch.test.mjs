@@ -27,7 +27,7 @@ let n = 0;
 function create(api, args = [], env = {}) {
   const dir = join(tmp, `app-${++n}`);
   return new Promise((resolve) => {
-    const c = spawn(process.execPath, [CLI, dir, ...args], { cwd: tmp, env: { ...process.env, GITHUB_TOKEN: "", UX_BUILDER_HELIX_API: api ?? "http://127.0.0.1:9", UX_BUILDER_HELIX_BUNDLE: BUNDLE, ...env } });
+    const c = spawn(process.execPath, [CLI, dir, "--modality", "responsive-web", ...args], { cwd: tmp, env: { ...process.env, GITHUB_TOKEN: "", UX_BUILDER_HELIX_API: api ?? "http://127.0.0.1:9", UX_BUILDER_HELIX_BUNDLE: BUNDLE, ...env } });
     let out = "";
     c.stdout.on("data", (d) => { out += d; }); c.stderr.on("data", (d) => { out += d; });
     c.on("close", (code) => resolve({ code, out, dir, version: () => JSON.parse(readFileSync(join(dir, ".claude/skills/helix/HELIX-VERSION.json"), "utf8")) }));
@@ -212,7 +212,7 @@ describe("US-068: create an app offline or on a pinned HELIX", () => {
     for (const f of ["package.json", "src/App.jsx", "app.blueprint.json", "AGENTS.md"]) assert.ok(existsSync(join(r.dir, f)), f);
     const spec = readFileSync(join(r.dir, "e2e/starter.spec.js"), "utf8");
     assert.doesNotMatch(spec, /@covers|US-001|docs\/helix/, "there is no US-001 to cite");
-    assert.equal((spec.match(/^test\(/gm) ?? []).length, 4, "the four tests are kept");
+    assert.equal((spec.match(/^test\(/gm) ?? []).length, 2, "the shell's two tests (Home, the theme) are kept");
     const scripts = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8")).scripts;
     assert.equal(scripts["test:e2e"], "playwright test");
     assert.equal(scripts["assess:validate"], undefined);
