@@ -394,6 +394,27 @@ has `plain`; `annotations.json` and `video.json` validate against their
 schemas; `report` links each shown finding to `video/index.html#<video name>@<start>`
 and lists the videos in `evidence.json`.
 
+### Journey-first report, HELIX artifact and pace *[Amended 2026-10-21 — planned, FEAT-015, ADR-033]*
+
+- `assess report` orders `report.md` and `report.html` journey → state → step
+  → finding. Each finding has its rule ID and full statement (or heuristic and
+  source), evidence, severity 0 to 4 and fix. Findings at no step go under the
+  journey's *General* section.
+- `report.md` carries `ddx:` frontmatter with `type: usability-evaluation-report`
+  and links to its journeys and stories. When the installed HELIX defines that
+  type, it is drafted from the type's template.
+- `assess validate-report` fails a finding that names neither a rule nor a
+  heuristic.
+- `assess video --pace slow|normal|fast` (default normal): a step holds 2 s;
+  a finding's caption holds max(5 s, words ÷ 200 × 60 s). Slow scales by 1.5,
+  fast by 0.6, never below 1 s a step or 3 s a finding. Captions show the rule
+  ID and statement, the problem and the fix. Chapters are titled
+  "<journey> · step <n>: <screen>".
+- `ux-builder-blueprint draw` writes a Mermaid `stateDiagram-v2` and state
+  table per screen; `wireframes` writes one per size class per declared state;
+  `propose` fills HELIX's UX types when installed, otherwise names the
+  missing types and leaves the drafts in the run's output.
+
 ## Error Semantics
 
 | Case | Result |

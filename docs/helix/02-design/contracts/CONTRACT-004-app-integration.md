@@ -636,6 +636,34 @@ had to settle:
   section, target, file, patch }], disagreements, current, problems,
   written: false }`, or an error naming `.helix.yml` when there is no marker.
 
+## Modalities, verdicts and the journey report *[Amended 2026-10-21 — planned, FEAT-014, FEAT-015, ADR-032, ADR-033]*
+
+### Starter
+
+`npm create @ux-builder/app <dir> [--modality <list>]`. In a terminal with no
+`--modality`, it asks for the modalities as a multi-select. With no terminal
+and no `--modality`, it exits 1 listing them. An unknown or future modality
+exits 1. A `--blueprint` whose `supports.modalities` disagrees with
+`--modality` exits 1. The app is the empty shell of FEAT-014's matrix, with
+no sample domain; its blueprint records `supports.modalities`, and its HELIX
+FEAT-001 and US-001 describe the shell.
+
+### Audit
+
+`ux-builder-audit [--blueprint <file>] [--modality <list>] <urls>`. The
+modalities come from the blueprint, else `--modality`, else
+`responsive-web` (reported as assumed). They choose the widths and the rules.
+
+`report.json` gains:
+
+- `verdicts.theme`: `{ status, theme, designSystem, applied, sdkOnly, contrast: { light, dark }, findings: [ids] }`;
+- `verdicts.modality`: one `{ modality, status, components: [{ name, present }], ruleFamilies: [{ family, checked }], fixes }` per modality;
+- on every finding: `ruleId`, `rule: { statement, sources }`, `fix`, and with journeys `journey` and `step`.
+
+`report.html` opens with the verdicts and a *Rules broken* table, then lists
+journey → step (screenshot with numbered boxes) → finding, then *Other
+screens*. Without journeys it groups by screen.
+
 ## Error Semantics
 
 | Condition | Error / Outcome | Retry | Recovery Expectation |

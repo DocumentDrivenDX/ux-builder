@@ -350,6 +350,40 @@ settle; the smallest additions that make the checks decidable:
   `action.destructive-safeguard` as `destructiveActions` is, and
   `actions[].highImpact` counts as a declared high-impact action.
 
+## Modalities and theme rules *[Amended 2026-10-21 — planned, FEAT-014, FEAT-015, ADR-032, ADR-033]*
+
+### `supports.modalities`
+
+`supports.modalities` is an array of `responsive-web`, `chat` and
+`hybrid-chat` (at least one). `ios`, `android`, `macos` and `windows` are
+reserved: `blueprint.valid` fails them as "future". A blueprint without the
+field is read as `["responsive-web"]`. `supports.sizeClasses` and
+`supports.inputs` must include those FEAT-014's matrix derives from the
+modalities, or `blueprint.valid` warns naming the missing values.
+
+### `screens[].path`
+
+A screen may name the URL path it is served at (`"path": "/review"`). The
+audit matches a page to a screen by `data-piq-screen` first, then by `path`.
+
+### Rule `when.modality`
+
+A rule's `when` may hold `modality: [...]`. The rule applies to a target only
+when the target's modalities intersect it. `rulesFor(target)` and MCP
+`get_rules` accept `modalities`; they expand to size classes, inputs and AI
+roles by the matrix. The `card.*` rules carry `when.modality: ["hybrid-chat"]`.
+
+### `theme.*` rules
+
+The catalogue gains a `theme` family, one rule per audit theme check:
+`theme.applied`, `theme.token-colors`, `theme.token-fonts`, `theme.token-radii`,
+`theme.token-overrides`, `theme.widget-overrides`, `theme.sdk-widgets`,
+`theme.foreign-components`, `theme.outside-theme`, `theme.brand`,
+`theme.fonts`, `theme.contrast`, `theme.reflow`, `theme.target-size`,
+`theme.focus-obscured`. Each has a statement, rationale and sources
+(CONTRACT-001, CONTRACT-003, WCAG 2.2). `tools/check-rules.mjs` fails an audit
+check that names no rule.
+
 ## Error Semantics
 
 | Case | Result |

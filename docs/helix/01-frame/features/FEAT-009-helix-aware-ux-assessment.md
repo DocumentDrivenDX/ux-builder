@@ -525,3 +525,9 @@ the evidence a finding needs is kept.
 - [x] Report-only writes; proposals go through HELIX.
 - [x] HELIX inputs and recommendation targets resolve through HELIX's marker, flow, catalogue and `ddx:` frontmatter (HLX-01 to HLX-06).
 - [ ] Representative users named before the pilot's usability claims (COV-03).
+
+## Evolution *[2026-10-21 — FEAT-015, ADR-033]*
+
+The report is ordered journey → step → finding with the rule spelled out
+(FEAT-015 RPT-05) and is written as a HELIX usability evaluation report
+(RPT-08).
