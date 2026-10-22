@@ -70,9 +70,9 @@ cancelled. The re-run was as slow.
 GitHub then left the run "in progress" while refusing to cancel or re-run it.
 Nothing was pushed or published. So that a stuck runner can neither hold a
 release for GitHub's 6-hour default nor block the next run:
-- the job has a 90-minute limit and each install 30 minutes (15 per ffmpeg
-  try, retried once). Those bound a hang without failing a run that is
-  only slow;
+- the job has a 120-minute limit, the Chromium install 30 and the ffmpeg
+  install 40 (the re-run spent 12 and 27 minutes on them and published).
+  Those bound a hang without failing a run that is only slow;
 - the workflow can be run by hand (`workflow_dispatch`, main only), so a
   release restarts without a push;
 - the concurrency group is `release-main`, because the hung run held `release`.
