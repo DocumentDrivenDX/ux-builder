@@ -159,6 +159,10 @@ Rules:
    enforces both (`@scarf/scarf` is named). No adapter configures a vendor's
    hosted service (such as `assistant-cloud`); an app that wants one opts in
    with its own approval. CopilotKit is not supported (amendment above).
+   *Amended 2026-10-22 (ADR-035):* the episode trace an app keeps of its own
+   builds is written only to the app's repository, and leaves it only when the
+   owner runs `ux-builder-trace export` and sends the bundle. No ux-builder
+   package makes a network request for it, so it is not telemetry.
 
 **Key Points**: Every theme dresses AI Elements and assistant-ui | Our patterns, adapters per runtime | Agents render catalogue components only | Licences checked, no telemetry, by construction
 
