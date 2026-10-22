@@ -30,6 +30,8 @@ ddx:
       to: ADR-022
     - kind: informs
       to: concerns
+    - kind: informs
+      to: FEAT-016
 kind: product
 ---
 
@@ -65,6 +67,9 @@ kind: product
 > P2-4. Evolved 2026-10-21 with ADR-032, ADR-033, FEAT-014 and FEAT-015 (the
 > operator's review of a new app and its audit): the "App modalities" subsystem
 > (FR-60 to FR-63), FR-64 to FR-66 under UX assessment, and P1-10.
+> Evolved 2026-10-22 with FEAT-016 (diagram and data-visualization tokens,
+> milestone M2 of the operator's visuals PRD, `~/Documents/visuals/PRD.md`
+> §6.5): FR-67 and FR-68 under Theme composition, P1-11 and its sketch.
 
 ## Summary
 
@@ -249,6 +254,13 @@ rules, so it invents colours and components.
       HELIX's UX artifacts.
 
     (FR-60 to FR-66, FEAT-014, FEAT-015, ADR-032, ADR-033.)
+11. Diagram and data-visualization tokens in every theme: status colours,
+    a fixed categorical series, region tints, edge weights, lifecycle tints,
+    and each design system's diagram stroke and node radius, all
+    contrast-checked and shown on each theme's page, so the visuals library
+    planned across DocumentDrivenDX (`@ux-builder/visuals`) draws in the
+    theme with no colour of its own (operator, 2026-10-22; FR-67, FR-68,
+    FEAT-016).
 
 ### Nice to Have (P2)
 
@@ -292,6 +304,20 @@ rules, so it invents colours and components.
 - **FR-27** — A design system chooses one variant at each screen pattern's
   variant points; a variant changes how a pattern looks, never its content or
   order, and a brand cannot choose variants (ADR-022). *(Added 2026-10-18.)*
+- **FR-67** — Every theme, in every appearance, carries the roles diagrams
+  and charts draw with: four status colours (positive, caution, negative,
+  info), each with a subtle fill; eight categorical series colours in a
+  fixed, colour-vision-safe order; three region tints; three edge weights;
+  three lifecycle tints for parts not yet built; and, from its design
+  system, a diagram stroke, a strong stroke and a node radius. A brand may
+  override the status and series colours and need not set any of them.
+  *(Added 2026-10-22, FEAT-016.)*
+- **FR-68** — The contrast gate checks the FR-67 roles in every theme,
+  appearance and preview pair: text on the status, region and lifecycle
+  fills and status colours used as text clear 4.5:1; series colours and
+  edges clear 3:1 against the ground and surface; neighbouring series stay
+  distinguishable under protanopia and deuteranopia. A theme that fails is
+  not published. *(Added 2026-10-22, FEAT-016.)*
 
 ### Subsystem: Palette generation
 
@@ -562,6 +588,7 @@ rules, so it invents colours and components.
 | P1-7 (FR-37–FR-40) | Assess the theme builder, increment 1 | Its manifest; the builder running on the mock model; three checkpoints (a signed-in fixture screen, an open dialog, a form with a validation error and its input kept) | The manifest validates against the repository's HELIX marker and catalogue; every journey traces to its stories, criteria and tests; the baseline records the e2e suite and the audit; each checkpoint is inspected in place with linked findings and the task continues |
 | P1-8 (FR-43–FR-45) | Create an app on HELIX | `npm create @ux-builder/app acme` online, then with `--helix-offline` | HELIX installed in `.claude/skills/helix/` with its version recorded; 8 HELIX documents typed and linked, plus `concerns.local.yml`; `assess validate` passes and `assess collect` reports 0 warnings with US-001's criteria explicit |
 | P1-9 (FR-46–FR-50) | Plan, check and assess an agent screen | A blueprint with an `agent` screen whose "Submit payment" action has no approval and which renders a `Wizard` inline at a 400 px column; the built screen streaming an unmarked answer with no Stop control; UI copy "I think this is right" | Blueprint findings for the missing approval and for the inline wizard's compact rules; audit findings for the missing disclosure and Stop control; one lint warning; the assessment's risky scenario stops at the approval |
+| P1-11 (FR-67, FR-68) | Diagram tokens in every theme | Every theme and preview pair, light and dark; a page drawing a status chip, a series legend, a region with a node, an edge in each weight and the three lifecycle tints with those tokens only | `npm run contrast` reports 0 failures; the audit reports no errors or warnings for that page in every theme and appearance; each theme's page lists every diagram token |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context
