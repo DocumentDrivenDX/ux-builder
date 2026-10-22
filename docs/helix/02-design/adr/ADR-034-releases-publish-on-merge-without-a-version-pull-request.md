@@ -60,3 +60,17 @@ the release cannot trigger itself.
   adds them. `main` takes direct commits from the workflow, which works
   because `main` is not branch-protected; protecting it later would need the
   workflow allowed to push.
+
+## Amendment *[2026-10-22 — the first run hung]*
+
+The first run under this decision got a runner whose package mirror stalled:
+10 minutes for Chromium and 19 minutes in `apt-get` before it was cancelled.
+GitHub then left the run "in progress" while refusing to cancel or re-run it.
+Nothing was pushed or published. So that a stuck runner can neither hold a
+release for GitHub's 6-hour default nor block the next run:
+- the job has a 45-minute limit and the installs 10 minutes each, and the
+  ffmpeg install is retried once;
+- the workflow can be run by hand (`workflow_dispatch`, main only), so a
+  release restarts without a push;
+- the concurrency group is `release-main`, because the hung run held `release`.
+

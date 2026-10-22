@@ -510,8 +510,9 @@ push to `main`:
    GitHub release.
 
 So merging a pull request with a changeset releases it; there is no second
-pull request to merge (ADR-034). If publishing fails part-way, the next push
-to `main` (or a re-run of the workflow) publishes what is missing.
+pull request to merge (ADR-034). If a run fails or times out (45 minutes),
+start it again from Actions → release → **Run workflow**: it publishes every
+version on `main` that isn't on npm yet.
 
 It publishes with [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
 (OIDC), so no npm token is stored anywhere. That needs a one-time setting:
