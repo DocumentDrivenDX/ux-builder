@@ -52,6 +52,24 @@
             "type": "string",
             "minLength": 1
           },
+          "heuristic": {
+            "description": "The usability heuristic the finding is about, when it breaks no catalogue rule (FEAT-015 RPT-01; CONTRACT-006 Journey-first report): its name and its source (a title or URL). A finding names a rule or a heuristic.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "source"],
+            "properties": { "name": { "type": "string", "minLength": 1 }, "source": { "type": "string", "minLength": 1 } }
+          },
+          "severity": {
+            "description": "Severity on Nielsen's 0 to 4 scale (0 not a problem, 4 a catastrophe). When absent the report derives it from priority: P0 4, P1 3, P2 2, P3 1.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4
+          },
+          "step": {
+            "description": "The walkthrough step the finding was found at, when its evidence cites no checkpoint of one (FEAT-015 RPT-05).",
+            "type": "integer",
+            "minimum": 1
+          },
           "finding_type": {
             "enum": [
               "deterministic",

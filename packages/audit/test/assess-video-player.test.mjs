@@ -50,7 +50,8 @@ describe("US-095: explore the findings in an interactive player", () => {
       await page.click("#play");
       await page.waitForFunction(() => window.__player.video.currentTime > 0.2);
       const chapters = await page.locator("#chapters a").allInnerTexts();
-      assert.deepEqual(chapters.map((c) => c.replace(/^\d+:\d+ · /, "")), ["Title card", "Main path", "Alternate 1", "End"]);
+      assert.deepEqual(chapters.map((c) => c.replace(/^\d+:\d+ · /, "")).filter((c) => !/^J-review · step \d+: /.test(c)), ["Title card", "Main path", "Alternate 1", "End"]);
+      assert.deepEqual(chapters.map((c) => c.replace(/^\d+:\d+ · /, "")).filter((c) => /^J-review · step /.test(c)).slice(0, 2), ["J-review · step 1: /queue", "J-review · step 2: /entry/1"], "a chapter per step");
       const listed = await page.locator("#findings a").allInnerTexts();
       assert.equal(listed.length, 2);
       assert.match(listed[1], /P1 · Checked · Approve and Reject look equally important/);

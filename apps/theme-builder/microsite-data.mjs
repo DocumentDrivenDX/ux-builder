@@ -173,6 +173,7 @@ export const NOTES = {
   "@ux-builder/ui ./stylelint": "The Stylelint plugin: no hard-coded colours, sizes or fonts in CSS",
   "@ux-builder/ui ./eslint": "The ESLint plugin: no hard-coded values in JSX, and the AI voice rules",
   "@ux-builder/ui ./blueprint": "checkBlueprint, the interaction rules and the blueprint schema",
+  "@ux-builder/ui ./blueprint/modalities": "The app modalities (responsive-web, chat, hybrid-chat): their size classes, inputs, AI roles, rule families and audit widths",
   "@ux-builder/ui ./catalogue.json": "The machine-readable catalogue: widgets, patterns, tokens, icons, rules and recipes",
   "@ux-builder/ui ./AGENTS.md": "Guidance for AI coding agents, generated from the catalogue",
   "@ux-builder/ui ./skill/*": "The Claude Code skill for building on the SDK",

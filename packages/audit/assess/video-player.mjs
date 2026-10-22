@@ -43,13 +43,17 @@ export function sdkStyles(theme = THEME) {
   return { css: [inlineUrls(readFileSync(fontsFile, "utf8"), dirname(fontsFile)), themeCss, readFileSync(uiFile, "utf8")].join("\n"), favicon };
 }
 
-/* The caption, as the player's pop-up and the MP4's picture show it.
-   Runs in Node and, by its source, in the page. */
+/* The caption, as the player's pop-up and the MP4's picture show it: the
+   problem in plain English, the rule it breaks (ID and full statement, or
+   heuristic and source) and the fix (FEAT-015 RPT-07). Runs in Node and, by
+   its source, in the page. */
 export function captionMarkup(a) {
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const kind = a.kind === "judgment" ? "Judgment" : "Checked";
   const low = a.confidence === "low" ? '<span class="cap__low">worth checking with users</span>' : "";
-  return `<div class="piq-card cap cap--${a.kind === "judgment" ? "judgment" : "checked"}"><p class="cap__tag"><span class="cap__kind">${kind}</span><span class="cap__priority">${esc(a.priority)}</span>${low}<span class="cap__id">${esc(a.finding)}</span></p><p class="cap__problem">${esc(a.caption.problem)}</p><p class="cap__rec"><strong>Recommendation:</strong> ${esc(a.caption.recommendation)}</p></div>`;
+  const r = a.rule;
+  const rule = !r ? "" : r.id ? `<p class="cap__rule"><code class="cap__rid">${esc(r.id)}</code> ${esc(r.statement)}</p>` : `<p class="cap__rule"><strong>Heuristic:</strong> ${esc(r.heuristic)}${r.source ? ` (${esc(r.source)})` : ""}</p>`;
+  return `<div class="piq-card cap cap--${a.kind === "judgment" ? "judgment" : "checked"}"><p class="cap__tag"><span class="cap__kind">${kind}</span><span class="cap__priority">${esc(a.priority)}</span>${low}<span class="cap__id">${esc(a.finding)}</span></p><p class="cap__problem">${esc(a.caption.problem)}</p>${rule}<p class="cap__rec"><strong>Fix:</strong> ${esc(a.caption.recommendation)}</p></div>`;
 }
 
 /* Where a caption of size (w, h) goes in a frame of size (fw, fh), beside
@@ -76,6 +80,8 @@ export const CAPTION_CSS = `
 .cap__priority { font-weight: 600; color: var(--piq-color-text-strong); }
 .cap__id { margin-left: auto; font-family: var(--piq-font-mono); }
 .cap__problem { font: 500 var(--piq-font-size-body, 1rem)/1.45 var(--piq-font-body); color: var(--piq-color-text-strong); }
+.cap__rule { margin-top: var(--piq-space-2, 8px) !important; padding-left: var(--piq-space-2, 8px); border-left: 3px solid var(--piq-color-border); font: 400 var(--piq-font-size-caption, .8125rem)/1.45 var(--piq-font-body); color: var(--piq-color-text-muted); }
+.cap__rid { font-family: var(--piq-font-mono); color: var(--piq-color-text-strong); }
 .cap__rec { margin-top: var(--piq-space-2, 8px) !important; font: 400 var(--piq-font-size-body, 1rem)/1.45 var(--piq-font-body); color: var(--piq-color-text); }
 .outline { position: absolute; border: 3px solid var(--piq-color-accent); border-radius: var(--piq-radius-sm, 4px); box-sizing: border-box; }
 .outline--judgment { border-style: dashed; }
@@ -98,7 +104,7 @@ export function playerData(dir) {
     const planJ = plan?.journeys?.find((j) => j.id === v.journey);
     return {
       name: v.files.clean.replace(/\.clean\.webm$/, ""), journey: v.journey, goal: planJ?.goal ?? null, viewport: v.viewport, src: v.files.clean, mp4: v.files.mp4 ?? null,
-      chapters: tl.chapters, annotations: tl.annotations,
+      chapters: tl.chapters, steps: tl.steps ?? [], annotations: tl.annotations,
       notShown: findings.filter((f) => f.journey_id === v.journey && !shown.has(f.id)).map((f) => ({ id: f.id, title: f.plain?.problem ?? f.title, priority: f.priority, reason: stopped.length ? `not reached: ${stopped.map((c) => `${c.title} stopped`).join("; ")}` : "its checkpoint was not on this replay's path" })),
     };
   });
@@ -142,6 +148,7 @@ body { margin: 0; background: var(--piq-color-ground); color: var(--piq-color-te
 .seek { display: block; padding: var(--piq-space-2, 8px) var(--piq-space-3, 12px); min-height: var(--piq-size-target, 40px); box-sizing: border-box; border-radius: var(--piq-radius-sm, 4px); color: var(--piq-color-text); text-decoration: none; }
 .seek:hover { background: var(--piq-color-surface-sunken); }
 .seek:focus-visible { outline: var(--piq-focus-ring, 2px solid var(--piq-color-accent)); outline-offset: 2px; }
+.seek--step { padding-left: var(--piq-space-6, 32px); font-size: var(--piq-font-size-caption, .8125rem); }
 .seek[aria-current="true"] { box-shadow: inset 3px 0 0 var(--piq-color-accent); color: var(--piq-color-text-strong); }
 .side .note { margin: 0 0 var(--piq-space-2, 8px); color: var(--piq-color-text-muted); font-size: var(--piq-font-size-caption, .8125rem); }
 .side .filters { display: flex; gap: var(--piq-space-2, 8px); margin-bottom: var(--piq-space-2, 8px); }
@@ -175,7 +182,12 @@ function app() {
     if (at != null) v.addEventListener("loadedmetadata", () => { v.currentTime = at; }, { once: true });
   }
   function renderSide() {
-    $("#chapters").innerHTML = cur.chapters.map((c) => `<li><a class="seek" href="#${esc(cur.name)}@${c.start}" data-seek="${c.start}">${mmss(c.start)} · ${c.kind === "title" ? "Title card" : esc(c.title)}${c.status === "stopped" ? " (stopped)" : ""}</a>${c.status === "stopped" ? `<p class="note">${esc(c.reason)}</p>` : ""}</li>`).join("");
+    // A chapter per step ("J-review · step 2: entry"), under the path it is on (RPT-07).
+    $("#chapters").innerHTML = cur.chapters.map((c) => {
+      const steps = (cur.steps ?? []).filter((s) => s.chapter === c.id);
+      const head = `<li><a class="seek" href="#${esc(cur.name)}@${c.start}" data-seek="${c.start}">${mmss(c.start)} · ${c.kind === "title" ? "Title card" : esc(c.title)}${c.status === "stopped" ? " (stopped)" : ""}</a>${c.status === "stopped" ? `<p class="note">${esc(c.reason)}</p>` : ""}</li>`;
+      return head + steps.map((s) => `<li class="step"><a class="seek seek--step" href="#${esc(cur.name)}@${s.start}" data-seek="${s.start}">${mmss(s.start)} · ${esc(s.title)}</a></li>`).join("");
+    }).join("");
     const list = visible();
     $("#findings").innerHTML = list.length ? list.map((a) => `<li><a class="seek" href="#${esc(cur.name)}@${a.start}" data-finding="${esc(key(a))}" aria-current="${Boolean(shown && key(shown) === key(a))}">${mmss(a.start)} · ${esc(a.priority)} · ${a.kind === "judgment" ? "Judgment" : "Checked"} · ${esc(a.caption.problem)}</a></li>`).join("") : `<li class="empty">No findings match.</li>`;
     $("#not-shown").innerHTML = cur.notShown.length ? cur.notShown.map((n) => `<li class="note">${esc(n.priority)} · ${esc(n.title)} (${esc(n.id)}): ${esc(n.reason)}</li>`).join("") : `<li class="empty">None.</li>`;
@@ -190,7 +202,8 @@ function app() {
     popup.innerHTML = `${captionMarkup(a)}<div class="popup__actions"><button type="button" class="piq-btn piq-btn--secondary piq-btn--sm" id="more" aria-expanded="${more}" aria-controls="more-panel">More</button><a class="piq-btn piq-btn--text piq-btn--sm" href="../report.html#${esc(a.finding)}">Open in report</a><button type="button" class="piq-btn piq-btn--sm" id="dismiss">${v.paused && pausedAt === a ? "Continue" : "Dismiss"}</button></div><div class="more" id="more-panel" ${more ? "" : "hidden"}>${d.hasScreenshot ? `<img src="${esc(d.screenshot)}" alt="The screen at checkpoint ${esc(a.checkpoint)}, as inspected">` : ""}<p>Finding: ${esc(d.title ?? a.finding)}</p><p>Confidence: ${esc(d.confidence?.level ?? a.confidence ?? "not stated")}${d.confidence?.reason ? `: ${esc(d.confidence.reason)}` : ""}</p><p>${d.alsoIn?.length ? `Also in: ${d.alsoIn.map(esc).join(", ")}` : "Seen in this journey only."}</p></div>`;
     popup.hidden = false;
     position(boxes);
-    $("#announce").textContent = `${a.kind === "judgment" ? "Judgment" : "Checked"}, ${a.priority}: ${a.caption.problem} Recommendation: ${a.caption.recommendation}`;
+    const rule = !a.rule ? "" : a.rule.id ? ` Rule ${a.rule.id}: ${a.rule.statement}` : ` Heuristic: ${a.rule.heuristic}.`;
+    $("#announce").textContent = `${a.kind === "judgment" ? "Judgment" : "Checked"}, ${a.priority}: ${a.caption.problem}${rule} Fix: ${a.caption.recommendation}`;
     renderSide();
   }
   // Over the video beside its outlines; under the video when the frame is too narrow for both.

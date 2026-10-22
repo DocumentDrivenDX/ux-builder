@@ -102,7 +102,7 @@ describe("US-058: trace each assessed journey to product intent", () => {
       run_id: "R-20261020T120000Z", title: "Undo is not offered", finding_type: "observed", journey_id: "J-undo", state_id: "S-undo-success", role: "reviewer",
       source_refs: ["US-002"], test_refs: [], evidence_refs: [], uncertainty: "seen once; not yet reproduced", observed_behavior: "No Undo after approving.",
       expected_behavior_or_proposed_requirement: "US-002-AC1", recommendation: "Show an Undo toast.", component_mapping: [], priority: "P1",
-      confidence: { level: "medium", reason: "one observation" }, effort: "S", dependencies: [], verification: "Approve, then Undo; the entry returns.", proposed_doc_changes: [], status: "open", ...over,
+      confidence: { level: "medium", reason: "one observation" }, effort: "S", dependencies: [], verification: "Approve, then Undo; the entry returns.", proposed_doc_changes: [], status: "open", heuristic: { name: "User control and freedom", source: "Nielsen, 10 usability heuristics" }, ...over,
     }; return { ...f, id: findingId(f) }; };
     const report = (f) => { writeFileSync(join(run, "backlog.json"), JSON.stringify({ schema: "backlog", version: 1, findings: [f], user_validation: [] })); return spawnSync(process.execPath, [CLI, "assess", "validate-report", run], { encoding: "utf8" }); };
     const bare = report(finding());

@@ -6,11 +6,20 @@
    records. It says what was checked, what was seen, what is uncertain, why
    each change matters and how to verify it; heuristics are listed as
    recommendations, claims about people as work for representative users,
-   and blocked stages apart from findings. compare() classifies findings
+   and blocked stages apart from findings. Its findings follow the journeys
+   (FEAT-015 RPT-05, RPT-08; CONTRACT-006 "Journey-first report"): journey,
+   then the state it was walked in, then step, then each finding with its
+   rule's ID and full statement (or its heuristic and source), evidence,
+   severity on Nielsen's 0 to 4 scale and fix; a finding at no step is under
+   its state's "General". report.md is a HELIX usability-evaluation-report
+   (ddx: frontmatter), drafted from the installed HELIX's template when it
+   defines that type. compare() classifies findings
    across two runs of one scope; gate() is the CI exit. */
 
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
+import { loadTypes } from "./helix.mjs";
+import { catalogueRules, ruleOf, SEVERITY_WORDS, severityOf } from "./rules.mjs";
 
 const read = (dir, f) => (existsSync(join(dir, f)) ? JSON.parse(readFileSync(join(dir, f), "utf8")) : null);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -70,74 +79,186 @@ export function videoLinks(video, id) {
   });
 }
 
-/* The report, as Markdown; the HTML wraps the same sections. */
+/* The steps of a walked journey a finding is at: its own step, else each
+   step whose checkpoint its evidence cites (FEAT-015 RPT-05). */
+const cites = (f, checkpoint) => (f.evidence_refs ?? []).some((r) => r === checkpoint || r === `checkpoints/${checkpoint}` || r.startsWith(`checkpoints/${checkpoint}/`));
+export function stepsOf(f, steps = []) {
+  if (Number.isInteger(f.step)) return steps.filter((s) => s.n === f.step);
+  return steps.filter((s) => s.checkpoint && cites(f, s.checkpoint));
+}
+const stateOf = (f, journey) => { const p = `S-${journey.replace(/^J-/, "")}-`; return f.state_id?.startsWith(p) ? f.state_id.slice(p.length) : f.state_id ?? "unknown"; };
+const screenOf = (s, planJ) => s.screen ?? (s.alternate == null ? planJ?.steps?.find((x) => x.n === s.n)?.screen : null) ?? (s.url ? (() => { try { return new URL(s.url, "http://x").pathname; } catch { return s.url; } })() : null);
+
+/* The journeys the report is ordered by (RPT-05): the plan's, then any the
+   walkthrough or the findings name; each with the states it was walked in,
+   its steps, and its findings, by state then step ("General" for a finding
+   at no step). */
+export function byJourney(r) {
+  const findings = r.backlog?.findings ?? [];
+  const cov = r.coverage?.entries ?? [];
+  const ids = [...new Set([...(r.plan?.journeys ?? []).map((j) => j.id), ...(r.walk?.journeys ?? []).map((j) => j.id), ...findings.map((f) => f.journey_id)].filter(Boolean))];
+  return ids.map((id) => {
+    const planJ = r.plan?.journeys?.find((j) => j.id === id) ?? null;
+    const steps = (r.walk?.journeys?.find((j) => j.id === id)?.steps ?? []).map((s) => ({ ...s, screen: screenOf(s, planJ) }));
+    const mine = findings.filter((f) => f.journey_id === id);
+    const entries = cov.filter((e) => e.journey === id);
+    const fallback = entries.some((e) => e.state === "success") ? "success" : entries.find((e) => e.status === "assessed")?.state ?? "success";
+    const stateNames = [...new Set([...entries.filter((e) => e.status === "assessed").map((e) => e.state), ...mine.map((f) => stateOf(f, id))])];
+    const states = stateNames.map((state) => {
+      const fs = mine.filter((f) => stateOf(f, id) === state);
+      const at = new Map(fs.map((f) => [f.id, stepsOf(f, steps)]));
+      const shown = steps.filter((s) => (s.state ?? fallback) === state || fs.some((f) => at.get(f.id).includes(s)));
+      return {
+        state, entry: entries.find((e) => e.state === state) ?? null,
+        steps: shown.map((s) => ({ step: s, findings: fs.filter((f) => at.get(f.id).includes(s)) })),
+        general: fs.filter((f) => !at.get(f.id).length),
+      };
+    });
+    return { id, goal: planJ?.goal ?? null, story: planJ?.story ?? null, entries, steps, states };
+  });
+}
+
+/* The installed HELIX's usability-evaluation-report type, if it defines one
+   (RPT-08; ADR-033): its location and template. */
+export function helixType(run) {
+  const path = run?.helix?.catalog?.path;
+  if (!path || !existsSync(path)) return null;
+  try { return loadTypes({ path }).find((t) => t.id === "usability-evaluation-report") ?? null; } catch { return null; }
+}
+
+/* The report, as Markdown with ddx: frontmatter; the HTML wraps the same
+   sections. Drafted from the HELIX type's template when there is one: its
+   sections in its order, each filled from the run where one of ours fits,
+   the rest of ours after them. */
 function markdown(dir, r) {
   const run = r.run ?? {}, findings = r.backlog?.findings ?? [];
+  const rules = catalogueRules(dir, run);
   const heur = findings.filter((f) => f.finding_type === "heuristic"), obligations = findings.filter((f) => f.finding_type !== "heuristic");
   const stagesOff = (run.stages ?? []).filter((s) => s.status !== "completed");
-  const L = [];
-  L.push(`# UX assessment: ${run.config?.scope?.app ?? "app"} — ${run.id}`, "");
-  L.push(`${CAVEAT} This report says what was checked, what was seen, what remains uncertain, why each change matters and how to verify it.`, "");
-  L.push("## Summary", "");
+  const journeys = byJourney(r);
+  const type = helixType(run);
+  const S = []; // { key, title, lines }
+  const sec = (key, title, lines) => S.push({ key, title, lines });
+
   const c = counts(findings);
-  L.push(`- Findings: ${findings.length} (${PRIORITIES.map((p) => `${p} ${c[p]}`).join(", ")}); ${heur.length} of them recommendations from UX heuristics rather than existing obligations.`);
   const cov = r.coverage?.entries ?? [];
-  L.push(`- Coverage: ${cov.filter((e) => e.status === "assessed").length} of ${cov.length} journey × state pairs assessed; ${cov.filter((e) => e.status === "blocked").length} blocked, ${cov.filter((e) => e.status === "not-assessed").length} not assessed, ${cov.filter((e) => e.status === "not-applicable").length} not applicable.`);
-  if (r.baseline) L.push(`- Baseline: ${r.baseline.tests.map((t) => `${t.id} ${t.status}`).join(", ") || "no tests declared"}; audit ${r.baseline.audit ? `${r.baseline.audit.findings.usability} usability and ${r.baseline.audit.findings.sdkAdoption} SDK-adoption findings` : "not run"}.`);
-  L.push(`- Inputs: HELIX flow \`${run.helix?.flow ?? "?"}\` (root \`${run.helix?.root ?? "?"}\`, catalogue ${run.helix?.catalog?.source ?? "?"}${run.helix?.catalog?.version ? ` ${run.helix.catalog.version}` : ""}); app commit \`${run.app?.commit?.slice(0, 10) ?? "?"}\`${run.app?.dirty ? " (with uncommitted changes)" : ""}; @ux-builder/ui ${run.versions?.ui ?? "not installed"}, audit ${run.versions?.audit ?? "?"}${run.agent ? `; agent ${run.agent.name}${run.agent.model ? ` (${run.agent.model})` : ""}` : ""}.`);
-  if (r.video) L.push(`- Walkthrough videos: ${r.video.videos.length} recorded${r.video.notRecorded.length ? `, ${r.video.notRecorded.length} not recorded` : ""}; [watch them in the player](video/index.html)${r.video.videos.some((v) => v.files.mp4) ? ", or share the MP4s in `video/`" : ""}.`);
-  if (stagesOff.length) L.push(`- Stages that did not complete (reported apart from findings): ${stagesOff.map((s) => `${s.stage} ${s.status}${s.reason ? ` — ${s.reason}` : ""}`).join("; ")}.`);
-  L.push("");
+  const summary = [];
+  summary.push(`- Findings: ${findings.length} (${PRIORITIES.map((p) => `${p} ${c[p]}`).join(", ")}); ${heur.length} of them recommendations from UX heuristics rather than existing obligations. Severity is on Nielsen's 0 to 4 scale (4 a catastrophe, 1 cosmetic).`);
+  summary.push(`- Coverage: ${cov.filter((e) => e.status === "assessed").length} of ${cov.length} journey × state pairs assessed; ${cov.filter((e) => e.status === "blocked").length} blocked, ${cov.filter((e) => e.status === "not-assessed").length} not assessed, ${cov.filter((e) => e.status === "not-applicable").length} not applicable.`);
+  if (r.baseline) summary.push(`- Baseline: ${r.baseline.tests.map((t) => `${t.id} ${t.status}`).join(", ") || "no tests declared"}; audit ${r.baseline.audit ? `${r.baseline.audit.findings.usability} usability and ${r.baseline.audit.findings.sdkAdoption} SDK-adoption findings` : "not run"}.`);
+  summary.push(`- Inputs: HELIX flow \`${run.helix?.flow ?? "?"}\` (root \`${run.helix?.root ?? "?"}\`, catalogue ${run.helix?.catalog?.source ?? "?"}${run.helix?.catalog?.version ? ` ${run.helix.catalog.version}` : ""}); app commit \`${run.app?.commit?.slice(0, 10) ?? "?"}\`${run.app?.dirty ? " (with uncommitted changes)" : ""}; @ux-builder/ui ${run.versions?.ui ?? "not installed"}, audit ${run.versions?.audit ?? "?"}${run.agent ? `; agent ${run.agent.name}${run.agent.model ? ` (${run.agent.model})` : ""}` : ""}.`);
+  summary.push(type ? `- HELIX artifact: a ${type.id}, drafted from the installed HELIX's template${type.template ? ` (\`${type.template.split(sep).slice(-4).join("/")}\`)` : ""}; its place in the flow is \`${type.dir}${type.naming ?? ""}\` (propose it with \`assess propose\`).` : "- HELIX artifact: a usability-evaluation-report (ddx: frontmatter); the installed HELIX defines no such type yet, so it stays in the run package until it is proposed to the flow.");
+  if (r.video) summary.push(`- Walkthrough videos: ${r.video.videos.length} recorded${r.video.notRecorded.length ? `, ${r.video.notRecorded.length} not recorded` : ""}; [watch them in the player](video/index.html)${r.video.videos.some((v) => v.files.mp4) ? ", or share the MP4s in `video/`" : ""}.`);
+  if (stagesOff.length) summary.push(`- Stages that did not complete (reported apart from findings): ${stagesOff.map((s) => `${s.stage} ${s.status}${s.reason ? ` — ${s.reason}` : ""}`).join("; ")}.`);
+  sec("summary", "Summary", summary);
+
   if (r.plan) {
-    L.push("## What was checked", "", "| Journey | Story | " + (r.plan.journeys[0]?.states ?? []).map((s) => s.state).join(" | ") + " |", "|---|---|" + (r.plan.journeys[0]?.states ?? []).map(() => "---").join("|") + "|");
+    const L = ["| Journey | Story | " + (r.plan.journeys[0]?.states ?? []).map((s) => s.state).join(" | ") + " |", "|---|---|" + (r.plan.journeys[0]?.states ?? []).map(() => "---").join("|") + "|"];
     for (const j of r.plan.journeys) L.push(`| ${j.id} | ${j.story} | ` + j.states.map((s) => { const e = cov.find((x) => x.journey === j.id && x.state === s.state); return e ? (e.status === "assessed" ? `assessed: ${e.outcome}` : e.status) : "missing"; }).join(" | ") + " |");
     L.push("", "Reasons for pairs not assessed:", "");
     for (const e of cov.filter((x) => x.status !== "assessed")) L.push(`- ${e.journey} × ${e.state}: ${e.status} — ${e.reason}`);
-    L.push("");
+    sec("checked", "What was checked", L);
   }
-  const section = (title, list) => {
-    if (!list.length) return;
-    L.push(`## ${title}`, "");
-    for (const p of PRIORITIES) for (const f of list.filter((x) => x.priority === p)) {
-      L.push(`### ${f.priority} · ${f.title} (${f.id})`, "");
-      L.push(`**${f.finding_type}** · ${f.journey_id} · ${f.state_id} · role ${f.role} · confidence ${f.confidence?.level} (${f.confidence?.reason}) · effort ${f.effort}${f.validation_work ? " · **validation work**" : ""}${(f.qualified ?? []).length ? ` · qualified: ${f.qualified.join(", ")}` : ""}`, "");
-      if (f.plain) L.push(`- **In plain English**: ${f.plain.problem} ${f.plain.recommendation}`);
-      L.push(`- **Observed**: ${f.observed_behavior}`, `- **Expected**: ${f.expected_behavior_or_proposed_requirement}`, `- **Recommendation**: ${f.recommendation}`);
-      if (f.component_mapping?.length) L.push(`- **Components**: ${f.component_mapping.map((m) => `\`${m.name}\` (${m.kind}, @ux-builder/ui ${m.version}, ${m.work})`).join("; ")}`);
-      L.push(`- **Verify**: ${f.verification}`);
-      L.push(`- **Requirements**: ${(f.source_refs ?? []).join(", ") || "none: a proposed criterion"} · **Tests**: ${(f.test_refs ?? []).join(", ") || "none"}`);
-      L.push(`- **Evidence**: ${(f.evidence_refs ?? []).map((x) => `\`${x}\``).join(", ") || `none — ${f.uncertainty}`}`);
-      const seen = videoLinks(r.video, f.id);
-      if (seen.length) L.push(`- **Seen in video**: ${seen.map((x) => `[${x.label}](${x.href})`).join(", ")}`);
-      if (f.proposed_doc_changes?.length) L.push(`- **Proposed HELIX changes**: ${f.proposed_doc_changes.join(", ")}`);
-      L.push("");
-    }
+
+  // A finding: its rule or heuristic in full, severity, evidence and fix (RPT-01, RPT-05).
+  const finding = (f, level) => {
+    const L = [];
+    const sev = severityOf(f);
+    const what = ruleOf(f, rules);
+    L.push(`${"#".repeat(level)} ${f.priority} · severity ${sev} · ${f.title} (${f.id})`, "");
+    L.push(`**${f.finding_type}** · severity ${sev} (${SEVERITY_WORDS[sev]}) · ${f.journey_id} · ${f.state_id} · role ${f.role} · confidence ${f.confidence?.level} (${f.confidence?.reason}) · effort ${f.effort}${f.validation_work ? " · **validation work**" : ""}${(f.qualified ?? []).length ? ` · qualified: ${f.qualified.join(", ")}` : ""}`, "");
+    if (what?.kind === "rule") L.push(`- **Rule** \`${what.id}\`: ${what.statement}${what.sources.length ? ` Sources: ${what.sources.map((s) => `[${s.title}](${s.url})`).join(", ")}.` : ""}`);
+    else if (what) L.push(`- **Heuristic**: ${what.name}${what.source ? ` — source: ${/^https?:/.test(what.source) ? `[${what.source}](${what.source})` : what.source}` : ""}`);
+    else L.push("- **Rule**: none named (assess validate-report fails this finding: name the rule or the heuristic it breaks)");
+    if (f.plain) L.push(`- **In plain English**: ${f.plain.problem} ${f.plain.recommendation}`);
+    L.push(`- **Observed**: ${f.observed_behavior}`, `- **Expected**: ${f.expected_behavior_or_proposed_requirement}`, `- **Fix**: ${f.recommendation}`);
+    if (f.component_mapping?.length) L.push(`- **Components**: ${f.component_mapping.map((m) => `\`${m.name}\` (${m.kind}, @ux-builder/ui ${m.version}, ${m.work})`).join("; ")}`);
+    L.push(`- **Verify**: ${f.verification}`);
+    L.push(`- **Requirements**: ${(f.source_refs ?? []).join(", ") || "none: a proposed criterion"} · **Tests**: ${(f.test_refs ?? []).join(", ") || "none"}`);
+    L.push(`- **Evidence**: ${(f.evidence_refs ?? []).map((x) => `\`${x}\``).join(", ") || `none — ${f.uncertainty}`}`);
+    const seen = videoLinks(r.video, f.id);
+    if (seen.length) L.push(`- **Seen in video**: ${seen.map((x) => `[${x.label}](${x.href})`).join(", ")}`);
+    if (f.proposed_doc_changes?.length) L.push(`- **Proposed HELIX changes**: ${f.proposed_doc_changes.join(", ")}`);
+    L.push("");
+    return L;
   };
-  section("Findings against the app's requirements", obligations);
-  section("Recommendations (UX heuristics, not existing obligations)", heur);
+  const ordered = (fs) => [...fs].sort((a, b) => severityOf(b) - severityOf(a) || PRIORITIES.indexOf(a.priority) - PRIORITIES.indexOf(b.priority) || (a.id < b.id ? -1 : 1));
+
+  // Journey → state → step → finding (RPT-05; CONTRACT-006).
+  const J = [];
+  if (!journeys.length) J.push("No journeys were planned or walked.", "");
+  for (const j of journeys) {
+    J.push(`### ${j.id}${j.goal ? ` — ${j.goal}` : ""}${j.story ? ` (${j.story})` : ""}`, "");
+    const walkedIn = j.entries.filter((e) => e.status === "assessed"), notWalked = j.entries.filter((e) => e.status !== "assessed");
+    J.push(`States walked: ${walkedIn.length ? walkedIn.map((e) => `${e.state} (assessed${e.outcome ? `: ${e.outcome}` : ""})`).join(", ") : j.entries.length ? "none yet" : "none recorded in coverage.json"}.${notWalked.length ? ` Not walked: ${notWalked.map((e) => `${e.state} (${e.status})`).join(", ")}.` : ""}`, "");
+    if (!j.states.length) J.push("No findings on this journey.", "");
+    for (const st of j.states) {
+      J.push(`#### State: ${st.state}`, "");
+      if (!st.steps.length && !st.general.length) J.push("No findings in this state.", "");
+      for (const { step, findings: fs } of st.steps) {
+        J.push(`##### Step ${step.n}${step.alternate != null ? ` (alternate ${step.alternate})` : ""}: ${step.action}${step.screen ? ` — ${step.screen}` : ""}`, "");
+        if (step.checkpoint) J.push(`Checkpoint \`${step.checkpoint}\`${step.status !== "done" ? ` · ${step.status}${step.reason ? `: ${step.reason}` : ""}` : ""}.`, "");
+        if (!fs.length) J.push("No findings at this step.", "");
+        for (const f of ordered(fs)) J.push(...finding(f, 6));
+      }
+      if (st.general.length) {
+        J.push("##### General", "", "Findings of this state at no particular step.", "");
+        for (const f of ordered(st.general)) J.push(...finding(f, 6));
+      }
+    }
+  }
+  sec("findings", "Findings by journey", J);
+
+  const index = (list) => ordered(list).map((f) => `- [${f.priority} · severity ${severityOf(f)} · ${f.title} (${f.id})](#${f.id}) — ${f.journey_id} · ${f.state_id}`);
+  if (obligations.length) sec("obligations", "Findings against the app's requirements", index(obligations));
+  if (heur.length) sec("recommendations", "Recommendations (UX heuristics, not existing obligations)", index(heur));
+
   const bl = r.proposals?.backlog;
   if (r.proposals?.proposals?.length || bl) {
-    L.push("## Proposed HELIX changes", "", "Patches for review in `proposals/`. None has been applied: an accepted proposal goes through HELIX, after `assess apply-check` confirms its target is unchanged.", "");
+    const L = ["Patches for review in `proposals/`. None has been applied: an accepted proposal goes through HELIX, after `assess apply-check` confirms its target is unchanged.", ""];
     if (bl) L.push(bl.target ? `- **improvement-backlog** → ${bl.target.kind === "existing" ? `${bl.target.id} \`${bl.target.path}\`` : `new ${bl.target.type} \`${bl.target.path}\``}: the backlog's ${bl.findings.length} finding(s) as backlog items. Patch: \`${bl.patch}\`.` : `- **improvement-backlog**: not proposed — ${bl.reason}`);
     for (const p of r.proposals.proposals ?? []) L.push(`- **${p.id}** (${p.change}${p.decision_needed ? `; needs a ${p.decision_needed.toUpperCase()} decision` : ""}) → ${p.target.kind === "existing" ? `${p.target.id} \`${p.target.path}\`` : `new ${p.target.type} ${p.target.id} \`${p.target.path}\``}${p.criterion ? `, criterion ${p.criterion}` : ""}; for ${p.findings.join(", ")}. Test: ${p.test_change.description}. Patch: \`${p.patch}\`.`);
-    L.push("");
+    sec("proposals", "Proposed HELIX changes", L);
   }
-  L.push("## Needs representative users", "", "The assessment makes none of these claims; each needs people from the app's audience.", "");
-  for (const u of r.backlog?.user_validation ?? []) L.push(`- **${u.claim}** — ${u.why}${u.method ? ` Method: ${u.method}` : ""}`);
-  if (!(r.backlog?.user_validation ?? []).length) L.push("- None recorded.");
-  L.push("");
+  const U = ["The assessment makes none of these claims; each needs people from the app's audience.", ""];
+  for (const u of r.backlog?.user_validation ?? []) U.push(`- **${u.claim}** — ${u.why}${u.method ? ` Method: ${u.method}` : ""}`);
+  if (!(r.backlog?.user_validation ?? []).length) U.push("- None recorded.");
+  sec("users", "Needs representative users", U);
   if (r.comparison) {
-    L.push(`## Compared with ${r.comparison.from}`, "");
+    const L = [];
     for (const s of ["new", "persistent", "regressed", "resolved", "not-rechecked"]) { const x = r.comparison.findings.filter((f) => f.status === s); if (x.length) L.push(`- ${s}: ${x.map((f) => f.id).join(", ")}`); }
     for (const f of r.comparison.baseline?.failures ?? []) L.push(`- Baseline failure from ${f.run}: \`${f.command}\` ${f.status}${f.reason ? ` (${f.reason})` : ""}; in this run's baseline: ${f.later}`);
-    L.push("");
+    sec("comparison", `Compared with ${r.comparison.from}`, L);
   }
   if (r.baseline) {
-    L.push("## Baseline", "", `${r.baseline.note}`, "");
+    const L = [`${r.baseline.note}`, ""];
     for (const t of r.baseline.tests) L.push(`- \`${t.command}\`: ${t.status}${t.counts && t.counts !== "unknown" ? ` (${t.counts.passed} passed, ${t.counts.failed} failed, ${t.counts.skipped} skipped)` : ""}, ${Math.round((t.durationMs ?? 0) / 1000)} s`);
-    L.push("");
+    sec("baseline", "Baseline", L);
   }
-  return L.join("\n");
+
+  // ddx: frontmatter (RPT-08): the type, and the journeys and stories it reports on.
+  const stories = [...new Set([...journeys.map((j) => j.story), ...findings.flatMap((f) => (f.source_refs ?? []).map((x) => /^US-\d+/.exec(x)?.[0]))].filter(Boolean))].sort();
+  const front = ["---", "ddx:", `  id: UER-${run.id ?? "run"}`, "  type: usability-evaluation-report", "  status: draft", ...(stories.length ? ["  links:", ...stories.flatMap((s) => ["    - kind: informed_by", `      to: ${s}`])] : []), ...(journeys.length ? ["  journeys:", ...journeys.map((j) => `    - ${j.id}`)] : []), "---", ""];
+  const head = [`# UX assessment: ${run.config?.scope?.app ?? "app"} — ${run.id}`, "", `${CAVEAT} This report says what was checked, what was seen, what remains uncertain, why each change matters and how to verify it.`, ""];
+  const body = (s) => [`## ${s.title}`, "", ...s.lines, ""];
+  let text;
+  if (type?.template) {
+    // The template's sections, in its order: ours where one fits, its own guidance otherwise.
+    const FIT = [["summary", /summary|overview/i], ["checked", /scope|method|checked|coverage|plan/i], ["findings", /finding|issue|problem|result/i], ["recommendations", /recommend/i], ["users", /user|participant|validation|research/i], ["proposals", /change|action|next/i]];
+    const tpl = readFileSync(type.template, "utf8").replace(/^---\n[\s\S]*?\n---\n\n?/, "");
+    const parts = tpl.split(/^(?=## )/m);
+    const used = new Set();
+    const out = [];
+    for (const p of parts.slice(1)) {
+      const title = /^## (.+)$/m.exec(p)[1].trim();
+      const fit = FIT.find(([k, re]) => re.test(title) && !used.has(k) && S.some((s) => s.key === k));
+      if (fit) { used.add(fit[0]); const s = S.find((x) => x.key === fit[0]); out.push(`## ${title}`, "", ...s.lines, ""); }
+      else out.push(p.trimEnd(), "");
+    }
+    for (const s of S) if (!used.has(s.key)) out.push(...body(s));
+    text = [...front, ...head, ...out].join("\n");
+  } else text = [...front, ...head, ...S.flatMap(body)].join("\n");
+  return text;
 }
 
 const md2html = (md, dir, selfContained) => {
@@ -150,7 +271,7 @@ const md2html = (md, dir, selfContained) => {
     if (/^\|/.test(line)) { if (/^\|[-| ]+\|$/.test(line)) continue; if (!table) { close(); out.push("<table>"); table = true; } out.push("<tr>" + line.slice(1, -1).split("|").map((c) => `<td>${inline(c.trim())}</td>`).join("") + "</tr>"); continue; }
     if (/^- /.test(line)) { if (!list) { close(); out.push("<ul>"); list = true; } out.push(`<li>${inline(line.slice(2))}</li>`); continue; }
     close();
-    const h = /^(#{1,3}) (.*)$/.exec(line);
+    const h = /^(#{1,6}) (.*)$/.exec(line);
     // A finding's heading is its anchor (report.html#F-…), which the walkthrough player links to.
     const anchor = h && /\((F-[0-9a-f]+)\)$/.exec(h[2]);
     if (h) out.push(`<h${h[1].length}${anchor ? ` id="${anchor[1]}"` : ""}>${inline(h[2])}</h${h[1].length}>`);
@@ -167,7 +288,7 @@ export function report(dir, { selfContained = false } = {}) {
 <style>:root{color-scheme:light dark;--fg:#1d1c1a;--bg:#f7f6f2;--line:#dcd9d0;--muted:#66625a}@media (prefers-color-scheme:dark){:root{--fg:#ecebe7;--bg:#171716;--line:#34332f;--muted:#a29f97}}
 body{margin:0;padding:32px 16px 64px;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:980px;margin:0 auto}h1{font-size:1.6rem;text-wrap:balance}h2{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:1rem}h3{margin-bottom:.3rem}p,li{max-width:75ch}
 code{font:13px ui-monospace,Menlo,monospace;overflow-wrap:anywhere}table{border-collapse:collapse;display:block;overflow-x:auto}td{border:1px solid var(--line);padding:4px 8px;font-size:13px;white-space:nowrap}img{max-width:min(100%,520px);border:1px solid var(--line);border-radius:6px;display:block;margin:6px 0}</style></head><body><main>
-${md2html(md, dir, selfContained)}
+${md2html(md.replace(/^---\n[\s\S]*?\n---\n\n?/, ""), dir, selfContained)}
 </main></body></html>\n`);
   const index = evidenceIndex(dir, r);
   writeFileSync(join(dir, "evidence.json"), JSON.stringify(index, null, 2) + "\n");
