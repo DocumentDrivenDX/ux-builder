@@ -77,3 +77,17 @@ release for GitHub's 6-hour default nor block the next run:
   release restarts without a push;
 - the concurrency group is `release-main`, because the hung run held `release`.
 
+
+## Amendment *[2026-10-22 — two merges in one release]*
+
+PR #46 merged while the release for #47 ran. The release rebased its
+Version Packages commit onto #46 and pushed it, which brought #46's changeset
+in unversioned. `changesets/action` then tried to open a Version Packages pull
+request, which the repository refuses, and published nothing. #46's own
+release run had checked out a commit from before the bump. So that two merges
+close together release once and correctly:
+- a run checks out the tip of `main`, not the commit that started it. Runs
+  queue one at a time, so a queued run releases everything merged before it
+  starts;
+- if `main` moves during a run, the run pushes and publishes nothing. The run
+  the newer push started, queued behind it, versions and publishes both.
