@@ -215,10 +215,18 @@ export async function writeWireframes(pages, dir) {
   catch (e) { return { files, pages, png: false, reason: `Chromium did not start (${e.message.split("\n")[0]}); run: npx playwright install chromium` }; }
   try {
     for (const p of pages) {
-      const tab = await browser.newPage({ viewport: { width: p.width, height: 800 }, deviceScaleFactor: 1 });
-      await tab.goto(pathToFileURL(join(dir, p.file)).href);
-      await tab.screenshot({ path: join(dir, p.file.replace(/\.html$/, ".png")), fullPage: true, animations: "disabled" });
-      await tab.close();
+      // Headless Chromium now and then fails a capture ("Unable to capture screenshot");
+      // a fresh tab takes it again, up to three tries.
+      for (let attempt = 1; ; attempt++) {
+        const tab = await browser.newPage({ viewport: { width: p.width, height: 800 }, deviceScaleFactor: 1 });
+        try {
+          await tab.goto(pathToFileURL(join(dir, p.file)).href, { waitUntil: "load" });
+          await tab.screenshot({ path: join(dir, p.file.replace(/\.html$/, ".png")), fullPage: true, animations: "disabled" });
+          break;
+        } catch (e) {
+          if (attempt >= 3 || !/Unable to capture screenshot/.test(e.message)) throw e;
+        } finally { await tab.close(); }
+      }
       files.push(p.file.replace(/\.html$/, ".png"));
     }
   } finally { await browser.close(); }
