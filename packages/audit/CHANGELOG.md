@@ -1,5 +1,30 @@
 # @ux-builder/audit
 
+## 0.3.0
+
+### Minor Changes
+
+- 319544e: The audit and the assessment report by journey, with every rule spelled out (FEAT-014 MOD-08 to MOD-10, FEAT-015 RPT-01 to RPT-08):
+  
+  - Every audit finding names its check (`check`) and the catalogue rule it breaks: `ruleId`, `rule: { id, title, statement, sources }`, `sources` and `fix`; theme findings name their `theme.*` rule, and a contrast finding's fix starts with the measured ratio. `rule` no longer holds the check's name: read `check`.
+  - `--modality responsive-web,chat,hybrid-chat` (or the blueprint's `supports.modalities`) chooses the widths and rule families. `report.json` gains `verdicts.theme` (declared theme, design system, applied, SDK-only, contrast per appearance) and `verdicts.modality` (the SDK components each modality needs, its rule families, the fixes), `pages` with the screen each maps to, and `journey`/`step` on findings.
+  - `index.html` opens with the verdicts and a *Rules broken* table, then each blueprint journey step by step with its screen's screenshot and findings, then *Other screens*; without journeys, by screen.
+  - `assess report` orders findings journey → state → step (or the state's *General*), each with its rule ID and statement or heuristic and source, evidence, severity 0 to 4 and fix; `report.md` is a HELIX `usability-evaluation-report` with `ddx:` frontmatter, drafted from the installed HELIX's template when it has that type. `assess validate-report` fails a finding that names neither `rule` nor `heuristic`.
+  - `assess video --pace slow|normal|fast`: a step holds 2 s and a finding max(5 s, its words at 200 a minute), scaled 1.5 or 0.6; captions carry the rule ID and statement, the problem and the fix; the chapter track has a chapter per step, `J-review · step 2: entry`.
+- 63176cc: `ux-builder-audit assess video` turns a UX assessment into walkthrough videos for the product or technical leader who owns the app (FEAT-013, US-091 to US-095):
+  
+  - It replays each journey the agent walked (each walkthrough step now records its browser action as `do`), the main path and each walked alternate as chapters, at a human pace with a cursor, signed in from the role's storage state before recording starts. At each checkpoint it checks the page is in the state that was inspected, stops the chapter with a card if not, and holds while each finding there is read.
+  - `video/<journey>.mp4` shows each finding where it was found: its elements outlined, and its problem and recommendation in plain English (each finding's new `plain` field), labelled **Checked** or **Judgment**. It needs `ffmpeg` on the PATH, which the package does not ship; without it the stage is partial and the player still works.
+  - `video/index.html` is an offline player in the ux-builder theme: findings pop up over the video, pause it, expand for the checkpoint's screenshot and confidence, link to the report, and can be filtered and stepped through by keyboard.
+  - `evidence.redact` selectors and text, and every password field, are masked from the first frame, including content that appears later and inside modal dialogs. A page without the mask discards the journey's video.
+  - `assess report` links each finding to its moment in the player, and `evidence.json` lists the videos. `validate-report` checks replay steps, secrets by reference, plain English, and that a video shows only backlog findings where they were found.
+  - New manifest field `video` (`viewports`, `holdSeconds`, `autoPause`); new records `annotations` and `video`.
+
+### Patch Changes
+
+- Updated dependencies [ce02a66]
+  - @ux-builder/ui@0.8.0
+
 ## 0.2.0
 
 ### Minor Changes

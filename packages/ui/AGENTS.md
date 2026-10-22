@@ -78,7 +78,7 @@ import { ThemeProvider } from "@ux-builder/ui";
 <!-- catalogue:start -->
 ## Reference (generated from the SDK; do not edit by hand)
 
-@ux-builder/ui 0.7.0, @ux-builder/tokens 1.6.0. The full catalogue, with every token and prop, is `@ux-builder/ui/catalogue.json`.
+@ux-builder/ui 0.8.0, @ux-builder/tokens 1.6.0. The full catalogue, with every token and prop, is `@ux-builder/ui/catalogue.json`.
 
 ### Components
 
