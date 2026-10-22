@@ -380,6 +380,21 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `journey.safeguarded` | always | blueprint `journey.safeguarded` | A journey step that takes a destructive action has its safeguard (undo or confirm), and one that takes a high-impact action has its approval. |
 | `journey.covers-errors` | always | blueprint `journey.covers-errors` | A journey through a screen that declares an error state has an alternate that covers that state. |
 | `journey.story-covered` | always | blueprint `journey.story-covered` | With a HELIX marker, every story a screen serves has a journey, and each journey's story and criteria exist in HELIX; the stories are read, never written. |
+| `theme.applied` | always | audit `theme-applied` | The page loads the declared theme's CSS and the theme's tokens resolve on the themed element. |
+| `theme.token-colors` | always | audit `token-colors` | Every colour the app draws is one of the theme's colour tokens, or a mix of two of them. |
+| `theme.token-fonts` | always | audit `token-fonts` | Text is set in the font families the theme names, through its type tokens. |
+| `theme.token-radii` | always | audit `token-radii` | Rounded corners use the theme's radius tokens. |
+| `theme.token-overrides` | always | audit `token-overrides` | The app never sets --piq-* tokens itself; only the theme defines them. |
+| `theme.widget-overrides` | always | audit `widget-overrides` | The app does not restyle the SDK's widgets with its own CSS; it chooses variants and tokens instead. |
+| `theme.sdk-widgets` | always | audit `sdk-widgets` | Icons, the logo, loading indicators and controls are the SDK's components, not drawn by the app. |
+| `theme.foreign-components` | always | audit `foreign-components` | The page renders no component from another UI library. |
+| `theme.outside-theme` | always | audit `outside-theme` | Every visible element sits inside the element the theme is applied to. |
+| `theme.brand` | always | audit `brand` | The page's favicon and logo are the theme's brand assets. |
+| `theme.fonts` | always | audit `fonts` | The theme's fonts are loaded, from the SDK's font files. |
+| `theme.contrast` | always | audit `contrast` | Text meets a contrast ratio of at least 4.5:1 (3:1 for large text) and controls' boundaries at least 3:1, in every appearance. |
+| `theme.reflow` | always | audit `reflow` | The page does not scroll sideways at the audited width, down to 320 CSS pixels. |
+| `theme.target-size` | always | audit `target-size` | Pointer targets are at least the theme's minimum target size, and never smaller than 24 by 24 CSS pixels. |
+| `theme.focus-obscured` | always | audit `focus-obscured` | A control that receives keyboard focus is never entirely hidden behind sticky or fixed content. |
 
 Recipes (tested combinations of patterns for a job):
 

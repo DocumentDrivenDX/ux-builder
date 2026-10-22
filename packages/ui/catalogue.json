@@ -23146,6 +23146,375 @@
             "wording": "paraphrased"
           }
         ]
+      },
+      {
+        "id": "theme.applied",
+        "title": "The theme is applied",
+        "statement": "The page loads the declared theme's CSS and the theme's tokens resolve on the themed element.",
+        "rationale": "Every other theme rule measures against the theme's tokens; without them the app wears no theme at all.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "theme-applied"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-003: theme selection",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-003-theme-selection.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.token-colors",
+        "title": "Colours come from the theme's tokens",
+        "statement": "Every colour the app draws is one of the theme's colour tokens, or a mix of two of them.",
+        "rationale": "A hard-coded colour does not follow the theme, its appearances or its contrast checks.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "token-colors"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-001: token names",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-001-token-names.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.token-fonts",
+        "title": "Text uses the theme's fonts",
+        "statement": "Text is set in the font families the theme names, through its type tokens.",
+        "rationale": "A foreign font breaks the theme's voice and its measured line lengths.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "token-fonts"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-001: token names",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-001-token-names.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.token-radii",
+        "title": "Corners use the theme's radii",
+        "statement": "Rounded corners use the theme's radius tokens.",
+        "rationale": "Radii are part of a design system's shape language; ad hoc values make the app look assembled from parts.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "token-radii"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-001: token names",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-001-token-names.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.token-overrides",
+        "title": "The app does not redefine theme tokens",
+        "statement": "The app never sets --piq-* tokens itself; only the theme defines them.",
+        "rationale": "An override silently forks the theme, so a theme change or a new appearance no longer reaches that part of the app.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "token-overrides"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-001: token names",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-001-token-names.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder CONTRACT-003: theme selection",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-003-theme-selection.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.widget-overrides",
+        "title": "The app does not restyle SDK widgets",
+        "statement": "The app does not restyle the SDK's widgets with its own CSS; it chooses variants and tokens instead.",
+        "rationale": "Restyled widgets drift from the design system and lose the states, focus rings and contrast the SDK guarantees.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "widget-overrides"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.sdk-widgets",
+        "title": "Icons, logo, loaders and controls come from the SDK",
+        "statement": "Icons, the logo, loading indicators and controls are the SDK's components, not drawn by the app.",
+        "rationale": "The SDK's components carry the theme, accessible names and states; hand-drawn ones carry none of that.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "sdk-widgets"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.foreign-components",
+        "title": "No other UI library's components",
+        "statement": "The page renders no component from another UI library.",
+        "rationale": "A second component library brings its own tokens, focus handling and look, which the theme cannot reach.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "foreign-components"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.outside-theme",
+        "title": "Everything visible is inside the themed element",
+        "statement": "Every visible element sits inside the element the theme is applied to.",
+        "rationale": "Content outside the themed element gets browser defaults instead of the theme.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "outside-theme"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-003: theme selection",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-003-theme-selection.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.brand",
+        "title": "The favicon and logo follow the theme",
+        "statement": "The page's favicon and logo are the theme's brand assets.",
+        "rationale": "A brand that does not match the theme tells users they may be in the wrong place.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "brand"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-002: brand and design-system files",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-002-brand-and-design-system-files.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.fonts",
+        "title": "The theme's fonts are loaded from the SDK",
+        "statement": "The theme's fonts are loaded, from the SDK's font files.",
+        "rationale": "A missing font falls back to a system face with different metrics, which shifts the layout.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "fonts"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder CONTRACT-002: brand and design-system files",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-002-brand-and-design-system-files.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder CONTRACT-004: app integration",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/02-design/contracts/CONTRACT-004-app-integration.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.contrast",
+        "title": "Text and controls meet contrast minimums",
+        "statement": "Text meets a contrast ratio of at least 4.5:1 (3:1 for large text) and controls' boundaries at least 3:1, in every appearance.",
+        "rationale": "Low contrast makes text and controls unreadable for people with low vision and in bright light.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "contrast"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "WCAG 2.2: 1.4.3 Contrast (Minimum)",
+            "url": "https://www.w3.org/TR/WCAG22/#contrast-minimum",
+            "licence": "W3C",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "WCAG 2.2: 1.4.11 Non-text Contrast",
+            "url": "https://www.w3.org/TR/WCAG22/#non-text-contrast",
+            "licence": "W3C",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.reflow",
+        "title": "Content reflows without sideways scrolling",
+        "statement": "The page does not scroll sideways at the audited width, down to 320 CSS pixels.",
+        "rationale": "Two-way scrolling makes reading and operating the page very hard on a narrow screen or when zoomed.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "reflow"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "WCAG 2.2: 1.4.10 Reflow",
+            "url": "https://www.w3.org/TR/WCAG22/#reflow",
+            "licence": "W3C",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.target-size",
+        "title": "Pointer targets are large enough",
+        "statement": "Pointer targets are at least the theme's minimum target size, and never smaller than 24 by 24 CSS pixels.",
+        "rationale": "Small targets are hard to hit for people with limited dexterity and on touch screens.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "target-size"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "WCAG 2.2: 2.5.8 Target Size (Minimum)",
+            "url": "https://www.w3.org/TR/WCAG22/#target-size-minimum",
+            "licence": "W3C",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "theme.focus-obscured",
+        "title": "A focused control is never hidden",
+        "statement": "A control that receives keyboard focus is never entirely hidden behind sticky or fixed content.",
+        "rationale": "Keyboard users cannot see where they are when the focused control is covered.",
+        "checks": [
+          {
+            "kind": "audit",
+            "id": "focus-obscured"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "WCAG 2.2: 2.4.11 Focus Not Obscured (Minimum)",
+            "url": "https://www.w3.org/TR/WCAG22/#focus-not-obscured-minimum",
+            "licence": "W3C",
+            "wording": "paraphrased"
+          }
+        ]
       }
     ],
     "recipes": [
