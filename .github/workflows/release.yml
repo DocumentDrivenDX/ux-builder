@@ -51,6 +51,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # The tip of main, not the commit that started the run: runs queue one at a
+          # time (concurrency), so a queued run releases everything merged before it starts.
+          ref: main
           fetch-depth: 0 # the tags, so changeset publish skips what is already released
       - uses: actions/setup-node@v4
         with:
@@ -81,16 +84,24 @@ jobs:
       # 2. Every gate CI runs, contrast and licences included, on what will be published.
       # The gates rewrite a few tracked files (the sample audit report); put them back.
       - run: npm run check && git checkout -- .
-      # 3. The bump goes to main before anything is published.
-      - if: steps.version.outputs.bumped == 'true'
-        run: git push origin HEAD:main || { git pull --rebase origin main && git push origin HEAD:main; }
+      # 3. The bump goes to main before anything is published. If main moved during this
+      # run, nothing is pushed or published here: the newer push started its own run, queued
+      # behind this one, which versions and publishes everything on main together. Rebasing
+      # instead would bring in the newer push's changesets unversioned, and changesets/action
+      # would then try to open a Version Packages pull request (2026-10-22).
+      - id: push
+        if: steps.version.outputs.bumped == 'true'
+        run: |
+          if git push origin HEAD:main; then echo "pushed=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::main moved during this release; the run its newer push started releases both."; echo "moved=true" >> "$GITHUB_OUTPUT"; fi
       # 4. With no changesets left, the action publishes: changeset publish, then
       # a tag and a GitHub release per package.
       # v2 is the action for Changesets CLI v3, which this repository uses: v1 reads
       # CLI v2's "New tag:" output, so with CLI v3 it published but pushed no tags
       # and created no releases. v2 pushes them through the GitHub API, signed,
       # with the workflow's own token.
-      - uses: changesets/action@v2
+      - if: steps.push.outputs.moved != 'true'
+        uses: changesets/action@v2
         with:
           publish-script: npx changeset publish
           create-github-releases: true
