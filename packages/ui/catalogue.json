@@ -1614,7 +1614,7 @@
     {
       "name": "Tooltip",
       "type": "component",
-      "purpose": "A short description of a control, shown while the pointer is over it or it has keyboard focus: the WAI-ARIA Tooltip pattern. 13).",
+      "purpose": "A short description of a control, shown while the pointer is over it or it has keyboard focus: the WAI-ARIA Tooltip pattern. The control points to it with aria-describedby; Escape hides it without moving focus; the pointer can move onto it without it closing (WCAG 1.4.13).",
       "props": [
         {
           "name": "content",
@@ -1878,7 +1878,7 @@
     {
       "name": "Attachments",
       "type": "component",
-      "purpose": "7); each file with its name (a link to it), type, size and version; removing one is confirmed. files: [{ id, name, href, type, size, version }]; onUpload(file); onRemove(file).",
+      "purpose": "A record's files: upload by a button, or by dropping a file as an extra (WCAG 2.5.7); each file with its name (a link to it), type, size and version; removing one is confirmed. files: [{ id, name, href, type, size, version }]; onUpload(file); onRemove(file).",
       "props": [
         {
           "name": "label",
@@ -1996,7 +1996,7 @@
     {
       "name": "Board",
       "type": "component",
-      "purpose": "Records grouped by status in columns, each headed with its count. 7).",
+      "purpose": "Records grouped by status in columns, each headed with its count. A card moves by dragging it to a column or by its \"Move to\" menu, so dragging is never the only way (WCAG 2.5.7).",
       "props": [
         {
           "name": "label",
@@ -3582,7 +3582,7 @@
     {
       "name": "ImportFlow",
       "type": "component",
-      "purpose": "7), map each file column to a field, validation errors by row with a file of the failed rows, a preview of the rows to save, then the import and the app's result report. The app reads, checks and saves: onFile(file), onMap(mapping), onCommit(); it supplies columns, fields, errors ([{ row, message }]), failedRowsHref, preview ({ columns, rows }) and result (a node).",
+      "purpose": "Bringing records in from a file, in steps: upload (a button, and drop as an extra, WCAG 2.5.7), map each file column to a field, validation errors by row with a file of the failed rows, a preview of the rows to save, then the import and the app's result report. The app reads, checks and saves: onFile(file), onMap(mapping), onCommit(); it supplies columns, fields, errors ([{ row, message }]), failedRowsHref, preview ({ columns, rows }) and result (a node).",
       "props": [
         {
           "name": "title",
@@ -3903,7 +3903,7 @@
     {
       "name": "PeriodComparison",
       "type": "component",
-      "purpose": "1). format(n) writes a value.",
+      "purpose": "A figure now against before (or a target): both values, the difference with its sign, and the direction in words (\"down 8% on last quarter\"), so it never depends on colour (WCAG 1.4.1). format(n) writes a value.",
       "props": [
         {
           "name": "label",
@@ -4490,7 +4490,7 @@
     {
       "name": "ReviewConfirm",
       "type": "component",
-      "purpose": "4). Once the app reports the result, a confirmation panel shows it with its reference.",
+      "purpose": "Answers before they are sent: grouped by section with a Change link to each, and what submitting will do said before the submit button (WCAG 3.3.4). Once the app reports the result, a confirmation panel shows it with its reference.",
       "props": [
         {
           "name": "title",
@@ -4906,7 +4906,7 @@
     {
       "name": "Subscriptions",
       "type": "component",
-      "purpose": "A report's scheduled deliveries and alerts: each with its frequency or threshold and its recipients; add one, pause one (\"Paused\" in text), or delete one after confirmation. , recipients: [], paused?",
+      "purpose": "A report's scheduled deliveries and alerts: each with its frequency or threshold and its recipients; add one, pause one (\"Paused\" in text), or delete one after confirmation. items: [{ id, kind: delivery or alert, name, frequency?, threshold?, recipients: [], paused?",
       "props": [
         {
           "name": "items",
@@ -5198,7 +5198,7 @@
     {
       "name": "useStickyClearance",
       "type": "hook",
-      "purpose": "11), even when the bar wraps onto two lines.",
+      "purpose": "Keeps a sticky bar's own height clear at the bottom of the area that scrolls it, while active, so focus scrolled into view never lands under the bar (WCAG 2.4.11), even when the bar wraps onto two lines.",
       "props": [
         {
           "name": "ref",
@@ -5415,7 +5415,7 @@
     {
       "name": "WorkQueue",
       "type": "component",
-      "purpose": "Work through items one at a time: the item, its position (\"3 of 12\"), previous and next, approve, reject (a comment is required) and assign. 4); a help dialog lists them.",
+      "purpose": "Work through items one at a time: the item, its position (\"3 of 12\"), previous and next, approve, reject (a comment is required) and assign. Single-key shortcuts (J, K, A, R) can be turned off and never fire while typing (WCAG 2.1.4); a help dialog lists them.",
       "props": [
         {
           "name": "items",
@@ -6077,7 +6077,7 @@
     {
       "name": "AdaptiveCard",
       "type": "component",
-      "purpose": "6 and earlier) drawn with the SDK's components in the nearest theme. Execute; a high-impact action only after the user approves.",
+      "purpose": "An Adaptive Card (schema 1.6 and earlier) drawn with the SDK's components in the nearest theme. onAction({ type, id, verb, data, inputs }) is called for Action.Submit and Action.Execute; a high-impact action only after the user approves.",
       "props": [
         {
           "name": "card",
@@ -6114,14 +6114,14 @@
     {
       "name": "cardSchema",
       "type": "constant",
-      "purpose": "6 JSON Schema (draft-06), as data.",
+      "purpose": "The vendored Adaptive Cards 1.6 JSON Schema (draft-06), as data.",
       "source": "src/adaptive-cards/../../adaptive-cards/check.mjs",
       "import": "import { cardSchema } from \"@ux-builder/ui/adaptive-cards\";"
     },
     {
       "name": "checkCard",
       "type": "function",
-      "purpose": "6 schema, then every card rule with an automatic check. Ordered by path, then rule.",
+      "purpose": "Findings for a card payload: the vendored 1.6 schema, then every card rule with an automatic check. Ordered by path, then rule.",
       "props": [
         {
           "name": "card",

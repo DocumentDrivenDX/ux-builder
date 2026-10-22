@@ -65,7 +65,9 @@ function propsOf(params) {
 }
 // Comment text as prose: no comment marks, and no references to planning documents.
 const clean = (c) => c.replace(/^\/\*+|\*+\/$/g, "").replace(/^\s*\*\s?/gm, "").replace(/\s*\((?:[A-Z]+-\d+[^()]*)\)/g, "").replace(/\s+/g, " ").trim();
-const firstSentences = (t, n = 2) => (t.match(/[^.!?]+[.!?]+(\s|$)/g) ?? [t]).slice(0, n).join("").trim();
+// The first n sentences. A sentence ends at . ! or ? followed by a space or the
+// end of the text, so "schema 1.6" or "e.g." mid-sentence does not split it.
+export const firstSentences = (t, n = 2) => (t.match(/(?:[^.!?]|[.!?]+(?!\s|$))+[.!?]+(\s|$)/g) ?? [t]).slice(0, n).join("").trim();
 
 /* The text between the bracket at open and its match: brackets nested in
    defaults (an arrow function, an object) and inside strings and template
