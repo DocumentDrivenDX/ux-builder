@@ -1,13 +1,17 @@
 name: release
 
-# Releases without anyone running version-packages or npm publish by hand.
-# On every push to main, changesets/action does one of two things:
-#   - pending changesets in .changeset/: open or update the "Version Packages"
-#     pull request (npm run version-packages: versions, changelogs, lockfile,
-#     catalogue);
-#   - none pending (that pull request just merged): run every gate, publish each
-#     public package whose version isn't on npm yet, tag it, and create a
-#     GitHub release for it.
+# Releases with no one running version-packages or npm publish by hand, and
+# no pull request to merge (ADR-034). On every push to main:
+#   1. pending changesets in .changeset/: npm run version-packages (versions,
+#      changelogs, lockfile, catalogue);
+#   2. npm run check: every gate, on the versioned tree;
+#   3. the version bump is committed to main as "Version Packages";
+#   4. changeset publish: each public package whose version isn't on npm yet
+#      is published, tagged and given a GitHub release.
+# A gate that fails stops the run before anything is committed or published.
+# A publish that fails leaves the bump on main; the next run publishes what is
+# missing. The workflow's own token pushes the commit, so GitHub runs no
+# workflow on it and the release does not trigger itself.
 # Publishing uses npm Trusted Publishing (OIDC): no npm token is stored. Each
 # public package must name this repository and release.yml as its trusted
 # publisher on npmjs.com (README, "Publishing a release").
@@ -16,8 +20,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write # push tags, create releases, push the version branch
-  pull-requests: write # open the Version Packages pull request
+  contents: write # push the version commit and tags, create releases
   id-token: write # npm Trusted Publishing and provenance
 
 # One release at a time; never cancel one halfway through publishing.
@@ -36,6 +39,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the tags, so changeset publish skips what is already released
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -48,18 +53,32 @@ jobs:
       - run: npx playwright install --with-deps chromium
       # ffmpeg for the walkthrough video MP4 tests (FEAT-013; the SDK does not ship it).
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      # 1. Apply the pending changesets, if any, and commit the bump (not pushed yet).
+      - id: version
+        run: |
+          if ls .changeset/*.md 2>/dev/null | grep -qv '/README.md$'; then
+            npm run version-packages
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Version Packages"
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+          fi
+      # 2. Every gate CI runs, contrast and licences included, on what will be published.
+      # The gates rewrite a few tracked files (the sample audit report); put them back.
+      - run: npm run check && git checkout -- .
+      # 3. The bump goes to main before anything is published.
+      - if: steps.version.outputs.bumped == 'true'
+        run: git push origin HEAD:main || { git pull --rebase origin main && git push origin HEAD:main; }
+      # 4. With no changesets left, the action publishes: changeset publish, then
+      # a tag and a GitHub release per package.
       # v2 is the action for Changesets CLI v3, which this repository uses: v1 reads
       # CLI v2's "New tag:" output, so with CLI v3 it published but pushed no tags
       # and created no releases. v2 pushes them through the GitHub API, signed,
       # with the workflow's own token.
       - uses: changesets/action@v2
         with:
-          version-script: npm run version-packages
-          # npm run check (every gate CI runs, contrast included), then
-          # changeset publish.
-          publish-script: npm run release
-          pr-title: Version Packages
-          commit-message: Version Packages
+          publish-script: npx changeset publish
           create-github-releases: true
         env:
           NPM_CONFIG_PROVENANCE: "true"

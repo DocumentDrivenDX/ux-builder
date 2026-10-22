@@ -157,3 +157,10 @@ Tracked as DDx beads, not yet built: epic `ux-builder-31fd7955`. Its beads are:
 
 - Billing or licensing of the SDK to clients.
 - Hosting a registry for client brand packages.
+
+## Evolution *[2026-10-22 — ADR-034]*
+
+The release workflow no longer opens a Version Packages pull request, which
+the repository's Actions settings blocked. On each push to `main` it applies
+the pending changesets, runs every gate, commits the bump to `main` and
+publishes, in one run (US-072).
