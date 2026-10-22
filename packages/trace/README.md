@@ -39,7 +39,9 @@ next episode starts or `end` runs with none open.
 |---|---|
 | `start --goal <text> [--story US-n]... [--screen id]... [--journey J-x]... [--agent name --model id] [--trigger change\|create] [--no-transcripts]` | Opens an episode, and prints its ID. Exits 1, naming the open episode, if one is open |
 | `attach-transcript [--file f] [--agent name]` | Copies a transcript, masked, and records a `transcript` event. With no `--file`, it reads a Claude Code hook's JSON on stdin (`transcript_path`, `session_id`, `cwd`) |
-| `end [--status done\|abandoned]` | Writes `change` (the commits carrying `UX-Episode: <id>`, with a warning for each commit that lacks it), `outcome` and `end` |
+| `decide --chose <what> --why <why> [--considered x]... [--relied id]... [--screen id] [--departs] [--workaround]` | Records a `decision`, as MCP `record_decision` does. Exits 2, naming the field, without `--chose` or `--why` |
+| `lint [--stylelint <glob>]... [--eslint <path>]...` | Runs Stylelint and ESLint through their Node APIs (the app's own, with its configuration), prints their reports, and records one `lint` check: status, attempt, and each rule with its severity and count. Exits 1 on an error. A created app's `npm run lint` is `ux-builder-trace lint --stylelint "src/**/*.css" --eslint src` |
+| `end [--status done\|abandoned] [--assessment <run-dir>]` | Writes `change` (the commits carrying `UX-Episode: <id>`, with a warning for each commit that lacks it), `outcome` and `end`. It warns, too, when the episode changed screens and recorded no decision. `--assessment` names a run whose `assess compare` the outcome carries |
 | `status` | The open episode, and every episode in the app |
 | `export [--episode <id>]... [--since <date>] --out <file>.tgz [--yes] [--include-open]` | Lists every file and its masked count, asks to confirm, masks again, checks the schemas and writes the bundle. Exits 1, naming the file and line, if a secret pattern is left unmasked in the stored trace |
 | `validate` | Checks every event against the schema, plus the `seq` order. Exits 1, naming the line |
@@ -72,11 +74,31 @@ import { openEpisode, currentEpisode, appendEvent, attemptOf, closeEpisode, mask
 | `attachTranscript(appDir, { file \| hookJson, agent? })` | `{ attached: true, episode, file, bytes, sha256, masked, kinds }`, or `{ attached: false, reason }` when transcripts are off |
 | `exportBundle(appDir, { episodes, since, out, yes, includeOpen, confirm?, log? })` | A promise of `{ written, out, bundle, files, preview }`. Without `yes`, it calls `confirm(preview)`. Without either, it writes nothing. Rejects with `TraceError` `SECRET` (`.problems: [{ file, line, kind }]`), `INVALID`, `EMPTY` or `USAGE` |
 | `validateTrace(appDir, { episodes? })` | `[{ file, line, message }]` |
+| `findApp(start)` | The nearest folder at or above `start` with `.ux-builder/`, or `null`. The other tools write nothing where it is `null` |
+| `recordCheck(appDir, check, { status?, findings, report?, verdicts?, assessment? }, { by })` | The `check` event, its `attempt` counted and its status following the findings when not given; `null` on failure. Never throws |
+| `countFindings(items, { ruleId?, severity? })` | A check's findings as the trace keeps them: `[{ ruleId, severity, count }]` |
+| `recordDecision(appDir, { chose, why, considered?, relied?, departs?, workaround?, screen? }, { by })` | The `decision` event. Throws `TraceError` `MISSING` (`.field`), writing nothing, without `chose` or `why` |
+| `assessmentRef(runDir)` | An assessment run's `comparison.json` as `outcome.assessment`, or `null` |
+| `closeEpisode(appDir, { files })` | With `files`, the count a tool wrote, used when the episode has no commit (create-app closes its episode before the app is a git repository) |
 
 Also exported:
+- `AGENT_GUIDE`: what an agent is asked to do in an episode, the text of the
+  created app's `AGENTS.md` and of the SDK's guidance;
+- `statusOf(findings)`;
 - `readBundle(file)`, `readEpisode(appDir, id)`, `listEpisodes(appDir)`;
 - `validateEvent`, `validateBundle`, `validateConfig`;
 - `KINDS`, `CHECKS`, `TRAILER`, `BY`, `VERSION`, `SECRET_PATTERNS`.
+
+Who writes what:
+- `@ux-builder/create-app`: the create episode (`start`, `created`, the
+  guidance it wrote to `AGENTS.md`, the starter blueprint's check, then its
+  close);
+- `@ux-builder/mcp`: a `guidance` event for each tool, `check` for
+  `check_blueprint` and `check_card`, and `start_episode`,
+  `record_decision`, `end_episode`;
+- `ux-builder-blueprint check` (`@ux-builder/ui`) and `ux-builder-audit`: a
+  `check` event each run, in an app with `.ux-builder/`;
+- `ux-builder-trace lint`: the lint `check`.
 
 What the tools write:
 - **`check`**: `{ check: "lint"|"blueprint"|"card"|"audit", attempt: attemptOf(appDir, check), status: "pass"|"warn"|"fail", findings: [{ ruleId, severity, count }], report? }`. The audit may add `verdicts: { theme, modality: [{ modality, status }] }` and `assessment: { run: "R-…", compare: [{ rule, finding: "F-…", status: "new"|"persistent"|"resolved"|"regressed"|"not-rechecked" }] }`. `outcome` copies these.

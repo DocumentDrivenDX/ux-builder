@@ -3,8 +3,8 @@
    npm install, npm run build and the lint rule with 0 findings; the
    generated app renders").
 
-   Packs this repository's @ux-builder/tokens, @ux-builder/ui and
-   @ux-builder/audit, scaffolds an app for each modality (FEAT-014:
+   Packs this repository's @ux-builder/tokens, @ux-builder/ui,
+   @ux-builder/audit and @ux-builder/trace, scaffolds an app for each modality (FEAT-014:
    responsive-web, chat, hybrid-chat, and responsive-web with hybrid-chat on
    the latest HELIX), installs, builds, lints and audits each, runs each
    one's own e2e test, and drives the combined one in Chromium. Needs the
@@ -14,12 +14,14 @@
 
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const tmp = mkdtempSync(join(tmpdir(), "starter-e2e-"));
@@ -41,7 +43,7 @@ let server, browser, created;
 
 before(async () => {
   mkdirSync(join(tmp, "sdk"));
-  for (const p of ["tokens", "ui", "audit"]) sh("npm", ["pack", "--silent", "--pack-destination", join(tmp, "sdk")], join(ROOT, "packages", p));
+  for (const p of ["tokens", "ui", "audit", "trace"]) sh("npm", ["pack", "--silent", "--pack-destination", join(tmp, "sdk")], join(ROOT, "packages", p));
   for (const [name, a] of Object.entries(APPS)) {
     const r = spawnSync(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), dir(name), "--modality", a.modalities, "--theme", "databricks", "--sdk-from", join(tmp, "sdk"), ...(a.helix ? [] : ["--no-helix"])], { cwd: tmp, encoding: "utf8" });
     assert.equal(r.status, 0, `create-app ${name}\n${r.stdout}\n${r.stderr}`);
@@ -253,4 +255,65 @@ test("FEAT-010: the fresh app is on the latest HELIX, its manifest validates, co
   assert.deepEqual(req.problems.filter((p) => p.severity === "warning"), [], "collect records no warning");
   assert.equal(req.documents.length, 8);
   assert.match(sh("npm", ["run", "test:e2e"], app), /3 passed/);
+});
+
+/* FEAT-016's success metric: the starter's episode has start, created, at
+   least one guidance and check, change, outcome and end, and validates. The
+   create episode is written by create-app itself (its guidance is what it
+   wrote to AGENTS.md; its check, the starter blueprint's). An agent's first
+   episode cannot happen here without an agent, so one is simulated: the
+   repository's MCP server, started in the created app as a host starts it,
+   answers start_episode, get_guidance, check_blueprint and record_decision;
+   a commit carries the trailer; end_episode closes it. */
+// @covers US-105-AC1
+// @covers US-106-AC2
+// @covers US-106-AC4
+// @covers US-106-AC5
+// @covers US-108-AC1
+test("FEAT-016: every created app's trace validates; its create episode is complete; an agent's episode over MCP records guidance, checks, a decision and the trailer commit", async () => {
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const kinds = (d, id) => readFileSync(join(d, `.ux-builder/trace/${id}.jsonl`), "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
+  for (const name of Object.keys(APPS)) {
+    const d = dir(name);
+    const create = kinds(d, `E-${today}-create`);
+    assert.deepEqual(create.map((e) => e.kind), ["start", "created", "guidance", "check", "change", "outcome", "end"], name);
+    assert.equal(create[0].trigger, "create");
+    assert.ok(create[0].sdk["@ux-builder/trace"], name);
+    assert.deepEqual(JSON.parse(readFileSync(join(d, ".claude/settings.json"), "utf8")).hooks.SessionEnd[0].hooks[0], { type: "command", command: "npx ux-builder-trace attach-transcript" }, name);
+    assert.match(readFileSync(join(d, ".gitignore"), "utf8"), /^\.ux-builder\/trace\/current$/m, name);
+    // npm run lint, check:blueprint and audit ran above with no episode open: their checks are in the unscoped episode.
+    const unscoped = readdirSync(join(d, ".ux-builder/trace")).find((f) => /-unscoped-/.test(f));
+    assert.ok(unscoped, `${name}: the checks run above are in the unscoped episode`);
+    const checks = kinds(d, unscoped.replace(/\.jsonl$/, "")).filter((e) => e.kind === "check").map((e) => e.check);
+    for (const c of ["lint", "blueprint", "audit"]) assert.ok(checks.includes(c), `${name}: ${c} wrote a check (${checks})`);
+    assert.match(sh("npx", ["ux-builder-trace", "validate"], d), /The trace is valid/, name);
+  }
+
+  // The agent's episode, simulated over MCP in the web app.
+  const d = dir("web");
+  const git = (...args) => sh("git", ["-c", "user.name=Starter E2E", "-c", "user.email=e2e@example.com", "-c", "commit.gpgsign=false", ...args], d);
+  git("init", "-q", "-b", "main");
+  git("add", "-A");
+  git("commit", "-q", "-m", "Create the app");
+  const c = new Client({ name: "starter-e2e", version: "1" });
+  await c.connect(new StdioClientTransport({ command: process.execPath, args: [join(ROOT, "packages/mcp/server.mjs")], cwd: d }));
+  let episode;
+  try {
+    const call = async (n, a = {}) => { const r = await c.callTool({ name: n, arguments: a }); assert.ok(!r.isError, `${n}: ${r.content[0].text}`); return r.content[0].text; };
+    ({ episode } = JSON.parse(await call("start_episode", { goal: "Review screen", stories: ["US-003"], screens: ["home"], agent: "e2e", model: "none" })));
+    await call("get_guidance", { modalities: ["responsive-web"] });
+    await call("check_blueprint", { blueprint: JSON.parse(readFileSync(join(d, "app.blueprint.json"), "utf8")) });
+    await call("record_decision", { chose: "CollectionList", considered: ["DataTable"], why: "the home screen lists records to open", relied: ["US-003"], screen: "home" });
+    writeFileSync(join(d, "src/Home.jsx"), readFileSync(join(d, "src/Home.jsx"), "utf8") + "\n");
+    git("commit", "-q", "-am", `Home: the review list\n\nUX-Episode: ${episode}`);
+    const end = JSON.parse(await call("end_episode", {}));
+    assert.deepEqual(end.warnings, []);
+    assert.equal(end.change.commits.length, 1);
+  } finally { await c.close(); }
+  const ev = kinds(d, episode);
+  const has = new Set(ev.map((e) => e.kind));
+  for (const k of ["start", "guidance", "check", "decision", "change", "outcome", "end"]) assert.ok(has.has(k), k);
+  assert.ok(ev.find((e) => e.kind === "guidance" && e.tool === "get_guidance").answer.components.length > 0);
+  assert.match(git("log", "-1", "--format=%B"), new RegExp(`UX-Episode: ${episode}`));
+  assert.match(sh("npx", ["ux-builder-trace", "validate"], d), /The trace is valid/);
 });

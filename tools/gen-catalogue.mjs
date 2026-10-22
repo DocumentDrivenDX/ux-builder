@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 import { load } from "../packages/tokens/compose.mjs";
 import eslintPlugin from "../packages/ui/lint/eslint.mjs";
 import { FUTURE_MODALITIES, MODALITIES } from "../packages/ui/blueprint/modalities.mjs";
+import { AGENT_GUIDE } from "../packages/trace/guide.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const UI = join(ROOT, "packages/ui");
@@ -436,9 +437,18 @@ function withRules(text) {
   return text.slice(0, a + RSTART.length) + "\n" + RULES.map((r, i) => `${i + 1}. ${r}`).join("\n") + "\n" + text.slice(b);
 }
 
+/* What the agent records in each episode (FEAT-016 TRC-05, US-107-AC3): the
+   same text as the created app's AGENTS.md, from @ux-builder/trace. */
+const ESTART = "<!-- episode:start -->", EEND = "<!-- episode:end -->";
+function withEpisode(text) {
+  const a = text.indexOf(ESTART), b = text.indexOf(EEND);
+  if (a < 0 || b < a) throw new Error(`missing ${ESTART} … ${EEND}`);
+  return text.slice(0, a + ESTART.length) + "\n" + AGENT_GUIDE + text.slice(b);
+}
+
 export function outputs() {
   const cat = catalogue();
-  const agents = withReference(withRules(read("packages/ui/AGENTS.md")), reference(cat));
+  const agents = withReference(withEpisode(withRules(read("packages/ui/AGENTS.md"))), reference(cat));
   return {
     "packages/ui/catalogue.json": JSON.stringify(cat, null, 2) + "\n",
     "packages/ui/AGENTS.md": agents,

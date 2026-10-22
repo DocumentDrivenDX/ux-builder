@@ -36,7 +36,7 @@ Today the MCP server logs nothing and checks keep only their last result. TRC-03
 
 1. The agent calls `get_rules` and `get_guidance`; each writes a `guidance` event.
 2. Lint fails twice on `ux-builder/no-hard-coded-values`, then passes; three `check` events record attempts 1 to 3.
-3. The audit passes; `trace end` writes `outcome` with `checksToGreen: { lint: 3, audit: 1 }`.
+3. The audit passes; `trace end` writes `outcome` with `checksToGreen: { lint: 2, audit: 0 }`, the runs before each check's first pass (lint passed at attempt 3, the audit at attempt 1).
 
 ## Acceptance Criteria
 

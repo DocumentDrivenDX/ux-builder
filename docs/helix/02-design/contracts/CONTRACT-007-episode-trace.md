@@ -116,7 +116,9 @@ for confirmation (`--yes` to skip). It makes no network request.
 `ux-builder-trace` has these subcommands:
 - `start --goal <text> [--story US-n]... [--screen id]... [--journey J-x]... [--agent name --model id] [--no-transcripts]`
 - `attach-transcript [--file f]`: reads a Claude Code hook's JSON on stdin when no `--file` is given.
-- `end [--status done|abandoned]`
+- `end [--status done|abandoned] [--assessment <run-dir>]`
+- `decide --chose <what> --why <why> [...]`: a `decision`, for agents without MCP. *[Amended 2026-10-22 — integration]*
+- `lint [--stylelint <glob>]... [--eslint <path>]...`: runs both linters and writes one `lint` check; a created app's `npm run lint`. *[Amended 2026-10-22 — integration]*
 - `status`
 - `export …`
 - `validate`
@@ -129,6 +131,11 @@ for confirmation (`--yes` to skip). It makes no network request.
 - `end_episode`.
 
 Every other tool writes a `guidance` event to the open episode.
+*[Amended 2026-10-22 — integration]* The server's app is its working
+directory, or `UX_BUILDER_APP`; the trace is the nearest `.ux-builder/` at or
+above it, and with none, nothing is written until `start_episode`. An object
+argument (a blueprint, a card) is recorded by its `sha256` and size only.
+`check_blueprint` and `check_card` also write a `check` event.
 
 ## Error Semantics
 

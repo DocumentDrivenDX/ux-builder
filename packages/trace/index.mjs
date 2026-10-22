@@ -24,6 +24,7 @@ import { findSecrets, mask as maskText, maskValue, maskedCount, rulesFor } from 
 import { tarGz, untarGz } from "./tar.mjs";
 
 export { SECRET_PATTERNS, envValues, findSecrets, maskedCount, redactPatterns } from "./mask.mjs";
+export { AGENT_GUIDE } from "./guide.mjs";
 
 const OWN = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"));
 export const VERSION = OWN.version;
@@ -244,6 +245,81 @@ export function attemptOf(appDir, check) {
   } catch { return 1; }
 }
 
+/* ---- What the other tools call ---- */
+
+/* The app a tool works in, for its trace: the nearest folder at or above
+   `start` that has .ux-builder/ (create-app makes it; so does the first
+   `ux-builder-trace start`), or null. A tool writes no event where there is
+   none, so running a check outside an app leaves nothing behind. */
+export function findApp(start = process.cwd()) {
+  let d = resolve(start);
+  for (;;) {
+    try { if (statSync(join(d, ".ux-builder")).isDirectory()) return d; } catch { /* not here */ }
+    const up = dirname(d);
+    if (up === d) return null;
+    d = up;
+  }
+}
+
+/* A check's findings as the trace keeps them: [{ ruleId, severity, count }],
+   one per rule and severity, sorted. `items` are the check's own findings;
+   `ruleId` and `severity` read each one (defaults: .ruleId ?? .rule, .severity). */
+export function countFindings(items = [], { ruleId = (f) => f.ruleId ?? f.rule, severity = (f) => f.severity } = {}) {
+  const by = new Map();
+  for (const f of items ?? []) {
+    const r = String(ruleId(f) ?? "unknown"), s = severity(f) ?? "error";
+    const key = `${r}\u0000${s}`;
+    const e = by.get(key) ?? { ruleId: r, severity: typeof s === "number" ? s : String(s), count: 0 };
+    e.count++;
+    by.set(key, e);
+  }
+  return [...by.values()].sort((a, b) => a.ruleId.localeCompare(b.ruleId) || String(a.severity).localeCompare(String(b.severity)));
+}
+
+/* The status of a check from its findings: fail on an error, warn on a warning, else pass. */
+export const statusOf = (findings = []) => (findings.some((f) => f.severity === "error" || f.severity === 2) ? "fail" : findings.some((f) => f.severity === "warning" || f.severity === 1) ? "warn" : "pass");
+
+/* Write a `check` event (US-106-AC2): its attempt is counted here. `fields`:
+   { status?, findings (as countFindings returns), report?, verdicts?, assessment? };
+   with no status, it follows the findings. Never throws; returns the event or null. */
+export function recordCheck(appDir, check, fields = {}, { by = BY } = {}) {
+  try {
+    if (!CHECKS.includes(check)) throw new Error(`unknown check "${check}"; the checks are ${CHECKS.join(", ")}`);
+    const findings = fields.findings ?? [];
+    return appendEvent(appDir, "check", { ...fields, check, attempt: attemptOf(appDir, check), status: fields.status ?? statusOf(findings), findings }, { by });
+  } catch (e) {
+    warnOnce(appDir, e);
+    return null;
+  }
+}
+
+/* Write a `decision` event (US-107-AC1, AC2): `chose` and `why` are required.
+   Throws TraceError MISSING naming the field, writing nothing, when one is
+   absent; `why` and every other string are masked when written. */
+export function recordDecision(appDir, { chose, considered, why, relied, departs, workaround, screen } = {}, { by = "agent" } = {}) {
+  for (const [name, v] of [["chose", chose], ["why", why]]) {
+    if (typeof v !== "string" || !v.trim()) throw new TraceError(`record_decision needs "${name}": ${name === "chose" ? "what you chose" : "why, in a sentence"}. Nothing was written.`, "MISSING", { field: name });
+  }
+  const list = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]).map(String);
+  const event = appendEvent(appDir, "decision", {
+    chose: chose.trim(), considered: list(considered), why: why.trim(), relied: list(relied), departs: !!departs, workaround: !!workaround,
+    ...(screen ? { screen: String(screen) } : {}),
+  }, { by });
+  return event;
+}
+
+/* An assessment run's comparison (ux-builder-audit assess compare), as
+   outcome.assessment: { run, compare: [{ rule, finding, status }] }, or null. */
+export function assessmentRef(runDir) {
+  let cmp, backlog = {};
+  try { cmp = JSON.parse(readFileSync(join(runDir, "comparison.json"), "utf8")); } catch { return null; }
+  try { backlog = JSON.parse(readFileSync(join(runDir, "backlog.json"), "utf8")); } catch { /* no backlog */ }
+  const rules = new Map((backlog.findings ?? []).map((f) => [f.id, f.rule ?? f.rule_id ?? f.ruleId ?? null]));
+  const run = cmp.to ?? null;
+  if (!run || !/^R-/.test(run)) return null;
+  return { run, compare: (cmp.findings ?? []).filter((f) => /^F-/.test(f.id)).map((f) => ({ rule: rules.get(f.id) ?? null, finding: f.id, status: f.status })) };
+}
+
 /* ---- Closing ---- */
 
 function changeOf(appDir, id, events) {
@@ -293,7 +369,7 @@ function outcomeOf(events, assessment) {
 
 /* Close the open episode (else this branch's unscoped one, as `unscoped`):
    writes change, outcome and end (US-105-AC4, AC5). */
-export function closeEpisode(appDir, { status = "done", by = BY, assessment, episode } = {}) {
+export function closeEpisode(appDir, { status = "done", by = BY, assessment, episode, files } = {}) {
   let id = episode ?? currentEpisode(appDir);
   let unscoped = false;
   if (!id) { id = openUnscoped(appDir).at(-1); unscoped = true; }
@@ -304,6 +380,12 @@ export function closeEpisode(appDir, { status = "done", by = BY, assessment, epi
   const final = unscoped ? "unscoped" : status === "abandoned" ? "abandoned" : "done";
   const rules = rulesFor(appDir);
   const { change, warnings } = changeOf(appDir, id, events);
+  // With no commit to count from, the tool that closes the episode may know how many files it wrote (create-app does).
+  if (Number.isInteger(files) && files >= 0 && !change.commits.length) change.files = files;
+  // Screens changed with no decision recorded (US-107-AC4).
+  if (!unscoped && change.screens.length && !events.some((e) => e.kind === "decision")) {
+    warnings.push(`no decisions were recorded, though the episode changed screen${change.screens.length === 1 ? "" : "s"} ${change.screens.join(", ")}: record each pattern choice, departure and workaround with record_decision (or ux-builder-trace decide)`);
+  }
   const outcome = outcomeOf(events, assessment);
   writeEvent(appDir, id, "change", change, by, rules);
   writeEvent(appDir, id, "outcome", outcome, by, rules);

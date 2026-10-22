@@ -25,13 +25,13 @@ const WEB = ["responsive-web"];
 describe("scaffold", () => {
   test("writes a React + Vite app on the SDK, on the chosen theme", () => {
     const r = scaffold(join(tmp, "acme"), { theme: "databricks", modalities: WEB });
-    assert.deepEqual(r.files, [".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "app.blueprint.json", "e2e/starter.spec.js", "eslint.config.js", "index.html", "package.json", "playwright.config.js", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/Home.jsx", "src/ThemeSwitch.jsx", "src/main.jsx", "vite.config.js"]);
+    assert.deepEqual(r.files, [".claude/settings.json", ".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "app.blueprint.json", "e2e/starter.spec.js", "eslint.config.js", "index.html", "package.json", "playwright.config.js", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/Home.jsx", "src/ThemeSwitch.jsx", "src/main.jsx", "vite.config.js"]);
     const pkg = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
     assert.equal(pkg.name, "acme");
     assert.match(readFileSync(join(r.dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="databricks" appearance="system"/);
     assert.match(readFileSync(join(r.dir, ".stylelintrc.json"), "utf8"), /"theme": "databricks"/);
     assert.match(readFileSync(join(r.dir, "CLAUDE.md"), "utf8"), /node_modules\/@ux-builder\/ui\/AGENTS\.md/);
-    for (const f of r.files) assert.doesNotMatch(readFileSync(join(r.dir, f), "utf8"), /__(APP_NAME|THEME|TOKENS|UI|AUDIT)__/, f);
+    for (const f of r.files) assert.doesNotMatch(readFileSync(join(r.dir, f), "utf8"), /__[A-Z_]+__/, f);
   });
 
   // @covers US-012-AC1
@@ -39,9 +39,9 @@ describe("scaffold", () => {
     const r = scaffold(join(tmp, "pinned"), { modalities: WEB });
     const deps = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8")).dependencies;
     const dev = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8")).devDependencies;
-    assert.deepEqual({ "@ux-builder/tokens": deps["@ux-builder/tokens"], "@ux-builder/ui": deps["@ux-builder/ui"], "@ux-builder/audit": dev["@ux-builder/audit"] }, sdkVersions());
+    assert.deepEqual({ "@ux-builder/tokens": deps["@ux-builder/tokens"], "@ux-builder/ui": deps["@ux-builder/ui"], "@ux-builder/audit": dev["@ux-builder/audit"], "@ux-builder/trace": dev["@ux-builder/trace"] }, sdkVersions());
     assert.match(deps["@ux-builder/ui"], /^\d+\.\d+\.\d+$/, "exact, not a range");
-    for (const p of ["tokens", "ui", "audit"]) assert.equal(sdkVersions()[`@ux-builder/${p}`], JSON.parse(readFileSync(join(ROOT, `packages/${p}/package.json`), "utf8")).version);
+    for (const p of ["tokens", "ui", "audit", "trace"]) assert.equal(sdkVersions()[`@ux-builder/${p}`], JSON.parse(readFileSync(join(ROOT, `packages/${p}/package.json`), "utf8")).version);
   });
 
   // @covers US-012-AC4

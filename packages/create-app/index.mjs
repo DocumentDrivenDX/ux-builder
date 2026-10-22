@@ -24,11 +24,29 @@
                         (not with --helix-version)
      --no-helix         no HELIX marker, documents, skill or ux-assessment.yml;
                         e2e/starter.spec.js has no @covers lines
+     --agent <name>     the agent creating the app, for its episode trace (default:
+                        UX_BUILDER_AGENT, else claude-code inside Claude Code, else none)
+     --model <id>       the agent's model, for its episode trace (default: UX_BUILDER_MODEL)
 
    By default the app also starts on the latest HELIX release: its skill and
    catalogue in .claude/skills/helix/, the .helix.yml marker and the starter
-   set of HELIX documents (FEAT-010, ADR-027). */
+   set of HELIX documents (FEAT-010, ADR-027).
 
+   The app keeps an episode trace from its first commit (FEAT-016,
+   CONTRACT-007): creating it is the first episode, E-<date>-create, in
+   .ux-builder/trace/, with its start (trigger create, the agent and model
+   when known, the SDK and HELIX versions), created (modalities, theme,
+   options, files written, the blueprint's hash), the guidance it gave
+   (AGENTS.md), the blueprint check, and its change, outcome and end. The
+   episode is closed before the app is a git repository, so its change counts
+   the files written and names no commit. The app's .gitignore ignores only
+   .ux-builder/trace/current; .claude/settings.json attaches each Claude Code
+   session's transcript (npx ux-builder-trace attach-transcript); npm run
+   lint records each run (ux-builder-trace lint); AGENTS.md asks the agent to
+   open an episode for each change, record its decisions, add the
+   UX-Episode trailer to its commits and end it. */
+
+import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, renameSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { basename, join, relative, resolve } from "node:path";
@@ -37,6 +55,7 @@ import { parseArgs } from "node:util";
 import { createInterface } from "node:readline";
 import { checkBlueprint } from "@ux-builder/ui/blueprint";
 import { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, modalityProblems } from "@ux-builder/ui/blueprint/modalities";
+import * as trace from "@ux-builder/trace";
 import { getHelix, install as installHelix } from "./helix.mjs";
 import { blueprintFor, modalityGuide, normalize, shellFiles, starterSpec } from "./shell.mjs";
 
@@ -48,7 +67,7 @@ const die = (m) => { console.error(`create-app: ${m}`); process.exit(1); };
 /* The SDK versions to pin: the ones this package was released with. */
 export function sdkVersions() {
   const v = (p) => JSON.parse(readFileSync(require.resolve(`${p}/package.json`), "utf8")).version;
-  return { "@ux-builder/tokens": v("@ux-builder/tokens"), "@ux-builder/ui": v("@ux-builder/ui"), "@ux-builder/audit": v("@ux-builder/audit") };
+  return { "@ux-builder/tokens": v("@ux-builder/tokens"), "@ux-builder/ui": v("@ux-builder/ui"), "@ux-builder/audit": v("@ux-builder/audit"), "@ux-builder/trace": v("@ux-builder/trace") };
 }
 export function themes() {
   return JSON.parse(readFileSync(require.resolve("@ux-builder/tokens/manifest.json"), "utf8")).themes.map((t) => t.name);
@@ -141,8 +160,8 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = 
 
   mkdirSync(target, { recursive: true });
   cpSync(join(HERE, "template"), target, { recursive: true });
-  // npm drops dotfiles named .gitignore from published packages; it (and .github) ships without the dot.
-  for (const f of ["gitignore", "github"]) if (existsSync(join(target, f))) renameSync(join(target, f), join(target, `.${f}`));
+  // npm drops dotfiles named .gitignore from published packages; it (and .github, .claude) ships without the dot.
+  for (const f of ["gitignore", "github", "claude"]) if (existsSync(join(target, f))) renameSync(join(target, f), join(target, `.${f}`));
   // The shell for the modalities (FEAT-014 MOD-04), its test and its plan.
   for (const [to, from] of Object.entries(shellFiles(modalities))) cpSync(join(HERE, "shells", from), join(target, to));
   mkdirSync(join(target, "e2e"), { recursive: true });
@@ -152,7 +171,8 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = 
   // The audit visits every screen of the shell, so each modality's screen is checked (FEAT-014 MOD-08).
   const auditUrls = [...new Set(blueprintFor(name, modalities).screens.map((sc) => sc.path ?? "/"))].map((p) => `http://127.0.0.1:4173${p}`).join(" ");
   const fill = (s) => s.replaceAll("__MODALITY_GUIDE__", guide).replaceAll("__MODALITIES__", modalities.join(", ")).replaceAll("__AUDIT_URLS__", auditUrls).replaceAll("__APP_NAME__", name).replaceAll("__THEME__", theme)
-    .replaceAll("__TOKENS__", dep("@ux-builder/tokens")).replaceAll("__UI__", dep("@ux-builder/ui")).replaceAll("__AUDIT__", dep("@ux-builder/audit"));
+    .replaceAll("__TOKENS__", dep("@ux-builder/tokens")).replaceAll("__UI__", dep("@ux-builder/ui")).replaceAll("__AUDIT__", dep("@ux-builder/audit")).replaceAll("__TRACE__", dep("@ux-builder/trace"))
+    .replaceAll("__EPISODE_GUIDE__", trace.AGENT_GUIDE.trimEnd()).replaceAll("__TRACE_IGNORE__", trace.GITIGNORE_LINES.join("\n"));
   const written = [];
   const walk = (d) => {
     for (const e of readdirSync(d, { withFileTypes: true })) {
@@ -184,10 +204,58 @@ export function uncite(spec) {
     .replace(/^\/\/ @covers [^\n]*\n/gm, "");
 }
 
+/* The agent creating the app, when known: --agent and --model, else
+   UX_BUILDER_AGENT and UX_BUILDER_MODEL, else claude-code inside Claude Code. */
+export function agentOf({ agent, model } = {}, env = process.env) {
+  return { name: agent || env.UX_BUILDER_AGENT || (env.CLAUDECODE === "1" ? "claude-code" : null), model: model || env.UX_BUILDER_MODEL || null };
+}
+
+/* The files the starter wrote: everything in the app but its trace. */
+function countFiles(dir) {
+  let n = 0;
+  const walk = (d) => { for (const e of readdirSync(d, { withFileTypes: true })) { if (e.name === ".ux-builder" || e.name === "node_modules") continue; if (e.isDirectory()) walk(join(d, e.name)); else n++; } };
+  walk(dir);
+  return n;
+}
+
+const OWN = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"));
+const sha256 = (text) => `sha256:${createHash("sha256").update(text).digest("hex")}`;
+
+/* The create episode (US-105-AC1; FEAT-016 TRC-01, TRC-03): start, created,
+   the guidance written to AGENTS.md, the starter blueprint's check, then
+   change, outcome and end. A trace that cannot be written never stops the
+   app being created. Returns the episode's ID, or null. */
+export function traceCreate(r, { agent, options = {} } = {}) {
+  const by = `${OWN.name}@${OWN.version}`;
+  let id;
+  try {
+    id = trace.openEpisode(r.dir, {
+      trigger: "create", slug: "create", by,
+      goal: { text: `Create ${r.name}, a ${r.modalities.join(" and ")} app on the ${r.theme} theme`, stories: r.helix ? ["US-001"] : [], screens: [], journeys: [] },
+      agent: agent ?? agentOf(),
+      sdk: { ...r.versions, [OWN.name]: OWN.version },
+    });
+  } catch (e) { process.stderr.write(`create-app: no episode trace was started (${e.message})\n`); return null; }
+  const blueprintText = readFileSync(join(r.dir, "app.blueprint.json"), "utf8");
+  const files = countFiles(r.dir);
+  trace.appendEvent(r.dir, "created", { modalities: r.modalities, theme: r.theme, options, files, blueprint: sha256(blueprintText) }, { by });
+  // What the app tells its agent: AGENTS.md (CLAUDE.md is the same), with the patterns its blueprint starts from.
+  const agents = readFileSync(join(r.dir, "AGENTS.md"), "utf8");
+  let bp = {};
+  try { bp = JSON.parse(blueprintText); } catch { /* checked below */ }
+  const patterns = [...new Set((bp.screens ?? []).map((s) => s.pattern).filter(Boolean))].sort();
+  trace.appendEvent(r.dir, "guidance", { tool: "create-app", input: { modalities: r.modalities, theme: r.theme }, answer: { ruleIds: [], components: patterns, recipes: [], guidanceHash: sha256(agents), bytes: Buffer.byteLength(agents) } }, { by });
+  // The starter's blueprint, checked as ux-builder-blueprint check does.
+  trace.recordCheck(r.dir, "blueprint", { findings: trace.countFindings(checkBlueprint(bp)) }, { by });
+  try { trace.closeEpisode(r.dir, { status: "done", files, by }); } catch (e) { process.stderr.write(`create-app: the create episode was not closed (${e.message})\n`); }
+  return id;
+}
+
 /* Create the app: HELIX first, so a pinned HELIX that cannot be had, or the
    refused combination, writes nothing (HLF-04); then the app; then HELIX
-   into it. If no HELIX can be had, the app is made without it (HLS-02). */
-export async function create(dir, { helix: h = {}, log = () => {}, ...opts } = {}) {
+   into it. If no HELIX can be had, the app is made without it (HLS-02).
+   Last, its first episode (traceCreate). */
+export async function create(dir, { helix: h = {}, log = () => {}, agent, ...opts } = {}) {
   let helix = h.skip ? null : await getHelix({ tag: h.tag, offline: h.offline, log });
   const unavailable = helix?.unavailable ?? null;
   if (unavailable) helix = null;
@@ -204,14 +272,16 @@ export async function create(dir, { helix: h = {}, log = () => {}, ...opts } = {
     if (existsSync(spec)) writeFileSync(spec, uncite(readFileSync(spec, "utf8")));
     if (unavailable) r.helixUnavailable = unavailable;
   }
+  const options = { name: r.name, blueprint: opts.blueprint ? "given" : "starter", helix: h.skip ? "none" : h.offline ? "offline" : h.tag ? `pinned ${h.tag}` : r.helix ? "latest" : "unavailable", ...(r.helix ? { helixTag: r.helix.tag } : {}), sdkFrom: !!opts.sdkFrom };
+  r.episode = traceCreate(r, { agent: agentOf(agent), options });
   return r;
 }
 
 // npm create runs the bin through a symlink in node_modules/.bin, so compare real paths.
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { values, positionals } = parseArgs({ allowPositionals: true, options: { modality: { type: "string" }, theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, help: { type: "boolean", short: "h" } } });
+  const { values, positionals } = parseArgs({ allowPositionals: true, options: { modality: { type: "string" }, theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, agent: { type: "string" }, model: { type: "string" }, help: { type: "boolean", short: "h" } } });
   if (values.help || !positionals[0]) {
-    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix]\n\nModalities (--modality, comma-separated; asked for in a terminal, required without one):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
+    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix] [--agent <name>] [--model <id>]\n\nModalities (--modality, comma-separated; asked for in a terminal, required without one):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
     process.exit(values.help ? 0 : 1);
   }
   // The modalities, before anything is written (MOD-01, MOD-03; US-096).
@@ -223,7 +293,7 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   }
   let r;
   try {
-    r = await create(positionals[0], { modalities, theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] }, log: (m) => console.error(m) });
+    r = await create(positionals[0], { modalities, theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] }, agent: { agent: values.agent, model: values.model }, log: (m) => console.error(m) });
   } catch (e) { die(e.message); }
   console.log(`Created ${r.name}, a ${r.modalities.join(" and ")} app, on the ${r.theme} theme (@ux-builder/tokens ${r.versions["@ux-builder/tokens"]}, @ux-builder/ui ${r.versions["@ux-builder/ui"]}).
 
@@ -232,6 +302,8 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   npm run dev      # http://localhost:5173
   npm run check:blueprint  # the plan of the screens, app.blueprint.json
   npm run lint     # no hard-coded colours, fonts or radii`);
+  if (r.episode) console.log(`
+Episode trace: ${r.episode} in .ux-builder/trace/ records the creation. Open an episode for each change (npx ux-builder-trace start, or the MCP tool start_episode); AGENTS.md says how.`);
   if (r.helix) console.log(`
 HELIX ${r.helix.tag}${r.helix.bundled ? ` (bundled with this starter: ${r.helix.reason})` : " (latest release, verified)"}: the helix skill in .claude/skills/helix/, the marker and ${r.helix.documents.length} documents in docs/helix/.`);
   if (r.helixUnavailable) console.log(`

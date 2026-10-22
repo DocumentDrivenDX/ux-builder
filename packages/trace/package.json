@@ -16,6 +16,8 @@
     "index.mjs",
     "mask.mjs",
     "tar.mjs",
+    "lint.mjs",
+    "guide.mjs",
     "cli.mjs",
     "schema",
     "README.md",

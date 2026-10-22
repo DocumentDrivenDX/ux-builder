@@ -15,6 +15,8 @@
    When the blueprint has journeys or screens that serve stories, check reads
    (never writes) the HELIX stories under the .helix.yml marker above the
    file (FEAT-012 JRN-03); with no marker it skips those checks and says so.
+   Each check is also a check event in the app's episode trace (FEAT-016)
+   when @ux-builder/trace is installed and .ux-builder/ is above the file.
 
    propose, draw and wireframes read app.blueprint.json when no file is
    given (FEAT-012 DRF-01, DRW-01, DRW-02; FEAT-015 RPT-09). propose writes
@@ -29,6 +31,7 @@
    Chromium), with the HTML still written. */
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { needsStories, readStories, skippedNote } from "./helix.mjs";
 import { checkBlueprint, skeleton } from "./index.mjs";
@@ -103,6 +106,7 @@ async function main(argv) {
   const note = storied && !helix ? skippedNote(file) : null;
   const findings = checkBlueprint(bp, { helix });
   const errors = findings.filter((f) => f.severity === "error").length;
+  await traceCheck(file, findings);
   if (values.json) { console.log(JSON.stringify(findings, null, 2)); if (note) console.error(`note: ${note}`); }
   else {
     for (const f of findings) console.log(`${f.severity.padEnd(7)} ${f.rule}  ${f.path || "/"}\n        ${f.message}\n        Fix: ${f.fix}`);
@@ -110,6 +114,19 @@ async function main(argv) {
     console.log(findings.length ? `${file}: ${errors} error${errors === 1 ? "" : "s"}, ${findings.length - errors} warning${findings.length - errors === 1 ? "" : "s"}` : `${file}: no findings`);
   }
   return errors ? 1 : 0;
+}
+
+/* The check, as a check event in the app's episode trace (FEAT-016 TRC-03,
+   US-106-AC2), when @ux-builder/trace is installed and a .ux-builder/ folder
+   is at or above the blueprint. Nothing is written otherwise; a trace that
+   cannot be written never changes the check's result. */
+async function traceCheck(file, findings) {
+  let trace;
+  try { trace = await import("@ux-builder/trace"); } catch { return; }
+  const app = trace.findApp(dirname(resolve(file)));
+  if (!app) return;
+  const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  trace.recordCheck(app, "blueprint", { findings: trace.countFindings(findings) }, { by: `@ux-builder/ui@${version}` });
 }
 
 process.exitCode = await main(process.argv.slice(2));

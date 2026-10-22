@@ -13,12 +13,26 @@
    0.7, the interaction rules and blueprint (FEAT-008): get_rules,
    list_recipes, get_recipe, get_blueprint_schema, check_blueprint; with
    FEAT-012, propose_from_blueprint (HELIX proposals, never written); and
-   check_card (Adaptive Cards, ADR-029). Resources:
-   ux-builder://catalogue, ux-builder://guidance. */
+   check_card (Adaptive Cards, ADR-029); and the episode trace (FEAT-016,
+   CONTRACT-007): start_episode, record_decision, end_episode. Resources:
+   ux-builder://catalogue, ux-builder://guidance.
 
+   The episode trace: every other tool's answer is written as a `guidance`
+   event, and check_blueprint and check_card also write a `check` event, to
+   the open episode of the app the server serves (else that branch's
+   unscoped episode). The app is the server's working directory, as an
+   agent host starts it in the project (UX_BUILDER_APP=<dir> names another),
+   and the trace goes to the nearest folder at or above it that has
+   .ux-builder/. Where there is none, nothing is written until
+   start_episode opens one. A guidance event records the tool, its
+   arguments (an object argument, such as a blueprint or a card, only by its
+   sha256 and size, never its contents) and a summary of the answer: the
+   rule IDs, components and recipes it named, its sha256 and its size. */
+
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -47,6 +61,10 @@ try {
   const [manifest, report] = await Promise.all([import(at("manifest.mjs")), import(at("validate-report.mjs"))]);
   assess = { manifest, report, skill: readFileSync(require.resolve("@ux-builder/audit/skill/ux-builder-assess/SKILL.md"), "utf8") };
 } catch { /* no @ux-builder/audit, or an older one */ }
+// The episode trace (FEAT-016), the app's @ux-builder/trace else ours.
+let trace = null;
+try { trace = await import(pathToFileURL(require.resolve("@ux-builder/trace")).href); } catch { /* no @ux-builder/trace */ }
+const OWN = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"));
 const readJson = (spec) => JSON.parse(readFileSync(require.resolve(spec), "utf8"));
 const readText = (spec) => readFileSync(require.resolve(spec), "utf8");
 
@@ -63,12 +81,74 @@ const fail = (message) => ({ content: [{ type: "text", text: message }], isError
 const near = (name, names) => names.filter((n) => n.includes(name) || name.includes(n)).slice(0, 5);
 
 const SIZE_CLASSES = ["compact", "medium", "expanded", "large", "extra-large"];
+const sha256 = (text) => `sha256:${createHash("sha256").update(text).digest("hex")}`;
 
-export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyReader, px = proposer, cc = cards) {
+/* A tool's arguments as a guidance event keeps them: an object argument (a
+   blueprint, a card) only by its hash and size, never its contents. */
+export function inputSummary(args = {}) {
+  const out = {};
+  for (const [k, v] of Object.entries(args ?? {})) {
+    if (v && typeof v === "object" && !Array.isArray(v)) { const text = JSON.stringify(v); out[k] = { sha256: sha256(text), bytes: Buffer.byteLength(text) }; }
+    else if (Array.isArray(v)) out[k] = v.map((x) => (x && typeof x === "object" ? sha256(JSON.stringify(x)) : x));
+    else out[k] = v;
+  }
+  return out;
+}
+
+/* A tool's answer as a guidance event keeps it (CONTRACT-007): the rule IDs,
+   components and recipes it named, its hash and its size. From JSON, the
+   string values that are a known ID or name; from Markdown, rule IDs
+   anywhere and names in code spans or tags. */
+export function answerSummary(result, cat) {
+  const text = (result?.content ?? []).map((c) => c.text ?? "").join("\n");
+  const ruleIds = new Set(), components = new Set(), recipes = new Set();
+  const knownRules = new Set((cat.interaction?.rules ?? []).map((r) => r.id));
+  const knownRecipes = new Set((cat.interaction?.recipes ?? []).map((r) => r.id));
+  const knownComponents = new Set([...cat.widgets.filter((w) => w.type === "component"), ...(cat.patterns ?? []).filter((p) => p.tier !== "helper"), ...(cat.assistant ?? [])].map((x) => x.name).filter((n) => /^[A-Z]/.test(n)));
+  const data = result?.structuredContent;
+  if (data && !result.isError) {
+    const walk = (v, key) => {
+      if (typeof v === "string") {
+        if (knownRules.has(v)) ruleIds.add(v);
+        if (knownComponents.has(v)) components.add(v);
+        if (knownRecipes.has(v) && /^(id|recipe|recipes)$/.test(key ?? "")) recipes.add(v);
+      } else if (Array.isArray(v)) v.forEach((x) => walk(x, key));
+      else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) walk(x, k);
+    };
+    walk(data);
+  } else {
+    for (const m of text.matchAll(/[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)+/g)) if (knownRules.has(m[0])) ruleIds.add(m[0]);
+    for (const m of text.matchAll(/`([^`\n]+)`|<([A-Z][A-Za-z0-9]*)/g)) for (const w of (m[1] ?? m[2]).match(/[A-Za-z][A-Za-z0-9-]*/g) ?? []) {
+      if (knownComponents.has(w)) components.add(w);
+      if (m[1] && knownRecipes.has(w)) recipes.add(w);
+    }
+  }
+  const sort = (x) => [...x].sort();
+  return { ruleIds: sort(ruleIds), components: sort(components), recipes: sort(recipes), guidanceHash: text ? sha256(text) : null, bytes: Buffer.byteLength(text) };
+}
+
+/* createServer(s, bp, ux, hx, px, cc, { trace, appDir }): `trace` is
+   @ux-builder/trace (null: no trace), `appDir` where the app is
+   (default UX_BUILDER_APP, else the working directory). */
+export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyReader, px = proposer, cc = cards, { trace: tr = trace, appDir = process.env.UX_BUILDER_APP || process.cwd() } = {}) {
   const { catalogue: cat, manifest, resolved } = s;
   const server = new McpServer({ name: "ux-builder", version: cat.packages["@ux-builder/ui"] }, {
-    instructions: `The AI-UI SDK (@ux-builder/ui ${cat.packages["@ux-builder/ui"]}, @ux-builder/tokens ${cat.packages["@ux-builder/tokens"]}). Before writing UI in an app that uses it, read get_guidance. Rules: ${cat.rules.join(" ")}`,
+    instructions: `The AI-UI SDK (@ux-builder/ui ${cat.packages["@ux-builder/ui"]}, @ux-builder/tokens ${cat.packages["@ux-builder/tokens"]}). Before writing UI in an app that uses it, read get_guidance. Rules: ${cat.rules.join(" ")}${tr ? " Record the build: start_episode before you change a screen, record_decision at every pattern choice, departure from the guidance and workaround, the trailer UX-Episode: <episode> on every commit, and end_episode when it is committed." : ""}`,
   });
+
+  // The episode trace (FEAT-016 TRC-03): every other tool's answer is a guidance event in the app's trace.
+  const by = `${OWN.name}@${OWN.version}`;
+  const app = () => (tr ? tr.findApp(appDir) : null);
+  const EPISODE_TOOLS = new Set(["start_episode", "record_decision", "end_episode"]);
+  const register = server.registerTool.bind(server);
+  server.registerTool = (name, config, handler) => register(name, config, async (...a) => {
+    const result = await handler(...a);
+    const at = !EPISODE_TOOLS.has(name) && app();
+    if (at) tr.appendEvent(at, "guidance", { tool: name, input: inputSummary(a.length > 1 ? a[0] : {}), answer: answerSummary(result, cat) }, { by });
+    return result;
+  });
+  // A check's findings, as a check event (US-106-AC2), when the app keeps a trace.
+  const checked = (check, findings) => { const at = app(); if (at) tr.recordCheck(at, check, { findings: tr.countFindings(findings) }, { by }); };
 
   server.registerTool("list_themes", {
     title: "List themes",
@@ -244,6 +324,7 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       const storied = hx?.needsStories(b) ?? false;
       const helix = storied ? hx.readStories(join(process.cwd(), "app.blueprint.json")) : null;
       const findings = bp.checkBlueprint(b, { helix });
+      checked("blueprint", findings);
       const notes = storied && !helix ? [hx.skippedNote(process.cwd())] : [];
       return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings, ...(notes.length ? { notes } : {}) });
     });
@@ -274,6 +355,7 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       inputSchema: { card: z.record(z.string(), z.unknown()).describe("The card payload (type AdaptiveCard)") },
     }, async ({ card }) => {
       const findings = cc.checkCard(card);
+      checked("card", findings);
       return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings });
     });
   }
@@ -324,6 +406,59 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
     }
     return { content: [{ type: "text", text: `${lines.join("\n")}\n${s.guidance()}` }] };
   });
+
+  // The episode trace's own tools (CONTRACT-007 MCP tools; US-105-AC2, US-107).
+  if (tr) {
+    const where = () => tr.findApp(appDir) ?? resolve(appDir);
+    const list = () => z.array(z.string()).optional();
+    server.registerTool("start_episode", {
+      title: "Start an episode",
+      description: "Open an episode before changing the app's UI or UX: its goal, and the HELIX stories, blueprint screens and journeys it serves. Every ux-builder tool then records what it told you and every check in it, in the app's .ux-builder/trace/. End each commit message in it with the trailer UX-Episode: <episode>, and call end_episode when its commits are made. Refused while another episode is open.",
+      inputSchema: {
+        goal: z.string().describe("What the change is for, in a sentence"),
+        stories: list().describe("HELIX story IDs, e.g. US-003"), screens: list().describe("Blueprint screen IDs"), journeys: list().describe("Journey IDs, e.g. J-review"),
+        agent: z.string().optional().describe("The agent, e.g. claude-code"), model: z.string().optional().describe("The model ID"),
+        transcripts: z.boolean().optional().describe("false: attach no transcript to this episode"),
+      },
+    }, async ({ goal, stories, screens, journeys, agent, model, transcripts }) => {
+      try {
+        const id = tr.openEpisode(where(), { trigger: "change", goal: { text: goal, stories, screens, journeys }, agent: { name: agent ?? null, model: model ?? null }, transcripts: transcripts !== false, by });
+        return ok({ episode: id, trailer: `${tr.TRAILER}: ${id}`, next: "Record each pattern choice, departure and workaround with record_decision; end every commit message with the trailer; call end_episode when the change is committed." });
+      } catch (e) { return fail(e.message); }
+    });
+
+    server.registerTool("record_decision", {
+      title: "Record a decision",
+      description: "Record a decision in the open episode, at every pattern choice, every departure from the guidance and every workaround for a missing component: what you chose (required), what else you considered, why (required, a sentence; masked like a transcript), the rule and story IDs you relied on, whether it departs from the guidance, whether it works around a missing component, and the screen. Never include code.",
+      inputSchema: {
+        chose: z.string().optional().describe("Required: what you chose, e.g. WorkQueue"),
+        considered: list().describe("What else you considered, e.g. CollectionList"),
+        why: z.string().optional().describe("Required: why, in a sentence"),
+        relied: list().describe("The rule IDs and story IDs you relied on"),
+        departs: z.boolean().optional().describe("true when this departs from the guidance"),
+        workaround: z.boolean().optional().describe("true when this works around a missing component"),
+        screen: z.string().optional().describe("The blueprint screen ID, when the decision is about one"),
+      },
+    }, async (d) => {
+      try {
+        const e = tr.recordDecision(where(), d, { by: "agent" });
+        return e ? ok({ recorded: true, episode: e.episode, seq: e.seq }) : fail("The decision could not be written to the trace (see the server's stderr).");
+      } catch (e) { return fail(e.message); }
+    });
+
+    server.registerTool("end_episode", {
+      title: "End the episode",
+      description: "Close the open episode once its commits are made: records its commits carrying the UX-Episode trailer, the files and screens changed, the audit's verdicts and findings, and each check's attempts before it passed. Returns warnings for commits without the trailer, or screens changed with no decision recorded.",
+      inputSchema: {
+        status: z.enum(["done", "abandoned"]).optional().describe("done (default) or abandoned"),
+        assessment: z.string().optional().describe("An assessment run's directory (after ux-builder-audit assess compare), for the outcome's compare classes"),
+      },
+    }, async ({ status, assessment }) => {
+      let ref;
+      if (assessment) { ref = tr.assessmentRef(resolve(where(), assessment)); if (!ref) return fail(`${assessment}: no comparison.json from ux-builder-audit assess compare there.`); }
+      try { return ok(tr.closeEpisode(where(), { status: status ?? "done", assessment: ref, by })); } catch (e) { return fail(e.message); }
+    });
+  }
 
   server.registerResource("catalogue", "ux-builder://catalogue", { title: "SDK catalogue", description: "Every token, widget, theme, design system and icon", mimeType: "application/json" },
     async (uri) => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(cat) }] }));
