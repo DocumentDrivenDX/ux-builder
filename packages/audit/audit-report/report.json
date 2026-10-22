@@ -1,9 +1,9 @@
 {
   "tool": "@ux-builder/audit",
   "version": "0.2.0",
-  "generatedAt": "2026-10-22T00:01:53.253Z",
+  "generatedAt": "2026-10-22T00:06:55.507Z",
   "urls": [
-    "http://127.0.0.1:49172/only-layout.html"
+    "http://127.0.0.1:51403/only-layout.html"
   ],
   "rules": {
     "theme-applied": "The theme's CSS is on the page and applies.",
@@ -43,7 +43,7 @@
   },
   "runs": [
     {
-      "url": "http://127.0.0.1:49172/only-layout.html",
+      "url": "http://127.0.0.1:51403/only-layout.html",
       "theme": "praxis-carbon",
       "appearance": "light",
       "mode": "event",
@@ -54,7 +54,7 @@
   "findings": [
     {
       "id": 2,
-      "url": "http://127.0.0.1:49172/only-layout.html",
+      "url": "http://127.0.0.1:51403/only-layout.html",
       "rule": "focus-obscured",
       "severity": "warning",
       "selector": "#under",
@@ -66,7 +66,7 @@
     },
     {
       "id": 1,
-      "url": "http://127.0.0.1:49172/only-layout.html",
+      "url": "http://127.0.0.1:51403/only-layout.html",
       "rule": "reflow",
       "severity": "warning",
       "selector": "html > body > div > div",

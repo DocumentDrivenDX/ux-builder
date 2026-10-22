@@ -18,9 +18,6 @@
     { "id": "US-074-AC3", "reason": "Planned: FEAT-005 (public distribution), framed 2026-10-21; not built yet." },
     { "id": "US-075-AC1", "reason": "Planned: FEAT-005 (public distribution), framed 2026-10-21; not built yet." },
     { "id": "US-075-AC2", "reason": "Planned: FEAT-005 (public distribution), framed 2026-10-21; not built yet." },
-    { "id": "US-075-AC3", "reason": "Built: every public package.json names the @ux-builder scope and the DocumentDrivenDX/ux-builder repository. Not yet tested (FEAT-005, framed 2026-10-21)." },
-    { "id": "US-094-AC1", "reason": "Planned: FEAT-013 (annotated journey walkthrough videos, ADR-031), drafted 2026-10-21; not built yet." },
-    { "id": "US-094-AC3", "reason": "Planned: FEAT-013 (annotated journey walkthrough videos, ADR-031), drafted 2026-10-21; not built yet." },
-    { "id": "US-094-AC4", "reason": "Planned: FEAT-013 (annotated journey walkthrough videos, ADR-031), drafted 2026-10-21; not built yet." }
+    { "id": "US-075-AC3", "reason": "Built: every public package.json names the @ux-builder scope and the DocumentDrivenDX/ux-builder repository. Not yet tested (FEAT-005, framed 2026-10-21)." }
   ]
 }

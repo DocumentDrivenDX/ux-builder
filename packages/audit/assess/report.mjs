@@ -26,7 +26,7 @@ function walk(dir, base = dir) {
   }
   return out;
 }
-const kindOf = (p) => p.endsWith(".png") ? "screenshot" : p.endsWith("tree.yml") ? "accessibility-tree" : p.startsWith("logs/") ? "test-log" : p.startsWith("audit/") ? "audit" : p.startsWith("proposals/") ? "proposal" : p.startsWith("evidence/real-user/") ? "real-user" : p.endsWith(".json") ? "record" : "other";
+const kindOf = (p) => /\.(mp4|webm)$/.test(p) ? "video" : p.endsWith(".vtt") ? "captions" : p === "video/index.html" ? "player" : p.endsWith(".png") ? "screenshot" : p.endsWith("tree.yml") ? "accessibility-tree" : p.startsWith("logs/") ? "test-log" : p.startsWith("audit/") ? "audit" : p.startsWith("proposals/") ? "proposal" : p.startsWith("evidence/real-user/") ? "real-user" : p.endsWith(".json") ? "record" : "other";
 
 /* Everything the run's records say about it. */
 export function load(dir) {
@@ -34,6 +34,7 @@ export function load(dir) {
     run: read(dir, "run.json"), req: read(dir, "requirements.json"), trace: read(dir, "traceability.json"), baseline: read(dir, "baseline.json"),
     plan: read(dir, "plan.json"), coverage: read(dir, "coverage.json"), walk: read(dir, "walkthrough.json"), backlog: read(dir, "backlog.json"),
     proposals: read(dir, "proposals.json"), alignment: read(dir, "alignment.json"), comparison: read(dir, "comparison.json"),
+    video: read(dir, "video/video.json"),
   };
 }
 
@@ -44,6 +45,9 @@ export function evidenceIndex(dir, r) {
   for (const f of r.backlog?.findings ?? []) for (const x of f.evidence_refs ?? []) note(x, f.id);
   for (const j of r.walk?.journeys ?? []) for (const s of j.steps ?? []) note(s.checkpoint, `${j.id} step ${s.n}`);
   for (const p of r.proposals?.proposals ?? []) note(p.patch, p.id);
+  // A walkthrough video, its timeline and captions are evidence of the findings they show (FEAT-013 OUT-02).
+  for (const v of r.video?.videos ?? []) for (const file of Object.values(v.files ?? {})) { note(`video/${file}`, `video ${v.journey}`); for (const f of v.findings ?? []) note(`video/${file}`, f.id); }
+  if (r.video) { note("video/video.json", "video"); note("video/index.html", "video"); }
   const files = walk(dir).filter((p) => !["report.md", "report.html", "evidence.json"].includes(p));
   const of = (p) => [...(refs.get(p) ?? []), ...[...refs.entries()].filter(([k]) => p.startsWith(`${k.startsWith("checkpoints/") ? k : `checkpoints/${k}`}/`)).flatMap(([, v]) => [...v])];
   return { schema: "evidence", version: 1, files: files.map((p) => ({ path: p, kind: kindOf(p), bytes: statSync(join(dir, p)).size, referencedBy: [...new Set(of(p))] })) };
@@ -53,6 +57,17 @@ function counts(findings) {
   const c = Object.fromEntries(PRIORITIES.map((p) => [p, 0]));
   for (const f of findings) c[f.priority] = (c[f.priority] ?? 0) + 1;
   return c;
+}
+
+/* Where a finding is in the walkthrough videos: one link per video it is shown in (FEAT-013 OUT-02). */
+const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+export function videoLinks(video, id) {
+  return (video?.videos ?? []).flatMap((v) => {
+    const at = (v.findings ?? []).find((f) => f.id === id)?.ranges?.[0];
+    if (!at) return [];
+    const name = v.files.clean.replace(/\.clean\.webm$/, "");
+    return [{ label: `${v.journey}${name.includes("@") ? ` ${v.viewport.width}×${v.viewport.height}` : ""} at ${mmss(at.start)}`, href: `video/index.html#${name}@${at.start}` }];
+  });
 }
 
 /* The report, as Markdown; the HTML wraps the same sections. */
@@ -70,6 +85,7 @@ function markdown(dir, r) {
   L.push(`- Coverage: ${cov.filter((e) => e.status === "assessed").length} of ${cov.length} journey × state pairs assessed; ${cov.filter((e) => e.status === "blocked").length} blocked, ${cov.filter((e) => e.status === "not-assessed").length} not assessed, ${cov.filter((e) => e.status === "not-applicable").length} not applicable.`);
   if (r.baseline) L.push(`- Baseline: ${r.baseline.tests.map((t) => `${t.id} ${t.status}`).join(", ") || "no tests declared"}; audit ${r.baseline.audit ? `${r.baseline.audit.findings.usability} usability and ${r.baseline.audit.findings.sdkAdoption} SDK-adoption findings` : "not run"}.`);
   L.push(`- Inputs: HELIX flow \`${run.helix?.flow ?? "?"}\` (root \`${run.helix?.root ?? "?"}\`, catalogue ${run.helix?.catalog?.source ?? "?"}${run.helix?.catalog?.version ? ` ${run.helix.catalog.version}` : ""}); app commit \`${run.app?.commit?.slice(0, 10) ?? "?"}\`${run.app?.dirty ? " (with uncommitted changes)" : ""}; @ux-builder/ui ${run.versions?.ui ?? "not installed"}, audit ${run.versions?.audit ?? "?"}${run.agent ? `; agent ${run.agent.name}${run.agent.model ? ` (${run.agent.model})` : ""}` : ""}.`);
+  if (r.video) L.push(`- Walkthrough videos: ${r.video.videos.length} recorded${r.video.notRecorded.length ? `, ${r.video.notRecorded.length} not recorded` : ""}; [watch them in the player](video/index.html)${r.video.videos.some((v) => v.files.mp4) ? ", or share the MP4s in `video/`" : ""}.`);
   if (stagesOff.length) L.push(`- Stages that did not complete (reported apart from findings): ${stagesOff.map((s) => `${s.stage} ${s.status}${s.reason ? ` — ${s.reason}` : ""}`).join("; ")}.`);
   L.push("");
   if (r.plan) {
@@ -85,11 +101,14 @@ function markdown(dir, r) {
     for (const p of PRIORITIES) for (const f of list.filter((x) => x.priority === p)) {
       L.push(`### ${f.priority} · ${f.title} (${f.id})`, "");
       L.push(`**${f.finding_type}** · ${f.journey_id} · ${f.state_id} · role ${f.role} · confidence ${f.confidence?.level} (${f.confidence?.reason}) · effort ${f.effort}${f.validation_work ? " · **validation work**" : ""}${(f.qualified ?? []).length ? ` · qualified: ${f.qualified.join(", ")}` : ""}`, "");
+      if (f.plain) L.push(`- **In plain English**: ${f.plain.problem} ${f.plain.recommendation}`);
       L.push(`- **Observed**: ${f.observed_behavior}`, `- **Expected**: ${f.expected_behavior_or_proposed_requirement}`, `- **Recommendation**: ${f.recommendation}`);
       if (f.component_mapping?.length) L.push(`- **Components**: ${f.component_mapping.map((m) => `\`${m.name}\` (${m.kind}, @ux-builder/ui ${m.version}, ${m.work})`).join("; ")}`);
       L.push(`- **Verify**: ${f.verification}`);
       L.push(`- **Requirements**: ${(f.source_refs ?? []).join(", ") || "none: a proposed criterion"} · **Tests**: ${(f.test_refs ?? []).join(", ") || "none"}`);
       L.push(`- **Evidence**: ${(f.evidence_refs ?? []).map((x) => `\`${x}\``).join(", ") || `none — ${f.uncertainty}`}`);
+      const seen = videoLinks(r.video, f.id);
+      if (seen.length) L.push(`- **Seen in video**: ${seen.map((x) => `[${x.label}](${x.href})`).join(", ")}`);
       if (f.proposed_doc_changes?.length) L.push(`- **Proposed HELIX changes**: ${f.proposed_doc_changes.join(", ")}`);
       L.push("");
     }
@@ -124,7 +143,7 @@ function markdown(dir, r) {
 const md2html = (md, dir, selfContained) => {
   // Screenshots are shown, not just named; self-contained, they are embedded so the file stands alone.
   const src = (c) => (selfContained ? `data:image/png;base64,${readFileSync(join(dir, c)).toString("base64")}` : c);
-  const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, (m, c) => (/\.png$/.test(c) && existsSync(join(dir, c)) ? `<a href="${selfContained ? "#" : c}"><img src="${src(c)}" alt="${c}" loading="lazy"></a>` : `<code>${c}</code>`));
+  const inline = (s) => esc(s).replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>').replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, (m, c) => (/\.png$/.test(c) && existsSync(join(dir, c)) ? `<a href="${selfContained ? "#" : c}"><img src="${src(c)}" alt="${c}" loading="lazy"></a>` : `<code>${c}</code>`));
   const out = []; let list = false, table = false;
   for (const line of md.split("\n")) {
     const close = () => { if (list) { out.push("</ul>"); list = false; } if (table) { out.push("</table>"); table = false; } };
@@ -132,7 +151,9 @@ const md2html = (md, dir, selfContained) => {
     if (/^- /.test(line)) { if (!list) { close(); out.push("<ul>"); list = true; } out.push(`<li>${inline(line.slice(2))}</li>`); continue; }
     close();
     const h = /^(#{1,3}) (.*)$/.exec(line);
-    if (h) out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`);
+    // A finding's heading is its anchor (report.html#F-…), which the walkthrough player links to.
+    const anchor = h && /\((F-[0-9a-f]+)\)$/.exec(h[2]);
+    if (h) out.push(`<h${h[1].length}${anchor ? ` id="${anchor[1]}"` : ""}>${inline(h[2])}</h${h[1].length}>`);
     else if (line.trim()) out.push(`<p>${inline(line)}</p>`);
   }
   return out.join("\n");

@@ -376,6 +376,12 @@ Decisions the build had to make *(FEAT-013 step 3, 2026-10-21)*:
   over the clean recording between its `start` and `end` and encodes H.264
   (CRF 26, 25 fps, no audio, `+faststart`). A failed encode is reported in
   the stage's reason and leaves the player working.
+- **The report** (run `assess report` after `video`): its summary links
+  the player; each finding shown in a video gets *In plain English* and
+  *Seen in video*, one link per video it is in; each finding's heading is
+  its anchor (`report.html#F-…`). `evidence.json` gains the kinds `video`,
+  `captions` and `player`; a video's files are referenced by the findings
+  it shows.
 - **Pacing** (ms): 450 before a step, 650 for the cursor to move, 55 a
   character typed, 900 to settle, 3200 for the title card, 4500 for the end
   card; network waits are cut off at 1 s. A missing element fails its step
