@@ -48,7 +48,7 @@ describe("schemas", () => {
     for (const e of ev) assert.deepEqual(validateEvent(e), [], `${e.seq} ${e.kind}`);
     assert.deepEqual(validateTrace(app), []);
     const outcome = ev.find((e) => e.kind === "outcome");
-    assert.deepEqual(outcome.checksToGreen, { lint: 1, audit: 0 }, "a warn run counts as green");
+    assert.deepEqual(outcome.checksToGreen, { lint: 2, audit: 1 }, "a warn run counts as green");
     assert.deepEqual(outcome.audit, { verdicts: FIXTURE_VERDICTS, findings: { "theme.radius": 1 } });
     assert.deepEqual(outcome.assessment, FIXTURE_ASSESSMENT);
     assert.match(ev[0].commit, /^[0-9a-f]{40}$/);
@@ -67,7 +67,7 @@ describe("schemas", () => {
     assert.notDeepEqual(outcome({ audit: null }), []);
     assert.notDeepEqual(outcome({ audit: { verdicts: { theme: "pass" }, findings: {} } }), [], "verdicts need modality");
     assert.notDeepEqual(outcome({ assessment: { run: "R-1", compare: [{ rule: null, finding: "F-1", status: "fixed" }] } }), []);
-    assert.notDeepEqual(outcome({ checksToGreen: { lint: -1 } }), []);
+    assert.notDeepEqual(outcome({ checksToGreen: { lint: 0 } }), []);
   });
 
   test("validate names a malformed line, a seq gap, an unknown kind and a schema failure, and exits 1", () => {

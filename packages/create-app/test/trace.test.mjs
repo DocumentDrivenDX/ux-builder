@@ -70,7 +70,7 @@ describe("US-105: creating the app is its first episode", () => {
     assert.deepEqual(ev[4].commits, []);
     assert.equal(ev[4].parent, null);
     assert.equal(ev[4].files, created.files, "outside git, the files written");
-    assert.deepEqual(ev[5].checksToGreen, { blueprint: 0 });
+    assert.deepEqual(ev[5].checksToGreen, { blueprint: 1 });
     assert.equal(ev.at(-1).status, "done");
     assert.equal(currentEpisode(dir), null);
     assert.deepEqual(validateTrace(dir), []);

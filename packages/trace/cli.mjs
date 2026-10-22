@@ -118,7 +118,7 @@ async function main(argv) {
       if (values.assessment) { assessment = assessmentRef(values.assessment); if (!assessment) fail(`--assessment ${values.assessment}: no comparison.json from ux-builder-audit assess compare there`, 2); }
       const r = closeEpisode(dir, { status: values.status ?? "done", assessment });
       for (const w of r.warnings) process.stderr.write(`warning: ${w}\n`);
-      const green = Object.entries(r.outcome.checksToGreen).map(([k, v]) => `${k} ${v === null ? "never passed" : `${v} failed run${v === 1 ? "" : "s"} first`}`).join(", ");
+      const green = Object.entries(r.outcome.checksToGreen).map(([k, v]) => `${k} ${v === null ? "never passed" : `passed on attempt ${v}`}`).join(", ");
       process.stdout.write(`Ended ${r.episode} (${r.status}): ${r.change.commits.length} commit${r.change.commits.length === 1 ? "" : "s"}, ${r.change.files} file${r.change.files === 1 ? "" : "s"} changed${green ? `; checks: ${green}` : ""}\n`);
       return 0;
     } catch (e) { fail(e.message); }

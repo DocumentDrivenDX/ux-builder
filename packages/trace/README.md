@@ -107,7 +107,7 @@ What the tools write:
 
 What the trace writes itself:
 - **`start.commit`**: the HEAD commit when the episode opened. It is `null` outside a git repository or before the first commit; `change` then carries `parent`, the parent of the episode's first trailer commit (or `null`).
-- **`outcome`**: `{ audit: { verdicts | null, findings: { ruleId: count } }, assessment: { run, compare } | null, checksToGreen }`. `audit.findings` comes from the last audit `check`, and is `{}` when there was none. `checksToGreen` counts, for each check, the runs before its first `pass` or `warn`: 0 when it passed first time, `null` when it never passed.
+- **`outcome`**: `{ audit: { verdicts | null, findings: { ruleId: count } }, assessment: { run, compare } | null, checksToGreen }`. `audit.findings` comes from the last audit `check`, and is `{}` when there was none. `checksToGreen` gives, for each check, the attempt on which it first passed or warned: 1 when it passed first time, `null` when it never passed.
 
 ## Masking
 

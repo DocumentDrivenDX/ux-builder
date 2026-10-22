@@ -89,9 +89,9 @@ describe("US-106: the trace across the tools", () => {
     assert.deepEqual(outcome, { ...outcome, ...closed.outcome }, "end_episode returns what it wrote");
     assert.deepEqual(outcome.audit.verdicts, { theme: "pass", modality: [{ modality: "responsive-web", status: "pass" }] });
     assert.deepEqual(outcome.audit.findings, { "nav.compact-destinations": 1, "token-colors": 1 });
-    // checksToGreen counts the runs before the first pass (CONTRACT-007, event.schema.json):
+    // checksToGreen is the attempt on which each check first passed (CONTRACT-007, event.schema.json):
     // lint failed twice and passed at attempt 3; the blueprint check and the audit passed first time.
-    assert.deepEqual(outcome.checksToGreen, { lint: 2, blueprint: 0, audit: 0 });
+    assert.deepEqual(outcome.checksToGreen, { lint: 3, blueprint: 1, audit: 1 });
     const green = (check) => events().find((e) => e.kind === "check" && e.check === check && e.status !== "fail").attempt;
     assert.deepEqual([green("lint"), green("audit")], [3, 1]);
     const change = events().find((e) => e.kind === "change");

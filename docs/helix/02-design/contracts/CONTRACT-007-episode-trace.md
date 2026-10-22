@@ -78,7 +78,7 @@ Each kind adds its own fields:
 | `decision` | agent, through MCP `record_decision` | `chose`, `considered[]`, `why`, `relied` (rule IDs and story IDs), `departs` (bool: departs from guidance), `workaround` (bool: a missing component worked around), `screen` |
 | `transcript` | `trace attach-transcript` | `file` (path under `transcripts/`), `agent`, `bytes`, `sha256`, `masked` (count) |
 | `change` | `trace end`, or MCP `end_episode` | `commits[]` (SHAs with the trailer), `parent` (the first of them's parent, when `start.commit` is null), `files` (count changed), `screens[]` |
-| `outcome` | `trace end`, or MCP `end_episode` | `audit`: `{ verdicts: { theme, modality: [{ modality, status }] } \| null, findings: { <ruleId>: count } }`; `assessment`: null or `{ run, compare: [{ rule, finding, status }] }`, status being `new`, `persistent`, `resolved`, `regressed` or `not-rechecked`; `checksToGreen`: `{ <check>: attempts }`, null for a check that never passed. A check is green at its first `pass` or `warn` |
+| `outcome` | `trace end`, or MCP `end_episode` | `audit`: `{ verdicts: { theme, modality: [{ modality, status }] } \| null, findings: { <ruleId>: count } }`; `assessment`: null or `{ run, compare: [{ rule, finding, status }] }`, status being `new`, `persistent`, `resolved`, `regressed` or `not-rechecked`; `checksToGreen`: `{ <check>: attempt }`, the attempt on which the check first passed (1 when it passed first time), null for a check that never passed. A check is green at its first `pass` or `warn` |
 | `end` | `trace end`, or MCP `end_episode` | `status` (`done`, `abandoned` or `unscoped`) |
 
 An event never contains source code, or a file's contents. `input` and

@@ -104,7 +104,7 @@ describe("closing an episode", () => {
     const r = closeEpisode(app, { status: "abandoned" });
     assert.equal(r.episode, id);
     assert.equal(r.status, "abandoned");
-    assert.deepEqual(r.outcome.checksToGreen, { lint: 2, blueprint: 0, card: null, audit: null });
+    assert.deepEqual(r.outcome.checksToGreen, { lint: 3, blueprint: 1, card: null, audit: null });
     assert.deepEqual(r.outcome.audit, { verdicts, findings: { "theme.colour": 2, "a11y.contrast": 2 } });
     assert.deepEqual(r.outcome.assessment, { run: "R-20261022-1", compare });
     assert.deepEqual(validateTrace(app), []);

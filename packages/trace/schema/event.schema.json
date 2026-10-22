@@ -199,8 +199,8 @@
         "checksToGreen": {
           "type": "object",
           "propertyNames": { "enum": ["lint", "blueprint", "card", "audit"] },
-          "additionalProperties": { "type": ["integer", "null"], "minimum": 0 },
-          "description": "Runs of each check before its first pass or warn: 0 when it passed first time, null when it never passed"
+          "additionalProperties": { "type": ["integer", "null"], "minimum": 1 },
+          "description": "The attempt on which each check first passed or warned: 1 when it passed first time, null when it never passed"
         }
       }
     },

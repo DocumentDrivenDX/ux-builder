@@ -358,7 +358,8 @@ function outcomeOf(events, assessment) {
     const runs = checks.filter((e) => e.check === c);
     if (!runs.length) continue;
     const i = runs.findIndex((e) => GREEN.has(e.status));
-    checksToGreen[c] = i < 0 ? null : i;
+    // The attempt on which the check first passed (1 when it passed first time), as tools/learn.mjs reads it.
+    checksToGreen[c] = i < 0 ? null : (runs[i].attempt ?? i + 1);
   }
   const a = checks.filter((e) => e.check === "audit").at(-1);
   // The last audit's verdicts ({ theme, modality: [{ modality, status }] }) and its findings per rule; {} with no audit.
