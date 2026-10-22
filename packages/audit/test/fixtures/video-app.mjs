@@ -14,7 +14,8 @@ import { validate } from "../../assess/manifest.mjs";
 import { video } from "../../assess/video.mjs";
 import { prepared } from "./run-package.mjs";
 
-const page = (title, body, script = "") => `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title}</title><style>body{font:16px system-ui;margin:24px}button{font:inherit;padding:8px 16px;margin-right:8px}</style></head><body><main>${body}</main>${script ? `<script>${script}</script>` : ""}</body></html>`;
+// Sensitive values are pure red (.customer-email, #acct b), so a frame can be searched for any pixel of them.
+const page = (title, body, script = "") => `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title}</title><style>body{font:16px system-ui;margin:24px}button{font:inherit;padding:8px 16px;margin-right:8px}.customer-email,#acct b{color:#ff0000;font-weight:700;font-size:22px}</style></head><body><main>${body}</main>${script ? `<script>${script}</script>` : ""}</body></html>`;
 export const signedIn = () => JSON.stringify({ cookies: [{ name: "session", value: "reviewer", domain: "127.0.0.1", path: "/", expires: -1, httpOnly: false, secure: false, sameSite: "Lax" }], origins: [] });
 export const plain = { problem: "Approve and Reject look equally important, so it is easy to reject by mistake.", recommendation: "Make Approve the one main action, and confirm before Reject." };
 
@@ -29,7 +30,7 @@ export async function videoApp() {
     if (url.pathname === "/__reset") { state.resets++; res.end("ok"); return; }
     if (url.pathname === "/login") return html(page("Sign in", `<h1>Sign in</h1><label>Password <input type="password" value="hunter2"></label>`));
     if (["/queue", "/entry/1"].includes(url.pathname) && !session && !url.searchParams.has("guest")) { res.writeHead(302, { location: "/login" }); res.end(); return; }
-    if (url.pathname === "/queue") return html(page("Queue", `<h1>Queue</h1><p>Signed in as <span class="customer-email">ann@example.test</span></p><p id="acct">Account 4417-2210 is flagged</p><ul><li><a href="/entry/1">Entry 1</a></li></ul>`, `setTimeout(() => { const p = document.createElement("p"); p.className = "customer-email"; p.textContent = "late@example.test"; document.querySelector("main").append(p); }, 300);`));
+    if (url.pathname === "/queue") return html(page("Queue", `<h1>Queue</h1><p>Signed in as <span class="customer-email">ann@example.test</span></p><p id="acct">Account <b>4417-2210</b> is flagged</p><ul><li><a href="/entry/1">Entry 1</a></li></ul>`, `setTimeout(() => { const p = document.createElement("p"); p.className = "customer-email"; p.textContent = "late@example.test"; document.querySelector("main").append(p); }, 300);`));
     if (url.pathname === "/entry/1") return html(page("Entry 1", `<h1>Entry 1</h1><button id="approve">Approve</button><button id="reject">Reject</button><dialog id="why"><label>Reason <input id="reason"></label><button id="confirm">Confirm reject</button></dialog>`, `document.getElementById("reject").onclick = () => why.showModal(); document.getElementById("confirm").onclick = () => { why.close(); document.querySelector("h1").textContent = "Rejected"; };`));
     if (url.pathname === "/modal") return html(page("Modal", `<h1>Modal</h1><dialog id="m"><p class="customer-email">in-a-modal@example.test</p></dialog>`, `m.showModal();`));
     if (url.pathname === "/hostile") return html(page("Hostile", `<h1>Hostile</h1>`, `window.__piqVideo = undefined;`));
@@ -39,9 +40,9 @@ export async function videoApp() {
   const base = `http://127.0.0.1:${server.address().port}`;
   const made = [];
 
-  function pkg({ role = { id: "reviewer", auth: { storageState: "reviewer.json" } }, video: v } = {}) {
+  function pkg({ role = { id: "reviewer", auth: { storageState: "reviewer.json" } }, video: v, files = {}, manifest = {} } = {}) {
     const p = prepared({
-      files: { "reviewer.json": signedIn() },
+      files: { "reviewer.json": signedIn(), ...files },
       manifest: {
         run: { baseUrl: `${base}/`, environment: "local" },
         roles: [role],
@@ -49,6 +50,7 @@ export async function videoApp() {
         evidence: { redact: { selectors: [".customer-email"], text: ["\\d{4}-\\d{4}"] } },
         restrictions: { writes: "report-only", allow: ["edit-test-data"] },
         ...(v ? { video: v } : {}),
+        ...manifest,
       },
     });
     made.push(p);

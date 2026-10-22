@@ -132,7 +132,7 @@ describe("US-093: record signed in, with sensitive data masked", () => {
       assert.equal(await pg.evaluate(() => window.__piqVideo.ok), true);
       assert.ok(await masked(pg.locator(".customer-email").first()), "a redacted selector");
       assert.ok(await masked(pg.locator(".customer-email").nth(1)), "one added after load");
-      const range = await pg.evaluate(() => { const t = document.getElementById("acct").firstChild; const i = t.nodeValue.indexOf("4417"); const r = document.createRange(); r.setStart(t, i); r.setEnd(t, i + 9); const b = r.getBoundingClientRect(); return { x: b.x, y: b.y, width: b.width, height: b.height }; });
+      const range = await pg.evaluate(() => { const t = document.querySelector("#acct b").firstChild; const i = t.nodeValue.indexOf("4417"); const r = document.createRange(); r.setStart(t, i); r.setEnd(t, i + 9); const b = r.getBoundingClientRect(); return { x: b.x, y: b.y, width: b.width, height: b.height }; });
       assert.ok(await masked({ boundingBox: async () => range }), "text matching a pattern");
       assert.equal(await masked(pg.locator("h1")), false, "nothing else");
       await pg.goto(`${base}/modal`);

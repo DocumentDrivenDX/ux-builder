@@ -21,7 +21,7 @@ ddx:
 # Feature Specification: FEAT-013 — Annotated journey walkthrough videos
 
 **Feature ID**: FEAT-013
-**Status**: Draft (2026-10-21, with ADR-031; awaiting review)
+**Status**: Built 2026-10-21 (every US-091..US-095 criterion cited by a passing test; ADR-031 still proposed; the leader comprehension metric is open: bead `ux-builder-1a30e38a`)
 **Priority**: P2
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: UX assessment
