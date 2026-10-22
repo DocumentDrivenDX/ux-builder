@@ -7,9 +7,9 @@ npm build interfaces from. Governed by `.helix.yml` at the repo root.
 | Activity | Contents |
 |---|---|
 | `00-discover/` | `product-vision.md`, `screen-pattern-inventory.md` (discovery note) |
-| `01-frame/` | `prd.md`, `concerns.md`, `features/FEAT-001` … `FEAT-015`, `user-stories/US-001` … `US-104` (US-066 not used) |
+| `01-frame/` | `prd.md`, `concerns.md`, `features/FEAT-001` … `FEAT-016`, `user-stories/US-001` … `US-111` (US-066 not used) |
 | `02-design/adr/` | ADR-011 and ADR-012 (imported), ADR-013 onward |
-| `02-design/contracts/` | CONTRACT-001 … CONTRACT-006 |
+| `02-design/contracts/` | CONTRACT-001 … CONTRACT-007 |
 | `02-design/solution-designs/` | SD-001 (palette engine), SD-002 (theme builder), SD-003 (interaction rules and blueprint), SD-004 (UX assessment), SD-005 (AI and agent experience rules) |
 | `03-test/` | `test-plan.md` (TP-001), `test-plans/STP-*` |
 | `04-build/` | `implementation-plan.md` |
@@ -34,7 +34,8 @@ verification. HELIX documents stay the authority, and a bead points to them.
 The store started 2026-10-21. Beads cited in older documents were in an
 earlier store that this repository does not carry.
 
-Open epics: FEAT-005 `ux-builder-31fd7955`, FEAT-013 `ux-builder-c4bdb16c`, FEAT-014 `ux-builder-a34a7ad1` and FEAT-015 `ux-builder-64edad4a`. Future native modalities (iOS, Android, macOS, Windows) are beads labelled `future`.
+Open epics: FEAT-005 `ux-builder-31fd7955`, FEAT-013 `ux-builder-c4bdb16c` and FEAT-016 `ux-builder-57f13272`.
+FEAT-014 (`ux-builder-a34a7ad1`) and FEAT-015 (`ux-builder-64edad4a`) were built and closed 2026-10-22. Future native modalities (iOS, Android, macOS, Windows) are beads labelled `future`.
 FEAT-011 (`ux-builder-8234c40f`) and FEAT-012 (`ux-builder-b7859050`) were
 built and closed 2026-10-21.
 Other open items: counsel's review of the rule sources (`ux-builder-78483e2c`)
