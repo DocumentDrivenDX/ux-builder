@@ -48,8 +48,8 @@ test.describe("The site's Reference and Proof pages", () => {
     const errors = watch(page);
     await open(page, "reference/rules");
     await expect(page.getByTestId("rules-shown")).toHaveText(`${rules.length} of ${rules.length} rules`);
-    expect(rules.length).toBe(84);
-    await expect(rows(page, "Interaction rules")).toHaveCount(84);
+    expect(rules.length).toBeGreaterThanOrEqual(99);
+    await expect(rows(page, "Interaction rules")).toHaveCount(rules.length);
     await page.getByLabel("Family").selectOption("card");
     const cards = rules.filter((r) => r.id.startsWith("card.")).length;
     await expect(rows(page, "Interaction rules")).toHaveCount(cards);

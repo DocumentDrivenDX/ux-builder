@@ -222,7 +222,7 @@ export function Traceability() {
         ]} />
 
       <H2 id="stories">By story</H2>
-      <DataTable caption="Coverage by story" rowKey="id" rows={stories} pageSize={100}
+      <DataTable caption="Coverage by story" rowKey="id" rows={stories} pageSize={Math.max(100, stories.length)}
         columns={[
           { key: "id", label: "Story", sortable: true, render: (r) => <a href={r.url}><b>{r.id}</b></a> },
           { key: "title", label: "Title", render: (r) => r.title },
