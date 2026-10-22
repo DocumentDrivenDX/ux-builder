@@ -61,11 +61,73 @@ app's own AI UI adds: a page without it gets no AI finding. The page's other
 checks apply inside generated UI as anywhere else.
 
 The `--width` checks and the interaction checks are warnings for their first
-minor release, then can fail a build like the rest. A finding from an
-interaction check carries `ruleId`, the rule in `@ux-builder/ui`'s catalogue
-it enforces, and `sources`, the guidelines that rule restates; the HTML report
-links them. A finding inside a theme-builder preview
-(`data-preview`) names that preview's option and design system.
+minor release, then can fail a build like the rest. A finding inside a
+theme-builder preview (`data-preview`) names that preview's option and design
+system.
+
+### Every finding names its rule
+
+Every check is a rule in `@ux-builder/ui`'s catalogue (`guidelines/rules.json`):
+the theme and design-system checks are the `theme.*` rules (`theme.token-colors`,
+`theme.contrast`…), the others the interaction and AI rules named above.
+`tools/check-rules.mjs` fails a check that no rule names. Each finding in
+`report.json` carries:
+
+| Field | |
+|---|---|
+| `check` | The check that found it (`token-colors`). `--off` and baselines use it. |
+| `ruleId` | The catalogue rule it breaks (`theme.token-colors`). A check that enforces several rules (`nav-per-breakpoint`, `modal-contract`) names the one each finding breaks; otherwise the check's `theme.*` rule, else its first. |
+| `rule` | `{ id, title, statement, sources }`: the rule in full, in the SDK's words. |
+| `sources` | The guidelines the rule restates, as `{ title, url }`. |
+| `fix` | What to do about it. A contrast finding's fix starts with the measured ratio (`Measured 3.09:1; it needs at least 4.5:1.`), also in `measured`. |
+| `screen`, `journey`, `step` | With `--blueprint`: the screen the page is, and the first journey and step that visit it (`steps` lists every one when there are several). |
+
+(Before 0.3, `rule` held the check's name; read `check` instead.)
+
+## Verdicts and modalities
+
+The report opens with two verdicts (FEAT-014), in `report.json` as `verdicts`:
+
+- **Theme** (`verdicts.theme`): the theme the page declares and its design
+  system, whether it applies, whether every component is the SDK's, and
+  contrast in light and dark, each item `pass`, `warn` or `fail` with the
+  `theme.*` rules and findings behind it.
+- **Modality fit** (`verdicts.modality`, one per modality): the SDK components
+  the modality needs, and whether its rule families were checked, with the fix
+  for anything missing. `chat` and `hybrid-chat` need the SDK's `Conversation`
+  (its log and composer; missing, the verdict fails); `hybrid-chat` also an
+  Adaptive Card part (missing, it warns); `responsive-web` needs `AppShell`
+  (missing, it fails) whose navigation adapts by size class: the bottom bar
+  below 600 px and the side navigation from 840 px (not adapting, it warns).
+
+The modalities come from the blueprint's `supports.modalities`, else
+`--modality`, else `responsive-web`, which the report says it assumed. Named,
+they choose the widths of FEAT-014's matrix (`responsive-web` 390, 768 and
+1280; `chat` and `hybrid-chat` 390 and 1280; the union for several) unless
+`--width` is given, and the rule families: a check whose rules are of no
+family the modalities need is not run (`chat` runs no `nav`, `modal` or
+`emphasis` check; only `hybrid-chat` runs the `card` checks). Assumed, every
+check runs at the widths `--width` gives, as before.
+
+## The report, by journey
+
+`index.html` reads in this order:
+
+1. the theme and modality-fit verdicts;
+2. **Rules broken**: each rule's ID, statement and sources, how many findings
+   break it and links to them (a finding shown under several steps counts
+   once);
+3. with `--blueprint` and its journeys: each journey, each of its steps with
+   its screen's screenshot (the findings' numbered boxes drawn on it) and every
+   finding on that screen: its severity, the rule ID and full statement, its
+   sources, the evidence (the element, its box and the runs it was seen in)
+   and the fix. A screen on several journeys is shown under each step. Then
+   **Other screens**: screens no journey visits, and pages that map to no
+   screen. Without journeys, one section per screen (or page);
+4. every check, as an index.
+
+A page maps to its screen by `data-piq-screen="<screen id>"` on any element,
+else by the screen whose `path` (`"path": "/settings"`) it is served at.
 
 SDK widgets (anything inside a `.piq-*` element) are trusted: their colours,
 fonts and radii are the SDK's. The audit holds the app's own markup to the
@@ -101,7 +163,8 @@ the report says so, and the favicon check is skipped.
 | `--json` | Print the report as JSON. |
 | `--write-baseline <file>` | Write every finding (not notes) to this file, in a stable order. Run it once when adopting the audit in an existing app, and commit the file. |
 | `--baseline <file>` | Leave out the findings in this file: they are not reported and do not affect the exit code. New findings are reported as usual; baselined ones no longer found are listed as resolved, so the file can shrink. A check the file names that this version lacks is ignored with a note. |
-| `--blueprint <file>` | The app's blueprint (`app.blueprint.json`). AI markup on a screen whose blueprint declares no AI role is reported (`ai-declared`); the screen's `ai.roles` and `ai.takeover` apply to the agent checks. A page names its screen with `data-piq-screen="<screen id>"` on its root. |
+| `--blueprint <file>` | The app's blueprint (`app.blueprint.json`). Its `supports.modalities` choose the widths and rule families; the report follows its journeys, step by step, matching each page to a screen by `data-piq-screen="<screen id>"`, else by the screen's `path`. AI markup on a screen whose blueprint declares no AI role is reported (`ai-declared`); the screen's `ai.roles` and `ai.takeover` apply to the agent checks. |
+| `--modality <list>` | The app's modalities when the blueprint names none, comma-separated: `responsive-web`, `chat`, `hybrid-chat`. They choose the widths and rule families, and the report gives a modality-fit verdict for each. A future modality (`ios`, `android`, `macos`, `windows`) or an unknown one exits 2. Without it or a blueprint, `responsive-web` is assumed. |
 
 A URL that starts with `/` is relative to the first full URL. The SDK's CSS
 and theme list are read from the app's own `@ux-builder/ui` and
@@ -121,8 +184,8 @@ if (report.summary.error) process.exitCode = 1;
 ## With an agent
 
 The report is built to be handed to a coding agent: `report.json` names each
-finding's element, value, the token or widget to use, and the themes it was
-seen in. "Fix every error in `audit-report/report.json`, then run
+finding's element, value, the rule it breaks in full, the fix, and the themes
+and widths it was seen in. "Fix every error in `audit-report/report.json`, then run
 `npm run audit` again" is a complete instruction.
 
 ## UX assessment
@@ -148,11 +211,11 @@ code or its HELIX documents.
 | `assess merge --run <R-id>` | One finding per user problem, with every evidence reference and a stable `F-` ID |
 | `assess propose --finding <F-id> --target <HELIX ID> \| --new <type>` | Writes a patch against a HELIX artifact (by `ddx.id`), or a new instance named and numbered by the catalogue and drafted from its template; nothing is applied |
 | `assess check-writes`, `assess apply-check P-<n>` | Nothing under the HELIX root or the app changed during the run; a proposal's target is unchanged before it is applied |
-| `assess report <run-dir>` | `report.html`, `report.md` and `evidence.json`: what was checked, seen and left uncertain; heuristics as recommendations; claims for representative users |
+| `assess report <run-dir>` | `report.html`, `report.md` and `evidence.json`: what was checked, seen and left uncertain; the findings by journey, then the state it was walked in, then step, each with its rule ID and full statement (or heuristic and source), evidence, severity on Nielsen's 0 to 4 scale and fix (a finding at no step under its state's *General*); heuristics also indexed as recommendations; claims for representative users. `report.md` is a HELIX `usability-evaluation-report` (`ddx:` frontmatter linking its journeys and stories), drafted from the installed HELIX's template when it defines that type |
 | `assess compare <earlier> <later>` | Each finding new, persistent, resolved, regressed or not rechecked; an unassessed state never resolves one |
-| `assess video --run <R-id>` | Replays each walked journey (its steps' `do`) in a browser of its own, signed in as its role, with `evidence.redact` masked from the first frame, pausing at each checkpoint's findings; writes `video/`: an MP4 per journey with the findings in plain English drawn in (needs `ffmpeg` on the PATH), the clean recording and its annotation timeline, captions, and `index.html`, a player whose findings pop up, pause the video and link to the report (FEAT-013) |
+| `assess video --run <R-id>` | Replays each walked journey (its steps' `do`) in a browser of its own, signed in as its role, with `evidence.redact` masked from the first frame, pausing at each checkpoint's findings; writes `video/`: an MP4 per journey with the findings drawn in (needs `ffmpeg` on the PATH), the clean recording and its annotation timeline, captions, a chapter track with a chapter per step (`J-review · step 2: entry`), and `index.html`, a player whose findings pop up, pause the video and link to the report (FEAT-013). Each caption has the problem in plain English, the rule's ID and full statement (or heuristic and source) and the fix. `--pace slow\|normal\|fast` (default normal): a step holds 2 s, a finding max(5 s, its caption's words at 200 a minute); slow × 1.5, fast × 0.6, never under 1 s a step or 3 s a finding (FEAT-015) |
 | `assess gate <run-dir> --fail-on P1` | For CI: fails on an open finding at that priority or above, or a blocked stage. See `examples/ux-assessment.workflow.yml` |
-| `assess validate-report <run-dir>` | Checks a run package: every record's schema, the coverage matrix, walkthroughs, findings and proposals |
+| `assess validate-report <run-dir>` | Checks a run package: every record's schema, the coverage matrix, walkthroughs, findings and proposals; a finding that names neither a rule (`rule`, a catalogue rule ID) nor a heuristic (`heuristic: { name, source }`) fails |
 
 The manifest binds HELIX rather than describing it: name the flow (or let the
 marker's `defaults.flow` choose), and the assessment finds the documents and

@@ -196,6 +196,95 @@
                 "minLength": 1
               }
             }
+          },
+          "hold": {
+            "type": "number",
+            "minimum": 0,
+            "description": "The seconds the finding is held at the video's pace (FEAT-015 RPT-06)"
+          },
+          "rule": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "The rule the finding breaks (ID and full statement), or its heuristic and source (FEAT-015 RPT-07)",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "statement": {
+                "type": "string",
+                "minLength": 1
+              },
+              "heuristic": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "id",
+                  "statement"
+                ]
+              },
+              {
+                "required": [
+                  "heuristic"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "pace": {
+      "enum": [
+        "slow",
+        "normal",
+        "fast"
+      ],
+      "description": "The pace the video was rendered at (FEAT-015 RPT-06; assess video --pace)"
+    },
+    "steps": {
+      "type": "array",
+      "description": "Each replayed step as a chapter of its own, in order (FEAT-015 RPT-07)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "n",
+          "chapter",
+          "title",
+          "start",
+          "end"
+        ],
+        "properties": {
+          "n": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "chapter": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "\"<journey> · step <n>: <screen>\" (FEAT-015 RPT-07)"
+          },
+          "screen": {
+            "type": "string"
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0
           }
         }
       }

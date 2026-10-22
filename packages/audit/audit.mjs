@@ -20,8 +20,10 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 import { chromium } from "playwright";
-import { enrich, inspect, modalEscape, prepare, sdkRulesIn, settle } from "./inspect.mjs";
-export { AI_CHECKS, inspect, STATE_AFFECTING } from "./inspect.mjs";
+import { DEFAULT_MODALITIES, expandModalities, MODALITIES } from "@ux-builder/ui/blueprint/modalities";
+import { enrich, inspect, modalEscape, prepare, ruleFor, rulesByCheck, sdkRulesIn, settle } from "./inspect.mjs";
+import { journeyIndex, modalityVerdicts, pageScreen, themeVerdict } from "./verdicts.mjs";
+export { AI_CHECKS, FIXES, inspect, STATE_AFFECTING } from "./inspect.mjs";
 export { attach, checkpoint, startBrowser } from "./assess/checkpoint.mjs";
 
 const own = createRequire(import.meta.url);
@@ -90,6 +92,47 @@ const loadedThemes = (page) => page.evaluate(() => {
   return [...names];
 });
 
+/* What the page shows of the SDK's shells, for the modality verdict
+   (FEAT-014 MOD-09): the Conversation (its log and composer), an Adaptive
+   Card part, and AppShell with which of its navigations is showing; and the
+   screen the page names (data-piq-screen). */
+const pageFacts = (page) => page.evaluate(() => {
+  const shown = (e) => !!e && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== "hidden";
+  const conv = document.querySelector(".piq-conversation");
+  const shell = document.querySelector(".piq-shell");
+  return {
+    screen: document.querySelector("[data-piq-screen]")?.getAttribute("data-piq-screen") || null,
+    conversation: !!conv && !!conv.querySelector("[role=log]") && !!conv.querySelector(".piq-composer"),
+    adaptiveCard: !!document.querySelector(".piq-adaptive-card:not(.piq-adaptive-card--invalid)"),
+    appShell: shell ? { bar: shown(shell.querySelector(".piq-shell__bar")), side: shown(shell.querySelector(".piq-shell__side")) } : null,
+  };
+});
+
+/* The app's modalities (FEAT-014 MOD-08; CONTRACT-004): the blueprint's
+   supports.modalities, else the ones given, else responsive-web, assumed. */
+export function modalitiesOf({ blueprint = null, modalities = null } = {}) {
+  const declared = Array.isArray(blueprint?.supports?.modalities) && blueprint.supports.modalities.length ? blueprint.supports.modalities : null;
+  if (declared) return { names: declared, source: "blueprint", assumed: false };
+  if (modalities?.length) return { names: modalities, source: "option", assumed: false };
+  return { names: [...DEFAULT_MODALITIES], source: "assumed", assumed: true };
+}
+
+/* The rule families each audit check enforces: its rules' ID prefixes. */
+export function checkFamilies(interaction) {
+  const byCheck = rulesByCheck(interaction);
+  return Object.fromEntries(Object.keys(RULES).map((c) => [c, [...new Set((byCheck.get(c) ?? []).map((r) => r.id.split(".")[0]))]]));
+}
+
+/* The rule families the modalities need (FEAT-014's matrix), and the AI
+   families of the AI roles the blueprint's screens declare. */
+export function familiesFor(names, blueprint = null) {
+  const fams = new Set(expandModalities(names).ruleFamilies);
+  const roles = new Set((blueprint?.screens ?? []).flatMap((s) => s?.ai?.roles ?? []));
+  if (roles.size) { fams.add("ai"); fams.add("genui"); }
+  if (roles.has("agent")) fams.add("agent");
+  return [...fams];
+}
+
 async function overlayShot(page, marked, path) {
   await page.evaluate((boxes) => {
     const layer = document.createElement("div");
@@ -113,10 +156,21 @@ async function overlayShot(page, marked, path) {
 /* Audit pages of a running app. Returns the report; writes screenshots
    under out when given. Each page is switched through every width, theme
    and appearance, and inspect() checks each state. */
-export async function audit({ urls, themes, appearances = ["light", "dark"], widths, ignore = [], rules = {}, contrast = true, out = null, wait = null, cwd = process.cwd(), viewport = { width: 1280, height: 900 }, baseline = null, blueprint = null, log = () => {} }) {
+export async function audit({ urls, themes, appearances = ["light", "dark"], widths, ignore = [], rules = {}, contrast = true, out = null, wait = null, cwd = process.cwd(), viewport = { width: 1280, height: 900 }, baseline = null, blueprint = null, modalities = null, log = () => {} }) {
   if (!urls?.length) throw new Error("audit: give at least one URL");
   const sdk = prepare(cwd, { contrast });
   const { manifest, interaction } = sdk;
+  // The modalities choose the widths and the rule families (FEAT-014 MOD-08).
+  // Assumed, the audit runs as before: every check, at the widths given.
+  const mods = modalitiesOf({ blueprint, modalities });
+  const unknown = mods.names.filter((m) => !MODALITIES[m]);
+  if (unknown.length) throw new Error(`audit: ${unknown.map((m) => `"${m}"`).join(", ")} ${unknown.length === 1 ? "is not a modality" : "are not modalities"}; available now: ${Object.keys(MODALITIES).join(", ")}`);
+  const families = checkFamilies(interaction);
+  const needed = familiesFor(mods.names, blueprint);
+  const offByModality = mods.assumed ? [] : Object.keys(RULES).filter((c) => families[c].length && !families[c].some((f) => needed.includes(f)));
+  rules = { ...Object.fromEntries(offByModality.map((c) => [c, false])), ...rules };
+  if (!widths?.length && !mods.assumed) widths = expandModalities(mods.names).widths;
+  const pages = [];
   const known = new Map(manifest.themes.map((t) => [t.name, t]));
   if (out) mkdirSync(join(out, "screens"), { recursive: true });
 
@@ -153,6 +207,9 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
       // Colours mid-transition are neither theme's: switch instantly.
       await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; }" });
       const shipped = await loadedThemes(page);
+      const declaredTheme = await page.evaluate(() => [...document.querySelectorAll("[data-theme]")].find((e) => !e.parentElement?.closest("[data-theme]"))?.dataset.theme ?? null);
+      const facts = { url, theme: declaredTheme, screen: null, widths: [] };
+      pages.push(facts);
       const wanted = themes?.length ? themes : [...known.keys()];
       const note = (rule, severity, message, extra = {}) => add({ url, rule, severity, selector: null, message, ...extra });
       for (const t of wanted) {
@@ -163,6 +220,9 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
       const sizes = widths?.length ? widths : [viewport.width];
       for (const width of sizes) {
       if (widths?.length) { await page.setViewportSize({ width, height: viewport.height }); await settle(page); }
+      const seen = await pageFacts(page);
+      facts.screen ??= seen.screen;
+      facts.widths.push({ width, conversation: seen.conversation, adaptiveCard: seen.adaptiveCard, appShell: seen.appShell });
       for (const theme of wanted.filter((t) => shipped.includes(t))) {
         const aps = (known.get(theme)?.appearances ?? ["light", "dark"]).filter((a) => appearances.includes(a)).sort();
         for (const appearance of aps) {
@@ -199,22 +259,24 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
   } finally {
     await browser.close();
   }
-  return report({ urls, runs, findings: [...groups.values()], interaction, baseline });
+  for (const p of pages) Object.assign(p, pageScreen(p, blueprint));
+  return report({ urls, runs, findings: [...groups.values()], interaction, baseline, modalities: { ...mods, widths: widths?.length ? widths : [viewport.width], ruleFamilies: needed, off: offByModality }, pages, blueprint, rules, contrast, manifest });
 }
 
 /* A finding's identity across audits, for the baseline (FEAT-008 AUD-03). */
-const baselineKey = (f) => [f.rule, f.url, f.selector ?? "", f.selector ? "" : f.message ?? ""].join("|");
+const checkOf = (f) => f.check ?? f.rule;
+const baselineKey = (f) => [checkOf(f), f.url, f.selector ?? "", f.selector ? "" : f.message ?? ""].join("|");
 
 /* The findings as a baseline file, in a stable order (CONTRACT-004). */
 export function toBaseline(report) {
-  const findings = report.findings.filter((f) => f.severity !== "info").map((f) => ({ rule: f.rule, url: f.url, selector: f.selector ?? null, ...(f.selector ? {} : { message: f.message }), runs: [...f.runs].sort() }));
+  const findings = report.findings.filter((f) => f.severity !== "info").map((f) => ({ rule: checkOf(f), url: f.url, selector: f.selector ?? null, ...(f.selector ? {} : { message: f.message }), runs: [...f.runs].sort() }));
   findings.sort((a, b) => a.rule.localeCompare(b.rule) || a.url.localeCompare(b.url) || (a.selector ?? "").localeCompare(b.selector ?? "") || (a.message ?? "").localeCompare(b.message ?? ""));
   return { tool: "ux-builder-audit", version: VERSION, findings };
 }
 
 /* Order and count the findings; mark a colour that is the same in every
    theme as hard-coded. */
-function report({ urls, runs, findings, interaction = null, baseline = null }) {
+function report({ urls, runs, findings, interaction = null, baseline = null, modalities = null, pages = [], blueprint = null, rules = {}, contrast = true, manifest = null }) {
   enrich(findings, interaction);
   for (const f of findings) {
     if (f.preview) f.message += ` — in the preview ${f.preview}`;
@@ -235,7 +297,29 @@ function report({ urls, runs, findings, interaction = null, baseline = null }) {
     resolved = [...known.entries()].filter(([k, b]) => !seen.has(k) && urls.includes(b.url)).map(([, b]) => b);
   }
   findings.sort((a, b) => SEVERITY.indexOf(a.severity) - SEVERITY.indexOf(b.severity) || a.rule.localeCompare(b.rule) || a.id - b.id);
-  const summary = { error: 0, warning: 0, info: 0, byRule: {}, ...(baseline ? { baselined, resolved: resolved.length } : {}) };
-  for (const f of findings) { summary[f.severity]++; summary.byRule[f.rule] = (summary.byRule[f.rule] ?? 0) + 1; }
-  return { tool: "@ux-builder/audit", version: VERSION, generatedAt: new Date().toISOString(), urls, rules: RULES, runs, findings, summary, ...(baseline ? { resolved, ...(ignored.length ? { baselineIgnored: ignored.map((b) => `${b.rule}: no such check in this version; ignored`) } : {}) } : {}) };
+  const summary = { error: 0, warning: 0, info: 0, byRule: {}, byRuleId: {}, ...(baseline ? { baselined, resolved: resolved.length } : {}) };
+  // Each finding names its check, and the rule it breaks in full: ID,
+  // statement, sources, and the fix (FEAT-015 RPT-01; CONTRACT-004).
+  const byCheck = rulesByCheck(interaction);
+  const pageOf = new Map(pages.map((p) => [p.url, p]));
+  findings = findings.map(({ rule: check, ruleId, statement, sources, ...rest }) => {
+    const r = ruleFor(check, ruleId, byCheck);
+    const id = r?.id ?? ruleId ?? null;
+    const cited = (r?.sources ?? sources ?? []).map(({ title, url }) => ({ title, url }));
+    const page = pageOf.get(rest.url);
+    return { id: rest.id, check, ruleId: id, rule: id ? { id, title: r?.title ?? null, statement: r?.statement ?? statement ?? RULES[check], sources: cited } : null, sources: cited, ...rest, ...(page?.screen ? { screen: page.screen } : {}) };
+  });
+  // With the blueprint's journeys: the journey and step of each finding's
+  // screen (FEAT-015 RPT-03). A screen on several steps lists them all.
+  const journeys = journeyIndex(blueprint);
+  if (journeys.length) for (const f of findings) {
+    const at = journeys.flatMap((j) => j.steps.filter((s) => s.screen && s.screen === f.screen).map((s) => ({ journey: j.id, step: s.n, ...(s.alternate ? { alternate: s.alternate } : {}) })));
+    if (at.length) { f.journey = at[0].journey; f.step = at[0].step; if (at.length > 1) f.steps = at; }
+  }
+  for (const f of findings) { summary[f.severity]++; summary.byRule[f.check] = (summary.byRule[f.check] ?? 0) + 1; if (f.ruleId) summary.byRuleId[f.ruleId] = (summary.byRuleId[f.ruleId] ?? 0) + 1; }
+  const verdicts = {
+    theme: themeVerdict({ findings, pages, runs, rules, contrast, manifest }),
+    modality: modalityVerdicts({ modalities, pages, rules, findings, families: checkFamilies(interaction), layout: runs.some((r) => r.width != null) }),
+  };
+  return { tool: "@ux-builder/audit", version: VERSION, generatedAt: new Date().toISOString(), urls, rules: RULES, ...(modalities ? { modalities } : {}), verdicts, pages, ...(journeys.length ? { journeys } : {}), runs, findings, summary, ...(baseline ? { resolved, ...(ignored.length ? { baselineIgnored: ignored.map((b) => `${b.rule}: no such check in this version; ignored`) } : {}) } : {}) };
 }

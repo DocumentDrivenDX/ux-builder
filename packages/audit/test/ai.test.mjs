@@ -49,17 +49,17 @@ const cliRun = (args) => new Promise((resolve) => {
 const OPTS = { themes: ["praxis-carbon"], appearances: ["light"], contrast: false, rules: { brand: false } };
 const run = (pages, more = {}) => audit({ urls: pages.map((p) => `${base}/${p}`), ...OPTS, ...more });
 const AI = new Set(AI_CHECKS);
-const ai = (r, page) => r.findings.filter((f) => AI.has(f.rule) && (!page || f.url.endsWith(`/${page}`)));
-const of = (r, rule, page) => ai(r, page).filter((f) => f.rule === rule);
-const brief = (fs) => JSON.stringify(fs.map(({ rule, selector, message }) => ({ rule, selector, message })), null, 1);
+const ai = (r, page) => r.findings.filter((f) => AI.has(f.check) && (!page || f.url.endsWith(`/${page}`)));
+const of = (r, rule, page) => ai(r, page).filter((f) => f.check === rule);
+const brief = (fs) => JSON.stringify(fs.map(({ check, selector, message }) => ({ check, selector, message })), null, 1);
 const CLEAN = ["clean-agent.html", "clean-done.html", "clean-chat.html", "clean-start.html"];
 
 /* Each seeded defect page reports its check, and only it among the AI checks. */
 async function seeded(page, rule, { also = [], selector, widths } = {}) {
   const r = await run([page], widths ? { widths } : {});
   const got = ai(r, page);
-  assert.ok(got.some((f) => f.rule === rule), `${page}: ${rule} expected; got ${brief(got)}`);
-  assert.deepEqual([...new Set(got.map((f) => f.rule))].sort(), [rule, ...also].sort(), `${page}: only ${[rule, ...also].join(", ")}; got ${brief(got)}`);
+  assert.ok(got.some((f) => f.check === rule), `${page}: ${rule} expected; got ${brief(got)}`);
+  assert.deepEqual([...new Set(got.map((f) => f.check))].sort(), [rule, ...also].sort(), `${page}: only ${[rule, ...also].join(", ")}; got ${brief(got)}`);
   if (selector) assert.ok(of(r, rule, page).some((f) => f.selector === selector), `${page}: ${rule} at ${selector}; got ${brief(got)}`);
   return of(r, rule, page);
 }
@@ -117,7 +117,7 @@ describe("US-078: the audit checks marked AI content", () => {
     const cli = await cliRun(["--theme", "praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--out", out, "--blueprint", join(FIXTURES, "app.blueprint.json"), `${base}/clean-chat.html`]);
     assert.equal(cli.status, 0, cli.stderr + cli.stdout);
     const json = JSON.parse(readFileSync(join(out, "report.json"), "utf8"));
-    assert.ok(json.findings.some((f) => f.rule === "ai-declared" && /"chat"/.test(f.message)));
+    assert.ok(json.findings.some((f) => f.check === "ai-declared" && /"chat"/.test(f.message)));
     assert.equal((await cliRun(["--blueprint", join(tmp, "missing.json"), `${base}/clean-chat.html`])).status, 2);
   });
 
@@ -133,13 +133,13 @@ describe("US-078: the audit checks marked AI content", () => {
     const pages = readdirSync(FIXTURES).filter((f) => f.endsWith(".html") && !f.startsWith("clean-") && !f.startsWith("inline-") && f !== "no-markers.html");
     const r = await run(pages, { widths: [360], blueprint: BLUEPRINT, rules: { brand: false } });
     const found = ai(r);
-    assert.deepEqual([...new Set(found.map((f) => f.rule))].sort(), [...AI_CHECKS].sort(), "every AI check is seeded");
+    assert.deepEqual([...new Set(found.map((f) => f.check))].sort(), [...AI_CHECKS].sort(), "every AI check is seeded");
     for (const f of found) {
-      assert.equal(f.severity, "warning", `${f.rule} is a warning`);
+      assert.equal(f.severity, "warning", `${f.check} is a warning`);
       const rule = CATALOGUE.find((x) => x.id === f.ruleId);
-      assert.ok(rule, `${f.rule}: ${f.ruleId} is a catalogue rule`);
-      assert.ok(rule.checks.some((c) => c.kind === "audit" && c.id === f.rule), `${f.ruleId} names the audit check ${f.rule}`);
-      assert.ok(f.sources.length && f.sources.every((s) => s.title && /^https:/.test(s.url)), `${f.rule} has sources`);
+      assert.ok(rule, `${f.check}: ${f.ruleId} is a catalogue rule`);
+      assert.ok(rule.checks.some((c) => c.kind === "audit" && c.id === f.check), `${f.ruleId} names the audit check ${f.check}`);
+      assert.ok(f.sources.length && f.sources.every((s) => s.title && /^https:/.test(s.url)), `${f.check} has sources`);
       assert.deepEqual(f.sources, rule.sources.map(({ title, url }) => ({ title, url })));
     }
     for (const c of AI_CHECKS) assert.ok(RULES[c], `${c} is a check --off can name`);
@@ -171,7 +171,7 @@ describe("US-079: users can follow and steer an agent", () => {
     assert.ok(!readFileSync(join(FIXTURES, "agent-who-acts-declared.html"), "utf8").includes("data-piq-ai-takeover"));
     assert.deepEqual(ai(await run(["agent-who-acts-declared.html"])), [], "without --blueprint, nothing says it supports takeover");
     const r = await run(["agent-who-acts-declared.html"], { blueprint: BLUEPRINT });
-    assert.deepEqual(ai(r).map((f) => [f.rule, f.selector]), [["agent-who-acts", "#actor"]], brief(ai(r)));
+    assert.deepEqual(ai(r).map((f) => [f.check, f.selector]), [["agent-who-acts", "#actor"]], brief(ai(r)));
   });
 
   // @covers US-079-AC4
@@ -219,12 +219,12 @@ describe("US-080: a chat that renders UI inline", () => {
   test("AC6: an inline pattern gets the page's own checks, and the rendered-card checks", async () => {
     const r = await run(["inline-pattern.html", "inline-pattern-clean.html"], { widths: [1280] });
     const inside = (f) => /#(answer|expense|submit-expense|save-draft|tiny)\b/.test(f.selector ?? "");
-    const primary = r.findings.filter((f) => f.rule === "one-primary-action" && f.url.endsWith("/inline-pattern.html"));
+    const primary = r.findings.filter((f) => f.check === "one-primary-action" && f.url.endsWith("/inline-pattern.html"));
     assert.equal(primary.length, 1, brief(primary));
     assert.ok(inside(primary[0]), primary[0].selector);
     assert.match(primary[0].message, /"Submit expense", "Save draft"/);
-    assert.ok(r.findings.some((f) => f.rule === "target-size" && f.selector?.includes("#tiny")), "target-size inside generated UI");
-    assert.deepEqual(r.findings.filter((f) => ["one-primary-action", "target-size"].includes(f.rule) && f.url.endsWith("/inline-pattern-clean.html")), []);
+    assert.ok(r.findings.some((f) => f.check === "target-size" && f.selector?.includes("#tiny")), "target-size inside generated UI");
+    assert.deepEqual(r.findings.filter((f) => ["one-primary-action", "target-size"].includes(f.check) && f.url.endsWith("/inline-pattern-clean.html")), []);
     // The rendered-card checks: an input with only a placeholder; generated UI too wide for compact.
     const [label] = await seeded("card-input-label.html", "card-input-label", { selector: "#amount" });
     assert.equal(label.ruleId, "card.input-label");

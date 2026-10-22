@@ -62,8 +62,9 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       before that step. --scenario errorProne records whether the error is
       shown in place and whether recovery needs no restart.
   validate-report <run-dir>
-      Check every record in a run package, that its evidence resolves, and that
-      findings relying on a conflicting HELIX ID are qualified.
+      Check every record in a run package, that its evidence resolves, that
+      findings relying on a conflicting HELIX ID are qualified, and that every
+      finding names the rule or the heuristic it breaks.
 
   propose --run R-id --finding F-id (--target <HELIX ID> | --new <type> [--title t])
           --kind new-requirement|unmet-criterion|scope --criterion "Given…" --test "…" [--test-file f] [--keeps text]
@@ -74,30 +75,37 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
   apply-check (P-n | improvement-backlog) --run R-id
       Check a proposal's target is unchanged since the proposal was written.
   report <run-dir> [--self-contained]
-      Write report.html, report.md and evidence.json; --self-contained embeds the screenshots.
+      Write report.html, report.md and evidence.json, by journey, state and step,
+      each finding with its rule (or heuristic), evidence, severity 0 to 4 and fix;
+      report.md is a HELIX usability-evaluation-report. --self-contained embeds
+      the screenshots.
   compare <earlier-run-dir> <later-run-dir>
       Classify findings: new, persistent, resolved, regressed, not rechecked;
       and list the earlier baseline's failures.
   gate <run-dir> [--fail-on P0|P1|P2|P3]
       For CI: exit 1 on an open finding at that priority or above, or a blocked stage.
-  video --run R-id [--journey J-id]... [--viewport WxH]... [--manifest f] [--out dir]
+  video --run R-id [--journey J-id]... [--viewport WxH]... [--pace slow|normal|fast] [--manifest f] [--out dir]
       Replay each walked journey (walkthrough.json's do steps) in a browser of
       its own, signed in as its role, masked as evidence.redact says, holding at
       each checkpoint's findings; write <out>/<run>/video/: a clean recording,
-      its annotation timeline and captions per journey, and video.json.
+      its annotation timeline and captions per journey, and video.json. At the
+      normal pace a step holds 2 s and a finding's caption (its problem, rule
+      and fix) max(5 s, its words at 200 a minute); slow is 1.5 times as long,
+      fast 0.6 times, never under 1 s a step or 3 s a finding.
 
 The ux-builder-assess skill (node_modules/@ux-builder/audit/skill/) says how
 an agent runs these as one assessment.`;
 
 const SUB = {
   async video(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, journey: { type: "string", multiple: true }, viewport: { type: "string", multiple: true } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, journey: { type: "string", multiple: true }, viewport: { type: "string", multiple: true }, pace: { type: "string", default: "normal" } } });
     const viewports = (o.viewport ?? []).map((v) => { const m = /^(\d+)x(\d+)$/.exec(v); return m && { width: Number(m[1]), height: Number(m[2]) }; });
+    if (!["slow", "normal", "fast"].includes(o.pace)) { console.error(`--pace is slow, normal or fast\n${USAGE}`); return 2; }
     if (!o.run || viewports.some((v) => !v)) { console.error(USAGE); return 2; }
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
     const { video } = await import("./video.mjs");
-    const r = await video({ ...ready, out: o.out, run: o.run, journeys: o.journey ?? [], viewports });
+    const r = await video({ ...ready, out: o.out, run: o.run, journeys: o.journey ?? [], viewports, pace: o.pace });
     if (r.error) { console.error(r.error); return r.code; }
     for (const v of r.record.videos) console.log(`${v.journey} ${v.viewport.width}×${v.viewport.height}: ${v.chapters.filter((c) => c.kind === "main" || c.kind === "alternate").length} chapter(s), ${v.findings.length} finding(s) shown → video/${v.files.clean}`);
     for (const n of r.record.notRecorded) console.error(`${n.journey}: not recorded — ${n.reason}`);

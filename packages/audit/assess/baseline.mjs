@@ -123,8 +123,9 @@ export async function baseline({ manifest, resolved, out, run, now = new Date(),
       } finally { await browser.close(); }
       writeFileSync(join(dir, "audit", "as-is.json"), JSON.stringify({ schema: "as-is", version: 1, note: "Pages not on the SDK, inspected as they are with the SDK-conformance checks off.", findings: asIs }, null, 2) + "\n");
     }
-    const all = [...report.findings, ...asIs].filter((f) => f.severity !== "info" || f.rule === "theme-applied");
-    const isAdoption = (f) => ADOPTION.has(f.rule) || (CONFORMANCE.includes(f.rule) && bare.includes(f.url));
+    const checkOf = (f) => f.check ?? f.rule;
+    const all = [...report.findings, ...asIs].filter((f) => f.severity !== "info" || checkOf(f) === "theme-applied");
+    const isAdoption = (f) => ADOPTION.has(checkOf(f)) || (CONFORMANCE.includes(checkOf(f)) && bare.includes(f.url));
     audited = {
       report: "audit/report.json", ...(asIs.length || bare.length ? { asIs: "audit/as-is.json" } : {}),
       urls, widths: a.widths ?? [], off, unsupported, pagesNotOnSdk: bare,

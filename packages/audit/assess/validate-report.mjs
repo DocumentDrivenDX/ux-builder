@@ -11,7 +11,8 @@
    findings, validation work for uncertain severe concerns, proposals aimed
    at HELIX artifacts that still exist, and qualified findings where the
    alignment review found a conflict, and an AI journey's findings each
-   naming the AI rule or heuristic they are about (FEAT-011 AIX-03). With
+   naming the AI rule or heuristic they are about (FEAT-011 AIX-03), and
+   every finding naming a rule or a heuristic (FEAT-015 RPT-01). With
    walkthrough videos (FEAT-013; CONTRACT-006 "Walkthrough videos"): steps
    that can be replayed, secrets only by reference, plain-English findings,
    and annotations that show only findings of the backlog, at the
@@ -115,6 +116,8 @@ export function validateReport(dir) {
     if (!f.source_refs?.length && !proposed) add("backlog.json", at, `${f.id} cites no requirement and proposes no criterion`);
     if (f.finding_type === "heuristic" && !proposed) add("backlog.json", `${at}/expected_behavior_or_proposed_requirement`, `${f.id} is a heuristic concern: state it as "Proposed criterion: …", a recommendation, not an existing obligation`);
     if (f.finding_type === "real-user" && !(f.evidence_refs ?? []).some((r) => r.startsWith("evidence/real-user/"))) add("backlog.json", at, `${f.id} is typed real-user without evidence from real users (evidence/real-user/…)`);
+    // Every finding names the rule or the heuristic it breaks (FEAT-015 RPT-01; US-102-AC4).
+    if (!f.rule && !f.heuristic?.name) add("backlog.json", at, `${f.id} names neither a rule nor a heuristic: give rule (a catalogue rule ID, e.g. modal.dismiss) or heuristic ({ name, source }, e.g. { "name": "Visibility of system status", "source": "Nielsen's 10 usability heuristics" })`);
     // A finding of an AI journey names the AI rule or heuristic it is about (FEAT-011 AIX-03; US-082-AC2).
     const ai = aiJourneys.get(f.journey_id);
     if (ai && !f.rule) add("backlog.json", at, `${f.id} is a finding of the AI journey ${f.journey_id}: name the AI rule or heuristic it is about (rule), one of ${ai.slice(0, 6).join(", ")}${ai.length > 6 ? ", …" : ""}`);

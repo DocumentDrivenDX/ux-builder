@@ -11,12 +11,16 @@
    - a title card, then the main path and each walked alternate as
      chapters, each after its fixture's reset and with cookies and storage
      put back to the role's signed-in state, behind a card;
-   - each step at a human pace, with a cursor and click marks;
+   - each step at a human pace (holds(): about 2 s a step, and at each
+     finding as long as its caption takes to read at 200 words a minute,
+     never under 5 s; --pace slow or fast scales both), with a cursor and
+     click marks, and a chapter per step titled "<journey> · step <n>:
+     <screen>" (FEAT-015 RPT-06, RPT-07);
    - at each checkpoint, the state it recorded checked again; a different
      state stops the chapter with a card, and shows none of its findings;
    - at a checkpoint with findings, the page held still while each is read,
-     and the finding's time range and its elements' boxes written to the
-     timeline;
+     and the finding's time range, its elements' boxes and its rule (ID and
+     full statement, or heuristic and source) written to the timeline;
    - an end card.
    The manifest's evidence.redact (and every password field) is masked from
    the first frame; if the mask is not on a page, the journey's video is
@@ -34,13 +38,20 @@ import { chromium } from "playwright";
 import { wouldApprove } from "./ai.mjs";
 import { guardContext, recordStage, refusal } from "./checkpoint.mjs";
 import { runDir } from "./plan.mjs";
+import { catalogueRules, ruleOf } from "./rules.mjs";
 import { layer } from "./video-layer.mjs";
 import { writePlayer } from "./video-player.mjs";
 import { findFfmpeg, renderMp4 } from "./video-render.mjs";
 
 export const DEFAULT_VIEWPORT = { width: 1440, height: 900 };
-export const HOLD = { min: 4, perWord: 0.3 };
-const PACE = { beforeStep: 450, move: 650, afterClick: 500, typeDelay: 55, settle: 900, card: 2600, title: 3200, end: 4500 };
+/* A finding's caption holds at least min seconds, and perWord seconds a word
+   (200 words a minute); the manifest's video.holdSeconds can change both. */
+export const HOLD = { min: 5, perWord: 60 / 200 };
+/* The pace's scale and its floors (FEAT-015 RPT-06; CONTRACT-006). */
+export const PACES = { slow: 1.5, normal: 1, fast: 0.6 };
+export const STEP_SECONDS = 2;
+export const FLOOR = { step: 1, finding: 3 };
+const PACE = { beforeStep: 450, move: 650, afterClick: 500, typeDelay: 55, card: 2600, title: 3200, end: 4500 };
 const PRIORITY = ["P0", "P1", "P2", "P3"];
 
 const json = (f) => JSON.parse(readFileSync(f, "utf8"));
@@ -48,7 +59,23 @@ const maybe = (f) => { try { return json(f); } catch { return null; } };
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const words = (t) => String(t ?? "").trim().split(/\s+/).filter(Boolean).length;
-export const holdFor = (caption, hold = HOLD) => Math.max(hold.min ?? HOLD.min, (hold.perWord ?? HOLD.perWord) * (words(caption.problem) + words(caption.recommendation)));
+/* The words a finding's caption shows: the problem, the rule (ID and
+   statement, or heuristic and source) and the fix. */
+export const captionWords = (caption, rule = null) => words(caption.problem) + words(caption.recommendation) + (rule ? words(rule.id ?? "") + words(rule.statement ?? "") + words(rule.heuristic ?? "") + words(rule.source ?? "") : 0);
+
+/* How long the video holds, in seconds, at a pace (FEAT-015 RPT-06;
+   US-103-AC1, AC2): a step 2 s, a finding max(5 s, its words ÷ 200 × 60 s);
+   slow × 1.5, fast × 0.6; never under 1 s a step or 3 s a finding. Pure. */
+export function holds(pace = "normal", hold = HOLD) {
+  if (!(pace in PACES)) throw new Error(`pace is slow, normal or fast, not "${pace}"`);
+  const k = PACES[pace];
+  return {
+    pace, scale: k,
+    step: +Math.max(FLOOR.step, STEP_SECONDS * k).toFixed(3),
+    finding: (n) => +Math.max(FLOOR.finding, Math.max(hold.min ?? HOLD.min, (hold.perWord ?? HOLD.perWord) * n) * k).toFixed(3),
+  };
+}
+export const holdFor = (caption, hold = HOLD, pace = "normal", rule = null) => holds(pace, hold).finding(captionWords(caption, rule));
 export const videoName = (journey, viewport) => (viewport.width === DEFAULT_VIEWPORT.width && viewport.height === DEFAULT_VIEWPORT.height ? journey : `${journey}@${viewport.width}x${viewport.height}`);
 export const kindOf = (f) => (f.finding_type === "heuristic" ? "judgment" : "checked");
 
@@ -94,12 +121,30 @@ const reset = (command, cwd) => new Promise((done) => {
 
 const vtt = (cues) => "WEBVTT\n\n" + cues.map((c, i) => `${i + 1}\n${stamp(c.start)} --> ${stamp(c.end)}\n${c.text}\n`).join("\n");
 const stamp = (t) => { const ms = Math.round(t * 1000); const h = Math.floor(ms / 3600000), m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60; return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(ms % 1000).padStart(3, "0")}`; };
-export const captionText = (a) => `[${a.kind === "judgment" ? "Judgment" : "Checked"} · ${a.priority}${a.confidence === "low" ? " · worth checking with users" : ""}] ${a.caption.problem} Recommendation: ${a.caption.recommendation} (${a.finding})`;
+/* The rule line of a caption: "<id>: <statement>", or "Heuristic: <name> (<source>)". */
+export const ruleText = (r) => (!r ? "" : r.id ? `${r.id}: ${r.statement}` : `Heuristic: ${r.heuristic}${r.source ? ` (${r.source})` : ""}`);
+export const captionText = (a) => `[${a.kind === "judgment" ? "Judgment" : "Checked"} · ${a.priority}${a.confidence === "low" ? " · worth checking with users" : ""}] ${a.caption.problem}${a.rule ? ` Rule ${ruleText(a.rule)}` : ""} Fix: ${a.caption.recommendation} (${a.finding})`;
+
+/* A step's screen, for its chapter title: the step's own, the blueprint
+   journey's step's, else its URL's path, else its action. */
+export function screenOf(step, planJ) {
+  if (step.screen) return step.screen;
+  const planned = step.alternate == null ? planJ?.steps?.find((x) => x.n === step.n)?.screen : null;
+  if (planned) return planned;
+  if (step.url) { try { return new URL(step.url, "http://x").pathname; } catch { return step.url; } }
+  return step.action;
+}
+export const stepTitle = (journey, step, planJ) => `${journey} · step ${step.n}: ${screenOf(step, planJ)}`;
+
+/* A finding's rule, as the timeline carries it. */
+const ruleOfFinding = (f, rules) => { const x = ruleOf(f, rules); return !x ? null : x.kind === "rule" ? { id: x.id, statement: x.statement } : { heuristic: x.name, ...(x.source ? { source: x.source } : {}) }; };
 
 /* Replay one journey at one viewport, recording. */
 async function recordJourney(browser, ctx) {
-  const { journey, planJ, chapters, viewport, role, signedIn, resolved, findings, inspections, outDir, name, appName, runId, startedAt, hold, deadline, pace } = ctx;
-  const wait = (ms) => sleep(ms * pace);
+  const { journey, planJ, chapters, viewport, role, signedIn, resolved, findings, inspections, outDir, name, appName, runId, startedAt, hold, deadline, pace, timeScale, rules } = ctx;
+  // Real time is scaled by timeScale (1; tests run faster); the timeline records what was shown.
+  const wait = (ms) => sleep(ms * timeScale);
+  const held = holds(pace, hold);
   const guard = { origins: resolved.run.origins, exclude: resolved.restrictions.excludeIntegrations, allow: resolved.restrictions.allow, deny: resolved.restrictions.deny };
   const tmp = join(outDir, `.recording-${name}`);
   rmSync(tmp, { recursive: true, force: true });
@@ -111,7 +156,7 @@ async function recordJourney(browser, ctx) {
   page.setDefaultTimeout(10_000);
   const t0 = Date.now();
   const now = () => (Date.now() - t0) / 1000;
-  const out = { chapters: [], annotations: [], discarded: null };
+  const out = { chapters: [], steps: [], annotations: [], discarded: null };
   const layerOn = async () => { try { return await page.evaluate(() => window.__piqVideo?.ok === true); } catch { return false; } };
   const card = async (html) => { await page.evaluate((h) => window.__piqVideo?.card(h), html).catch(() => {}); };
   let last = null;
@@ -121,7 +166,7 @@ async function recordJourney(browser, ctx) {
     const b = await locator.boundingBox();
     if (!b) return null;
     const x = b.x + b.width / 2, y = b.y + b.height / 2;
-    await page.evaluate(([x, y, ms]) => window.__piqVideo?.move(x, y, ms), [x, y, PACE.move * pace]);
+    await page.evaluate(([x, y, ms]) => window.__piqVideo?.move(x, y, ms), [x, y, PACE.move * timeScale]);
     await wait(PACE.move + 100);
     last = { x, y };
     return { x, y };
@@ -165,6 +210,10 @@ async function recordJourney(browser, ctx) {
     if (!ch.steps[0]?.do?.goto) await page.goto(resolved.run.baseUrl, { waitUntil: "load" });
     let covered = ci > 0;
     for (const s of ch.steps) {
+      // Each step is a chapter of its own in the chapter track (RPT-07).
+      const stepMark = { n: s.n, chapter: ch.id, title: stepTitle(journey.id, s, planJ), screen: screenOf(s, planJ), start: +now().toFixed(3) };
+      out.steps.push(stepMark);
+      const closeStep = () => { stepMark.end = +now().toFixed(3); };
       if (deadline && Date.now() > deadline) { await stop(`limit reached: the journey's ${resolved.limits.journeyMinutes} minutes (limits.journeyMinutes) are spent`); break; }
       const d = s.do;
       if (!d) { await stop(`step ${s.n} records no replay step ("do")`); break; }
@@ -190,7 +239,7 @@ async function recordJourney(browser, ctx) {
           const at = await pointAt(l);
           if (at) await page.evaluate(([x, y]) => window.__piqVideo?.mark(x, y), [at.x, at.y]);
           await l.fill("");
-          await l.pressSequentially(String(value), { delay: PACE.typeDelay * pace });
+          await l.pressSequentially(String(value), { delay: PACE.typeDelay * timeScale });
         } else if (d.press) {
           if (await page.evaluate(wouldApprove, { key: d.press })) { await stop(`step ${s.n} would activate an approve control; the assessment never approves`); break; }
           await page.keyboard.press(d.press);
@@ -205,8 +254,9 @@ async function recordJourney(browser, ctx) {
       if (!(await layerOn())) { out.discarded = `the mask layer is not on ${page.url()}; nothing is recorded without it (PRV-01)`; break; }
       if (last) await page.evaluate(([x, y]) => window.__piqVideo?.move(x, y, 0), [last.x, last.y]).catch(() => {});
       if (covered) { await card(null); covered = false; }
-      await wait(PACE.settle);
-      if (!s.checkpoint) continue;
+      // The step holds (RPT-06): 2 s at the normal pace.
+      await wait(held.step * 1000);
+      if (!s.checkpoint) { closeStep(); continue; }
       // The state the checkpoint recorded (REP-05).
       const insp = inspections.get(s.checkpoint);
       const want = s.url ?? insp?.url;
@@ -234,10 +284,13 @@ async function recordJourney(browser, ctx) {
           } catch { /* not on this page: a caption only */ }
         }
         const caption = f.plain ?? { problem: f.title, recommendation: f.recommendation };
+        const rule = ruleOfFinding(f, rules);
+        const secs = held.finding(captionWords(caption, rule));
         const start = now();
-        await wait(holdFor(caption, hold) * 1000);
-        out.annotations.push({ finding: f.id, checkpoint: s.checkpoint, chapter: ch.id, start: +start.toFixed(3), end: +now().toFixed(3), kind: kindOf(f), priority: f.priority, ...(f.confidence?.level ? { confidence: f.confidence.level } : {}), boxes, caption });
+        await wait(secs * 1000);
+        out.annotations.push({ finding: f.id, checkpoint: s.checkpoint, chapter: ch.id, start: +start.toFixed(3), end: +now().toFixed(3), hold: +secs.toFixed(3), kind: kindOf(f), priority: f.priority, ...(f.confidence?.level ? { confidence: f.confidence.level } : {}), boxes, ...(rule ? { rule } : {}), caption });
       }
+      closeStep();
     }
     if (out.discarded) break;
     if (chapter.end == null) chapter.end = now();
@@ -262,11 +315,17 @@ async function recordJourney(browser, ctx) {
   if (out.discarded) rmSync(tmp, { recursive: true, force: true });
   else { await video.saveAs(file); rmSync(tmp, { recursive: true, force: true }); }
   for (const c of out.chapters) { c.start = +c.start.toFixed(3); c.end = +(c.end ?? out.duration).toFixed(3); }
+  // A step a stop cut short ends where its chapter does.
+  for (const st of out.steps) st.end ??= out.chapters.find((c) => c.id === st.chapter)?.end ?? out.duration;
   return out;
 }
 
 /* Run `assess video`: returns { code, dir, record, stage }. */
-export async function video({ manifest, resolved, out, run, journeys: only = [], viewports = [], env = process.env, now = Date.now, pace = 1, ffmpeg = "ffmpeg" }) {
+/* pace: slow, normal or fast (FEAT-015 RPT-06). timeScale scales real time
+   only, for tests (a number for pace is read as one, as before). */
+export async function video({ manifest, resolved, out, run, journeys: only = [], viewports = [], env = process.env, now = Date.now, pace = "normal", timeScale = 1, ffmpeg = "ffmpeg" }) {
+  if (typeof pace === "number") { timeScale = pace; pace = "normal"; }
+  if (!(pace in PACES)) return { code: 2, error: `--pace is slow, normal or fast, not "${pace}"` };
   const dir = runDir(manifest, resolved, out, run);
   const vdir = join(dir, "video");
   const walk = maybe(join(dir, "walkthrough.json"));
@@ -281,7 +340,8 @@ export async function video({ manifest, resolved, out, run, journeys: only = [],
   const hold = { ...HOLD, ...resolved.video?.holdSeconds };
   mkdirSync(vdir, { recursive: true });
   const startedAt = new Date(now()).toISOString();
-  const record = { schema: "video", version: 1, videos: [], notRecorded: [] };
+  const record = { schema: "video", version: 1, pace, videos: [], notRecorded: [] };
+  const rules = catalogueRules(dir, runRec);
   const browser = await chromium.launch();
   try {
     for (const j of walk.journeys ?? []) {
@@ -296,15 +356,17 @@ export async function video({ manifest, resolved, out, run, journeys: only = [],
       for (const viewport of vps) {
         const name = videoName(j.id, viewport);
         const deadline = resolved.limits?.journeyMinutes ? Date.now() + resolved.limits.journeyMinutes * 60_000 : null;
-        const r = await recordJourney(browser, { journey: j, planJ, chapters, viewport, role, signedIn: auth.state, resolved, findings, inspections, outDir: vdir, name, appName: resolved.app?.name ?? "", runId: run, startedAt: runRec?.startedAt ?? null, hold, deadline, pace });
+        const r = await recordJourney(browser, { journey: j, planJ, chapters, viewport, role, signedIn: auth.state, resolved, findings, inspections, outDir: vdir, name, appName: resolved.app?.name ?? "", runId: run, startedAt: runRec?.startedAt ?? null, hold, deadline, pace, timeScale, rules });
         if (r.discarded) { record.notRecorded.push({ journey: j.id, viewport, reason: r.discarded }); continue; }
-        const timeline = { schema: "annotations", version: 1, journey: j.id, viewport, duration: r.duration, chapters: r.chapters, annotations: r.annotations };
+        const timeline = { schema: "annotations", version: 1, journey: j.id, viewport, pace, duration: r.duration, chapters: r.chapters, steps: r.steps, annotations: r.annotations };
         writeFileSync(join(vdir, `${name}.annotations.json`), JSON.stringify(timeline, null, 2) + "\n");
         writeFileSync(join(vdir, `${name}.vtt`), vtt(r.annotations.map((a) => ({ start: a.start, end: a.end, text: captionText(a) }))));
-        writeFileSync(join(vdir, `${name}.chapters.vtt`), vtt(r.chapters.map((c) => ({ start: c.start, end: c.end, text: c.title }))));
+        // The chapter track: the title card, each step ("J-review · step 2: entry"), the end (RPT-07).
+        const track = [...r.chapters.filter((c) => c.kind === "title"), ...r.steps, ...r.chapters.filter((c) => c.kind === "end")].map((c) => ({ start: c.start, end: c.end, text: c.kind === "title" ? `${j.id} · ${c.title}` : c.kind === "end" ? `${j.id} · end` : c.title }));
+        writeFileSync(join(vdir, `${name}.chapters.vtt`), vtt(track));
         const ranges = new Map();
         for (const a of r.annotations) ranges.set(a.finding, [...(ranges.get(a.finding) ?? []), { start: a.start, end: a.end }]);
-        record.videos.push({ journey: j.id, viewport, files: { clean: `${name}.clean.webm`, annotations: `${name}.annotations.json`, captions: `${name}.vtt`, chapters: `${name}.chapters.vtt` }, chapters: r.chapters, findings: [...ranges].map(([id, rs]) => ({ id, ranges: rs })) });
+        record.videos.push({ journey: j.id, viewport, steps: r.steps.map(({ n, chapter, title, start, end }) => ({ n, chapter, title, start, end })), files: { clean: `${name}.clean.webm`, annotations: `${name}.annotations.json`, captions: `${name}.vtt`, chapters: `${name}.chapters.vtt` }, chapters: r.chapters, findings: [...ranges].map(([id, rs]) => ({ id, ranges: rs })) });
       }
     }
   } finally { await browser.close(); }

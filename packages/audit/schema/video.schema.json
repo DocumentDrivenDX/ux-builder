@@ -164,6 +164,45 @@
                 }
               }
             }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "n",
+                "chapter",
+                "title",
+                "start",
+                "end"
+              ],
+              "properties": {
+                "n": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "chapter": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "\"<journey> · step <n>: <screen>\" (FEAT-015 RPT-07)"
+                },
+                "screen": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "end": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
           }
         }
       }
@@ -203,6 +242,14 @@
           }
         }
       }
+    },
+    "pace": {
+      "enum": [
+        "slow",
+        "normal",
+        "fast"
+      ],
+      "description": "The pace the video was rendered at (FEAT-015 RPT-06; assess video --pace)"
     }
   }
 }

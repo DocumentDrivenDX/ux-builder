@@ -40,7 +40,7 @@ export function prepared({ files = {}, run = "R-20261021T090000Z", manifest = {}
       source_refs: ["US-001"], test_refs: ["test/queue.test.mjs"], evidence_refs: ["checkpoints/C-review-1/screenshot.png"],
       observed_behavior: "After Approve, the row disappears with no message.", expected_behavior_or_proposed_requirement: "US-001-AC2: the entry leaves the queue, and the reviewer can tell it was approved.",
       recommendation: "Show a toast with Undo (ToastProvider).", component_mapping: [], priority: "P2", confidence: { level: "high", reason: "seen at two checkpoints" }, effort: "S",
-      dependencies: [], verification: "Approve an entry; a toast names it and offers Undo.", proposed_doc_changes: [], status: "open", ...over,
+      dependencies: [], verification: "Approve an entry; a toast names it and offers Undo.", proposed_doc_changes: [], status: "open", heuristic: { name: "Visibility of system status", source: "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design" }, ...over,
     };
     return { ...f, id: over.id ?? findingId(f) };
   };
