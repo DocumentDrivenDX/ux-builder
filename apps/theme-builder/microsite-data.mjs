@@ -185,6 +185,9 @@ export const NOTES = {
   "@ux-builder/audit ./assess/*": "The assessment's operations, as ux-builder-audit assess runs them",
   "@ux-builder/audit ./package.json": "The package's own metadata",
   "@ux-builder/mcp .": "The MCP server (ux-builder-mcp); createServer for an in-process client",
+  "@ux-builder/trace .": "The episode trace an app keeps while it is built: openEpisode, appendEvent, closeEpisode, attachTranscript, exportBundle and validateTrace (ux-builder-trace)",
+  "@ux-builder/trace ./schema/*": "The JSON Schemas of a trace event, the export bundle and .ux-builder/config.json",
+  "@ux-builder/trace ./package.json": "The package's own metadata",
 };
 
 /* What a wildcard export matches today, from the package's files. */

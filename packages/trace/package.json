@@ -1,0 +1,42 @@
+{
+  "name": "@ux-builder/trace",
+  "version": "0.1.0",
+  "license": "MIT OR Apache-2.0",
+  "description": "The episode trace (FEAT-016, CONTRACT-007): what ux-builder's tools write to an app while it is built or changed (episodes, events, masked transcripts), and the export bundle an owner shares by choice, with the ux-builder-trace command. It makes no network request.",
+  "type": "module",
+  "bin": {
+    "ux-builder-trace": "./cli.mjs"
+  },
+  "exports": {
+    ".": "./index.mjs",
+    "./schema/*": "./schema/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.mjs",
+    "mask.mjs",
+    "tar.mjs",
+    "cli.mjs",
+    "schema",
+    "README.md",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "yaml": "^2.9.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DocumentDrivenDX/ux-builder.git",
+    "directory": "packages/trace"
+  }
+}

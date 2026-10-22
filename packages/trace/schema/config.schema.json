@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/trace/config.schema.json",
+  "title": "Episode trace configuration (CONTRACT-007 v1)",
+  "description": ".ux-builder/config.json, committed with the app. Both fields are optional.",
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "transcripts": { "type": "boolean", "default": true, "description": "false: attach-transcript copies nothing and says why" },
+    "redact": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "array", "items": { "type": "string" }, "description": "Regular expressions; each match is written as [masked:redact]" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
