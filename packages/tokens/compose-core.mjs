@@ -5,6 +5,9 @@
    fit them, SD-001 D3). compose.mjs adds loading and validation and re-exports
    everything here. */
 
+// The SDK's diagram colours (FEAT-017), for a brand load() did not attach its own copy to.
+import DATAVIZ from "../../tokens/dataviz.json" with { type: "json" };
+
 export const REF = /\{([a-z0-9.-]+)\}/g;
 const FONT_ROLES = ["display", "heading", "body", "mono"];
 export const APPEARANCES = ["dark", "light"];
@@ -60,10 +63,12 @@ export function anatomyTokens(anatomy, appearance) {
   return m;
 }
 
-/** A brand's tokens for one appearance: color, state, brand, plus derived roles. */
-export function brandTokens(brand, appearance) {
+/** A brand's tokens for one appearance: the diagram colours, then color, state, brand, plus derived roles.
+    The diagram colours (CONTRACT-002 Composition step 4) come first so a brand's own status or series
+    colour replaces the SDK's; load() attaches the dataviz file it read, else the one beside this package. */
+export function brandTokens(brand, appearance, viz = brand.dataviz ?? DATAVIZ) {
   const a = brand.appearances[appearance];
-  const m = new Map();
+  const m = groupsToMap(viz.derived, groupsToMap(viz.appearances[appearance]));
   for (const g of ["color", "state", "brand"]) {
     for (const [k, t] of Object.entries(a[g])) m.set(`${g}.${k}`, entry(t, t.$asset ? `url("../brand/${t.$asset}")` : t.$value));
   }

@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DocumentDrivenDX/ux-builder/tokens/schema/dataviz.schema.json",
+  "title": "Diagram and data-visualization colours",
+  "description": "The SDK's default status and series colours per appearance, and the diagram roles derived from a brand's own roles (FEAT-017, CONTRACT-002 Composition step 4). A brand may set any status or series colour itself.",
+  "type": "object",
+  "required": [
+    "appearances",
+    "derived"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "$description": {
+      "type": "string"
+    },
+    "appearances": {
+      "type": "object",
+      "required": [
+        "light",
+        "dark"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "light": {
+          "$ref": "#/$defs/hues"
+        },
+        "dark": {
+          "$ref": "#/$defs/hues"
+        }
+      }
+    },
+    "derived": {
+      "type": "object",
+      "required": [
+        "color"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status-positive-subtle",
+            "status-caution-subtle",
+            "status-negative-subtle",
+            "status-info-subtle",
+            "diagram-region-1",
+            "diagram-region-2",
+            "diagram-region-3",
+            "diagram-edge",
+            "diagram-edge-strong",
+            "diagram-edge-muted",
+            "lifecycle-placeholder",
+            "lifecycle-decided",
+            "lifecycle-unknown"
+          ],
+          "properties": {
+            "status-positive-subtle": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "status-caution-subtle": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "status-negative-subtle": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "status-info-subtle": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "diagram-region-1": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "diagram-region-2": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "diagram-region-3": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "diagram-edge": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "diagram-edge-strong": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "diagram-edge-muted": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "lifecycle-placeholder": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "lifecycle-decided": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            },
+            "lifecycle-unknown": {
+              "$ref": "design-system.schema.json#/$defs/token"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hues": {
+      "type": "object",
+      "required": [
+        "color"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status-positive",
+            "status-caution",
+            "status-negative",
+            "status-info",
+            "series-1",
+            "series-2",
+            "series-3",
+            "series-4",
+            "series-5",
+            "series-6",
+            "series-7",
+            "series-8"
+          ],
+          "properties": {
+            "status-positive": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "status-caution": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "status-negative": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "status-info": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "series-1": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "series-2": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "series-3": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "series-4": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "series-5": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "series-6": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "series-7": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            },
+            "series-8": {
+              "$ref": "brand.schema.json#/$defs/colour"
+            }
+          }
+        }
+      }
+    }
+  }
+}

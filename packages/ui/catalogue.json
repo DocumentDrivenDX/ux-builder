@@ -19175,6 +19175,54 @@
       "alias0": "--rule"
     },
     {
+      "name": "--piq-color-diagram-edge",
+      "path": "color.diagram-edge",
+      "group": "color",
+      "tier": "role",
+      "purpose": "A data edge. Clears 3:1 on the ground, a card and the deepest region",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-diagram-edge-muted",
+      "path": "color.diagram-edge-muted",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Return and control edges, drawn dashed. Clears 3:1 on the ground, a card and the deepest region",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-diagram-edge-strong",
+      "path": "color.diagram-edge-strong",
+      "group": "color",
+      "tier": "role",
+      "purpose": "An action edge and the main flow. Clears 3:1 on the ground, a card and the deepest region",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-diagram-region-1",
+      "path": "color.diagram-region-1",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Region tint: outermost group, zone or band. `color.text` clears 4.5:1 on it; each is at least as far from the ground as the one before",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-diagram-region-2",
+      "path": "color.diagram-region-2",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Region tint: a group inside region 1, or the alternate band. `color.text` clears 4.5:1 on it; each is at least as far from the ground as the one before",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-diagram-region-3",
+      "path": "color.diagram-region-3",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Region tint: the innermost group. `color.text` clears 4.5:1 on it; each is at least as far from the ground as the one before",
+      "alias0": null
+    },
+    {
       "name": "--piq-color-ground",
       "path": "color.ground",
       "group": "color",
@@ -19191,11 +19239,163 @@
       "alias0": "--rail"
     },
     {
+      "name": "--piq-color-lifecycle-decided",
+      "path": "color.lifecycle-decided",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Fill of a diagram part decided, not built. `color.text` clears 4.5:1 on it",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-lifecycle-placeholder",
+      "path": "color.lifecycle-placeholder",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Fill of a diagram part planned, not built. `color.text` clears 4.5:1 on it",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-lifecycle-unknown",
+      "path": "color.lifecycle-unknown",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Fill of a diagram part of unknown status, drawn dashed. `color.text` clears 4.5:1 on it",
+      "alias0": null
+    },
+    {
       "name": "--piq-color-on-accent",
       "path": "color.on-accent",
       "group": "color",
       "tier": "role",
       "purpose": "Text and counts drawn on the accent; today only the literal value of `--badge-fg`. Added by CONTRACT-002 (2026-10-06)",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-series-1",
+      "path": "color.series-1",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Categorical slot 1, blue. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-series-2",
+      "path": "color.series-2",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Categorical slot 2, orange. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-series-3",
+      "path": "color.series-3",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Categorical slot 3, aqua. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-series-4",
+      "path": "color.series-4",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Categorical slot 4, yellow. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-series-5",
+      "path": "color.series-5",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Categorical slot 5, magenta. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-series-6",
+      "path": "color.series-6",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Categorical slot 6, green. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-series-7",
+      "path": "color.series-7",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Categorical slot 7, violet. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-series-8",
+      "path": "color.series-8",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Categorical slot 8, red. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-status-caution",
+      "path": "color.status-caution",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Status, needs attention: near a threshold, partial. Clears 4.5:1 on the ground and a card, so it MAY be text",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-status-caution-subtle",
+      "path": "color.status-caution-subtle",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Fill behind a caution value or chip; `color.text` clears 4.5:1 on it, and `status-caution` 3:1 as a mark",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-status-info",
+      "path": "color.status-info",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Status, neutral information. Clears 4.5:1 on the ground and a card, so it MAY be text",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-status-info-subtle",
+      "path": "color.status-info-subtle",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Fill behind a info value or chip; `color.text` clears 4.5:1 on it, and `status-info` 3:1 as a mark",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-status-negative",
+      "path": "color.status-negative",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Status, bad: a threshold missed, a failure. Clears 4.5:1 on the ground and a card, so it MAY be text",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-status-negative-subtle",
+      "path": "color.status-negative-subtle",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Fill behind a negative value or chip; `color.text` clears 4.5:1 on it, and `status-negative` 3:1 as a mark",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-status-positive",
+      "path": "color.status-positive",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Status, good: a target met, a test passed. Clears 4.5:1 on the ground and a card, so it MAY be text",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-status-positive-subtle",
+      "path": "color.status-positive-subtle",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Fill behind a positive value or chip; `color.text` clears 4.5:1 on it, and `status-positive` 3:1 as a mark",
       "alias0": null
     },
     {
@@ -19895,6 +20095,14 @@
       "alias0": "--radius"
     },
     {
+      "name": "--piq-radius-diagram-node",
+      "path": "radius.diagram-node",
+      "group": "radius",
+      "tier": "role",
+      "purpose": "Corner radius of a diagram node",
+      "alias0": null
+    },
+    {
       "name": "--piq-shadow-card",
       "path": "shadow.card",
       "group": "shadow",
@@ -19956,6 +20164,22 @@
       "group": "size",
       "tier": "role",
       "purpose": "Maximum width of page content in the extra-large class",
+      "alias0": null
+    },
+    {
+      "name": "--piq-size-diagram-stroke",
+      "path": "size.diagram-stroke",
+      "group": "size",
+      "tier": "role",
+      "purpose": "Outline of a diagram node, and an edge",
+      "alias0": null
+    },
+    {
+      "name": "--piq-size-diagram-stroke-strong",
+      "path": "size.diagram-stroke-strong",
+      "group": "size",
+      "tier": "role",
+      "purpose": "The main flow, an action edge, the outline of the project's own parts",
       "alias0": null
     },
     {

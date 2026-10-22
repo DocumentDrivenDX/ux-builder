@@ -258,16 +258,16 @@ Spacing props (`gap`) are the theme's space steps, 0 to 8. Each design system ch
 Style your own markup with these. Each names a role; its value comes from the theme.
 
 - **border**: `--piq-border-default`
-- **color**: `--piq-color-accent`, `--piq-color-border`, `--piq-color-ground`, `--piq-color-ground-recessed`, `--piq-color-on-accent`, `--piq-color-structure`, `--piq-color-surface`, `--piq-color-surface-sunken`, `--piq-color-text`, `--piq-color-text-muted`, `--piq-color-text-strong`, `--piq-color-text-subtle`
+- **color**: `--piq-color-accent`, `--piq-color-border`, `--piq-color-diagram-edge`, `--piq-color-diagram-edge-muted`, `--piq-color-diagram-edge-strong`, `--piq-color-diagram-region-1`, `--piq-color-diagram-region-2`, `--piq-color-diagram-region-3`, `--piq-color-ground`, `--piq-color-ground-recessed`, `--piq-color-lifecycle-decided`, `--piq-color-lifecycle-placeholder`, `--piq-color-lifecycle-unknown`, `--piq-color-on-accent`, `--piq-color-series-1`, `--piq-color-series-2`, `--piq-color-series-3`, `--piq-color-series-4`, `--piq-color-series-5`, `--piq-color-series-6`, `--piq-color-series-7`, `--piq-color-series-8`, `--piq-color-status-caution`, `--piq-color-status-caution-subtle`, `--piq-color-status-info`, `--piq-color-status-info-subtle`, `--piq-color-status-negative`, `--piq-color-status-negative-subtle`, `--piq-color-status-positive`, `--piq-color-status-positive-subtle`, `--piq-color-structure`, `--piq-color-surface`, `--piq-color-surface-sunken`, `--piq-color-text`, `--piq-color-text-muted`, `--piq-color-text-strong`, `--piq-color-text-subtle`
 - **focus**: `--piq-focus-offset`, `--piq-focus-ring`
 - **font-size**: `--piq-font-size-body`, `--piq-font-size-display`, `--piq-font-size-heading`, `--piq-font-size-label`, `--piq-font-size-lead`, `--piq-font-size-small`, `--piq-font-size-title`
 - **font-weight**: `--piq-font-weight-regular`, `--piq-font-weight-strong`
 - **font**: `--piq-font-body`, `--piq-font-display`, `--piq-font-heading`, `--piq-font-mono`
 - **letter-spacing**: `--piq-letter-spacing-eyebrow`, `--piq-letter-spacing-label`
 - **line-height**: `--piq-line-height-body`, `--piq-line-height-tight`
-- **radius**: `--piq-radius-card`, `--piq-radius-control`
+- **radius**: `--piq-radius-card`, `--piq-radius-control`, `--piq-radius-diagram-node`
 - **shadow**: `--piq-shadow-card`, `--piq-shadow-overlay`
-- **size**: `--piq-size-breakpoint-expanded`, `--piq-size-breakpoint-extra-large`, `--piq-size-breakpoint-large`, `--piq-size-breakpoint-medium`, `--piq-size-content-form`, `--piq-size-content-page`, `--piq-size-measure`, `--piq-size-target-minimum`, `--piq-size-target-touch`
+- **size**: `--piq-size-breakpoint-expanded`, `--piq-size-breakpoint-extra-large`, `--piq-size-breakpoint-large`, `--piq-size-breakpoint-medium`, `--piq-size-content-form`, `--piq-size-content-page`, `--piq-size-diagram-stroke`, `--piq-size-diagram-stroke-strong`, `--piq-size-measure`, `--piq-size-target-minimum`, `--piq-size-target-touch`
 - **space**: `--piq-space-1`, `--piq-space-2`, `--piq-space-3`, `--piq-space-4`, `--piq-space-5`, `--piq-space-6`, `--piq-space-7`, `--piq-space-8`, `--piq-space-gutter-compact`, `--piq-space-gutter-expanded`, `--piq-space-gutter-extra-large`, `--piq-space-gutter-large`, `--piq-space-gutter-medium`
 - **state-layer**: `--piq-state-layer-hover`, `--piq-state-layer-press`
 - **state**: `--piq-state-closed`, `--piq-state-evaluation`, `--piq-state-limited`, `--piq-state-live`, `--piq-state-purchasing`

@@ -896,6 +896,118 @@
     "table.row-border": {
       "tier": "component",
       "css0": null
+    },
+    "color.status-positive": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.status-positive-subtle": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.status-caution": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.status-caution-subtle": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.status-negative": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.status-negative-subtle": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.status-info": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.status-info-subtle": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.series-1": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.series-2": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.series-3": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.series-4": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.series-5": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.series-6": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.series-7": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.series-8": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.diagram-region-1": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.diagram-region-2": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.diagram-region-3": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.diagram-edge": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.diagram-edge-strong": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.diagram-edge-muted": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.lifecycle-placeholder": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.lifecycle-decided": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.lifecycle-unknown": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.diagram-stroke": {
+      "tier": "role",
+      "css0": null
+    },
+    "size.diagram-stroke-strong": {
+      "tier": "role",
+      "css0": null
+    },
+    "radius.diagram-node": {
+      "tier": "role",
+      "css0": null
     }
   }
 }

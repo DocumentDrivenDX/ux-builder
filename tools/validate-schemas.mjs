@@ -16,9 +16,10 @@
       against a broken copy of a real file, which must fail.
    5. tokens/names.json and CONTRACT-001's table name the same tokens with the
       same 0.x names, so the document and the data cannot drift.
-   6. tokens/layout.json and every tokens/variants/*.variants.json validate
-      (ADR-021, ADR-022); the composer's own rules for them are tested in
-      tools/__tests__/variants.test.mjs.
+   6. tokens/layout.json, every tokens/variants/*.variants.json and
+      tokens/dataviz.json validate (ADR-021, ADR-022, FEAT-017); the
+      composer's own rules for them are tested in
+      tools/__tests__/variants.test.mjs and diagram-tokens.test.mjs.
 
    Exits 1 if any check fails. */
 
@@ -39,7 +40,7 @@ const read = (f) => JSON.parse(readFileSync(f, "utf8"));
 
 // Strict, except that a token's $value may be a string or a number.
 const ajv = new Ajv2020({ strict: true, allowUnionTypes: true, allErrors: true });
-for (const f of ["font.schema.json", "brand.schema.json", "design-system.schema.json", "theme.schema.json", "layout.schema.json", "variants.schema.json"]) {
+for (const f of ["font.schema.json", "brand.schema.json", "design-system.schema.json", "theme.schema.json", "layout.schema.json", "variants.schema.json", "dataviz.schema.json"]) {
   const schema = read(join(SCHEMAS, f));
   if (!ajv.validateSchema(schema)) fail(`${f} is not valid JSON Schema 2020-12`, ajv.errors);
   ajv.addSchema(schema, f);
@@ -50,6 +51,7 @@ const validate = {
   theme: ajv.getSchema("theme.schema.json"),
   layout: ajv.getSchema("layout.schema.json"),
   variants: ajv.getSchema("variants.schema.json"),
+  dataviz: ajv.getSchema("dataviz.schema.json"),
 };
 
 let failures = 0;
@@ -114,6 +116,7 @@ const carbon = read(join(ROOT, "tokens/design-systems/carbon.design-system.json"
 const synaptiq = read(join(ROOT, "tokens/themes/synaptiq.theme.json"));
 const tabsPoint = read(join(ROOT, "tokens/variants/tabs.variants.json"));
 const layout = read(join(ROOT, "tokens/layout.json"));
+const dataviz = read(join(ROOT, "tokens/dataviz.json"));
 const clone = (o) => structuredClone(o);
 const mustFail = [
   // @covers US-002-AC1
@@ -132,6 +135,9 @@ const mustFail = [
   ["variants", "a variant point with four variants", () => { const d = clone(tabsPoint); d.variants.a = d.variants.b = d.variants.underlined; return d; }],
   ["variants", "a literal colour in a variant", () => { const d = clone(tabsPoint); d.variants.enclosed.tokens.tabs["tab-bg-selected"].$value = "#FFFFFF"; return d; }],
   ["layout", "a layout file without the size-class boundaries", () => { const d = clone(layout); delete d.constants.size["breakpoint-large"]; return d; }],
+  ["dataviz", "a dataviz file without series 8", () => { const d = clone(dataviz); delete d.appearances.dark.color["series-8"]; return d; }],
+  ["dataviz", "a ninth series colour", () => { const d = clone(dataviz); d.appearances.light.color["series-9"] = { $value: "#000000" }; return d; }],
+  ["brand", "a brand series colour that is not a hex", () => { const d = clone(praxis); d.appearances.light.color["series-2"] = { $value: "{color.accent}" }; return d; }],
 ];
 for (const [kind, what, make] of mustFail) {
   if (validate[kind](make())) fail(`rule not enforced: ${what} was accepted`);
@@ -139,8 +145,8 @@ for (const [kind, what, make] of mustFail) {
 }
 
 // ---- 6: the layout base and the variant points
-for (const file of [join(ROOT, "tokens/layout.json"), ...readdirSync(join(ROOT, "tokens/variants")).filter((f) => f.endsWith(".variants.json")).sort().map((f) => join(ROOT, "tokens/variants", f))]) {
-  const f = file.slice(ROOT.length + 1), kind = f.endsWith("layout.json") ? "layout" : "variants";
+for (const file of [join(ROOT, "tokens/layout.json"), join(ROOT, "tokens/dataviz.json"), ...readdirSync(join(ROOT, "tokens/variants")).filter((f) => f.endsWith(".variants.json")).sort().map((f) => join(ROOT, "tokens/variants", f))]) {
+  const f = file.slice(ROOT.length + 1), kind = f.endsWith("layout.json") ? "layout" : f.endsWith("dataviz.json") ? "dataviz" : "variants";
   if (!validate[kind](read(file))) fail(`${f} does not match ${kind}.schema.json`, validate[kind].errors);
   else console.log(`ok    ${f}`);
 }

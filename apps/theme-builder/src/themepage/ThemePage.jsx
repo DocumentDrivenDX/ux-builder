@@ -5,11 +5,13 @@ import { SURFACES } from "../../../../packages/tokens/bridges.mjs";
 import aiComponents from "../../../../packages/ui/ai/vendor/components.json";
 import { getTheme } from "../api.js";
 import { ThemePreview } from "../Themes.jsx";
+import { DiagramSection } from "./Diagrams.jsx";
 import { indexStories, placeStories, storybookUrl, storyName } from "./stories.js";
 
 /* A theme's own page (?theme=<name>): the page wears the theme, in light,
    dark or the system's setting, and shows its brand (logos, mark, favicon,
-   palette), its CSS for each appearance and for auto, and every widget,
+   palette), its CSS for each appearance and for auto, its diagram and
+   chart tokens (FEAT-017), and every widget,
    screen pattern, assistant part and Adaptive Card in the SDK, each with
    every one of its Storybook stories rendered, linked to that story in
    Storybook, in this theme: no story in Storybook is missing here. A menu on the left
@@ -110,6 +112,7 @@ export function ThemePage({ name }) {
             <ThemePreview theme={theme} />
           </section>
           <CssSection theme={theme} aps={aps} />
+          <DiagramSection tokens={a.tokens} />
           <Catalogue id="widgets" title="UI Components" items={WIDGETS} from="@ux-builder/ui" link={link} />
           <AiCatalogue theme={theme} tokens={a.tokens} appearance={appearance} link={link} />
           <Catalogue id="patterns" title="Screen patterns" items={PATTERNS} from="@ux-builder/ui/patterns" link={link} />
@@ -153,6 +156,8 @@ function Nav() {
       <ul>{item("brand", "Logos and palette")}</ul>
       <p className="tp-nav__group">CSS</p>
       <ul>{item("css-light", "Light")}{item("css-dark", "Dark")}{item("css-auto", "Auto")}{item("css-bridges", "Generative UI bridges")}</ul>
+      <p className="tp-nav__group">Diagrams</p>
+      <ul>{item("diagrams", "Diagrams and data")}</ul>
       <p className="tp-nav__group">UI Components</p>
       <ul>{WIDGETS.map((w) => entry("widget", w.name))}</ul>
       <div className="tp-nav__ai">

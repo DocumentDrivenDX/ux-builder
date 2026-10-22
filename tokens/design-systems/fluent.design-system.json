@@ -121,6 +121,10 @@
       }
     },
     "radius": {
+      "diagram-node": {
+        "$value": "4px",
+        "$description": "Fluent borderRadiusMedium, as its cards. (FEAT-017)"
+      },
       "control": {
         "$value": "4px",
         "$description": "Fluent borderRadiusMedium: controls and fields."
@@ -173,6 +177,10 @@
       }
     },
     "size": {
+      "diagram-stroke": {
+        "$value": "1px",
+        "$description": "Fluent strokeWidthThin. (FEAT-017)"
+      },
       "measure": {
         "$value": "70ch"
       }

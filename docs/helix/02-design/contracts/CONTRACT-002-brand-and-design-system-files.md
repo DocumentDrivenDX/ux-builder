@@ -18,6 +18,8 @@ ddx:
       to: ADR-022
     - kind: informs
       to: FEAT-006
+    - kind: informs
+      to: FEAT-017
 ---
 
 # Contract
@@ -25,7 +27,7 @@ ddx:
 **Contract ID**: CONTRACT-002 — Brand and design system files
 **Type**: schema
 **Version**: v1
-**Status**: accepted — v1 accepted by the operator 2026-10-06, including the `color.on-accent` addition (bead `ux-builder-739039c8`); the Amendment below (theme files, ADR-018) accepted by the operator 2026-10-06 (bead `ux-builder-22865f72`). Sections it changes are marked *[Amended — ADR-018]*. A second amendment (pattern variants, ADR-022; 2026-10-18) is marked *[Amended 2026-10-18 — ADR-022]*; shipped in `@ux-builder/tokens` 1.5.0.
+**Status**: accepted — v1 accepted by the operator 2026-10-06, including the `color.on-accent` addition (bead `ux-builder-739039c8`); the Amendment below (theme files, ADR-018) accepted by the operator 2026-10-06 (bead `ux-builder-22865f72`). Sections it changes are marked *[Amended — ADR-018]*. A second amendment (pattern variants, ADR-022; 2026-10-18) is marked *[Amended 2026-10-18 — ADR-022]*; shipped in `@ux-builder/tokens` 1.5.0. A third (diagram and chart colours, FEAT-017; 2026-10-22) is marked *[Amended 2026-10-22 — FEAT-017]*.
 **Related**: ADR-018 (themes are what apps select), ADR-013 (theme = brand × design system), ADR-017 (brand fonts), CONTRACT-001 (token names), FEAT-001 (THEME-01 to THEME-08), FEAT-002 (generation settings), FEAT-003 (the brand builder writes brand files)
 
 ## Purpose
@@ -71,7 +73,7 @@ with `$value` and optional `$description` and `$type`; a reference is
 | `name` | string | yes | MUST match `^[a-z][a-z0-9]*(-[a-z0-9]+)*$`, ≤ 40 chars, unique among brands | Used in theme identifiers |
 | `title` | string | yes | Human-readable name | Shown in the gallery and builder |
 | `appearances` | object with `light` and/or `dark` | yes | At least one. A theme is built only for the appearances the brand defines. | |
-| `appearances.<ap>.color` | group of colour tokens | yes | MUST set `ground`, `surface`, `surface-sunken`, `text-strong`, `text`, `text-muted`, `text-subtle`, `structure`, `accent`, `on-accent`, `border`; MAY set `ground-recessed`. Values MUST be `#rgb` or `#rrggbb`. No other keys. | `on-accent` is new, see below |
+| `appearances.<ap>.color` | group of colour tokens | yes | MUST set `ground`, `surface`, `surface-sunken`, `text-strong`, `text`, `text-muted`, `text-subtle`, `structure`, `accent`, `on-accent`, `border`; MAY set `ground-recessed`, and *[Amended 2026-10-22 — FEAT-017]* `status-positive`, `status-caution`, `status-negative`, `status-info` and `series-1` … `series-8`, each replacing the SDK's default for that appearance only. Values MUST be `#rgb` or `#rrggbb`. No other keys. | `on-accent` is new, see below |
 | `appearances.<ap>.state` | group of colour tokens | yes | MUST set `live`, `limited`, `purchasing`, `evaluation`, `closed`; hex only | |
 | `appearances.<ap>.brand` | group | yes | MUST set `logo-paint` (hex). MAY set `logo-image`, `mark-image`, `favicon` as paths (`.svg`, `.png`, `.webp`) relative to the brand file, and `logo-bg`, `logo-mask`, `mark-bg`, `mark-mask`, `logo-aspect`, `logo-height`, `logo-height-sm`. | Harness only (CONTRACT-001 brand tier) |
 | `fonts` | object | no | MAY override `display`, `heading`, `body`, `mono`, each a font declaration. A role left out comes from the design system. | ADR-017 |
@@ -79,6 +81,16 @@ with `$value` and optional `$description` and `$type`; a reference is
 
 A brand file MUST NOT contain any other key: no shapes, sizes, spacing or
 widget tokens (ADR-013).
+
+### Diagram colours file *[Amended 2026-10-22 — FEAT-017]*
+
+`tokens/dataviz.json`, one per repository, validated by
+`tokens/schema/dataviz.schema.json`.
+
+| Element | Type / Shape | Required | Rules | Notes |
+|---------|---------------|----------|-------|-------|
+| `appearances.light.color`, `appearances.dark.color` | group of colour tokens | yes | MUST set `status-positive`, `status-caution`, `status-negative`, `status-info`, `series-1` … `series-8`, hex only; no other keys | The defaults a brand may replace |
+| `derived.color` | group of tokens | yes | MUST set `status-<s>-subtle` for each status, `diagram-region-1` … `-3`, `diagram-edge`, `diagram-edge-strong`, `diagram-edge-muted`, `lifecycle-placeholder`, `lifecycle-decided`, `lifecycle-unknown`; no other keys. Values reference brand roles or the status colours, alone or in a two-reference `color-mix()` | The same in both appearances |
 
 ### Design system file
 
@@ -165,7 +177,10 @@ order; a later step overrides an earlier one for the same token:
 2. *S*.`appearances`.*A*
 3. Font roles `font.display|heading|body|mono` from *B*.`fonts`, else
    *S*.`fonts`, rendered as `family, fallback…`
-4. *B*.`appearances`.*A* (`color`, `state`, `brand`)
+4. *[Amended 2026-10-22 — FEAT-017]* The diagram colours: `dataviz.json`
+   `appearances`.*A*, then its `derived` roles; then *B*.`appearances`.*A*
+   (`color`, `state`, `brand`), so a brand's own status or series colour
+   replaces the default
 5. Derived: if *B* sets no `color.ground-recessed`, it equals `color.ground`
 
 References resolve after step 5. A theme is built only if *B* defines *A*.
