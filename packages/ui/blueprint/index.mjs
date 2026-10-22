@@ -3,6 +3,7 @@
 
      import { rulesFor, checkBlueprint } from "@ux-builder/ui/blueprint";
      rulesFor({ context: "view", sizeClasses: ["compact"], inputs: ["coarse"], aiRoles: ["agent"] });
+     rulesFor({ modalities: ["chat"] });   // FEAT-014: expands to the matrix's axes
      checkBlueprint(JSON.parse(readFileSync("app.blueprint.json", "utf8")));
 
    Reads only the installed catalogue.json, so it runs in Node or a browser
@@ -10,12 +11,16 @@
 
 import catalogue from "../catalogue.json" with { type: "json" };
 import { checkFlow } from "./flow.mjs";
+import { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, SHARED_FAMILIES, expandModalities, modalityProblems } from "./modalities.mjs";
 
 const { rules: RULES, recipes: RECIPES, limits: LIMITS, blueprintSchema, aiRoles: AI_ROLES } = catalogue.interaction;
-const PATTERNS = catalogue.patterns.filter((p) => p.type === "component").map((p) => p.name);
+/* A screen's pattern: a catalogue pattern, or the assistant's Conversation or
+   AssistantPanel for a chat screen (FEAT-014: the chat modalities' shell). */
+const PATTERNS = [...catalogue.patterns, ...(catalogue.assistant ?? []).filter((a) => ["Conversation", "AssistantPanel"].includes(a.name))].filter((p) => p.type === "component").map((p) => p.name);
 const byId = new Map(RULES.map((r) => [r.id, r]));
 
 export { blueprintSchema, LIMITS as limits, RULES as rules, RECIPES as recipes };
+export { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, expandModalities, modalityProblems };
 
 /* The checks this module runs, by the rule ID each reports. */
 export const CHECKS = [
@@ -51,12 +56,32 @@ const meets = (axis, values) => !axis || values == null || axis.some((v) => [].c
 /* AI roles are the exception: a target with no role matches no AI rule (FEAT-011 AIO-02). */
 const meetsRole = (axis, roles) => !axis || axis.some((v) => [].concat(roles ?? []).includes(v));
 
+const familyOf = (r) => r.id.split(".")[0];
+
 /* Rules whose `when` matches the target on every axis the rule names; an
    axis the target leaves out matches every value, except `aiRoles`: a rule
-   for an AI role applies only to a target with that role. */
-export function rulesFor({ context, sizeClasses, inputs, aiRoles } = {}) {
-  return RULES.filter((r) => meets(r.when?.context, context) && meets(r.when?.sizeClass, sizeClasses) && meets(r.when?.input, inputs) && meetsRole(r.when?.aiRole, aiRoles));
+   for an AI role applies only to a target with that role.
+
+   With `modalities` (FEAT-014 MOD-06, CONTRACT-005 `when.modality`), the
+   modalities expand by the matrix to the size classes, inputs and AI roles
+   the target leaves out, a rule with `when.modality` applies only when they
+   meet it, and only the modalities' rule families are returned (with the
+   blueprint's own). Without `modalities`, `when.modality` is not read, as
+   before FEAT-014. */
+export function rulesFor({ context, sizeClasses, inputs, aiRoles, modalities } = {}) {
+  let families = null, mods = null;
+  if (modalities != null) {
+    const x = expandModalities([].concat(modalities));
+    mods = x.modalities;
+    families = new Set([...x.ruleFamilies, ...SHARED_FAMILIES]);
+    sizeClasses ??= x.sizeClasses; inputs ??= x.inputs; aiRoles ??= x.aiRoles;
+  }
+  return RULES.filter((r) => meets(r.when?.context, context) && meets(r.when?.sizeClass, sizeClasses) && meets(r.when?.input, inputs) && meetsRole(r.when?.aiRole, aiRoles)
+    && (!mods || (meetsRole(r.when?.modality, mods) && families.has(familyOf(r)))));
 }
+
+/* A blueprint's modalities: supports.modalities, or responsive-web when it names none (FEAT-014). */
+export const modalitiesOf = (bp) => (Array.isArray(bp?.supports?.modalities) && bp.supports.modalities.length ? bp.supports.modalities : DEFAULT_MODALITIES);
 
 /* ----------------------------------------------------------- recipes */
 const words = (s) => (s ?? "").toLowerCase().match(/[a-z0-9-]+/g) ?? [];
@@ -134,7 +159,7 @@ export const nearestPattern = (name) => PATTERNS.reduce((best, p) => (distance(n
 
 const applies = (rule, bp) => {
   const w = rule.when ?? {};
-  return meets(w.context, bp.kind) && meets(w.sizeClass, bp.supports?.sizeClasses) && meets(w.input, bp.supports?.inputs);
+  return meets(w.context, bp.kind) && meets(w.sizeClass, bp.supports?.sizeClasses) && meets(w.input, bp.supports?.inputs) && meetsRole(w.modality, modalitiesOf(bp));
 };
 
 /* Every modal in a screen, with its path and whether it sits inside another. */
@@ -183,7 +208,23 @@ export function checkBlueprint(bp, { helix } = {}) {
   schemaErrors.splice(0, Infinity, ...schemaErrors.filter(([path, msg]) => !own(path, msg)));
   // Inside a screen's ai, a value outside its enum is named (US-077-AC6); elsewhere the message is as before.
   const named = (path, msg) => (path[2] === "ai" && msg.startsWith("must be one of") ? `is ${JSON.stringify(valueAt(bp, path))}; it ${msg}` : msg);
-  for (const [path, msg] of schemaErrors) add("blueprint.valid", path, msg.startsWith('"') ? `${msg}.` : `${ptr(path) || "The blueprint"} ${named(path, msg)}.`, "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005).");
+  // A modality outside the enum is named, and a future one is called future (FEAT-014 MOD-03).
+  const modality = (path) => path.length === 3 && path[0] === "supports" && path[1] === "modalities" && typeof valueAt(bp, path) === "string";
+  for (const [path, msg] of schemaErrors) {
+    if (modality(path) && msg.startsWith("must be one of")) { add("blueprint.valid", path, modalityProblems([valueAt(bp, path)])[0], `Use ${Object.keys(MODALITIES).map((m) => JSON.stringify(m)).join(", ")}; native apps are not supported yet.`); continue; }
+    add("blueprint.valid", path, msg.startsWith('"') ? `${msg}.` : `${ptr(path) || "The blueprint"} ${named(path, msg)}.`, "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005).");
+  }
+  // supports.sizeClasses and inputs include what the modalities derive, or a warning names what is missing (US-098-AC4).
+  const declared = Array.isArray(bp.supports?.modalities) ? bp.supports.modalities.filter((m) => MODALITIES[m]) : [];
+  if (declared.length) {
+    const x = expandModalities(declared);
+    for (const [axis, want] of [["sizeClasses", x.sizeClasses], ["inputs", x.inputs]]) {
+      const have = bp.supports[axis];
+      if (!Array.isArray(have)) continue;
+      const missing = want.filter((v) => !have.includes(v));
+      if (missing.length) add("blueprint.valid", ["supports", axis], `supports.${axis} lacks ${missing.map((v) => JSON.stringify(v)).join(", ")}, which ${declared.join(" and ")} ${declared.length > 1 ? "need" : "needs"} (FEAT-014's matrix).`, `Add ${missing.map((v) => JSON.stringify(v)).join(", ")} to supports.${axis}, or change supports.modalities.`, "warning");
+    }
+  }
 
   const screens = Array.isArray(bp.screens) ? bp.screens.filter((s) => s && typeof s === "object") : [];
   const ids = new Map();

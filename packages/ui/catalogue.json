@@ -11,7 +11,7 @@
     "Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui, ux-builder/no-inline-svg and ux-builder/ai-neutral-voice (a warning on copy that presents the AI as a person, \"I think…\", or as the actor, \"Copilot, summarize\"; English only), then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.",
     "Select themes with ThemeProvider (theme, appearance) or data-theme and data-appearance on <html>; never restyle per theme in app code.",
     "Compose screens from @ux-builder/ui/patterns before writing any layout CSS: AppShell for the frame, with each screen inside a Page, which gives it the page gutter and width (AppShell's content area and the screen patterns have none of their own; ErrorScreen excepted); CollectionList, ListDetail, RecordDetail, FormPage, QuickEdit, Dashboard, ReportViewer, SettingsPage and ErrorScreen for screens; the regions and the layout primitives (Stack, Cluster, Grid, Page, SplitView) for anything else. Supply content, data and actions through their slots; never fork or restyle a pattern.",
-    "Plan before you build: describe the app or view in app.blueprint.json (ux-builder-blueprint init, or the MCP tool get_blueprint_schema), choose its screens from the recipes (list_recipes), and run ux-builder-blueprint check (or check_blueprint) until it reports no errors. Then build, lint and audit. Rules apply by size class, input and context (app or embedded view), never by device."
+    "Plan before you build: describe the app or view in app.blueprint.json (ux-builder-blueprint init, or the MCP tool get_blueprint_schema), choose its screens from the recipes (list_recipes), and run ux-builder-blueprint check (or check_blueprint) until it reports no errors. Then build, lint and audit. Rules apply by size class, input and context (app or embedded view), and by the app's modalities (supports.modalities: responsive-web, chat, hybrid-chat), never by device."
   ],
   "lint": {
     "rule": "ux-builder/no-hard-coded-values",
@@ -20506,6 +20506,121 @@
       "assistant",
       "agent"
     ],
+    "modalities": [
+      {
+        "name": "responsive-web",
+        "label": "Responsive web app (phone to desktop)",
+        "sizeClasses": [
+          "compact",
+          "medium",
+          "expanded",
+          "large"
+        ],
+        "inputs": [
+          "coarse",
+          "fine"
+        ],
+        "aiRoles": [],
+        "shell": "AppShell with an empty Home screen",
+        "components": [
+          "@ux-builder/ui",
+          "@ux-builder/ui/patterns"
+        ],
+        "ruleFamilies": [
+          "nav",
+          "layout",
+          "modal",
+          "action",
+          "feedback",
+          "loading",
+          "screen",
+          "emphasis",
+          "input",
+          "text",
+          "view",
+          "pattern",
+          "flow",
+          "journey",
+          "theme"
+        ],
+        "widths": [
+          390,
+          768,
+          1280
+        ]
+      },
+      {
+        "name": "chat",
+        "label": "Chat app (the conversation is the interface)",
+        "sizeClasses": [
+          "compact",
+          "medium",
+          "expanded"
+        ],
+        "inputs": [
+          "coarse",
+          "fine"
+        ],
+        "aiRoles": [
+          "assistant"
+        ],
+        "shell": "a full-screen Conversation",
+        "components": [
+          "@ux-builder/ui/assistant"
+        ],
+        "ruleFamilies": [
+          "ai",
+          "feedback",
+          "input",
+          "text",
+          "theme"
+        ],
+        "widths": [
+          390,
+          1280
+        ]
+      },
+      {
+        "name": "hybrid-chat",
+        "label": "Hybrid chat app (replies include Adaptive Cards and inline UI)",
+        "sizeClasses": [
+          "compact",
+          "medium",
+          "expanded"
+        ],
+        "inputs": [
+          "coarse",
+          "fine"
+        ],
+        "aiRoles": [
+          "assistant"
+        ],
+        "shell": "a Conversation that renders Adaptive Card parts",
+        "components": [
+          "@ux-builder/ui/assistant",
+          "@ux-builder/ui/adaptive-cards"
+        ],
+        "ruleFamilies": [
+          "ai",
+          "feedback",
+          "input",
+          "text",
+          "genui",
+          "card",
+          "theme"
+        ],
+        "widths": [
+          390,
+          1280
+        ]
+      }
+    ],
+    "futureModalities": [
+      "ios",
+      "android",
+      "macos",
+      "windows"
+    ],
     "rules": [
       {
         "id": "blueprint.valid",
@@ -22481,6 +22596,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22518,6 +22636,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22551,6 +22672,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22582,6 +22706,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22609,6 +22736,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22642,6 +22772,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22669,6 +22802,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22700,6 +22836,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22727,6 +22866,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22760,6 +22902,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22787,6 +22932,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22814,6 +22962,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22841,6 +22992,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22874,6 +23028,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -22901,6 +23058,9 @@
           "aiRole": [
             "assistant",
             "agent"
+          ],
+          "modality": [
+            "hybrid-chat"
           ]
         },
         "checks": [
@@ -23841,6 +24001,19 @@
                   "fine"
                 ]
               }
+            },
+            "modalities": {
+              "description": "The kinds of experience the app gives its users (FEAT-014, ADR-032): responsive-web, chat, hybrid-chat. Without it, the blueprint is read as [\"responsive-web\"]. ios, android, macos and windows are future modalities and are refused.",
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "responsive-web",
+                  "chat",
+                  "hybrid-chat"
+                ]
+              }
             }
           }
         },
@@ -23892,6 +24065,12 @@
               },
               "pattern": {
                 "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "description": "The URL path the screen is served at, e.g. /review; the audit matches a page to a screen by data-piq-screen, then by path.",
+                "type": "string",
+                "pattern": "^/",
                 "minLength": 1
               },
               "primaryAction": {

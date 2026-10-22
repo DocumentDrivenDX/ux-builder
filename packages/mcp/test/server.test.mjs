@@ -213,6 +213,36 @@ describe("US-076: an agent reads the AI rules for a screen's role through MCP", 
   });
 });
 
+describe("US-098: the modalities choose the rules and components, over MCP", () => {
+  // @covers US-098-AC1
+  test("AC1: get_rules with modalities [chat] is rulesFor's: the assistant AI rules, feedback, input and text; no nav.* or card.*", async () => {
+    const { rulesFor } = await import("@ux-builder/ui/blueprint");
+    for (const target of [{ modalities: ["chat"] }, { modalities: ["hybrid-chat"] }, { context: "app", modalities: ["responsive-web", "hybrid-chat"] }]) {
+      assert.deepEqual((await call("get_rules", target)).data, rulesFor(target));
+    }
+    const got = (await call("get_rules", { modalities: ["chat"] })).data.map((r) => r.id);
+    assert.ok(got.includes("ai.disclose") && got.includes("feedback.explain-failure") && got.includes("input.touch-targets") && got.includes("text.line-length"));
+    assert.deepEqual(got.filter((id) => /^(nav|card)\./.test(id)), []);
+    const ios = await call("get_rules", { modalities: ["ios"] });
+    assert.equal(ios.isError, true);
+    assert.match(ios.content[0].text, /"ios" is a future modality/);
+  });
+
+  // @covers US-098-AC5
+  test("AC5: get_guidance with modalities names, for each, the components to build with and the rule families", async () => {
+    const text = (await client.callTool({ name: "get_guidance", arguments: { modalities: ["chat", "hybrid-chat"] } })).content[0].text;
+    const head = text.slice(0, text.indexOf("\n# ", 2));
+    assert.match(head, /## chat: [\s\S]*Build with: @ux-builder\/ui\/assistant\.[\s\S]*Rule families that apply: ai\.\*, feedback\.\*, input\.\*, text\.\*/);
+    assert.match(head, /## hybrid-chat: [\s\S]*Build with: @ux-builder\/ui\/assistant, @ux-builder\/ui\/adaptive-cards\.[\s\S]*genui\.\*, card\.\*/);
+    assert.doesNotMatch(head, /## responsive-web/);
+    assert.match(text, /### Modalities/, "then the whole guidance");
+    const web = (await client.callTool({ name: "get_guidance", arguments: { modalities: ["responsive-web"] } })).content[0].text;
+    assert.match(web, /## responsive-web: [\s\S]*Build with: @ux-builder\/ui, @ux-builder\/ui\/patterns\.[\s\S]*nav\.\*/);
+    const bad = await client.callTool({ name: "get_guidance", arguments: { modalities: ["android"] } });
+    assert.equal(bad.isError, true);
+  });
+});
+
 describe("US-087: check_blueprint checks journeys against the HELIX stories", () => {
   // @covers US-087-AC4
   test("journeys are checked against the stories under the marker above the server's directory", async () => {
