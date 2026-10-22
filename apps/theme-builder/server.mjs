@@ -59,7 +59,14 @@ http.on("request", async (req, res) => {
   const route = api[`${req.method} ${req.url.split("?")[0]}`];
   if (!route) return vite.middlewares(req, res);
   try { send(res, 200, await route(req)); }
-  catch (e) { send(res, e.status ?? 500, { error: e.status ? e.message : `server error: ${e.message}` }); if (!e.status) console.error(e); }
+  // Only the API's own refusals carry an HTTP status; a failed command's exit
+  // code (child_process puts it in e.status) is not one, and must not crash
+  // the server (US-019-AC9).
+  catch (e) {
+    const status = Number.isInteger(e.status) && e.status >= 400 && e.status < 600 ? e.status : 500;
+    if (status === 500) console.error(e);
+    if (!res.headersSent) send(res, status, { error: status === 500 ? `server error: ${String(e.stderr || e.message).trim().split("\n").filter(Boolean).pop()}` : e.message });
+  }
 });
 http.listen(port, "127.0.0.1", () => {
   console.log(`theme builder: http://127.0.0.1:${port}/  (model: ${model.available ? model.name : "unavailable"}, review: ${review}, repo: ${root})`);
