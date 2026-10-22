@@ -18,6 +18,9 @@ name: release
 on:
   push:
     branches: [main]
+  # Actions → release → Run workflow: restart a release without a push (it
+  # publishes whatever version on main is not on npm yet).
+  workflow_dispatch:
 
 permissions:
   contents: write # push the version commit and tags, create releases
@@ -25,7 +28,9 @@ permissions:
 
 # One release at a time; never cancel one halfway through publishing.
 concurrency:
-  group: release
+  # Renamed from "release" on 2026-10-22: a hung run that GitHub would neither
+  # cancel nor re-run held that group, so later runs would queue behind it.
+  group: release-main
   cancel-in-progress: false
 
 # No telemetry (ADR-023 rule 8), as in ci.yml; tools/check-licences.mjs
@@ -36,7 +41,13 @@ env:
 
 jobs:
   release:
+    # Only main is released, also when the workflow is run by hand from another branch.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # A healthy run takes about 20 minutes, and one whose package mirror is slow
+    # (44.8 kB/s on 2026-10-22) about 50 minutes; a hung runner fails at 120 instead of
+    # holding the release for GitHub's 6-hour default.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,8 +62,11 @@ jobs:
       - run: npm ci
       # Chromium for the browser tests inside npm run check.
       - run: npx playwright install --with-deps chromium
+        timeout-minutes: 30
       # ffmpeg for the walkthrough video MP4 tests (FEAT-013; the SDK does not ship it).
+      # A slow package mirror took 27 minutes here on 2026-10-22; the limit only stops a hang.
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+        timeout-minutes: 40
       # 1. Apply the pending changesets, if any, and commit the bump (not pushed yet).
       - id: version
         run: |

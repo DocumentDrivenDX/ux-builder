@@ -60,3 +60,20 @@ the release cannot trigger itself.
   adds them. `main` takes direct commits from the workflow, which works
   because `main` is not branch-protected; protecting it later would need the
   workflow allowed to push.
+
+## Amendment *[2026-10-22 — the first run hung]*
+
+The first run under this decision got a runner whose Ubuntu package mirror
+(`azure.archive.ubuntu.com`) served 44.8 kB/s: 10 minutes for Chromium's
+system packages and 19 minutes in the ffmpeg `apt-get` before it was
+cancelled. The re-run was as slow.
+GitHub then left the run "in progress" while refusing to cancel or re-run it.
+Nothing was pushed or published. So that a stuck runner can neither hold a
+release for GitHub's 6-hour default nor block the next run:
+- the job has a 120-minute limit, the Chromium install 30 and the ffmpeg
+  install 40 (the re-run spent 12 and 27 minutes on them and published).
+  Those bound a hang without failing a run that is only slow;
+- the workflow can be run by hand (`workflow_dispatch`, main only), so a
+  release restarts without a push;
+- the concurrency group is `release-main`, because the hung run held `release`.
+
