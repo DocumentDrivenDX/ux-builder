@@ -6,7 +6,7 @@
    gives the audit's verdicts and findings and each check's attempts, and no
    event holds source code or a file's contents.
 
-     npm test */
+     Needs the built packages: runs in npm run test:built (npm run check). */
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -16,13 +16,13 @@ import { before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { readEpisode, validateEvent, validateTrace } from "../../packages/trace/index.mjs";
-import { cli, commit, tempApp } from "../../packages/trace/test/helpers.mjs";
-import { createServer } from "../../packages/mcp/server.mjs";
-import { recordAudit } from "../../packages/audit/trace.mjs";
-import { skeleton } from "../../packages/ui/blueprint/index.mjs";
+import { readEpisode, validateEvent, validateTrace } from "../../../packages/trace/index.mjs";
+import { cli, commit, tempApp } from "../../../packages/trace/test/helpers.mjs";
+import { createServer } from "../../../packages/mcp/server.mjs";
+import { recordAudit } from "../../../packages/audit/trace.mjs";
+import { skeleton } from "../../../packages/ui/blueprint/index.mjs";
 
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const SOURCES = {
   "src/review.js": "var queue = [];\nexport function review(entry) { queue.push(entry); return queue.length; }\n",
   "src/review.css": ".review-queue { color: #c0ffee; padding: var(--piq-space-4); }\n",
