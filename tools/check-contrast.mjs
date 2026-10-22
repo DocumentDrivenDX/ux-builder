@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /* Every text role must clear 4.5:1 on the ground it sits on, in every theme
-   and appearance (WCAG 2.x AA for body text).
+   and appearance (WCAG 2.x AA for body text), and every diagram and chart
+   role (FEAT-016) its own floor: 4.5:1 for text, 3:1 for marks and edges,
+   neighbouring series apart under colour-vision deficiency, region tints
+   deepening from the ground.
 
      npm run contrast                     # fail on any new failure
      node tools/check-contrast.mjs --update-baseline
@@ -20,7 +23,7 @@ import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { FLOOR, PAIRS, measure, pairId } from "./contrast.mjs";
+import { DIAGRAM_PAIRS, FLOOR, PAIRS, diagramFailures, measure, pairId } from "./contrast.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // --resolved and --baseline check another build (the tests feed it a failing brand).
@@ -38,6 +41,13 @@ for (const file of resolvedFiles) {
     if (!m) continue;
     const r = m.ratio;
     if (r < FLOOR) failures.push({ id: pairId(theme, appearance, fg, bg), label, ratio: Number(r.toFixed(2)) });
+  }
+  // @covers US-105-AC4
+  // A file with no diagram roles is from before FEAT-016 (a test's fixture); that every
+  // built theme has all of them is tools/__tests__/diagram-tokens.test.mjs's to check.
+  if (!Object.keys(tokens).some((k) => k.startsWith("piq-color-series-"))) continue;
+  for (const f of diagramFailures(tokens)) {
+    failures.push({ id: pairId(theme, appearance, f.fg, f.bg), label: `${f.label}, floor ${f.floor.toFixed(2)}`, ratio: f.ratio === null ? null : Number(f.ratio.toFixed(2)), ...(f.unit && { unit: f.unit }) });
   }
 }
 
@@ -57,9 +67,9 @@ const fresh = failures.filter((f) => !known.has(f.id));
 const fixed = [...known].filter((id) => !now.has(id));
 
 for (const f of failures) {
-  console.log(`${known.has(f.id) ? "known" : "NEW  "}  ${f.ratio.toFixed(2)}:1  ${f.id}  (${f.label})`);
+  console.log(`${known.has(f.id) ? "known" : "NEW  "}  ${f.ratio === null ? "unmeasurable" : f.unit ? `${f.unit} ${f.ratio.toFixed(2)}` : `${f.ratio.toFixed(2)}:1`}  ${f.id}  (${f.label})`);
 }
 for (const id of fixed) console.log(`FIXED  ${id}: remove it from tools/contrast-baseline.json`);
-console.log(`\n${resolvedFiles.length} theme/appearance combinations, ${PAIRS.length} pairings each, floor ${FLOOR}:1.`);
+console.log(`\n${resolvedFiles.length} theme/appearance combinations, ${PAIRS.length} pairings each, floor ${FLOOR}:1; ${DIAGRAM_PAIRS.length} diagram pairings, series separation and region order (FEAT-016).`);
 if (fresh.length || fixed.length) process.exit(1);
 console.log(`No new failures. ${known.size} known failure(s) remain in the baseline.`);

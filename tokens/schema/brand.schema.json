@@ -54,6 +54,9 @@
             "text-muted": { "$ref": "#/$defs/colour" }, "text-subtle": { "$ref": "#/$defs/colour" },
             "structure": { "$ref": "#/$defs/colour" }, "accent": { "$ref": "#/$defs/colour" },
             "on-accent": { "$ref": "#/$defs/colour" }, "border": { "$ref": "#/$defs/colour" }
+          },
+          "patternProperties": {
+            "^(status-(positive|caution|negative|info)|series-[1-8])$": { "$ref": "#/$defs/colour", "description": "Optional: replaces the SDK's default status or series colour (tokens/dataviz.json) in this appearance only (FEAT-016 VIZ-06)." }
           }
         },
         "state": {

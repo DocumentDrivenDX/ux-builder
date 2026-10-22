@@ -18,6 +18,8 @@ ddx:
       to: ADR-022
     - kind: informs
       to: FEAT-006
+    - kind: informs
+      to: FEAT-016
 ---
 
 # Contract
@@ -26,7 +28,7 @@ ddx:
 **Type**: library (public CSS custom properties and DTCG token paths of `@ux-builder/tokens`)
 **Version**: v1 (for `@ux-builder/tokens` 1.0.0)
 **Status**: complete — accepted by the operator 2026-10-06, all six decisions as proposed (bead `ux-builder-30fc0a3a`)
-**Related**: ADR-015 (rename to roles, with aliases), ADR-011 (tiered names), ADR-013 (brand × design system), FEAT-001 (THEME-10, THEME-11); ADR-021, ADR-022 and FEAT-006 for the screen-pattern tokens *[Amended 2026-10-18]*
+**Related**: ADR-015 (rename to roles, with aliases), ADR-011 (tiered names), ADR-013 (brand × design system), FEAT-001 (THEME-10, THEME-11); ADR-021, ADR-022 and FEAT-006 for the screen-pattern tokens *[Amended 2026-10-18]*; FEAT-016 for the diagram and chart tokens *[Amended 2026-10-22]*
 
 ## Purpose
 
@@ -449,6 +451,52 @@ gets the point's default, which is also the `ui.css` fallback.
 | — | `page-header.gap` | `--piq-page-header-gap` | every theme, from its `page-header` variant | Space between title, status and actions |
 | — | `table.row-stripe-bg` | `--piq-table-row-stripe-bg` | every theme, from its `table` variant | Fill of alternate rows (`transparent` when ruled) |
 | — | `table.row-border` | `--piq-table-row-border` | every theme, from its `table` variant | Rule between rows (`none` when banded) |
+
+#### Tokens added for diagrams and charts *[Amended 2026-10-22 — FEAT-016]*
+
+Additive; no accepted name changes. Every theme and preview pair sets every
+one of them in every appearance (CONTRACT-002 Composition step 4). Status
+and series values are SDK defaults in `tokens/dataviz.json`, one set per
+appearance, which a brand MAY replace per appearance; the others are derived
+from the brand's own roles, so they follow its ground. Stroke and radius are
+anatomy: `tokens/layout.json` defaults, which Carbon (`0`, `1px`), Fluent
+(`4px`, `1px`), Material (`12px`) and Databricks (`8px`) override. The
+contrast each MUST clear is checked by `npm run contrast` in every theme,
+appearance and preview pair; neighbouring series MUST also stay at least
+8 ΔE apart (OKLab ×100) under simulated protanopia and deuteranopia and 15
+with normal vision. `state.*` (availability) and `color.status-*`
+(outcomes) are separate families.
+
+| Current | New path | New CSS variable | Defined in | Meaning |
+|---|---|---|---|---|
+| — | `color.status-positive` | `--piq-color-status-positive` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Status, good: a target met, a test passed. Clears 4.5:1 on the ground and a card, so it MAY be text |
+| — | `color.status-positive-subtle` | `--piq-color-status-positive-subtle` | every theme; derived: `color-mix()` of `status-positive` 12% into `surface` | Fill behind a positive value or chip; `color.text` clears 4.5:1 on it, and `status-positive` 3:1 as a mark |
+| — | `color.status-caution` | `--piq-color-status-caution` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Status, needs attention: near a threshold, partial. Clears 4.5:1 on the ground and a card, so it MAY be text |
+| — | `color.status-caution-subtle` | `--piq-color-status-caution-subtle` | every theme; derived: `color-mix()` of `status-caution` 12% into `surface` | Fill behind a caution value or chip; `color.text` clears 4.5:1 on it, and `status-caution` 3:1 as a mark |
+| — | `color.status-negative` | `--piq-color-status-negative` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Status, bad: a threshold missed, a failure. Clears 4.5:1 on the ground and a card, so it MAY be text |
+| — | `color.status-negative-subtle` | `--piq-color-status-negative-subtle` | every theme; derived: `color-mix()` of `status-negative` 12% into `surface` | Fill behind a negative value or chip; `color.text` clears 4.5:1 on it, and `status-negative` 3:1 as a mark |
+| — | `color.status-info` | `--piq-color-status-info` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Status, neutral information. Clears 4.5:1 on the ground and a card, so it MAY be text |
+| — | `color.status-info-subtle` | `--piq-color-status-info-subtle` | every theme; derived: `color-mix()` of `status-info` 12% into `surface` | Fill behind a info value or chip; `color.text` clears 4.5:1 on it, and `status-info` 3:1 as a mark |
+| — | `color.series-1` | `--piq-color-series-1` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Categorical slot 1, blue. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled |
+| — | `color.series-2` | `--piq-color-series-2` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Categorical slot 2, orange. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled |
+| — | `color.series-3` | `--piq-color-series-3` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Categorical slot 3, aqua. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled |
+| — | `color.series-4` | `--piq-color-series-4` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Categorical slot 4, yellow. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled |
+| — | `color.series-5` | `--piq-color-series-5` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Categorical slot 5, magenta. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled |
+| — | `color.series-6` | `--piq-color-series-6` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Categorical slot 6, green. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled |
+| — | `color.series-7` | `--piq-color-series-7` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Categorical slot 7, violet. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled |
+| — | `color.series-8` | `--piq-color-series-8` | every theme; `dataviz.json` default per appearance, a brand MAY set its own | Categorical slot 8, red. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled |
+| — | `color.diagram-region-1` | `--piq-color-diagram-region-1` | every theme; derived: `text` 3% into `ground` | Region tint: outermost group, zone or band. `color.text` clears 4.5:1 on it; each is at least as far from the ground as the one before |
+| — | `color.diagram-region-2` | `--piq-color-diagram-region-2` | every theme; derived: `text` 5% into `ground` | Region tint: a group inside region 1, or the alternate band. `color.text` clears 4.5:1 on it; each is at least as far from the ground as the one before |
+| — | `color.diagram-region-3` | `--piq-color-diagram-region-3` | every theme; derived: `text` 7% into `ground` | Region tint: the innermost group. `color.text` clears 4.5:1 on it; each is at least as far from the ground as the one before |
+| — | `color.diagram-edge` | `--piq-color-diagram-edge` | every theme; derived: `{color.text-muted}` | A data edge. Clears 3:1 on the ground, a card and the deepest region |
+| — | `color.diagram-edge-strong` | `--piq-color-diagram-edge-strong` | every theme; derived: `{color.text}` | An action edge and the main flow. Clears 3:1 on the ground, a card and the deepest region |
+| — | `color.diagram-edge-muted` | `--piq-color-diagram-edge-muted` | every theme; derived: `{color.text-subtle}` | Return and control edges, drawn dashed. Clears 3:1 on the ground, a card and the deepest region |
+| — | `color.lifecycle-placeholder` | `--piq-color-lifecycle-placeholder` | every theme; derived: `accent` 10% into `surface` | Fill of a diagram part planned, not built. `color.text` clears 4.5:1 on it |
+| — | `color.lifecycle-decided` | `--piq-color-lifecycle-decided` | every theme; derived: `status-info` 10% into `surface` | Fill of a diagram part decided, not built. `color.text` clears 4.5:1 on it |
+| — | `color.lifecycle-unknown` | `--piq-color-lifecycle-unknown` | every theme; derived: `{color.surface-sunken}` | Fill of a diagram part of unknown status, drawn dashed. `color.text` clears 4.5:1 on it |
+| — | `size.diagram-stroke` | `--piq-size-diagram-stroke` | every theme; `layout.json` default `1.5px`, a design system MAY override | Outline of a diagram node, and an edge |
+| — | `size.diagram-stroke-strong` | `--piq-size-diagram-stroke-strong` | every theme; `layout.json` default `2px`, a design system MAY override | The main flow, an action edge, the outline of the project's own parts |
+| — | `radius.diagram-node` | `--piq-radius-diagram-node` | every theme; `layout.json` default `8px`, a design system MAY override | Corner radius of a diagram node |
 
 ## Precedence and Compatibility
 

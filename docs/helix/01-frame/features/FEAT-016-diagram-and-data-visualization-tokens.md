@@ -128,11 +128,12 @@ brand or design system sets them is normative in CONTRACT-002.
 #### Contrast gate
 
 - **GATE-01** — Each status colour must clear 4.5:1 against the ground and
-  the surface, and against its own subtle fill.
+  the surface, so it can be text, and 3:1 against its own subtle fill, where
+  it is a mark (an icon or dot) beside a label in body text.
 - **GATE-02** — Body text must clear 4.5:1 on each subtle fill, each region
   tint and each lifecycle tint.
 - **GATE-03** — Each series colour and each edge colour must clear 3:1
-  against the ground and the surface.
+  against the ground, the surface and the deepest region tint.
 - **GATE-04** — Every pair of neighbouring series colours (1–2, 2–3 … 7–8)
   must stay distinguishable: at least 8 ΔE (OKLab ×100) under simulated
   protanopia and deuteranopia, and at least 15 ΔE with normal vision.

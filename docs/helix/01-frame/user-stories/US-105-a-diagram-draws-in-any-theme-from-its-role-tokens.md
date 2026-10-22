@@ -57,6 +57,7 @@ check contrast itself.
 
 ## Edge Cases
 
+- **A status chip**: the status colour is the chip's mark (3:1 on its fill); its label is `color.text` (4.5:1).
 - **A two-hex `color-mix()` tint**: measured as the colour it mixes to.
 - **A token that is neither a hex nor a two-hex mix**: the gate fails on it.
 

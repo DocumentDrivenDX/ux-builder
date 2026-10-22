@@ -1,0 +1,55 @@
+{
+  "$schema": "./schema/dataviz.schema.json",
+  "$description": "The colours diagrams and charts draw with (FEAT-016, CONTRACT-002 Composition step 4). appearances: the SDK's status and series colours for each appearance, used by every brand that does not set its own. derived: roles every brand gets from its own ground, surface, text and accent, the same in both appearances. The series are the reference categorical palette (blue, orange, aqua, yellow, magenta, green, violet, red, in that order; the order is what keeps neighbours apart under colour-vision deficiency), each stepped in OKLCH lightness only until it clears 3:1 on every current ground, surface and deepest region tint. The status colours are stepped the same way to clear 4.5:1, so they can be text.",
+  "appearances": {
+    "light": {
+      "color": {
+        "status-positive": { "$value": "#007D02", "$description": "Good: a target met, a test passed, a state reached." },
+        "status-caution": { "$value": "#8E6300", "$description": "Needs attention: near a threshold, partial." },
+        "status-negative": { "$value": "#C73234", "$description": "Bad: a threshold missed, a failure, an error state." },
+        "status-info": { "$value": "#196AC7", "$description": "Neutral information; also the tint of a decided part." },
+        "series-1": { "$value": "#2A78D6", "$description": "Blue." },
+        "series-2": { "$value": "#D8561F", "$description": "Orange." },
+        "series-3": { "$value": "#099063", "$description": "Aqua." },
+        "series-4": { "$value": "#AB7305", "$description": "Yellow, stepped to ochre to clear 3:1 on a pale ground." },
+        "series-5": { "$value": "#C65C86", "$description": "Magenta." },
+        "series-6": { "$value": "#008300", "$description": "Green." },
+        "series-7": { "$value": "#6250D6", "$description": "Violet." },
+        "series-8": { "$value": "#E14747", "$description": "Red." }
+      }
+    },
+    "dark": {
+      "color": {
+        "status-positive": { "$value": "#1FAB1D", "$description": "Good: a target met, a test passed, a state reached." },
+        "status-caution": { "$value": "#FAB219", "$description": "Needs attention: near a threshold, partial." },
+        "status-negative": { "$value": "#F7615B", "$description": "Bad: a threshold missed, a failure, an error state." },
+        "status-info": { "$value": "#4895F4", "$description": "Neutral information; also the tint of a decided part." },
+        "series-1": { "$value": "#3987E5", "$description": "Blue." },
+        "series-2": { "$value": "#D95926", "$description": "Orange." },
+        "series-3": { "$value": "#199E70", "$description": "Aqua." },
+        "series-4": { "$value": "#C98500", "$description": "Yellow." },
+        "series-5": { "$value": "#D55181", "$description": "Magenta." },
+        "series-6": { "$value": "#148B11", "$description": "Green, lifted to clear 3:1 on the lightest dark surface." },
+        "series-7": { "$value": "#9085E9", "$description": "Violet." },
+        "series-8": { "$value": "#E66767", "$description": "Red." }
+      }
+    }
+  },
+  "derived": {
+    "color": {
+      "status-positive-subtle": { "$value": "color-mix(in srgb, {color.status-positive} 12%, {color.surface})", "$description": "Fill behind a positive value or chip." },
+      "status-caution-subtle": { "$value": "color-mix(in srgb, {color.status-caution} 12%, {color.surface})", "$description": "Fill behind a caution value or chip." },
+      "status-negative-subtle": { "$value": "color-mix(in srgb, {color.status-negative} 12%, {color.surface})", "$description": "Fill behind a negative value or chip." },
+      "status-info-subtle": { "$value": "color-mix(in srgb, {color.status-info} 12%, {color.surface})", "$description": "Fill behind an informational value or chip." },
+      "diagram-region-1": { "$value": "color-mix(in srgb, {color.text} 3%, {color.ground})", "$description": "Outermost group, zone or band: the ground, barely tinted." },
+      "diagram-region-2": { "$value": "color-mix(in srgb, {color.text} 5%, {color.ground})", "$description": "A group inside region 1, or the alternate band." },
+      "diagram-region-3": { "$value": "color-mix(in srgb, {color.text} 7%, {color.ground})", "$description": "The innermost group." },
+      "diagram-edge": { "$value": "{color.text-muted}", "$description": "A data edge: what travels between parts." },
+      "diagram-edge-strong": { "$value": "{color.text}", "$description": "An action edge, and the main flow." },
+      "diagram-edge-muted": { "$value": "{color.text-subtle}", "$description": "Return and control edges, drawn dashed." },
+      "lifecycle-placeholder": { "$value": "color-mix(in srgb, {color.accent} 10%, {color.surface})", "$description": "Fill of a part that is planned but not built." },
+      "lifecycle-decided": { "$value": "color-mix(in srgb, {color.status-info} 10%, {color.surface})", "$description": "Fill of a part that is decided but not built." },
+      "lifecycle-unknown": { "$value": "{color.surface-sunken}", "$description": "Fill of a part whose status is unknown, drawn dashed and muted." }
+    }
+  }
+}

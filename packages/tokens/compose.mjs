@@ -47,7 +47,7 @@ function checkFonts(fonts, where) {
 /** Read and validate every source under tokensDir; artwork must live under assetRoot. */
 export function load(tokensDir, assetRoot) {
   const ajv = new Ajv2020({ strict: true, allowUnionTypes: true, allErrors: true });
-  for (const f of ["font", "brand", "design-system", "theme", "layout", "variants"]) ajv.addSchema(readJson(join(tokensDir, "schema", `${f}.schema.json`)), `${f}.schema.json`);
+  for (const f of ["font", "brand", "design-system", "theme", "layout", "variants", "dataviz"]) ajv.addSchema(readJson(join(tokensDir, "schema", `${f}.schema.json`)), `${f}.schema.json`);
   const names = readJson(join(tokensDir, "names.json")).tokens;
 
   const read = (dir, kind) => {
@@ -71,6 +71,7 @@ export function load(tokensDir, assetRoot) {
     return doc;
   };
   const layout = validated(join(tokensDir, "layout.json"), "layout");
+  const dataviz = validated(join(tokensDir, "dataviz.json"), "dataviz");
   const variants = new Map();
   for (const f of readdirSync(join(tokensDir, "variants")).filter((x) => x.endsWith(".variants.json")).sort()) {
     const doc = validated(join(tokensDir, "variants", f), "variants");
@@ -78,6 +79,8 @@ export function load(tokensDir, assetRoot) {
     variants.set(doc.point, doc);
   }
   const brands = read("brands", "brand");
+  // Not enumerable, like an anatomy's baseTokens: a loaded brand still serialises exactly as written.
+  for (const b of brands.values()) Object.defineProperty(b, "dataviz", { value: dataviz, enumerable: false, configurable: true });
   const designSystems = read("design-systems", "design-system");
   const themes = read("themes", "theme");
 
@@ -103,6 +106,8 @@ export function load(tokensDir, assetRoot) {
   const noBoundaries = (groups, where) => {
     for (const k of Object.keys(groups?.size ?? {})) if (k.startsWith("breakpoint-")) fail(`${where}: sets size.${k}; size-class boundaries are SDK constants (ADR-021, CONTRACT-001)`);
   };
+  for (const [ap, groups] of Object.entries(dataviz.appearances)) checkGroups(groups, `dataviz.json ${ap}`);
+  checkGroups(dataviz.derived, "dataviz.json derived");
   checkGroups(layout.constants, "layout.json constants");
   checkGroups(layout.defaults, "layout.json defaults");
   noBoundaries(layout.defaults, "layout.json defaults");
@@ -166,7 +171,7 @@ export function load(tokensDir, assetRoot) {
     if (t.anatomy) checkAnatomy(t.anatomy, `theme ${t.name}`);
     if (t.default && !brand.appearances[t.default]) fail(`theme ${t.name}: default ${t.default}, but brand ${t.brand} has no ${t.default} appearance`);
   }
-  return { names, brands, designSystems, themes, layout, variants };
+  return { names, brands, designSystems, themes, layout, variants, dataviz };
 }
 
 /* ----------------------------------------------------------------- names */

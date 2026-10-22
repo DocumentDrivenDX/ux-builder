@@ -47,8 +47,8 @@ test.describe("A theme's page", () => {
     await expect(nav.getByRole("link", { name: "Logos and palette" })).toBeVisible();
     const links = await nav.getByRole("link").allTextContents();
     const ai = JSON.parse(readFileSync(join(REPO, "packages/ui/ai/vendor/components.json"), "utf8")).components;
-    expect(links).toEqual(["Logos and palette", "Light", "Dark", "Auto", "Generative UI bridges", ...names("widgets"), "About these", ...ai.map((c) => `${c.name}, ${c.library}`), ...names("patterns"), "Conversation", ...names("assistant").filter((n) => n !== "Conversation"), ...names("adaptiveCards")]);
-    await expect(nav.locator(".tp-nav__group")).toHaveText(["Brand", "CSS", "UI Components", "AI Components", "Screen patterns", "Assistant", "Adaptive Cards"]);
+    expect(links).toEqual(["Logos and palette", "Light", "Dark", "Auto", "Generative UI bridges", "Diagrams and data", ...names("widgets"), "About these", ...ai.map((c) => `${c.name}, ${c.library}`), ...names("patterns"), "Conversation", ...names("assistant").filter((n) => n !== "Conversation"), ...names("adaptiveCards")]);
+    await expect(nav.locator(".tp-nav__group")).toHaveText(["Brand", "CSS", "Diagrams", "UI Components", "AI Components", "Screen patterns", "Assistant", "Adaptive Cards"]);
 
     await nav.getByRole("link", { name: "Dark", exact: true }).click();
     await expect(page).toHaveURL(/#css-dark$/);
@@ -145,6 +145,50 @@ test.describe("A theme's page", () => {
     // And none of them is among the UI Components.
     for (const c of ai) await expect(page.locator(`#widgets #ai-${c.name}`)).toHaveCount(0);
     expect(errors).toEqual([]);
+  });
+
+  // @covers US-106-AC1 @covers US-106-AC2 @covers US-106-AC3 @covers US-106-AC4
+  test("Diagrams and data shows every diagram token with its value and contrast, and a sample node and edges in the design system's shape", async ({ page }) => {
+    const errors = watch(page);
+    const diagram = Object.entries(JSON.parse(readFileSync(join(REPO, "tokens/names.json"), "utf8")).tokens)
+      .filter(([p]) => /^color\.(status|series|diagram|lifecycle)-/.test(p)).map(([p]) => `piq-${p.replace(/\./g, "-")}`);
+    expect(diagram).toHaveLength(25);
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/?theme=praxis-carbon");
+    await page.getByRole("radiogroup", { name: "Theme appearance" }).getByRole("radio", { name: "Light" }).click();
+    const nav = page.getByRole("navigation", { name: "Theme contents" });
+    await nav.getByRole("link", { name: "Diagrams and data" }).click();
+    await expect(page).toHaveURL(/#diagrams$/);
+    const section = page.getByRole("region", { name: "Diagrams and data" });
+    await expect(section).toBeInViewport();
+    // After the CSS, before the widgets.
+    expect(await page.evaluate(() => [...document.querySelectorAll(".tp-main > section")].map((s) => s.id).slice(0, 7))).toEqual(["brand", "css-light", "css-dark", "css-auto", "css-bridges", "diagrams", "widgets"]);
+
+    const check = async (ap) => {
+      const tokens = resolved("praxis-carbon", ap);
+      await expect(section.locator("[data-token]")).toHaveCount(diagram.length);
+      for (const n of diagram) {
+        const row = section.locator(`[data-token="${n}"]`);
+        await expect(row).toContainText(`--${n}`);
+        await expect(row).toContainText(tokens[n]);
+        await expect(row.locator(".tp-viz__verdict")).toHaveText(/^\d+\.\d\d:1 · .+ · passes (4\.5|3):1$/);
+      }
+    };
+    await check("light");
+    // Carbon: square nodes, 1px and 2px strokes, read from the page's own tokens.
+    const node = section.locator('[data-sample="node"]');
+    expect(await node.evaluate((el) => [getComputedStyle(el).borderTopLeftRadius, getComputedStyle(el).borderTopWidth])).toEqual(["0px", "2px"]);
+    expect(await section.locator('[data-sample="diagram-edge"] .tp-viz__line').evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("1px");
+    await expect(section).toContainText("Closest neighbours: series");
+
+    await page.getByRole("radiogroup", { name: "Theme appearance" }).getByRole("radio", { name: "Dark" }).click();
+    await check("dark");
+    expect(errors).toEqual([]);
+  });
+
+  test("Material's diagram nodes are rounded on its theme page", async ({ page }) => {
+    await page.goto("/?theme=praxis-material#diagrams");
+    expect(await page.locator('#diagrams [data-sample="node"]').evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe("12px");
   });
 
   test("a theme with one appearance offers only it and Auto; an unknown theme says so", async ({ page }) => {

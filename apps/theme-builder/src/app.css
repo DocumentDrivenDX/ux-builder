@@ -222,6 +222,20 @@ body { margin: 0; }
 .tb-contents { display: contents; }
 .tb-contents[hidden] { display: none; }
 
+/* Diagrams and data (FEAT-016): every diagram token with its verdict, and a sample node and edges. */
+.tp-viz__group { display: grid; gap: var(--piq-space-2); }
+.tp-viz__group h3 { margin: 0; font-size: var(--piq-font-size-lead); color: var(--piq-color-text-strong); }
+.tp-viz__tokens { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--piq-space-2); }
+.tp-viz__token { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--piq-space-1) var(--piq-space-3); align-items: center; font-size: var(--piq-font-size-small); }
+.tp-viz__name { display: grid; min-width: 0; overflow-wrap: anywhere; }
+.tp-viz__mix { font-size: var(--piq-font-size-label); color: var(--piq-color-text-muted); }
+.tp-viz__verdict { grid-column: 2 / -1; color: var(--piq-color-text-muted); }
+.tp-viz__sample { display: flex; flex-wrap: wrap; gap: var(--piq-space-5); align-items: center; padding: var(--piq-space-4); border-radius: var(--piq-radius-diagram-node); }
+.tp-viz__node { display: grid; gap: var(--piq-space-1); padding: var(--piq-space-3) var(--piq-space-4); background: var(--piq-color-surface); border: var(--piq-size-diagram-stroke-strong) solid var(--piq-color-diagram-edge-strong); border-radius: var(--piq-radius-diagram-node); font-size: var(--piq-font-size-small); }
+.tp-viz__edges { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--piq-space-2); font-size: var(--piq-font-size-small); }
+.tp-viz__edges li { display: flex; flex-wrap: wrap; align-items: center; gap: var(--piq-space-2); }
+.tp-viz__line { inline-size: 4rem; }
+
 /* AI Components: other libraries' components, set apart from the SDK's own, in the menu and on the page. */
 .tp-nav__ai { margin-block-start: var(--piq-space-4); padding-block-start: var(--piq-space-2); border-block-start: var(--piq-border-default); }
 .tp-nav__lib { margin-inline-start: auto; padding-inline-start: var(--piq-space-2); font-size: var(--piq-font-size-label); color: var(--piq-color-text-muted); }

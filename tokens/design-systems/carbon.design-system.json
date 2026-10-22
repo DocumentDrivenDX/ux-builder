@@ -140,6 +140,10 @@
       }
     },
     "radius": {
+      "diagram-node": {
+        "$value": "0",
+        "$description": "Carbon v11: square nodes, like its tiles. (FEAT-016)"
+      },
       "control": {
         "$value": "0",
         "$description": "Carbon v11: square corners on controls and fields."
@@ -192,6 +196,10 @@
       }
     },
     "size": {
+      "diagram-stroke": {
+        "$value": "1px",
+        "$description": "Carbon draws hairline borders: 1px. (FEAT-016)"
+      },
       "measure": {
         "$value": "70ch"
       }
