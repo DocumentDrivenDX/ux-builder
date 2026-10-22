@@ -1,4 +1,4 @@
-/* Diagram and data-visualization tokens (FEAT-016, US-105): every theme and
+/* Diagram and data-visualization tokens (FEAT-017, US-112): every theme and
    preview pair carries them, slot n is the same hue everywhere, a brand may
    replace a status or series colour in one appearance, each design system
    has its own shape, and the gate fails a brand that breaks them.
@@ -37,10 +37,10 @@ const hue = (h) => {
 };
 const apart = (a, b) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
 
-describe("US-105 diagram tokens", () => {
+describe("US-112 diagram tokens", () => {
   test("names.json has the 28 roles of CONTRACT-001", () => assert.equal(NAMES.length, 28));
 
-  // @covers US-105-AC1
+  // @covers US-112-AC1
   test("AC1: every theme and preview pair sets all 28 in every appearance, and every theme's CSS declares them", () => {
     const all = everything();
     assert.equal(all.length, 61);
@@ -51,7 +51,7 @@ describe("US-105 diagram tokens", () => {
     }
   });
 
-  // @covers US-105-AC2
+  // @covers US-112-AC2
   test("AC2: series slot n is the same hue family in every theme and appearance", () => {
     for (let i = 1; i <= 8; i++) {
       const ref = hue(src.dataviz.appearances.light.color[`series-${i}`].$value);
@@ -62,7 +62,7 @@ describe("US-105 diagram tokens", () => {
     }
   });
 
-  // @covers US-105-AC3
+  // @covers US-112-AC3
   test("AC3: a brand's own series colour in light replaces the default there, and dark keeps the default", () => {
     const praxis = src.brands.get("praxis");
     const brand = { ...praxis, appearances: structuredClone(praxis.appearances) };
@@ -87,7 +87,7 @@ describe("US-105 diagram tokens", () => {
     for (const [where, tokens] of everything()) assert.deepEqual(diagramFailures(tokens), [], where);
   });
 
-  // @covers US-105-AC6
+  // @covers US-112-AC6
   test("AC6: each design system has its own node radius and stroke; a theme with its own anatomy gets the defaults", () => {
     const shape = (t, ap) => { const r = resolvedJson(src, t, ap); return [r["piq-radius-diagram-node"], r["piq-size-diagram-stroke"], r["piq-size-diagram-stroke-strong"]]; };
     assert.deepEqual(shape("praxis-carbon", "light"), ["0", "1px", "2px"]);
@@ -100,7 +100,7 @@ describe("US-105 diagram tokens", () => {
     assert.deepEqual(shape(own.name, themeAppearances(src, own)[0]), [d.radius["diagram-node"].$value, d.size["diagram-stroke"].$value, d.size["diagram-stroke-strong"].$value]);
   });
 
-  // @covers US-105-AC5
+  // @covers US-112-AC5
   test("AC5: the gate fails a status colour below 4.5:1 and series that collide under deuteranopia, naming theme, appearance, pairing and value", () => {
     const resolved = join(tmp, "failing");
     mkdirSync(resolved);

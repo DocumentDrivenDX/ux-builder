@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/DocumentDrivenDX/ux-builder/tokens/schema/dataviz.schema.json",
   "title": "Diagram and data-visualization colours",
-  "description": "The SDK's default status and series colours per appearance, and the diagram roles derived from a brand's own roles (FEAT-016, CONTRACT-002 Composition step 4). A brand may set any status or series colour itself.",
+  "description": "The SDK's default status and series colours per appearance, and the diagram roles derived from a brand's own roles (FEAT-017, CONTRACT-002 Composition step 4). A brand may set any status or series colour itself.",
   "type": "object",
   "required": [
     "appearances",

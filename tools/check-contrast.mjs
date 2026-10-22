@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Every text role must clear 4.5:1 on the ground it sits on, in every theme
    and appearance (WCAG 2.x AA for body text), and every diagram and chart
-   role (FEAT-016) its own floor: 4.5:1 for text, 3:1 for marks and edges,
+   role (FEAT-017) its own floor: 4.5:1 for text, 3:1 for marks and edges,
    neighbouring series apart under colour-vision deficiency, region tints
    deepening from the ground.
 
@@ -42,8 +42,8 @@ for (const file of resolvedFiles) {
     const r = m.ratio;
     if (r < FLOOR) failures.push({ id: pairId(theme, appearance, fg, bg), label, ratio: Number(r.toFixed(2)) });
   }
-  // @covers US-105-AC4
-  // A file with no diagram roles is from before FEAT-016 (a test's fixture); that every
+  // @covers US-112-AC4
+  // A file with no diagram roles is from before FEAT-017 (a test's fixture); that every
   // built theme has all of them is tools/__tests__/diagram-tokens.test.mjs's to check.
   if (!Object.keys(tokens).some((k) => k.startsWith("piq-color-series-"))) continue;
   for (const f of diagramFailures(tokens)) {
@@ -70,6 +70,6 @@ for (const f of failures) {
   console.log(`${known.has(f.id) ? "known" : "NEW  "}  ${f.ratio === null ? "unmeasurable" : f.unit ? `${f.unit} ${f.ratio.toFixed(2)}` : `${f.ratio.toFixed(2)}:1`}  ${f.id}  (${f.label})`);
 }
 for (const id of fixed) console.log(`FIXED  ${id}: remove it from tools/contrast-baseline.json`);
-console.log(`\n${resolvedFiles.length} theme/appearance combinations, ${PAIRS.length} pairings each, floor ${FLOOR}:1; ${DIAGRAM_PAIRS.length} diagram pairings, series separation and region order (FEAT-016).`);
+console.log(`\n${resolvedFiles.length} theme/appearance combinations, ${PAIRS.length} pairings each, floor ${FLOOR}:1; ${DIAGRAM_PAIRS.length} diagram pairings, series separation and region order (FEAT-017).`);
 if (fresh.length || fixed.length) process.exit(1);
 console.log(`No new failures. ${known.size} known failure(s) remain in the baseline.`);

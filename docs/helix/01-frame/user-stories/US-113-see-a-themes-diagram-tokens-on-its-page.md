@@ -1,20 +1,20 @@
 ---
 ddx:
-  id: US-106
+  id: US-113
   type: user-stories
   status: draft
   links:
     - kind: informed_by
-      to: FEAT-016
+      to: FEAT-017
     - kind: informed_by
       to: US-020
 ---
 
-# US-106: See a theme's diagram tokens on its page
+# US-113: See a theme's diagram tokens on its page
 
-**Feature**: FEAT-016 — Diagram and data-visualization tokens
+**Feature**: FEAT-017 — Diagram and data-visualization tokens
 **Feature Requirements**: PAGE-01, PAGE-02, PAGE-03
-**PRD Requirements**: FR-67
+**PRD Requirements**: FR-73
 **Priority**: P1
 **Status**: Draft
 
@@ -27,7 +27,7 @@ ddx:
 ## Context
 
 Each theme's page (`?theme=<name>`, US-020) shows its brand, CSS and every
-widget. FEAT-016 adds diagram roles; this story puts them on the page.
+widget. FEAT-017 adds diagram roles; this story puts them on the page.
 
 ## Walkthrough
 
@@ -41,10 +41,10 @@ widget. FEAT-016 adds diagram roles; this story puts them on the page.
 
 ## Acceptance Criteria
 
-- [ ] **US-106-AC1** — Given a theme's page, when the menu is read, then it has a "Diagrams and data" link to a section of that name, after the CSS.
-- [ ] **US-106-AC2** — Given the section in an appearance, when it renders, then it lists every diagram colour token, each with its CSS name and that appearance's resolved value, and the contrast it is held to against what it sits on, with the ratio.
-- [ ] **US-106-AC3** — Given the section, when it renders, then a sample node and edge draw with the theme's diagram node radius and stroke widths.
-- [ ] **US-106-AC4** — Given the page, when the appearance switches, then the listed values change to the other appearance's.
+- [ ] **US-113-AC1** — Given a theme's page, when the menu is read, then it has a "Diagrams and data" link to a section of that name, after the CSS.
+- [ ] **US-113-AC2** — Given the section in an appearance, when it renders, then it lists every diagram colour token, each with its CSS name and that appearance's resolved value, and the contrast it is held to against what it sits on, with the ratio.
+- [ ] **US-113-AC3** — Given the section, when it renders, then a sample node and edge draw with the theme's diagram node radius and stroke widths.
+- [ ] **US-113-AC4** — Given the page, when the appearance switches, then the listed values change to the other appearance's.
 
 ## Edge Cases
 
@@ -54,16 +54,16 @@ widget. FEAT-016 adds diagram roles; this story puts them on the page.
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-106-AC1 | `?theme=praxis-carbon` | read the menu | a "Diagrams and data" link after the CSS links |
-| AC2 | US-106-AC2 | the section, light | render | every diagram colour token with name, resolved value and ratio |
-| AC3 | US-106-AC3 | the section | render | the sample node's corner and stroke are the theme's tokens |
-| AC4 | US-106-AC4 | the page | switch to dark | values are the dark appearance's |
+| AC1 | US-113-AC1 | `?theme=praxis-carbon` | read the menu | a "Diagrams and data" link after the CSS links |
+| AC2 | US-113-AC2 | the section, light | render | every diagram colour token with name, resolved value and ratio |
+| AC3 | US-113-AC3 | the section | render | the sample node's corner and stroke are the theme's tokens |
+| AC4 | US-113-AC4 | the page | switch to dark | values are the dark appearance's |
 
 ## Dependencies
 
-- **Feature Spec**: FEAT-016
+- **Feature Spec**: FEAT-017
 - **Feature Requirements**: PAGE-01, PAGE-02, PAGE-03
-- **PRD Requirements**: FR-67
+- **PRD Requirements**: FR-73
 - **External**: US-020 (the theme page)
 
 ## Out of Scope

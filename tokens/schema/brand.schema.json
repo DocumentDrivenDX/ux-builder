@@ -56,7 +56,7 @@
             "on-accent": { "$ref": "#/$defs/colour" }, "border": { "$ref": "#/$defs/colour" }
           },
           "patternProperties": {
-            "^(status-(positive|caution|negative|info)|series-[1-8])$": { "$ref": "#/$defs/colour", "description": "Optional: replaces the SDK's default status or series colour (tokens/dataviz.json) in this appearance only (FEAT-016 VIZ-06)." }
+            "^(status-(positive|caution|negative|info)|series-[1-8])$": { "$ref": "#/$defs/colour", "description": "Optional: replaces the SDK's default status or series colour (tokens/dataviz.json) in this appearance only (FEAT-017 VIZ-06)." }
           }
         },
         "state": {

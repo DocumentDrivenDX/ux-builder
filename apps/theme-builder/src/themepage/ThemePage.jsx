@@ -11,7 +11,7 @@ import { indexStories, storybookUrl } from "./stories.js";
 /* A theme's own page (?theme=<name>): the page wears the theme, in light,
    dark or the system's setting, and shows its brand (logos, mark, favicon,
    palette), its CSS for each appearance and for auto, its diagram and
-   chart tokens (FEAT-016), and every widget,
+   chart tokens (FEAT-017), and every widget,
    screen pattern, assistant part and Adaptive Card in the SDK, each rendered from its own Storybook story
    with a link to that story in Storybook, in this theme. A menu on the left
    reaches every part; on a phone it sits above the content. */

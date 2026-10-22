@@ -17,7 +17,7 @@
    5. tokens/names.json and CONTRACT-001's table name the same tokens with the
       same 0.x names, so the document and the data cannot drift.
    6. tokens/layout.json, every tokens/variants/*.variants.json and
-      tokens/dataviz.json validate (ADR-021, ADR-022, FEAT-016); the
+      tokens/dataviz.json validate (ADR-021, ADR-022, FEAT-017); the
       composer's own rules for them are tested in
       tools/__tests__/variants.test.mjs and diagram-tokens.test.mjs.
 

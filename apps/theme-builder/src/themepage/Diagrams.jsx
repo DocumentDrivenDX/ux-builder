@@ -1,6 +1,6 @@
 import { CVD_FLOOR, DIAGRAM_PAIRS, NORMAL_FLOOR, SERIES, deltaE, measure, solid } from "../../../../tools/contrast.mjs";
 
-/* "Diagrams and data" on a theme's page (FEAT-016, US-106): every diagram
+/* "Diagrams and data" on a theme's page (FEAT-017, US-113): every diagram
    and chart colour in the page's appearance, each with its value and the
    contrast it is held to, worst case first; then the stroke widths and node
    corner drawn on a sample node and edges. The verdicts come from the rule

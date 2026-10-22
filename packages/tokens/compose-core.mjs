@@ -5,7 +5,7 @@
    fit them, SD-001 D3). compose.mjs adds loading and validation and re-exports
    everything here. */
 
-// The SDK's diagram colours (FEAT-016), for a brand load() did not attach its own copy to.
+// The SDK's diagram colours (FEAT-017), for a brand load() did not attach its own copy to.
 import DATAVIZ from "../../tokens/dataviz.json" with { type: "json" };
 
 export const REF = /\{([a-z0-9.-]+)\}/g;

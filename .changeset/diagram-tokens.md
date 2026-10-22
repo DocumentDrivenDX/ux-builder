@@ -2,7 +2,7 @@
 "@ux-builder/tokens": minor
 ---
 
-Diagram and data-visualization tokens in every theme and appearance (FEAT-016; US-105, US-106). The new tokens add nothing to existing names or values:
+Diagram and data-visualization tokens in every theme and appearance (FEAT-017; US-112, US-113). The new tokens add nothing to existing names or values:
 
 - Status: `--piq-color-status-positive`, `-caution`, `-negative`, `-info`, each with a `-subtle` fill. Each status colour clears 4.5:1 as text on the ground and a card, and 3:1 as a mark on its own fill.
 - Series: `--piq-color-series-1` … `-8`. These are blue, orange, aqua, yellow, magenta, green, violet and red, in a fixed colour-vision-safe order. Each clears 3:1 on the ground, a card and the deepest region.

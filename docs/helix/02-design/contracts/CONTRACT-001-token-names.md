@@ -19,7 +19,7 @@ ddx:
     - kind: informs
       to: FEAT-006
     - kind: informs
-      to: FEAT-016
+      to: FEAT-017
 ---
 
 # Contract
@@ -28,7 +28,7 @@ ddx:
 **Type**: library (public CSS custom properties and DTCG token paths of `@ux-builder/tokens`)
 **Version**: v1 (for `@ux-builder/tokens` 1.0.0)
 **Status**: complete — accepted by the operator 2026-10-06, all six decisions as proposed (bead `ux-builder-30fc0a3a`)
-**Related**: ADR-015 (rename to roles, with aliases), ADR-011 (tiered names), ADR-013 (brand × design system), FEAT-001 (THEME-10, THEME-11); ADR-021, ADR-022 and FEAT-006 for the screen-pattern tokens *[Amended 2026-10-18]*; FEAT-016 for the diagram and chart tokens *[Amended 2026-10-22]*
+**Related**: ADR-015 (rename to roles, with aliases), ADR-011 (tiered names), ADR-013 (brand × design system), FEAT-001 (THEME-10, THEME-11); ADR-021, ADR-022 and FEAT-006 for the screen-pattern tokens *[Amended 2026-10-18]*; FEAT-017 for the diagram and chart tokens *[Amended 2026-10-22]*
 
 ## Purpose
 
@@ -452,7 +452,7 @@ gets the point's default, which is also the `ui.css` fallback.
 | — | `table.row-stripe-bg` | `--piq-table-row-stripe-bg` | every theme, from its `table` variant | Fill of alternate rows (`transparent` when ruled) |
 | — | `table.row-border` | `--piq-table-row-border` | every theme, from its `table` variant | Rule between rows (`none` when banded) |
 
-#### Tokens added for diagrams and charts *[Amended 2026-10-22 — FEAT-016]*
+#### Tokens added for diagrams and charts *[Amended 2026-10-22 — FEAT-017]*
 
 Additive; no accepted name changes. Every theme and preview pair sets every
 one of them in every appearance (CONTRACT-002 Composition step 4). Status

@@ -140,7 +140,7 @@
     "radius": {
       "diagram-node": {
         "$value": "12px",
-        "$description": "M3 shape medium, as its cards. (FEAT-016)"
+        "$description": "M3 shape medium, as its cards. (FEAT-017)"
       },
       "control": {
         "$value": "8px",

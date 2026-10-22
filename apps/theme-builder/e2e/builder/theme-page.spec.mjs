@@ -147,7 +147,7 @@ test.describe("A theme's page", () => {
     expect(errors).toEqual([]);
   });
 
-  // @covers US-106-AC1 @covers US-106-AC2 @covers US-106-AC3 @covers US-106-AC4
+  // @covers US-113-AC1 @covers US-113-AC2 @covers US-113-AC3 @covers US-113-AC4
   test("Diagrams and data shows every diagram token with its value and contrast, and a sample node and edges in the design system's shape", async ({ page }) => {
     const errors = watch(page);
     const diagram = Object.entries(JSON.parse(readFileSync(join(REPO, "tokens/names.json"), "utf8")).tokens)

@@ -142,7 +142,7 @@
     "radius": {
       "diagram-node": {
         "$value": "0",
-        "$description": "Carbon v11: square nodes, like its tiles. (FEAT-016)"
+        "$description": "Carbon v11: square nodes, like its tiles. (FEAT-017)"
       },
       "control": {
         "$value": "0",
@@ -198,7 +198,7 @@
     "size": {
       "diagram-stroke": {
         "$value": "1px",
-        "$description": "Carbon draws hairline borders: 1px. (FEAT-016)"
+        "$description": "Carbon draws hairline borders: 1px. (FEAT-017)"
       },
       "measure": {
         "$value": "70ch"

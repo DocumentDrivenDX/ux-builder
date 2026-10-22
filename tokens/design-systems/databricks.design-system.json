@@ -126,7 +126,7 @@
     "radius": {
       "diagram-node": {
         "$value": "8px",
-        "$description": "rounded-md, as its controls. (FEAT-016)"
+        "$description": "rounded-md, as its controls. (FEAT-017)"
       },
       "control": {
         "$value": "8px",

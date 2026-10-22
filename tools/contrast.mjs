@@ -99,7 +99,7 @@ export const pairId = (theme, appearance, fg, bg) => `${theme}.${appearance}: --
 
 /* ------------------------------------------------- diagrams and charts */
 
-/* The roles diagrams and charts draw with (FEAT-016), held to WCAG 2.x:
+/* The roles diagrams and charts draw with (FEAT-017), held to WCAG 2.x:
    text at 4.5:1 (1.4.3), graphics, which series marks and edges are, at
    3:1 (1.4.11). A status colour is checked as text on the ground and a
    card, since a metric prints its change in it; on its own subtle fill it
@@ -126,7 +126,7 @@ export const DIAGRAM_PAIRS = [
   ...["edge", "edge-strong", "edge-muted"].flatMap((e) => ON.map(([bg, where]) => [c(`diagram-${e}`), bg, `${e.replace("-", " ")} on ${where}`, GRAPHIC])),
 ];
 
-/* Colour-vision separation (FEAT-016 GATE-04): Euclidean distance in OKLab
+/* Colour-vision separation (FEAT-017 GATE-04): Euclidean distance in OKLab
    ×100 between neighbouring series, under protanopia and deuteranopia as
    Machado, Oliveira and Fernandes (2009) simulate them at severity 1.0 in
    linear RGB, and with normal vision. The model is part of the threshold:
@@ -152,7 +152,7 @@ export function deltaE(a, b, kind) {
   return 100 * Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
 }
 
-/* Every FEAT-016 failure in one theme's resolved tokens: { fg, bg, label, ratio, floor, unit? }.
+/* Every FEAT-017 failure in one theme's resolved tokens: { fg, bg, label, ratio, floor, unit? }.
    A separation failure carries its ΔE as ratio, with unit "ΔE"; bg names
    the neighbour and the vision it was measured under. */
 export function diagramFailures(tokens) {

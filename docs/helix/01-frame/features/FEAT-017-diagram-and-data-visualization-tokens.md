@@ -1,6 +1,6 @@
 ---
 ddx:
-  id: FEAT-016
+  id: FEAT-017
   type: feature-specification
   status: draft
   links:
@@ -13,19 +13,19 @@ ddx:
     - kind: informed_by
       to: CONTRACT-002
     - kind: informs
-      to: US-105
+      to: US-112
     - kind: informs
-      to: US-106
+      to: US-113
 ---
 
-# Feature Specification: FEAT-016 — Diagram and data-visualization tokens
+# Feature Specification: FEAT-017 — Diagram and data-visualization tokens
 
-**Feature ID**: FEAT-016
+**Feature ID**: FEAT-017
 **Status**: Draft (2026-10-22)
 **Priority**: P1
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: Theme composition
-**Covered PRD Requirements**: FR-67, FR-68 (drafted with this feature)
+**Covered PRD Requirements**: FR-73, FR-74 (drafted with this feature)
 **Cross-Subsystem Rationale**: None — single subsystem. The theme page (FEAT-003's builder) and the audit (FEAT-004) only show and check what this feature adds.
 
 ## Overview
@@ -175,8 +175,8 @@ brand or design system sets them is normative in CONTRACT-002.
 
 ## User Stories
 
-- [US-105 — A diagram draws in any theme from its role tokens](../user-stories/US-105-a-diagram-draws-in-any-theme-from-its-role-tokens.md)
-- [US-106 — See a theme's diagram tokens on its page](../user-stories/US-106-see-a-themes-diagram-tokens-on-its-page.md)
+- [US-112 — A diagram draws in any theme from its role tokens](../user-stories/US-112-a-diagram-draws-in-any-theme-from-its-role-tokens.md)
+- [US-113 — See a theme's diagram tokens on its page](../user-stories/US-113-see-a-themes-diagram-tokens-on-its-page.md)
 
 ## Edge Cases and Error Handling
 
@@ -219,7 +219,7 @@ brand or design system sets them is normative in CONTRACT-002.
 - **Other features**: FEAT-001 (theme composition and the contrast gate),
   FEAT-003 (the theme page), FEAT-004 (the audit).
 - **External services**: none.
-- **PRD requirements**: FR-67, FR-68 (P1-11); supports FR-20 (no
+- **PRD requirements**: FR-73, FR-74 (P1-12); supports FR-20 (no
   hard-coded presentation values).
 - **Downstream**: the visuals PRD's M3 and M4 (`@ux-builder/visuals`) read
   these tokens; umf's `umf.visual` (M1) names roles, not colours.

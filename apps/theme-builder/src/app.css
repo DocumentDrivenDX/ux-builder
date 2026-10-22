@@ -222,7 +222,7 @@ body { margin: 0; }
 .tb-contents { display: contents; }
 .tb-contents[hidden] { display: none; }
 
-/* Diagrams and data (FEAT-016): every diagram token with its verdict, and a sample node and edges. */
+/* Diagrams and data (FEAT-017): every diagram token with its verdict, and a sample node and edges. */
 .tp-viz__group { display: grid; gap: var(--piq-space-2); }
 .tp-viz__group h3 { margin: 0; font-size: var(--piq-font-size-lead); color: var(--piq-color-text-strong); }
 .tp-viz__tokens { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--piq-space-2); }

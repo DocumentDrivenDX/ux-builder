@@ -1,5 +1,5 @@
-/* A diagram drawn only from the FEAT-016 tokens passes the audit in every
-   theme and appearance (US-105-AC7): status chips, a series legend, nested
+/* A diagram drawn only from the FEAT-017 tokens passes the audit in every
+   theme and appearance (US-112-AC7): status chips, a series legend, nested
    regions holding a node, an edge in each weight and the three lifecycle
    tints. The page loads the built @ux-builder/tokens CSS over HTTP, as an
    app would, and is switched through every theme the package ships.
@@ -66,8 +66,8 @@ before(async () => {
 });
 after(() => server?.close());
 
-// @covers US-105-AC7
-test("US-105-AC7: a diagram drawn only from the diagram tokens passes the audit in every theme and appearance", async () => {
+// @covers US-112-AC7
+test("US-112-AC7: a diagram drawn only from the diagram tokens passes the audit in every theme and appearance", async () => {
   const r = await audit({ urls: [`${base}/diagram.html`], themes: THEMES });
   const expected = manifest.themes.flatMap((t) => t.appearances.map((ap) => `${t.name}/${ap}`)).sort();
   assert.deepEqual(r.runs.map((x) => `${x.theme}/${x.appearance}`).sort(), expected);

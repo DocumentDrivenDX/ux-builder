@@ -15,7 +15,7 @@
       "content-page": { "$value": "90rem", "$description": "Maximum width of page content in the extra-large class." },
       "target-minimum": { "$value": "1.5rem", "$description": "Smallest pointer target on any input: 24 CSS px (WCAG 2.2, 2.5.8)." },
       "target-touch": { "$value": "2.75rem", "$description": "Smallest target under pointer: coarse: 44 CSS px (Apple HIG)." },
-      "diagram-stroke": { "$value": "1.5px", "$description": "Outline of a diagram node, and an edge (FEAT-016)." },
+      "diagram-stroke": { "$value": "1.5px", "$description": "Outline of a diagram node, and an edge (FEAT-017)." },
       "diagram-stroke-strong": { "$value": "2px", "$description": "The main flow, an action edge, and the accent outline of the project's own parts." }
     },
     "radius": {

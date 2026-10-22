@@ -1,6 +1,6 @@
 {
   "$schema": "./schema/dataviz.schema.json",
-  "$description": "The colours diagrams and charts draw with (FEAT-016, CONTRACT-002 Composition step 4). appearances: the SDK's status and series colours for each appearance, used by every brand that does not set its own. derived: roles every brand gets from its own ground, surface, text and accent, the same in both appearances. The series are the reference categorical palette (blue, orange, aqua, yellow, magenta, green, violet, red, in that order; the order is what keeps neighbours apart under colour-vision deficiency), each stepped in OKLCH lightness only until it clears 3:1 on every current ground, surface and deepest region tint. The status colours are stepped the same way to clear 4.5:1, so they can be text.",
+  "$description": "The colours diagrams and charts draw with (FEAT-017, CONTRACT-002 Composition step 4). appearances: the SDK's status and series colours for each appearance, used by every brand that does not set its own. derived: roles every brand gets from its own ground, surface, text and accent, the same in both appearances. The series are the reference categorical palette (blue, orange, aqua, yellow, magenta, green, violet, red, in that order; the order is what keeps neighbours apart under colour-vision deficiency), each stepped in OKLCH lightness only until it clears 3:1 on every current ground, surface and deepest region tint. The status colours are stepped the same way to clear 4.5:1, so they can be text.",
   "appearances": {
     "light": {
       "color": {
