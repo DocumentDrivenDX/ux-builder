@@ -16,7 +16,7 @@
     "contrast": "node tools/check-contrast.mjs",
     "gallery": "node tools/gen-gallery.mjs",
     "brand": "node tools/brand.mjs",
-    "check": "npm run schemas && npm run lint && node tools/gen-catalogue.mjs --check && npm run rules && npm run coverage && npm test && npm run build && npm run licences && npm run test:built && npm test --workspace @ux-builder/tokens && npm test --workspace @ux-builder/ui && npm test --workspace @ux-builder/create-app && npm test --workspace @ux-builder/mcp && npm test --workspace @ux-builder/audit && npm run verify && npm run contrast && npm run gallery && npm run gallery -- --brand tests/fixtures/brands/sample.brand.json",
+    "check": "npm run schemas && npm run lint && node tools/gen-catalogue.mjs --check && npm run rules && npm run coverage && npm test && npm run build && npm run licences && npm run test:built && npm test --workspace @ux-builder/tokens && npm test --workspace @ux-builder/ui && npm test --workspace @ux-builder/create-app && npm test --workspace @ux-builder/mcp && npm test --workspace @ux-builder/audit && npm test --workspace @ux-builder/trace && npm run verify && npm run contrast && npm run gallery && npm run gallery -- --brand tests/fixtures/brands/sample.brand.json",
     "storybook": "npm run build && npm run storybook --workspace @ux-builder/ui",
     "build-storybook": "npm run build && npm run build-storybook --workspace @ux-builder/ui",
     "changeset": "changeset",

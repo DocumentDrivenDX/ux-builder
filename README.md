@@ -51,6 +51,7 @@ public themes; any other opens by its name. The site is rebuilt from `main` by
 | [`@ux-builder/create-app`](packages/create-app) | `npm create` | A new React + Vite app already on the SDK, with lint, the audit and CI |
 | [`@ux-builder/audit`](packages/audit) | devDependency | `ux-builder-audit`: checks the running app in every theme and appearance |
 | [`@ux-builder/mcp`](packages/mcp) | `npx` | The SDK for AI coding agents over MCP |
+| [`@ux-builder/trace`](packages/trace) | devDependency | `ux-builder-trace`: the episode trace an app keeps while it is built, and the export its owner shares by choice |
 
 `@ux-builder/engine` (the palette engine) and the theme builder app are
 private to this repository and are used to make new themes.

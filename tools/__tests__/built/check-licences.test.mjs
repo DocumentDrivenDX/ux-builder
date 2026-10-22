@@ -53,7 +53,7 @@ test("SPDX expressions: OR passes on one allowed choice, AND needs every part, W
 test("US-049-AC1: every published SDK package's production, peer and optional trees, and its vendored record, are read", () => {
   const { packages } = scan(ROOT);
   const names = packages.map((p) => p.name).sort();
-  assert.deepEqual(names, ["@ux-builder/audit", "@ux-builder/create-app", "@ux-builder/mcp", "@ux-builder/tokens", "@ux-builder/ui"], "the private engine is not published, so it is not checked");
+  assert.deepEqual(names, ["@ux-builder/audit", "@ux-builder/create-app", "@ux-builder/mcp", "@ux-builder/tokens", "@ux-builder/trace", "@ux-builder/ui"], "the private engine is not published, so it is not checked");
   const ui = packages.find((p) => p.name === "@ux-builder/ui");
   assert.ok(ui.third.some((t) => t.name === "react"), "peer dependencies are read");
   assert.ok(ui.third.some((t) => t.name === "eslint"), "the lint peers and their trees are read");

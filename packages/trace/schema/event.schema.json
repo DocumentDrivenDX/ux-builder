@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/trace/event.schema.json",
+  "title": "Episode trace event (CONTRACT-007 v1)",
+  "description": "One line of .ux-builder/trace/<episode>.jsonl. Every event has v, episode, seq, at, kind and by; each kind adds its own fields. An event never holds source code or a file's contents.",
+  "type": "object",
+  "required": ["v", "episode", "seq", "at", "kind", "by"],
+  "properties": {
+    "v": { "const": 1 },
+    "episode": { "$ref": "#/$defs/episodeId" },
+    "seq": { "type": "integer", "minimum": 1 },
+    "at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$" },
+    "kind": { "enum": ["start", "created", "guidance", "check", "decision", "transcript", "change", "outcome", "end"] },
+    "by": { "type": "string", "minLength": 1, "description": "The tool and its version (\"@ux-builder/mcp@0.6.0\"), or \"agent\"" }
+  },
+  "allOf": [
+    { "if": { "properties": { "kind": { "const": "start" } } }, "then": { "$ref": "#/$defs/start" } },
+    { "if": { "properties": { "kind": { "const": "created" } } }, "then": { "$ref": "#/$defs/created" } },
+    { "if": { "properties": { "kind": { "const": "guidance" } } }, "then": { "$ref": "#/$defs/guidance" } },
+    { "if": { "properties": { "kind": { "const": "check" } } }, "then": { "$ref": "#/$defs/check" } },
+    { "if": { "properties": { "kind": { "const": "decision" } } }, "then": { "$ref": "#/$defs/decision" } },
+    { "if": { "properties": { "kind": { "const": "transcript" } } }, "then": { "$ref": "#/$defs/transcript" } },
+    { "if": { "properties": { "kind": { "const": "change" } } }, "then": { "$ref": "#/$defs/change" } },
+    { "if": { "properties": { "kind": { "const": "outcome" } } }, "then": { "$ref": "#/$defs/outcome" } },
+    { "if": { "properties": { "kind": { "const": "end" } } }, "then": { "$ref": "#/$defs/end" } }
+  ],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "episodeId": { "type": "string", "pattern": "^E-\\d{8}-[a-z0-9]+(-[a-z0-9]+)*$" },
+    "strings": { "type": "array", "items": { "type": "string" } },
+    "nullableString": { "type": ["string", "null"] },
+    "count": { "type": "integer", "minimum": 0 },
+    "sha": { "type": "string", "pattern": "^[0-9a-f]{7,64}$" },
+    "verdicts": {
+      "type": "object",
+      "required": ["theme", "modality"],
+      "properties": {
+        "theme": { "type": "string" },
+        "modality": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["modality", "status"],
+            "properties": { "modality": { "type": "string" }, "status": { "type": "string" } },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "start": {
+      "required": ["trigger", "goal", "agent", "sdk", "helix"],
+      "properties": {
+        "trigger": { "enum": ["create", "change"] },
+        "goal": {
+          "type": "object",
+          "required": ["stories", "screens", "journeys", "text"],
+          "properties": {
+            "stories": { "type": "array", "items": { "type": "string", "pattern": "^US-\\d+" } },
+            "screens": { "$ref": "#/$defs/strings" },
+            "journeys": { "$ref": "#/$defs/strings" },
+            "text": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "agent": {
+          "type": "object",
+          "required": ["name", "model"],
+          "properties": { "name": { "$ref": "#/$defs/nullableString" }, "model": { "$ref": "#/$defs/nullableString" } },
+          "additionalProperties": false
+        },
+        "sdk": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Package name to installed version" },
+        "helix": { "$ref": "#/$defs/nullableString" },
+        "transcripts": { "type": "boolean", "description": "false when the episode was opened with --no-transcripts" },
+        "commit": { "oneOf": [{ "$ref": "#/$defs/sha" }, { "type": "null" }], "description": "The HEAD commit when the episode opened; null outside a git repository or before the first commit" },
+        "branch": { "$ref": "#/$defs/nullableString" },
+        "unscoped": { "type": "boolean", "description": "true for the per-branch episode that collects events written with no episode open" }
+      }
+    },
+    "created": {
+      "required": ["modalities", "theme", "options", "files", "blueprint"],
+      "properties": {
+        "modalities": { "$ref": "#/$defs/strings" },
+        "theme": { "type": "string" },
+        "options": { "type": "object" },
+        "files": { "$ref": "#/$defs/count" },
+        "blueprint": { "$ref": "#/$defs/nullableString", "description": "The blueprint's hash" }
+      }
+    },
+    "guidance": {
+      "required": ["tool", "input", "answer"],
+      "properties": {
+        "tool": { "type": "string" },
+        "input": { "type": "object" },
+        "answer": {
+          "type": "object",
+          "required": ["ruleIds", "components", "recipes", "guidanceHash", "bytes"],
+          "properties": {
+            "ruleIds": { "$ref": "#/$defs/strings" },
+            "components": { "$ref": "#/$defs/strings" },
+            "recipes": { "$ref": "#/$defs/strings" },
+            "guidanceHash": { "$ref": "#/$defs/nullableString" },
+            "bytes": { "$ref": "#/$defs/count" }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["ruleId", "severity", "count"],
+      "properties": {
+        "ruleId": { "type": "string" },
+        "severity": { "type": ["string", "integer"] },
+        "count": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "assessmentRef": {
+      "type": "object",
+      "required": ["run"],
+      "required": ["run", "compare"],
+      "properties": {
+        "run": { "type": "string", "pattern": "^R-" },
+        "compare": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["rule", "finding", "status"],
+            "properties": {
+              "rule": { "type": ["string", "null"] },
+              "finding": { "type": "string", "pattern": "^F-" },
+              "status": { "enum": ["new", "persistent", "resolved", "regressed", "not-rechecked"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "check": {
+      "required": ["check", "attempt", "status", "findings"],
+      "properties": {
+        "check": { "enum": ["lint", "blueprint", "card", "audit"] },
+        "attempt": { "type": "integer", "minimum": 1 },
+        "status": { "enum": ["pass", "warn", "fail"] },
+        "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "report": { "$ref": "#/$defs/nullableString", "description": "The report's path, for the audit" },
+        "verdicts": { "$ref": "#/$defs/verdicts", "description": "The audit's verdicts: the theme's, and each modality's" },
+        "assessment": { "$ref": "#/$defs/assessmentRef" }
+      }
+    },
+    "decision": {
+      "required": ["chose", "why"],
+      "properties": {
+        "chose": { "type": "string" },
+        "considered": { "$ref": "#/$defs/strings" },
+        "why": { "type": "string" },
+        "relied": { "$ref": "#/$defs/strings", "description": "Rule IDs and story IDs" },
+        "departs": { "type": "boolean" },
+        "workaround": { "type": "boolean" },
+        "screen": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "transcript": {
+      "required": ["file", "agent", "bytes", "sha256", "masked"],
+      "properties": {
+        "file": { "type": "string", "pattern": "^transcripts/E-[^/]+/\\d+\\.[A-Za-z0-9]+$" },
+        "agent": { "type": "string" },
+        "bytes": { "$ref": "#/$defs/count" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "masked": { "$ref": "#/$defs/count" },
+        "session": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "change": {
+      "required": ["commits", "files", "screens"],
+      "properties": {
+        "commits": { "type": "array", "items": { "$ref": "#/$defs/sha" } },
+        "untrailered": { "type": "array", "items": { "$ref": "#/$defs/sha" }, "description": "Commits in the episode's range with no UX-Episode trailer" },
+        "parent": { "oneOf": [{ "$ref": "#/$defs/sha" }, { "type": "null" }], "description": "When start.commit is null: the parent of the episode's first trailer commit, or null" },
+        "files": { "$ref": "#/$defs/count" },
+        "screens": { "$ref": "#/$defs/strings" }
+      }
+    },
+    "outcome": {
+      "required": ["audit", "assessment", "checksToGreen"],
+      "properties": {
+        "audit": {
+          "type": "object",
+          "required": ["verdicts", "findings"],
+          "properties": {
+            "verdicts": { "oneOf": [{ "$ref": "#/$defs/verdicts" }, { "type": "null" }] },
+            "findings": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 }, "description": "Rule ID to count, from the last audit check; {} with none" }
+          },
+          "additionalProperties": false
+        },
+        "assessment": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/assessmentRef" }] },
+        "checksToGreen": {
+          "type": "object",
+          "propertyNames": { "enum": ["lint", "blueprint", "card", "audit"] },
+          "additionalProperties": { "type": ["integer", "null"], "minimum": 0 },
+          "description": "Runs of each check before its first pass or warn: 0 when it passed first time, null when it never passed"
+        }
+      }
+    },
+    "end": {
+      "required": ["status"],
+      "properties": { "status": { "enum": ["done", "abandoned", "unscoped"] } }
+    }
+  }
+}
