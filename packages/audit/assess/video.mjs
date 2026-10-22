@@ -36,6 +36,7 @@ import { guardContext, recordStage, refusal } from "./checkpoint.mjs";
 import { runDir } from "./plan.mjs";
 import { layer } from "./video-layer.mjs";
 import { writePlayer } from "./video-player.mjs";
+import { findFfmpeg, renderMp4 } from "./video-render.mjs";
 
 export const DEFAULT_VIEWPORT = { width: 1440, height: 900 };
 export const HOLD = { min: 4, perWord: 0.3 };
@@ -265,7 +266,7 @@ async function recordJourney(browser, ctx) {
 }
 
 /* Run `assess video`: returns { code, dir, record, stage }. */
-export async function video({ manifest, resolved, out, run, journeys: only = [], viewports = [], env = process.env, now = Date.now, pace = 1 }) {
+export async function video({ manifest, resolved, out, run, journeys: only = [], viewports = [], env = process.env, now = Date.now, pace = 1, ffmpeg = "ffmpeg" }) {
   const dir = runDir(manifest, resolved, out, run);
   const vdir = join(dir, "video");
   const walk = maybe(join(dir, "walkthrough.json"));
@@ -307,11 +308,23 @@ export async function video({ manifest, resolved, out, run, journeys: only = [],
       }
     }
   } finally { await browser.close(); }
+  // The MP4s (OUT-03): with ffmpeg on the PATH; without it, the player still works.
+  const problems = [];
+  const encoder = record.videos.length ? findFfmpeg(ffmpeg) : null;
+  if (record.videos.length && !encoder) problems.push("ffmpeg is not on the PATH, so no MP4 was written; the player (video/index.html) still plays every journey");
+  if (encoder) for (const v of record.videos) {
+    const name = v.files.clean.replace(/\.clean\.webm$/, "");
+    try {
+      await renderMp4({ clean: join(vdir, v.files.clean), timeline: json(join(vdir, v.files.annotations)), out: join(vdir, `${name}.mp4`), ffmpeg: encoder, work: join(vdir, `.render-${name}`) });
+      v.files.mp4 = `${name}.mp4`;
+    } catch (e) { problems.push(e.message); }
+  }
   writeFileSync(join(vdir, "video.json"), JSON.stringify(record, null, 2) + "\n");
   writePlayer(dir, { autoPause: resolved.video?.autoPause ?? true, appName: resolved.app?.name ?? null });
   const stopped = record.videos.flatMap((v) => v.chapters.filter((c) => c.status === "stopped").map((c) => `${v.journey} ${c.title}: ${c.reason}`));
-  const partial = record.notRecorded.length || stopped.length;
-  const stage = { stage: "video", status: partial ? "partial" : "completed", ...(partial ? { reason: [...record.notRecorded.map((n) => `${n.journey} not recorded: ${n.reason}`), ...stopped].join("; ") } : {}), startedAt };
+  const reasons = [...record.notRecorded.map((n) => `${n.journey} not recorded: ${n.reason}`), ...stopped, ...problems];
+  const partial = reasons.length > 0;
+  const stage = { stage: "video", status: partial ? "partial" : "completed", ...(partial ? { reason: reasons.join("; ") } : {}), startedAt };
   recordStage(dir, stage);
   return { code: partial ? 1 : 0, dir, record, stage };
 }

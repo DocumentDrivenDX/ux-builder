@@ -169,6 +169,8 @@ function app() {
     v.src = cur.src;
     v.style.aspectRatio = `${cur.viewport.width} / ${cur.viewport.height}`;
     $("#goal").textContent = cur.goal ? `${cur.goal} · ${cur.journey} · ${cur.viewport.width}×${cur.viewport.height}` : `${cur.journey} · ${cur.viewport.width}×${cur.viewport.height}`;
+    $("#mp4").hidden = !cur.mp4;
+    if (cur.mp4) $("#mp4").setAttribute("href", cur.mp4);
     renderSide();
     if (at != null) v.addEventListener("loadedmetadata", () => { v.currentTime = at; }, { once: true });
   }
@@ -281,7 +283,7 @@ addEventListener("piq:set-theme", (e) => { const d = e.detail || {}; if (d.theme
 <section id="stage" aria-label="Video">
 <div class="pick"><div class="pick__field"><div class="piq-field"><label class="piq-field__label" for="journey">Journey</label><span class="piq-select"><select class="piq-field__input piq-select__input" id="journey"></select></span></div></div><p id="goal" class="note"></p></div>
 <div class="stagebox"><div class="frame" id="frame"><video id="video" preload="metadata" playsinline aria-describedby="goal"></video><div class="overlay" id="overlay" aria-hidden="true"></div></div><div class="popup" id="popup" role="group" aria-label="Finding" hidden></div></div>
-<div class="controls"><button type="button" class="piq-btn piq-btn--secondary" id="prev" aria-keyshortcuts="p">Previous finding</button><button type="button" class="piq-btn" id="play" aria-keyshortcuts="k">Play</button><button type="button" class="piq-btn piq-btn--secondary" id="next" aria-keyshortcuts="n">Next finding</button><button type="button" class="piq-btn piq-btn--text" id="auto" aria-pressed="true">Pause at findings: on</button><span class="time" id="time">0:00</span></div>
+<div class="controls"><button type="button" class="piq-btn piq-btn--secondary" id="prev" aria-keyshortcuts="p">Previous finding</button><button type="button" class="piq-btn" id="play" aria-keyshortcuts="k">Play</button><button type="button" class="piq-btn piq-btn--secondary" id="next" aria-keyshortcuts="n">Next finding</button><button type="button" class="piq-btn piq-btn--text" id="auto" aria-pressed="true">Pause at findings: on</button><a class="piq-btn piq-btn--text" id="mp4" href="#" download hidden>Download MP4</a><span class="time" id="time">0:00</span></div>
 <p class="piq-visually-hidden" id="announce" aria-live="polite"></p>
 ${notRecorded}
 </section>

@@ -370,6 +370,12 @@ Decisions the build had to make *(FEAT-013 step 3, 2026-10-21)*:
   Below 640 px the pop-up sits under the video instead of over it. Keys: `n`
   and `p` next and previous finding, `k` (or Space) play and pause, `m`
   More, Escape dismiss.
+- **The MP4** is drawn after the recording: each annotation becomes one
+  transparent picture the size of the recording, rendered in the theme
+  from the player's own `captionMarkup` and `place`, and `ffmpeg` lays each
+  over the clean recording between its `start` and `end` and encodes H.264
+  (CRF 26, 25 fps, no audio, `+faststart`). A failed encode is reported in
+  the stage's reason and leaves the player working.
 - **Pacing** (ms): 450 before a step, 650 for the cursor to move, 55 a
   character typed, 900 to settle, 3200 for the title card, 4500 for the end
   card; network waits are cut off at 1 s. A missing element fails its step

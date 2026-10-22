@@ -28,6 +28,8 @@ jobs:
       # Chromium for the browser tests inside npm run check (theme selection,
       # US-005) and the e2e suites below.
       - run: npx playwright install --with-deps chromium
+      # ffmpeg for the walkthrough video MP4 tests (FEAT-013; the SDK does not ship it).
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - run: npm run check
       # So a reviewer can see what a change looks like before it merges.
       - uses: actions/upload-artifact@v4
