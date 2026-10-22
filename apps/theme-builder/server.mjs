@@ -10,6 +10,7 @@
    BUILDER_ROOT    the repository to read names from and save into (default: this one) */
 
 import OpenAI from "openai";
+import { globSync } from "node:fs";
 import { createServer } from "node:http";
 import { createServer as createVite } from "vite";
 import { context } from "./api/context.mjs";
@@ -17,7 +18,7 @@ import { DEFAULT_MODEL, feedback } from "./api/feedback.mjs";
 import { openaiKey } from "./api/key.mjs";
 import { save } from "./api/save.mjs";
 import { theme } from "./api/theme.mjs";
-import { REPO, viteOptions } from "./vite.shared.mjs";
+import { APP, REPO, viteOptions } from "./vite.shared.mjs";
 
 const root = process.env.BUILDER_ROOT ?? REPO;
 const review = process.env.BUILDER_REVIEW === "files" ? "files" : "pr";
@@ -71,6 +72,15 @@ http.on("request", async (req, res) => {
     if (!res.headersSent) send(res, status, { error: status === 500 ? `server error: ${String(e.stderr || e.message).trim().split("\n").filter(Boolean).pop()}` : e.message });
   }
 });
+// Answer only once Vite has found and bundled every dependency: requests
+// that arrive while it re-optimises get 504 "Outdated Optimize Dep" (seen in
+// CI's e2e on a cold cache). Transforming every source file up front makes
+// it discover them all at start; then wait for the bundling to finish.
+const optimizer = vite.environments?.client?.depsOptimizer;
+const sources = [...globSync("src/**/*.{js,jsx}", { cwd: APP })].filter((f) => !/\.(test|stories)\.jsx?$/.test(f));
+await Promise.all(["src/main.jsx", "src/home/main.jsx", ...sources].map((f) => vite.warmupRequest(`/${f}`).catch(() => {})));
+await optimizer?.scanProcessing;
+await Promise.all(Object.values(optimizer?.metadata?.discovered ?? {}).map((d) => d.processing).filter(Boolean));
 http.listen(port, "127.0.0.1", () => {
   console.log(`theme builder: http://127.0.0.1:${port}/  (model: ${model.available ? model.name : "unavailable"}, review: ${review}, repo: ${root})`);
 });
