@@ -499,25 +499,29 @@ Releases use [Changesets](https://github.com/changesets/changesets). Run
 Releases are automated by `.github/workflows/release.yml`, which runs on every
 push to `main`:
 
-1. While `.changeset/` holds pending changesets, it opens (or updates) a
-   **Version Packages** pull request made by `npm run version-packages`:
-   versions, changelogs, `package-lock.json` and the catalogue.
-2. Merging that pull request releases it: the workflow runs `npm run release`
-   (`npm run check`, every gate including contrast, then `changeset publish`),
-   which publishes each public package whose version isn't on npm yet, with
-   provenance, then tags it and creates a GitHub release.
+1. It applies the pending changesets in `.changeset/` with
+   `npm run version-packages` (versions, changelogs, `package-lock.json` and
+   the catalogue) and commits that as **Version Packages**.
+2. It runs `npm run check`, every gate including contrast, on the versioned
+   tree. If a gate fails, nothing is pushed or published.
+3. It pushes the Version Packages commit to `main`.
+4. It runs `changeset publish`, which publishes each public package whose
+   version isn't on npm yet, with provenance, then tags it and creates a
+   GitHub release.
+
+So merging a pull request with a changeset releases it; there is no second
+pull request to merge (ADR-034). If publishing fails part-way, the next push
+to `main` (or a re-run of the workflow) publishes what is missing.
 
 It publishes with [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
-(OIDC), so no npm token is stored anywhere. That needs two one-time settings:
+(OIDC), so no npm token is stored anywhere. That needs a one-time setting:
 each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`)
 lists GitHub Actions, `DocumentDrivenDX/ux-builder`, workflow `release.yml` as
-a trusted publisher on npmjs.com; and the repository allows GitHub Actions to
-create pull requests (Settings → Actions → General). A brand-new package has to
+a trusted publisher on npmjs.com. A brand-new package has to
 be published once by hand before a trusted publisher can be added to it.
 
-The Version Packages pull request is opened with the workflow's own token, so
-GitHub doesn't run `ci.yml` on it; close and reopen it (or push to its branch)
-to run the checks before merging.
+The workflow pushes the Version Packages commit with its own token, so GitHub
+starts no workflow for it; the release ran every gate on that commit already.
 
 #### Publishing by hand
 

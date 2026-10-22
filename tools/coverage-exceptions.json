@@ -3,7 +3,7 @@
   "exceptions": [
     { "id": "US-014-AC4", "reason": "A graded sample of AI-agent tasks (>= 90% of components on SDK widgets and role tokens) needs real agent runs and human grading; not yet run." },
     { "id": "US-031-AC5", "reason": "A graded sample of 10 agent tasks (at least 9 on the matching patterns with no app-written layout CSS) needs real agent runs and human grading; not yet run. The audit part also waits for its width option." },
-    { "id": "US-072-AC1", "reason": "Built: .github/workflows/release.yml (changesets/action, Trusted Publishing, create-github-releases). Evidenced by each release run, not yet by a test (FEAT-005, framed 2026-10-21)." },
+    { "id": "US-072-AC1", "reason": "Built: .github/workflows/release.yml (version, every gate, commit to main, changeset publish with Trusted Publishing and GitHub releases; ADR-034). Evidenced by each release run, not yet by a test (FEAT-005, framed 2026-10-21)." },
     { "id": "US-072-AC2", "reason": "Built: npm run release runs npm run check (contrast, licences) before changeset publish. Evidenced by release runs, not yet by a test (FEAT-005, framed 2026-10-21)." },
     { "id": "US-072-AC3", "reason": "Planned: FEAT-005 (public distribution), framed 2026-10-21; not built yet." },
     { "id": "US-072-AC4", "reason": "Planned: FEAT-005 (public distribution), framed 2026-10-21; not built yet." },
