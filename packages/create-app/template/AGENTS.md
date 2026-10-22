@@ -7,6 +7,15 @@ SDK's widgets, style with `--piq-*` role tokens, never hard-code colours,
 fonts or radii, and run `npm run lint`, then `npm run audit` (the running app
 in every theme; fix every error it reports).
 
+## Modalities
+
+__MODALITY_GUIDE__
+
+The app starts as an empty shell for its modalities, with no sample data:
+build your own screens in it.
+
+## Screens
+
 Plan screens before building them. The app's destinations and screens are
 described in `app.blueprint.json`: add a screen there first, choosing its
 pattern from the recipes in the guidance (or the MCP tool `list_recipes`),

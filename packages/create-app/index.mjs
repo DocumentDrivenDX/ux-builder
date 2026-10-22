@@ -1,14 +1,18 @@
 #!/usr/bin/env node
-/* npm create @ux-builder/app <dir> -- --theme <name>  (FEAT-004 SDK-08, SDK-09; US-012)
+/* npm create @ux-builder/app <dir> -- --modality <list> --theme <name>  (FEAT-004 SDK-08, SDK-09; US-012; FEAT-014)
 
    Scaffolds a React + Vite app already on the AI-UI SDK: the theme's CSS and
    fonts, @ux-builder/ui's widgets and ThemeProvider with a theme and appearance
-   switcher, a page built from SDK widgets and role tokens only, the
-   ux-builder/no-hard-coded-values lint rule in `npm run lint`, and the agent
-   guidance (CLAUDE.md, the Claude Code skill). @ux-builder/tokens and
-   @ux-builder/ui are pinned to the exact versions this package was released
-   with.
+   switcher, the empty shell for the app's modalities (FEAT-014: an AppShell
+   with a Home screen, a Conversation, or both) built from SDK components and
+   role tokens only, with no sample domain, the ux-builder/no-hard-coded-values
+   lint rule in `npm run lint`, and the agent guidance (CLAUDE.md, the Claude
+   Code skill). @ux-builder/tokens and @ux-builder/ui are pinned to the exact
+   versions this package was released with.
 
+     --modality <list>  the app's modalities, comma-separated: responsive-web, chat,
+                        hybrid-chat (FEAT-014). In a terminal without it, the starter
+                        asks; without a terminal it is required, and none is assumed
      --theme <name>     the theme to start on (default: the first listed)
      --name <name>      the package name (default: the directory's name)
      --blueprint <file> start from this plan of the app's screens instead of the
@@ -30,8 +34,11 @@ import { createRequire } from "node:module";
 import { basename, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { createInterface } from "node:readline";
 import { checkBlueprint } from "@ux-builder/ui/blueprint";
+import { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, modalityProblems } from "@ux-builder/ui/blueprint/modalities";
 import { getHelix, install as installHelix } from "./helix.mjs";
+import { blueprintFor, modalityGuide, normalize, shellFiles, starterSpec } from "./shell.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
@@ -47,6 +54,56 @@ export function themes() {
   return JSON.parse(readFileSync(require.resolve("@ux-builder/tokens/manifest.json"), "utf8")).themes.map((t) => t.name);
 }
 
+/* ---------------------------------------------------------- modalities */
+const NAMES = Object.keys(MODALITIES);
+const FUTURE = `Native apps (${FUTURE_MODALITIES.join(", ")}) are future modalities.`;
+export const modalityList = () => NAMES.map((m) => `  ${m.padEnd(15)} ${MODALITIES[m].label}`).join("\n");
+
+/* A --modality value as a list, or an Error saying which are available now (MOD-03). */
+export function parseModalities(value) {
+  const names = String(value ?? "").split(/[\s,]+/).map((x) => x.trim()).filter(Boolean);
+  const problems = modalityProblems(names);
+  if (problems.length) throw new Error(`--modality ${value ?? ""}: ${problems.join(" ")} ${FUTURE}`.replace(/ +/g, " "));
+  return normalize(names);
+}
+
+/* The modalities: --modality, checked against --blueprint's (FEAT-014 edge
+   case), or the blueprint's own, or null when the starter must ask. A
+   blueprint that names none is read as responsive-web. */
+export function resolveModalities({ modality, blueprint } = {}) {
+  const flag = modality != null ? parseModalities(modality) : null;
+  if (!blueprint) return flag;
+  let bp;
+  try { bp = JSON.parse(readFileSync(blueprint, "utf8")); } catch { return flag; } // readBlueprint names the problem
+  const declared = Array.isArray(bp?.supports?.modalities) ? bp.supports.modalities : DEFAULT_MODALITIES;
+  const own = normalize(declared);
+  if (flag && (flag.length !== own.length || flag.some((m) => !own.includes(m)))) {
+    throw new Error(`--modality ${flag.join(",")} disagrees with --blueprint ${blueprint}, whose supports.modalities is ${declared.join(",")}${Array.isArray(bp?.supports?.modalities) ? "" : " (it names none, so it is read as responsive-web)"}; give the same modalities, or leave out --modality. No app was created.`);
+  }
+  return flag ?? own;
+}
+
+/* The multi-select, in a terminal (MOD-01): the modalities numbered; answer
+   with numbers or names, comma-separated. Asks again on an answer it cannot
+   use; rejects when the input ends. */
+export function askModalities({ input = process.stdin, output = process.stdout } = {}) {
+  const rl = createInterface({ input, output, terminal: false });
+  output.write(`Which modalities does the app have? Choose one or more, e.g. 1,3:\n${NAMES.map((m, i) => `  ${i + 1}. ${m.padEnd(15)} ${MODALITIES[m].label}`).join("\n")}\n`);
+  return new Promise((resolveAnswer, reject) => {
+    let done = false;
+    const ask = () => output.write("Modalities: ");
+    rl.on("line", (line) => {
+      const picked = line.split(/[\s,]+/).filter(Boolean).map((x) => (/^\d+$/.test(x) ? NAMES[Number(x) - 1] ?? x : x));
+      try {
+        const ms = parseModalities(picked.join(","));
+        done = true; rl.close(); resolveAnswer(ms);
+      } catch (e) { output.write(`${e.message.replace(/^--modality [^:]*: /, "")}\n`); ask(); }
+    });
+    rl.on("close", () => { if (!done) reject(new Error(`no modalities were chosen; no app was created. Choose with --modality <list>:\n${modalityList()}`)); });
+    ask();
+  });
+}
+
 /* Write the app. Returns the files written, relative to dir. */
 /* A blueprint given with --blueprint: its text, or an exit naming each error
    before anything is written. */
@@ -59,7 +116,12 @@ export function readBlueprint(file) {
   return text.endsWith("\n") ? text : text + "\n";
 }
 
-export function scaffold(dir, { theme, name, sdkFrom, blueprint } = {}) {
+export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = {}) {
+  // Never assumed (MOD-01): the CLI asks, or takes --modality.
+  if (!Array.isArray(modalities) || !modalities.length) throw new Error(`the app's modalities are required (--modality <list>):\n${modalityList()}`);
+  const problems = modalityProblems(modalities);
+  if (problems.length) throw new Error(`${problems.join(" ")} ${FUTURE}`);
+  modalities = normalize(modalities);
   const target = resolve(dir);
   if (existsSync(target) && readdirSync(target).length) die(`${dir} exists and is not empty`);
   const plan = blueprint ? readBlueprint(blueprint) : null;
@@ -81,7 +143,15 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint } = {}) {
   cpSync(join(HERE, "template"), target, { recursive: true });
   // npm drops dotfiles named .gitignore from published packages; it (and .github) ships without the dot.
   for (const f of ["gitignore", "github"]) if (existsSync(join(target, f))) renameSync(join(target, f), join(target, `.${f}`));
-  const fill = (s) => s.replaceAll("__APP_NAME__", name).replaceAll("__THEME__", theme)
+  // The shell for the modalities (FEAT-014 MOD-04), its test and its plan.
+  for (const [to, from] of Object.entries(shellFiles(modalities))) cpSync(join(HERE, "shells", from), join(target, to));
+  mkdirSync(join(target, "e2e"), { recursive: true });
+  writeFileSync(join(target, "e2e/starter.spec.js"), starterSpec(modalities));
+  writeFileSync(join(target, "app.blueprint.json"), JSON.stringify(blueprintFor("__APP_NAME__", modalities), null, 2) + "\n");
+  const guide = modalityGuide(modalities);
+  // The audit visits every screen of the shell, so each modality's screen is checked (FEAT-014 MOD-08).
+  const auditUrls = [...new Set(blueprintFor(name, modalities).screens.map((sc) => sc.path ?? "/"))].map((p) => `http://127.0.0.1:4173${p}`).join(" ");
+  const fill = (s) => s.replaceAll("__MODALITY_GUIDE__", guide).replaceAll("__MODALITIES__", modalities.join(", ")).replaceAll("__AUDIT_URLS__", auditUrls).replaceAll("__APP_NAME__", name).replaceAll("__THEME__", theme)
     .replaceAll("__TOKENS__", dep("@ux-builder/tokens")).replaceAll("__UI__", dep("@ux-builder/ui")).replaceAll("__AUDIT__", dep("@ux-builder/audit"));
   const written = [];
   const walk = (d) => {
@@ -94,7 +164,7 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint } = {}) {
   };
   walk(target);
   if (plan) writeFileSync(join(target, "app.blueprint.json"), plan);
-  return { dir: target, theme, name, versions, files: written.sort() };
+  return { dir: target, theme, name, modalities, versions, files: written.sort() };
 }
 
 /* The .helix.yml marker: the app's one flow and the HELIX it started on (HLA-01, HLI-02). */
@@ -139,16 +209,23 @@ export async function create(dir, { helix: h = {}, log = () => {}, ...opts } = {
 
 // npm create runs the bin through a symlink in node_modules/.bin, so compare real paths.
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { values, positionals } = parseArgs({ allowPositionals: true, options: { theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, help: { type: "boolean", short: "h" } } });
+  const { values, positionals } = parseArgs({ allowPositionals: true, options: { modality: { type: "string" }, theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, help: { type: "boolean", short: "h" } } });
   if (values.help || !positionals[0]) {
-    console.log(`npm create @ux-builder/app <dir> -- [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix]\n\nThemes: ${themes().join(", ")}`);
+    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix]\n\nModalities (--modality, comma-separated; asked for in a terminal, required without one):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
     process.exit(values.help ? 0 : 1);
+  }
+  // The modalities, before anything is written (MOD-01, MOD-03; US-096).
+  let modalities;
+  try { modalities = resolveModalities({ modality: values.modality, blueprint: values.blueprint }); } catch (e) { die(e.message); }
+  if (!modalities) {
+    if (!(process.stdin.isTTY && process.stdout.isTTY)) die(`which modalities does the app have? Without a terminal the starter cannot ask, and it assumes none: pass --modality <list>, one or more of:\n${modalityList()}\nNo app was created.`);
+    try { modalities = await askModalities(); } catch (e) { die(e.message); }
   }
   let r;
   try {
-    r = await create(positionals[0], { theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] }, log: (m) => console.error(m) });
+    r = await create(positionals[0], { modalities, theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] }, log: (m) => console.error(m) });
   } catch (e) { die(e.message); }
-  console.log(`Created ${r.name} on the ${r.theme} theme (@ux-builder/tokens ${r.versions["@ux-builder/tokens"]}, @ux-builder/ui ${r.versions["@ux-builder/ui"]}).
+  console.log(`Created ${r.name}, a ${r.modalities.join(" and ")} app, on the ${r.theme} theme (@ux-builder/tokens ${r.versions["@ux-builder/tokens"]}, @ux-builder/ui ${r.versions["@ux-builder/ui"]}).
 
   cd ${relative(process.cwd(), r.dir).startsWith("..") ? r.dir : relative(process.cwd(), r.dir) || "."}
   npm install

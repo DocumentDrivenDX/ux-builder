@@ -268,3 +268,9 @@ reference; proposals; drawings).
 - Generating screen code from the blueprint (ADR-025 decision 3 stands).
 - A visual flow editor.
 - Writing HELIX documents without a person accepting the proposal.
+
+## Evolution *[2026-10-21 — FEAT-014, FEAT-015]*
+
+The blueprint records the app's modalities (`supports.modalities`) and a
+screen's `path`. `draw` and `wireframes` cover every declared state with a
+state diagram and per-state wireframes (FEAT-015 RPT-09).

@@ -18,6 +18,7 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load } from "../packages/tokens/compose.mjs";
 import eslintPlugin from "../packages/ui/lint/eslint.mjs";
+import { FUTURE_MODALITIES, MODALITIES } from "../packages/ui/blueprint/modalities.mjs";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const UI = join(ROOT, "packages/ui");
@@ -215,7 +216,7 @@ export const RULES = [
   "Run the lint rule ux-builder/no-hard-coded-values (@ux-builder/ui/stylelint, @ux-builder/ui/eslint) with ux-builder/no-foreign-ui, ux-builder/no-inline-svg and ux-builder/ai-neutral-voice (a warning on copy that presents the AI as a person, \"I think…\", or as the actor, \"Copilot, summarize\"; English only), then the theme audit on the running app (npx ux-builder-audit <url>, @ux-builder/audit), and fix what they report.",
   "Select themes with ThemeProvider (theme, appearance) or data-theme and data-appearance on <html>; never restyle per theme in app code.",
   "Compose screens from @ux-builder/ui/patterns before writing any layout CSS: AppShell for the frame, with each screen inside a Page, which gives it the page gutter and width (AppShell's content area and the screen patterns have none of their own; ErrorScreen excepted); CollectionList, ListDetail, RecordDetail, FormPage, QuickEdit, Dashboard, ReportViewer, SettingsPage and ErrorScreen for screens; the regions and the layout primitives (Stack, Cluster, Grid, Page, SplitView) for anything else. Supply content, data and actions through their slots; never fork or restyle a pattern.",
-  "Plan before you build: describe the app or view in app.blueprint.json (ux-builder-blueprint init, or the MCP tool get_blueprint_schema), choose its screens from the recipes (list_recipes), and run ux-builder-blueprint check (or check_blueprint) until it reports no errors. Then build, lint and audit. Rules apply by size class, input and context (app or embedded view), never by device.",
+  "Plan before you build: describe the app or view in app.blueprint.json (ux-builder-blueprint init, or the MCP tool get_blueprint_schema), choose its screens from the recipes (list_recipes), and run ux-builder-blueprint check (or check_blueprint) until it reports no errors. Then build, lint and audit. Rules apply by size class, input and context (app or embedded view), and by the app's modalities (supports.modalities: responsive-web, chat, hybrid-chat), never by device.",
 ];
 
 /* ------------------------------------------- interaction rules (FEAT-008) */
@@ -224,7 +225,9 @@ export function interaction() {
   const blueprintSchema = json("guidelines/schema/blueprint.schema.json");
   // The AI roles a rule or a screen may name (FEAT-011, CONTRACT-005), from the rule schema.
   const aiRoles = json("guidelines/schema/rules.schema.json").$defs.rule.properties.when.properties.aiRole.items.enum;
-  return { version: rules.version, limits: rules.limits, aiRoles, rules: rules.rules, recipes: recipes.recipes, blueprintSchema };
+  // The app modalities and what each expands to (FEAT-014's matrix, packages/ui/blueprint/modalities.mjs).
+  const modalities = Object.entries(MODALITIES).map(([name, m]) => ({ name, ...m }));
+  return { version: rules.version, limits: rules.limits, aiRoles, modalities, futureModalities: FUTURE_MODALITIES, rules: rules.rules, recipes: recipes.recipes, blueprintSchema };
 }
 
 export function catalogue() {
@@ -336,9 +339,11 @@ function reference(cat) {
     "",
     `An agent built for Microsoft hosts may answer with an Adaptive Card (open-source schema 1.6) instead of a component. Render it with ${code("<AdaptiveCard card onAction />")} from ${code("@ux-builder/ui/adaptive-cards")}: each element becomes an SDK widget in the app's theme, a ColumnSet stacks at compact, and an element outside 1.6 shows its fallback or a plain notice; nothing is inserted as HTML. In a ${code("<Conversation>")}, a tool result ${code('{ type: "adaptive-card", card }')} (or the card itself) is an ${code('"adaptive-card"')} part, and ${code("onCardAction")} receives its actions. ${code("onAction")} gets ${code("{ type, id, verb, data, inputs }")} for Action.Submit and Action.Execute. Mark an action that pays, sends, deletes or publishes with ${code('"data": { "ux-builder": { "highImpact": true, "consequence": "Pay £120.00 to Acme Ltd" } }')}: the user approves it before ${code("onAction")}, and the marker is removed from ${code("data")}. Check every card before the agent sends it with ${code("checkCard(card)")} (also ${code("@ux-builder/ui/adaptive-cards/check")} for Node, or the MCP tool ${code("check_card")}), and fix what it reports: ${cat.interaction.rules.filter((r) => r.checks.some((c) => c.kind === "card")).map((r) => code(r.id)).join(", ")}.`,
     "",
+    ...modalitySection(cat),
+    "",
     "### Interaction and screen rules",
     "",
-    `How screens fit together and behave: navigation by size, modals, safeguards, states and emphasis (FEAT-008). Each rule has an ID that the blueprint check and the audit report use. The loop: **plan** the app in ${code("app.blueprint.json")} (${code("npx ux-builder-blueprint init")}) from the recipes, **check** it (${code("npx ux-builder-blueprint check app.blueprint.json")}, or the MCP tool ${code("check_blueprint")}) until it has no errors, **build** from the patterns it names, then **lint** and **audit**. Rules apply by size class, input (${code("coarse")} touch, ${code("fine")} pointer) and context (${code("app")}, or an embedded ${code("view")}), never by device. Get the rules for a target with ${code("rulesFor()")} from ${code("@ux-builder/ui/blueprint")} or the MCP tool ${code("get_rules")}; the full rules, recipes and blueprint schema are in ${code("catalogue.json")} (${code("interaction")}).`,
+    `How screens fit together and behave: navigation by size, modals, safeguards, states and emphasis (FEAT-008). Each rule has an ID that the blueprint check and the audit report use. The loop: **plan** the app in ${code("app.blueprint.json")} (${code("npx ux-builder-blueprint init")}) from the recipes, **check** it (${code("npx ux-builder-blueprint check app.blueprint.json")}, or the MCP tool ${code("check_blueprint")}) until it has no errors, **build** from the patterns it names, then **lint** and **audit**. Rules apply by size class, input (${code("coarse")} touch, ${code("fine")} pointer) and context (${code("app")}, or an embedded ${code("view")}), never by device. Get the rules for a target with ${code("rulesFor()")} from ${code("@ux-builder/ui/blueprint")} or the MCP tool ${code("get_rules")}; the full rules, recipes and blueprint schema are in ${code("catalogue.json")} (${code("interaction")}). To document every state, not only the happy path: ${code("npx ux-builder-blueprint draw")} writes each screen's interaction states (a Mermaid ${code("stateDiagram-v2")} and a table of what the user sees, the action available and the announcement), ${code("wireframes")} draws each declared state at each size class, and ${code("propose")} drafts HELIX's interaction-state-diagram, wireframe, screen-flow and user-journey-map documents (as patches where the installed HELIX defines those types, as drafts in its output where not).`,
     "",
     "| Rule | Applies | Checked by | Statement |",
     "|------|---------|------------|-----------|",
@@ -358,6 +363,23 @@ function reference(cat) {
     "|-------|---------------|-------------|",
     ...cat.themes.map((t) => `| ${code(t.name)} | ${t.designSystem ?? "own anatomy"} | ${t.appearances.join(", ")} (default ${t.default}) |`),
   ].join("\n");
+}
+
+/* The modalities section (FEAT-014 MOD-07, US-098-AC5): for each modality,
+   its shell, the components to build with and the rule families that apply. */
+function modalitySection(cat) {
+  const ms = cat.interaction.modalities;
+  return [
+    "### Modalities",
+    "",
+    `An app declares the kind of experience it gives in ${code("app.blueprint.json")}: ${code('"supports": { "modalities": ["responsive-web"] }')}, one or more of ${ms.map((m) => code(m.name)).join(", ")} (a blueprint without it is read as ${code("responsive-web")}; ${cat.interaction.futureModalities.map(code).join(", ")} are future and refused). The starter asks for them (${code("npm create @ux-builder/app <dir> -- --modality responsive-web,hybrid-chat")}; an agent passes ${code("--modality")}). Each modality expands to size classes, inputs and AI roles, so ${code("rulesFor({ modalities })")} or ${code("get_rules")} with ${code("modalities")} returns its rules, and ${code("get_guidance")} with ${code("modalities")} names its components. Build with the components for the app's modalities:`,
+    "",
+    "| Modality | Shell | Build with | Rule families | Size classes; inputs; AI roles |",
+    "|----------|-------|------------|---------------|-------------------------------|",
+    ...ms.map((m) => `| ${code(m.name)} | ${m.shell} | ${m.components.map(code).join(", ")} | ${m.ruleFamilies.map((f) => code(`${f}.*`)).join(", ")} | ${m.sizeClasses.join(", ")}; ${m.inputs.join(", ")}; ${m.aiRoles.length ? m.aiRoles.join(", ") : "none"} |`),
+    "",
+    `With several modalities, the app is an ${code("<AppShell>")} whose destinations are Home and Assistant, each built for its modality, and the rules are the union of theirs.`,
+  ];
 }
 
 /* The AI and agent section (FEAT-011 AIO-01, US-076-AC5): the AI rule IDs

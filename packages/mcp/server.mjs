@@ -204,10 +204,13 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
         sizeClasses: z.array(z.enum(SIZE_CLASSES)).optional().describe("The size classes the app or view supports: compact from 0px, medium 600, expanded 840, large 1200, extra-large 1600"),
         inputs: z.array(z.enum(["coarse", "fine"])).optional().describe("coarse: touch; fine: mouse, trackpad or pen"),
         ...(aiRoles ? { aiRoles: z.array(z.string()).optional().describe(`The screen's AI roles: ${aiRoles.join(", ")} (generative: AI output in an ordinary screen; assistant: a conversation; agent: the AI acts for the user). Without one, no AI rule is returned`) } : {}),
+        ...(bp.MODALITIES ? { modalities: z.array(z.string()).optional().describe(`The app's modalities (its blueprint's supports.modalities): ${Object.keys(bp.MODALITIES).join(", ")}. They expand to the size classes, inputs and AI roles the target leaves out, and keep only their rule families (FEAT-014)`) } : {}),
       },
     }, async (target) => {
       const unknown = (target.aiRoles ?? []).filter((r) => !aiRoles.includes(r));
       if (unknown.length) return fail(`Unknown AI role${unknown.length > 1 ? "s" : ""} ${unknown.map((r) => `"${r}"`).join(", ")}. The roles are: ${aiRoles.join(", ")}.`);
+      const problems = target.modalities && bp.modalityProblems ? bp.modalityProblems(target.modalities) : [];
+      if (problems.length) return fail(problems.join(" "));
       return ok(bp.rulesFor(target));
     });
 
@@ -304,11 +307,23 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
     });
   }
 
+  // The modalities (FEAT-014's matrix): from the catalogue, or the blueprint module of an older one.
+  const modalities = cat.interaction?.modalities ?? (bp?.MODALITIES ? Object.entries(bp.MODALITIES).map(([name, m]) => ({ name, ...m })) : null);
   server.registerTool("get_guidance", {
     title: "Get the SDK guidance",
-    description: "How to build UI with the SDK: the rules, setup, common tasks and a reference. Read before writing UI.",
-    inputSchema: {},
-  }, async () => ({ content: [{ type: "text", text: s.guidance() }] }));
+    description: `How to build UI with the SDK: the rules, setup, common tasks and a reference. Read before writing UI.${modalities ? ` With modalities (the app's supports.modalities: ${modalities.map((m) => m.name).join(", ")}), it starts with the components to build with and the rule families that apply for each.` : ""}`,
+    inputSchema: modalities ? { modalities: z.array(z.string()).optional().describe(`The app's modalities: ${modalities.map((m) => m.name).join(", ")}`) } : {},
+  }, async ({ modalities: want } = {}) => {
+    if (!want?.length || !modalities) return { content: [{ type: "text", text: s.guidance() }] };
+    const unknown = want.filter((n) => !modalities.some((m) => m.name === n));
+    if (unknown.length) return fail(bp?.modalityProblems ? bp.modalityProblems(unknown).join(" ") : `Unknown modality ${unknown.map((n) => `"${n}"`).join(", ")}. Available now: ${modalities.map((m) => m.name).join(", ")}.`);
+    const lines = ["# For this app's modalities", ""];
+    for (const n of want) {
+      const m = modalities.find((x) => x.name === n);
+      lines.push(`## ${m.name}: ${m.label}`, "", `- Shell: ${m.shell}.`, `- Build with: ${m.components.join(", ")}.`, `- Rule families that apply: ${m.ruleFamilies.map((f) => `${f}.*`).join(", ")} (get_rules with modalities ["${m.name}"]).`, `- Size classes: ${m.sizeClasses.join(", ")}; inputs: ${m.inputs.join(", ")}; AI roles on its screens: ${m.aiRoles.length ? m.aiRoles.join(", ") : "none"}.`, "");
+    }
+    return { content: [{ type: "text", text: `${lines.join("\n")}\n${s.guidance()}` }] };
+  });
 
   server.registerResource("catalogue", "ux-builder://catalogue", { title: "SDK catalogue", description: "Every token, widget, theme, design system and icon", mimeType: "application/json" },
     async (uri) => ({ contents: [{ uri: uri.href, mimeType: "application/json", text: JSON.stringify(cat) }] }));

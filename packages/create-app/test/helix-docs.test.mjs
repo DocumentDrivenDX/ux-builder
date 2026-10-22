@@ -16,17 +16,17 @@ const BUNDLE = bundle("8.8.0");
 process.env.UX_BUILDER_HELIX_BUNDLE = BUNDLE;
 after(() => { rmSync(tmp, { recursive: true, force: true }); rmSync(BUNDLE, { recursive: true, force: true }); });
 let n = 0;
-const make = async (helix = { offline: true }, log) => { const r = await create(join(tmp, `app-${++n}`), { theme: "databricks", name: "acme", helix, log }); return { r, read: (p) => readFileSync(join(r.dir, "docs/helix", p), "utf8") }; };
+const make = async (helix = { offline: true }, log) => { const r = await create(join(tmp, `app-${++n}`), { theme: "databricks", name: "acme", modalities: ["responsive-web"], helix, log }); return { r, read: (p) => readFileSync(join(r.dir, "docs/helix", p), "utf8") }; };
 const fm = (text) => /^---\n([\s\S]*?)\n---/.exec(text)[1];
 const SET = {
   "00-discover/product-vision.md": ["product-vision", "product-vision"],
   "01-frame/prd.md": ["prd", "prd"],
   "01-frame/concerns.md": ["concerns", "concerns"],
-  "01-frame/features/FEAT-001-starter-matters-screen.md": ["FEAT-001", "feature-specification"],
-  "01-frame/user-stories/US-001-see-search-and-add-matters.md": ["US-001", "user-stories"],
+  "01-frame/features/FEAT-001-app-shell.md": ["FEAT-001", "feature-specification"],
+  "01-frame/user-stories/US-001-open-the-app-and-see-where-to-start.md": ["US-001", "user-stories"],
   "02-design/DESIGN.md": ["design-system", "design-system"],
   "03-test/test-plan.md": ["TP-001", "test-plan"],
-  "03-test/test-plans/STP-001-see-search-and-add-matters.md": ["STP-001", "story-test-plan"],
+  "03-test/test-plans/STP-001-open-the-app-and-see-where-to-start.md": ["STP-001", "story-test-plan"],
 };
 
 describe("US-069: start with the HELIX documents drafted", () => {
@@ -40,7 +40,7 @@ describe("US-069: start with the HELIX documents drafted", () => {
       assert.match(f, /^ {2}status: draft$/m, p);
       assert.match(f, /^ {2}authoring:$/m, `${p} keeps the template's own frontmatter`);
     }
-    assert.match(fm(read("01-frame/user-stories/US-001-see-search-and-add-matters.md")), /links:\n {4}- kind: informed_by\n {6}to: FEAT-001/);
+    assert.match(fm(read("01-frame/user-stories/US-001-open-the-app-and-see-where-to-start.md")), /links:\n {4}- kind: informed_by\n {6}to: FEAT-001/);
     assert.match(read("01-frame/concerns.local.yml"), /frontend-framework: react-vite/);
     assert.ok(existsSync(join(r.dir, ".helix.yml")));
   });
@@ -52,13 +52,13 @@ describe("US-069: start with the HELIX documents drafted", () => {
     const concerns = read("01-frame/concerns.md");
     for (const c of ["react-vite", "e2e-playwright", "packaged-design-system", "a11y-wcag-aa", "ux-interaction-patterns"]) assert.match(concerns, new RegExp(`^\\| ${c} \\| library`, "m"), c);
     assert.match(concerns, /language-runtime slot[\s\S]*assumption: HELIX has no Node concern/);
-    const story = read("01-frame/user-stories/US-001-see-search-and-add-matters.md");
-    for (const ac of ["US-001-AC1", "US-001-AC2", "US-001-AC3", "US-001-AC4"]) assert.match(story, new RegExp(`\\*\\*${ac}\\*\\* — Given`), ac);
+    const story = read("01-frame/user-stories/US-001-open-the-app-and-see-where-to-start.md");
+    for (const ac of ["US-001-AC1", "US-001-AC2"]) assert.match(story, new RegExp(`\\*\\*${ac}\\*\\* — Given`), ac);
     assert.match(story, /^\*\*Feature\*\*: FEAT-001/m);
     assert.match(read("02-design/DESIGN.md"), /^# DESIGN\.md — acme$/m);
     assert.match(read("02-design/DESIGN.md"), /`app\.blueprint\.json`[\s\S]*AppShell/);
     assert.match(read("03-test/test-plan.md"), /npm run check:blueprint[\s\S]*npm run test:e2e/);
-    assert.match(read("03-test/test-plans/STP-001-see-search-and-add-matters.md"), /`@covers US-001-AC4`/);
+    assert.match(read("03-test/test-plans/STP-001-open-the-app-and-see-where-to-start.md"), /`@covers US-001-AC2`/);
   });
 
   // @covers US-069-AC3
@@ -70,7 +70,7 @@ describe("US-069: start with the HELIX documents drafted", () => {
     const prd = read("01-frame/prd.md");
     assert.match(prd, /### Primary Persona: \[Name\]/);
     assert.match(prd.split("### Goals")[1].split("\n### ")[0], /\[/, "goals are the owner's");
-    assert.match(read("01-frame/user-stories/US-001-see-search-and-add-matters.md"), /^\*\*Priority\*\*: \[P0 \| P1 \| P2\]$/m);
+    assert.match(read("01-frame/user-stories/US-001-open-the-app-and-see-where-to-start.md"), /^\*\*Priority\*\*: \[P0 \| P1 \| P2\]$/m);
   });
 
   // @covers US-069-AC4

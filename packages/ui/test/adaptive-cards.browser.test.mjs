@@ -243,7 +243,7 @@ describe("US-083: an agent's Adaptive Card renders in the app's theme", () => {
     const cards = [CLEAN, PAY_INVOICE, EVERY_ELEMENT, DESTRUCTIVE, COLUMNS, ...samples.map((f) => offline(JSON.parse(readFileSync(join(SAMPLES, f), "utf8"))))];
     const urls = cards.map((c) => pageFile(c, { width: 700 }));
     const r = await audit({ urls, themes: ["praxis-carbon"], appearances: ["light", "dark"], wait: ".piq-adaptive-card", rules: { brand: false }, cwd: PKG });
-    const errors = r.findings.filter((f) => f.severity === "error").map((f) => `${f.rule} ${f.url.replace(/.*\//, "")} ${f.selector ?? ""}: ${f.message}`);
+    const errors = r.findings.filter((f) => f.severity === "error").map((f) => `${f.check} ${f.url.replace(/.*\//, "")} ${f.selector ?? ""}: ${f.message}`);
     assert.deepEqual(errors, []);
     assert.equal(r.runs.length, urls.length * 2);
   });

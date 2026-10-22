@@ -18,6 +18,7 @@
   "files": [
     "audit.mjs",
     "inspect.mjs",
+    "verdicts.mjs",
     "assess",
     "schema",
     "examples",

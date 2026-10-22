@@ -23,9 +23,16 @@
      --write-baseline <f>  write every finding to this file, to adopt the audit in an existing app
      --baseline <f>        leave out the findings in this file: they neither show as new nor fail the
                            build; those no longer found are listed as resolved
-     --blueprint <f>       the app's blueprint (app.blueprint.json): AI-marked content on a screen
-                           (data-piq-screen="<screen id>") whose blueprint declares no AI role is
-                           reported (ai-declared), and the screen's ai.roles and ai.takeover apply
+     --blueprint <f>       the app's blueprint (app.blueprint.json): its supports.modalities choose the
+                           widths and rule families; pages map to its screens (data-piq-screen="<screen id>",
+                           else the screen's path) and the report follows its journeys, step by step;
+                           AI-marked content on a screen whose blueprint declares no AI role is reported
+                           (ai-declared), and the screen's ai.roles and ai.takeover apply
+     --modality <list>     the app's modalities when no blueprint names them, comma-separated:
+                           responsive-web, chat, hybrid-chat. They choose the widths (390, 768 and 1280
+                           for responsive-web; 390 and 1280 for chat) and the rule families, and the
+                           report gives a modality-fit verdict for each. Without either, responsive-web
+                           is assumed (and the report says so), at the widths --width gives
 
    A URL that starts with "/" is taken relative to the first full URL. The
    browser is Playwright's Chromium: install it once with
@@ -50,7 +57,7 @@ const { values: o, positionals } = parseArgs({
     serve: { type: "string" }, wait: { type: "string" }, ignore: { type: "string", multiple: true },
     off: { type: "string", multiple: true }, "no-contrast": { type: "boolean" },
     out: { type: "string", default: "audit-report" }, "fail-on": { type: "string", default: "error" },
-    json: { type: "boolean" }, "write-baseline": { type: "string" }, baseline: { type: "string" }, blueprint: { type: "string" }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
+    json: { type: "boolean" }, "write-baseline": { type: "string" }, baseline: { type: "string" }, blueprint: { type: "string" }, modality: { type: "string", multiple: true }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
   },
 });
 if (o.version) { console.log(VERSION); process.exit(0); }
@@ -75,6 +82,17 @@ if (o.blueprint) {
   if (!Array.isArray(blueprint?.screens)) { console.error(`ux-builder-audit: --blueprint ${o.blueprint}: no screens (a blueprint has "screens": [...])`); process.exit(2); }
 }
 
+const { modalityProblems } = await import("@ux-builder/ui/blueprint/modalities");
+const modalities = (o.modality ?? []).flatMap((m) => m.split(",")).map((m) => m.trim()).filter(Boolean);
+if (o.modality) {
+  const problems = modalityProblems(modalities);
+  if (problems.length) { console.error(`ux-builder-audit: --modality: ${problems.join(" ")}`); process.exit(2); }
+}
+const fromBlueprint = blueprint?.supports?.modalities;
+if (modalities.length && Array.isArray(fromBlueprint) && fromBlueprint.length && [...modalities].sort().join() !== [...fromBlueprint].sort().join()) {
+  console.error(`ux-builder-audit: --modality ${modalities.join(",")} disagrees with the blueprint's supports.modalities (${fromBlueprint.join(", ")}); the blueprint's are used`);
+}
+
 const base = positionals.find((u) => /^https?:/.test(u));
 const urls = positionals.map((u) => (u.startsWith("/") && base ? new URL(u, base).href : u));
 
@@ -93,7 +111,7 @@ try {
   if (!o.json) console.error(`Auditing ${urls.join(", ")} …`);
   const report = await audit({
     urls, themes: o.theme, appearances: o.appearance ?? ["light", "dark"], widths, wait: o.wait, ignore: o.ignore ?? [],
-    rules: Object.fromEntries((o.off ?? []).map((c) => [c, false])), contrast: !o["no-contrast"], out, baseline, blueprint,
+    rules: Object.fromEntries((o.off ?? []).map((c) => [c, false])), contrast: !o["no-contrast"], out, baseline, blueprint, modalities,
     log: o.json ? () => {} : (m) => console.error(m),
   });
   writeReports(report, out);

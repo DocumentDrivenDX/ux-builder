@@ -20,7 +20,7 @@ process.env.UX_BUILDER_HELIX_BUNDLE = BUNDLE;
 after(() => { rmSync(tmp, { recursive: true, force: true }); rmSync(BUNDLE, { recursive: true, force: true }); });
 let app, checked;
 before(async () => {
-  app = await create(join(tmp, "acme"), { theme: "databricks", name: "acme", helix: { offline: true } });
+  app = await create(join(tmp, "acme"), { theme: "databricks", name: "acme", modalities: ["responsive-web", "chat"], helix: { offline: true } });
   checked = validate(load(join(app.dir, "ux-assessment.yml")));
 });
 
@@ -48,9 +48,9 @@ describe("US-070: the new app's documents pass HELIX's reading and are traced", 
   // @covers US-070-AC3
   test("AC3: the starter's e2e test cites every US-001 criterion, and collect links each as explicit", () => {
     const spec = readFileSync(join(app.dir, "e2e/starter.spec.js"), "utf8");
-    for (const ac of ["US-001-AC1", "US-001-AC2", "US-001-AC3", "US-001-AC4"]) assert.match(spec, new RegExp(`@covers ${ac}\\b`), ac);
+    for (const ac of ["US-001-AC1", "US-001-AC2", "US-001-AC3"]) assert.match(spec, new RegExp(`@covers ${ac}\\b`), ac);
     const r = collect({ ...checked, manifest: load(join(app.dir, "ux-assessment.yml")), out: join(tmp, "runs"), run: "R-20261021T000001Z" });
-    assert.deepEqual(r.traceability.journeys[0].criteria.map((c) => [c.id, c.link, c.tests[0]?.file]), ["AC1", "AC2", "AC3", "AC4"].map((a) => [`US-001-${a}`, "explicit", "e2e/starter.spec.js"]));
+    assert.deepEqual(r.traceability.journeys[0].criteria.map((c) => [c.id, c.link, c.tests[0]?.file]), ["AC1", "AC2", "AC3"].map((a) => [`US-001-${a}`, "explicit", "e2e/starter.spec.js"]));
     assert.equal(JSON.parse(readFileSync(join(app.dir, "package.json"), "utf8")).scripts["test:e2e"], "playwright test");
   });
 });

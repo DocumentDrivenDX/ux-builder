@@ -30,14 +30,72 @@ export const NEW_CHECKS = new Set(["reflow", "target-size", "focus-obscured", "o
 export const AI_CHECKS = ["ai-disclose", "ai-stop", "ai-correct", "ai-starters", "ai-declared", "agent-approval", "agent-plan", "agent-interrupt", "agent-who-acts", "agent-recover", "agent-summary", "genui-review-prefill", "card-input-label", "card-narrow-first"];
 for (const c of AI_CHECKS) NEW_CHECKS.add(c);
 
-/* Each finding with the rule it enforces and that rule's sources (FEAT-008
-   AUD-02), and a new check's severity held at warning. */
-export function enrich(findings, interaction) {
+/* What to do about a finding of each check (FEAT-015 RPT-01): the fix the
+   report and the assessment show beside the rule's statement. A finding's
+   message names the element, value or widget; this says how to put it right. */
+export const FIXES = {
+  "theme-applied": "Load the theme's CSS (@ux-builder/tokens/themes.css) and wrap the app in the SDK's ThemeProvider, which applies the theme and answers the theme switch.",
+  "token-colors": "Use a --piq-color-* role token (or a color-mix of two) instead of the literal colour.",
+  "token-fonts": "Set the text in the theme's fonts: var(--piq-font-body), var(--piq-font-heading) or var(--piq-font-mono).",
+  "token-radii": "Use a --piq-radius-* token for the corner.",
+  "token-overrides": "Remove the --piq-* declaration from the app's CSS; choose another theme, or make one in the theme builder.",
+  "widget-overrides": "Remove the rule that restyles the SDK widget; use its props and variants instead, or ask the design-system team for a variant.",
+  "sdk-widgets": "Use the SDK's widget the finding names instead of drawing it in the app.",
+  "foreign-components": "Replace the other library's component with the SDK's equivalent.",
+  "outside-theme": "Move the element inside the themed element (the ThemeProvider's root), so the theme reaches it.",
+  brand: "Let the ThemeProvider set the favicon, and draw the logo with the SDK's Logo.",
+  fonts: "Load the theme's fonts from @ux-builder/tokens/fonts.css, not from a font service.",
+  contrast: "Use the role tokens made for text on that surface (--piq-color-text or --piq-color-text-muted on --piq-color-surface or --piq-color-ground); inside an SDK widget, report it to the design-system team.",
+  reflow: "Let the content wrap at narrow widths: no fixed width wider than the window, and wide content (tables, code) scrolling in a region of its own.",
+  "target-size": "Make the control at least var(--piq-size-target-touch) square, or space it so its target is.",
+  "focus-obscured": "Give the page scroll-padding for its sticky header and bars, so a focused control scrolls clear of them (the SDK's AppShell does).",
+  "one-modal": "Close the first dialog before opening another, or show the next step inside the same dialog.",
+  "modal-contract": "Give the dialog a title (aria-labelledby its heading), a Close or Cancel button, and close it on Escape; the SDK's Dialog does all three.",
+  "one-primary-action": "Keep one primary button in each region or dialog; make the others secondary.",
+  "nav-per-breakpoint": "Use the SDK's AppShell: a bottom bar of up to five destinations when narrow, a standing rail or side navigation when wide.",
+  "line-length": "Limit the measure of prose, for example with max-inline-size: 70ch.",
+  "ai-disclose": "Label AI-made content as such: the Conversation's disclosure, or data-piq-ai-label on its region.",
+  "ai-stop": "Offer Stop or Pause beside the AI's status while it works (the Conversation's composer does).",
+  "ai-correct": "Offer Retry, Regenerate, Edit or Undo on AI-made content.",
+  "ai-starters": "Offer suggested starting points in an empty conversation, and keep the prompt open.",
+  "ai-declared": "Declare the screen's AI role in the blueprint (screens[].ai.roles) and mark the page with data-piq-screen.",
+  "agent-approval": "Offer Approve and Deny with neither chosen in advance (the SDK's ApprovalCard).",
+  "agent-plan": "Show the agent's plan as steps, each stating its status in text.",
+  "agent-interrupt": "Offer Pause or Stop while the agent runs.",
+  "agent-who-acts": "Say who is acting, the agent or the user, in a live region (the Conversation's actor line).",
+  "agent-recover": "Say what went wrong at the failed step, and offer Retry or a step back.",
+  "agent-summary": "Show a summary of what was done when the run finishes.",
+  "genui-review-prefill": "Keep the values the AI pre-fills editable, and submit them only from the user's own control.",
+  "card-input-label": "Give each input in the generated UI a label of its own.",
+  "card-narrow-first": "Lay the generated UI out for the compact size class first, so it never scrolls sideways.",
+};
+
+/* The catalogue rule a finding of a check is reported under (FEAT-015
+   RPT-01, RPT-02): the one the check named on the finding (nav-per-breakpoint
+   and modal-contract name the rule each finding breaks); otherwise the
+   check's theme.* rule (target-size is also input.touch-targets'); otherwise
+   the first rule in the catalogue that names the check. */
+export function ruleFor(check, ruleId, byCheck) {
+  const cands = byCheck.get(check) ?? [];
+  return cands.find((r) => r.id === ruleId) ?? cands.find((r) => r.id.startsWith("theme.")) ?? cands[0] ?? null;
+}
+
+/* The catalogue's rules by the audit check they name. */
+export function rulesByCheck(interaction) {
   const byCheck = new Map();
-  for (const r of interaction?.rules ?? []) for (const c of r.checks) if (c.kind === "audit") (byCheck.get(c.id) ?? byCheck.set(c.id, []).get(c.id)).push(r);
+  for (const r of interaction?.rules ?? []) for (const c of r.checks ?? []) if (c.kind === "audit") (byCheck.get(c.id) ?? byCheck.set(c.id, []).get(c.id)).push(r);
+  return byCheck;
+}
+
+/* Each finding with the rule it enforces, that rule's statement and sources
+   (FEAT-008 AUD-02, FEAT-015 RPT-01) and the fix; a new check's severity held
+   at warning. A contrast finding's fix cites the measured ratio. */
+export function enrich(findings, interaction) {
+  const byCheck = rulesByCheck(interaction);
   for (const f of findings) {
-    const rule = (byCheck.get(f.rule) ?? []).find((r) => r.id === f.ruleId) ?? (byCheck.get(f.rule) ?? [])[0];
-    if (rule) { f.ruleId = rule.id; f.sources = rule.sources.map(({ title, url }) => ({ title, url })); }
+    const rule = ruleFor(f.rule, f.ruleId, byCheck);
+    if (rule) { f.ruleId = rule.id; f.statement = rule.statement; f.sources = rule.sources.map(({ title, url }) => ({ title, url })); }
+    if (!f.fix && FIXES[f.rule]) f.fix = f.measured ? `Measured ${f.measured.ratio}:1; it needs at least ${f.measured.required}. ${FIXES[f.rule]}` : FIXES[f.rule];
     if (NEW_CHECKS.has(f.rule)) f.severity = "warning";
   }
   return findings;
@@ -455,7 +513,7 @@ export async function inspect(page, { sdk = null, cwd = process.cwd(), theme, ap
     for (const n of v) {
       const d = n.data;
       // Inside an SDK widget it is the SDK's to fix: reported, not failed.
-      findings.push({ rule: "contrast", severity: n.sdk ? "warning" : "error", selector: n.target.join(" "), ...(n.preview ? { preview: n.preview } : {}), message: `contrast ${d.contrastRatio ?? "?"}:1 (needs ${d.expectedContrastRatio ?? "4.5:1"}): ${d.fgColor ?? ""} on ${d.bgColor ?? ""}${n.sdk ? " — in an SDK widget: the SDK's to fix, report it to the design-system team" : ""}`, property: "contrast", value: `${d.fgColor} on ${d.bgColor}`, owner: n.sdk ? "sdk" : "app" });
+      findings.push({ rule: "contrast", severity: n.sdk ? "warning" : "error", selector: n.target.join(" "), ...(n.preview ? { preview: n.preview } : {}), message: `contrast ${d.contrastRatio ?? "?"}:1 (needs ${d.expectedContrastRatio ?? "4.5:1"}): ${d.fgColor ?? ""} on ${d.bgColor ?? ""}${n.sdk ? " — in an SDK widget: the SDK's to fix, report it to the design-system team" : ""}`, property: "contrast", value: `${d.fgColor} on ${d.bgColor}`, owner: n.sdk ? "sdk" : "app", ...(d.contrastRatio != null ? { measured: { ratio: d.contrastRatio, required: d.expectedContrastRatio ?? "4.5:1" } } : {}) });
     }
   }
   const notes = [];

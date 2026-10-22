@@ -120,7 +120,18 @@ and journeys (FEAT-012), `ux-builder-blueprint propose` drafts HELIX
 content as patches it never applies, `draw` writes the IA map, flow and
 journey diagrams as Mermaid and SVG, and `wireframes` renders each screen's
 pattern at each supported size class as HTML and PNG (PNG needs
-`playwright` and its Chromium); see the repository README. The rules, recipes and the
+`playwright` and its Chromium). Every declared state is drawn too
+(FEAT-015 RPT-09): `draw` writes `states-<screen>.mmd` (a Mermaid
+`stateDiagram-v2` with each state the screen declares and the transitions
+between them), its SVG, and `states-<screen>.md` with a state table (what
+the user sees, the action available, the live-region announcement) and
+notes on the default transitions and any state the screen does not
+declare; `wireframes` writes `<screen>.<state>.<size>.html` and `.png` for
+each state beside the ideal `<screen>.<size>.html`; and `propose` drafts
+HELIX's interaction-state-diagram, wireframe, screen-flow and
+user-journey-map documents, as patches when the installed HELIX defines
+those types and otherwise as drafts under `helix-proposals/drafts/`. See
+the repository README. The rules, recipes and the
 blueprint schema are also in `catalogue.json` (`interaction`) and in
 `AGENTS.md`.
 

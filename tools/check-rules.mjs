@@ -83,6 +83,10 @@ export function checkRules({ rules, recipes, notices = "" }, k) {
     }
     for (const p of r.appliesTo?.patterns ?? []) if (!k.patterns.has(p)) problems.push(`${at}: names the pattern "${p}", which is not in the catalogue`);
   }
+  // Every audit check is a catalogue rule's (FEAT-015 RPT-02, US-101-AC3):
+  // a finding is reported under the rule that names its check.
+  const named = new Set((rules.rules ?? []).flatMap((r) => (r.checks ?? []).filter((c) => c.kind === "audit").map((c) => c.id)));
+  for (const c of k.audit ?? []) if (!named.has(c)) problems.push(`audit check ${c}: no rule names it (checks: [{ kind: "audit", id: "${c}" }]); its findings would have no rule ID, statement or sources`);
   const rids = new Set();
   for (const r of recipes.recipes ?? []) {
     const at = `recipe ${r.id}`;

@@ -127,6 +127,18 @@
                   "agent"
                 ]
               }
+            },
+            "modality": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "responsive-web",
+                  "chat",
+                  "hybrid-chat"
+                ]
+              }
             }
           }
         },

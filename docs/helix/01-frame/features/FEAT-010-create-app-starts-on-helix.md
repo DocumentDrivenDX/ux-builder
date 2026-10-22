@@ -254,3 +254,9 @@ written.
 - [x] Fetch, verify, install and fall back are testable without the network (a local release server).
 - [x] Owner decisions stay placeholders.
 - [x] Documents come from the installed HELIX's templates, not copies in create-app.
+
+## Evolution *[2026-10-21 — FEAT-014, ADR-032]*
+
+The starter no longer ships the Matters sample. Its starter set's FEAT-001 is
+"the app's shell for its modalities" and US-001 is "open the app and see where
+to start", with a criterion per chosen modality (FEAT-014 MOD-04, MOD-05).

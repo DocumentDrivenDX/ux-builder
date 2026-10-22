@@ -175,8 +175,14 @@ assessment.
    apart, components named from the app's installed `@ux-builder/ui`
    catalogue, heuristics as "Proposed criterion: …", `plain` (the problem and
    recommendation in plain English) and `elements`, and `user_validation` for
-   claims only people can confirm. Then `assess merge --run <R-id>` gives each
-   a stable ID and merges duplicates.
+   claims only people can confirm. Every finding names what it breaks: `rule`,
+   a catalogue rule ID (`modal.dismiss`; the report spells out its statement
+   and sources), or `heuristic`, `{ "name": "Visibility of system status",
+   "source": "Nielsen Norman Group: 10 Usability Heuristics" }`;
+   `validate-report` fails one that names neither. Give `step` when its
+   evidence cites no step's checkpoint, and `severity` (Nielsen's 0 to 4) when
+   it differs from what its priority implies (P0 4, P1 3, P2 2, P3 1). Then
+   `assess merge --run <R-id>` gives each a stable ID and merges duplicates.
 7. **Proposals.** For each finding worth a HELIX change:
    `assess propose --run <R-id> --finding <F-id> --target <US-…>` (or
    `--new user-stories --title …`) `--kind unmet-criterion|new-requirement|scope
@@ -185,15 +191,21 @@ assessment.
    entry in the app's HELIX `improvement-backlog`; nothing is applied.
    `assess check-writes --run <R-id>` must report no change.
 8. **Report and check.** `assess report <out>/<run>`, then
-   `assess validate-report <out>/<run>`; fix what it reports. To compare with
+   `assess validate-report <out>/<run>`; fix what it reports. The report reads
+   by journey, then state, then step, each finding with its rule (or
+   heuristic), evidence, severity and fix; a finding at no step is under its
+   state's *General*. `report.md` is a HELIX usability-evaluation-report
+   (`ddx:` frontmatter); propose it to the flow rather than copying it there. To compare with
    an earlier run: `assess compare <earlier> <later>`; `comparison.json`
    keeps the earlier baseline's failures, so name them in what you hand over. In CI:
    `assess gate <run> --fail-on P1` (see `examples/ux-assessment.workflow.yml`).
 9. **Video.** `assess video --run <R-id> --manifest ux-assessment.yml`
    replays each walked journey and writes `video/`: an MP4 per journey (with
    `ffmpeg` on the PATH) and `video/index.html`, a player whose findings pop
-   up. Then `assess report` again, so the report links each finding to its
-   moment, and `assess validate-report`. A chapter that stopped means a step
+   up. A step holds 2 s and a finding's caption (its problem, rule and fix) as
+   long as it takes to read; `--pace slow` (× 1.5) or `--pace fast` (× 0.6)
+   for an audience that needs it. Then `assess report` again, so the report
+   links each finding to its moment, and `assess validate-report`. A chapter that stopped means a step
    no longer replays: say which, rather than walking it again silently.
 
 ## Ranking (FND-04)

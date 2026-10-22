@@ -30,7 +30,7 @@ describe("US-094: go from a video to the report and back", () => {
     for (const a of p.read("video/J-review.annotations.json").annotations) {
       const m = Math.floor(a.start / 60), s = String(Math.floor(a.start % 60)).padStart(2, "0");
       assert.ok(html.includes(`<a href="video/index.html#J-review@${a.start}">J-review at ${m}:${s}</a>`), `a link to ${a.finding} at ${a.start}`);
-      assert.match(html, new RegExp(`<h3 id="${a.finding}">`), `${a.finding} is an anchor`);
+      assert.match(html, new RegExp(`<h[1-6] id="${a.finding}">`), `${a.finding} is an anchor`);
     }
     assert.match(md, /- Walkthrough videos: 1 recorded; \[watch them in the player\]\(video\/index\.html\)/);
     assert.match(md, new RegExp(`In plain English\\*\\*: ${f.both.plain.problem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));

@@ -316,3 +316,9 @@ end to end). The ffmpeg dependency was decided in `ux-builder-87cc5d3b` (on the 
 - Apps not governed by HELIX.
 - Hosting or uploading videos or the player anywhere.
 - Editing the video by hand inside ux-builder.
+
+## Evolution *[2026-10-21 — FEAT-015, ADR-033]*
+
+The operator found the first videos too fast. Their timing now comes from
+reading time with `--pace` (FEAT-015 RPT-06), each caption spells out the
+rule's ID and statement, and chapters are titled by journey and step (RPT-07).

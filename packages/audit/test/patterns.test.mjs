@@ -115,8 +115,8 @@ before(async () => {
 });
 after(() => server?.close());
 
-const problems = (r) => r.findings.filter((f) => f.severity === "error" || ["reflow", "target-size", "focus-obscured"].includes(f.rule));
-const show = (fs) => JSON.stringify(fs.map((f) => `${f.rule} ${f.selector ?? ""} ${f.message} [${f.runs.join(" ")}]`), null, 1);
+const problems = (r) => r.findings.filter((f) => f.severity === "error" || ["reflow", "target-size", "focus-obscured"].includes(f.check));
+const show = (fs) => JSON.stringify(fs.map((f) => `${f.check} ${f.selector ?? ""} ${f.message} [${f.runs.join(" ")}]`), null, 1);
 
 describe("SDK-20 audit at every size class", () => {
   let mistakes;
@@ -132,7 +132,7 @@ describe("SDK-20 audit at every size class", () => {
   // @covers US-034-AC2
   test("AC2: each run records its width, in the JSON and the HTML report, and each finding names the widths it was seen at", async () => {
     assert.ok(mistakes.runs.every((r) => typeof r.width === "number"));
-    const reflow = mistakes.findings.find((f) => f.rule === "reflow");
+    const reflow = mistakes.findings.find((f) => f.check === "reflow");
     assert.ok(reflow.runs.every((x) => /@\d+$/.test(x)));
     const { html } = await import("../report.mjs");
     const withShots = await audit({ urls: [`${base}/layout.html`], themes: ["praxis-carbon"], appearances: ["light"], widths: [360, 1366], out: join(tmpdir(), `widths-${process.pid}`) });
@@ -144,7 +144,7 @@ describe("SDK-20 audit at every size class", () => {
 
   // @covers US-034-AC3
   test("AC3: a page that scrolls sideways at 320px is reported with its widest element; a region that scrolls by itself is not", () => {
-    const f = mistakes.findings.filter((x) => x.rule === "reflow");
+    const f = mistakes.findings.filter((x) => x.check === "reflow");
     assert.equal(f.length, 1);
     assert.equal(f[0].severity, "warning");
     assert.match(f[0].message, /scrolls sideways at 320px/);
@@ -154,20 +154,20 @@ describe("SDK-20 audit at every size class", () => {
 
   // @covers US-034-AC4
   test("AC4: a control under the minimum target size is reported with its size; an inline link in a sentence is not", () => {
-    const f = mistakes.findings.filter((x) => x.rule === "target-size");
+    const f = mistakes.findings.filter((x) => x.check === "target-size");
     assert.ok(f.some((x) => x.selector.includes("#tiny") && /12×12px target, under the 24px minimum/.test(x.message)));
     assert.ok(!f.some((x) => /(^|> )a(\[|\.|:|$)/.test(x.selector)), "inline links are exempt");
   });
 
   // @covers US-034-AC5
   test("AC5: a control hidden behind fixed content when focused is reported, naming what covers it", () => {
-    const f = mistakes.findings.filter((x) => x.rule === "focus-obscured");
+    const f = mistakes.findings.filter((x) => x.check === "focus-obscured");
     assert.ok(f.some((x) => x.selector.includes("#hidden-by-bar") && /hidden behind/.test(x.message)), show(f));
   });
 
   test("without --width the audit reports as before: none of the new checks", async () => {
     const r = await audit({ urls: [`${base}/layout-mistakes.html`], themes: ["praxis-carbon"], appearances: ["light"] });
-    assert.deepEqual(r.findings.filter((f) => ["reflow", "target-size", "focus-obscured"].includes(f.rule)), []);
+    assert.deepEqual(r.findings.filter((f) => ["reflow", "target-size", "focus-obscured"].includes(f.check)), []);
     assert.equal(r.runs[0].width, undefined);
   });
 
@@ -193,15 +193,15 @@ describe("SDK-20 audit at every size class", () => {
     const r = await run(["--json", "--off", "brand", "--width", "320", "--theme", "praxis-carbon", "--appearance", "light", `${base}/only-layout.html`]);
     const report = JSON.parse(r.stdout);
     assert.ok(report.findings.length > 0);
-    assert.deepEqual([...new Set(report.findings.map((f) => f.rule))].filter((x) => !["reflow", "target-size", "focus-obscured", "theme-applied"].includes(x)), []);
-    assert.ok(report.findings.filter((f) => f.rule !== "theme-applied").every((f) => f.severity === "warning"));
+    assert.deepEqual([...new Set(report.findings.map((f) => f.check))].filter((x) => !["reflow", "target-size", "focus-obscured", "theme-applied"].includes(x)), []);
+    assert.ok(report.findings.filter((f) => f.check !== "theme-applied").every((f) => f.severity === "warning"));
     assert.equal(r.status, 0, r.stderr);
   });
 
   // @covers US-032-AC6 @covers US-034-AC6
   test("US-032-AC6, US-034-AC6: a contrast failure inside a builder preview is reported against that preview's option and design system", async () => {
     const r = await audit({ urls: [`${base}/preview.html`], themes: ["praxis-carbon"], appearances: ["light"], widths: [1280] });
-    const c = r.findings.filter((f) => f.rule === "contrast");
+    const c = r.findings.filter((f) => f.check === "contrast");
     assert.equal(c.length, 1, show(c));
     assert.equal(c[0].preview, "Bold:carbon:light:collection");
     assert.match(c[0].message, /in the preview Bold:carbon:light:collection/);
@@ -231,7 +231,7 @@ describe("the screen patterns audited at every size class", () => {
   test("US-030-AC7: every variant point reports no errors, contrast or target-size findings at every width, theme and appearance", async () => {
     const r = await all("/variants.html");
     assert.deepEqual(problems(r), [], show(problems(r)));
-    assert.deepEqual(r.findings.filter((f) => f.rule === "contrast"), [], "contrast, including the SDK's own");
+    assert.deepEqual(r.findings.filter((f) => f.check === "contrast"), [], "contrast, including the SDK's own");
   });
 
   test("the extended screens report no errors and none of the size-class checks at every width, theme and appearance", async () => {
@@ -241,7 +241,7 @@ describe("the screen patterns audited at every size class", () => {
 
   test("patterns.css is the SDK's own CSS, not the app restyling widgets", async () => {
     const r = await audit({ urls: [`${base}/list.html`], themes: ["praxis-carbon"], appearances: ["light"] });
-    assert.deepEqual(r.findings.filter((f) => f.rule === "widget-overrides"), []);
+    assert.deepEqual(r.findings.filter((f) => f.check === "widget-overrides"), []);
   });
 });
 
@@ -251,25 +251,25 @@ describe("the app's own markup inside the SDK's frame and patterns", () => {
   const at = (id) => r.findings.filter((f) => (f.selector ?? "").includes(`#${id}`));
 
   test("is held to the theme: colours, fonts, radii, icons and controls it draws itself", () => {
-    assert.ok(at("bar").some((f) => f.rule === "token-colors" && f.severity === "error"), "the bar's hard-coded grey");
-    assert.ok(at("bar").some((f) => f.rule === "token-fonts"), "Inter");
-    assert.ok(at("bar").some((f) => f.rule === "token-radii"), "a 12px corner");
-    assert.ok(at("bar-button").some((f) => f.rule === "token-colors" && f.severity === "error"), "the button's purple");
-    assert.ok(at("bar-button").some((f) => f.rule === "contrast" && f.severity === "error"), "the app's contrast failure is an error, not the SDK's warning");
-    assert.ok(at("bar-icon").some((f) => f.rule === "sdk-widgets" && f.severity === "error"), "an icon drawn inside the app's styled markup");
-    assert.ok(at("bare-icon").some((f) => f.rule === "sdk-widgets" && f.severity === "error"), "an unstyled icon placed straight into a Stack");
-    assert.ok(at("bare-button").some((f) => f.rule === "sdk-widgets"), "a native button placed straight into a Stack");
-    assert.ok(at("bar-input").some((f) => f.rule === "sdk-widgets"), "a native text input");
+    assert.ok(at("bar").some((f) => f.check === "token-colors" && f.severity === "error"), "the bar's hard-coded grey");
+    assert.ok(at("bar").some((f) => f.check === "token-fonts"), "Inter");
+    assert.ok(at("bar").some((f) => f.check === "token-radii"), "a 12px corner");
+    assert.ok(at("bar-button").some((f) => f.check === "token-colors" && f.severity === "error"), "the button's purple");
+    assert.ok(at("bar-button").some((f) => f.check === "contrast" && f.severity === "error"), "the app's contrast failure is an error, not the SDK's warning");
+    assert.ok(at("bar-icon").some((f) => f.check === "sdk-widgets" && f.severity === "error"), "an icon drawn inside the app's styled markup");
+    assert.ok(at("bare-icon").some((f) => f.check === "sdk-widgets" && f.severity === "error"), "an unstyled icon placed straight into a Stack");
+    assert.ok(at("bare-button").some((f) => f.check === "sdk-widgets"), "a native button placed straight into a Stack");
+    assert.ok(at("bar-input").some((f) => f.check === "sdk-widgets"), "a native text input");
   });
 
   test("while the SDK's widgets and their parts stay trusted: table cells, the menu button, the appearance switch", () => {
     const ours = new Set(["bar", "bar-icon", "bar-input", "bar-button", "bare-icon", "bare-button"]);
     const others = r.findings.filter((f) => f.selector && ![...ours].some((id) => f.selector.includes(`#${id}`)));
-    assert.deepEqual(others.map((f) => `${f.rule}: ${f.selector}`), []);
+    assert.deepEqual(others.map((f) => `${f.check}: ${f.selector}`), []);
   });
 
   test("a bundler's :is() of patterns.css is still the SDK's own CSS", async () => {
     const m = await audit({ urls: [`${base}/merged.html`], themes: ["praxis-carbon"], appearances: ["light"] });
-    assert.deepEqual(m.findings.filter((f) => f.rule === "widget-overrides"), []);
+    assert.deepEqual(m.findings.filter((f) => f.check === "widget-overrides"), []);
   });
 });

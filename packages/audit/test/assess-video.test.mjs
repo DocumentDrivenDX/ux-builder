@@ -72,7 +72,7 @@ describe("US-091: watch a journey with its usability problems", () => {
     const vtt = readFileSync(join(p.dir, "video/J-review.vtt"), "utf8");
     assert.match(vtt, /\[Judgment · P3 · worth checking with users\] Nothing says which entry/);
     assert.match(vtt, /\[Checked · P1\] Approve and Reject look equally important/);
-    assert.match(readFileSync(join(p.dir, "video/J-review.chapters.vtt"), "utf8"), /Alternate 1/);
+    assert.match(readFileSync(join(p.dir, "video/J-review.chapters.vtt"), "utf8"), /J-review · step 4: Open the reason/, "the alternate's steps are chapters too");
   });
 
   // @covers US-093-AC1

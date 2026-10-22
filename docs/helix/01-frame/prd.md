@@ -62,7 +62,9 @@ kind: product
 > architecture, and P2-3.
 > Evolved 2026-10-21 with ADR-031 and FEAT-013 (annotated journey walkthrough
 > videos, at the operator's request): FR-57 to FR-59 under UX assessment, and
-> P2-4.
+> P2-4. Evolved 2026-10-21 with ADR-032, ADR-033, FEAT-014 and FEAT-015 (the
+> operator's review of a new app and its audit): the "App modalities" subsystem
+> (FR-60 to FR-63), FR-64 to FR-66 under UX assessment, and P1-10.
 
 ## Summary
 
@@ -231,6 +233,22 @@ rules, so it invents colours and components.
    lint, and in the UX assessment; Adaptive Cards rendered with the SDK's
    components and checked by the card rules (operator, 2026-10-21; FR-46 to
    FR-52, FEAT-011, ADR-029).
+10. Modalities and findings people can act on (operator, 2026-10-21,
+    after creating and auditing an app):
+    - A new app is created for the modalities chosen: a responsive
+      mobile and desktop web app, a chat app, or a hybrid chat app with
+      Adaptive Cards. It starts as an empty shell for those modalities,
+      with no sample domain. Native iOS, Android, macOS and Windows apps
+      are future.
+    - The modalities choose the components, rules and audit.
+    - Every finding, in the audit report, the assessment report and the
+      walkthrough video, is grouped by journey and step, and names the
+      rule it breaks in full with its source and fix.
+    - The audit gives a verdict on the theme and on the modality fit.
+    - The usability report is a HELIX artifact, and ux-builder drafts
+      HELIX's UX artifacts.
+
+    (FR-60 to FR-66, FEAT-014, FEAT-015, ADR-032, ADR-033.)
 
 ### Nice to Have (P2)
 
@@ -441,6 +459,32 @@ rules, so it invents colours and components.
   is sent, and a rendered card is audited like any other UI.
   *(Added 2026-10-21.)*
 
+### Subsystem: App modalities
+
+- **FR-60** — A new app is created for one or more modalities. Today these
+  are `responsive-web` (a mobile and desktop web app), `chat` (a chat app)
+  and `hybrid-chat` (a chat app that renders Adaptive Cards). The starter
+  asks for them when it runs in a terminal and takes `--modality` otherwise.
+  The choice is recorded in the blueprint. Native iOS, Android, macOS and
+  Windows apps are future modalities (ADR-032). *(Added 2026-10-21.)*
+- **FR-61** — A new app starts as an empty shell for its modalities, with no
+  sample domain or data: an app shell with one empty home screen for
+  `responsive-web`, a conversation for `chat`, and a conversation that
+  renders cards for `hybrid-chat`. Its HELIX documents describe that shell.
+  *(Added 2026-10-21.)*
+- **FR-62** — The modalities select what the app is built and checked with:
+  its size classes and inputs, its AI roles, the SDK components the guidance
+  points to, the rules that apply, and the widths the audit inspects.
+  *(Added 2026-10-21.)*
+- **FR-63** — The audit gives two verdicts with the evidence behind each:
+  - the **theme**: the app wears the theme it declares, on that theme's
+    design system, with SDK components only, and its palette passes
+    contrast in every appearance;
+  - the **modality fit**: the app uses the UI and AI components its
+    modalities call for, and the rules for those modalities were applied.
+
+  *(Added 2026-10-21.)*
+
 ### Subsystem: UX assessment
 
 - **FR-37** — An app owner commits an assessment manifest that binds the
@@ -484,6 +528,26 @@ rules, so it invents colours and components.
 - **FR-59** — Videos mask what the manifest says to redact from the first
   frame, never show sign-in or secret values, and are written only in the
   run package. *(Added 2026-10-21.)*
+- **FR-64** — Every finding names the rule it breaks: its ID, its full
+  statement, its source and the recommended fix. This includes theme and
+  design-system findings, which are rules in the catalogue too.
+  *(Added 2026-10-21.)*
+- **FR-65** — The audit report, the assessment report and the walkthrough
+  video group findings by user journey, then by step, showing each finding
+  where the journey meets it, and fall back to grouping by screen when there
+  are no journeys. The video plays at a human pace and spells out each rule.
+  *(Added 2026-10-21.)*
+- **FR-66** — The assessment's report is a HELIX artifact (a usability
+  evaluation report). ux-builder drafts HELIX's UX artifacts from the
+  blueprint and the run:
+  - user journey maps;
+  - screen flows;
+  - wireframes;
+  - interaction-state diagrams covering every state: ideal, empty,
+    loading, partial and error.
+
+  They are drafted as HELIX's own types once HELIX defines them, and from
+  ux-builder's drafts until then (ADR-033). *(Added 2026-10-21.)*
 
 ## Acceptance Test Sketches
 

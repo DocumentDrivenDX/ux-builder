@@ -1,10 +1,14 @@
-/* The starter's acceptance test (US-012-AC1 to AC3, AC5, AC6; US-022-AC10; bead acceptance: "a CI
-   job scaffolds a fresh app, runs npm install, npm run build and the lint
-   rule with 0 findings; the generated app renders").
+/* The starter's acceptance test (US-012-AC1 to AC3, AC5, AC6; US-022-AC10;
+   US-097-AC2 to AC5; bead acceptance: "a CI job scaffolds a fresh app, runs
+   npm install, npm run build and the lint rule with 0 findings; the
+   generated app renders").
 
-   Packs this repository's @ux-builder/tokens and @ux-builder/ui, scaffolds an app
-   that installs them, builds and lints it, serves the build and drives it in
-   Chromium. Needs the network for react and vite; about a minute.
+   Packs this repository's @ux-builder/tokens, @ux-builder/ui and
+   @ux-builder/audit, scaffolds an app for each modality (FEAT-014:
+   responsive-web, chat, hybrid-chat, and responsive-web with hybrid-chat on
+   the latest HELIX), installs, builds, lints and audits each, runs each
+   one's own e2e test, and drives the combined one in Chromium. Needs the
+   network for react, vite and HELIX; a few minutes.
 
      npm run build && npm run test:e2e --workspace @ux-builder/create-app */
 
@@ -13,32 +17,43 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { after, before, test } from "node:test";
+import { after, before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const tmp = mkdtempSync(join(tmpdir(), "starter-e2e-"));
-const app = join(tmp, "matters");
 const sh = (cmd, args, cwd) => {
   const r = spawnSync(cmd, args, { cwd, encoding: "utf8", env: { ...process.env, npm_config_loglevel: "error" } });
   assert.equal(r.status, 0, `${cmd} ${args.join(" ")}\n${r.stdout}\n${r.stderr}`);
   return r.stdout;
 };
+/* Each app: its modalities, and whether it starts on the latest HELIX. */
+const APPS = {
+  both: { modalities: "responsive-web,hybrid-chat", helix: true },
+  web: { modalities: "responsive-web" },
+  chat: { modalities: "chat" },
+  hybrid: { modalities: "hybrid-chat" },
+};
+const dir = (name) => join(tmp, name);
+const app = dir("both");
 let server, browser, created;
 
 before(async () => {
   mkdirSync(join(tmp, "sdk"));
   for (const p of ["tokens", "ui", "audit"]) sh("npm", ["pack", "--silent", "--pack-destination", join(tmp, "sdk")], join(ROOT, "packages", p));
-  created = spawnSync(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), app, "--theme", "databricks", "--sdk-from", join(tmp, "sdk")], { cwd: tmp, encoding: "utf8" });
-  assert.equal(created.status, 0, `create-app\n${created.stdout}\n${created.stderr}`);
-  sh("npm", ["install", "--no-audit", "--no-fund"], app);
+  for (const [name, a] of Object.entries(APPS)) {
+    const r = spawnSync(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), dir(name), "--modality", a.modalities, "--theme", "databricks", "--sdk-from", join(tmp, "sdk"), ...(a.helix ? [] : ["--no-helix"])], { cwd: tmp, encoding: "utf8" });
+    assert.equal(r.status, 0, `create-app ${name}\n${r.stdout}\n${r.stderr}`);
+    if (a.helix) created = r;
+    sh("npm", ["install", "--no-audit", "--no-fund"], dir(name));
+  }
 });
 after(async () => { server?.kill(); await browser?.close(); rmSync(tmp, { recursive: true, force: true }); });
 
 // @covers US-012-AC1
-test("AC1: the fresh app builds", () => {
-  sh("npm", ["run", "build"], app);
+test("AC1: the fresh app of every modality builds", () => {
+  for (const name of Object.keys(APPS)) sh("npm", ["run", "build"], dir(name));
 });
 
 test("npm install puts the SDK's Claude Code skill in place", () => {
@@ -46,38 +61,67 @@ test("npm install puts the SDK's Claude Code skill in place", () => {
 });
 
 // @covers US-051-AC1
-test("US-051-AC1: the fresh app's blueprint passes ux-builder-blueprint check, as its CI runs it", () => {
-  const out = sh("npm", ["run", "check:blueprint"], app);
-  assert.match(out, /app\.blueprint\.json: no findings/);
+test("US-051-AC1: the fresh app's blueprint passes ux-builder-blueprint check, as its CI runs it, for every modality", () => {
+  for (const name of Object.keys(APPS)) assert.match(sh("npm", ["run", "check:blueprint"], dir(name)), /app\.blueprint\.json: no findings/, name);
 });
 
 // @covers US-012-AC3
 // @covers US-022-AC10
-test("AC3: the fresh app passes the lint rule with zero findings", () => {
-  const out = sh("npm", ["run", "lint"], app);
-  assert.doesNotMatch(out, /ux-builder\/no-(hard-coded-values|foreign-ui|inline-svg)/);
+test("AC3: the fresh app of every modality passes the lint rule with zero findings", () => {
+  for (const name of Object.keys(APPS)) assert.doesNotMatch(sh("npm", ["run", "lint"], dir(name)), /ux-builder\/(no-hard-coded-values|no-foreign-ui|no-inline-svg|ai-neutral-voice)/, name);
 });
 
 // @covers US-022-AC10
-test("US-022-AC10: the fresh app passes the theme audit in every theme, as its CI runs it", () => {
-  const out = sh("npm", ["run", "audit"], app);
-  assert.match(out, /Theme audit: 0 errors/);
-  const report = JSON.parse(readFileSync(join(app, "audit-report/report.json"), "utf8"));
-  assert.ok(report.runs.length >= 10, `${report.runs.length} runs`);
-  assert.ok(report.runs.every((r) => r.mode === "event"), "switched by the starter's ThemeProvider");
-  assert.equal(report.summary.error, 0, JSON.stringify(report.findings.filter((f) => f.severity === "error"), null, 1));
-  assert.deepEqual(report.findings.filter((f) => f.severity !== "info" && f.owner !== "sdk").map((f) => f.message), [], "nothing the app itself should fix");
-  // The SDK's own widgets clear contrast in every theme the starter shows
-  // (plain's Limited pill measured 4.2:1 until 2026-10-08).
-  assert.deepEqual(report.findings.filter((f) => f.rule === "contrast").map((f) => `${f.runs.join(" ")}: ${f.selector}: ${f.message}`), [], "SDK widgets clear contrast");
+test("US-022-AC10: the fresh app of every modality passes the theme audit in every theme, as its CI runs it", () => {
+  for (const name of Object.keys(APPS)) {
+    const out = sh("npm", ["run", "audit"], dir(name));
+    assert.match(out, /Theme audit: 0 errors/, name);
+    const report = JSON.parse(readFileSync(join(dir(name), "audit-report/report.json"), "utf8"));
+    assert.ok(report.runs.length >= 10, `${name}: ${report.runs.length} runs`);
+    assert.ok(report.runs.every((r) => r.mode === "event"), "switched by the starter's ThemeProvider");
+    assert.equal(report.summary.error, 0, JSON.stringify(report.findings.filter((f) => f.severity === "error"), null, 1));
+    assert.deepEqual(report.findings.filter((f) => f.severity !== "info" && f.owner !== "sdk").map((f) => `${f.check}: ${f.message}`), [], `${name}: nothing the app itself should fix`);
+    // The SDK's own widgets clear contrast in every theme the starter shows.
+    assert.deepEqual(report.findings.filter((f) => f.check === "contrast").map((f) => `${f.runs.join(" ")}: ${f.selector}: ${f.message}`), [], `${name}: SDK widgets clear contrast`);
+    // Audited as the modalities its blueprint declares, and its shell fits them (US-099).
+    const { supports } = JSON.parse(readFileSync(join(dir(name), "app.blueprint.json"), "utf8"));
+    assert.deepEqual(report.verdicts.modality.map((v) => v.modality), supports.modalities, `${name}: the blueprint's modalities`);
+    // Every required component is there. An empty hybrid-chat shell shows its first card only after a
+    // message, so the audit of the first screen may warn that it saw no Adaptive Card part, and nothing else.
+    for (const v of report.verdicts.modality) {
+      const missing = v.components.filter((c) => !c.present).map((c) => c.name);
+      const allowed = v.modality === "hybrid-chat" ? ["Adaptive Card part"] : [];
+      assert.notEqual(v.status, "fail", `${name} ${v.modality}: ${JSON.stringify(v.fixes)}`);
+      assert.deepEqual(missing.filter((m) => !allowed.includes(m)), [], `${name} ${v.modality}: missing ${missing}`);
+      assert.ok(v.components.every((c) => c.adapts !== false), `${name} ${v.modality}: the navigation adapts by size class`);
+    }
+    assert.notEqual(report.verdicts.theme.status, "fail", `${name}: ${JSON.stringify(report.verdicts.theme.items?.filter((i) => i.status === "fail"))}`);
+  }
+});
+
+describe("US-097: each modality's app runs as its shell, and its own e2e test passes", () => {
+  // @covers US-097-AC2
+  test("AC2: responsive-web is an AppShell with one Home screen whose empty state says where to start, from compact to large", () => {
+    assert.match(sh("npm", ["run", "test:e2e"], dir("web")), /2 passed/);
+    assert.match(readFileSync(join(dir("web"), "e2e/starter.spec.js"), "utf8"), /setViewportSize\(\{ width: 390[\s\S]*Frame the first feature in HELIX[\s\S]*setViewportSize\(\{ width: 1280/);
+  });
+
+  // @covers US-097-AC3
+  test("AC3: chat is a full-screen, empty SDK Conversation with its composer and AI disclosure; hybrid-chat's draws Adaptive Card parts", () => {
+    assert.match(sh("npm", ["run", "test:e2e"], dir("chat")), /2 passed/);
+    assert.match(readFileSync(join(dir("chat"), "e2e/starter.spec.js"), "utf8"), /full-screen, empty Conversation/);
+    assert.match(sh("npm", ["run", "test:e2e"], dir("hybrid")), /2 passed/);
+    assert.match(readFileSync(join(dir("hybrid"), "e2e/starter.spec.js"), "utf8"), /piq-adaptive-card__heading/);
+  });
 });
 
 // @covers US-012-AC2
-test("AC2: the app renders on the SDK and switches theme and appearance", async () => {
+// @covers US-097-AC4
+test("AC2: the app renders on the SDK, switches theme and appearance; with responsive-web and hybrid-chat its AppShell has Home and Assistant", async () => {
   server = spawn("npx", ["vite", "preview", "--port", "5193", "--strictPort", "--host", "127.0.0.1"], { cwd: app, stdio: "ignore" });
   for (let i = 0; i < 60; i++) { try { if ((await fetch("http://127.0.0.1:5193/")).ok) break; } catch { /* starting */ } await new Promise((r) => setTimeout(r, 250)); }
   browser = await chromium.launch();
-  const page = await browser.newPage({ colorScheme: "light" });
+  const page = await browser.newPage({ colorScheme: "light", viewport: { width: 1280, height: 800 } });
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
@@ -85,10 +129,16 @@ test("AC2: the app renders on the SDK and switches theme and appearance", async 
   const provider = page.locator(".app");
   await assertAttr(provider, "data-theme", "databricks");
   await assertAttr(provider, "data-appearance", "light");
-  await page.getByRole("heading", { name: "matters", exact: true }).waitFor();
-  const btn = () => page.locator(".piq-btn").first().evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
+  await page.getByRole("heading", { name: "Home", exact: true }).waitFor();
+  const side = page.locator(".piq-shell__side");
+  assert.deepEqual(await side.getByRole("link").allInnerTexts(), ["Home", "Assistant"], "the destinations");
+  assert.match(await page.locator("[data-piq-screen=home] .piq-state-panel").innerText(), /Frame the first feature in HELIX/);
+
+  await side.getByRole("link", { name: "Assistant" }).click();
+  await page.waitForURL(/\/assistant$/);
+  assert.equal(await page.locator(".piq-conversation .piq-message").count(), 0, "the conversation starts empty");
+  const btn = () => page.locator(".piq-composer .piq-btn").first().evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
   assert.equal(await btn(), "8px", "Databricks buttons");
-  assert.equal(await page.locator("table tbody tr").count(), 3);
 
   await page.getByLabel("Theme").selectOption("praxis-carbon");
   await assertAttr(provider, "data-theme", "praxis-carbon");
@@ -98,14 +148,14 @@ test("AC2: the app renders on the SDK and switches theme and appearance", async 
   await page.getByRole("radio", { name: "Dark" }).click();
   await assertAttr(provider, "data-appearance", "dark");
 
-  const add = page.getByRole("button", { name: /Add matter/ });
-  await add.click();
-  assert.equal(await add.getAttribute("aria-busy"), "true", "busy while the request runs (US-021-AC5)");
-  await page.locator(".piq-toast").waitFor();
-  assert.equal(await add.getAttribute("aria-busy"), null);
-  await page.getByLabel("Search").fill("estate");
-  assert.equal(await page.locator("table tbody tr").count(), 1);
+  await page.getByRole("textbox", { name: "Ask the assistant" }).fill("Hello");
+  await page.getByRole("button", { name: "Send" }).click();
+  await page.locator('.piq-message[data-role="assistant"] .piq-adaptive-card__heading').waitFor();
+  await page.goBack();
+  await page.waitForURL(/\/$/);
+  await page.locator("[data-piq-screen=home]").waitFor();
   assert.deepEqual(errors, []);
+  await page.close();
 });
 
 // @covers US-012-AC5
@@ -113,7 +163,7 @@ test("AC5: the header's logo follows the theme and appearance", async () => {
   const page = await browser.newPage({ colorScheme: "light" });
   await page.goto("http://127.0.0.1:5193/");
   const provider = page.locator(".app");
-  const logo = page.locator(".masthead .piq-logo");
+  const logo = page.locator(".brand .piq-logo");
   await assertAttr(provider, "data-theme", "databricks");
   // Databricks ships no artwork: its title, as a wordmark.
   await assertAttr(logo, "data-logo", "text");
@@ -176,7 +226,8 @@ async function assertAttr(locator, name, value) {
 // @covers US-070-AC1
 // @covers US-070-AC2
 // @covers US-070-AC3
-test("FEAT-010: the fresh app is on the latest HELIX, its manifest validates, collect records no warning and its e2e test passes", () => {
+// @covers US-097-AC5
+test("FEAT-010: the fresh app is on the latest HELIX, its manifest validates, collect records no warning, and its e2e test cites US-001's criteria and passes", () => {
   // This test fetches the real latest release from GitHub. Without the network the starter
   // falls back (to the bundled copy, or, in a checkout with no bundle, to no HELIX); say so plainly.
   const said = `${created.stdout}${created.stderr}`;
@@ -186,15 +237,20 @@ test("FEAT-010: the fresh app is on the latest HELIX, its manifest validates, co
   assert.equal(v.bundled, false, `the starter used the bundled HELIX, not the latest release (${v.reason}); is GitHub reachable?`);
   assert.match(v.tag, /^v\d+\.\d+\.\d+$/);
   assert.ok(existsSync(join(app, ".claude/skills/helix/SKILL.md")) && existsSync(join(app, ".claude/skills/helix/references/graph.yml")));
-  assert.ok(existsSync(join(app, "docs/helix/01-frame/user-stories/US-001-see-search-and-add-matters.md")));
+  const story = readFileSync(join(app, "docs/helix/01-frame/user-stories/US-001-open-the-app-and-see-where-to-start.md"), "utf8");
+  assert.match(readFileSync(join(app, "docs/helix/01-frame/features/FEAT-001-app-shell.md"), "utf8"), /The app's shell for its modalities/);
+  const acs = [...story.matchAll(/\*\*(US-001-AC\d+)\*\* — /g)].map((m) => m[1]);
+  assert.deepEqual(acs, ["US-001-AC1", "US-001-AC2", "US-001-AC3"], "Home, the card-drawing conversation, the theme");
+  const spec = readFileSync(join(app, "e2e/starter.spec.js"), "utf8");
+  for (const id of acs) assert.match(spec, new RegExp(`// @covers ${id}\\n`), id);
   const out = sh("npm", ["run", "assess:validate"], app);
   assert.match(out, /ux-assessment\.yml: valid/);
   const runs = join(tmp, "assess-runs");
   const collected = sh("npx", ["ux-builder-audit", "assess", "collect", "--run", "R-20261021T000000Z", "--out", runs], app);
-  assert.match(collected, /journeys' criteria 4 explicit, 0 uncovered/);
-  const dir = /Wrote (.+)\/requirements\.json/.exec(collected)[1];
-  const req = JSON.parse(readFileSync(join(dir, "requirements.json"), "utf8"));
+  assert.match(collected, /journeys' criteria 3 explicit, 0 uncovered/);
+  const at = /Wrote (.+)\/requirements\.json/.exec(collected)[1];
+  const req = JSON.parse(readFileSync(join(at, "requirements.json"), "utf8"));
   assert.deepEqual(req.problems.filter((p) => p.severity === "warning"), [], "collect records no warning");
   assert.equal(req.documents.length, 8);
-  sh("npm", ["run", "test:e2e"], app);
+  assert.match(sh("npm", ["run", "test:e2e"], app), /3 passed/);
 });

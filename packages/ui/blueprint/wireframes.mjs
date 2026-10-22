@@ -1,11 +1,19 @@
 /* ux-builder-blueprint wireframes: each screen drawn by its catalogue
    pattern, with placeholder content, in the neutral `plain` theme, at each
-   supported size class, as static HTML and PNG (FEAT-012 DRW-02; ADR-030
-   decision 6). Node only.
+   supported size class and in each state it declares, as static HTML and PNG
+   (FEAT-012 DRW-02; FEAT-015 RPT-09; ADR-030 decision 6). Node only.
 
      import { wireframes, writeWireframes } from "./wireframes.mjs";
-     const pages = await wireframes(blueprint);            // [{ screen, sizeClass, file, html, width }]
+     const pages = await wireframes(blueprint);            // [{ screen, state, sizeClass, file, html, width }]
      await writeWireframes(pages, "blueprint-wireframes");  // HTML, PNG (Playwright's Chromium)
+
+   The ideal state is <screen>.<size>.html; each other state the screen has
+   (states.mjs: the declared ones, and any an action or journey step names)
+   is <screen>.<state>.<size>.html. A pattern that draws the state itself
+   (its `status`, or no items) is given it; for one that does not, the
+   wireframe is the page with the pattern's heading and the SDK's StatePanel
+   (or Skeleton, while loading) in place of its content, and the page says
+   so (data-drawn-by="StatePanel").
 
    The SDK's own React components draw each screen (server-rendered, as the
    gallery is), inside AppShell with the app's destinations for an app, on
@@ -21,6 +29,7 @@ import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import catalogue from "../catalogue.json" with { type: "json" };
 import { sizesOf } from "./project.mjs";
+import { stateModels } from "./states.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
@@ -71,6 +80,38 @@ function placeholder(name, s, { h, ui, P }) {
   return props ?? { title, label: title, children: text("Placeholder content.") };
 }
 
+const STATUSES = new Map(catalogue.patterns.map((p) => [p.name, p.statuses ?? []]));
+// Patterns whose `status` prop draws their states.
+const STATUS_PROP = new Set(["CollectionList", "RecordDetail", "ReportViewer", "ChartFrame"]);
+
+/* A screen's pattern in a state other than ideal: { el, by } where by is
+   "pattern" when the pattern draws the state, "StatePanel" when the page
+   does around it. */
+function stateElement(s, state, lib) {
+  const { h, ui, P } = lib;
+  const own = STATUSES.get(s.pattern) ?? [];
+  const props = placeholder(s.pattern, s, lib);
+  // In error and partial, Try again is the region's primary action (states.mjs: error offers the retry
+  // and back); the screen's own primary action is left out in error and drawn secondary in partial.
+  if (props.actions && (state === "error" || state === "partial")) {
+    const label = (Array.isArray(s.actions) ? s.actions.find((a) => a?.primary)?.label : null) ?? s.primaryAction?.label;
+    props.actions = state === "partial" && label ? h(ui.Button, { variant: "secondary" }, label) : null;
+  }
+  if (STATUS_PROP.has(s.pattern) && (own.includes(state) || (state === "no-results" && own.includes("empty")))) {
+    const rows = state === "partial" ? props.rows?.slice(0, 2) : state === "ready" ? props.rows : [];
+    const extra = s.pattern === "CollectionList" ? { rows: rows ?? [], ...(state === "no-results" ? { search: "zzz" } : {}) } : {};
+    return { el: h(P[s.pattern], { ...props, ...extra, status: state === "no-results" ? "empty" : state, onRetry: noop }), by: "pattern" };
+  }
+  if (state === "empty" && s.pattern === "WorkQueue") return { el: h(P.WorkQueue, { ...props, items: [] }), by: "pattern" };
+  if (state === "empty" && s.pattern === "HomeScreen") return { el: h(P.HomeScreen, { ...props, tiles: [], assigned: { ...props.assigned, items: [] }, recent: { ...props.recent, items: [] } }), by: "pattern" };
+  if (s.pattern === "ErrorScreen" && own.includes(state)) return { el: h(P.ErrorScreen, { ...props, kind: state, children: undefined }), by: "pattern" };
+  const primary = (Array.isArray(s.actions) ? s.actions.find((a) => a?.primary)?.label : null);
+  const body = state === "loading"
+    ? h("div", { "aria-busy": "true" }, h(ui.Skeleton, { variant: "rect", height: 40 }), h(ui.Skeleton, { lines: 6 }))
+    : h(P.StatePanel, { kind: ["empty", "no-results", "forbidden", "error", "partial"].includes(state) ? state : "empty", onRetry: noop, action: state === "empty" && primary ? h(ui.Button, null, primary) : undefined, ...(["empty", "no-results", "forbidden", "error", "partial"].includes(state) ? {} : { title: `${s.title ?? s.id}: ${state}` }) });
+  return { el: h("div", null, h(P.PageHeader, { title: s.title ?? s.id }), body), by: "StatePanel" };
+}
+
 /* A screen's pattern as a React element, or null for a pattern the catalogue lacks. */
 function screenElement(s, lib) {
   const { h, P } = lib;
@@ -86,7 +127,7 @@ function screenElement(s, lib) {
   return h(P[s.pattern], placeholder(s.pattern, s, lib));
 }
 
-const box = (s) => `<div class="wf-unknown" role="img" aria-label="${esc(`${s.title ?? s.id}: ${s.pattern ?? "no pattern"}`)}" style="display:grid;place-items:center;min-block-size:240px;margin:var(--piq-space-4);border:2px dashed var(--piq-color-border);border-radius:var(--piq-radius-md, 8px);color:var(--piq-color-text);font:var(--piq-font-body, inherit)"><p><strong>${esc(s.title ?? s.id)}</strong><br>${esc(s.pattern ?? "no pattern")}: not a pattern in @ux-builder/ui ${esc(catalogue.packages["@ux-builder/ui"])}</p></div>`;
+const box = (s, state = "ideal") => `<div class="wf-unknown" role="img" aria-label="${esc(`${s.title ?? s.id}${state === "ideal" ? "" : ` (${state})`}: ${s.pattern ?? "no pattern"}`)}" style="display:grid;place-items:center;min-block-size:240px;margin:var(--piq-space-4);border:2px dashed var(--piq-color-border);border-radius:var(--piq-radius-md, 8px);color:var(--piq-color-text);font:var(--piq-font-body, inherit)"><p><strong>${esc(s.title ?? s.id)}</strong><br>${esc(s.pattern ?? "no pattern")}: not a pattern in @ux-builder/ui ${esc(catalogue.packages["@ux-builder/ui"])}</p></div>`;
 
 /* The page around a screen: the theme and the SDK's CSS, nothing else. */
 const page = (title, sizeClass, body) => `<!doctype html>
@@ -116,35 +157,47 @@ async function library() {
   return { h, render: renderToStaticMarkup, ui, P };
 }
 
-/* The wireframes of a blueprint: one page per screen and supported size
-   class, in blueprint order. */
+/* The wireframes of a blueprint: one page per screen, state and supported
+   size class, in blueprint order (the ideal state first). */
 export async function wireframes(bp) {
   const lib = await library();
   const { h, render, P } = lib;
   const sizes = sizesOf(bp);
   const dests = (Array.isArray(bp.destinations) ? bp.destinations : []).filter((d) => d && typeof d === "object");
   const nav = dests.map((d) => ({ id: d.id, label: d.label ?? d.id, href: `#${d.id}`, icon: "home" }));
+  const models = new Map(stateModels(bp).map((m) => [m.screen, m]));
+  const seen = new Set();
   const out = [];
   for (const s of (Array.isArray(bp.screens) ? bp.screens : []).filter((x) => x && typeof x.id === "string")) {
-    let markup, known = true;
-    try {
-      const el = screenElement(s, lib);
-      known = !!el;
-      // In a Page, as an app builds each screen (the starter's guide).
-      const content = el ? render(h(P.Page, null, el)) : box(s);
-      // A view is drawn without a shell; the host provides it.
-      markup = bp.kind === "view" || !nav.length ? `<main>${content}</main>` : render(h(P.AppShell, { nav, current: dests.find((d) => d.screen === s.id)?.id ?? null, brand: h("strong", null, bp.name ?? "App") }, h("div", { dangerouslySetInnerHTML: { __html: content } })));
-    } catch (e) {
-      known = false;
-      markup = `<main>${box({ ...s, pattern: `${s.pattern} (could not be drawn: ${e.message})` })}</main>`;
+    if (seen.has(s.id)) continue;
+    seen.add(s.id);
+    for (const state of models.get(s.id)?.states ?? ["ideal"]) {
+      let markup, known = true, by = "pattern";
+      try {
+        let el = null;
+        if (PATTERNS.has(s.pattern) && typeof P[s.pattern] === "function") {
+          if (state === "ideal") el = screenElement(s, lib);
+          else ({ el, by } = stateElement(s, state, lib));
+        }
+        known = !!el;
+        // In a Page, as an app builds each screen (the starter's guide).
+        const content = el ? render(h(P.Page, null, el)) : box(s, state);
+        const marked = state === "ideal" ? content : `<div data-state="${esc(state)}" data-drawn-by="${known ? by : "box"}">${content}</div>`;
+        // A view is drawn without a shell; the host provides it.
+        markup = bp.kind === "view" || !nav.length ? `<main>${marked}</main>` : render(h(P.AppShell, { nav, current: dests.find((d) => d.screen === s.id)?.id ?? null, brand: h("strong", null, bp.name ?? "App") }, h("div", { dangerouslySetInnerHTML: { __html: marked } })));
+      } catch (e) {
+        known = false;
+        markup = `<main>${box({ ...s, pattern: `${s.pattern} (could not be drawn: ${e.message})` }, state)}</main>`;
+      }
+      const name = state === "ideal" ? s.id : `${s.id}.${state}`;
+      for (const size of sizes) out.push({ screen: s.id, state, drawnBy: known ? by : null, pattern: s.pattern ?? null, known, sizeClass: size, width: WIDTHS[size] ?? 1024, file: `${name}.${size}.html`, html: page(state === "ideal" ? s.title ?? s.id : `${s.title ?? s.id} (${state})`, size, markup) });
     }
-    for (const size of sizes) out.push({ screen: s.id, pattern: s.pattern ?? null, known, sizeClass: size, width: WIDTHS[size] ?? 1024, file: `${s.id}.${size}.html`, html: page(s.title ?? s.id, size, markup) });
   }
   return out;
 }
 
 /* Write the pages and assets, and a PNG of each at its size class's width.
-   Returns { files, png: true } or { files, png: false, reason }. */
+   Returns { files, pages, png: true } or { files, pages, png: false, reason }. */
 export async function writeWireframes(pages, dir) {
   mkdirSync(join(dir, "assets"), { recursive: true });
   for (const f of readdirSync(dir)) if (/\.(html|png)$/.test(f)) rmSync(join(dir, f));
@@ -156,20 +209,28 @@ export async function writeWireframes(pages, dir) {
     const pw = await import(pathToFileURL(resolveFrom(["playwright", "@playwright/test"])).href);
     chromium = pw.chromium ?? pw.default?.chromium;
     if (!chromium) throw new Error("no chromium export");
-  } catch { return { files, png: false, reason: "PNGs need Playwright: npm install --save-dev playwright && npx playwright install chromium" }; }
+  } catch { return { files, pages, png: false, reason: "PNGs need Playwright: npm install --save-dev playwright && npx playwright install chromium" }; }
   let browser;
   try { browser = await chromium.launch(); }
-  catch (e) { return { files, png: false, reason: `Chromium did not start (${e.message.split("\n")[0]}); run: npx playwright install chromium` }; }
+  catch (e) { return { files, pages, png: false, reason: `Chromium did not start (${e.message.split("\n")[0]}); run: npx playwright install chromium` }; }
   try {
     for (const p of pages) {
-      const tab = await browser.newPage({ viewport: { width: p.width, height: 800 }, deviceScaleFactor: 1 });
-      await tab.goto(pathToFileURL(join(dir, p.file)).href);
-      await tab.screenshot({ path: join(dir, p.file.replace(/\.html$/, ".png")), fullPage: true, animations: "disabled" });
-      await tab.close();
+      // Headless Chromium now and then fails a capture ("Unable to capture screenshot");
+      // a fresh tab takes it again, up to three tries.
+      for (let attempt = 1; ; attempt++) {
+        const tab = await browser.newPage({ viewport: { width: p.width, height: 800 }, deviceScaleFactor: 1 });
+        try {
+          await tab.goto(pathToFileURL(join(dir, p.file)).href, { waitUntil: "load" });
+          await tab.screenshot({ path: join(dir, p.file.replace(/\.html$/, ".png")), fullPage: true, animations: "disabled" });
+          break;
+        } catch (e) {
+          if (attempt >= 3 || !/Unable to capture screenshot/.test(e.message)) throw e;
+        } finally { await tab.close(); }
+      }
       files.push(p.file.replace(/\.html$/, ".png"));
     }
   } finally { await browser.close(); }
-  return { files, png: true };
+  return { files, pages, png: true };
 }
 
 /* The first of these packages the app (or this package) has installed. */

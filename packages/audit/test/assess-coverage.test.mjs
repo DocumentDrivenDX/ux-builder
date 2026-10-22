@@ -48,7 +48,7 @@ describe("US-061: inspect coverage instead of a false pass", () => {
     assert.equal(p.cli("report", p.dir).status, 0);
     const md = readFileSync(join(p.dir, "report.md"), "utf8");
     assert.match(md, /## Recommendations \(UX heuristics, not existing obligations\)[\s\S]*Bulk approve is missing/);
-    assert.doesNotMatch(md.split("## Recommendations")[0], /Bulk approve is missing/, "not listed among the app's requirements");
+    assert.doesNotMatch(/## Findings against the app.s requirements\n([\s\S]*?)\n## /.exec(md)?.[1] ?? "", /Bulk approve is missing/, "not listed among the app's requirements");
   });
 
   // @covers US-061-AC3
