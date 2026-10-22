@@ -35,7 +35,10 @@ const http = createServer();
 const vite = await createVite({
   ...viteOptions(), appType: "spa",
   server: { middlewareMode: true, hmr: { server: http }, fs: { allow: [REPO] } },
-  optimizeDeps: { entries: ["index.html"] },   // not the e2e test client's page
+  // Every page the server serves, so their dependencies are optimised up front:
+  // one discovered mid-session answers 504 "Outdated Optimize Dep" and reloads.
+  // Not the e2e test client's page.
+  optimizeDeps: { entries: ["index.html", "home.html"] },
 });
 
 async function readJson(req, limit = 12 * 1024 * 1024) {
