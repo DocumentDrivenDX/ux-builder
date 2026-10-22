@@ -5,13 +5,14 @@ import { SURFACES } from "../../../../packages/tokens/bridges.mjs";
 import aiComponents from "../../../../packages/ui/ai/vendor/components.json";
 import { getTheme } from "../api.js";
 import { ThemePreview } from "../Themes.jsx";
-import { indexStories, storybookUrl } from "./stories.js";
+import { indexStories, placeStories, storybookUrl, storyName } from "./stories.js";
 
 /* A theme's own page (?theme=<name>): the page wears the theme, in light,
    dark or the system's setting, and shows its brand (logos, mark, favicon,
    palette), its CSS for each appearance and for auto, and every widget,
-   screen pattern, assistant part and Adaptive Card in the SDK, each rendered from its own Storybook story
-   with a link to that story in Storybook, in this theme. A menu on the left
+   screen pattern, assistant part and Adaptive Card in the SDK, each with
+   every one of its Storybook stories rendered, linked to that story in
+   Storybook, in this theme: no story in Storybook is missing here. A menu on the left
    reaches every part; on a phone it sits above the content. */
 
 // The SDK's stories, as Storybook has them: the samples and their ids.
@@ -32,8 +33,12 @@ const first = (name) => (a, b) => Number(b.name === name) - Number(a.name === na
 const ASSISTANT = (catalogue.assistant ?? []).filter((p) => p.type === "component").sort(first("Conversation"));
 // Cards an agent sends (ADR-029), drawn with the SDK's components.
 const ADAPTIVE = (catalogue.adaptiveCards ?? []).filter((c) => c.type === "component").sort(byName);
+// Every story in its entry, once; the few no entry renders (the text roles) in Foundations.
+const PLACED = placeStories(INDEX, [...WIDGETS, ...PATTERNS, ...ASSISTANT, ...ADAPTIVE].map((c) => c.name));
+const samples = (name) => PLACED.byEntry.get(name) ?? [];
 const PREF = "theme-page-appearance";
 const slug = (kind, name) => `${kind}-${name}`;
+const storySlug = (s) => `story-${s.id}`;
 
 function systemDark() { return typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches; }
 function useSystemDark() {
@@ -70,6 +75,16 @@ export function ThemePage({ name }) {
     document.head.appendChild(link);
     return () => link.remove();
   }, [a?.favicon]);
+  // The menu and the sections sit below the header, however tall it wraps.
+  useEffect(() => {
+    const top = document.querySelector(".tp-top");
+    if (!top || typeof ResizeObserver !== "function") return undefined;
+    const set = () => document.querySelector(".tp")?.style.setProperty("--tp-top", `${top.getBoundingClientRect().height}px`);
+    const ro = new ResizeObserver(set);
+    ro.observe(top);
+    set();
+    return () => ro.disconnect();
+  }, [theme]);
   // Once the page has its sections, go to the one the URL names.
   useEffect(() => { if (theme && location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView(); }, [theme]);
 
@@ -100,6 +115,7 @@ export function ThemePage({ name }) {
           <Catalogue id="patterns" title="Screen patterns" items={PATTERNS} from="@ux-builder/ui/patterns" link={link} />
           <Catalogue id="assistant" title="Assistant" items={ASSISTANT} from="@ux-builder/ui/assistant" link={link} />
           <Catalogue id="adaptive-cards" title="Adaptive Cards" items={ADAPTIVE} from="@ux-builder/ui/adaptive-cards" link={link} />
+          {PLACED.rest.length > 0 && <Foundations link={link} />}
         </main>
       </div>
     </ThemeProvider>
@@ -125,7 +141,12 @@ function Nav() {
     return () => { removeEventListener("scroll", onScroll); cancelAnimationFrame(frame); };
   }, []);
   useEffect(() => { ref.current?.querySelector('[aria-current="location"]')?.scrollIntoView({ block: "nearest" }); }, [current]);
-  const item = (id, label) => <li key={id}><a href={`#${id}`} aria-current={current === id ? "location" : undefined}>{label}</a></li>;
+  const item = (id, label, sub) => <li key={id}><a href={`#${id}`} aria-current={current === id ? "location" : undefined}>{label}</a>{sub}</li>;
+  // An entry with more than one story lists them under it, as Storybook does.
+  const entry = (kind, name) => {
+    const list = samples(name);
+    return item(slug(kind, name), name, list.length > 1 && <ul className="tp-nav__stories">{list.map((s) => item(`${slug(kind, name)}--${storySlug(s)}`, storyLabel(s)))}</ul>);
+  };
   return (
     <nav className="tp-nav" aria-label="Theme contents" ref={ref}>
       <p className="tp-nav__group">Brand</p>
@@ -133,17 +154,21 @@ function Nav() {
       <p className="tp-nav__group">CSS</p>
       <ul>{item("css-light", "Light")}{item("css-dark", "Dark")}{item("css-auto", "Auto")}{item("css-bridges", "Generative UI bridges")}</ul>
       <p className="tp-nav__group">UI Components</p>
-      <ul>{WIDGETS.map((w) => item(slug("widget", w.name), w.name))}</ul>
+      <ul>{WIDGETS.map((w) => entry("widget", w.name))}</ul>
       <div className="tp-nav__ai">
         <p className="tp-nav__group">AI Components</p>
         <ul>{item("ai", "About these")}{AI.map((c) => item(slug("ai", c.name), <>{c.name}<span className="tp-nav__lib"><span className="piq-visually-hidden">, </span>{c.library}</span></>))}</ul>
       </div>
       <p className="tp-nav__group">Screen patterns</p>
-      <ul>{PATTERNS.map((p) => item(slug("pattern", p.name), p.name))}</ul>
+      <ul>{PATTERNS.map((p) => entry("pattern", p.name))}</ul>
       <p className="tp-nav__group">Assistant</p>
-      <ul>{ASSISTANT.map((p) => item(slug("assistant", p.name), p.name))}</ul>
+      <ul>{ASSISTANT.map((p) => entry("assistant", p.name))}</ul>
       <p className="tp-nav__group">Adaptive Cards</p>
-      <ul>{ADAPTIVE.map((c) => item(slug("adaptive-card", c.name), c.name))}</ul>
+      <ul>{ADAPTIVE.map((c) => entry("adaptive-card", c.name))}</ul>
+      {PLACED.rest.length > 0 && <>
+        <p className="tp-nav__group">Foundations</p>
+        <ul>{PLACED.rest.map((s) => item(`foundations--${storySlug(s)}`, `${s.title.split("/").at(-1)}: ${storyLabel(s)}`))}</ul>
+      </>}
     </nav>
   );
 }
@@ -207,8 +232,9 @@ function Catalogue({ id, title, items, from, link }) {
 }
 
 function Entry({ kind, item, from, link }) {
-  const stories = INDEX.byComponent.get(item.name) ?? [];
-  const [first, ...more] = stories;
+  const shown = samples(item.name);
+  const [first] = shown;
+  const more = (INDEX.byComponent.get(item.name) ?? []).filter((s) => !shown.includes(s));
   const id = slug(kind, item.name);
   return (
     <article id={id} data-nav className="tp-entry" aria-labelledby={`${id}-h`}>
@@ -219,7 +245,7 @@ function Entry({ kind, item, from, link }) {
       <p className="tp-entry__purpose">{item.purpose}</p>
       <code className="tp-entry__import">{`import { ${item.name} } from "${from}";`}</code>
       {first
-        ? <Sample story={first} />
+        ? shown.map((s) => <Sample key={s.id} story={s} id={shown.length > 1 ? `${id}--${storySlug(s)}` : undefined} link={shown.length > 1 ? link : undefined} />)
         : <p className="tp-hint">No story yet.</p>}
       {more.length > 0 && (
         <p className="tp-entry__more">Also in: {more.slice(0, 6).map((s, i) => <span key={s.id}>{i ? ", " : ""}<a href={link(s.id)} target="_blank" rel="noreferrer">{s.title.split("/").at(-1)} › {s.key}</a></span>)}</p>
@@ -268,11 +294,27 @@ function AiCatalogue({ theme, tokens, appearance, link }) {
   );
 }
 
-/* One story, rendered as Storybook renders it. */
-function Sample({ story }) {
+/* The stories no entry renders, each with its own link. */
+function Foundations({ link }) {
   return (
-    <figure className="tp-sample" data-story={story.id}>
-      <figcaption>{story.title} › {story.key}</figcaption>
+    <section id="foundations" className="tp-section tp-catalogue" aria-labelledby="foundations-h">
+      <h2 id="foundations-h">Foundations</h2>
+      {PLACED.rest.map((s) => <Sample key={s.id} story={s} id={`foundations--${storySlug(s)}`} link={link} />)}
+    </section>
+  );
+}
+
+// A story's name as Storybook shows it.
+const storyLabel = (s) => s.story?.name ?? storyName(s.key);
+
+/* One story, rendered as Storybook renders it; with an id, the menu reaches it. */
+function Sample({ story, id, link }) {
+  return (
+    <figure className="tp-sample" data-story={story.id} id={id} data-nav={id ? "" : undefined}>
+      <figcaption>
+        <span>{story.title} › {storyLabel(story)}</span>
+        {link && <a className="tp-ext" href={link(story.id)} target="_blank" rel="noreferrer">Storybook<Icon name="external-link" /></a>}
+      </figcaption>
       <div className="tp-sample__canvas"><Boundary><StoryRender story={story} /></Boundary></div>
     </figure>
   );

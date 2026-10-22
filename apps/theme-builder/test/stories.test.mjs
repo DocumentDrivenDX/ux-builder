@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { storyNameFromExport, toId } from "storybook/internal/csf";
-import { indexStories, storyId, storybookUrl } from "../src/themepage/stories.js";
+import { indexStories, placeStories, storyId, storybookUrl } from "../src/themepage/stories.js";
 
 const UI = fileURLToPath(new URL("../../../packages/ui/", import.meta.url));
 const catalogue = JSON.parse(readFileSync(join(UI, "catalogue.json"), "utf8"));
@@ -40,4 +40,18 @@ test("every widget, screen pattern and assistant component has a story, its own 
 
 test("a Storybook link names the story and the theme in its appearance", () => {
   assert.equal(storybookUrl("http://localhost:6006/", "ui-components-button--primary", "praxis-carbon", "dark"), "http://localhost:6006/?path=/story/ui-components-button--primary&globals=theme:praxis-carbon-dark");
+});
+
+test("every story in Storybook has a place on the page", () => {
+  const names = ["widgets", "patterns", "assistant", "adaptiveCards"].flatMap((k) => catalogue[k].filter((x) => x.type === "component").map((x) => x.name));
+  const { byEntry, rest } = placeStories({ stories, byComponent }, names);
+  const placed = new Set([...byEntry.values()].flat().concat(rest));
+  for (const s of stories) assert.ok(placed.has(s), `${s.title} › ${s.key} is on the page`);
+  // Each Adaptive Card story under the Adaptive Card, the invoice first, as Storybook lists them.
+  const cards = stories.filter((s) => s.title === "Patterns/Adaptive Cards");
+  assert.ok(cards.length > 1);
+  assert.deepEqual(byEntry.get("AdaptiveCard").map((s) => s.key), cards.map((s) => s.key));
+  assert.equal(byEntry.get("Button")[0].title, "UI Components/Button");
+  // Only the foundations that are not components of their own are left over.
+  for (const s of rest) assert.match(s.title, /^Foundations\//, `${s.title} › ${s.key}`);
 });

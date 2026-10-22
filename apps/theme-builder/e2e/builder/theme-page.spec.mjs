@@ -45,10 +45,20 @@ test.describe("A theme's page", () => {
     await page.goto("/?theme=praxis-carbon");
     const nav = page.getByRole("navigation", { name: "Theme contents" });
     await expect(nav.getByRole("link", { name: "Logos and palette" })).toBeVisible();
-    const links = await nav.getByRole("link").allTextContents();
+    // The entries; an entry with several stories lists them beneath it.
+    const links = await nav.locator(":scope > ul > li > a, .tp-nav__ai > ul > li > a").allTextContents();
     const ai = JSON.parse(readFileSync(join(REPO, "packages/ui/ai/vendor/components.json"), "utf8")).components;
-    expect(links).toEqual(["Logos and palette", "Light", "Dark", "Auto", "Generative UI bridges", ...names("widgets"), "About these", ...ai.map((c) => `${c.name}, ${c.library}`), ...names("patterns"), "Conversation", ...names("assistant").filter((n) => n !== "Conversation"), ...names("adaptiveCards")]);
-    await expect(nav.locator(".tp-nav__group")).toHaveText(["Brand", "CSS", "UI Components", "AI Components", "Screen patterns", "Assistant", "Adaptive Cards"]);
+    expect(links).toEqual(["Logos and palette", "Light", "Dark", "Auto", "Generative UI bridges", ...names("widgets"), "About these", ...ai.map((c) => `${c.name}, ${c.library}`), ...names("patterns"), "Conversation", ...names("assistant").filter((n) => n !== "Conversation"), ...names("adaptiveCards"), "Text roles: All Pairings"]);
+    await expect(nav.locator(".tp-nav__group")).toHaveText(["Brand", "CSS", "UI Components", "AI Components", "Screen patterns", "Assistant", "Adaptive Cards", "Foundations"]);
+    // Every Adaptive Card story, as Storybook lists them, each reaching its own sample.
+    const cards = nav.locator('a[href="#adaptive-card-AdaptiveCard"] + .tp-nav__stories > li > a');
+    await expect(cards).toHaveText(["Pay Invoice", "Every Element", "Clean", "Destructive Action", "Compact Columns", "Text Not Html", "Newer Version", "Official Samples", "Checked Draft", "In A Conversation"]);
+    await cards.last().click();
+    await expect(page.locator("#adaptive-card-AdaptiveCard--story-patterns-adaptive-cards--in-a-conversation")).toBeInViewport();
+    // The menu's last link can be scrolled to: the menu fits below the header.
+    const last = nav.getByRole("link").last();
+    await last.scrollIntoViewIfNeeded();
+    await expect(last).toBeInViewport({ ratio: 1 });
 
     await nav.getByRole("link", { name: "Dark", exact: true }).click();
     await expect(page).toHaveURL(/#css-dark$/);
@@ -75,14 +85,14 @@ test.describe("A theme's page", () => {
       await page.emulateMedia({ colorScheme: ap });
       await page.goto(`/?theme=${theme}`);
       await expect(page.getByRole("navigation", { name: "Theme contents" }).getByRole("link", { name: "Conversation", exact: true })).toBeVisible();
-      const conv = page.locator("#assistant-Conversation .tp-sample .piq-conversation");
+      const conv = page.locator("#assistant-Conversation .tp-sample").first().locator(".piq-conversation");
       await expect(conv).toHaveCount(1);
       await expect(conv.locator('[data-piq-ai="step"]').first()).toContainText("Looked up time entries");
       await expect(conv.locator(".piq-sources li")).toHaveCount(2);
       await expect(conv.locator('[data-piq-ai="approval"]').getByRole("button")).toHaveText(["Approve", "Deny"]);
       for (const name of names("assistant")) {
-        await expect(page.locator(`#assistant-${name} .tp-sample`), `${name} has a sample`).toHaveCount(1);
-        await expect(page.locator(`#assistant-${name} .tp-sample`)).not.toContainText("did not render here");
+        await expect(page.locator(`#assistant-${name} .tp-sample`).first(), `${name} has a sample`).toBeVisible();
+        for (const sample of await page.locator(`#assistant-${name} .tp-sample`).all()) await expect(sample).not.toContainText("did not render here");
       }
       const tokens = resolved(theme, ap);
       expect((await conv.locator(".piq-approval").evaluate((el) => getComputedStyle(el).borderInlineStartColor))).toBeTruthy();
@@ -99,17 +109,19 @@ test.describe("A theme's page", () => {
     for (const [kind, list] of [["widget", names("widgets")], ["pattern", names("patterns")], ["adaptive-card", names("adaptiveCards")]]) {
       for (const name of list) {
         const entry = page.locator(`#${kind}-${name}`);
-        await expect(entry.locator(".tp-sample"), `${name} has a sample`).toHaveCount(1);
-        await expect(entry.locator(".tp-sample"), `${name}'s story renders`).not.toContainText("did not render here");
-        const story = await entry.locator(".tp-sample").getAttribute("data-story");
+        await expect(entry.locator(".tp-sample").first(), `${name} has a sample`).toBeVisible();
+        for (const sample of await entry.locator(".tp-sample").all()) await expect(sample, `${name}'s stories render`).not.toContainText("did not render here");
+        const story = await entry.locator(".tp-sample").first().getAttribute("data-story");
         await expect(entry.getByRole("link", { name: "Open in Storybook" })).toHaveAttribute("href", `http://localhost:6006/?path=/story/${story}&globals=theme:praxis-carbon-light`);
       }
     }
     // Its own story first: Button's sample is the Button story, not one that merely contains a button.
-    expect(await page.locator("#widget-Button .tp-sample").getAttribute("data-story")).toMatch(/^ui-components-button--/);
-    // The Adaptive Card's sample is its first story: the invoice card with its actions.
-    expect(await page.locator("#adaptive-card-AdaptiveCard .tp-sample").getAttribute("data-story")).toBe("patterns-adaptive-cards--pay-invoice");
-    await expect(page.locator("#adaptive-card-AdaptiveCard .tp-sample").getByRole("button", { name: "Pay invoice" })).toBeVisible();
+    expect(await page.locator("#widget-Button .tp-sample").first().getAttribute("data-story")).toMatch(/^ui-components-button--/);
+    // The Adaptive Card's first sample is its first story: the invoice card with its actions; the rest follow.
+    const cards = page.locator("#adaptive-card-AdaptiveCard .tp-sample");
+    expect(await cards.first().getAttribute("data-story")).toBe("patterns-adaptive-cards--pay-invoice");
+    await expect(cards.first().getByRole("button", { name: "Pay invoice" })).toBeVisible();
+    expect((await cards.evaluateAll((els) => els.map((el) => el.dataset.story))).length).toBe(10);
     // The samples wear the theme: Carbon's square buttons.
     expect(await page.locator("#widget-Button .piq-btn").first().evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe("0px");
     expect(errors).toEqual([]);
