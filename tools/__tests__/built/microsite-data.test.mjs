@@ -67,7 +67,7 @@ describe("Reference: rules and Adaptive Cards", () => {
   test("every rule in the catalogue, with its checks and sources", () => {
     const rules = JSON.parse(read("packages/ui/catalogue.json")).interaction.rules;
     assert.equal(d.rules.length, rules.length);
-    assert.equal(d.rules.length, 84);
+    assert.equal(d.rules.length, 99);
     for (const r of d.rules) { assert.ok(r.checks.length, r.id); assert.ok(r.sources.length, r.id); }
   });
   test("the contract's element mapping covers every element and action the renderer draws", () => {
