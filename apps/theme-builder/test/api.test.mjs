@@ -267,4 +267,76 @@ describe("save (US-019)", async () => {
     assert.match(readFileSync(ghLog, "utf8"), /pr create --head theme\/acme --base main --title Add the acme theme/, "reviewed against the branch it was made from");
     assert.ok(!existsSync(join(d, "tokens/themes/acme.theme.json")), "the files live on the theme branch, not the starting one");
   });
+  /* A clone like another person's: committed, with an origin it may or may not push to. */
+  const clone = (n, { readOnly = false } = {}) => {
+    const d = repo(n), remote = join(tmp, `${n}-origin.git`);
+    const git = (...a) => execFileSync("git", a, { cwd: d, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+    execFileSync("git", ["init", "-q", "--bare", remote]);
+    git("init", "-q", "-b", "main"); git("config", "user.email", "t@example.com"); git("config", "user.name", "Test");
+    git("add", "."); git("commit", "-q", "-m", "base"); git("remote", "add", "origin", remote); git("push", "-q", "-u", "origin", "main");
+    // Refuse every push to origin, as GitHub does for someone who is not a collaborator.
+    if (readOnly) { writeFileSync(join(remote, "hooks/pre-receive"), "#!/bin/sh\necho 'Permission to DocumentDrivenDX/ux-builder.git denied to contributor.' >&2\nexit 1\n"); chmodSync(join(remote, "hooks/pre-receive"), 0o755); }
+    return { d, git, remote };
+  };
+  const fakeGh = (n, script) => { const gh = join(tmp, `${n}-gh`); writeFileSync(gh, `#!/bin/sh\necho "$@" >> ${join(tmp, `${n}-gh.log`)}\n${script}\n`); chmodSync(gh, 0o755); return { gh, log: () => readFileSync(join(tmp, `${n}-gh.log`), "utf8") }; };
+
+  // @covers US-019-AC8
+  test("AC8: no write access to origin: the branch goes to the person's fork and the pull request to the original repository", () => {
+    const { d, git } = clone("fork", { readOnly: true });
+    const fork = join(tmp, "fork-fork.git");
+    execFileSync("git", ["init", "-q", "--bare", fork]);
+    const { gh, log } = fakeGh("fork", `case "$1 $2" in
+  "repo view") echo DocumentDrivenDX/ux-builder ;;
+  "repo fork") git remote add fork ${fork} ;;
+  "api user") echo contributor ;;
+  "pr create") echo https://example.invalid/pull/8 ;;
+esac`);
+    const r = save({ body: body({ name: "forked" }), root: d, designSystems: DS, review: "pr", gh });
+    assert.equal(r.pr, "https://example.invalid/pull/8");
+    assert.equal(r.pushed, "fork");
+    assert.ok(execFileSync("git", ["--git-dir", fork, "branch", "--list", "theme/forked"], { encoding: "utf8" }).includes("theme/forked"), "pushed to the fork");
+    assert.match(log(), /pr create --repo DocumentDrivenDX\/ux-builder --head contributor:theme\/forked --base main/);
+    assert.equal(git("rev-parse", "--abbrev-ref", "HEAD"), "main");
+  });
+
+  // @covers US-019-AC8
+  test("AC8: no write access and no usable gh: saved on a local branch, with how to share it, not an error", () => {
+    const { d, git } = clone("local", { readOnly: true });
+    const { gh } = fakeGh("local", 'echo "To get started with GitHub CLI, please run:  gh auth login" >&2; exit 4');
+    const r = save({ body: body({ name: "local" }), root: d, designSystems: DS, review: "pr", gh });
+    assert.equal(r.pr, null);
+    assert.equal(r.branch, "theme/local");
+    assert.match(r.note, /saved on the branch theme\/local in this clone/);
+    assert.match(r.note, /Permission to DocumentDrivenDX\/ux-builder.git denied/, "says why the push failed");
+    assert.match(r.note, /gh auth login/);
+    assert.ok(git("show", "--name-only", "--format=", "theme/local").includes("tokens/themes/local.theme.json"), "committed on its branch");
+    assert.equal(git("rev-parse", "--abbrev-ref", "HEAD"), "main");
+  });
+
+  // @covers US-019-AC9
+  test("AC9: no git identity: refused before anything changes, in plain words", () => {
+    const { d, git } = clone("noident");
+    git("config", "--unset", "user.name"); git("config", "--unset", "user.email"); git("config", "user.useConfigOnly", "true");
+    const env = { GIT_CONFIG_GLOBAL: process.env.GIT_CONFIG_GLOBAL, GIT_CONFIG_NOSYSTEM: process.env.GIT_CONFIG_NOSYSTEM };
+    Object.assign(process.env, { GIT_CONFIG_GLOBAL: "/dev/null", GIT_CONFIG_NOSYSTEM: "1" });
+    try {
+      assert.throws(() => save({ body: body({ name: "noident" }), root: d, designSystems: DS, review: "pr", gh: "false" }), (e) => e.status === 400 && /git config --global user.name/.test(e.message));
+    } finally { for (const [k, v] of Object.entries(env)) if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+    assert.equal(git("branch", "--list", "theme/*"), "");
+    assert.equal(git("status", "--porcelain"), "", "nothing written");
+  });
+
+  // @covers US-019-AC9
+  test("AC9: a commit that fails leaves no branch or files behind, and the same name saves on the next try", () => {
+    const { d, git } = clone("retry");
+    const hook = join(d, ".git/hooks/pre-commit");
+    writeFileSync(hook, "#!/bin/sh\necho 'pre-commit: blocked for the test' >&2\nexit 1\n"); chmodSync(hook, 0o755);
+    const { gh } = fakeGh("retry", "echo https://example.invalid/pull/9");
+    assert.throws(() => save({ body: body({ name: "retry" }), root: d, designSystems: DS, review: "pr", gh }), (e) => e.status === 500 && /could not be committed: pre-commit: blocked for the test/.test(e.message));
+    assert.equal(git("rev-parse", "--abbrev-ref", "HEAD"), "main");
+    assert.equal(git("branch", "--list", "theme/*"), "", "no theme branch left");
+    assert.equal(git("status", "--porcelain"), "", "no files left");
+    rmSync(hook);
+    assert.equal(save({ body: body({ name: "retry" }), root: d, designSystems: DS, review: "pr", gh }).pr, "https://example.invalid/pull/9");
+  });
 });

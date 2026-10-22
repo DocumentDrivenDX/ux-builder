@@ -47,8 +47,8 @@ test.describe("A theme's page", () => {
     await expect(nav.getByRole("link", { name: "Logos and palette" })).toBeVisible();
     const links = await nav.getByRole("link").allTextContents();
     const ai = JSON.parse(readFileSync(join(REPO, "packages/ui/ai/vendor/components.json"), "utf8")).components;
-    expect(links).toEqual(["Logos and palette", "Light", "Dark", "Auto", "Generative UI bridges", ...names("widgets"), "About these", ...ai.map((c) => `${c.name}, ${c.library}`), ...names("patterns"), "Conversation", ...names("assistant").filter((n) => n !== "Conversation")]);
-    await expect(nav.locator(".tp-nav__group")).toHaveText(["Brand", "CSS", "UI Components", "AI Components", "Screen patterns", "Assistant"]);
+    expect(links).toEqual(["Logos and palette", "Light", "Dark", "Auto", "Generative UI bridges", ...names("widgets"), "About these", ...ai.map((c) => `${c.name}, ${c.library}`), ...names("patterns"), "Conversation", ...names("assistant").filter((n) => n !== "Conversation"), ...names("adaptiveCards")]);
+    await expect(nav.locator(".tp-nav__group")).toHaveText(["Brand", "CSS", "UI Components", "AI Components", "Screen patterns", "Assistant", "Adaptive Cards"]);
 
     await nav.getByRole("link", { name: "Dark", exact: true }).click();
     await expect(page).toHaveURL(/#css-dark$/);
@@ -96,7 +96,7 @@ test.describe("A theme's page", () => {
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/?theme=praxis-carbon");
     await page.getByRole("radiogroup", { name: "Theme appearance" }).getByRole("radio", { name: "Light" }).click();
-    for (const [kind, list] of [["widget", names("widgets")], ["pattern", names("patterns")]]) {
+    for (const [kind, list] of [["widget", names("widgets")], ["pattern", names("patterns")], ["adaptive-card", names("adaptiveCards")]]) {
       for (const name of list) {
         const entry = page.locator(`#${kind}-${name}`);
         await expect(entry.locator(".tp-sample"), `${name} has a sample`).toHaveCount(1);
@@ -107,6 +107,9 @@ test.describe("A theme's page", () => {
     }
     // Its own story first: Button's sample is the Button story, not one that merely contains a button.
     expect(await page.locator("#widget-Button .tp-sample").getAttribute("data-story")).toMatch(/^ui-components-button--/);
+    // The Adaptive Card's sample is its first story: the invoice card with its actions.
+    expect(await page.locator("#adaptive-card-AdaptiveCard .tp-sample").getAttribute("data-story")).toBe("patterns-adaptive-cards--pay-invoice");
+    await expect(page.locator("#adaptive-card-AdaptiveCard .tp-sample").getByRole("button", { name: "Pay invoice" })).toBeVisible();
     // The samples wear the theme: Carbon's square buttons.
     expect(await page.locator("#widget-Button .piq-btn").first().evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe("0px");
     expect(errors).toEqual([]);

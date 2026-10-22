@@ -9,7 +9,7 @@
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { ENGINE_VERSION } from "../../../packages/engine/src/index.js";
@@ -116,11 +116,19 @@ function validate(root, files) {
   finally { rmSync(d, { recursive: true, force: true }); }
 }
 
-const git = (root, ...args) => execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+/* A command's failure, in plain words: its last line of stderr, without
+   execFileSync's "Command failed" preamble: the line that says why, when
+   there is one (a push's "Permission … denied", not "failed to push"). Its exit code is not an HTTP
+   status, so it never travels as one (US-019-AC9). */
+const WHY = /denied|permission|authenticat|not logged in|could not read|not found|rejected|blocked|identity/i;
+const said = (e) => {
+  const lines = String(e.stderr || e.stdout || e.message || e).trim().split("\n").map((l) => l.replace(/^(remote|error|fatal|ERROR):\s*/, "").trim()).filter(Boolean);
+  return lines.find((l) => WHY.test(l)) ?? lines.pop() ?? String(e);
+};
+const run = (cmd, root, args) => execFileSync(cmd, args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+const git = (root, ...args) => run("git", root, args);
+const tryRun = (f) => { try { return { ok: true, out: f() }; } catch (e) { return { ok: false, why: said(e) }; } };
 
-/* A new theme changes @ux-builder/ui's generated catalogue and agent guidance
-   (they list every theme), and npm run check fails if they are stale, so a
-   save regenerates them in the same change. Returns the files it changed. */
 export const GENERATED = ["packages/ui/catalogue.json", "packages/ui/AGENTS.md", "packages/ui/skill/ux-builder-ui/SKILL.md"];
 function regenerate(root) {
   const script = join(root, "tools/gen-catalogue.mjs");
@@ -142,23 +150,60 @@ export function save({ body, root, designSystems, review = "pr", gh = "gh" }) {
     return { files: [...Object.keys(files), ...regenerate(root)], branch: null, pr: null };
   }
 
+  // Before anything changes: a commit needs a name and an email (US-019-AC9).
+  if (!tryRun(() => git(root, "var", "GIT_AUTHOR_IDENT")).ok) fail(400, 'git does not know who you are, so the theme cannot be committed. Run: git config --global user.name "Your Name" && git config --global user.email you@example.com');
   const back = git(root, "rev-parse", "--abbrev-ref", "HEAD");
   const branch = `theme/${name}`;
+  if (tryRun(() => git(root, "rev-parse", "--verify", "--quiet", `refs/heads/${branch}`)).ok) fail(409, `there is already a branch ${branch} in this clone; delete it (git branch -D ${branch}) or choose another name`);
   const flagged = (body.option.moves ?? []).filter((m) => m.flagged);
+  const brandName = brandNameFor(name, body.designSystem);
+  const title = `Add the ${name} theme`;
+  const prBody = `Made in the theme builder (FEAT-003).\n\n- Brand: \`tokens/brands/${brandName}.brand.json\` (strategy ${body.option.brand.generation.strategy}, engine ${body.option.brand.generation.engine})\n- Theme: \`tokens/themes/${name}.theme.json\` on **${body.designSystem}**${body.default ? `, ${body.default} by default` : ""}\n- Logo: \`brand/${brandName}/\`\n\n${flagged.length ? `Colours moved far for contrast, worth a look:\n${flagged.map((m) => `- ${m.appearance} ${m.role}: ${m.from} → ${m.to} (ΔL ${m.deltaL})`).join("\n")}\n\n` : ""}Preview: \`npm run gallery\` (the theme is in it), or the gallery artifact from CI. Regenerate: \`npm run brand -- --regenerate tokens/brands/${brandName}.brand.json\`.`;
+  let generated = [];
+  let keep = false; // the commit stays on its branch (saved locally) instead of being undone
   git(root, "switch", "-c", branch);
   try {
     for (const [p, c] of Object.entries(files)) { mkdirSync(join(root, p, ".."), { recursive: true }); writeFileSync(join(root, p), c); }
-    const generated = regenerate(root);
+    generated = regenerate(root);
     git(root, "add", "--", ...Object.keys(files), ...generated);
-    git(root, "commit", "-m", `Add the ${name} theme from the theme builder\n\nThe ${brandNameFor(name, body.designSystem)} brand (strategy ${body.option.brand.generation.strategy}) on the ${body.designSystem} design system.`);
-    git(root, "push", "-u", "origin", branch);
+    const committed = tryRun(() => git(root, "commit", "-m", `${title} from the theme builder\n\nThe ${brandName} brand (strategy ${body.option.brand.generation.strategy}) on the ${body.designSystem} design system.`));
+    if (!committed.ok) fail(500, `the theme could not be committed: ${committed.why}`);
+    keep = true; // from here the commit is the person's work, whatever happens to the push
+    const all = [...Object.keys(files), ...generated];
     // Review against the branch the theme was made from, so the pull request shows only the theme.
-    const onRemote = (() => { try { return git(root, "ls-remote", "--heads", "origin", back) !== ""; } catch { return false; } })();
-    const pr = execFileSync(gh, ["pr", "create", "--head", branch, ...(onRemote ? ["--base", back] : []), "--title", `Add the ${name} theme`, "--body",
-      `Made in the theme builder (FEAT-003).\n\n- Brand: \`tokens/brands/${brandNameFor(name, body.designSystem)}.brand.json\` (strategy ${body.option.brand.generation.strategy}, engine ${body.option.brand.generation.engine})\n- Theme: \`tokens/themes/${name}.theme.json\` on **${body.designSystem}**${body.default ? `, ${body.default} by default` : ""}\n- Logo: \`brand/${brandNameFor(name, body.designSystem)}/\`\n\n${flagged.length ? `Colours moved far for contrast, worth a look:\n${flagged.map((m) => `- ${m.appearance} ${m.role}: ${m.from} → ${m.to} (ΔL ${m.deltaL})`).join("\n")}\n\n` : ""}Preview: \`npm run gallery\` (the theme is in it), or the gallery artifact from CI. Regenerate: \`npm run brand -- --regenerate tokens/brands/${brandNameFor(name, body.designSystem)}.brand.json\`.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)`],
-      { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
-    return { files: [...Object.keys(files), ...generated], branch, pr };
+    const onRemote = tryRun(() => git(root, "ls-remote", "--heads", "origin", back)).out;
+    const base = onRemote ? ["--base", back] : [];
+    // 1. Push to origin, when this clone may (a collaborator's clone).
+    const pushed = tryRun(() => git(root, "push", "-u", "origin", branch));
+    if (pushed.ok) {
+      const pr = tryRun(() => run(gh, root, ["pr", "create", "--head", branch, ...base, "--title", title, "--body", prBody]));
+      if (pr.ok) return { files: all, branch, pr: pr.out };
+      return { files: all, branch, pr: null, pushed: "origin", note: `pushed ${branch}, but the pull request could not be opened (${pr.why}); open it on GitHub from that branch` };
+    }
+    // 2. No write access (US-019-AC8): push to the person's fork and open the pull request from it.
+    const steps = [];
+    const step = (f) => { const r = steps.every((x) => x.ok) ? tryRun(f) : { ok: false }; steps.push(r); return r; };
+    const upstream = step(() => run(gh, root, ["repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"]));
+    step(() => run(gh, root, ["repo", "fork", "--remote", "--remote-name", "fork"]));
+    const login = step(() => run(gh, root, ["api", "user", "-q", ".login"]));
+    const toFork = step(() => git(root, "push", "-u", "fork", branch));
+    if (toFork.ok) {
+      const pr = tryRun(() => run(gh, root, ["pr", "create", "--repo", upstream.out, "--head", `${login.out}:${branch}`, ...base, "--title", title, "--body", prBody]));
+      if (pr.ok) return { files: all, branch, pr: pr.out, pushed: "fork" };
+      return { files: all, branch, pr: null, pushed: "fork", note: `pushed ${branch} to your fork, but the pull request could not be opened (${pr.why}); open it on GitHub from your fork` };
+    }
+    // 3. Nowhere to push: the theme is committed in this clone (saved locally), with the next steps.
+    const why = steps.find((x) => !x.ok)?.why;
+    return { files: all, branch, pr: null, pushed: null, note: `saved on the branch ${branch} in this clone; it could not be pushed (${pushed.why}) or sent to a fork (${why}). To share it: gh auth login, then gh repo fork --remote --remote-name fork, git push -u fork ${branch}, and gh pr create` };
   } finally {
+    // A save that failed before its commit leaves nothing behind, so it can be tried again (US-019-AC9).
+    if (!keep) {
+      tryRun(() => git(root, "reset", "-q"));
+      if (generated.length) tryRun(() => git(root, "checkout", "--", ...generated));
+      for (const p of Object.keys(files)) rmSync(join(root, p), { force: true });
+      try { rmdirSync(join(root, "brand", brandName)); } catch { /* not ours, or not empty */ }
+    }
     try { git(root, "switch", back); } catch { /* left on the theme branch; the response still reports it */ }
+    if (!keep) tryRun(() => git(root, "branch", "-D", branch));
   }
 }

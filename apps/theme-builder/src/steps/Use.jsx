@@ -88,7 +88,7 @@ export function Use({ saved, option, ds, brandTitle }) {
   const agentPrompt = lib ? `${agent}\nAssistant: run ${lib.add}, import @ux-builder/tokens/bridges/shadcn/${t}.css after the theme, and connect it through the AI SDK; send no telemetry.` : agent;
   return (
     <section className="tb-col tb-gap">
-      <p className="tb-status" role="status">Theme <b>{t}</b> saved{saved.pr ? <> and opened for review: <a href={saved.pr}>{saved.pr}</a></> : <> to {saved.files.join(", ")}; commit them and open a pull request</>}. Follow the steps below to use it in your app.</p>
+      <p className="tb-status" role="status">Theme <b>{t}</b> saved{saved.pr ? <> and opened for review: <a href={saved.pr}>{saved.pr}</a></> : saved.branch ? <> {saved.note ?? `on the branch ${saved.branch}`}</> : <> to {saved.files.join(", ")}; commit them and open a pull request</>}. Follow the steps below to use it in your app.</p>
       <div className="tb-col"><h1>Use {t} in your app</h1><p className="tb-lede">{tasks.length === 8 ? "Eight" : "Nine"} tasks, about {tasks.length === 8 ? 15 : 25} minutes. Tick them off as you go; the code below is filled in for this theme and your framework.</p></div>
       <div className="tb-use">
         <div className="tb-col">
