@@ -44,9 +44,10 @@ jobs:
     # Only main is released, also when the workflow is run by hand from another branch.
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # A healthy run takes about 20 minutes; a hung runner fails instead of holding
-    # the release for GitHub's 6-hour default.
-    timeout-minutes: 45
+    # A healthy run takes about 20 minutes, and one whose package mirror is slow
+    # (44.8 kB/s on 2026-10-22) about an hour; a hung runner fails at 90 instead of
+    # holding the release for GitHub's 6-hour default.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,13 +62,13 @@ jobs:
       - run: npm ci
       # Chromium for the browser tests inside npm run check.
       - run: npx playwright install --with-deps chromium
-        timeout-minutes: 10
+        timeout-minutes: 30
       # ffmpeg for the walkthrough video MP4 tests (FEAT-013; the SDK does not ship it).
       # Retried once: a runner's package mirror sometimes stalls (2026-10-22).
       - run: |
           install() { sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg; }
-          timeout 240 bash -c "$(declare -f install); install" || { sleep 10; timeout 240 bash -c "$(declare -f install); install"; }
-        timeout-minutes: 10
+          timeout 900 bash -c "$(declare -f install); install" || { sleep 10; timeout 900 bash -c "$(declare -f install); install"; }
+        timeout-minutes: 31
       # 1. Apply the pending changesets, if any, and commit the bump (not pushed yet).
       - id: version
         run: |

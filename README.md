@@ -510,7 +510,7 @@ push to `main`:
    GitHub release.
 
 So merging a pull request with a changeset releases it; there is no second
-pull request to merge (ADR-034). If a run fails or times out (45 minutes),
+pull request to merge (ADR-034). If a run fails or times out (90 minutes),
 start it again from Actions → release → **Run workflow**: it publishes every
 version on `main` that isn't on npm yet.
 

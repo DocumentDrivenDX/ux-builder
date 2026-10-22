@@ -63,13 +63,16 @@ the release cannot trigger itself.
 
 ## Amendment *[2026-10-22 — the first run hung]*
 
-The first run under this decision got a runner whose package mirror stalled:
-10 minutes for Chromium and 19 minutes in `apt-get` before it was cancelled.
+The first run under this decision got a runner whose Ubuntu package mirror
+(`azure.archive.ubuntu.com`) served 44.8 kB/s: 10 minutes for Chromium's
+system packages and 19 minutes in the ffmpeg `apt-get` before it was
+cancelled. The re-run was as slow.
 GitHub then left the run "in progress" while refusing to cancel or re-run it.
 Nothing was pushed or published. So that a stuck runner can neither hold a
 release for GitHub's 6-hour default nor block the next run:
-- the job has a 45-minute limit and the installs 10 minutes each, and the
-  ffmpeg install is retried once;
+- the job has a 90-minute limit and each install 30 minutes (15 per ffmpeg
+  try, retried once). Those bound a hang without failing a run that is
+  only slow;
 - the workflow can be run by hand (`workflow_dispatch`, main only), so a
   release restarts without a push;
 - the concurrency group is `release-main`, because the hung run held `release`.
