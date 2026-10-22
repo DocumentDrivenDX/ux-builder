@@ -65,6 +65,9 @@ kind: product
 > P2-4. Evolved 2026-10-21 with ADR-032, ADR-033, FEAT-014 and FEAT-015 (the
 > operator's review of a new app and its audit): the "App modalities" subsystem
 > (FR-60 to FR-63), FR-64 to FR-66 under UX assessment, and P1-10.
+> Evolved 2026-10-22 with ADR-035 and FEAT-016 (the operator: the full train of
+> thought from the app back to ux-builder, so we can learn from it and
+> optimize): the "Learning from builds" subsystem (FR-67 to FR-72) and P1-11.
 
 ## Summary
 
@@ -249,6 +252,18 @@ rules, so it invents colours and components.
       HELIX's UX artifacts.
 
     (FR-60 to FR-66, FEAT-014, FEAT-015, ADR-032, ADR-033.)
+11. Learning from builds (operator, 2026-10-22: "having the full train of
+    thought from the app back to the ux-builder ... we can learn from it and
+    optimize"):
+    - Creating an app, or changing an app's UI or UX, leaves a full trail
+      committed in the app: the goal, what ux-builder told the agent, every
+      check and how many tries it took, the agent's decisions and its full
+      transcript, the change and the outcome.
+    - An owner exports it by choice, and ux-builder learns from the
+      exports of every app (its own, Synaptiq's and clients') to improve
+      its guidance, rules, components, checks and starter.
+
+    (FR-67 to FR-72, FEAT-016, ADR-035.)
 
 ### Nice to Have (P2)
 
@@ -548,6 +563,33 @@ rules, so it invents colours and components.
 
   They are drafted as HELIX's own types once HELIX defines them, and from
   ux-builder's drafts until then (ADR-033). *(Added 2026-10-21.)*
+
+### Subsystem: Learning from builds
+
+- **FR-67** — Every app creation and every change to an app's UI or UX is an
+  **episode**, with an ID, its goal (the HELIX stories, blueprint screens or
+  journeys it serves), its trigger, and the agent and model doing it. The
+  commits it makes name it. *(Added 2026-10-22.)*
+- **FR-68** — ux-builder's tools record each episode as a trace committed in
+  the app: the creation options; every guidance, rule and component answer
+  the MCP server gives; every lint, blueprint, card and audit check, failures
+  included; the change; and the outcome. *(Added 2026-10-22.)*
+- **FR-69** — The agent records its decisions in the trace: what it chose,
+  what else it considered, why, and the rule or story it relied on,
+  including where it departed from guidance or worked around a missing
+  component. *(Added 2026-10-22.)*
+- **FR-70** — The agent's full transcript is kept with its episode, with
+  secrets masked. *(Added 2026-10-22.)*
+- **FR-71** — An owner exports episodes as a bundle: redacted, checked
+  against its schema and shown before it is written. ux-builder sends
+  nothing itself (ADR-023 rule 8). *(Added 2026-10-22.)*
+- **FR-72** — ux-builder learns from exported bundles from any app, its own,
+  Synaptiq's and clients'. The bundles are kept in a private learning store,
+  never in this repository. Its learning report shows where the guidance,
+  rules, components, checks and starter fall short. That becomes beads and
+  proposals, and episodes replay as evaluation tasks. Only aggregated
+  results with no client content enter this repository. *(Added
+  2026-10-22.)*
 
 ## Acceptance Test Sketches
 
