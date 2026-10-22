@@ -29,6 +29,7 @@
     "coverage": "node tools/check-coverage.mjs",
     "rules": "node tools/check-rules.mjs",
     "licences": "node tools/check-licences.mjs",
+    "learn": "node tools/learn.mjs",
     "test:built": "node --test 'tools/__tests__/built/*.test.mjs'"
   },
   "engines": {
