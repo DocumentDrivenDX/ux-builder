@@ -36,8 +36,8 @@ before(async () => {
 after(() => { server?.close(); rmSync(out, { recursive: true, force: true }); });
 
 // As patterns.test.mjs: no error, and none of the layout checks (reflow, targets, focus).
-const problems = (r) => r.findings.filter((f) => f.severity === "error" || ["reflow", "target-size", "focus-obscured", "one-primary-action", "nav-per-breakpoint", "modal-contract", "one-modal"].includes(f.rule));
-const show = (fs) => JSON.stringify(fs.map((f) => `${f.rule} ${f.selector ?? ""} ${f.message} [${f.runs.join(" ")}]`), null, 1);
+const problems = (r) => r.findings.filter((f) => f.severity === "error" || ["reflow", "target-size", "focus-obscured", "one-primary-action", "nav-per-breakpoint", "modal-contract", "one-modal"].includes(f.check));
+const show = (fs) => JSON.stringify(fs.map((f) => `${f.check} ${f.selector ?? ""} ${f.message} [${f.runs.join(" ")}]`), null, 1);
 
 describe("US-090-AC3: a wireframe passes its pattern's audit checks", () => {
   // @covers US-090-AC3

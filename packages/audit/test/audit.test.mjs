@@ -85,7 +85,7 @@ before(async () => {
 });
 after(() => { server?.close(); rmSync(tmp, { recursive: true, force: true }); });
 
-const of = (r, rule, where) => r.findings.filter((f) => f.rule === rule && (!where || (f.selector ?? f.rule_selector ?? "").includes(where) || f.message.includes(where)));
+const of = (r, rule, where) => r.findings.filter((f) => f.check === rule && (!where || (f.selector ?? f.rule_selector ?? "").includes(where) || f.message.includes(where)));
 
 describe("US-022 @ux-builder/audit", () => {
   let dirty;
@@ -182,7 +182,7 @@ describe("US-022 @ux-builder/audit", () => {
   test("the favicon is checked on the provider's element, not a data-theme on <html>, and an inlined data: URI is read whole", async () => {
     const r = await audit({ urls: [`${base}/inlined.html`], themes: THEMES });
     assert.equal(r.runs.length, 4);
-    assert.deepEqual(r.findings.filter((f) => f.rule === "brand" && /favicon/.test(f.message)), []);
+    assert.deepEqual(r.findings.filter((f) => f.check === "brand" && /favicon/.test(f.message)), []);
   });
 
   test("an app that does not answer the switch is switched by attribute, and says so", async () => {

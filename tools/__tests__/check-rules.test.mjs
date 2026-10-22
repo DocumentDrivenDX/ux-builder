@@ -103,3 +103,29 @@ describe("US-050-AC6: a quoted source is credited in the shipped notices", () =>
     assert.deepEqual(checkRules({ ...sources(), notices: "" }, k), [], "no rule quotes today, so empty notices pass");
   });
 });
+
+describe("US-101: every audit check is a catalogue rule's (FEAT-015 RPT-02)", () => {
+  const THEME_CHECKS = ["theme-applied", "token-colors", "token-fonts", "token-radii", "token-overrides", "widget-overrides", "sdk-widgets", "foreign-components", "outside-theme", "brand", "fonts", "contrast", "reflow", "target-size", "focus-obscured"];
+
+  // @covers US-101-AC1
+  test("AC1: each theme and design-system check has a theme.* rule with a statement, rationale and sources", () => {
+    const rules = read("guidelines/rules.json").rules;
+    for (const c of THEME_CHECKS) {
+      const r = rules.find((x) => x.id.startsWith("theme.") && x.checks.some((y) => y.kind === "audit" && y.id === c));
+      assert.ok(r, `a theme.* rule names ${c}`);
+      assert.ok(r.statement.length > 20 && r.rationale.length > 20, r.id);
+      assert.ok(r.sources.length && r.sources.every((s) => s.title && s.url), r.id);
+    }
+    const contrast = rules.find((x) => x.id === "theme.contrast");
+    assert.deepEqual(contrast.sources.map((s) => s.url).sort(), ["https://www.w3.org/TR/WCAG22/#contrast-minimum", "https://www.w3.org/TR/WCAG22/#non-text-contrast"]);
+  });
+
+  // @covers US-101-AC3
+  test("AC3: the check fails an audit check that no rule names, naming the check", () => {
+    const s = sources();
+    s.rules.rules = s.rules.rules.map((r) => ({ ...r, checks: r.checks.filter((c) => !(c.kind === "audit" && c.id === "token-radii")) }));
+    const problems = checkRules(s, k);
+    assert.deepEqual(problems.filter((p) => p.startsWith("audit check")), ['audit check token-radii: no rule names it (checks: [{ kind: "audit", id: "token-radii" }]); its findings would have no rule ID, statement or sources']);
+    assert.deepEqual(checkRules(sources(), k), [], "every shipped check is named");
+  });
+});

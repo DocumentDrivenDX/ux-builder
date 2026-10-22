@@ -131,8 +131,8 @@ describe("US-062: inspect() checks the state just reached", () => {
       await p.goto(url, { waitUntil: "networkidle" });
       await p.addStyleTag({ content: "*, *::before, *::after { transition: none !important; }" });
       const i = await inspect(p, { cwd: PKG, rules: { brand: false }, contrast: true, stateAffecting: true });
-      const key = (f) => [f.rule, f.selector ?? "", f.rule_selector ?? "", f.property ?? "", f.value ?? ""].join("|");
-      const fromAudit = r.findings.filter((f) => f.rule !== "theme-applied" && f.rule !== "fonts").map(key).sort();
+      const key = (f) => [f.check ?? f.rule, f.selector ?? "", f.rule_selector ?? "", f.property ?? "", f.value ?? ""].join("|");
+      const fromAudit = r.findings.filter((f) => f.check !== "theme-applied" && f.check !== "fonts").map(key).sort();
       const fromInspect = [...new Set(i.findings.map(key))].sort();
       assert.ok(fromAudit.length >= 3, JSON.stringify(fromAudit));
       assert.deepEqual(fromInspect, fromAudit);

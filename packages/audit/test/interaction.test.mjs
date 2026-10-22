@@ -69,7 +69,7 @@ const cliRun = (args) => new Promise((resolve) => {
 });
 const OPTS = { themes: ["praxis-carbon"], appearances: ["light"], contrast: false, rules: { brand: false } };
 const run = (paths, more = {}) => audit({ urls: paths.map((p) => `${base}${p}`), ...OPTS, ...more });
-const of = (r, rule, path) => r.findings.filter((f) => f.rule === rule && (!path || f.url.endsWith(path)));
+const of = (r, rule, path) => r.findings.filter((f) => f.check === rule && (!path || f.url.endsWith(path)));
 
 describe("US-054: the audit checks structure and interaction", () => {
   // @covers US-054-AC1
@@ -124,7 +124,7 @@ describe("US-054: the audit checks structure and interaction", () => {
   // @covers US-054-AC6
   test("AC6: findings carry their rule and sources, the HTML links them, and they are warnings that exit 0", async () => {
     const r = await run(["/two-modals.html", "/primary.html"]);
-    const ours = r.findings.filter((f) => ["one-modal", "modal-contract", "one-primary-action", "nav-per-breakpoint", "line-length"].includes(f.rule));
+    const ours = r.findings.filter((f) => ["one-modal", "modal-contract", "one-primary-action", "nav-per-breakpoint", "line-length"].includes(f.check));
     assert.ok(ours.length >= 3);
     for (const f of ours) {
       assert.equal(f.severity, "warning");
@@ -137,7 +137,7 @@ describe("US-054: the audit checks structure and interaction", () => {
     const cli = await cliRun(["--theme", "praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--out", out, `${base}/primary.html`]);
     assert.equal(cli.status, 0, cli.stderr + cli.stdout);
     const json = JSON.parse(readFileSync(join(out, "report.json"), "utf8"));
-    assert.ok(json.findings.some((f) => f.rule === "one-primary-action" && f.ruleId === "emphasis.one-primary" && f.sources.length));
+    assert.ok(json.findings.some((f) => f.check === "one-primary-action" && f.ruleId === "emphasis.one-primary" && f.sources.length));
   });
 });
 
