@@ -81,3 +81,27 @@ export function storybookUrl(base, id, theme, appearance) {
   const g = theme ? `&globals=theme:${theme}-${appearance}` : "";
   return `${base.replace(/\/$/, "")}/?path=/story/${id}${g}`;
 }
+
+/* Where each story sits on the page, so every story Storybook has is on it once:
+   names are the page's entries. A story goes to the entry it is the first
+   sample of, else its file's component, else the first entry it renders
+   itself, else the first it renders at all. Returns { byEntry: Map(name →
+   stories, its first sample first), rest: stories no entry renders }. */
+export function placeStories({ stories, byComponent }, names) {
+  const byEntry = new Map(names.map((n) => [n, []]));
+  const firstOf = new Map();
+  for (const n of names) { const f = byComponent.get(n)?.[0]; if (f && !firstOf.has(f)) firstOf.set(f, n); }
+  const rest = [];
+  for (const s of stories) {
+    const metaName = s.meta.component?.displayName ?? s.meta.component?.name;
+    const home = firstOf.get(s) ?? (byEntry.has(metaName) ? metaName : undefined)
+      ?? [...s.direct].find((c) => byEntry.has(c)) ?? [...s.uses].find((c) => byEntry.has(c));
+    if (home) byEntry.get(home).push(s); else rest.push(s);
+  }
+  // An entry's first sample leads, even when another entry is its home too.
+  for (const [n, list] of byEntry) {
+    const f = byComponent.get(n)?.[0];
+    if (f) byEntry.set(n, [f, ...list.filter((s) => s !== f)]);
+  }
+  return { byEntry, rest };
+}
