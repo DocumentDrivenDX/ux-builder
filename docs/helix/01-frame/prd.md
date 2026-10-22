@@ -60,6 +60,9 @@ kind: product
 > Evolved 2026-10-21 with ADR-030 and FEAT-012 (screen flows and user journeys
 > in the blueprint): FR-53 to FR-56 under Interaction and information
 > architecture, and P2-3.
+> Evolved 2026-10-21 with ADR-031 and FEAT-013 (annotated journey walkthrough
+> videos, at the operator's request): FR-57 to FR-59 under UX assessment, and
+> P2-4.
 
 ## Summary
 
@@ -238,6 +241,12 @@ rules, so it invents colours and components.
    draft HELIX content and draw flows and wireframes (operator, 2026-10-21;
    FR-53 to FR-56, FEAT-012). The flow and journey fields and their checks
    come first; drafting and drawing follow.
+4. An annotated MP4 per journey from each UX assessment, and an
+   interactive HTML player of the same journeys with the findings as
+   pop-ups, for the product or technical leader who owns the app: the
+   walked journeys replayed, with each finding's problem and recommendation
+   in plain English where a user meets it (operator, 2026-10-21; FR-57 to
+   FR-59, FEAT-013, ADR-031).
 
 ## Functional Requirements
 
@@ -461,6 +470,20 @@ rules, so it invents colours and components.
   with earlier runs; assessments stay within local or staging environments,
   allowed origins and actions, and keep secrets out of what they write.
   *(Added 2026-10-20.)*
+- **FR-57** — The assessment records each walked journey as replayable
+  steps and replays the journeys and their alternates, signed in as each
+  journey's role, at a human pace, into one video per journey
+  (ADR-031). *(Added 2026-10-21.)*
+- **FR-58** — The video shows each merged finding at the checkpoint where it
+  was found: the elements involved outlined, and the problem and
+  recommendation in plain English, labelled as checked or as judgment. It
+  shows no finding on a state the replay did not reach, and links to and
+  from the report. The same annotations come as an MP4 to share and as an
+  interactive HTML player whose pop-ups expand for evidence.
+  *(Added 2026-10-21.)*
+- **FR-59** — Videos mask what the manifest says to redact from the first
+  frame, never show sign-in or secret values, and are written only in the
+  run package. *(Added 2026-10-21.)*
 
 ## Acceptance Test Sketches
 

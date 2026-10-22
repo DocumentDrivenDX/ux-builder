@@ -6,6 +6,7 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { assessCommands } from "../../microsite-data.mjs";
 import { REPO, watch } from "../helpers.mjs";
 
 const read = (p) => readFileSync(join(REPO, p), "utf8");
@@ -31,7 +32,7 @@ test.describe("The site's Reference and Proof pages", () => {
     for (const t of tools) await expect(page.getByRole("table", { name: "ux-builder-mcp tools" }).getByText(t, { exact: true })).toBeVisible();
     for (const o of ["--blueprint <file>", "--helix-offline", "--no-helix"]) await expect(page.getByRole("table", { name: "create-app options" }).getByText(o, { exact: true })).toBeVisible();
     await expect(page.getByRole("table", { name: "ux-builder-audit options" }).getByText("--write-baseline <f>", { exact: true })).toBeVisible();
-    await expect(page.getByRole("table", { name: "assess subcommands" }).locator("tbody tr")).toHaveCount(16);
+    await expect(page.getByRole("table", { name: "assess subcommands" }).locator("tbody tr")).toHaveCount(assessCommands().commands.length);
     await expect(page.getByRole("table", { name: "ux-builder-blueprint commands" }).locator("tbody tr")).toHaveCount(5);
     expect(errors).toEqual([]);
   });

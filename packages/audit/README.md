@@ -150,6 +150,7 @@ code or its HELIX documents.
 | `assess check-writes`, `assess apply-check P-<n>` | Nothing under the HELIX root or the app changed during the run; a proposal's target is unchanged before it is applied |
 | `assess report <run-dir>` | `report.html`, `report.md` and `evidence.json`: what was checked, seen and left uncertain; heuristics as recommendations; claims for representative users |
 | `assess compare <earlier> <later>` | Each finding new, persistent, resolved, regressed or not rechecked; an unassessed state never resolves one |
+| `assess video --run <R-id>` | Replays each walked journey (its steps' `do`) in a browser of its own, signed in as its role, with `evidence.redact` masked from the first frame, pausing at each checkpoint's findings; writes `video/`: an MP4 per journey with the findings in plain English drawn in (needs `ffmpeg` on the PATH), the clean recording and its annotation timeline, captions, and `index.html`, a player whose findings pop up, pause the video and link to the report (FEAT-013) |
 | `assess gate <run-dir> --fail-on P1` | For CI: fails on an open finding at that priority or above, or a blocked stage. See `examples/ux-assessment.workflow.yml` |
 | `assess validate-report <run-dir>` | Checks a run package: every record's schema, the coverage matrix, walkthroughs, findings and proposals |
 

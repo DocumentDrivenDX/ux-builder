@@ -29,8 +29,9 @@ td.n { font-variant-numeric: tabular-nums; text-align: right; }
 .sev { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
 </style></head><body><main>
 <header><h1>Theme audit: <span class="">No errors</span></h1>
-<p class="meta"><code>http://127.0.0.1:49743/only-layout.html</code> · 10/19/2026, 3:40:44 PM · @ux-builder/audit 0.1.0 · 1 theme × appearance × width runs</p></header>
+<p class="meta"><code>http://127.0.0.1:55907/only-layout.html</code> · 10/21/2026, 5:20:44 PM · @ux-builder/audit 0.2.0 · 1 theme × appearance × width runs</p></header>
 <section class="counts"><div class="count"><b class="error">0</b>errors</div><div class="count"><b class="warning">2</b>warnings</div><div class="count"><b class="info">0</b>notes</div></section>
+
 <section><h2>Checks</h2><div style="overflow-x:auto"><table><thead><tr><th>Check</th><th>What it holds the app to</th><th class="n">Findings</th></tr></thead><tbody>
 <tr><td><a href="#theme-applied"><code>theme-applied</code></a></td><td>The theme's CSS is on the page and applies.</td><td class="n">—</td></tr>
 <tr><td><a href="#token-colors"><code>token-colors</code></a></td><td>Every colour the app draws is one of the theme's colour tokens (or a mix of two).</td><td class="n">—</td></tr>
@@ -47,6 +48,25 @@ td.n { font-variant-numeric: tabular-nums; text-align: right; }
 <tr><td><a href="#reflow"><code>reflow</code></a></td><td>The page does not scroll sideways at the audited width (WCAG 1.4.10 at 320px).</td><td class="n">1</td></tr>
 <tr><td><a href="#target-size"><code>target-size</code></a></td><td>Pointer targets are at least the theme's minimum target size (WCAG 2.5.8).</td><td class="n">—</td></tr>
 <tr><td><a href="#focus-obscured"><code>focus-obscured</code></a></td><td>A focused control is never hidden behind sticky or fixed content (WCAG 2.4.11).</td><td class="n">1</td></tr>
+<tr><td><a href="#one-modal"><code>one-modal</code></a></td><td>At most one modal dialog is open at a time (rule modal.one-at-a-time).</td><td class="n">—</td></tr>
+<tr><td><a href="#modal-contract"><code>modal-contract</code></a></td><td>An open modal has a name, a way out, and closes on Escape (rules modal.titled, modal.dismiss).</td><td class="n">—</td></tr>
+<tr><td><a href="#one-primary-action"><code>one-primary-action</code></a></td><td>Each page region or dialog has at most one primary button (rule emphasis.one-primary).</td><td class="n">—</td></tr>
+<tr><td><a href="#nav-per-breakpoint"><code>nav-per-breakpoint</code></a></td><td>Navigation suits the width: few destinations when narrow, standing when wide (rules nav.compact-destinations, nav.standing-at-expanded).</td><td class="n">—</td></tr>
+<tr><td><a href="#line-length"><code>line-length</code></a></td><td>Lines of prose stay readable (rule text.line-length).</td><td class="n">—</td></tr>
+<tr><td><a href="#ai-disclose"><code>ai-disclose</code></a></td><td>AI-generated content is labelled as AI-made, by itself or a labelled region (rule ai.disclose).</td><td class="n">—</td></tr>
+<tr><td><a href="#ai-stop"><code>ai-stop</code></a></td><td>While the AI works, a Stop or Pause control is in or beside its status (rule ai.stop).</td><td class="n">—</td></tr>
+<tr><td><a href="#ai-correct"><code>ai-correct</code></a></td><td>AI-generated content has a retry, regenerate, edit or undo control (rule ai.correct).</td><td class="n">—</td></tr>
+<tr><td><a href="#ai-starters"><code>ai-starters</code></a></td><td>An empty conversation offers suggested starting points, and the prompt stays open (rule ai.starters).</td><td class="n">—</td></tr>
+<tr><td><a href="#ai-declared"><code>ai-declared</code></a></td><td>With --blueprint: a screen showing AI content declares its AI role (rule ai.declared).</td><td class="n">—</td></tr>
+<tr><td><a href="#agent-approval"><code>agent-approval</code></a></td><td>An approval offers approve and deny, neither chosen for the user (rule agent.approve-high-impact).</td><td class="n">—</td></tr>
+<tr><td><a href="#agent-plan"><code>agent-plan</code></a></td><td>An agent's plan has steps, each stating its status in text (rule agent.plan-visible).</td><td class="n">—</td></tr>
+<tr><td><a href="#agent-interrupt"><code>agent-interrupt</code></a></td><td>A running agent can be paused or stopped (rule agent.interrupt).</td><td class="n">—</td></tr>
+<tr><td><a href="#agent-who-acts"><code>agent-who-acts</code></a></td><td>Where the user can take over, a live region says who is acting (rule agent.who-acts).</td><td class="n">—</td></tr>
+<tr><td><a href="#agent-recover"><code>agent-recover</code></a></td><td>A failed step says what went wrong and can be retried or stepped back from (rule agent.recover).</td><td class="n">—</td></tr>
+<tr><td><a href="#agent-summary"><code>agent-summary</code></a></td><td>A finished run shows a summary of what was done (rule agent.summary).</td><td class="n">—</td></tr>
+<tr><td><a href="#genui-review-prefill"><code>genui-review-prefill</code></a></td><td>Values the AI pre-fills in inline UI are editable and submitted by the user's own control (rule genui.review-prefill).</td><td class="n">—</td></tr>
+<tr><td><a href="#card-input-label"><code>card-input-label</code></a></td><td>Every input in generated UI has a label of its own (rule card.input-label).</td><td class="n">—</td></tr>
+<tr><td><a href="#card-narrow-first"><code>card-narrow-first</code></a></td><td>With --width: generated UI does not scroll sideways at the compact size class (rule card.narrow-first).</td><td class="n">—</td></tr>
 </tbody></table></div></section>
 <section><h2>Screens</h2><p class="meta">Each theme and appearance as audited; numbered boxes mark the findings below.</p><div class="shots">
 <a href="screens/1-praxis-carbon-light-320.png"><img src="screens/1-praxis-carbon-light-320.png" alt="praxis-carbon light" loading="lazy"><span><b>praxis-carbon</b> · light · 320px</span></a>

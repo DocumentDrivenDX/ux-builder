@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/video.schema.json",
+  "title": "ux-builder assessment record: walkthrough videos (CONTRACT-006 Walkthrough videos)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "videos",
+    "notRecorded"
+  ],
+  "properties": {
+    "schema": {
+      "const": "video"
+    },
+    "version": {
+      "const": 1
+    },
+    "videos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "journey",
+          "viewport",
+          "files",
+          "chapters",
+          "findings"
+        ],
+        "properties": {
+          "journey": {
+            "type": "string",
+            "pattern": "^J-"
+          },
+          "viewport": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "width",
+              "height"
+            ],
+            "properties": {
+              "width": {
+                "type": "integer"
+              },
+              "height": {
+                "type": "integer"
+              }
+            }
+          },
+          "files": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "clean",
+              "annotations"
+            ],
+            "properties": {
+              "clean": {
+                "type": "string"
+              },
+              "annotations": {
+                "type": "string"
+              },
+              "mp4": {
+                "type": "string"
+              },
+              "captions": {
+                "type": "string"
+              },
+              "chapters": {
+                "type": "string"
+              }
+            }
+          },
+          "chapters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "kind",
+                "start",
+                "end",
+                "status"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "enum": [
+                    "title",
+                    "main",
+                    "alternate",
+                    "end"
+                  ]
+                },
+                "alternate": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "title": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "end": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "status": {
+                  "enum": [
+                    "recorded",
+                    "stopped"
+                  ]
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "ranges"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^F-"
+                },
+                "ranges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "start",
+                      "end"
+                    ],
+                    "properties": {
+                      "start": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "end": {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "notRecorded": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "journey",
+          "reason"
+        ],
+        "properties": {
+          "journey": {
+            "type": "string"
+          },
+          "viewport": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "width",
+              "height"
+            ],
+            "properties": {
+              "width": {
+                "type": "integer"
+              },
+              "height": {
+                "type": "integer"
+              }
+            }
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

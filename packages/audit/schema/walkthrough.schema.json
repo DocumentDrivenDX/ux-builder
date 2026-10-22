@@ -109,6 +109,157 @@
                       "type": "boolean"
                     }
                   }
+                },
+                "do": {
+                  "description": "The replay step the agent took (CONTRACT-006 Walkthrough videos; the inspect --replay format). A secret value is { secret: NAME }, never a literal.",
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "goto"
+                      ],
+                      "properties": {
+                        "goto": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "action": {
+                          "enum": [
+                            "create-test-data",
+                            "edit-test-data",
+                            "delete-test-data",
+                            "payment",
+                            "send-message",
+                            "production-approval",
+                            "delete-real-data"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "click"
+                      ],
+                      "properties": {
+                        "click": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "action": {
+                          "enum": [
+                            "create-test-data",
+                            "edit-test-data",
+                            "delete-test-data",
+                            "payment",
+                            "send-message",
+                            "production-approval",
+                            "delete-real-data"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "fill",
+                        "value"
+                      ],
+                      "properties": {
+                        "fill": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "action": {
+                          "enum": [
+                            "create-test-data",
+                            "edit-test-data",
+                            "delete-test-data",
+                            "payment",
+                            "send-message",
+                            "production-approval",
+                            "delete-real-data"
+                          ]
+                        },
+                        "value": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "secret"
+                              ],
+                              "properties": {
+                                "secret": {
+                                  "type": "string",
+                                  "pattern": "^[A-Z_][A-Z0-9_]*$"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "press"
+                      ],
+                      "properties": {
+                        "press": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "action": {
+                          "enum": [
+                            "create-test-data",
+                            "edit-test-data",
+                            "delete-test-data",
+                            "payment",
+                            "send-message",
+                            "production-approval",
+                            "delete-real-data"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "waitFor"
+                      ],
+                      "properties": {
+                        "waitFor": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "action": {
+                          "enum": [
+                            "create-test-data",
+                            "edit-test-data",
+                            "delete-test-data",
+                            "payment",
+                            "send-message",
+                            "production-approval",
+                            "delete-real-data"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                "alternate": {
+                  "description": "The blueprint alternate (plan.json alternates[].n) this step belongs to; absent for the main path.",
+                  "type": "integer",
+                  "minimum": 1
                 }
               }
             }

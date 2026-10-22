@@ -110,6 +110,18 @@ export function refusal(plan, { origins = null, exclude = [], allow = [], deny =
   return null;
 }
 
+/* Abort, in a browser context, every request off the origins or to an
+   excluded integration (ENV-02). A walkthrough video's replay uses it too. */
+export async function guardContext(context, { origins = null, exclude = [] } = {}) {
+  const ex = excluded(exclude);
+  await context.route("**/*", (route) => {
+    const u = route.request().url();
+    if (!/^https?:/.test(u)) return route.continue();
+    const off = origins?.length && !origins.includes(new URL(u).origin);
+    return off || ex.by(u) ? route.abort("blockedbyclient") : route.continue();
+  });
+}
+
 /* Replay recorded steps in a browser of our own; true when the expected
    state is there. Steps: { goto } | { click } | { fill, value } | { press } | { waitFor },
    each with an optional action class. Nothing runs if a step is refused;
@@ -119,16 +131,10 @@ async function replay(plan, guard, { scenario = null, highImpactStep = null, dir
   if (why) throw restricted(why);
   const risky = scenario === "risky";
   if (risky && !Number.isInteger(highImpactStep)) throw restricted("the risky scenario names no high-impact step (a replay step with highImpact: true, --high-impact-step, or the manifest's scenarios.risky.step as a number), so it cannot stop before it");
-  const ex = excluded(guard.exclude);
   const browser = await chromium.launch();
   try {
     const context = await browser.newContext({ viewport: plan.viewport ?? { width: 1280, height: 900 } });
-    await context.route("**/*", (route) => {
-      const u = route.request().url();
-      if (!/^https?:/.test(u)) return route.continue();
-      const off = guard.origins?.length && !guard.origins.includes(new URL(u).origin);
-      return off || ex.by(u) ? route.abort("blockedbyclient") : route.continue();
-    });
+    await guardContext(context, guard);
     const page = await context.newPage();
     // The risky scenario (US-082-AC3, AC4): at an approval, record it, choose Deny and stop;
     // with none before the high-impact step, stop before it.

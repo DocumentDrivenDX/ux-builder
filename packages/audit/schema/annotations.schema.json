@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/annotations.schema.json",
+  "title": "ux-builder assessment record: a walkthrough video's annotation timeline (CONTRACT-006 Walkthrough videos)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "journey",
+    "viewport",
+    "chapters",
+    "annotations"
+  ],
+  "properties": {
+    "schema": {
+      "const": "annotations"
+    },
+    "version": {
+      "const": 1
+    },
+    "journey": {
+      "type": "string",
+      "pattern": "^J-"
+    },
+    "viewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "height"
+      ],
+      "properties": {
+        "width": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        }
+      }
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 0
+    },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "start",
+          "end",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "title",
+              "main",
+              "alternate",
+              "end"
+            ]
+          },
+          "alternate": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0
+          },
+          "status": {
+            "enum": [
+              "recorded",
+              "stopped"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "annotations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding",
+          "checkpoint",
+          "chapter",
+          "start",
+          "end",
+          "kind",
+          "priority",
+          "boxes",
+          "caption"
+        ],
+        "properties": {
+          "finding": {
+            "type": "string",
+            "pattern": "^F-"
+          },
+          "checkpoint": {
+            "type": "string",
+            "pattern": "^C-"
+          },
+          "chapter": {
+            "type": "string"
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0
+          },
+          "kind": {
+            "enum": [
+              "checked",
+              "judgment"
+            ]
+          },
+          "priority": {
+            "enum": [
+              "P0",
+              "P1",
+              "P2",
+              "P3"
+            ]
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "boxes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "x",
+                "y",
+                "width",
+                "height"
+              ],
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "height": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "caption": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "problem",
+              "recommendation"
+            ],
+            "properties": {
+              "problem": {
+                "type": "string",
+                "minLength": 1
+              },
+              "recommendation": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -95,6 +95,37 @@ with its `state`): walk the alternates too. Its `entry` is a screen
 (`entryKind: screen`); reach it through the app's navigation from
 `run.baseUrl`.
 
+## Replayable steps and plain English
+
+A run can be replayed as a video for the app's product or technical leader
+(`assess video`, FEAT-013). For that, record two things as you go:
+
+- **`do` on every walkthrough step**: the browser action you took, in the
+  `--replay` format. Map your driver's actions (Playwright MCP shown):
+
+  | You did | Record |
+  |---|---|
+  | `browser_navigate` | `{ "goto": "/queue" }` (a path within `run.origins`) |
+  | `browser_click` | `{ "click": "role=button[name='Approve']" }` |
+  | `browser_type`, `browser_fill_form` | `{ "fill": "role=textbox[name='Note']", "value": "Looks fine" }` |
+  | `browser_press_key` | `{ "press": "Escape" }` |
+  | `browser_wait_for` | `{ "waitFor": "text=Approved" }` |
+
+  Prefer role-and-name selectors, then labels, then stable IDs; never an
+  index into a list that changes. Give a step that changes data its
+  `action` class (`create-test-data`, …). A password or any value the
+  manifest treats as secret is `{ "value": { "secret": "ENV_NAME" } }`,
+  never the literal. Steps of a blueprint alternate carry `alternate: <n>`
+  (`plan.json`'s `alternates[].n`) and start with their own `goto`.
+- **`plain` on every finding**: `{ "problem": "…", "recommendation": "…" }`,
+  one or two short sentences each, in the words a product leader would use
+  about their users. No rule ID, token or component name there: "Approve and
+  Reject look equally important, so it is easy to reject by mistake" and
+  "Make Approve the one main action, and confirm before Reject". Keep the
+  specifics (the rule, `component_mapping`, the proposal) in their own
+  fields, where the report shows them. Add `elements`, the selectors of what
+  the finding is about, so the video can outline them.
+
 ## Stages
 
 Run them in this order. Each command writes under `<out>/<run>/` (default
@@ -129,7 +160,8 @@ assessment.
 
    Run `assess reset --fixture <id>` before each scenario. Record every step in
    `walkthrough.json` (action, URL, checkpoint, observation with its basis;
-   your judgment apart). Look at the screenshot and accessibility tree yourself; do not judge visual
+   your judgment apart; and `do`, the replay step: see *Replayable steps and
+   plain English*). Look at the screenshot and accessibility tree yourself; do not judge visual
    quality from DOM text. Induce failures only with the manifest's fixtures or
    mocks. If your driver cannot share its browser, use `--replay <steps.json>`;
    give a step that changes data its `action` (such as `create-test-data`),
@@ -141,7 +173,8 @@ assessment.
    (status, reason, outcome, evidence). Write `backlog.json`: one finding per
    user problem (give it a `key`), ranked P0–P3 with confidence and effort
    apart, components named from the app's installed `@ux-builder/ui`
-   catalogue, heuristics as "Proposed criterion: …", and `user_validation` for
+   catalogue, heuristics as "Proposed criterion: …", `plain` (the problem and
+   recommendation in plain English) and `elements`, and `user_validation` for
    claims only people can confirm. Then `assess merge --run <R-id>` gives each
    a stable ID and merges duplicates.
 7. **Proposals.** For each finding worth a HELIX change:
@@ -156,6 +189,12 @@ assessment.
    an earlier run: `assess compare <earlier> <later>`; `comparison.json`
    keeps the earlier baseline's failures, so name them in what you hand over. In CI:
    `assess gate <run> --fail-on P1` (see `examples/ux-assessment.workflow.yml`).
+9. **Video.** `assess video --run <R-id> --manifest ux-assessment.yml`
+   replays each walked journey and writes `video/`: an MP4 per journey (with
+   `ffmpeg` on the PATH) and `video/index.html`, a player whose findings pop
+   up. Then `assess report` again, so the report links each finding to its
+   moment, and `assess validate-report`. A chapter that stopped means a step
+   no longer replays: say which, rather than walking it again silently.
 
 ## Ranking (FND-04)
 

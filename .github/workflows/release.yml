@@ -46,6 +46,8 @@ jobs:
       - run: npm ci
       # Chromium for the browser tests inside npm run check.
       - run: npx playwright install --with-deps chromium
+      # ffmpeg for the walkthrough video MP4 tests (FEAT-013; the SDK does not ship it).
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       # v2 is the action for Changesets CLI v3, which this repository uses: v1 reads
       # CLI v2's "New tag:" output, so with CLI v3 it published but pushed no tags
       # and created no releases. v2 pushes them through the GitHub API, signed,

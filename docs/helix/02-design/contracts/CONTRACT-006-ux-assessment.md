@@ -76,6 +76,7 @@ YAML at the app's root. Unknown keys are errors. JSON Schema:
 | `evidence.out` | path | no | Default `ux-assessment/` |
 | `evidence.capture` | `screenshot`, `tree`, `both` | no | Default `both`. What `inspect` writes for a checkpoint: `screenshot.png`, `tree.yml` or both; the one not captured is `null` in `inspection.json` |
 | `evidence.redact` | `{ selectors?: string[], text?: regex[] }` | no | Masked before writing |
+| `video` | `{ viewports?: { width, height }[], holdSeconds?: { min, perWord }, autoPause?: boolean }` | no | *[Amended 2026-10-21 — planned, FEAT-013, ADR-031]* Walkthrough videos. Defaults: one viewport 1440 × 900; a hold of at least 4 s plus 0.3 s a word of caption; the player pauses at pop-ups |
 | `limits` | `{ runMinutes?, steps?, journeyMinutes? }` | no | Defaults 60, 200, 15, applied when a command is given the manifest. `runMinutes`: minutes from the run's `startedAt` (`run.json`) after which `inspect` takes no step and `browser --run` stops. `steps`: the most browser steps in one run, where a step is a checkpoint `inspect` records or an action a replay takes. `journeyMinutes`: minutes from a journey's first checkpoint after which `inspect` takes no step for that journey; also the default timeout of a `tests[]` command without `timeoutMinutes`. A step refused for a limit is recorded `blocked: limit` and the `walkthrough` stage `partial` |
 | `restrictions.allow` | action[] | no | Permitted test actions (`create-test-data`, `edit-test-data`, `delete-test-data`) |
 | `restrictions.deny` | action[] | no | Always includes `payment`, `send-message`, `production-approval`, `delete-real-data`. A denied action can never be allowed: naming one in `allow` fails validation |
@@ -305,6 +306,93 @@ Decisions the build had to make, the smallest that make the criteria testable:
   control there; **a better request** is possible with an `edit` control or
   the request kept in its field. These are deterministic proxies; the agent's
   own observation in `walkthrough.json` stays the judgment.
+
+### Walkthrough videos *[Amended 2026-10-21 — planned, FEAT-013, ADR-031]*
+
+Field and record changes:
+
+| Where | Change |
+|---|---|
+| `walkthrough.json` `steps[]` | Gains `do`: the replay step the agent took (`{ goto } \| { click } \| { fill, value } \| { press } \| { waitFor }`, the `inspect --replay` format), with optional `action` class. A secret value is `{ secret: NAME }`, never a literal; a literal matching a secret pattern is always reported. When the run has `video/`, a `done` step with no `do` is reported by `validate-report` as not replayable *(built: only then, so runs without videos validate as before)* |
+| `walkthrough.json` `steps[]` | Gains `alternate`: the blueprint alternate (`plan.json` `alternates[].n`) the step belongs to; absent for the main path. Each alternate is its own chapter, replayed from its own first step *(added at build)* |
+| `backlog.json` `findings[]` | Gains `plain: { problem, recommendation }`: one or two sentences each, in the user's terms, with no rule ID, `--piq-` token or component name. Required for every finding shown in a video. A component name is one written as code would (`ToastProvider`, `useToast`, `<Button>`); a one-word name in ordinary prose (a button) is not *(built)* |
+| `backlog.json` `findings[]` | Gains `elements`: selectors of the elements the finding is about, outlined in the video; without it, the replay outlines the selectors of the cited checkpoint's audit findings with the finding's `rule`, else shows the caption only *(added at build)* |
+
+Further records in the run package, under `video/`:
+
+| File | Written by | Holds |
+|---|---|---|
+| `<J-id>[@<w>x<h>].clean.webm` | `video` | The replay's recording, cursor only, no annotations |
+| `<J-id>[@<w>x<h>].annotations.json` | `video` | `{ schema: "annotations", version: 1, journey, viewport, chapters: [{ id, kind: title \| main \| alternate \| end, alternate?, start, end, status: recorded \| stopped, reason? }], annotations: [{ finding, checkpoint, start, end, kind: checked \| judgment, priority, confidence, boxes: [{ x, y, width, height }], caption: { problem, recommendation } }] }`. Times in seconds; boxes in viewport pixels |
+| `<J-id>[@<w>x<h>].mp4` | `video` (with `ffmpeg`) | H.264, no audio; the clean video with the annotations composited and title and end cards |
+| `<J-id>[@<w>x<h>].vtt`, `.chapters.vtt` | `video` | WebVTT captions (each annotation's caption) and chapters |
+| `video.json` | `video` | `{ schema: "video", version: 1, videos: [{ journey, viewport, files, chapters, findings: [{ id, ranges }] }], notRecorded: [{ journey, reason }] }` |
+| `index.html` | `video` | The interactive player (FEAT-013 OUT-04): no server, no network, the `ux-builder` theme |
+
+Further subcommand:
+
+| Subcommand | Behaviour | Exit |
+|---|---|---|
+| `video --run id [--journey J-id]... [--viewport WxH]... [--manifest f] [--out dir]` | For each journey with `done` steps (or the ones named): in one recording, the title card, then for the main path and each walked alternate (after the first: the fixture's reset and the signed-in state put back, behind a card), signed in by the role's `auth` before recording, installs `evidence.redact` masking from the first paint, replays `do` at a human pace, re-checks each checkpoint's state, and holds at checkpoints with findings, writing their annotations. Then writes the files above. Applies `run.origins`, `restrictions` and `limits` as `inspect --replay` does | 0 every journey recorded; 1 a journey not recorded, a chapter stopped, or no `ffmpeg` (MP4 skipped), with the `video` stage `partial`; 2 usage |
+
+Decisions the build had to make *(FEAT-013 step 3, 2026-10-21)*:
+- **One recording per journey and viewport.** Playwright records a browser
+  context from its first page, and chapters joined from separate
+  recordings would need `ffmpeg` even for the player. So each journey is one
+  context: the title card, then each chapter, then the end card. Between
+  chapters, behind an opaque card, the fixture's reset runs (without
+  blocking the replay), cookies and `localStorage`/`sessionStorage` are
+  cleared, and the role's storage state is put back. ADR-031 decision 8's
+  "fresh context" is met by this reset.
+- **Signing in.** `auth: { storageState }` is loaded into the context
+  before its first page, so no sign-in is filmed. `auth: { env: NAME }`
+  names a variable holding a Playwright storage state (a path to one, or
+  its JSON); unset or unreadable, the journey is not recorded, with the
+  reason. `auth: none` starts signed out.
+- **The checkpoint's state** is the step's `url` (else the inspection's)
+  by path and query, and, for a replayed inspection, its
+  `verified.assertion`. A difference stops the chapter.
+- **Fail closed.** The mask layer's `window.__piqVideo.ok` is checked after
+  every step; if it is missing on any page, the journey's whole recording
+  is deleted and listed in `notRecorded`. Every password field is masked
+  besides `evidence.redact`.
+- **The top layer.** An app's modal dialog or popover renders above any
+  z-index, so the layer is itself a manual popover and shows itself again
+  above each modal or popover the app opens.
+- **Element boxes** are measured after scrolling the first element into
+  view, in viewport pixels, while the page holds still.
+- **The player** (`index.html`, written by `video` after `video.json`)
+  inlines the `ux-builder-databricks` theme, its fonts (SIL OFL 1.1), its
+  logo and favicon, and the SDK's widget CSS, and answers `piq:set-theme`;
+  it passes the audit with no error or warning. Lists are links to moments,
+  `index.html#<video name>@<seconds>` (the video name is the journey, with
+  `@WxH` for a viewport other than 1440 × 900), which the page opens at.
+  Below 640 px the pop-up sits under the video instead of over it. Keys: `n`
+  and `p` next and previous finding, `k` (or Space) play and pause, `m`
+  More, Escape dismiss.
+- **The MP4** is drawn after the recording: each annotation becomes one
+  transparent picture the size of the recording, rendered in the theme
+  from the player's own `captionMarkup` and `place`, and `ffmpeg` lays each
+  over the clean recording between its `start` and `end` and encodes H.264
+  (CRF 26, 25 fps, no audio, `+faststart`). A failed encode is reported in
+  the stage's reason and leaves the player working.
+- **The report** (run `assess report` after `video`): its summary links
+  the player; each finding shown in a video gets *In plain English* and
+  *Seen in video*, one link per video it is in; each finding's heading is
+  its anchor (`report.html#F-…`). `evidence.json` gains the kinds `video`,
+  `captions` and `player`; a video's files are referenced by the findings
+  it shows.
+- **Pacing** (ms): 450 before a step, 650 for the cursor to move, 55 a
+  character typed, 900 to settle, 3200 for the title card, 4500 for the end
+  card; network waits are cut off at 1 s. A missing element fails its step
+  after 10 s.
+
+Further rules `validate-report` enforces when `video/` exists: every
+annotation's `finding` is in `backlog.json` and cites its `checkpoint`; a
+chapter `stopped` shows no annotation after its stop; every finding shown
+has `plain`; `annotations.json` and `video.json` validate against their
+schemas; `report` links each shown finding to `video/index.html#<video name>@<start>`
+and lists the videos in `evidence.json`.
 
 ## Error Semantics
 

@@ -39,6 +39,9 @@
               "proposal",
               "real-user",
               "record",
+              "video",
+              "captions",
+              "player",
               "other"
             ]
           },
