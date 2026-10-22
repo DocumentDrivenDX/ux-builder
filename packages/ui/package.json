@@ -32,6 +32,7 @@
     "./stylelint": "./lint/stylelint.mjs",
     "./eslint": "./lint/eslint.mjs",
     "./blueprint": "./blueprint/index.mjs",
+    "./blueprint/modalities": "./blueprint/modalities.mjs",
     "./catalogue.json": "./catalogue.json",
     "./AGENTS.md": "./AGENTS.md",
     "./skill/*": "./skill/*",
