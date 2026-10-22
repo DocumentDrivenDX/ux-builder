@@ -149,7 +149,9 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = 
   writeFileSync(join(target, "e2e/starter.spec.js"), starterSpec(modalities));
   writeFileSync(join(target, "app.blueprint.json"), JSON.stringify(blueprintFor("__APP_NAME__", modalities), null, 2) + "\n");
   const guide = modalityGuide(modalities);
-  const fill = (s) => s.replaceAll("__MODALITY_GUIDE__", guide).replaceAll("__MODALITIES__", modalities.join(", ")).replaceAll("__APP_NAME__", name).replaceAll("__THEME__", theme)
+  // The audit visits every screen of the shell, so each modality's screen is checked (FEAT-014 MOD-08).
+  const auditUrls = [...new Set(blueprintFor(name, modalities).screens.map((sc) => sc.path ?? "/"))].map((p) => `http://127.0.0.1:4173${p}`).join(" ");
+  const fill = (s) => s.replaceAll("__MODALITY_GUIDE__", guide).replaceAll("__MODALITIES__", modalities.join(", ")).replaceAll("__AUDIT_URLS__", auditUrls).replaceAll("__APP_NAME__", name).replaceAll("__THEME__", theme)
     .replaceAll("__TOKENS__", dep("@ux-builder/tokens")).replaceAll("__UI__", dep("@ux-builder/ui")).replaceAll("__AUDIT__", dep("@ux-builder/audit"));
   const written = [];
   const walk = (d) => {

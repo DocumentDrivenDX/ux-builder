@@ -10,7 +10,7 @@
     "check:blueprint": "ux-builder-blueprint check app.blueprint.json",
     "test:e2e": "playwright test",
     "lint": "stylelint \"src/**/*.css\" && eslint src",
-    "audit": "vite build && ux-builder-audit --serve \"vite preview --port 4173 --strictPort --host 127.0.0.1\" http://127.0.0.1:4173/",
+    "audit": "vite build && ux-builder-audit --blueprint app.blueprint.json --serve \"vite preview --port 4173 --strictPort --host 127.0.0.1\" __AUDIT_URLS__",
     "postinstall": "node scripts/install-skill.mjs"
   },
   "dependencies": {

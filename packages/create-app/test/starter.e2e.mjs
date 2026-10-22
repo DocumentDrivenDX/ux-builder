@@ -80,9 +80,22 @@ test("US-022-AC10: the fresh app of every modality passes the theme audit in eve
     assert.ok(report.runs.length >= 10, `${name}: ${report.runs.length} runs`);
     assert.ok(report.runs.every((r) => r.mode === "event"), "switched by the starter's ThemeProvider");
     assert.equal(report.summary.error, 0, JSON.stringify(report.findings.filter((f) => f.severity === "error"), null, 1));
-    assert.deepEqual(report.findings.filter((f) => f.severity !== "info" && f.owner !== "sdk").map((f) => `${f.rule}: ${f.message}`), [], `${name}: nothing the app itself should fix`);
+    assert.deepEqual(report.findings.filter((f) => f.severity !== "info" && f.owner !== "sdk").map((f) => `${f.check}: ${f.message}`), [], `${name}: nothing the app itself should fix`);
     // The SDK's own widgets clear contrast in every theme the starter shows.
-    assert.deepEqual(report.findings.filter((f) => f.rule === "contrast").map((f) => `${f.runs.join(" ")}: ${f.selector}: ${f.message}`), [], `${name}: SDK widgets clear contrast`);
+    assert.deepEqual(report.findings.filter((f) => f.check === "contrast").map((f) => `${f.runs.join(" ")}: ${f.selector}: ${f.message}`), [], `${name}: SDK widgets clear contrast`);
+    // Audited as the modalities its blueprint declares, and its shell fits them (US-099).
+    const { supports } = JSON.parse(readFileSync(join(dir(name), "app.blueprint.json"), "utf8"));
+    assert.deepEqual(report.verdicts.modality.map((v) => v.modality), supports.modalities, `${name}: the blueprint's modalities`);
+    // Every required component is there. An empty hybrid-chat shell shows its first card only after a
+    // message, so the audit of the first screen may warn that it saw no Adaptive Card part, and nothing else.
+    for (const v of report.verdicts.modality) {
+      const missing = v.components.filter((c) => !c.present).map((c) => c.name);
+      const allowed = v.modality === "hybrid-chat" ? ["Adaptive Card part"] : [];
+      assert.notEqual(v.status, "fail", `${name} ${v.modality}: ${JSON.stringify(v.fixes)}`);
+      assert.deepEqual(missing.filter((m) => !allowed.includes(m)), [], `${name} ${v.modality}: missing ${missing}`);
+      assert.ok(v.components.every((c) => c.adapts !== false), `${name} ${v.modality}: the navigation adapts by size class`);
+    }
+    assert.notEqual(report.verdicts.theme.status, "fail", `${name}: ${JSON.stringify(report.verdicts.theme.items?.filter((i) => i.status === "fail"))}`);
   }
 });
 
