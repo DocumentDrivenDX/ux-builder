@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { Linter, RuleTester } from "eslint";
 import stylelint from "stylelint";
 import eslintPlugin from "../lint/eslint.mjs";
@@ -209,10 +209,15 @@ describe("US-081 ai-neutral-voice", () => {
 
   test("the recommended config has it as a warning, and the starter template's copy passes", () => {
     assert.equal(eslintPlugin.configs.recommended.rules["ux-builder/ai-neutral-voice"], "warn");
-    const app = readFileSync(join(ROOT, "packages/create-app/template/src/App.jsx"), "utf8");
-    const r = new Linter({ configType: "flat" }).verify(app, [{ files: ["**/*.jsx"], ...eslintPlugin.configs.recommended,
-      languageOptions: { ecmaVersion: "latest", sourceType: "module", parserOptions: { ecmaFeatures: { jsx: true } } },
-      rules: { "ux-builder/ai-neutral-voice": "warn" } }], { filename: "src/App.jsx" });
-    assert.deepEqual(r.map((m) => m.message), []);
+    // The starter's shared files and every modality's shell (FEAT-014).
+    const dirs = ["packages/create-app/template/src", "packages/create-app/shells"];
+    const files = dirs.flatMap((d) => readdirSync(join(ROOT, d)).filter((f) => f.endsWith(".jsx")).map((f) => join(ROOT, d, f)));
+    assert.ok(files.length >= 6, files.join());
+    for (const file of files) {
+      const r = new Linter({ configType: "flat" }).verify(readFileSync(file, "utf8"), [{ files: ["**/*.jsx"], ...eslintPlugin.configs.recommended,
+        languageOptions: { ecmaVersion: "latest", sourceType: "module", parserOptions: { ecmaFeatures: { jsx: true } } },
+        rules: { "ux-builder/ai-neutral-voice": "warn" } }], { filename: "src/App.jsx" });
+      assert.deepEqual(r.map((m) => m.message), [], file);
+    }
   });
 });
