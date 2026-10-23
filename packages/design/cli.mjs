@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { checkpoint, DesignError, findApp, init, setMode, stateGet, stateSet, status, VERSION } from "./index.mjs";
+import { checkpoint, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -30,6 +30,9 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       experiment, release.
   mode full|change [--why <text>]
       the full loop, or change mode for an everyday change.
+  validate
+      check every document in docs/ux/: frontmatter, ID, place, sections,
+      links and its type's rules. Exits 1 on a problem.
 
 Options:
   --app <dir>   the app (default: the nearest folder above with .ux-builder/
@@ -91,6 +94,11 @@ async function main(argv) {
       return 0;
     }
     throw new DesignError(`unknown state command "${sub ?? ""}": use get, set or checkpoint`);
+  }
+  if (command === "validate") {
+    const r = validate(app);
+    print(r, values.json, r.valid ? `docs/ux/: ${r.documents.length} document${r.documents.length === 1 ? "" : "s"}, no problems.` : r.problems.map((p) => `${p.path}: ${p.message}`).join("\n"));
+    return r.valid ? 0 : 1;
   }
   if (command === "mode") {
     const r = setMode(app, { mode: rest[0], why: values.why });

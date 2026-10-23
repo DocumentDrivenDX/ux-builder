@@ -53,7 +53,7 @@ describe("status", () => {
     assert.equal(out.untestedAssumptions, 2);
     assert.deepEqual(out.openQuestions, ["Should people sign in to save rivers?"]);
     assert.equal(out.next, "Build an exploratory prototype of map first.");
-    assert.deepEqual(out.documents, ["docs/ux/brief.md", "docs/ux/decisions/UXD-1.md"]);
+    assert.deepEqual(out.documents.map((d) => d.path), ["docs/ux/brief.md", "docs/ux/decisions/UXD-1.md"]);
     assert.deepEqual(out, status(app));
   });
 

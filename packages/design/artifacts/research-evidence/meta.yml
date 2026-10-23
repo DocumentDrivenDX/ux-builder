@@ -1,0 +1,22 @@
+# Research evidence: a docs/ux type of the guided design loop (FEAT-018, CONTRACT-008).
+# Stage 1 home; mapped into HELIX in stage 2.
+
+type: research-evidence
+name: Research evidence
+description: |
+  One research source (an interview, an analytics export, support
+  tickets, a survey, usability observations or a session transcript):
+  where the owner keeps it, and the masked excerpts the synthesis cites.
+  Raw material is never copied in (ADR-039).
+id:
+  prefix: EV
+  pattern: "^EV-[1-9][0-9]*$"
+  example: EV-1
+output: docs/ux/evidence/EV-<n>.md
+sections:
+    - Source
+    - Excerpts
+    - Synthesis notes
+rules:
+    - participants
+    - masked

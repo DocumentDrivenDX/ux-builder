@@ -1,0 +1,24 @@
+# Baseline: a docs/ux type of the guided design loop (FEAT-018, CONTRACT-008).
+# Stage 1 home; mapped into HELIX in stage 2.
+
+type: baseline
+name: Baseline
+description: |
+  What an existing app is today, drafted in its first guided session
+  from the blueprint, the HELIX documents and the latest audit and
+  assessment. Every drafted point is current state, assumed, until the
+  person confirms it.
+id:
+  prefix: baseline
+  pattern: "^baseline$"
+  example: baseline
+output: docs/ux/baseline.md
+sections:
+    - Screens
+    - Journeys
+    - Stories
+    - Open findings
+    - Draft brief
+    - Draft jobs
+    - Draft tasks
+rules: []

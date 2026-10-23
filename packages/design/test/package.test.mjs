@@ -13,8 +13,8 @@ const at = (p) => fileURLToPath(new URL(`../${p}`, import.meta.url));
 
 describe("@ux-builder/design's package", () => {
   // @covers US-114-AC6
-  test("depends on @ux-builder/ui, @ux-builder/audit and @ux-builder/trace, plus ajv, a library that makes no network call", () => {
-    assert.deepEqual(Object.keys(PKG.dependencies).sort(), ["@ux-builder/audit", "@ux-builder/trace", "@ux-builder/ui", "ajv"]);
+  test("depends on @ux-builder/ui, @ux-builder/audit and @ux-builder/trace, plus ajv and yaml, libraries that make no network call", () => {
+    assert.deepEqual(Object.keys(PKG.dependencies).sort(), ["@ux-builder/audit", "@ux-builder/trace", "@ux-builder/ui", "ajv", "yaml"]);
     assert.equal(PKG.private, undefined);
     assert.equal(PKG.publishConfig.access, "public");
     // npm run licences checks this file against the installed tree (US-049); it must exist and be shipped.
@@ -24,6 +24,6 @@ describe("@ux-builder/design's package", () => {
 
   test("ships the CLI, the schema and the skill", () => {
     assert.equal(PKG.bin["ux-builder-design"], "./cli.mjs");
-    for (const f of ["cli.mjs", "index.mjs", "init.mjs", "schema", "skill"]) assert.ok(PKG.files.includes(f), f);
+    for (const f of ["cli.mjs", "index.mjs", "init.mjs", "checkpoints.mjs", "documents.mjs", "schema", "skill", "artifacts"]) assert.ok(PKG.files.includes(f), f);
   });
 });

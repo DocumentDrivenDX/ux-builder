@@ -12,3 +12,4 @@ package as installed; the licence texts of vendored source are in this package's
 | fast-uri | 3.1.8 | BSD-3-Clause | https://github.com/fastify/fast-uri |
 | json-schema-traverse | 1.0.0 | MIT | https://github.com/epoberezkin/json-schema-traverse |
 | require-from-string | 2.0.2 | MIT | floatdrop/require-from-string |
+| yaml | 2.9.1 | ISC | github:eemeli/yaml |

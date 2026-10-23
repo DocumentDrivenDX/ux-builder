@@ -2,29 +2,11 @@
    GDL-76): where the loop stands, in plain words, for the agent opening a
    session or a person without one. */
 
-import { existsSync, readdirSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { uxDocuments } from "./documents.mjs";
 import { readState } from "./state.mjs";
 
 const ACTIVITY = { baseline: "Baseline", define: "Define", explore: "Explore", experience: "Experience", validate: "Validate" };
 const UNTESTED = new Set(["assumed", "hypothesis", "current-state"]);
-
-/* Every file under docs/ux/, relative to the app, sorted. */
-function uxDocuments(app) {
-  const root = join(app, "docs/ux");
-  if (!existsSync(root)) return [];
-  const out = [];
-  const walk = (dir, rel) => {
-    for (const name of readdirSync(dir).sort()) {
-      const abs = join(dir, name);
-      const r = rel ? `${rel}/${name}` : name;
-      if (statSync(abs).isDirectory()) walk(abs, r);
-      else out.push(`docs/ux/${r}`);
-    }
-  };
-  walk(root, "");
-  return out;
-}
 
 export function status(app) {
   const s = readState(app);
@@ -64,6 +46,6 @@ export function summary(r) {
   if (r.openIssues) lines.push(`${plural(r.openIssues, "usability issue is", "usability issues are")} open.`);
   if (r.runningExperiments.length) lines.push(`Running: ${r.runningExperiments.join(", ")}.`);
   lines.push(r.next ? `Next: ${r.next}` : "Next: not set.");
-  if (r.documents.length) lines.push(`Documents: ${r.documents.join(", ")}.`);
+  if (r.documents.length) lines.push(`Documents: ${r.documents.map((d) => d.path).join(", ")}.`);
   return lines.join("\n");
 }

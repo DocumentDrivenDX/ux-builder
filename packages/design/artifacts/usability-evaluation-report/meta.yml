@@ -1,0 +1,27 @@
+# UX evaluation report: a docs/ux type of the guided design loop (FEAT-018, CONTRACT-008).
+# Stage 1 home; mapped into HELIX in stage 2.
+
+type: usability-evaluation-report
+name: UX evaluation report
+description: |
+  One evaluation's results: method, tasks, measures, the rubric with
+  predicted and observed columns, findings by journey, state coverage
+  and recommendations. From the usability-evaluation-report type
+  proposed to HELIX (docs/proposals/helix-ux-artifact-types); it becomes
+  HELIX's type in stage 2 (H-1).
+id:
+  prefix: UER
+  pattern: "^UER-[1-9][0-9]*$"
+  example: UER-1
+output: docs/ux/evaluations/UER-<n>.md
+sections:
+    - Executive summary
+    - Product and goals
+    - Method
+    - Tasks and journeys
+    - Measures
+    - Rubric
+    - Findings by journey
+    - State coverage
+    - Recommendations
+rules: []

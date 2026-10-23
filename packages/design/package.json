@@ -19,7 +19,9 @@
     "status.mjs",
     "checkpoints.mjs",
     "init.mjs",
+    "documents.mjs",
     "cli.mjs",
+    "artifacts",
     "schema",
     "skill",
     "README.md",
@@ -35,7 +37,8 @@
     "@ux-builder/audit": "^0.4.0",
     "@ux-builder/trace": "^0.1.0",
     "@ux-builder/ui": "^0.9.0",
-    "ajv": "^8.20.0"
+    "ajv": "^8.20.0",
+    "yaml": "^2.9.1"
   },
   "publishConfig": {
     "access": "public"

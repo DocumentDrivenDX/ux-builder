@@ -110,6 +110,28 @@ and only questions whose answers materially change the design. Make small,
 reversible assumptions yourself and list each one with
 `state set 'assumptions[+]' '{"text":"…"}'` so the person can review them.
 
+## Documents
+
+The loop's own documents live in `docs/ux/`, one type each, written from a
+template in `node_modules/@ux-builder/design/artifacts/<type>/`
+(`template.md`, with `prompt.md` saying what to fill in and `example.md`
+showing a finished one):
+
+| Type | Path |
+|---|---|
+| experience-brief | `docs/ux/brief.md` |
+| baseline | `docs/ux/baseline.md` |
+| research-evidence | `docs/ux/evidence/EV-<n>.md` |
+| jobs | `docs/ux/jobs.md` |
+| ux-decision | `docs/ux/decisions/UXD-<n>.md` |
+| test-kit | `docs/ux/tests/TK-<n>/kit.md` |
+| usability-evaluation-report | `docs/ux/evaluations/UER-<n>.md` |
+| insights | `docs/ux/insights/INS-<yyyy-mm-dd>.md` |
+| experiment | `docs/ux/experiments/EXP-<n>.md` |
+
+After writing or changing one, run `ux-builder-design validate` and fix what
+it reports.
+
 ## HELIX documents
 
 HELIX documents (`docs/helix/`) change only through proposals: run
