@@ -119,3 +119,15 @@ describe("Define in the skill (US-122)", () => {
     assert.match(s, /Regenerate the brief whenever its sources change: the PRD, the\s+stories or the design state/);
   });
 });
+
+describe("starting in an existing app (US-115)", () => {
+  // @covers US-115-AC6
+  test("the first session runs baseline, then routes a change, 'too complicated', complaints and a new feature", () => {
+    const s = section("Starting in an existing app");
+    assert.match(s, /run `ux-builder-design baseline`/);
+    assert.match(s, /\*\*a specific change\*\*.*→ impact, then Explore/);
+    assert.match(s, /\*\*"it feels too complicated"\*\* → the assessment, then `simplify`/);
+    assert.match(s, /\*\*user complaints\*\* → evidence/);
+    assert.match(s, /\*\*a new feature\*\* → Define/);
+  });
+});

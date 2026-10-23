@@ -99,7 +99,7 @@ removes its criteria from `tools/coverage-exceptions.json`.
 | B-021 | `check --diff`, `simplicity.delta-decided` (US-120) | CONTRACT-005 amendment; STP-120 | B-020 | ui tests; `npm run rules` | Built 2026-10-23 (rule licence nngroup-terms added to the rules schema) |
 | B-022 | `docs/ux/` types, templates, examples, `validate` (US-123) | CONTRACT-008 Documents; STP-123 | B-018 | design tests | Built 2026-10-23 |
 | B-023 | `brief`, `principles.json`, project rules in `check` (US-122) | SD-006 Project rules; STP-122 | B-022 | design and ui tests | Built 2026-10-23 (principles kept in the design state; brief writes principles.json) |
-| B-024 | `baseline` and routing an existing app (US-115-AC5, AC6) | SD-006 Baseline; STP-115 | B-022 | design tests | |
+| B-024 | `baseline` and routing an existing app (US-115-AC5, AC6) | SD-006 Baseline; STP-115 | B-022 | design tests | Built 2026-10-23 |
 | B-025 | MCP wrappers and the parity test (US-116) | ADR-036 rule 2; STP-116 | B-018 to B-024 | mcp tests | Phase 1 exit: a fixture idea reaches `core-1` with no MCP |
 | B-026 | Hypotheses and evidence with masking (US-124, US-125) | ADR-039; STP-124, STP-125 | B-022 | design tests | Phase 2 |
 | B-027 | Jobs and its rules (US-126) | CONTRACT-008 type rules; STP-126 | B-026 | design tests | |

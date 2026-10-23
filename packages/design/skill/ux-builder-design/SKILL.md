@@ -36,6 +36,19 @@ Record what you learn as you go, with `ux-builder-design state set`:
 - an open question: `state set 'questions[+]' '{"text":"…"}'`;
 - the next action: `state set next '"Test map first with five users"'`.
 
+## Starting in an existing app
+
+`ux-builder-design init` starts an existing app at Baseline. In its first
+session, run `ux-builder-design baseline`: it writes `docs/ux/baseline.md`
+from the blueprint, the HELIX stories and the latest assessment run (run
+`ux-builder-audit assess` first if there is none), with every drafted brief
+point, job and task marked current state, assumed. Go through it with the
+person, then ask what they want to improve and route the request:
+- **a specific change** ("move the filters") → impact, then Explore;
+- **"it feels too complicated"** → the assessment, then `simplify`;
+- **user complaints** → evidence (`evidence add`), then Understand;
+- **a new feature** → Define for that feature.
+
 ## The four activities
 
 The person works through four recurring activities. You move between the

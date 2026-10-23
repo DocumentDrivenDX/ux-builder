@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { brief, checkpoint, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { baseline, brief, checkpoint, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -30,6 +30,10 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       experiment, release.
   mode full|change [--why <text>]
       the full loop, or change mode for an everyday change.
+  baseline
+      an existing app's first session: docs/ux/baseline.md from the blueprint,
+      the HELIX stories and the latest assessment run, every drafted point
+      marked current state, assumed.
   brief [--name <product>]
       write the experience brief (docs/ux/brief.md and brief.html) from the
       HELIX PRD and stories and the design state, and .ux-builder/principles.json.
@@ -97,6 +101,11 @@ async function main(argv) {
       return 0;
     }
     throw new DesignError(`unknown state command "${sub ?? ""}": use get, set or checkpoint`);
+  }
+  if (command === "baseline") {
+    const r = baseline(app);
+    print(r, values.json, `Wrote ${r.written.join(", ")}: ${r.screens} screens, ${r.journeys} journeys, ${r.stories} stories, ${r.findings} open findings; drafted ${r.drafted.join(", ") || "nothing"} as current state, assumed.`);
+    return 0;
   }
   if (command === "brief") {
     const r = brief(app, { name: values.name });
