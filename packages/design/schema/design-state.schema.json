@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://documentdrivendx.github.io/ux-builder/schema/design-state.schema.json",
+  "title": "Design state (CONTRACT-008)",
+  "description": "Where the guided design loop stands: .ux-builder/design-state.json, committed with the app (ADR-036 rule 6).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "activity", "mode", "startedFrom", "checkpoints", "questions", "assumptions", "alternatives", "issues", "experiments", "faked", "next"],
+  "properties": {
+    "version": { "const": 1 },
+    "activity": { "enum": ["baseline", "define", "explore", "experience", "validate"] },
+    "mode": { "enum": ["full", "change"] },
+    "modeReason": { "type": "string" },
+    "startedFrom": { "enum": ["new", "existing"] },
+    "checkpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status", "at"],
+        "properties": {
+          "id": { "enum": ["core-1", "core-2", "core-3", "significant-change", "experiment", "release"] },
+          "status": { "enum": ["passed", "skipped"] },
+          "answer": { "type": "string" },
+          "reason": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^Q-[1-9][0-9]*$" },
+          "text": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["open", "answered"] },
+          "answer": { "type": "string" }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text", "status", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^A-[1-9][0-9]*$" },
+          "text": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["assumed", "hypothesis", "confirmed", "refuted", "current-state"] },
+          "evidence": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "file", "status"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "file": { "type": "string" },
+          "status": { "enum": ["candidate", "chosen", "rejected"] },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["finding", "status"],
+        "properties": {
+          "finding": { "type": "string" },
+          "status": { "enum": ["open", "fixed", "wont-fix"] }
+        }
+      }
+    },
+    "experiments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^EXP-[1-9][0-9]*$" },
+          "status": { "enum": ["running", "ended"] }
+        }
+      }
+    },
+    "faked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["what", "where"],
+        "properties": {
+          "what": { "type": "string" },
+          "where": { "type": "string" }
+        }
+      }
+    },
+    "next": { "type": "string" }
+  }
+}

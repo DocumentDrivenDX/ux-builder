@@ -93,7 +93,7 @@ removes its criteria from `tools/coverage-exceptions.json`.
 
 | Slice | Story / Area | Governing Artifacts | Depends On | Validation Gate | Notes |
 |-------|---------------|---------------------|------------|-----------------|-------|
-| B-018 | Package skeleton, functions and CLI, network guard, design state, `state`, `status` (US-117) | CONTRACT-008 Package, Commands, Design state; STP-117 | None | `npm test --workspace @ux-builder/design` | Phase 1 start; adds the workspace to `npm run check` |
+| B-018 | Package skeleton, functions and CLI, network guard, design state, `state`, `status` (US-117) | CONTRACT-008 Package, Commands, Design state; STP-117 | None | `npm test --workspace @ux-builder/design` | Built 2026-10-23: US-117 cited; the workspace is in `npm run check`; the package stays private until B-025 |
 | B-019 | `init`, create-app `--mcp`, the skill installed in new and existing apps (US-114; US-115-AC1 to AC3) | ADR-036; STP-114, STP-115 | B-018 | design and create-app tests | |
 | B-020 | Checkpoints, `mode`, `decide` fields and `--kind addition`, skill sections for them (US-118, US-119, US-121) | CONTRACT-008, CONTRACT-007 amendment; STP-118, STP-119, STP-121 | B-019 | design and trace tests | |
 | B-021 | `check --diff`, `simplicity.delta-decided` (US-120) | CONTRACT-005 amendment; STP-120 | B-020 | ui tests; `npm run rules` | |
