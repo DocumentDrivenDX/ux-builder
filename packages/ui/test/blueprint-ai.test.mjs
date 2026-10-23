@@ -56,7 +56,7 @@ describe("US-076: the AI rules for a screen's role", () => {
   // @covers US-076-AC4
   test("AC4: every AI rule has a statement, rationale, check kind and a paraphrased, licensed source", () => {
     const licences = new Set(["apple-terms", "microsoft-terms", "CC-BY-4.0", "CC-BY-NC-SA-4.0", "CC-BY-NC-ND-4.0", "W3C", "own"]);
-    assert.equal(AI.length, 47, "SD-005 has 47 rules");
+    assert.equal(AI.length, 48, "SD-005 has 48 rules");
     for (const r of AI) {
       assert.ok(r.title && r.statement && r.rationale, `${r.id} has a title, statement and rationale`);
       assert.ok(r.checks.length && r.checks.every((c) => ["blueprint", "audit", "lint", "card", "review"].includes(c.kind) && c.id), `${r.id} has a check kind`);
@@ -199,11 +199,22 @@ describe("US-080: a chat that renders UI inline (blueprint part)", () => {
     assert.match(f[0].message, /CollectionList, rendered inline on "Ask" at compact and medium/, "the default region: compact and medium");
     assert.match(checkBlueprint(chat({ renders: ["CollectionList"], region: ["expanded"] }))[0].message, /at expanded/, "ai.region sets the size classes");
     assert.deepEqual(checkBlueprint(chat({ renders: ["CollectionList"] }, { states: ["empty", "loading", "error"] })), [], "the screen declares the states");
-    assert.deepEqual(checkBlueprint(chat({ renders: ["Wizard", "DataTable"] })), [], "patterns with no blueprint rule of their own");
+    assert.deepEqual(checkBlueprint(chat({ renders: ["Wizard", "DataTable"], region: ["medium", "expanded"] })), [], "patterns with no blueprint rule at these size classes");
     // In a view, a shell pattern inline breaks the view's own rule.
     const v = { ...skeleton("view") };
     v.screens = [{ ...v.screens[0], ai: { roles: ["generative"], essential: true, renders: ["AppShell"] } }];
     assert.deepEqual(checkBlueprint(v).map((x) => [x.rule, x.severity, x.path]), [["view.no-shell", "warning", "/screens/0/ai/renders/0"]]);
+  });
+
+  // @covers US-080-AC7
+  test("AC7: a Wizard or FormPage rendered inline at compact is a genui.inline-compact warning, pointing to the screen (PRD P1-9)", () => {
+    const chat = (ai) => app([{ id: "chat", title: "Ask", pattern: "FormPage", ai: { roles: ["agent"], acts: true, highImpactActions: [{ label: "Submit payment", approval: "each" }], ...ai } }]);
+    const f = only(checkBlueprint(chat({ renders: ["Wizard", "FormPage", "DataTable"] })), "genui.inline-compact");
+    assert.deepEqual(f.map((x) => [x.severity, x.path]), [["warning", "/screens/0/ai/renders/0"], ["warning", "/screens/0/ai/renders/1"]]);
+    assert.match(f[0].message, /Wizard, rendered inline on "Ask" at compact/);
+    assert.match(f[0].fix, /screen of its own/);
+    assert.deepEqual(only(checkBlueprint(chat({ renders: ["Wizard"], region: ["medium", "expanded"] })), "genui.inline-compact"), [], "a column that is never compact");
+    assert.deepEqual(only(checkBlueprint(app([{ id: "w", title: "Intake", pattern: "Wizard" }])), "genui.inline-compact"), [], "a Wizard screen of its own is not inline");
   });
 
   // @covers US-080-AC2
@@ -214,7 +225,7 @@ describe("US-080: a chat that renders UI inline (blueprint part)", () => {
     assert.match(f[0].message, /ListDetail is not renderable/);
     assert.match(f[0].fix, /artifact pane/);
     assert.match(f[1].fix, /Did you mean "Wizard"/);
-    assert.deepEqual(checkBlueprint(chat(["Wizard", "FormPage", "DataTable", "Card"])), []);
+    assert.deepEqual(only(checkBlueprint(chat(["Wizard", "FormPage", "DataTable", "Card"])), "genui.renderable"), []);
   });
 });
 

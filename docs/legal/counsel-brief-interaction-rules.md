@@ -25,7 +25,7 @@ The rules restate guidance from four sources:
 
 ### Added 2026-10-21: AI and agent experience rules (FEAT-011, ADR-028)
 
-47 further rules (SD-005 *Rule catalogue*, including 15 Adaptive Cards rules) restate guidance on generative AI,
+48 further rules (SD-005 *Rule catalogue*, including 15 Adaptive Cards rules; 47 when this section was written, `genui.inline-compact`, paraphrasing Microsoft Teams card design (CC BY 4.0), was added 2026-10-23) restate guidance on generative AI,
 assistants and agents from these sources. All are paraphrased; 0 are quoted.
 
 | Source | Terms as we read them (2026-10-21) | How the rules use it |

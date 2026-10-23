@@ -98,7 +98,7 @@ the findings of a blueprint check or an audit by rule ID.
 | `screens[].id`, `.title`, `.pattern` | string | yes | `pattern`: a catalogue pattern |
 | `screens[].primaryAction` | `{ "label" }` | no | At most one per screen |
 | `screens[].destructiveActions` | array | no | Each `{ "label", "safeguard": "undo" | "confirm" | "none" }` |
-| `screens[].states` | (`"empty"`, `"loading"`, `"error"`)[] | no | |
+| `screens[].states` | (`"empty"`, `"loading"`, `"error"`, `"partial"`)[] | no | `partial` (part of the content failed on its own) from `@ux-builder/ui` 0.10.0 *[Amended 2026-10-23 — AR-2026-10-22 D-4]*; `screen.states` still asks only for empty, loading and error |
 | `screens[].modals` | array | no | Each `{ "id", "title", "kind": "dialog" | "sheet", "dismiss": "cancel" | "close" | "done", "editsData"?: boolean, "guardsUnsavedChanges"?: boolean, "modals"?: array }` |
 
 Unknown fields are errors (`blueprint.valid`).

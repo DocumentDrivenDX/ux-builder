@@ -4,11 +4,13 @@
      npm test --workspace @ux-builder/ui */
 
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { CHECKS, cardSchema, checkCard } from "../adaptive-cards/check.mjs";
+import { listEpisodes, openEpisode, readEpisode } from "@ux-builder/trace";
+import { CHECKS, cardSchema, checkCard, traceWritten } from "../adaptive-cards/check.mjs";
 import * as entry from "../dist/adaptive-cards.js";
 import { CLEAN, COLUMNS, DESTRUCTIVE, EVERY_ELEMENT, MARKUP, NEWER, PAY_INVOICE } from "../src/adaptive-cards/story-data.js";
 
@@ -210,5 +212,30 @@ describe("US-085-AC6: high-impact actions are marked", () => {
     assert.deepEqual(at(checkCard(noConsequence), "card.high-impact-marked"), ["/actions/0/data/ux-builder"]);
     // The verb counts too.
     assert.deepEqual(at(checkCard(card([], { actions: [action("Confirm", { verb: "pay" })] })), "card.high-impact-marked"), ["/actions/0"]);
+  });
+});
+
+describe("US-106: checkCard in the app's episode trace (AR-2026-10-22 D-6)", () => {
+  // @covers US-106-AC2
+  test("AC2: in Node, checkCard writes a card check event to the open episode; { trace: false } and an app without a trace write nothing", async () => {
+    const tmp = mkdtempSync(join(tmpdir(), "card-trace-"));
+    try {
+      const app = join(tmp, "app"), outside = join(tmp, "outside");
+      mkdirSync(join(app, ".ux-builder"), { recursive: true });
+      mkdirSync(outside);
+      const episode = openEpisode(app, { goal: { text: "Invoice card" } });
+      const bad = { type: "AdaptiveCard", version: "1.6", body: [{ type: "Input.Text", id: "q" }] };
+      const findings = checkCard(bad, { trace: app });
+      assert.ok(findings.length > 0, "the findings are returned at once, as before");
+      checkCard(CLEAN, { trace: app });
+      checkCard(bad, { trace: false });
+      checkCard(bad, { trace: outside });
+      await traceWritten();
+      const checks = readEpisode(app, episode).filter((e) => e.kind === "check");
+      assert.deepEqual(checks.map((e) => [e.check, e.attempt, e.status]), [["card", 1, "warn"], ["card", 2, "pass"]]);
+      assert.ok(checks[0].findings.some((f) => f.ruleId === "card.input-label" && f.severity === "warning" && f.count === 1));
+      assert.match(checks[0].by, /^@ux-builder\/ui@/);
+      assert.deepEqual(listEpisodes(outside), [], "no trace where the app keeps none");
+    } finally { rmSync(tmp, { recursive: true, force: true }); }
   });
 });

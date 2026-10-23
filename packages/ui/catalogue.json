@@ -6126,6 +6126,10 @@
         {
           "name": "card",
           "default": null
+        },
+        {
+          "name": "{ trace }",
+          "default": "{}"
         }
       ],
       "source": "src/adaptive-cards/../../adaptive-cards/check.mjs",
@@ -6144,6 +6148,13 @@
       "purpose": "The highest schema version the renderer and the check support.",
       "source": "src/adaptive-cards/../../adaptive-cards/check.mjs",
       "import": "import { SUPPORTED_VERSION } from \"@ux-builder/ui/adaptive-cards\";"
+    },
+    {
+      "name": "traceWritten",
+      "type": "constant",
+      "purpose": "Resolves when every trace write so far is done.",
+      "source": "src/adaptive-cards/../../adaptive-cards/check.mjs",
+      "import": "import { traceWritten } from \"@ux-builder/ui/adaptive-cards\";"
     }
   ],
   "icons": [
@@ -22666,6 +22677,48 @@
         ]
       },
       {
+        "id": "genui.inline-compact",
+        "title": "A task rendered in a reply fits the compact column",
+        "statement": "At the compact size class, a form or a task in steps rendered inside a conversation shows one short step at a time with its progress, and leaves the composer and the Stop control reachable; a longer task opens on a screen of its own, linked from the reply.",
+        "rationale": "A conversation's column at the compact size class is a phone's width; a long form inside a message pushes the composer away and is hard to finish.",
+        "appliesTo": {
+          "patterns": [
+            "Wizard",
+            "FormPage"
+          ]
+        },
+        "when": {
+          "sizeClass": [
+            "compact"
+          ]
+        },
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "genui.inline-compact"
+          },
+          {
+            "kind": "review",
+            "id": "genui.inline-compact"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "Microsoft Teams: Designing Adaptive Cards (best practices)",
+            "url": "https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/design-effective-cards",
+            "licence": "CC-BY-4.0",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-011: AI and agent experience rules (AIB-03)",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-011-ai-and-agent-experience-rules.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
         "id": "genui.review-prefill",
         "title": "Pre-filled values are the user's to submit",
         "statement": "Values the AI pre-fills in an inline form or wizard are editable, and are submitted only by the user's own action.",
@@ -24341,7 +24394,8 @@
                   "enum": [
                     "empty",
                     "loading",
-                    "error"
+                    "error",
+                    "partial"
                   ]
                 }
               },

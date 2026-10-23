@@ -521,7 +521,7 @@ open-source schema, version 1.6 and earlier.
 | Export | Signature | Behaviour |
 |---|---|---|
 | `AdaptiveCard` | `<AdaptiveCard card={object} onAction={(action) => void} />` | Renders the card with SDK components, in the nearest theme; marks it `data-piq-ai="generated"` |
-| `checkCard` | `(card: object) => Finding[]` | The vendored schema, then every `card.*` rule; CONTRACT-005 *Finding* shape, `path` a JSON Pointer into the card |
+| `checkCard` | `(card: object, options?: { trace?: string \| false }) => Finding[]` | The vendored schema, then every `card.*` rule; CONTRACT-005 *Finding* shape, `path` a JSON Pointer into the card. *[Amended 2026-10-23 — AR-2026-10-22 D-6; from `@ux-builder/ui` 0.10.0]* In Node, it also writes a `card` check event (CONTRACT-007) to the trace of the app at or above `trace` (default: the working directory), after it returns; `traceWritten()` resolves when that is done. `trace: false`, a browser, or no `@ux-builder/trace` or `.ux-builder/` writes nothing |
 | `cardSchema` | object | The vendored Adaptive Cards 1.6 JSON Schema (MIT) |
 
 `onAction` receives `{ type: "Action.Submit" | "Action.Execute", id?, verb?, data, inputs }`,
@@ -536,7 +536,7 @@ an action marked high-impact until the user approves.
 | `TextBlock` (`style: heading` → a heading); `RichTextBlock`, `TextRun` | Text in the theme's type scale; a sanitised markdown subset, never HTML |
 | `Image`, `ImageSet` | `img` with `altText`; `Cluster` |
 | `Media` | Native `video` or `audio` with its captions |
-| `Container` (`style`: `emphasis`, `good`, `attention`, `warning`, `accent`) | `Stack` on the matching surface or status tokens |
+| `Container` (`style`: `emphasis`, `good`, `attention`, `warning`, `accent`) | `Stack` on the matching surface or status tokens: `emphasis` → `color.surface-sunken`; `good`, `warning`, `attention` → `color.status-positive`, `-caution`, `-negative` (CONTRACT-001, from `@ux-builder/ui` 0.10.0; `state.*` before); `accent` → `color.accent` |
 | `ColumnSet`, `Column` (`auto`, `stretch`, weight, px) | `Grid`, collapsing to one column at compact |
 | `FactSet` | `DescriptionList` |
 | `Table` | `DataTable` (static) |
@@ -573,7 +573,7 @@ The renderer shows an approval with `consequence`, Approve and Deny
 
 | Surface | As built |
 |---|---|
-| `@ux-builder/ui/adaptive-cards/check` | A second export: `checkCard`, `cardSchema`, `CHECKS` (the rule IDs `checkCard` reports) and `SUPPORTED_VERSION`, with no React, so Node tools (the MCP server, `tools/check-rules.mjs`) load it without a DOM. `@ux-builder/ui/adaptive-cards` exports the same functions with `AdaptiveCard`. The schema is vendored verbatim at `adaptive-cards/schema-1.6/adaptive-card.json` (MIT, recorded in `licenses/vendored.json`) |
+| `@ux-builder/ui/adaptive-cards/check` | A second export: `checkCard`, `cardSchema`, `CHECKS` (the rule IDs `checkCard` reports), `SUPPORTED_VERSION` and `traceWritten`, with no React, so Node tools (the MCP server, `tools/check-rules.mjs`) load it without a DOM. `@ux-builder/ui/adaptive-cards` exports the same functions with `AdaptiveCard`. The schema is vendored verbatim at `adaptive-cards/schema-1.6/adaptive-card.json` (MIT, recorded in `licenses/vendored.json`) |
 | `checkCard` findings | Schema problems are `severity: "error"` under `card.version` (the card is not a valid 1.6 card); every rule finding is a warning. No rule runs on an element the schema rejects, or inside it. An element outside 1.6 is a `card.version` warning only when it has no `fallback`; its fallback is checked in its place. Ordered by path, then rule |
 | `AdaptiveCard` props | Also `decision` and `onDecide({ action, decision })`, so an app records the user's choice on a high-impact action (`action` is the action's `id`, else its `verb`, else its title); `headingLevel` (default 3); `disclosure` (visible AI disclosure text, tied with `aria-describedby`). Only the user's choice in the card, or a `decision` the app passes back, decides; no field of the card is read for it |
 | Conversation (*Assistant and generative UI*) | A message part `{ type: "adaptive-card", id?, card }` renders `AdaptiveCard`, done without changing `GenerativeComponent` or the renderable catalogue. `Conversation` gains `onCardAction({ messageId, partId, action })` and `onCardDecide({ messageId, partId, action, decision })`, and keeps each card's decision by message and part. The AI SDK and assistant-ui adapters map a tool output `{ type: "adaptive-card", card }`, or an object with `type: "AdaptiveCard"`, to that part |

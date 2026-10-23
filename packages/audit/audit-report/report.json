@@ -1,9 +1,9 @@
 {
   "tool": "@ux-builder/audit",
-  "version": "0.3.0",
-  "generatedAt": "2026-10-22T19:01:38.664Z",
+  "version": "0.4.0",
+  "generatedAt": "2026-10-23T19:05:41.378Z",
   "urls": [
-    "http://127.0.0.1:64028/only-layout.html"
+    "http://127.0.0.1:62429/only-layout.html"
   ],
   "rules": {
     "theme-applied": "The theme's CSS is on the page and applies.",
@@ -257,7 +257,7 @@
   },
   "pages": [
     {
-      "url": "http://127.0.0.1:64028/only-layout.html",
+      "url": "http://127.0.0.1:62429/only-layout.html",
       "theme": "praxis-carbon",
       "screen": null,
       "widths": [
@@ -274,7 +274,7 @@
   ],
   "runs": [
     {
-      "url": "http://127.0.0.1:64028/only-layout.html",
+      "url": "http://127.0.0.1:62429/only-layout.html",
       "theme": "praxis-carbon",
       "appearance": "light",
       "mode": "event",
@@ -304,7 +304,7 @@
           "url": "https://www.w3.org/TR/WCAG22/#focus-not-obscured-minimum"
         }
       ],
-      "url": "http://127.0.0.1:64028/only-layout.html",
+      "url": "http://127.0.0.1:62429/only-layout.html",
       "severity": "warning",
       "selector": "#under",
       "message": "focused, it is hidden behind html > body > div > div",
@@ -335,7 +335,7 @@
           "url": "https://www.w3.org/TR/WCAG22/#reflow"
         }
       ],
-      "url": "http://127.0.0.1:64028/only-layout.html",
+      "url": "http://127.0.0.1:62429/only-layout.html",
       "severity": "warning",
       "selector": "html > body > div > div",
       "message": "the page scrolls sideways at 320px (content 916px wide; widest: html > body > div > div)",
