@@ -438,6 +438,12 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
         departs: z.boolean().optional().describe("true when this departs from the guidance"),
         workaround: z.boolean().optional().describe("true when this works around a missing component"),
         screen: z.string().optional().describe("The blueprint screen ID, when the decision is about one"),
+        kind: z.enum(["addition", "checkpoint"]).optional().describe("addition: a new destination, screen, modal, required input or step; it then needs the five answers below"),
+        goal: z.string().optional().describe("For an addition: the user goal it supports"),
+        without: z.string().optional().describe("For an addition: whether the goal can be reached without it"),
+        simplest: z.string().optional().describe("For an addition: the simplest viable alternative"),
+        assumptions: list().describe("For an addition: what it assumes about user behaviour"),
+        validation: z.string().optional().describe("For an addition: how the team will know the result is better"),
       },
     }, async (d) => {
       try {

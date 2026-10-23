@@ -41,8 +41,8 @@ Three core checkpoints (after Define, Explore and Validate) and three conditiona
 ## Acceptance Criteria
 
 - [ ] **US-118-AC1** — Given an app at Define with an open episode, when `state checkpoint core-1 --answer <text>` runs, then the state marks `core-1` passed with the answer and time, and the trace gains a `decision` event whose `chose` is the answer.
-- [ ] **US-118-AC2** — Given an app, when `state checkpoint core-2 --skip --reason <text>` runs, then the state marks `core-2` skipped with the reason; without `--reason` it exits 1 and writes nothing.
-- [ ] **US-118-AC3** — Given any checkpoint ID other than the six CONTRACT-008 names, when `state checkpoint` runs with it, then it exits 1 naming the six valid IDs.
+- [ ] **US-118-AC2** — Given an app, when `state checkpoint core-2 --skip --reason <text>` runs, then the state marks `core-2` skipped with the reason; without `--reason` it exits 2 (bad input, CONTRACT-008) and writes nothing.
+- [ ] **US-118-AC3** — Given any checkpoint ID other than the six CONTRACT-008 names, when `state checkpoint` runs with it, then it exits 2 (bad input, CONTRACT-008) naming the six valid IDs.
 - [ ] **US-118-AC4** — Given the installed skill, when its text is read, then it lists the three core and three conditional checkpoints, says to ask one question and wait, to ask only questions whose answers change the design, and to list small reversible assumptions with `state set`.
 - [ ] **US-118-AC5** — Given the installed skill, when its text is read, then it says HELIX documents change only through `ux-builder-blueprint propose` patches offered as a batch at a checkpoint, and that the guide never edits `docs/helix/` itself.
 
@@ -55,8 +55,8 @@ Three core checkpoints (after Define, Explore and Validate) and three conditiona
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
 | AC1 | US-118-AC1 | an app at Define with an open episode | `state checkpoint core-1 --answer <text>` runs | the state marks `core-1` passed with the answer and time, and the trace gains a `decision` event whose `chose` is the answer |
-| AC2 | US-118-AC2 | an app | `state checkpoint core-2 --skip --reason <text>` runs | the state marks `core-2` skipped with the reason; without `--reason` it exits 1 and writes nothing |
-| AC3 | US-118-AC3 | any checkpoint ID other than the six CONTRACT-008 names | `state checkpoint` runs with it | it exits 1 naming the six valid IDs |
+| AC2 | US-118-AC2 | an app | `state checkpoint core-2 --skip --reason <text>` runs | the state marks `core-2` skipped with the reason; without `--reason` it exits 2 (bad input, CONTRACT-008) and writes nothing |
+| AC3 | US-118-AC3 | any checkpoint ID other than the six CONTRACT-008 names | `state checkpoint` runs with it | it exits 2 (bad input, CONTRACT-008) naming the six valid IDs |
 | AC4 | US-118-AC4 | the installed skill | its text is read | it lists the three core and three conditional checkpoints, says to ask one question and wait, to ask only questions whose answers change the design, and to list small reversible assumptions with `state set` |
 | AC5 | US-118-AC5 | the installed skill | its text is read | it says HELIX documents change only through `ux-builder-blueprint propose` patches offered as a batch at a checkpoint, and that the guide never edits `docs/helix/` itself |
 

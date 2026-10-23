@@ -216,9 +216,12 @@ name, question, measures[], baseline: boolean, sources[] }`. Baselines:
 `decision` events, `record_decision` and `ux-builder-trace decide` gain
 optional `goal`, `without`, `simplest`, `assumptions[]`, `validation`.
 `decide --kind addition` (a new destination, screen, modal, required input
-or step) requires all five and exits 2 naming a missing one.
+or step) requires all five and exits 2 naming a missing one; the event
+records it as `decisionKind: "addition"` (the event's own `kind` stays
+`decision`).
 Checkpoint answers are recorded as `decision` events with
-`checkpoint: <id>`.
+`decisionKind: "checkpoint"` and `checkpoint: <id>`. A decision about an
+interaction decision record carries `ux: "UXD-<n>"`.
 
 ## Amendment to CONTRACT-004 (app integration) *[FEAT-018]*
 

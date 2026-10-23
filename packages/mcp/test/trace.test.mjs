@@ -12,7 +12,7 @@ import { join } from "node:path";
 import { after, before, describe, test } from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { currentEpisode, readEpisode, validateEvent, validateTrace } from "@ux-builder/trace";
+import { currentEpisode, readEpisode, recordDecision, validateEvent, validateTrace } from "@ux-builder/trace";
 import { skeleton } from "@ux-builder/ui/blueprint";
 import { CLEAN } from "../../ui/src/adaptive-cards/story-data.js";
 import { answerSummary, createServer, sdk } from "../server.mjs";
@@ -133,6 +133,27 @@ describe("FEAT-016: the MCP server writes the episode trace", () => {
     assert.match(d.why, /^a queue fits review; the demo key \[masked:[a-z-]+\] stays out of it$/);
     assert.ok(!readFileSync(join(app, `.ux-builder/trace/${d.episode}.jsonl`), "utf8").includes(KEY));
     assert.deepEqual(validateEvent(d), []);
+  });
+
+  // @covers US-119-AC2
+  test("US-119-AC2: record_decision with the five answers writes the same event decide does", async () => {
+    const input = { kind: "addition", chose: "A map screen", why: "People choose rivers by place", goal: "Find a river near me", without: "No: a list hides distance", simplest: "A list sorted by distance", assumptions: ["Location is available"], validation: "Compare task time in a test" };
+    const r = await call("record_decision", input);
+    assert.ok(!r.isError, r.content[0].text);
+    const viaMcp = events().at(-1);
+    // The same input through the library decide uses, in another app.
+    const other = mkdtempSync(join(tmpdir(), "mcp-decide-"));
+    try {
+      mkdirSync(join(other, ".ux-builder"), { recursive: true });
+      const viaDecide = recordDecision(other, input, { by: "agent" });
+      const strip = ({ seq, at, episode, ...rest }) => rest;
+      assert.deepEqual(strip(viaMcp), strip(viaDecide));
+      assert.equal(viaMcp.goal, "Find a river near me");
+      assert.deepEqual(validateEvent(viaMcp), []);
+    } finally { rmSync(other, { recursive: true, force: true }); }
+    const missing = await call("record_decision", { ...input, validation: undefined });
+    assert.equal(missing.isError, true);
+    assert.match(missing.content[0].text, /an addition needs "validation"/);
   });
 
   // @covers US-107-AC2

@@ -17,6 +17,7 @@
     "app.mjs",
     "state.mjs",
     "status.mjs",
+    "checkpoints.mjs",
     "init.mjs",
     "cli.mjs",
     "schema",

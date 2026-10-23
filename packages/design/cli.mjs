@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { DesignError, findApp, init, stateGet, stateSet, status, VERSION } from "./index.mjs";
+import { checkpoint, DesignError, findApp, init, setMode, stateGet, stateSet, status, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -24,6 +24,12 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   state set <path> <json>
       write one field, checked against the schema. <path>[+] appends to a
       list: state set 'assumptions[+]' '{"text":"Location is available"}'.
+  state checkpoint <id> (--answer <text> | --skip --reason <text>)
+      record the person's answer at a checkpoint, or a skip and why, in the
+      state and the trace. <id>: core-1, core-2, core-3, significant-change,
+      experiment, release.
+  mode full|change [--why <text>]
+      the full loop, or change mode for an everyday change.
 
 Options:
   --app <dir>   the app (default: the nearest folder above with .ux-builder/
@@ -46,7 +52,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -79,7 +85,17 @@ async function main(argv) {
       print(out, values.json, `${path} set.`);
       return 0;
     }
-    throw new DesignError(`unknown state command "${sub ?? ""}": use get or set`);
+    if (sub === "checkpoint") {
+      const r = checkpoint(app, { id: path, answer: values.answer, skip: values.skip, reason: values.reason });
+      print(r, values.json, `Checkpoint ${r.checkpoint.id} ${r.checkpoint.status}${r.trace ? ` (trace ${r.trace.episode})` : ""}.`);
+      return 0;
+    }
+    throw new DesignError(`unknown state command "${sub ?? ""}": use get, set or checkpoint`);
+  }
+  if (command === "mode") {
+    const r = setMode(app, { mode: rest[0], why: values.why });
+    print(r, values.json, r.mode === "change" ? "Change mode: challenge, impact, complexity, decision." : "The full loop.");
+    return 0;
   }
   throw new DesignError(`unknown command "${command}"; see ux-builder-design --help`);
 }

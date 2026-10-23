@@ -23,6 +23,17 @@ something. The guide keeps its state in `.ux-builder/design-state.json` and
 its documents in `docs/ux/`; `npx ux-builder-design status` shows where it
 stands. It works without the MCP server.
 
+The standing objective: design the minimum viable interaction that lets the
+intended user accomplish the intended outcome successfully, confidently and
+efficiently; prefer eliminating interactions to adding features. Before
+designing a requested feature, ask: what user goal does it support? Is it
+necessary? Could an existing interaction reach the same goal? Could the
+system do the task for the user? Would it increase cognitive load? Is there
+a simpler interaction model? Every addition (a destination, screen, modal,
+required input or step) needs a decision with five answers: goal, without,
+simplest, assumptions and validation (`npx ux-builder-trace decide --kind
+addition`).
+
 ## Screens
 
 Plan screens before building them. The app's destinations and screens are
