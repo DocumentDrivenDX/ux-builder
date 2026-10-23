@@ -43,7 +43,7 @@ let server, browser, created;
 
 before(async () => {
   mkdirSync(join(tmp, "sdk"));
-  for (const p of ["tokens", "ui", "audit", "trace"]) sh("npm", ["pack", "--silent", "--pack-destination", join(tmp, "sdk")], join(ROOT, "packages", p));
+  for (const p of ["tokens", "ui", "audit", "trace", "design"]) sh("npm", ["pack", "--silent", "--pack-destination", join(tmp, "sdk")], join(ROOT, "packages", p));
   for (const [name, a] of Object.entries(APPS)) {
     const r = spawnSync(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), dir(name), "--modality", a.modalities, "--theme", "databricks", "--sdk-from", join(tmp, "sdk"), ...(a.helix ? [] : ["--no-helix"])], { cwd: tmp, encoding: "utf8" });
     assert.equal(r.status, 0, `create-app ${name}\n${r.stdout}\n${r.stderr}`);

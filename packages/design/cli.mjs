@@ -3,13 +3,19 @@
    deterministic work, for the agent (through its shell) and for a person.
    Exit codes: 0 done; 1 a check failed; 2 bad input or a refusal. */
 
+import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { DesignError, findApp, stateGet, stateSet, status, VERSION } from "./index.mjs";
+import { DesignError, findApp, init, stateGet, stateSet, status, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
 Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
 
+  init [--mcp]
+      put the guide in this app: the skill in .claude/skills/ux-builder-design/,
+      an empty design state, a starting blueprint if there is none, and with
+      --mcp a .mcp.json for the ux-builder MCP server. Refuses if a design
+      state exists.
   status
       where the loop stands: activity, mode, chosen alternative, untested
       assumptions, open questions, checkpoints and the next action.
@@ -40,10 +46,18 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
+
+  if (command === "init") {
+    // init works in the folder it is given (or this one): an existing app may have no .ux-builder/ yet.
+    const r = init(resolve(values.app ?? "."), { mcp: values.mcp });
+    print(r, values.json, [`Wrote ${r.written.join(", ")}.`, ...r.notes].join("\n"));
+    return 0;
+  }
+
   const app = values.app ? findApp(values.app) : findApp();
 
   if (command === "status") {

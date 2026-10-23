@@ -27,6 +27,13 @@
      --agent <name>     the agent creating the app, for its episode trace (default:
                         UX_BUILDER_AGENT, else claude-code inside Claude Code, else none)
      --model <id>       the agent's model, for its episode trace (default: UX_BUILDER_MODEL)
+     --mcp              also write .mcp.json for the ux-builder MCP server (optional:
+                        the guide and the skills work without it; ADR-036)
+
+   Every app gets the guided design loop (FEAT-018, ADR-036): @ux-builder/design,
+   its skill in .claude/skills/ux-builder-design/ and an empty design state
+   (.ux-builder/design-state.json, starting at Define). CLAUDE.md, AGENTS.md and
+   the Home screen point to /ux-builder-design.
 
    By default the app also starts on the latest HELIX release: its skill and
    catalogue in .claude/skills/helix/, the .helix.yml marker and the starter
@@ -56,6 +63,7 @@ import { createInterface } from "node:readline";
 import { checkBlueprint } from "@ux-builder/ui/blueprint";
 import { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, modalityProblems } from "@ux-builder/ui/blueprint/modalities";
 import * as trace from "@ux-builder/trace";
+import { init as initDesign } from "@ux-builder/design";
 import { getHelix, install as installHelix } from "./helix.mjs";
 import { blueprintFor, modalityGuide, normalize, shellFiles, starterSpec } from "./shell.mjs";
 
@@ -67,7 +75,7 @@ const die = (m) => { console.error(`create-app: ${m}`); process.exit(1); };
 /* The SDK versions to pin: the ones this package was released with. */
 export function sdkVersions() {
   const v = (p) => JSON.parse(readFileSync(require.resolve(`${p}/package.json`), "utf8")).version;
-  return { "@ux-builder/tokens": v("@ux-builder/tokens"), "@ux-builder/ui": v("@ux-builder/ui"), "@ux-builder/audit": v("@ux-builder/audit"), "@ux-builder/trace": v("@ux-builder/trace") };
+  return { "@ux-builder/tokens": v("@ux-builder/tokens"), "@ux-builder/ui": v("@ux-builder/ui"), "@ux-builder/audit": v("@ux-builder/audit"), "@ux-builder/trace": v("@ux-builder/trace"), "@ux-builder/design": v("@ux-builder/design") };
 }
 export function themes() {
   return JSON.parse(readFileSync(require.resolve("@ux-builder/tokens/manifest.json"), "utf8")).themes.map((t) => t.name);
@@ -171,7 +179,7 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = 
   // The audit visits every screen of the shell, so each modality's screen is checked (FEAT-014 MOD-08).
   const auditUrls = [...new Set(blueprintFor(name, modalities).screens.map((sc) => sc.path ?? "/"))].map((p) => `http://127.0.0.1:4173${p}`).join(" ");
   const fill = (s) => s.replaceAll("__MODALITY_GUIDE__", guide).replaceAll("__MODALITIES__", modalities.join(", ")).replaceAll("__AUDIT_URLS__", auditUrls).replaceAll("__APP_NAME__", name).replaceAll("__THEME__", theme)
-    .replaceAll("__TOKENS__", dep("@ux-builder/tokens")).replaceAll("__UI__", dep("@ux-builder/ui")).replaceAll("__AUDIT__", dep("@ux-builder/audit")).replaceAll("__TRACE__", dep("@ux-builder/trace"))
+    .replaceAll("__TOKENS__", dep("@ux-builder/tokens")).replaceAll("__UI__", dep("@ux-builder/ui")).replaceAll("__AUDIT__", dep("@ux-builder/audit")).replaceAll("__TRACE__", dep("@ux-builder/trace")).replaceAll("__DESIGN__", dep("@ux-builder/design"))
     .replaceAll("__EPISODE_GUIDE__", trace.AGENT_GUIDE.trimEnd()).replaceAll("__TRACE_IGNORE__", trace.GITIGNORE_LINES.join("\n"));
   const written = [];
   const walk = (d) => {
@@ -272,16 +280,18 @@ export async function create(dir, { helix: h = {}, log = () => {}, agent, ...opt
     if (existsSync(spec)) writeFileSync(spec, uncite(readFileSync(spec, "utf8")));
     if (unavailable) r.helixUnavailable = unavailable;
   }
-  const options = { name: r.name, blueprint: opts.blueprint ? "given" : "starter", helix: h.skip ? "none" : h.offline ? "offline" : h.tag ? `pinned ${h.tag}` : r.helix ? "latest" : "unavailable", ...(r.helix ? { helixTag: r.helix.tag } : {}), sdkFrom: !!opts.sdkFrom };
+  // The guided design loop (FEAT-018 GDL-72): the skill and an empty design state, starting at Define.
+  r.design = initDesign(r.dir, { mcp: !!opts.mcp, startedFrom: "new" });
+  const options = { name: r.name, mcp: !!opts.mcp, blueprint: opts.blueprint ? "given" : "starter", helix: h.skip ? "none" : h.offline ? "offline" : h.tag ? `pinned ${h.tag}` : r.helix ? "latest" : "unavailable", ...(r.helix ? { helixTag: r.helix.tag } : {}), sdkFrom: !!opts.sdkFrom };
   r.episode = traceCreate(r, { agent: agentOf(agent), options });
   return r;
 }
 
 // npm create runs the bin through a symlink in node_modules/.bin, so compare real paths.
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { values, positionals } = parseArgs({ allowPositionals: true, options: { modality: { type: "string" }, theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, agent: { type: "string" }, model: { type: "string" }, help: { type: "boolean", short: "h" } } });
+  const { values, positionals } = parseArgs({ allowPositionals: true, options: { mcp: { type: "boolean" }, modality: { type: "string" }, theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, agent: { type: "string" }, model: { type: "string" }, help: { type: "boolean", short: "h" } } });
   if (values.help || !positionals[0]) {
-    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix] [--agent <name>] [--model <id>]\n\nModalities (--modality, comma-separated; asked for in a terminal, required without one):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
+    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix] [--agent <name>] [--model <id>] [--mcp]\n\nModalities (--modality, comma-separated; asked for in a terminal, required without one):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
     process.exit(values.help ? 0 : 1);
   }
   // The modalities, before anything is written (MOD-01, MOD-03; US-096).
@@ -293,7 +303,7 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   }
   let r;
   try {
-    r = await create(positionals[0], { modalities, theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] }, agent: { agent: values.agent, model: values.model }, log: (m) => console.error(m) });
+    r = await create(positionals[0], { modalities, theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] }, agent: { agent: values.agent, model: values.model }, mcp: values.mcp, log: (m) => console.error(m) });
   } catch (e) { die(e.message); }
   console.log(`Created ${r.name}, a ${r.modalities.join(" and ")} app, on the ${r.theme} theme (@ux-builder/tokens ${r.versions["@ux-builder/tokens"]}, @ux-builder/ui ${r.versions["@ux-builder/ui"]}).
 
@@ -301,7 +311,9 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   npm install
   npm run dev      # http://localhost:5173
   npm run check:blueprint  # the plan of the screens, app.blueprint.json
-  npm run lint     # no hard-coded colours, fonts or radii`);
+  npm run lint     # no hard-coded colours, fonts or radii
+
+Design with your agent: in Claude Code, type /ux-builder-design (the guide's skill is in .claude/skills/ux-builder-design/).${r.design?.mcp ? " .mcp.json configures the ux-builder MCP server." : ""}`);
   if (r.episode) console.log(`
 Episode trace: ${r.episode} in .ux-builder/trace/ records the creation. Open an episode for each change (npx ux-builder-trace start, or the MCP tool start_episode); AGENTS.md says how.`);
   if (r.helix) console.log(`

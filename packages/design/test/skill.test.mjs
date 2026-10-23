@@ -49,3 +49,16 @@ describe("the skill", () => {
     assert.match(SKILL, /you never need it/);
   });
 });
+
+describe("the skill for a new app (US-114)", () => {
+  // @covers US-114-AC5
+  test("names the eight capabilities and the four activities, and opens each session with the design state's summary", () => {
+    const caps = section("Eight capabilities");
+    for (const c of ["Requirements analysis", "UX research", "Task modelling", "Interaction optimization", "UX design", "Prototyping", "UX evaluation", "Artifact management"]) assert.match(caps, new RegExp(`\\| ${c} \\|`));
+    const acts = section("The four activities");
+    for (const a of ["Define", "Explore", "Experience", "Validate"]) assert.match(acts, new RegExp(`^\\| ${a} \\|`, "m"));
+    const open = section("Opening every session");
+    assert.match(open, /ux-builder-design status/);
+    assert.match(open, /Tell the person where things stand/);
+  });
+});

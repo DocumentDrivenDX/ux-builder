@@ -14,6 +14,15 @@ __MODALITY_GUIDE__
 The app starts as an empty shell for its modalities, with no sample data:
 build your own screens in it.
 
+## Designing
+
+To design or redesign the app's experience with your agent, start the
+guided design loop: in Claude Code, type `/ux-builder-design` (the skill is
+in `.claude/skills/ux-builder-design/`), or ask the agent to design
+something. The guide keeps its state in `.ux-builder/design-state.json` and
+its documents in `docs/ux/`; `npx ux-builder-design status` shows where it
+stands. It works without the MCP server.
+
 ## Screens
 
 Plan screens before building them. The app's destinations and screens are

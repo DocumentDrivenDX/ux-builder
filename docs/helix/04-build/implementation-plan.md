@@ -94,12 +94,12 @@ removes its criteria from `tools/coverage-exceptions.json`.
 | Slice | Story / Area | Governing Artifacts | Depends On | Validation Gate | Notes |
 |-------|---------------|---------------------|------------|-----------------|-------|
 | B-018 | Package skeleton, functions and CLI, network guard, design state, `state`, `status` (US-117) | CONTRACT-008 Package, Commands, Design state; STP-117 | None | `npm test --workspace @ux-builder/design` | Built 2026-10-23: US-117 cited; the workspace is in `npm run check`; the package stays private until B-025 |
-| B-019 | `init`, create-app `--mcp`, the skill installed in new and existing apps (US-114; US-115-AC1 to AC3) | ADR-036; STP-114, STP-115 | B-018 | design and create-app tests | |
+| B-019 | `init`, create-app `--mcp`, the skill installed in new and existing apps (US-114; US-115-AC1 to AC3) | ADR-036; STP-114, STP-115 | B-018 | design and create-app tests | Built 2026-10-23, with US-115-AC4 (init's refusal); `@ux-builder/design` 0.1.0 made public for the starter to depend on |
 | B-020 | Checkpoints, `mode`, `decide` fields and `--kind addition`, skill sections for them (US-118, US-119, US-121) | CONTRACT-008, CONTRACT-007 amendment; STP-118, STP-119, STP-121 | B-019 | design and trace tests | |
 | B-021 | `check --diff`, `simplicity.delta-decided` (US-120) | CONTRACT-005 amendment; STP-120 | B-020 | ui tests; `npm run rules` | |
 | B-022 | `docs/ux/` types, templates, examples, `validate` (US-123) | CONTRACT-008 Documents; STP-123 | B-018 | design tests | |
 | B-023 | `brief`, `principles.json`, project rules in `check` (US-122) | SD-006 Project rules; STP-122 | B-022 | design and ui tests | |
-| B-024 | `baseline` and routing an existing app (US-115-AC4 to AC6) | SD-006 Baseline; STP-115 | B-022 | design tests | |
+| B-024 | `baseline` and routing an existing app (US-115-AC5, AC6) | SD-006 Baseline; STP-115 | B-022 | design tests | |
 | B-025 | MCP wrappers and the parity test (US-116) | ADR-036 rule 2; STP-116 | B-018 to B-024 | mcp tests | Phase 1 exit: a fixture idea reaches `core-1` with no MCP |
 | B-026 | Hypotheses and evidence with masking (US-124, US-125) | ADR-039; STP-124, STP-125 | B-022 | design tests | Phase 2 |
 | B-027 | Jobs and its rules (US-126) | CONTRACT-008 type rules; STP-126 | B-026 | design tests | |

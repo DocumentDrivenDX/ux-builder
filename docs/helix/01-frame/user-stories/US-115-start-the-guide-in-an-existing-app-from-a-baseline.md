@@ -44,7 +44,7 @@ ddx:
 - [ ] **US-115-AC1** — Given an app with ux-builder, a blueprint and a HELIX marker, when `ux-builder-design init` runs, then it installs the skill into `.claude/skills/ux-builder-design/`, writes a valid empty design state and exits 0.
 - [ ] **US-115-AC2** — Given an app with ux-builder and no `app.blueprint.json`, when `init` runs, then it also writes a starting blueprint as `ux-builder-blueprint init` does, and says the guide will help describe the current screens.
 - [ ] **US-115-AC3** — Given an app without `@ux-builder/ui` installed, when `init` runs, then it writes the state and skill, and prints that the validated prototype and the audit need the SDK, naming the adoption steps.
-- [ ] **US-115-AC4** — Given an app that already has `.ux-builder/design-state.json`, when `init` runs, then it exits 1, names the file and leaves it unchanged.
+- [ ] **US-115-AC4** — Given an app that already has `.ux-builder/design-state.json`, when `init` runs, then it exits 2 (a refusal, CONTRACT-008), names the file and leaves it unchanged.
 - [ ] **US-115-AC5** — Given an initialized app with a blueprint, HELIX stories and an assessment run, when `ux-builder-design baseline` runs, then `docs/ux/baseline.md` lists every screen, journey, story and open finding, every drafted job and task is marked *current state, assumed*, and the state's activity is `baseline`.
 - [ ] **US-115-AC6** — Given the installed skill, when its text is read, then it says that an existing app's first session runs `baseline` and then routes a specific change to impact and Explore, "too complicated" to the assessment and `simplify`, complaints to evidence, and a new feature to Define.
 
@@ -60,7 +60,7 @@ ddx:
 | AC1 | US-115-AC1 | an app with ux-builder, a blueprint and a HELIX marker | `ux-builder-design init` runs | it installs the skill into `.claude/skills/ux-builder-design/`, writes a valid empty design state and exits 0 |
 | AC2 | US-115-AC2 | an app with ux-builder and no `app.blueprint.json` | `init` runs | it also writes a starting blueprint as `ux-builder-blueprint init` does, and says the guide will help describe the current screens |
 | AC3 | US-115-AC3 | an app without `@ux-builder/ui` installed | `init` runs | it writes the state and skill, and prints that the validated prototype and the audit need the SDK, naming the adoption steps |
-| AC4 | US-115-AC4 | an app that already has `.ux-builder/design-state.json` | `init` runs | it exits 1, names the file and leaves it unchanged |
+| AC4 | US-115-AC4 | an app that already has `.ux-builder/design-state.json` | `init` runs | it exits 2 (a refusal, CONTRACT-008), names the file and leaves it unchanged |
 | AC5 | US-115-AC5 | an initialized app with a blueprint, HELIX stories and an assessment run | `ux-builder-design baseline` runs | `docs/ux/baseline.md` lists every screen, journey, story and open finding, every drafted job and task is marked *current state, assumed*, and the state's activity is `baseline` |
 | AC6 | US-115-AC6 | the installed skill | its text is read | it says that an existing app's first session runs `baseline` and then routes a specific change to impact and Explore, "too complicated" to the assessment and `simplify`, complaints to evidence, and a new feature to Define |
 

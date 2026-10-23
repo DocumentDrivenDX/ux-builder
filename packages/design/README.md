@@ -5,8 +5,16 @@ designer or developer through designing an app's UX, and stops for the
 person's decision at each checkpoint. The agent does the reasoning; this
 package does the deterministic work.
 
-**Status:** being built (FEAT-018 phase 1). The package is private until
-phase 1 is complete; nothing here is published yet.
+**Status:** being built (FEAT-018 phase 1). `init`, `status` and the
+design state work; the rest of the loop's commands arrive slice by slice.
+New apps from `npm create @ux-builder/app` get it already.
+
+```sh
+npm install -D @ux-builder/design
+npx ux-builder-design init          # an existing app; --mcp also writes .mcp.json
+```
+
+Then, in Claude Code, type `/ux-builder-design`.
 
 - **CLI first, MCP optional.** Every capability is a `ux-builder-design`
   command with `--json` output and an exported function. The skill drives
@@ -17,7 +25,12 @@ phase 1 is complete; nothing here is published yet.
 
 ## Commands built so far
 
+`init` refuses when a design state exists. In an app without
+`@ux-builder/ui` it still works, and says the validated prototype and the
+audit need the SDK.
+
 ```sh
+npx ux-builder-design init [--mcp]           # the skill, an empty design state, a starting blueprint if none
 npx ux-builder-design status                 # where the loop stands, in plain words
 npx ux-builder-design state get [<path>]     # the design state, or one field
 npx ux-builder-design state set <path> <json>

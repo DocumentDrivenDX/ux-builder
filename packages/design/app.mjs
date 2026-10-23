@@ -20,12 +20,12 @@ export function findApp(start = process.cwd()) {
 }
 
 /* Where the guide may write, relative to the app. */
-const ALLOWED = [/^docs\/ux\//, /^\.ux-builder\//, /^prototype\//, /^app\.blueprint(\.[a-z0-9-]+)?\.json$/];
+const ALLOWED = [/^docs\/ux\//, /^\.ux-builder\//, /^prototype\//, /^app\.blueprint(\.[a-z0-9-]+)?\.json$/, /^\.claude\/skills\/ux-builder-design\//, /^\.mcp\.json$/];
 
 export function writeInApp(app, path, text) {
   const rel = relative(app, resolve(app, path)).split(sep).join("/");
   if (rel.startsWith("..") || !ALLOWED.some((re) => re.test(rel))) {
-    throw new DesignError(`refusing to write ${rel}: the guide writes only under docs/ux/, .ux-builder/, prototype/ and the blueprint files`);
+    throw new DesignError(`refusing to write ${rel}: the guide writes only under docs/ux/, .ux-builder/, prototype/, its own skill, .mcp.json and the blueprint files`);
   }
   const abs = join(app, rel);
   mkdirSync(dirname(abs), { recursive: true });

@@ -31,6 +31,7 @@ There is no sample domain or data. Native `ios`, `android`, `macos` and
 | `--helix-version <tag>` | Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written |
 | `--helix-offline` | Use the HELIX bundled with this starter; no network request. Not with `--helix-version` (refused, nothing written) |
 | `--no-helix` | Leave HELIX out: no marker, documents, skill or `ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines |
+| `--mcp` | Also write `.mcp.json` for the ux-builder MCP server (`npx @ux-builder/mcp`). Optional: the skills and the guided design loop work without it (ADR-036) |
 
 The HELIX request reads `GITHUB_TOKEN` (sent to GitHub's API as a bearer
 token, never written) and honours `HTTPS_PROXY`, `HTTP_PROXY` and `NO_PROXY`
@@ -93,6 +94,11 @@ without HELIX, and the output says why.
   pointing at the SDK's guidance and naming, for each of the app's
   modalities, the components to build with and the rule families that apply, and the Claude Code skill `ux-builder-ui`,
   installed into `.claude/skills/` by `npm install`.
+- The guided design loop (FEAT-018): `@ux-builder/design` as a dev
+  dependency, its skill in `.claude/skills/ux-builder-design/` (refreshed by
+  `npm install`), and an empty design state, `.ux-builder/design-state.json`,
+  starting at Define. `CLAUDE.md`, `AGENTS.md` and the Home screen say to
+  start with `/ux-builder-design`.
 
 The new app pins the exact SDK versions npm installed with the starter: the
 newest within the starter's ranges (`@ux-builder/tokens` ^1.6.0, `@ux-builder/ui`

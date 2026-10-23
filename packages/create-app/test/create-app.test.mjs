@@ -39,9 +39,9 @@ describe("scaffold", () => {
     const r = scaffold(join(tmp, "pinned"), { modalities: WEB });
     const deps = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8")).dependencies;
     const dev = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8")).devDependencies;
-    assert.deepEqual({ "@ux-builder/tokens": deps["@ux-builder/tokens"], "@ux-builder/ui": deps["@ux-builder/ui"], "@ux-builder/audit": dev["@ux-builder/audit"], "@ux-builder/trace": dev["@ux-builder/trace"] }, sdkVersions());
+    assert.deepEqual({ "@ux-builder/tokens": deps["@ux-builder/tokens"], "@ux-builder/ui": deps["@ux-builder/ui"], "@ux-builder/audit": dev["@ux-builder/audit"], "@ux-builder/trace": dev["@ux-builder/trace"], "@ux-builder/design": dev["@ux-builder/design"] }, sdkVersions());
     assert.match(deps["@ux-builder/ui"], /^\d+\.\d+\.\d+$/, "exact, not a range");
-    for (const p of ["tokens", "ui", "audit", "trace"]) assert.equal(sdkVersions()[`@ux-builder/${p}`], JSON.parse(readFileSync(join(ROOT, `packages/${p}/package.json`), "utf8")).version);
+    for (const p of ["tokens", "ui", "audit", "trace", "design"]) assert.equal(sdkVersions()[`@ux-builder/${p}`], JSON.parse(readFileSync(join(ROOT, `packages/${p}/package.json`), "utf8")).version);
   });
 
   // @covers US-012-AC4
