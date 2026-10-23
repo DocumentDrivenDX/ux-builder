@@ -1,5 +1,12 @@
 # @ux-builder/audit
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [d9967eb]
+  - @ux-builder/ui@0.10.0
+
 ## 0.4.0
 
 ### Minor Changes
