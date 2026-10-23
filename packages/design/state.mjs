@@ -41,6 +41,7 @@ export function emptyState({ startedFrom = "new" } = {}) {
     questions: [],
     assumptions: [],
     alternatives: [],
+    principles: [],
     issues: [],
     experiments: [],
     faked: [],
@@ -110,7 +111,7 @@ export function stateGet(app, { path } = {}) {
 }
 
 /* Fields an appended item gets when the agent leaves them out. */
-const NEXT_ID = { assumptions: "A", questions: "Q", experiments: "EXP" };
+const NEXT_ID = { assumptions: "A", questions: "Q", experiments: "EXP", principles: "PR" };
 function withDefaults(list, items, item, now) {
   if (!item || typeof item !== "object" || Array.isArray(item)) return item;
   const out = { ...item };
@@ -121,6 +122,7 @@ function withDefaults(list, items, item, now) {
   }
   if (list === "assumptions") { out.status ??= "assumed"; out.evidence ??= []; }
   if (list === "questions") out.status ??= "open";
+  if (list === "principles") out.status ??= "assumed";
   if (list === "alternatives") out.status ??= "candidate";
   if (list === "issues") out.status ??= "open";
   if (list === "experiments") out.status ??= "running";

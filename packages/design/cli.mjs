@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { checkpoint, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { brief, checkpoint, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -30,6 +30,9 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       experiment, release.
   mode full|change [--why <text>]
       the full loop, or change mode for an everyday change.
+  brief [--name <product>]
+      write the experience brief (docs/ux/brief.md and brief.html) from the
+      HELIX PRD and stories and the design state, and .ux-builder/principles.json.
   validate
       check every document in docs/ux/: frontmatter, ID, place, sections,
       links and its type's rules. Exits 1 on a problem.
@@ -55,7 +58,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -94,6 +97,11 @@ async function main(argv) {
       return 0;
     }
     throw new DesignError(`unknown state command "${sub ?? ""}": use get, set or checkpoint`);
+  }
+  if (command === "brief") {
+    const r = brief(app, { name: values.name });
+    print(r, values.json, [`Wrote ${r.written.join(", ")}.`, ...r.notes].join("\n"));
+    return 0;
   }
   if (command === "validate") {
     const r = validate(app);

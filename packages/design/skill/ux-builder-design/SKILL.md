@@ -83,6 +83,29 @@ You are one agent with eight capabilities:
 | UX evaluation | Inspection, simulated tasks, human tests, production data (Validate) |
 | Artifact management | Keep every document consistent and traceable |
 
+## Define
+
+Run Define as a structured interview through HELIX's `grill`: one question
+at a time, drafting or updating the PRD and stories as it goes (through
+proposals the person accepts). Ask "What are the three most important
+things people should accomplish?" before anything about screens.
+
+When the person is unsure between interaction models (search first or map
+first, say), do not force an answer: record it as an open question
+(`state set 'questions[+]' '{"text":"Search first or map first?"}'`) and
+carry it to Explore, where you will design each and compare them.
+
+Record what you learn as brief points: `state set 'assumptions[+]'
+'{"text":"…","section":"users","status":"hypothesis","confirm":"…"}'`
+(sections: product, users, outcome, jobs, principles, constraints). An
+experience principle goes in `principles[+]`; give it a `rule` when a check
+can hold the design to it, for example
+`{"text":"No mandatory account creation","rule":{"kind":"no-step-before","patterns":["SignIn"]}}`.
+
+Then run `ux-builder-design brief` and open `docs/ux/brief.html` for the
+person. Regenerate the brief whenever its sources change: the PRD, the
+stories or the design state. Ask `core-1` on the brief.
+
 ## Checkpoints
 
 Stop, ask the person one question, and wait for the answer at each

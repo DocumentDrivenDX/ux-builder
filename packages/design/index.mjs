@@ -10,5 +10,6 @@ export { DesignError, findApp, writeInApp } from "./app.mjs";
 export { canonical, emptyState, hasState, parsePath, readState, SCHEMA, serialize, STATE_FILE, stateGet, stateSet, validateState, writeState } from "./state.mjs";
 export { status, summary } from "./status.mjs";
 export { checkpoint, CHECKPOINTS, setMode } from "./checkpoints.mjs";
+export { brief, BRIEF_SECTIONS, briefContent, briefHtml, principlesFile } from "./brief.mjs";
 export { ARTIFACTS, documentTypes, exampleFile, helixIds, helixRoot, parseDocument, pathFor, templateFile, uxDocuments, validate, validateDocument } from "./documents.mjs";
 export { ADOPT_SDK, init, installSkill, MCP_SERVER, SKILL_DIR, writeMcpConfig } from "./init.mjs";

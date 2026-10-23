@@ -31,10 +31,10 @@
    Chromium), with the HTML still written. */
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { needsStories, readStories, skippedNote } from "./helix.mjs";
-import { checkBlueprint, complexityDelta, deltaFindings, skeleton } from "./index.mjs";
+import { checkBlueprint, complexityDelta, deltaFindings, principleFindings, skeleton } from "./index.mjs";
 import { propose, writeProposals } from "./propose.mjs";
 import { drawings, writeDrawings } from "./draw.mjs";
 
@@ -105,6 +105,8 @@ async function main(argv) {
   const helix = storied ? readStories(file) : null;
   const note = storied && !helix ? skippedNote(file) : null;
   const findings = checkBlueprint(bp, { helix });
+  // The app's experience principles that a check can express (FEAT-018 GDL-16).
+  findings.push(...principleFindings(bp, readPrinciples(file)));
   // --diff: the complexity this blueprint adds over a base one (FEAT-018 GDL-12).
   let delta = null;
   if (values.diff) {
@@ -137,6 +139,19 @@ function deltaText(base, delta) {
   }
   if (!delta.journeys.length) lines.push("  no journey changed");
   return lines.join("\n");
+}
+
+/* The app's principles: .ux-builder/principles.json in the nearest folder at
+   or above the blueprint that has one; none otherwise. */
+function readPrinciples(file) {
+  let d = dirname(resolve(file));
+  for (;;) {
+    const p = join(d, ".ux-builder/principles.json");
+    if (existsSync(p)) { try { return JSON.parse(readFileSync(p, "utf8")).principles ?? []; } catch { return []; } }
+    const up = dirname(d);
+    if (up === d) return [];
+    d = up;
+  }
 }
 
 /* Every decision recorded in the app's trace, when @ux-builder/trace is

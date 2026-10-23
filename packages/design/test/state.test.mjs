@@ -81,7 +81,7 @@ describe("state get and set", () => {
     const text = readFileSync(join(app, ".ux-builder/design-state.json"), "utf8");
     assert.equal(text, serialize(readState(app)));
     const keys = Object.keys(JSON.parse(text));
-    assert.deepEqual(keys, ["version", "activity", "mode", "startedFrom", "checkpoints", "questions", "assumptions", "alternatives", "issues", "experiments", "faked", "next"]);
+    assert.deepEqual(keys, ["version", "activity", "mode", "startedFrom", "checkpoints", "questions", "assumptions", "alternatives", "principles", "issues", "experiments", "faked", "next"]);
     assert.deepEqual(Object.keys(JSON.parse(text).assumptions[0]), ["id", "text", "status", "evidence"]);
   });
 

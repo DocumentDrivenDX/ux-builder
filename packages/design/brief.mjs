@@ -1,0 +1,139 @@
+/* ux-builder-design brief (CONTRACT-008 Commands, FEAT-018 GDL-14 to
+   GDL-16): the experience brief, docs/ux/brief.md and a page to read,
+   from the HELIX PRD and stories and the design state, every point marked
+   with its status; and .ux-builder/principles.json, the principles a check
+   can express, which ux-builder-blueprint check applies as project rules. */
+
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { writeInApp } from "./app.mjs";
+import { helixRoot, parseDocument } from "./documents.mjs";
+import { readState } from "./state.mjs";
+
+export const BRIEF_SECTIONS = [
+  ["product", "Product"],
+  ["users", "Target users"],
+  ["outcome", "Primary outcome"],
+  ["jobs", "Primary jobs"],
+  ["principles", "Experience principles"],
+  ["constraints", "Constraints"],
+  ["questions", "Open questions"],
+];
+
+/* HELIX documents under the marker's root: [{ path, front, body }]. */
+function helixDocs(app) {
+  const root = helixRoot(app);
+  if (!root || !existsSync(join(app, root))) return [];
+  const out = [];
+  const walk = (dir) => {
+    for (const name of readdirSync(join(app, dir)).sort()) {
+      const rel = `${dir.replace(/\/$/, "")}/${name}`;
+      if (statSync(join(app, rel)).isDirectory()) walk(rel);
+      else if (name.endsWith(".md")) out.push({ path: rel, ...parseDocument(readFileSync(join(app, rel), "utf8")) });
+    }
+  };
+  walk(root);
+  return out;
+}
+
+/* The lines under a heading (## or ###) up to the next heading of that
+   level or above. */
+function under(body, heading) {
+  const lines = body.split("\n");
+  const i = lines.findIndex((l) => new RegExp(`^#{2,3} ${heading}\\s*$`, "i").test(l));
+  if (i < 0) return [];
+  const level = lines[i].match(/^#+/)[0].length;
+  const rest = lines.slice(i + 1);
+  const end = rest.findIndex((l) => { const m = l.match(/^(#+) /); return m && m[1].length <= level; });
+  return end < 0 ? rest : rest.slice(0, end);
+}
+
+const sentence = (text) => (text.match(/^[^.!?]*[.!?]/)?.[0] ?? text).trim();
+
+/* What the PRD and stories say, as confirmed points by section. */
+function fromHelix(docs) {
+  const points = Object.fromEntries(BRIEF_SECTIONS.map(([k]) => [k, []]));
+  const prd = docs.find((d) => d.front?.ddx?.id === "prd" || d.front?.ddx?.type === "prd");
+  if (prd) {
+    const title = prd.body.match(/^# (.+)$/m)?.[1]?.replace(/^Product Requirements Document\s*[—-]\s*/i, "").trim();
+    const summary = under(prd.body, "Summary").filter((l) => l.trim() && !l.startsWith(">") && !l.startsWith("|")).join(" ").trim();
+    if (title || summary) points.product.push({ text: [title, summary && sentence(summary)].filter(Boolean).join(": "), status: "confirmed", from: "prd" });
+    for (const [, who] of prd.body.matchAll(/^### (?:Primary|Secondary) Persona: (.+)$/gm)) points.users.push({ text: who.trim(), status: "confirmed", from: "prd" });
+    for (const l of under(prd.body, "Constraints")) { const m = l.match(/^\s*[-*] (.+)$/); if (m) points.constraints.push({ text: m[1].replace(/\*\*/g, "").trim(), status: "confirmed", from: "prd" }); }
+  }
+  for (const d of docs.filter((x) => /^US-\d+$/.test(String(x.front?.ddx?.id ?? "")))) {
+    const t = d.body.match(/^# (US-\d+): (.+)$/m);
+    if (t) points.jobs.push({ text: `${t[1]}: ${t[2].trim()}`, status: "confirmed", from: t[1] });
+  }
+  return { points, prd: !!prd };
+}
+
+const LABEL = { confirmed: "confirmed", assumed: "assumed", hypothesis: "hypothesis", "current-state": "current state, assumed" };
+
+/* The brief's content: { sections: [{ key, heading, points }], helix, notes }. */
+export function briefContent(app) {
+  const state = readState(app);
+  const docs = helixDocs(app);
+  const helix = helixRoot(app) !== null;
+  const { points, prd } = fromHelix(docs);
+  for (const a of state.assumptions) {
+    if (a.status === "refuted" || !a.section) continue;
+    points[a.section].push({ text: a.text, status: a.status, id: a.id, confirm: a.confirm });
+  }
+  for (const p of state.principles ?? []) if (p.status !== "refuted") points.principles.push({ text: p.text, status: p.status, id: p.id, rule: p.rule?.kind });
+  for (const q of state.questions) if (q.status === "open") points.questions.push({ text: `${q.id}: ${q.text}`, status: null });
+  const notes = [];
+  if (!helix) notes.push("HELIX was not found (no .helix.yml): the brief is built from the design state alone.");
+  else if (!prd) notes.push("HELIX has no PRD yet: the brief is built from the stories and the design state.");
+  return { sections: BRIEF_SECTIONS.map(([key, heading]) => ({ key, heading, points: points[key] })), helix, prd, notes };
+}
+
+function markdown(content, name) {
+  const lines = [];
+  lines.push("---", "ux:", "  id: brief", "  type: experience-brief");
+  if (content.prd) lines.push("  links:", "    - kind: informed_by", "      to: prd");
+  lines.push("---", "", `# Experience brief${name ? `: ${name}` : ""}`, "");
+  for (const s of content.sections) {
+    lines.push(`## ${s.heading}`, "");
+    if (!s.points.length) lines.push(s.key === "questions" ? "- None open." : "- Not yet known.");
+    for (const p of s.points) {
+      lines.push(`- ${p.text}${p.status ? ` [${LABEL[p.status]}]` : ""}${p.rule ? ` (checked: ${p.rule})` : ""}`);
+      if (p.status === "hypothesis") lines.push(`  Confirm by: ${p.confirm?.trim() || "to be decided with the person"}`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n");
+}
+
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/* The brief as a page to read in a browser; plain HTML, no scripts. */
+export function briefHtml(content, name) {
+  const body = content.sections.map((s) => `<section><h2>${esc(s.heading)}</h2><ul>${(s.points.length ? s.points : [{ text: s.key === "questions" ? "None open." : "Not yet known.", status: null }]).map((p) => `<li>${esc(p.text)}${p.status ? ` <span class="status status-${esc(p.status)}">${esc(LABEL[p.status])}</span>` : ""}${p.status === "hypothesis" ? `<br><small>Confirm by: ${esc(p.confirm?.trim() || "to be decided with the person")}</small>` : ""}</li>`).join("")}</ul></section>`).join("\n");
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experience brief${name ? `: ${esc(name)}` : ""}</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem}h2{margin-top:1.5rem;font-size:1.1rem}.status{font-size:.75rem;border:1px solid;border-radius:1rem;padding:0 .5rem}.status-hypothesis{border-style:dashed}</style>
+</head><body><h1>Experience brief${name ? `: ${esc(name)}` : ""}</h1>
+${content.notes.map((n) => `<p><em>${esc(n)}</em></p>`).join("\n")}
+${body}
+</body></html>
+`;
+}
+
+/* The checkable principles, as .ux-builder/principles.json. */
+export function principlesFile(state) {
+  return { principles: (state.principles ?? []).filter((p) => p.status !== "refuted").map((p) => ({ id: p.id, text: p.text, ...(p.rule ? { rule: p.rule } : {}) })) };
+}
+
+export function brief(app, { name } = {}) {
+  const content = briefContent(app);
+  let product = name;
+  if (!product) { try { product = JSON.parse(readFileSync(join(app, "package.json"), "utf8")).name; } catch { product = ""; } }
+  const written = [
+    writeInApp(app, "docs/ux/brief.md", markdown(content, product)),
+    writeInApp(app, "docs/ux/brief.html", briefHtml(content, product)),
+    writeInApp(app, ".ux-builder/principles.json", JSON.stringify(principlesFile(readState(app)), null, 2) + "\n"),
+  ];
+  return { written, sections: content.sections, notes: content.notes, helix: content.helix };
+}

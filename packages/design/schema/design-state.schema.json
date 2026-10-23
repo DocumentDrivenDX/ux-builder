@@ -5,25 +5,85 @@
   "description": "Where the guided design loop stands: .ux-builder/design-state.json, committed with the app (ADR-036 rule 6).",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "activity", "mode", "startedFrom", "checkpoints", "questions", "assumptions", "alternatives", "issues", "experiments", "faked", "next"],
+  "required": [
+    "version",
+    "activity",
+    "mode",
+    "startedFrom",
+    "checkpoints",
+    "questions",
+    "assumptions",
+    "alternatives",
+    "issues",
+    "experiments",
+    "faked",
+    "next"
+  ],
   "properties": {
-    "version": { "const": 1 },
-    "activity": { "enum": ["baseline", "define", "explore", "experience", "validate"] },
-    "mode": { "enum": ["full", "change"] },
-    "modeReason": { "type": "string" },
-    "startedFrom": { "enum": ["new", "existing"] },
+    "version": {
+      "const": 1
+    },
+    "activity": {
+      "enum": [
+        "baseline",
+        "define",
+        "explore",
+        "experience",
+        "validate"
+      ]
+    },
+    "mode": {
+      "enum": [
+        "full",
+        "change"
+      ]
+    },
+    "modeReason": {
+      "type": "string"
+    },
+    "startedFrom": {
+      "enum": [
+        "new",
+        "existing"
+      ]
+    },
     "checkpoints": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "status", "at"],
+        "required": [
+          "id",
+          "status",
+          "at"
+        ],
         "properties": {
-          "id": { "enum": ["core-1", "core-2", "core-3", "significant-change", "experiment", "release"] },
-          "status": { "enum": ["passed", "skipped"] },
-          "answer": { "type": "string" },
-          "reason": { "type": "string" },
-          "at": { "type": "string", "format": "date-time" }
+          "id": {
+            "enum": [
+              "core-1",
+              "core-2",
+              "core-3",
+              "significant-change",
+              "experiment",
+              "release"
+            ]
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "skipped"
+            ]
+          },
+          "answer": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       }
     },
@@ -32,12 +92,29 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "text", "status"],
+        "required": [
+          "id",
+          "text",
+          "status"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^Q-[1-9][0-9]*$" },
-          "text": { "type": "string", "minLength": 1 },
-          "status": { "enum": ["open", "answered"] },
-          "answer": { "type": "string" }
+          "id": {
+            "type": "string",
+            "pattern": "^Q-[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "open",
+              "answered"
+            ]
+          },
+          "answer": {
+            "type": "string"
+          }
         }
       }
     },
@@ -46,12 +123,51 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "text", "status", "evidence"],
+        "required": [
+          "id",
+          "text",
+          "status",
+          "evidence"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^A-[1-9][0-9]*$" },
-          "text": { "type": "string", "minLength": 1 },
-          "status": { "enum": ["assumed", "hypothesis", "confirmed", "refuted", "current-state"] },
-          "evidence": { "type": "array", "items": { "type": "string" } }
+          "id": {
+            "type": "string",
+            "pattern": "^A-[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "assumed",
+              "hypothesis",
+              "confirmed",
+              "refuted",
+              "current-state"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "section": {
+            "enum": [
+              "product",
+              "users",
+              "outcome",
+              "jobs",
+              "principles",
+              "constraints"
+            ],
+            "description": "The brief section the point belongs to (FEAT-018 GDL-14)"
+          },
+          "confirm": {
+            "type": "string",
+            "description": "For a hypothesis: what would confirm it (an interview question, a test task, a metric)"
+          }
         }
       }
     },
@@ -60,12 +176,63 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "file", "status"],
+        "required": [
+          "name",
+          "file",
+          "status"
+        ],
         "properties": {
-          "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
-          "file": { "type": "string" },
-          "status": { "enum": ["candidate", "chosen", "rejected"] },
-          "reason": { "type": "string" }
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "file": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "candidate",
+              "chosen",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "principles": {
+      "type": "array",
+      "description": "Experience principles (FEAT-018 GDL-16): each a rubric note, or a project rule ux-builder-blueprint check applies when it has a rule",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^PR-[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "assumed",
+              "hypothesis",
+              "refuted"
+            ]
+          },
+          "rule": {
+            "$ref": "#/$defs/principleRule"
+          }
         }
       }
     },
@@ -74,10 +241,21 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["finding", "status"],
+        "required": [
+          "finding",
+          "status"
+        ],
         "properties": {
-          "finding": { "type": "string" },
-          "status": { "enum": ["open", "fixed", "wont-fix"] }
+          "finding": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "fixed",
+              "wont-fix"
+            ]
+          }
         }
       }
     },
@@ -86,10 +264,21 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "status"],
+        "required": [
+          "id",
+          "status"
+        ],
         "properties": {
-          "id": { "type": "string", "pattern": "^EXP-[1-9][0-9]*$" },
-          "status": { "enum": ["running", "ended"] }
+          "id": {
+            "type": "string",
+            "pattern": "^EXP-[1-9][0-9]*$"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "ended"
+            ]
+          }
         }
       }
     },
@@ -98,13 +287,66 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["what", "where"],
+        "required": [
+          "what",
+          "where"
+        ],
         "properties": {
-          "what": { "type": "string" },
-          "where": { "type": "string" }
+          "what": {
+            "type": "string"
+          },
+          "where": {
+            "type": "string"
+          }
         }
       }
     },
-    "next": { "type": "string" }
+    "next": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "principleRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "no-step-before",
+            "max-required-inputs",
+            "max-steps",
+            "no-modal-in"
+          ]
+        },
+        "screens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "no-step-before: screen IDs no journey may start on"
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "no-step-before: patterns no journey may start on"
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "journeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "no-modal-in: the journeys (all when absent)"
+        }
+      }
+    }
   }
 }

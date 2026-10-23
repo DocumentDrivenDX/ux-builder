@@ -21,6 +21,7 @@ const byId = new Map(RULES.map((r) => [r.id, r]));
 
 export { blueprintSchema, LIMITS as limits, RULES as rules, RECIPES as recipes };
 export { complexityDelta, deltaFindings, journeyLoad, stepKey } from "./complexity.mjs";
+export { PRINCIPLE_KINDS, principleFindings } from "./principles.mjs";
 export { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, expandModalities, modalityProblems };
 
 /* The checks this module runs, by the rule ID each reports. */

@@ -19,6 +19,7 @@
     "status.mjs",
     "checkpoints.mjs",
     "init.mjs",
+    "brief.mjs",
     "documents.mjs",
     "cli.mjs",
     "artifacts",

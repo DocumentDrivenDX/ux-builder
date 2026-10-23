@@ -109,3 +109,13 @@ describe("checkpoints, HELIX, challenge and change mode in the skill", () => {
     assert.match(s, /Tell the person which mode you are\s+in and why, and that they can switch/);
   });
 });
+
+describe("Define in the skill (US-122)", () => {
+  // @covers US-122-AC5
+  test("runs Define through HELIX's grill, carries an undecided interaction model to Explore as an open question, and regenerates the brief when its sources change", () => {
+    const s = section("Define");
+    assert.match(s, /structured interview through HELIX's `grill`/);
+    assert.match(s, /record it as an open question[\s\S]*carry it to Explore/);
+    assert.match(s, /Regenerate the brief whenever its sources change: the PRD, the\s+stories or the design state/);
+  });
+});

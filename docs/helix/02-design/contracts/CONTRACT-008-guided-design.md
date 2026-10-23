@@ -117,8 +117,9 @@ input or a refusal (named on stderr).
 | `startedFrom` | `new`, `existing` | |
 | `checkpoints[]` | `{ id, status: passed\|skipped, answer?, reason?, at }` | `id`: `core-1`, `core-2`, `core-3`, `significant-change`, `experiment`, `release` |
 | `questions[]` | `{ id, text, status: open\|answered, answer? }` | Open questions |
-| `assumptions[]` | `{ id: "A-<n>", text, status: assumed\|hypothesis\|confirmed\|refuted\|current-state, evidence[] }` | `current-state` marks a baseline item, shown as *current state, assumed* |
+| `assumptions[]` | `{ id: "A-<n>", text, status: assumed\|hypothesis\|confirmed\|refuted\|current-state, evidence[], section?, confirm? }` | `current-state` marks a baseline item, shown as *current state, assumed* |
 | `alternatives[]` | `{ name, file, status: candidate\|chosen\|rejected, reason? }` | |
+| `principles[]` | `{ id: "PR-<n>", text, status: confirmed\|assumed\|hypothesis\|refuted, rule? }` | Experience principles; one with a `rule` becomes a project rule (Project principles) |
 | `issues[]` | `{ finding, status: open\|fixed\|wont-fix }` | Unresolved usability issues |
 | `experiments[]` | `{ id, status: running\|ended }` | |
 | `faked[]` | `{ what, where }` | Data and error handling a prototype faked |
