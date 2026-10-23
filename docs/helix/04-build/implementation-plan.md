@@ -27,6 +27,24 @@ test. B-017 built 2026-10-21 (AR-2026-10-21 C1 to C8).
 The legal review ADR-025 asks for is prepared as `docs/legal/counsel-brief-interaction-rules.md`;
 counsel's answer is still to come.
 
+## Later features *[Added 2026-10-22]*
+
+From 2026-10-21, work items are DDx beads (`docs/helix/README.md`), so
+FEAT-011 to FEAT-017 were decomposed into beads, not slices of this plan. Each
+feature's epic holds its build items, acceptance and verification:
+
+| Feature | Epic | State (2026-10-22) |
+|---|---|---|
+| FEAT-011 AI and agent experience rules | `ux-builder-8234c40f` | built, closed |
+| FEAT-012 Screen flows and journeys | `ux-builder-b7859050` | built, closed |
+| FEAT-013 Walkthrough videos | `ux-builder-c4bdb16c` | built; open for its comprehension check |
+| FEAT-014 App modalities | `ux-builder-a34a7ad1` | built, closed |
+| FEAT-015 Findings by journey | `ux-builder-64edad4a` | built, closed |
+| FEAT-016 Learning from builds | `ux-builder-57f13272` | built; open for its follow-ups |
+| FEAT-017 Diagram and chart tokens | `ux-builder-55c21e32` | built, closed |
+
+The slices below cover FEAT-009 and FEAT-010 only.
+
 ## Scope
 
 **Governing Artifacts**:

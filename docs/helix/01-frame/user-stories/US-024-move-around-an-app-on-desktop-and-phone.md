@@ -66,6 +66,7 @@ compact (inventory §1.2, §6.3).
 - [ ] **US-024-AC6** — Given a workspace menu with 8 workspaces, when it opens, then it offers a search that narrows the list; with 7 or fewer it shows no search.
 - [ ] **US-024-AC7** — Given each error screen (not found, no permission, offline, maintenance, expired session), when it renders, then it has one level-1 heading stating what happened and at least one link or button that leads on.
 - [ ] **US-024-AC8** — Given the shell under `pointer: coarse` with a sticky top bar, when a user tabs through every control, then each target is at least the touch-target token's size, no control is reachable only on hover, and no focused element is covered by the top or bottom bar (WCAG 2.5.8, 1.4.13, 2.4.11).
+- [ ] **US-024-AC9** — *(Planned, optional: AR-2026-10-22 D-8.)* Given `LocalNav`, when its items swap panels in place, then it follows the APG Tabs pattern; when its items are links, the current one has `aria-current="page"`; and inside an embedded view it adapts to the view's container size class, not the window's (NAV-03).
 
 ## Edge Cases
 
@@ -87,6 +88,7 @@ compact (inventory §1.2, §6.3).
 | Workspace search | US-024-AC6 | 8 and 7 workspaces | Open menu | Search shown; not shown |
 | Error screens | US-024-AC7 | Each of 5 screens | Render | One h1; a way forward |
 | Touch, hover, focus | US-024-AC8 | `pointer: coarse`, 390 px | Tab through shell | Targets ≥ token; nothing hover-only; focus never covered |
+| Local navigation | US-024-AC9 | `LocalNav` as tabs, as links, in an embedded view | Keyboard; render at a compact container | APG Tabs keys; `aria-current` on the current link; adapts to the container |
 
 ## Dependencies
 

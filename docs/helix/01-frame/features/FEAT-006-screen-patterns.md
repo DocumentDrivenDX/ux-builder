@@ -118,7 +118,10 @@ NAV-02. Expandable navigation groups open and close by disclosure buttons that
 report `aria-expanded`; navigation never uses the ARIA menu role.
 NAV-03. Local navigation that swaps panels in place follows the APG Tabs
 pattern; local navigation that changes the URL uses links with
-`aria-current="page"`.
+`aria-current="page"`. *[Amended 2026-10-23 — AR-2026-10-22 D-8]* `LocalNav`
+is optional and planned (US-024-AC9), wanted first for Praxis plug-ins, the
+embedded apps of a coming modality; `Tabs` and `TabsSection` cover the
+panel-swapping case today.
 NAV-04. Breadcrumbs render as an ordered list in a labelled navigation
 landmark, the last item marked `aria-current="page"`; in the compact size class
 they reduce to a single link to the parent.

@@ -23,7 +23,7 @@ criteria; earlier features keep their tests where they are, traced by
 
 **Goals**: every acceptance criterion is cited by a test or excepted with a reason (`npm run coverage`) | `npm run check`, the builder and starter e2e suites, the Storybook build and tests and the site build pass before a change merges.
 **Out of Scope**: graded agent-run samples and representative-user studies (excepted with reasons). FEAT-009 increments 2 and 3 were built 2026-10-21 and are in scope; none of their criteria is excepted.
-**Traceability Source**: the PRD, FEAT-001 to FEAT-009 and their user stories; for FEAT-009, SD-004 and the story test plans below.
+**Traceability Source**: the PRD, FEAT-001 to FEAT-017 and their user stories; for FEAT-009, SD-004 and the story test plans below. FEAT-011 to FEAT-017 have no story test plans: their criteria are traced by `@covers` alone, at the layers allocated below (AR-2026-10-22).
 
 ### Test Levels
 
@@ -89,6 +89,16 @@ criteria; earlier features keep their tests where they are, traced by
 | FEAT-010: fetch, fallback, proxy, safe extraction, pins (US-067, US-068) | [[STP-067]], [[STP-068]] | Integration | The CLI against a local release server and proxy; the starter e2e against GitHub |
 | FEAT-010: the starter set, heading merge, determinism (US-069) | [[STP-069]] | Integration | Documents drafted from fixture templates |
 | FEAT-010: manifest, traceability, guidance (US-070, US-071) | [[STP-070]], [[STP-071]] | Integration | The assessment's own `validate` and `collect` on a created app |
+| FEAT-011: AI rules, blueprint `ai`, MCP (US-076, US-077, US-081) | — | Unit and contract | The blueprint checks and the rule data are pure functions over fixtures |
+| FEAT-011: AI audit checks, voice lint (US-078 to US-080) | — | Integration (Chromium) | The checks read AI markup on fixture pages; the lint rule on fixture sources |
+| FEAT-011: AI journeys in three scenarios (US-082) | — | Integration (Chromium) | `assess inspect --scenario` against fixture pages; never approving is the thing under test |
+| FEAT-011: Adaptive Cards rendering and `checkCard` (US-083 to US-085) | — | Unit and E2E | `checkCard` over fixture payloads; the renderer in Storybook and the theme page |
+| FEAT-012: flows, journeys, drawings, proposals, wireframes (US-086 to US-090) | — | Unit and integration | The checks and drawings are deterministic over fixture blueprints; `propose` against fixture HELIX trees; wireframes in Chromium |
+| FEAT-013: walkthrough videos and the player (US-091 to US-095) | — | Integration (Chromium, ffmpeg) | `assess video` replays fixture journeys; MP4 criteria need `ffmpeg` and run in CI; the player at 480, 960 and 1440 px |
+| FEAT-014: modalities in the starter, the rules and the audit (US-096 to US-099) | — | Integration and E2E | The starter's CLI and shells from packed tarballs; the audit's verdicts on fixture pages |
+| FEAT-015: rules named on findings, the journey report, pace, HELIX UX types (US-100 to US-104) | — | Integration | Audit and assessment reports over fixture runs; `propose` drafts against fixture HELIX trees |
+| FEAT-016: the episode trace, export and learning (US-105 to US-111) | — | Unit and integration | `ux-builder-trace` and the tools' trace writes in temp repositories; export with no network; `tools/learn.mjs` over fixture bundles |
+| FEAT-017: diagram tokens, the gate and the theme page (US-112, US-113) | — | Contract and E2E | `npm run contrast` over every resolved theme; the theme page's diagram section in Playwright |
 
 Every P0 criterion of an in-scope story maps to one layer here and to
 tests in its STP.
@@ -109,6 +119,7 @@ tests in its STP.
 | CI Tool | GitHub Actions, `ubuntu-latest`, Node 24 (`.github/workflows/ci.yml`) |
 | Test DB | None; fixture repositories in temp directories, removed after each test |
 | Services | Chromium from `npx playwright install --with-deps chromium`; local HTTP servers started by the tests on free ports |
+| Video | `ffmpeg` on the PATH (CI installs it). Without it, the MP4 tests of FEAT-013 skip with a reason, so MP4 criteria are verified in CI |
 
 ## Risks
 

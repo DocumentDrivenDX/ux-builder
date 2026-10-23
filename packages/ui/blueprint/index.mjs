@@ -28,7 +28,7 @@ export const CHECKS = [
   "modal.titled", "modal.dismiss", "modal.one-at-a-time", "modal.unsaved-changes",
   "view.no-shell", "view.size-classes", "view.one-task", "view.states",
   // AI and agent screens (FEAT-011 AIB-02): warnings, as ADR-028 decision 5.
-  "agent.declare-high-impact", "agent.approve-high-impact", "ai.fallback", "ai.consent", "genui.renderable",
+  "agent.declare-high-impact", "agent.approve-high-impact", "ai.fallback", "ai.consent", "genui.renderable", "genui.inline-compact",
   // Flows and journeys (FEAT-012 FLW-02, JRN-02, JRN-03; flow.mjs): warnings, but flow.target-exists.
   "flow.reachable", "flow.no-dead-end", "flow.target-exists", "flow.primary-consistent",
   "journey.walkable", "journey.safeguarded", "journey.covers-errors", "journey.story-covered",
@@ -181,6 +181,8 @@ const INLINE_CHECKS = {
     if (missing.length) return [`${name}, rendered inline on "${s.title ?? s.id}" at ${region.join(" and ")}, has no ${missing.join(", ")} state${missing.length > 1 ? "s" : ""}; the screen does not declare ${missing.length > 1 ? "them" : "it"}.`, `Add ${missing.map((x) => JSON.stringify(x)).join(", ")} to the screen's states, and supply each state's content to the inline ${name}.`];
   },
   "view.no-shell": ({ name }) => [`A view renders ${name} inline; the host draws the shell.`, "Render a screen pattern without a shell, or a widget."],
+  // AR-2026-10-22 D-2: the compact column is a phone's width.
+  "genui.inline-compact": ({ s, name }) => [`${name}, rendered inline on "${s.title ?? s.id}" at compact, must fit the conversation's column: one short step at a time with its progress, the composer and Stop still reachable.`, `Keep each step to a few fields and check it at 360 px; for a longer task, reply with a link to a screen of its own, and render ${name} inline only from medium (ai.region).`],
 };
 const inlineRules = (name, bp, region) => RULES.filter((r) => INLINE_CHECKS[r.id] && r.appliesTo?.patterns?.includes(name) && !r.when?.aiRole
   && meets(r.when?.context, bp.kind) && meets(r.when?.sizeClass, region) && meets(r.when?.input, bp.supports?.inputs));

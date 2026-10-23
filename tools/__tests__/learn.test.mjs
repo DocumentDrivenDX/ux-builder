@@ -21,12 +21,12 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { analyse, beads, compareReplay, evals, grade, insideRepo, loadCatalogue, loadStore } from "../learn.mjs";
+import { analyse, beads, compareReplay, evals, grade, insideRepo, loadCatalogue, loadStore, replayProblems } from "../learn.mjs";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIX = join(ROOT, "tools/__tests__/fixtures/learn-store");
@@ -185,6 +185,26 @@ describe("US-111: replay episodes as evaluation tasks", () => {
     assert.match(readFileSync(join(dir, "result.compare.md"), "utf8"), /\| checksToGreen.lint \| 1 \| 2 \| worse \|/);
     // Never green is the worst result.
     assert.equal(compareReplay(task, { ...result, checksToGreen: { lint: null, audit: 1 } }).rows[1].result, "worse");
+  });
+
+  // @covers US-111-AC2
+  test("replay-result refuses a result that does not follow the manual procedure's format, naming each problem", () => {
+    const { episodes } = loadStore(store);
+    const task = evals(episodes, loadCatalogue()).tasks.find((t) => t.task === "E-20261010-matters-nav");
+    const good = { v: 1, task: task.task, sdk: { "@ux-builder/ui": "0.10.0" }, agent: { name: "claude-code", model: "m" },
+      checksToGreen: { lint: 1, audit: 1 }, audit: { status: "pass", findings: {} }, assessment: { open: [] } };
+    assert.deepEqual(replayProblems(task, good), [], "the procedure's example shape is accepted");
+    const bad = { v: 1, task: "E-other", sdk: {}, checksToGreen: { lint: 0 }, audit: { findings: { x: -1 } }, components: 1.5 };
+    const problems = replayProblems(task, bad);
+    for (const m of [/task is "E-other"/, /^sdk must/, /^agent must/, /^checksToGreen must/, /^audit must/, /^assessment must be \{ open/, /^components must be a count/]) assert.ok(problems.some((x) => m.test(x)), String(m));
+    const dir = join(tmp, "replay-bad");
+    mkdirSync(dir);
+    writeFileSync(join(dir, "task.json"), JSON.stringify(task));
+    writeFileSync(join(dir, "result.json"), JSON.stringify(bad));
+    const r = run("replay-result", "--task", join(dir, "task.json"), "--result", join(dir, "result.json"));
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /does not follow docs\/learning\/replay-an-evaluation-task\.md/);
+    assert.ok(!existsSync(join(dir, "result.compare.json")), "nothing is written for a refused result");
   });
 
   // @covers US-111-AC3

@@ -23,7 +23,7 @@ ddx:
 **Priority**: P1
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: Learning from builds
-**Covered PRD Requirements**: FR-67 to FR-72 (drafted with this feature)
+**Covered PRD Requirements**: FR-67, FR-68, FR-69, FR-70, FR-71, FR-72 (drafted with this feature)
 **Cross-Subsystem Rationale**: The starter (FEAT-010, FEAT-014) opens the first episode. The MCP server, the lint plugin and the audit (CONTRACT-004) write to it. The assessment (FEAT-009) supplies its outcome. ux-builder's own planning (beads, HELIX) receives what is learned.
 
 ## Overview
@@ -50,7 +50,7 @@ components, checks and starter.
 
 ## Problem Statement
 
-- **Current situation**:
+- **Current situation** (before `@ux-builder/trace` 0.1.0, `@ux-builder/mcp` 0.6.0 and `@ux-builder/create-app` 0.7.0, which shipped this feature):
   - The MCP server logs nothing.
   - `create-app` keeps no record.
   - Checks keep only their last result.
@@ -143,7 +143,10 @@ enters this repository.
 TRC-11. `ux-builder-learn --evals` turns episodes into evaluation tasks: the
 goal, the starting commit and the outcome to beat. They can be replayed
 against a new SDK version and graded. That supplies the graded agent runs
-that US-014-AC4 and US-031-AC5 wait on.
+that US-014-AC4 and US-031-AC5 wait on. *[Amended 2026-10-23 — AR-2026-10-22
+D-5]* A maintainer replays a task by the manual procedure in
+`docs/learning/replay-an-evaluation-task.md`; a runner that does it with an
+agent is planned (bead `ux-builder-9f2522e0`).
 
 ## User Stories
 

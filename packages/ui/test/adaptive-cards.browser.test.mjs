@@ -152,7 +152,8 @@ describe("US-083: an agent's Adaptive Card renders in the app's theme", () => {
     const look = () => page.evaluate(() => {
       const card = document.querySelector(".piq-adaptive-card"), h = card.querySelector(".piq-adaptive-card__heading"), good = card.querySelector('[data-ac-style="good"]'), el = card.querySelectorAll(".piq-adaptive-card__el")[1];
       const cs = (e) => getComputedStyle(e);
-      return { bg: cs(card).backgroundColor, text: cs(h).color, font: cs(h).fontFamily, size: cs(h).fontSize, stripe: cs(good).borderInlineStartColor, gap: cs(el).marginBlockStart };
+      const probe = document.createElement("i"); probe.style.color = "var(--piq-color-status-positive)"; good.append(probe); const positive = cs(probe).color; probe.remove();
+      return { bg: cs(card).backgroundColor, text: cs(h).color, font: cs(h).fontFamily, size: cs(h).fontSize, stripe: cs(good).borderInlineStartColor, gap: cs(el).marginBlockStart, positive };
     });
     const switchTo = (theme, appearance) => page.evaluate(([t, a]) => window.dispatchEvent(new CustomEvent("piq:set-theme", { detail: { theme: t, appearance: a } })), [theme, appearance]);
     const light = await look();
@@ -162,6 +163,7 @@ describe("US-083: an agent's Adaptive Card renders in the app's theme", () => {
     assert.notEqual(dark.bg, light.bg, "the surface follows the appearance");
     assert.notEqual(dark.text, light.text, "the text colour follows the appearance");
     assert.notEqual(dark.stripe, light.stripe, "the good style's tone follows the appearance");
+    for (const [ap, v] of [["light", light], ["dark", dark]]) assert.equal(v.stripe, v.positive, `the good style is the theme's status-positive in ${ap}`);
     const other = (await page.evaluate(() => [...new Set([...document.styleSheets].flatMap((s) => { try { return [...s.cssRules]; } catch { return []; } }).flatMap((r) => [...(r.selectorText ?? "").matchAll(/\[data-theme="([^"]+)"\]/g)].map((m) => m[1])))])).find((t) => t !== "praxis-carbon");
     await switchTo(other, "light");
     await page.waitForFunction((t) => document.querySelector("[data-theme]").dataset.theme === t, other);
@@ -350,7 +352,7 @@ describe("US-085: card actions call the app, with approval when high-impact", ()
     const page = await open(DESTRUCTIVE);
     const discard = page.getByRole("button", { name: "Discard draft" });
     assert.equal(await discard.getAttribute("data-style"), "destructive");
-    const [edge, closed] = await page.evaluate(() => { const b = document.querySelector('[data-style="destructive"]'); const probe = document.createElement("i"); probe.style.color = "var(--piq-state-closed)"; b.append(probe); const c = getComputedStyle(probe).color; probe.remove(); return [getComputedStyle(b).borderTopColor, c]; });
+    const [edge, closed] = await page.evaluate(() => { const b = document.querySelector('[data-style="destructive"]'); const probe = document.createElement("i"); probe.style.color = "var(--piq-color-status-negative)"; b.append(probe); const c = getComputedStyle(probe).color; probe.remove(); return [getComputedStyle(b).borderTopColor, c]; });
     assert.equal(edge, closed, "the destructive emphasis is the theme's loss tone");
     await discard.click();
     const dialog = page.getByRole("alertdialog", { name: "Discard draft?" });

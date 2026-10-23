@@ -181,7 +181,9 @@ AIB-01. A screen may declare `ai` (CONTRACT-005):
 - `highImpactActions`, each with its approval: `each` (every time) or
   `plan` (approved as part of a plan the user reviews);
 - `dataLeavesDevice`;
-- `fallback` (the screen or destination that does the job without AI).
+- `fallback` (the screen or destination that does the job without AI);
+- `essential`, `region`, `consent` and `takeover`, as CONTRACT-005 defines
+  them.
 
 AIB-02. The blueprint check reports, as warnings:
 - an `agent` screen that acts but declares no high-impact action review;
@@ -195,6 +197,10 @@ AIB-02. The blueprint check reports, as warnings:
 AIB-03. An inline pattern is checked with its own rules (FEAT-008) at the
 size class of the region it renders in: the conversation's column, not the
 window (ADR-021).
+*[Amended 2026-10-23 — AR-2026-10-22 D-2]* At the compact size class, an
+inline `Wizard` or `FormPage` is held to `genui.inline-compact`: one short step
+at a time with its progress, the composer and Stop still reachable, and a
+longer task on a screen of its own (US-080-AC7).
 
 #### Markup and audit
 

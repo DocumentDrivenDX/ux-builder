@@ -23,7 +23,7 @@ import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import { DIAGRAM_PAIRS, FLOOR, PAIRS, diagramFailures, measure, pairId } from "./contrast.mjs";
+import { DIAGRAM_PAIRS, DIAGRAM_ROLES, FLOOR, PAIRS, diagramFailures, measure, pairId } from "./contrast.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // --resolved and --baseline check another build (the tests feed it a failing brand).
@@ -35,7 +35,7 @@ const BASELINE = args.baseline ?? join(ROOT, "tools/contrast-baseline.json");
 const failures = [];
 const resolvedFiles = readdirSync(RESOLVED).filter((f) => f.endsWith(".json")).sort();
 for (const file of resolvedFiles) {
-  const { theme, appearance, tokens } = JSON.parse(readFileSync(join(RESOLVED, file), "utf8"));
+  const { theme, appearance, tokens, fixture } = JSON.parse(readFileSync(join(RESOLVED, file), "utf8"));
   for (const [fg, bg, label] of PAIRS) {
     const m = measure(tokens, fg, bg);
     if (!m) continue;
@@ -43,9 +43,12 @@ for (const file of resolvedFiles) {
     if (r < FLOOR) failures.push({ id: pairId(theme, appearance, fg, bg), label, ratio: Number(r.toFixed(2)) });
   }
   // @covers US-112-AC4
-  // A file with no diagram roles is from before FEAT-017 (a test's fixture); that every
-  // built theme has all of them is tools/__tests__/diagram-tokens.test.mjs's to check.
-  if (!Object.keys(tokens).some((k) => k.startsWith("piq-color-series-"))) continue;
+  // Every built theme sets every diagram role (AR-2026-10-22 D-7): a missing one fails, by name.
+  // Only a test's own file marked "fixture": true may leave them out.
+  if (fixture) continue;
+  const missing = DIAGRAM_ROLES.filter((r) => !(r in tokens));
+  for (const r of missing) failures.push({ id: `${theme}.${appearance}: --${r} missing`, label: "a diagram role every theme sets (FEAT-017)", ratio: null, missing: true });
+  if (missing.length) continue;
   for (const f of diagramFailures(tokens)) {
     failures.push({ id: pairId(theme, appearance, f.fg, f.bg), label: `${f.label}, floor ${f.floor.toFixed(2)}`, ratio: f.ratio === null ? null : Number(f.ratio.toFixed(2)), ...(f.unit && { unit: f.unit }) });
   }
@@ -67,7 +70,7 @@ const fresh = failures.filter((f) => !known.has(f.id));
 const fixed = [...known].filter((id) => !now.has(id));
 
 for (const f of failures) {
-  console.log(`${known.has(f.id) ? "known" : "NEW  "}  ${f.ratio === null ? "unmeasurable" : f.unit ? `${f.unit} ${f.ratio.toFixed(2)}` : `${f.ratio.toFixed(2)}:1`}  ${f.id}  (${f.label})`);
+  console.log(`${known.has(f.id) ? "known" : "NEW  "}  ${f.missing ? "missing" : f.ratio === null ? "unmeasurable" : f.unit ? `${f.unit} ${f.ratio.toFixed(2)}` : `${f.ratio.toFixed(2)}:1`}  ${f.id}  (${f.label})`);
 }
 for (const id of fixed) console.log(`FIXED  ${id}: remove it from tools/contrast-baseline.json`);
 console.log(`\n${resolvedFiles.length} theme/appearance combinations, ${PAIRS.length} pairings each, floor ${FLOOR}:1; ${DIAGRAM_PAIRS.length} diagram pairings, series separation and region order (FEAT-017).`);

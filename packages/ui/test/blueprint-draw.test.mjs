@@ -13,6 +13,7 @@ import { join } from "node:path";
 import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { drawings } from "../blueprint/draw.mjs";
+import { checkBlueprint } from "../blueprint/index.mjs";
 import { wireframes } from "../blueprint/wireframes.mjs";
 import { BLUEPRINT } from "./helix-app.mjs";
 
@@ -164,6 +165,21 @@ describe("US-104: every declared state, drawn", () => {
     assert.match(d.markdown, /- forbidden is not declared, but "Deny" leads to it\./);
     assert.match(d.markdown, /- error is not declared, but J step 1\./);
     assert.match(d.markdown, /\| forbidden \| Deny from ideal; DENIED from loading \| "You don't have access to this"/);
+  });
+
+  // @covers US-104-AC5
+  test("AC5: a screen may declare partial; it validates, is drawn with its retry, and gets a wireframe in that state", async () => {
+    const plan = { version: 1, kind: "view", name: "R", supports: { sizeClasses: ["compact", "medium"], inputs: ["fine"] }, screens: [{ id: "main", title: "Report", pattern: "CollectionList", states: ["empty", "loading", "error", "partial"] }] };
+    assert.deepEqual(checkBlueprint(plan).filter((f) => f.rule === "blueprint.valid"), [], "partial is a declared state");
+    const d = drawings(plan).find((x) => x.name === "states-main");
+    assert.match(d.mermaid, /stateDiagram-v2\n {4}ideal\n {4}loading\n {4}empty\n {4}partial\n {4}error\n/);
+    assert.ok(d.mermaid.includes("    loading --> partial: LOADED [some failed]\n"), "loading settles into partial");
+    assert.ok(d.mermaid.includes("    partial --> loading: RETRY\n"), "partial retries");
+    assert.match(d.markdown, /\| partial \| LOADED \[some failed\] from loading \| "Some of this didn't load"/);
+    const page = (await wireframes(plan)).find((p) => p.file.startsWith("main.partial."));
+    assert.ok(page, "a wireframe in the partial state");
+    assert.ok(page.html.includes('data-state="partial"'));
+    assert.match(checkBlueprint({ ...plan, screens: [{ ...plan.screens[0], states: ["stale"] }] }).map((f) => f.rule).join(), /blueprint\.valid/, "other states are still refused");
   });
 
   // @covers US-104-AC4

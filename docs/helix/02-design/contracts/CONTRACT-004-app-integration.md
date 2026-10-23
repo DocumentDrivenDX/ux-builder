@@ -44,7 +44,7 @@ ddx:
 
 **Contract ID**: CONTRACT-004 — App integration
 **Type**: library and CLI (the package entry points, React API, lint rules, audit command and MCP server an app builds on)
-**Version**: v1 (current releases: `@ux-builder/tokens` 1.6.0, `@ux-builder/ui` 0.6.3, `@ux-builder/create-app` 0.4.2, `@ux-builder/audit` 0.1.2, `@ux-builder/mcp` 0.3.1; each amendment below names the release it is normative from)
+**Version**: v1 (current releases: `@ux-builder/tokens` 1.7.0, `@ux-builder/ui` 0.9.0, `@ux-builder/create-app` 0.7.0, `@ux-builder/audit` 0.4.0, `@ux-builder/mcp` 0.6.0; `@ux-builder/trace` 0.1.0 is CONTRACT-007's; each amendment below names the release it is normative from)
 **Status**: accepted — by the operator 2026-10-08, as written; matches the packages released that day. *Screen patterns* (below), an amendment of 2026-10-18 for FEAT-006 (ADR-020, ADR-021, ADR-022) accepted with those ADRs, shipped in `@ux-builder/ui` 0.6.0. The amendments for FEAT-008, FEAT-009 and FEAT-010 ship in `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0, `@ux-builder/mcp` 0.4.0 and `@ux-builder/create-app` 0.5.0.
 **Related**: FEAT-004 (SDK-01–18), FEAT-005 (DIST-01), CONTRACT-001 (token names), CONTRACT-003 (theme selection), ADR-011 (embedded views), ADR-016 (React first), ADR-017 (fonts)
 
@@ -177,7 +177,7 @@ Outputs in `--out`: `report.json`, `index.html` (self-contained) and
 |---|---|
 | `tool`, `version`, `generatedAt`, `urls`, `rules` | strings, ISO time, string[], check list |
 | `runs[]` | `{ url, theme, appearance, mode: "event" \| "attributes", screenshot }` |
-| `findings[]` | `{ id, url, rule, severity: "error" \| "warning" \| "info", selector, message, runs: ["<theme>/<appearance>"], property?, value?, owner?: "app" \| "sdk", everyTheme? }` |
+| `findings[]` | `{ id, url, check, ruleId, rule: { id, title, statement, sources } \| null, sources, severity: "error" \| "warning" \| "info", selector, message, runs: ["<theme>/<appearance>"], property?, value?, owner?: "app" \| "sdk", everyTheme?, fix?, screen?, journey?, step? }`. *[Amended 2026-10-21 — FEAT-015]* From `@ux-builder/audit` 0.3.0, `check` is the check's name (`token-colors`) and `rule` the catalogue rule in full; before 0.3.0, `rule` held the check's name |
 | `summary` | `{ error, warning, info, byRule }` |
 
 A finding's `id` matches the number drawn on the screenshots. Findings with
@@ -240,6 +240,12 @@ app that uses no pattern MUST NOT need `patterns` or `patterns.css`.
 | `PrimaryNav`, `LocalNav`, `WorkspaceSwitcher`, `BulkActionBar` | Navigation and menus (with `MenuButton` and `Breadcrumbs` from `.`) |
 | `PageHeader`, `FilterBar`, `FilterPanel`, `DescriptionList`, `Timeline`, `StatTile`, `ChartFrame`, `TabsSection`, `ConfirmDialog`, `StatePanel` | Regions (with `Pagination` from `.`) |
 | `AppShell`, `ErrorScreen`, `CollectionList`, `ListDetail`, `RecordDetail`, `FormPage`, `QuickEdit`, `Dashboard`, `ReportViewer`, `SettingsPage` | Screens |
+
+`LocalNav` is planned and optional (NAV-03, US-024-AC9; AR-2026-10-22 D-8):
+it is not in `@ux-builder/ui` yet, and an app may rely on it only from the
+release that ships it. It is wanted first for Praxis plug-ins, which are
+embedded apps, the modality FEAT-014 will add next. Until then, `Tabs` and
+`TabsSection` cover local navigation that swaps panels.
 
 Props are normative in `catalogue.json`, as for widgets. Every pattern follows
 these conventions:
@@ -366,9 +372,10 @@ script runs on `prepack`, and also as `npm run bundle-helix`. It writes
 `helix/`, and it sets the HELIX version in `licenses/vendored.json`. It is
 not part of the published interface.
 
-## AI and agent experience *[Amended 2026-10-21 — planned, FEAT-011, ADR-028]*
+## AI and agent experience *[Amended 2026-10-21 — FEAT-011, ADR-028]*
 
-Normative from the minors that ship FEAT-011. The formats are CONTRACT-005
+Normative from `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0 and
+`@ux-builder/mcp` 0.4.0, which shipped FEAT-011. The formats are CONTRACT-005
 *AI and agent experience* and CONTRACT-006 (`journeys[].ai`, `scenarios`).
 
 | Surface | Addition |
@@ -509,9 +516,10 @@ are peer dependencies marked optional in `peerDependenciesMeta`, and never
 | `AGENTS.md`, skill | An "Assistant" section: the components, the renderable list, and that a tool result renders UI as `{ component, props }` |
 | `@ux-builder/mcp` | Tool `list_renderable` (no input) → `[{ name, import, purpose, propsSchema }]`. `get_widget` and `get_pattern` return `renderable` and `propsSchema` with the entry |
 
-## Adaptive Cards *[Amended 2026-10-21 — planned, ADR-029, FEAT-011, FEAT-007]*
+## Adaptive Cards *[Amended 2026-10-21 — ADR-029, FEAT-011, FEAT-007]*
 
-Normative from the `@ux-builder/ui` minor that ships ADR-029. It covers the
+Normative from `@ux-builder/ui` 0.7.0 (and `check_card` from
+`@ux-builder/mcp` 0.4.0), which shipped ADR-029. It covers the
 open-source schema, version 1.6 and earlier.
 
 ### Entry point `@ux-builder/ui/adaptive-cards`
@@ -519,7 +527,7 @@ open-source schema, version 1.6 and earlier.
 | Export | Signature | Behaviour |
 |---|---|---|
 | `AdaptiveCard` | `<AdaptiveCard card={object} onAction={(action) => void} />` | Renders the card with SDK components, in the nearest theme; marks it `data-piq-ai="generated"` |
-| `checkCard` | `(card: object) => Finding[]` | The vendored schema, then every `card.*` rule; CONTRACT-005 *Finding* shape, `path` a JSON Pointer into the card |
+| `checkCard` | `(card: object, options?: { trace?: string \| false }) => Finding[]` | The vendored schema, then every `card.*` rule; CONTRACT-005 *Finding* shape, `path` a JSON Pointer into the card. *[Amended 2026-10-23 — AR-2026-10-22 D-6; from `@ux-builder/ui` 0.10.0]* In Node, it also writes a `card` check event (CONTRACT-007) to the trace of the app at or above `trace` (default: the working directory), after it returns; `traceWritten()` resolves when that is done. `trace: false`, a browser, or no `@ux-builder/trace` or `.ux-builder/` writes nothing |
 | `cardSchema` | object | The vendored Adaptive Cards 1.6 JSON Schema (MIT) |
 
 `onAction` receives `{ type: "Action.Submit" | "Action.Execute", id?, verb?, data, inputs }`,
@@ -534,7 +542,7 @@ an action marked high-impact until the user approves.
 | `TextBlock` (`style: heading` → a heading); `RichTextBlock`, `TextRun` | Text in the theme's type scale; a sanitised markdown subset, never HTML |
 | `Image`, `ImageSet` | `img` with `altText`; `Cluster` |
 | `Media` | Native `video` or `audio` with its captions |
-| `Container` (`style`: `emphasis`, `good`, `attention`, `warning`, `accent`) | `Stack` on the matching surface or status tokens |
+| `Container` (`style`: `emphasis`, `good`, `attention`, `warning`, `accent`) | `Stack` on the matching surface or status tokens: `emphasis` → `color.surface-sunken`; `good`, `warning`, `attention` → `color.status-positive`, `-caution`, `-negative` (CONTRACT-001, from `@ux-builder/ui` 0.10.0; `state.*` before); `accent` → `color.accent` |
 | `ColumnSet`, `Column` (`auto`, `stretch`, weight, px) | `Grid`, collapsing to one column at compact |
 | `FactSet` | `DescriptionList` |
 | `Table` | `DataTable` (static) |
@@ -571,14 +579,17 @@ The renderer shows an approval with `consequence`, Approve and Deny
 
 | Surface | As built |
 |---|---|
-| `@ux-builder/ui/adaptive-cards/check` | A second export: `checkCard`, `cardSchema`, `CHECKS` (the rule IDs `checkCard` reports) and `SUPPORTED_VERSION`, with no React, so Node tools (the MCP server, `tools/check-rules.mjs`) load it without a DOM. `@ux-builder/ui/adaptive-cards` exports the same functions with `AdaptiveCard`. The schema is vendored verbatim at `adaptive-cards/schema-1.6/adaptive-card.json` (MIT, recorded in `licenses/vendored.json`) |
+| `@ux-builder/ui/adaptive-cards/check` | A second export: `checkCard`, `cardSchema`, `CHECKS` (the rule IDs `checkCard` reports), `SUPPORTED_VERSION` and `traceWritten`, with no React, so Node tools (the MCP server, `tools/check-rules.mjs`) load it without a DOM. `@ux-builder/ui/adaptive-cards` exports the same functions with `AdaptiveCard`. The schema is vendored verbatim at `adaptive-cards/schema-1.6/adaptive-card.json` (MIT, recorded in `licenses/vendored.json`) |
 | `checkCard` findings | Schema problems are `severity: "error"` under `card.version` (the card is not a valid 1.6 card); every rule finding is a warning. No rule runs on an element the schema rejects, or inside it. An element outside 1.6 is a `card.version` warning only when it has no `fallback`; its fallback is checked in its place. Ordered by path, then rule |
 | `AdaptiveCard` props | Also `decision` and `onDecide({ action, decision })`, so an app records the user's choice on a high-impact action (`action` is the action's `id`, else its `verb`, else its title); `headingLevel` (default 3); `disclosure` (visible AI disclosure text, tied with `aria-describedby`). Only the user's choice in the card, or a `decision` the app passes back, decides; no field of the card is read for it |
 | Conversation (*Assistant and generative UI*) | A message part `{ type: "adaptive-card", id?, card }` renders `AdaptiveCard`, done without changing `GenerativeComponent` or the renderable catalogue. `Conversation` gains `onCardAction({ messageId, partId, action })` and `onCardDecide({ messageId, partId, action, decision })`, and keeps each card's decision by message and part. The AI SDK and assistant-ui adapters map a tool output `{ type: "adaptive-card", card }`, or an object with `type: "AdaptiveCard"`, to that part |
 | Actions | Up to four primary actions show as buttons; the rest, and `mode: "secondary"`, are in a "More actions" `MenuButton`. A high-impact action's inputs are taken when it is activated; the card's inputs are disabled while the approval is pending and after it. `Action.OpenUrl` links stay usable after a decision (they act on nothing) |
 | Text | Bold, italic, links (http, https, mailto) and bulleted and numbered lists are formatted; `DATE()` and `TIME()` are formatted for the user's locale; everything else, HTML included, shows as text. TextBlocks always wrap. Text `color` values are drawn in the strong or muted text colour, never a hue that could fail contrast; tones show on container styles |
 
-## Flows and journeys *[Amended 2026-10-21 — planned, FEAT-012, ADR-030]*
+## Flows and journeys *[Amended 2026-10-21 — FEAT-012, ADR-030]*
+
+Normative from `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0 and
+`@ux-builder/mcp` 0.4.0, which shipped FEAT-012.
 
 | Surface | Addition |
 |---|---|
@@ -634,9 +645,18 @@ had to settle:
   the blueprint lives (default `app.blueprint.json` in the server's
   directory). It returns `{ flow, helix, proposals: [{ id, kind, path,
   section, target, file, patch }], disagreements, current, problems,
-  written: false }`, or an error naming `.helix.yml` when there is no marker.
+  drafts: [{ id, kind, type, path, sections, text }], uxTypes: { installed,
+  missing }, written: false }`, or an error naming `.helix.yml` when there is
+  no marker. *[Amended 2026-10-21 — FEAT-015 RPT-09]* `drafts` are the HELIX
+  UX-type documents (interaction-state-diagram, wireframe, screen-flow,
+  user-journey-map) for the types the installed HELIX does not define, named in
+  `uxTypes.missing`.
 
-## Modalities, verdicts and the journey report *[Amended 2026-10-21 — planned, FEAT-014, FEAT-015, ADR-032, ADR-033]*
+## Modalities, verdicts and the journey report *[Amended 2026-10-21 — FEAT-014, FEAT-015, ADR-032, ADR-033]*
+
+Normative from `@ux-builder/ui` 0.8.0, `@ux-builder/audit` 0.3.0,
+`@ux-builder/mcp` 0.5.0 and `@ux-builder/create-app` 0.6.0, which shipped
+FEAT-014 and FEAT-015.
 
 ### Starter
 
@@ -658,7 +678,7 @@ modalities come from the blueprint, else `--modality`, else
 
 - `verdicts.theme`: `{ status, theme, designSystem, applied, sdkOnly, contrast: { light, dark }, findings: [ids] }`;
 - `verdicts.modality`: one `{ modality, status, components: [{ name, present }], ruleFamilies: [{ family, checked }], fixes }` per modality;
-- on every finding: `ruleId`, `rule: { statement, sources }`, `fix`, and with journeys `journey` and `step`.
+- on every finding: `check`, `ruleId`, `rule: { id, title, statement, sources }`, `sources`, `fix`, and with a blueprint `screen`, and with journeys `journey` and `step` (`steps` when several visit it).
 
 `report.html` opens with the verdicts and a *Rules broken* table, then lists
 journey → step (screenshot with numbered boxes) → finding, then *Other

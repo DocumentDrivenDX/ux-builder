@@ -143,6 +143,9 @@ brand or design system sets them is normative in CONTRACT-002.
   appearance and every brand × design-system preview pair. A failure must
   fail `npm run contrast`, naming the theme, appearance, pairing and
   measured value. The baseline of known failures must not grow.
+  *[Amended 2026-10-23 — AR-2026-10-22 D-7]* A built theme or pair missing
+  any of the 28 roles fails, naming each missing role; only a test's own
+  resolved file marked `"fixture": true` is exempt.
 
 #### Theme page
 

@@ -13,7 +13,7 @@ import { join } from "node:path";
 import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { combinations, composeOn, load, resolveAll, resolvedJson, resolvedPairJson, themeAppearances, themeCss } from "../../packages/tokens/compose.mjs";
-import { diagramFailures, solid } from "../contrast.mjs";
+import { DIAGRAM_ROLES, diagramFailures, solid } from "../contrast.mjs";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const src = load(join(ROOT, "tokens"), join(ROOT, "brand"));
@@ -98,6 +98,26 @@ describe("US-112 diagram tokens", () => {
     assert.ok(own, "a theme with its own anatomy");
     const d = src.layout.defaults;
     assert.deepEqual(shape(own.name, themeAppearances(src, own)[0]), [d.radius["diagram-node"].$value, d.size["diagram-stroke"].$value, d.size["diagram-stroke-strong"].$value]);
+  });
+
+  // @covers US-112-AC4
+  test("AC4: the gate fails a built theme missing a diagram role, naming it; only a file marked fixture is let off", () => {
+    const resolved = join(tmp, "missing");
+    mkdirSync(resolved);
+    const tokens = resolvedJson(src, "praxis-carbon", "light");
+    delete tokens["piq-color-series-5"];
+    delete tokens["piq-radius-diagram-node"];
+    writeFileSync(join(resolved, "gap.carbon.light.json"), JSON.stringify({ theme: "gap.carbon", appearance: "light", tokens }));
+    writeFileSync(join(resolved, "old.light.json"), JSON.stringify({ theme: "old", appearance: "light", fixture: true, tokens: { "piq-color-text": "#111111", "piq-color-ground": "#FFFFFF" } }));
+    const baseline = join(tmp, "baseline-missing.json");
+    writeFileSync(baseline, JSON.stringify({ floor: 4.5, known: [] }));
+    const r = spawnSync(process.execPath, [join(ROOT, "tools/check-contrast.mjs"), "--resolved", resolved, "--baseline", baseline], { encoding: "utf8" });
+    assert.equal(r.status, 1, r.stdout);
+    assert.match(r.stdout, /NEW\s+missing\s+gap\.carbon\.light: --piq-color-series-5 missing/);
+    assert.match(r.stdout, /NEW\s+missing\s+gap\.carbon\.light: --piq-radius-diagram-node missing/);
+    assert.doesNotMatch(r.stdout, /old\.light/);
+    assert.equal(DIAGRAM_ROLES.length, 28);
+    assert.deepEqual([...DIAGRAM_ROLES].sort(), [...NAMES].sort(), "the gate's list is CONTRACT-001's");
   });
 
   // @covers US-112-AC5

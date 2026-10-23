@@ -1100,9 +1100,10 @@
   border-inline-start: var(--piq-notice-stripe-width, var(--piq-space-1)) solid var(--_tone);
   background: color-mix(in srgb, var(--_tone) var(--piq-notice-tone-mix, 0%), var(--piq-notice-bg, var(--piq-color-surface)));
 }
-.piq-adaptive-card [data-ac-style="good"] { --_tone: var(--piq-state-live); }
-.piq-adaptive-card [data-ac-style="warning"] { --_tone: var(--piq-state-limited); }
-.piq-adaptive-card [data-ac-style="attention"] { --_tone: var(--piq-state-closed); }
+/* Outcomes, not availability: the FEAT-017 status roles (D-1, AR-2026-10-22). */
+.piq-adaptive-card [data-ac-style="good"] { --_tone: var(--piq-color-status-positive); }
+.piq-adaptive-card [data-ac-style="warning"] { --_tone: var(--piq-color-status-caution); }
+.piq-adaptive-card [data-ac-style="attention"] { --_tone: var(--piq-color-status-negative); }
 .piq-adaptive-card [data-ac-style="accent"] { --_tone: var(--piq-color-accent); }
 .piq-adaptive-card__container[data-valign="center"],
 .piq-adaptive-card__column > .piq-stack[data-valign="center"] { justify-content: center; block-size: 100%; }
@@ -1127,7 +1128,7 @@
 .piq-adaptive-card__el > .piq-adaptive-card__action-set { margin-block-start: 0; }
 .piq-adaptive-card__link { text-decoration: none; }
 /* The destructive emphasis: the status tone for loss, on the secondary button's own anatomy. */
-.piq-adaptive-card__actions .piq-btn[data-style="destructive"] { border-color: var(--piq-state-closed); box-shadow: inset var(--piq-space-1) 0 0 var(--piq-state-closed); }
+.piq-adaptive-card__actions .piq-btn[data-style="destructive"] { border-color: var(--piq-color-status-negative); box-shadow: inset var(--piq-space-1) 0 0 var(--piq-color-status-negative); }
 .piq-adaptive-card__show { display: grid; gap: var(--piq-space-2); padding-inline-start: var(--piq-space-3); border-inline-start: var(--piq-border-default); }
 .piq-adaptive-card__select { margin-block-start: var(--piq-space-2); }
 .piq-adaptive-card__select-button,

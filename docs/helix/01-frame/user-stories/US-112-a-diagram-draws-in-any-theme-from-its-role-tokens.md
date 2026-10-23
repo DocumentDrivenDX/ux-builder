@@ -50,7 +50,7 @@ check contrast itself.
 - [ ] **US-112-AC1** — Given the token build, when it finishes, then every theme and preview pair's resolved JSON, in every appearance it has, sets all 28 diagram tokens of CONTRACT-001, and every theme's CSS declares them.
 - [ ] **US-112-AC2** — Given the resolved series in any two themes, when slot *n* is compared, then it is the same hue family (its OKLCH hue within 30° of the default's).
 - [ ] **US-112-AC3** — Given a brand that sets `color.series-2` for its light appearance only, when it is built, then its light themes use that value and its dark themes keep the default.
-- [ ] **US-112-AC4** — Given every theme and preview pair, when `npm run contrast` runs, then GATE-01 to GATE-05 hold and it reports 0 failures.
+- [ ] **US-112-AC4** — Given every theme and preview pair, when `npm run contrast` runs, then GATE-01 to GATE-05 hold and it reports 0 failures; a resolved file missing any of the 28 roles, unless marked `"fixture": true`, fails naming each missing role (AR-2026-10-22 D-7).
 - [ ] **US-112-AC5** — Given a brand whose status colour is below 4.5:1 on its ground, or whose series 3 and 4 collide under deuteranopia, when the gate runs on it, then it fails, naming the theme, appearance, pairing and measured value.
 - [ ] **US-112-AC6** — Given Carbon and Material, when their themes are built, then each has its own diagram node radius, and a theme with its own anatomy gets the SDK defaults.
 - [ ] **US-112-AC7** — Given a page that draws a status chip on its subtle fill, a series legend, a region holding a node, an edge in each weight and the three lifecycle tints with those tokens only, when the audit runs in every theme and appearance, then it reports no errors and no warnings.

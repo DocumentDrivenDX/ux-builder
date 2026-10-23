@@ -1,5 +1,5 @@
 import { Button, Card, ChoicePicker, DataTable, Icon, Notice, ProgressBar, Select, StatusPill, Switch, TextField, ThemeProvider } from "@ux-builder/ui";
-import { iconArrowRight, iconBell, iconBot, iconCheck, iconCopy, iconPackage, iconPalette, iconPlug, iconScanEye, iconShieldCheck, iconSparkles, iconTerminal, iconWand2 } from "@ux-builder/ui/icons";
+import { iconArrowRight, iconBell, iconBot, iconCheck, iconCopy, iconHistory, iconPackage, iconPalette, iconPlug, iconScanEye, iconShieldCheck, iconSparkles, iconTerminal, iconWand2 } from "@ux-builder/ui/icons";
 import catalogue from "@ux-builder/ui/catalogue.json";
 import { useState } from "react";
 import { ROOT } from "../site-root.js";
@@ -21,6 +21,7 @@ import uiPkg from "../../../../packages/ui/package.json";
 import createPkg from "../../../../packages/create-app/package.json";
 import auditPkg from "../../../../packages/audit/package.json";
 import mcpPkg from "../../../../packages/mcp/package.json";
+import tracePkg from "../../../../packages/trace/package.json";
 
 /* The GitHub Pages home page's sections (tools/build-pages.mjs), shown by the
    site's shell (microsite/Site.jsx). They wear the SDK's own
@@ -56,6 +57,7 @@ export const PACKAGES = [
   { pkg: createPkg, icon: iconSparkles, what: "A new React + Vite app on the SDK and on HELIX from its first commit, with lint, the audit, a browser test and CI." },
   { pkg: auditPkg, icon: iconScanEye, what: "Drives the running app through every theme in light and dark and reports anything off-theme; assesses a HELIX app's journeys." },
   { pkg: mcpPkg, icon: iconPlug, what: "The SDK over MCP: themes, widgets, tokens, icons and rules, and checks of blueprints and cards, for any coding agent." },
+  { pkg: tracePkg, icon: iconHistory, what: "The episode trace each build of an app leaves in its repository, and the export its owner shares only by choice." },
 ];
 
 export function Copy({ text, label = "Copy" }) {
@@ -322,9 +324,9 @@ export function Packages() {
       <div className="uxh-wrap uxh-col uxh-gap">
         <div className="uxh-head">
           <span className="uxh-eyebrow"><Icon icon={iconPackage} />On npm, no token needed</span>
-          <h2 id="pkg-h">Five packages. Take what you need.</h2>
+          <h2 id="pkg-h">Six packages. Take what you need.</h2>
         </div>
-        <ul className="uxh-cards uxh-cards--five">
+        <ul className="uxh-cards uxh-cards--six">
           {PACKAGES.map(({ pkg, icon, what }) => (
             <li key={pkg.name}>
               <a className="uxh-card uxh-card--link" href={`https://www.npmjs.com/package/${pkg.name}`}>
