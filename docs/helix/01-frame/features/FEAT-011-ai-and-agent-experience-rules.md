@@ -181,7 +181,9 @@ AIB-01. A screen may declare `ai` (CONTRACT-005):
 - `highImpactActions`, each with its approval: `each` (every time) or
   `plan` (approved as part of a plan the user reviews);
 - `dataLeavesDevice`;
-- `fallback` (the screen or destination that does the job without AI).
+- `fallback` (the screen or destination that does the job without AI);
+- `essential`, `region`, `consent` and `takeover`, as CONTRACT-005 defines
+  them.
 
 AIB-02. The blueprint check reports, as warnings:
 - an `agent` screen that acts but declares no high-impact action review;

@@ -137,10 +137,9 @@ not part of this contract, and they may change in any release.
 | `check <file> [--json]` | Prints findings (or JSON) | 0 no errors; 1 an error finding; 2 usage or unreadable file |
 | `init [--kind app\|view] [--out <file>]` | Writes `skeleton(kind)` to `app.blueprint.json` (or `--out`); refuses to overwrite | 0 written; 1 exists; 2 usage |
 
-## AI and agent experience *[Amended 2026-10-21 — planned, FEAT-011, ADR-028]*
+## AI and agent experience *[Amended 2026-10-21 — FEAT-011, ADR-028]*
 
-Planned for the `@ux-builder/ui` minor that ships FEAT-011. Until then, a
-name here may change only by amending this section. Everything is optional:
+Normative from `@ux-builder/ui` 0.7.0, which shipped FEAT-011. Everything is optional:
 a rule, blueprint or page without these fields behaves as before.
 
 ### Rule additions
@@ -254,9 +253,9 @@ The blueprint checks and audit checks of these rules are warnings
 (ADR-028 decision 5). Their IDs are SD-005's rule IDs. Their findings use
 the *Finding* shape above.
 
-## Flows and journeys *[Amended 2026-10-21 — planned, FEAT-012, ADR-030]*
+## Flows and journeys *[Amended 2026-10-21 — FEAT-012, ADR-030]*
 
-Planned for the `@ux-builder/ui` minor that ships FEAT-012. All fields are
+Normative from `@ux-builder/ui` 0.7.0, which shipped FEAT-012. All fields are
 optional, and a blueprint without them is unchanged.
 
 ### `screens[].actions[]`
@@ -350,7 +349,10 @@ settle; the smallest additions that make the checks decidable:
   `action.destructive-safeguard` as `destructiveActions` is, and
   `actions[].highImpact` counts as a declared high-impact action.
 
-## Modalities and theme rules *[Amended 2026-10-21 — planned, FEAT-014, FEAT-015, ADR-032, ADR-033]*
+## Modalities and theme rules *[Amended 2026-10-21 — FEAT-014, FEAT-015, ADR-032, ADR-033]*
+
+Normative from `@ux-builder/ui` 0.8.0, which shipped the modalities and the
+`theme.*` rules.
 
 ### `supports.modalities`
 

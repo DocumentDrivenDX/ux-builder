@@ -16,14 +16,14 @@ export const SECTIONS = [
   },
   {
     id: "start", title: "Start", mode: "Start", question: "How do I try it correctly?",
-    lede: "From nothing to a themed screen in minutes: a new app on HELIX, an existing app, a theme from your logo, an agent doing the work, a UX assessment, or cards from Microsoft agents.",
+    lede: "From nothing to a themed screen in minutes: a new app on HELIX, shaped by its modalities, an existing app, a theme from your logo, an agent doing the work, a UX assessment, or cards from Microsoft agents.",
     pages: [
-      { id: "new-app", title: "Start a new app", blurb: "One command scaffolds a React + Vite app that is on-theme and on HELIX from its first commit." },
+      { id: "new-app", title: "Start a new app", blurb: "One command scaffolds a React + Vite app for its modalities, on-theme and on HELIX from its first commit." },
       { id: "existing-app", title: "Add it to an existing app", blurb: "Install two packages, load the theme, wrap the app." },
       { id: "theme-from-logo", title: "Make a theme from your logo", blurb: "The guided builder: logo in, accessible palettes out, saved for review." },
-      { id: "agents", title: "Work with AI coding agents", blurb: "AGENTS.md, a Claude Code skill and an MCP server that know your installed version." },
+      { id: "agents", title: "Work with AI coding agents", blurb: "AGENTS.md, a Claude Code skill and an MCP server that know your installed version, and the episode trace." },
       { id: "ci", title: "Keep it on-theme in CI", blurb: "Lint rules and a running-app audit that catch drift before it ships." },
-      { id: "assess", title: "Assess an app's UX", blurb: "Walk an app's journeys from its HELIX stories, in three scenarios for AI, and get a report with proposals." },
+      { id: "assess", title: "Assess an app's UX", blurb: "Walk an app's journeys from its HELIX stories, in three scenarios for AI, and get a report by journey, proposals and walkthrough videos." },
       { id: "microsoft-agents", title: "Show cards from Microsoft agents", blurb: "Render Adaptive Cards from Copilot, Teams and Bot Framework agents in your theme, and check them before they are sent." },
     ],
   },
@@ -32,7 +32,7 @@ export const SECTIONS = [
     lede: "The model behind the SDK: what a theme is, how tokens are named, how screens adapt and connect, and how AI screens are planned, built and checked.",
     pages: [
       { id: "themes", title: "Themes: a brand on a design system", blurb: "Identity and anatomy are separate, so any brand can wear any design system." },
-      { id: "tokens", title: "Role tokens and appearances", blurb: "Tokens named by what they are for, in light, dark and auto." },
+      { id: "tokens", title: "Role tokens and appearances", blurb: "Tokens named by what they are for, in light, dark and auto, including diagram and chart colours." },
       { id: "patterns", title: "Screen patterns and size classes", blurb: "Whole screens that adapt to the space they are given." },
       { id: "generative-ui", title: "Generative UI and embedded views", blurb: "The SDK's own assistant, bridges for AI Elements and assistant-ui, and views a host can dress." },
       { id: "ai-agent-experience", title: "AI and agent experience", blurb: "AI roles per screen, the rules they bring, the markers the audit reads, approvals and chat with inline UI." },

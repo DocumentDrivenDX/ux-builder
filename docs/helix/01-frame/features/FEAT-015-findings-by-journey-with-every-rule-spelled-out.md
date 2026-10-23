@@ -100,8 +100,9 @@ covers the states each journey was walked in.
 RPT-06. The video (FEAT-013) plays at a human pace by default:
 - about 2 seconds per step;
 - at each finding, a pause long enough to read its text at 200 words a
-  minute, and never less than 5 seconds;
-- `--pace slow|normal|fast` scales this (slow ×1.5, fast ×0.6).
+  minute, and never less than 5 seconds at the normal pace;
+- `--pace slow|normal|fast` scales this (slow ×1.5, fast ×0.6), never below
+  1 second a step or 3 seconds a finding (US-103).
 
 RPT-07. Each finding in the video shows the rule ID and its full statement, as
 well as the problem in plain English and the fix. The chapter titles are the

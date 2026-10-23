@@ -33,7 +33,9 @@ On every push to `main`, one run of `release.yml`:
 1. applies the pending changesets (`npm run version-packages`) and commits the
    bump locally as "Version Packages";
 2. runs every gate (`npm run check`) on the versioned tree;
-3. pushes the bump to `main` (rebasing once if `main` moved);
+3. pushes the bump to `main` (rebasing once if `main` moved; superseded by
+   the second amendment below: if `main` moved, the run pushes and publishes
+   nothing);
 4. publishes each public package whose version is not on npm
    (`changeset publish`, with provenance through Trusted Publishing), tags it
    and creates its GitHub release.

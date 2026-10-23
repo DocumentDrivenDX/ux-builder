@@ -27,7 +27,7 @@ ddx:
 **Contract ID**: CONTRACT-002 — Brand and design system files
 **Type**: schema
 **Version**: v1
-**Status**: accepted — v1 accepted by the operator 2026-10-06, including the `color.on-accent` addition (bead `ux-builder-739039c8`); the Amendment below (theme files, ADR-018) accepted by the operator 2026-10-06 (bead `ux-builder-22865f72`). Sections it changes are marked *[Amended — ADR-018]*. A second amendment (pattern variants, ADR-022; 2026-10-18) is marked *[Amended 2026-10-18 — ADR-022]*; shipped in `@ux-builder/tokens` 1.5.0. A third (diagram and chart colours, FEAT-017; 2026-10-22) is marked *[Amended 2026-10-22 — FEAT-017]*.
+**Status**: accepted — v1 accepted by the operator 2026-10-06, including the `color.on-accent` addition (bead `ux-builder-739039c8`); the Amendment below (theme files, ADR-018) accepted by the operator 2026-10-06 (bead `ux-builder-22865f72`). Sections it changes are marked *[Amended — ADR-018]*. A second amendment (pattern variants, ADR-022; 2026-10-18) is marked *[Amended 2026-10-18 — ADR-022]*; shipped in `@ux-builder/tokens` 1.5.0. A third (diagram and chart colours, FEAT-017; 2026-10-22) is marked *[Amended 2026-10-22 — FEAT-017]*; shipped in `@ux-builder/tokens` 1.7.0.
 **Related**: ADR-018 (themes are what apps select), ADR-013 (theme = brand × design system), ADR-017 (brand fonts), CONTRACT-001 (token names), FEAT-001 (THEME-01 to THEME-08), FEAT-002 (generation settings), FEAT-003 (the brand builder writes brand files)
 
 ## Purpose

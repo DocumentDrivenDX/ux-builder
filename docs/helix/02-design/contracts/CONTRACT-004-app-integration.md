@@ -44,7 +44,7 @@ ddx:
 
 **Contract ID**: CONTRACT-004 — App integration
 **Type**: library and CLI (the package entry points, React API, lint rules, audit command and MCP server an app builds on)
-**Version**: v1 (current releases: `@ux-builder/tokens` 1.6.0, `@ux-builder/ui` 0.6.3, `@ux-builder/create-app` 0.4.2, `@ux-builder/audit` 0.1.2, `@ux-builder/mcp` 0.3.1; each amendment below names the release it is normative from)
+**Version**: v1 (current releases: `@ux-builder/tokens` 1.7.0, `@ux-builder/ui` 0.9.0, `@ux-builder/create-app` 0.7.0, `@ux-builder/audit` 0.4.0, `@ux-builder/mcp` 0.6.0; `@ux-builder/trace` 0.1.0 is CONTRACT-007's; each amendment below names the release it is normative from)
 **Status**: accepted — by the operator 2026-10-08, as written; matches the packages released that day. *Screen patterns* (below), an amendment of 2026-10-18 for FEAT-006 (ADR-020, ADR-021, ADR-022) accepted with those ADRs, shipped in `@ux-builder/ui` 0.6.0. The amendments for FEAT-008, FEAT-009 and FEAT-010 ship in `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0, `@ux-builder/mcp` 0.4.0 and `@ux-builder/create-app` 0.5.0.
 **Related**: FEAT-004 (SDK-01–18), FEAT-005 (DIST-01), CONTRACT-001 (token names), CONTRACT-003 (theme selection), ADR-011 (embedded views), ADR-016 (React first), ADR-017 (fonts)
 
@@ -177,7 +177,7 @@ Outputs in `--out`: `report.json`, `index.html` (self-contained) and
 |---|---|
 | `tool`, `version`, `generatedAt`, `urls`, `rules` | strings, ISO time, string[], check list |
 | `runs[]` | `{ url, theme, appearance, mode: "event" \| "attributes", screenshot }` |
-| `findings[]` | `{ id, url, rule, severity: "error" \| "warning" \| "info", selector, message, runs: ["<theme>/<appearance>"], property?, value?, owner?: "app" \| "sdk", everyTheme? }` |
+| `findings[]` | `{ id, url, check, ruleId, rule: { id, title, statement, sources } \| null, sources, severity: "error" \| "warning" \| "info", selector, message, runs: ["<theme>/<appearance>"], property?, value?, owner?: "app" \| "sdk", everyTheme?, fix?, screen?, journey?, step? }`. *[Amended 2026-10-21 — FEAT-015]* From `@ux-builder/audit` 0.3.0, `check` is the check's name (`token-colors`) and `rule` the catalogue rule in full; before 0.3.0, `rule` held the check's name |
 | `summary` | `{ error, warning, info, byRule }` |
 
 A finding's `id` matches the number drawn on the screenshots. Findings with
@@ -366,9 +366,10 @@ script runs on `prepack`, and also as `npm run bundle-helix`. It writes
 `helix/`, and it sets the HELIX version in `licenses/vendored.json`. It is
 not part of the published interface.
 
-## AI and agent experience *[Amended 2026-10-21 — planned, FEAT-011, ADR-028]*
+## AI and agent experience *[Amended 2026-10-21 — FEAT-011, ADR-028]*
 
-Normative from the minors that ship FEAT-011. The formats are CONTRACT-005
+Normative from `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0 and
+`@ux-builder/mcp` 0.4.0, which shipped FEAT-011. The formats are CONTRACT-005
 *AI and agent experience* and CONTRACT-006 (`journeys[].ai`, `scenarios`).
 
 | Surface | Addition |
@@ -509,9 +510,10 @@ are peer dependencies marked optional in `peerDependenciesMeta`, and never
 | `AGENTS.md`, skill | An "Assistant" section: the components, the renderable list, and that a tool result renders UI as `{ component, props }` |
 | `@ux-builder/mcp` | Tool `list_renderable` (no input) → `[{ name, import, purpose, propsSchema }]`. `get_widget` and `get_pattern` return `renderable` and `propsSchema` with the entry |
 
-## Adaptive Cards *[Amended 2026-10-21 — planned, ADR-029, FEAT-011, FEAT-007]*
+## Adaptive Cards *[Amended 2026-10-21 — ADR-029, FEAT-011, FEAT-007]*
 
-Normative from the `@ux-builder/ui` minor that ships ADR-029. It covers the
+Normative from `@ux-builder/ui` 0.7.0 (and `check_card` from
+`@ux-builder/mcp` 0.4.0), which shipped ADR-029. It covers the
 open-source schema, version 1.6 and earlier.
 
 ### Entry point `@ux-builder/ui/adaptive-cards`
@@ -578,7 +580,10 @@ The renderer shows an approval with `consequence`, Approve and Deny
 | Actions | Up to four primary actions show as buttons; the rest, and `mode: "secondary"`, are in a "More actions" `MenuButton`. A high-impact action's inputs are taken when it is activated; the card's inputs are disabled while the approval is pending and after it. `Action.OpenUrl` links stay usable after a decision (they act on nothing) |
 | Text | Bold, italic, links (http, https, mailto) and bulleted and numbered lists are formatted; `DATE()` and `TIME()` are formatted for the user's locale; everything else, HTML included, shows as text. TextBlocks always wrap. Text `color` values are drawn in the strong or muted text colour, never a hue that could fail contrast; tones show on container styles |
 
-## Flows and journeys *[Amended 2026-10-21 — planned, FEAT-012, ADR-030]*
+## Flows and journeys *[Amended 2026-10-21 — FEAT-012, ADR-030]*
+
+Normative from `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0 and
+`@ux-builder/mcp` 0.4.0, which shipped FEAT-012.
 
 | Surface | Addition |
 |---|---|
@@ -634,9 +639,18 @@ had to settle:
   the blueprint lives (default `app.blueprint.json` in the server's
   directory). It returns `{ flow, helix, proposals: [{ id, kind, path,
   section, target, file, patch }], disagreements, current, problems,
-  written: false }`, or an error naming `.helix.yml` when there is no marker.
+  drafts: [{ id, kind, type, path, sections, text }], uxTypes: { installed,
+  missing }, written: false }`, or an error naming `.helix.yml` when there is
+  no marker. *[Amended 2026-10-21 — FEAT-015 RPT-09]* `drafts` are the HELIX
+  UX-type documents (interaction-state-diagram, wireframe, screen-flow,
+  user-journey-map) for the types the installed HELIX does not define, named in
+  `uxTypes.missing`.
 
-## Modalities, verdicts and the journey report *[Amended 2026-10-21 — planned, FEAT-014, FEAT-015, ADR-032, ADR-033]*
+## Modalities, verdicts and the journey report *[Amended 2026-10-21 — FEAT-014, FEAT-015, ADR-032, ADR-033]*
+
+Normative from `@ux-builder/ui` 0.8.0, `@ux-builder/audit` 0.3.0,
+`@ux-builder/mcp` 0.5.0 and `@ux-builder/create-app` 0.6.0, which shipped
+FEAT-014 and FEAT-015.
 
 ### Starter
 
@@ -658,7 +672,7 @@ modalities come from the blueprint, else `--modality`, else
 
 - `verdicts.theme`: `{ status, theme, designSystem, applied, sdkOnly, contrast: { light, dark }, findings: [ids] }`;
 - `verdicts.modality`: one `{ modality, status, components: [{ name, present }], ruleFamilies: [{ family, checked }], fixes }` per modality;
-- on every finding: `ruleId`, `rule: { statement, sources }`, `fix`, and with journeys `journey` and `step`.
+- on every finding: `check`, `ruleId`, `rule: { id, title, statement, sources }`, `sources`, `fix`, and with a blueprint `screen`, and with journeys `journey` and `step` (`steps` when several visit it).
 
 `report.html` opens with the verdicts and a *Rules broken* table, then lists
 journey → step (screenshot with numbered boxes) → finding, then *Other

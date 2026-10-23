@@ -21,23 +21,44 @@ never hard-code presentation:
   adapt to the width they are given, from a desktop window to a phone or a
   narrow embedded panel. Each design system picks its own conventions at a
   few variant points (navigation, page header, tabs, table).
+- **Diagram and chart colours.** Every theme carries status, series, region,
+  edge and lifecycle tokens for diagrams and charts, held to the same
+  contrast gate as the widgets.
+- **Modalities.** An app declares what it is: a `responsive-web` app, a
+  `chat` app, a `hybrid-chat` app whose replies draw cards, or several. The
+  starter builds that shell, and the rules and the audit follow it.
 - **Guardrails.** ESLint and Stylelint rules catch literal colours, fonts and
   radii. An audit drives the running app through every theme in light and dark
-  and reports anything that isn't the theme's.
+  and reports anything that isn't the theme's. It also checks the interaction
+  and AI rules, and gives a verdict on the theme and on each modality.
+- **Planned before it's built.** An app's screens, flows and journeys live in
+  `app.blueprint.json`. It is checked against cited interaction and AI rules
+  before any code exists, and it draws IA maps, flows and wireframes and
+  drafts HELIX documents.
+- **AI screens done right.** The SDK's own assistant and an Adaptive Cards
+  renderer draw AI UI in the app's theme. Approvals can always be denied, and
+  every reply can be stopped. A bridge stylesheet per theme dresses AI
+  Elements and assistant-ui too.
+- **A UX assessment.** A coding agent walks a HELIX-governed app's journeys
+  against its stories. It reports findings by journey, each with its rule
+  spelled out, and records an annotated walkthrough video of each journey.
 - **Built for coding agents.** Agent guidance (`AGENTS.md`) and a Claude Code
   skill are generated from the source, and an MCP server describes the SDK
   version an app actually has installed.
-- **Generative UI bridges.** A bridge stylesheet per theme maps the theme onto
-  shadcn/ui's variables, so AI Elements and assistant-ui chat components wear
-  the app's theme and switch with it.
+- **Learning from builds.** Every build of an app leaves an episode trace in
+  the app's repository: the guidance, the checks and the agent's decisions.
+  Nothing is sent anywhere; an owner shares episodes only by exporting them.
 - **Licences checked.** Every third-party licence the packages depend on or
   ship is checked before release, and nothing the SDK ships reports usage.
 
 The [project site](https://documentdrivendx.github.io/ux-builder/) wears the
 `ux-builder-databricks` theme. It has a page for each theme
 (`themes/?theme=<name>`: its logos, palette and CSS, and every widget, AI
-component and screen pattern in it) and every widget in
-[Storybook](https://documentdrivendx.github.io/ux-builder/storybook/). The
+component and screen pattern in it, and its diagram tokens) and every widget in
+[Storybook](https://documentdrivendx.github.io/ux-builder/storybook/). Its
+Start, Concepts, Reference and Proof pages explain each feature and are
+generated where they can be (commands, MCP tools, rules, decisions,
+traceability, releases). The
 [theme list](https://documentdrivendx.github.io/ux-builder/themes/) links only
 public themes; any other opens by its name. The site is rebuilt from `main` by
 `.github/workflows/pages.yml`.
@@ -47,10 +68,10 @@ public themes; any other opens by its name. The site is rebuilt from `main` by
 | Package | Install as | What it gives an app |
 |---|---|---|
 | [`@ux-builder/tokens`](packages/tokens) | dependency | The themes as CSS, every token's value as JSON, the fonts, brand artwork, generative UI bridges |
-| [`@ux-builder/ui`](packages/ui) | dependency | Widgets (React 19 and CSS), patterns, `ThemeProvider`, icons, `Logo`, favicon, lint rules, agent guidance |
-| [`@ux-builder/create-app`](packages/create-app) | `npm create` | A new React + Vite app already on the SDK, with lint, the audit and CI |
-| [`@ux-builder/audit`](packages/audit) | devDependency | `ux-builder-audit`: checks the running app in every theme and appearance |
-| [`@ux-builder/mcp`](packages/mcp) | `npx` | The SDK for AI coding agents over MCP |
+| [`@ux-builder/ui`](packages/ui) | dependency | Widgets (React 19 and CSS), patterns, the assistant, Adaptive Cards, `ThemeProvider`, icons, `Logo`, favicon, the blueprint, lint rules, agent guidance |
+| [`@ux-builder/create-app`](packages/create-app) | `npm create` | A new React + Vite app on the SDK and on HELIX, shaped by its modalities, with lint, the audit, the trace and CI |
+| [`@ux-builder/audit`](packages/audit) | devDependency | `ux-builder-audit`: checks the running app in every theme and appearance; `assess` runs the UX assessment |
+| [`@ux-builder/mcp`](packages/mcp) | `npx` | The SDK for AI coding agents over MCP, including the blueprint and card checks and the episode trace |
 | [`@ux-builder/trace`](packages/trace) | devDependency | `ux-builder-trace`: the episode trace an app keeps while it is built, and the export its owner shares by choice |
 
 `@ux-builder/engine` (the palette engine) and the theme builder app are
@@ -100,15 +121,18 @@ import { Button, Logo, ThemeProvider } from "@ux-builder/ui";
 ```
 
 It also exports the patterns (`@ux-builder/ui/patterns`), icons
-(`@ux-builder/ui/icons`), the ESLint and Stylelint rules, `catalogue.json`
-and `AGENTS.md`. See the [`ui` README](packages/ui/README.md) and the
-[Quick start](#quick-start).
+(`@ux-builder/ui/icons`), the assistant (`@ux-builder/ui/assistant`),
+Adaptive Cards (`@ux-builder/ui/adaptive-cards`), the blueprint
+(`@ux-builder/ui/blueprint`, bin `ux-builder-blueprint`), the ESLint and
+Stylelint rules, `catalogue.json` and `AGENTS.md`. See the
+[`ui` README](packages/ui/README.md) and the [Quick start](#quick-start).
 
 **`@ux-builder/create-app`: a new app.** It scaffolds a React + Vite app that
-is already on the SDK, with lint, the audit and CI:
+is already on the SDK and on HELIX, with lint, the audit, the episode trace
+and CI:
 
 ```sh
-npm create @ux-builder/app my-app -- --theme synaptiq   # --name sets the package name
+npm create @ux-builder/app my-app -- --modality responsive-web --theme synaptiq   # --name sets the package name
 ```
 
 See the [`create-app` README](packages/create-app/README.md).
@@ -134,17 +158,30 @@ their props, tokens, icons and guidance.
 claude mcp add ux-builder -- npx @ux-builder/mcp   # any MCP client: npx @ux-builder/mcp
 ```
 
-See the [`mcp` README](packages/mcp/README.md).
+It also checks blueprints and Adaptive Cards, drafts HELIX content from a
+blueprint, serves the UX assessment's skill, and writes to the app's episode
+trace (`start_episode`, `record_decision`, `end_episode`). See the
+[`mcp` README](packages/mcp/README.md).
+
+**`@ux-builder/trace`: the episode trace.** It records each build of the
+app in the app's own repository, and exports the episodes its owner chooses
+to share. A created app already has it:
+
+```sh
+npx ux-builder-trace start --goal "Review screen" --story US-003
+npx ux-builder-trace end
+npx ux-builder-trace export --out episodes.tgz   # lists every file and asks first; sends nothing
+```
+
+See the [`trace` README](packages/trace/README.md) and
+[Learning from builds](#learning-from-builds).
 
 The surface an app may rely on is specified in
 [CONTRACT-004](docs/helix/02-design/contracts/CONTRACT-004-app-integration.md).
 That covers entry points, props, the theme switch event, lint rules, audit
-options and compatibility.
-
-The screen patterns (`@ux-builder/ui/patterns`), layout and variant tokens are
-built in this repository and ship in the first `@ux-builder/ui` release after
-0.6.0, with the matching `@ux-builder/tokens` release (CONTRACT-004). Token names are specified in CONTRACT-001 and theme
-selection in CONTRACT-003.
+options and compatibility. Token names are specified in CONTRACT-001, theme
+selection in CONTRACT-003, the rules and the blueprint in CONTRACT-005, the
+UX assessment in CONTRACT-006 and the episode trace in CONTRACT-007.
 
 ## Quick start
 
@@ -153,20 +190,38 @@ Node 20 or later, React 19.
 **A new app:**
 
 ```sh
-npm create @ux-builder/app my-app -- --theme databricks
+npm create @ux-builder/app my-app -- --modality responsive-web --theme databricks
 cd my-app && npm install && npm run dev
 ```
+
+`--modality` takes one or more of `responsive-web`, `chat` and `hybrid-chat`,
+comma-separated. In a terminal, without it, the starter asks; without a
+terminal (an agent, CI) it is required, and the starter writes nothing
+without it. Native modalities (`ios`, `android`, `macos`, `windows`) are
+future ones and are refused.
 
 The starter comes with:
 
 - the theme's CSS and fonts;
 - `ThemeProvider` with a theme and appearance switcher, plus the theme's logo
   and favicon;
-- a page built only from SDK widgets;
-- `npm run lint` and `npm run audit`, and a CI workflow that runs both;
-- `CLAUDE.md`/`AGENTS.md` pointing at the SDK's guidance.
+- the empty shell of its modalities, built only from SDK components: an
+  `AppShell` with a Home screen, a full-screen `Conversation`, or a
+  conversation whose replies draw Adaptive Cards. There is no sample data;
+- `app.blueprint.json` and `npm run check:blueprint`;
+- the latest HELIX release (its skill, the `.helix.yml` marker and the
+  starter HELIX documents), `ux-assessment.yml`, and a Playwright test that
+  cites the first story's criteria;
+- the episode trace: creating the app is its first episode, and a Claude Code
+  hook attaches each session's transcript;
+- `npm run lint` and `npm run audit`, and a CI workflow that runs the
+  blueprint check, lint and the audit;
+- `CLAUDE.md`/`AGENTS.md` pointing at the SDK's guidance, with the components
+  and rules for each modality.
 
-Without `--theme`, the app starts on `plain`.
+Without `--theme`, the app starts on `plain`. `--no-helix` leaves HELIX out,
+and `--blueprint plan.json` starts from your own plan. The
+[`create-app` README](packages/create-app/README.md) lists every option.
 
 **An existing React app:**
 
@@ -237,6 +292,17 @@ Without a provider, select a theme with attributes:
 ```html
 <html data-theme="praxis-carbon" data-appearance="light">
 ```
+
+**Diagram and chart tokens** (FEAT-017) are in every theme and appearance:
+four status colours with subtle fills (`--piq-color-status-positive`,
+`-caution`, `-negative`, `-info`), eight series colours whose slot *n* is the
+same hue family in every theme (`--piq-color-series-1` to `-8`), three
+region tints, three edge weights, three lifecycle tints for parts not yet
+built, and two stroke widths and a node radius that each design system may
+set. The contrast gate
+checks each pairing, and neighbouring series for colour-vision deficiency.
+Draw diagrams and charts with these, never with raw hexes. The names are in
+CONTRACT-001, and each theme's page shows them.
 
 **Fonts ship with the SDK** (ADR-017). Roboto, IBM Plex, DM Sans and Mono,
 Abril Fatface, Zilla Slab and Quicksand are bundled under OFL-1.1.
@@ -339,9 +405,19 @@ theme, and text contrast. With `--width` (one per size class, for example
 is hidden behind sticky content. It checks the interaction rules too: one
 modal at a time, that a modal has a name, a way out and closes on Escape, one
 primary button per region, navigation that suits the width, and readable line
-lengths; each finding names its rule and sources. It writes `audit-report/index.html` with screenshots
-and `audit-report/report.json`, and exits 1 on an error. See
-[`packages/audit`](packages/audit/README.md) for the options.
+lengths. On AI screens it reads the markers the SDK's assistant and cards
+emit (`data-piq-ai`) and checks disclosure, Stop while busy, approvals that
+can be denied, plans with step status and recovery.
+
+Every finding names its rule: its ID, its statement in full, its sources and
+the fix. The report opens with two verdicts: the **theme** (applied, SDK
+components only, contrast in light and dark) and the **fit of each
+modality** (the components it needs and the rule families checked). The
+modalities come from the blueprint's `supports.modalities`, else
+`--modality`. With `--blueprint`, the report then follows the app's
+journeys: each step's screenshot with its findings drawn on it. It writes
+`audit-report/index.html` and `audit-report/report.json`, and exits 1 on an
+error. See [`packages/audit`](packages/audit/README.md) for the options.
 
 ### Interaction and screen rules
 
@@ -442,8 +518,29 @@ and catalogue. The commands trace each journey to its HELIX stories,
 acceptance criteria and tests, record the app's tests and the audit as a
 baseline, and inspect the exact page state the agent's browser reached, over
 CDP. The skill `ux-builder-assess`, shipped in `@ux-builder/audit`, tells the
-agent how to run them and write ranked, evidence-backed recommendations. The
-assessment never changes the app's code or its HELIX documents. See
+agent how to run them and write ranked, evidence-backed recommendations.
+Journeys through an assistant or agent are walked in three scenarios
+(normal, error-prone, risky), and the walk never approves a high-impact
+action.
+
+```sh
+npx ux-builder-audit assess init                       # proposes ux-assessment.yml
+npx ux-builder-audit assess validate
+npx ux-builder-audit assess report ux-assessment/<run> # report.html, report.md, evidence.json
+npx ux-builder-audit assess video --run <run>          # an annotated walkthrough video per journey
+```
+
+The report is organized by journey, then state, then step. Every finding
+gives its rule's ID and full statement (or its heuristic and source), the
+evidence, a severity on Nielsen's 0 to 4 scale, and the fix. `report.md` is
+a HELIX *usability-evaluation-report*. `assess video` replays each walked
+journey and records an MP4 with the findings drawn in, captions and
+chapters, plus a player whose findings pause the video and link to the
+report (`--pace slow|normal|fast`; needs `ffmpeg`). Sensitive data is masked
+from the first frame.
+
+The assessment never changes the app's code or its HELIX documents. It
+proposes changes as patches. See
 [`packages/audit`](packages/audit/README.md#ux-assessment).
 
 ### AI coding agents
@@ -453,6 +550,12 @@ assessment never changes the app's code or its HELIX documents. See
 - The Claude Code skill `ux-builder-ui`, which the starter installs. Elsewhere,
   run `cp -R node_modules/@ux-builder/ui/skill/ux-builder-ui .claude/skills/`.
 - The MCP server: `claude mcp add ux-builder -- npx @ux-builder/mcp`.
+- The skill `ux-builder-assess`, in `node_modules/@ux-builder/audit/skill/`
+  (or over MCP, `get_assessment_skill`), for the UX assessment.
+- The episode trace. In a created app, `AGENTS.md` asks the agent to open an
+  episode for each change, record its decisions (`ux-builder-trace decide` or
+  MCP `record_decision`), end each commit message with the `UX-Episode:`
+  trailer, and close the episode.
 
 ## Developing
 
@@ -467,19 +570,22 @@ npm run e2e        # the builder's UI suite and the starter end to end (Chromium
 ```
 
 ```
-tokens/          themes, brands, shared design systems, layout, variants, token names, JSON Schemas
+tokens/          themes, brands, shared design systems, layout, variants, diagram tokens, token names, JSON Schemas
 brand/           brand artwork the brand files point at
+guidelines/      the interaction and AI rules (rules.json), recipes and the blueprint's JSON Schema
 packages/
   tokens/        @ux-builder/tokens: composes themes and bridges, builds dist/
   engine/        palette options from a logo (private)
-  ui/            @ux-builder/ui: widgets, patterns, lint rules, generated guidance, Storybook
+  ui/            @ux-builder/ui: widgets, patterns, assistant, Adaptive Cards, blueprint,
+                 lint rules, generated guidance, Storybook
                  (ai/: AI Elements and assistant-ui previews, not published)
   create-app/    @ux-builder/create-app: the starter
-  audit/         @ux-builder/audit: the running-app audit
+  audit/         @ux-builder/audit: the running-app audit and the UX assessment
   mcp/           @ux-builder/mcp: the MCP server
-apps/theme-builder/   the guided theme builder
-tools/           gates (contrast, equivalence, schemas, coverage, licences) and generators
-docs/helix/      vision, PRD, features, user stories, ADRs, contracts, solution designs
+  trace/         @ux-builder/trace: the episode trace and its export
+apps/theme-builder/   the guided theme builder, the project site and the theme pages
+tools/           gates (contrast, equivalence, schemas, coverage, rules, licences), generators, learn.mjs
+docs/helix/      vision, PRD, features, user stories, ADRs, contracts, solution designs, test plans, alignment reviews
 ```
 
 Design docs follow the [HELIX](https://github.com/DocumentDrivenDX/helix)
@@ -555,7 +661,7 @@ version on `main` that isn't on npm yet.
 
 It publishes with [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
 (OIDC), so no npm token is stored anywhere. That needs a one-time setting:
-each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`)
+each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`, `trace`)
 lists GitHub Actions, `DocumentDrivenDX/ux-builder`, workflow `release.yml` as
 a trusted publisher on npmjs.com. A brand-new package has to
 be published once by hand before a trusted publisher can be added to it.

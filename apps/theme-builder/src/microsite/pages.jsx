@@ -115,6 +115,11 @@ const NOW = [
   ["FEAT-010", "A starter that begins on HELIX"],
   ["FEAT-011", "AI and agent experience rules, the audit's AI checks, and Adaptive Cards in your theme"],
   ["FEAT-012", "Screen flows and journeys in the blueprint, drawn and drafted into HELIX"],
+  ["FEAT-013", "Annotated walkthrough videos of each assessed journey"],
+  ["FEAT-014", "App modalities: responsive web, chat and hybrid chat, chosen when the app is created"],
+  ["FEAT-015", "Findings by journey, each with its rule spelled out"],
+  ["FEAT-016", "The episode trace, and learning from the builds owners choose to share"],
+  ["FEAT-017", "Diagram and chart tokens in every theme"],
 ];
 const Item = ({ x }) => <li><span>{x.title}</span>{x.features.length > 0 && <span className="uxm-hint"> ({x.features.join(", ")})</span>}</li>;
 function Roadmap() {
@@ -133,13 +138,18 @@ function Roadmap() {
         <li><b>&lt;1 hr</b><span>from nothing to a themed screen</span></li>
         <li><b>90%</b><span>of agent-built components on SDK widgets and tokens</span></li>
       </ul>
-      <Cite ids={["Product vision", "FEAT-005", "FEAT-007", "FEAT-008", "FEAT-009", "FEAT-010", "FEAT-011", "FEAT-012"]} />
+      <Cite ids={["Product vision", "FEAT-005", "FEAT-007", "FEAT-008", "FEAT-009", "FEAT-010", "FEAT-011", "FEAT-012", "FEAT-013", "FEAT-014", "FEAT-015", "FEAT-016", "FEAT-017"]} />
     </>
   );
 }
 
 /* ---- Start ---- */
 
+const MODALITIES = [
+  { modality: "responsive-web", starts: "An `AppShell` with one empty Home screen, whose navigation adapts by size class" },
+  { modality: "chat", starts: "A full-screen `Conversation` from `@ux-builder/ui/assistant`, with its composer and AI disclosure" },
+  { modality: "hybrid-chat", starts: "A `Conversation` whose replies draw Adaptive Card parts" },
+];
 const HELIX_OPTIONS = [
   { option: "--helix-version <tag>", effect: "Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written." },
   { option: "--helix-offline", effect: "Use the HELIX bundled with the starter, with no network request. Not with `--helix-version`." },
@@ -150,23 +160,28 @@ function NewApp() {
     <>
       <p className="uxm-lede">One command gives you a React + Vite app that wears a theme from its first commit, is governed by HELIX, and has lint, the audit, a browser test and CI already wired up.</p>
       <H2 id="create">Create the app</H2>
-      <Command text="npm create @ux-builder/app my-app -- --theme ux-builder-databricks" />
+      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme ux-builder-databricks" />
       <Command text="cd my-app && npm install && npm run dev" />
+      <H2 id="modalities">Choose its modalities</H2>
+      <p><code>--modality</code> says what the app is, and the starter builds that shell from SDK components, with no sample data. Name several, comma-separated, for an <code>AppShell</code> with one destination per modality. In a terminal, without it, the starter asks; without one (an agent, CI) it is required, and nothing is written without it.</p>
+      <DataTable caption="Modalities" rowKey="modality" columns={[{ key: "modality", label: "Modality", render: (r) => <code>{r.modality}</code> }, { key: "starts", label: "The app starts as", render: (r) => <Md>{r.starts}</Md> }]} rows={MODALITIES} />
+      <p>The modalities are recorded in <code>app.blueprint.json</code> as <code>supports.modalities</code>. They choose the rules the blueprint check applies and the widths and checks the audit runs, and the app's <code>AGENTS.md</code> names the components and rule families for each. Native iOS, Android, macOS and Windows apps are future modalities and are refused.</p>
       <H2 id="inside">What's inside</H2>
       <ul>
         <li>The theme's CSS and fonts, and <code>ThemeProvider</code> with a light, auto and dark switch</li>
         <li>The theme's logo and favicon</li>
-        <li>A page built only from SDK widgets</li>
+        <li>The empty shell of its modalities, built only from SDK components</li>
         <li><code>npm run lint</code> (including the <code>ux-builder/ai-neutral-voice</code> warning) and <code>npm run audit</code>, and a CI workflow that runs the blueprint check, lint and the audit</li>
         <li><code>CLAUDE.md</code> and <code>AGENTS.md</code> pointing at the SDK's guidance, and the Claude Code skill <code>ux-builder-ui</code></li>
         <li><code>app.blueprint.json</code>, the plan of the app's screens, and <code>npm run check:blueprint</code></li>
         <li>HELIX, its documents, <code>ux-assessment.yml</code> and <code>e2e/starter.spec.js</code> (below)</li>
+        <li>The episode trace (<code>@ux-builder/trace</code>): creating the app is its first episode, <code>npm run lint</code> records each run, and a Claude Code hook attaches each session's transcript (<a href={`${href("start", "agents")}#trace`}>below, for agents</a>)</li>
       </ul>
       <H2 id="helix">On HELIX from the first commit</H2>
       <p>The app is created on the latest HELIX release: its skill and catalogue in <code>.claude/skills/helix/</code>, with <code>HELIX-VERSION.json</code> recording the version, where it came from and its digest; the <code>.helix.yml</code> marker; and the starter set of HELIX documents in <code>docs/helix/</code>, drafted from that release's templates:</p>
       <ul>
         <li>the product vision, the PRD and the concerns;</li>
-        <li><code>FEAT-001</code> and <code>US-001</code> for the starter screen;</li>
+        <li><code>FEAT-001</code> and <code>US-001</code> for the shell of its modalities;</li>
         <li><code>DESIGN.md</code>, the test plan and <code>STP-001</code>.</li>
       </ul>
       <p>What the starter knows (the name, theme, stack, the screen's criteria, design choices and checks) is filled in. The product's purpose, users, goals and metrics are yours to write. The release is verified against GitHub's SHA-256 digest; if it cannot be fetched, the HELIX bundled with the starter is used, and the app records why.</p>
@@ -194,7 +209,7 @@ function NewApp() {
       <p>A plan with an error is refused, with each error, and nothing is written. <a href={href("concepts", "flows-journeys")}>Flows and journeys</a> explains the plan's model.</p>
       <Affiliation />
       <Notice tone="info" title="Node 20 or later, React 19">Without <code>--theme</code>, the app starts on <code>plain</code>.</Notice>
-      <Cite ids={["FEAT-010", "ADR-027", "FEAT-008"]} />
+      <Cite ids={["FEAT-010", "ADR-027", "FEAT-008", "FEAT-014", "ADR-032", "FEAT-016"]} />
     </>
   );
 }
@@ -262,10 +277,16 @@ function Agents() {
       </ul>
       <H2 id="loop">Plan, check, build, lint, audit, assess</H2>
       <p>Agents get the interaction rules where they plan. Over MCP, <code>list_recipes</code> suggests patterns for a job, <code>get_rules</code> gives the rules for a context, size classes, inputs (never a device) and AI roles, and <code>check_blueprint</code> checks the plan. Each finding has a rule ID, a path and a fix. Then the agent builds each screen from its pattern, lint and the audit check the result against the same rule IDs, and the assessment walks the journeys.</p>
+      <H2 id="trace">The episode trace</H2>
+      <p>Every change to an app's UI is an <b>episode</b>. The SDK's tools record what they told the agent and every check, with how many tries it took to pass, in <code>.ux-builder/trace/</code>, committed with the code. The agent adds its side: it opens an episode, records each pattern choice, departure and workaround with its reason, ends each commit message with the <code>UX-Episode:</code> trailer, and closes the episode. A created app's <code>AGENTS.md</code> asks for this.</p>
+      <Command text={'npx ux-builder-trace start --goal "Review screen" --story US-003'} />
+      <Command text={'npx ux-builder-trace decide --chose CollectionList --why "a queue the reviewer works through"'} />
+      <Command text="npx ux-builder-trace end" />
+      <p>Over MCP, <code>start_episode</code>, <code>record_decision</code> and <code>end_episode</code> do the same. Secrets are masked, and nothing is ever sent anywhere: an owner shares episodes only by running <code>ux-builder-trace export</code>, which lists every file and asks first.</p>
       <Affiliation />
       <H2 id="demo">See it work</H2>
       <AiSection />
-      <Cite ids={["FEAT-004", "FEAT-011", "ADR-023"]} />
+      <Cite ids={["FEAT-004", "FEAT-011", "ADR-023", "FEAT-016", "ADR-035", "CONTRACT-007"]} />
     </>
   );
 }
@@ -280,14 +301,15 @@ function Ci() {
       <p><code>ux-builder/ai-neutral-voice</code> warns on UI text that presents an AI as thinking or feeling ("I think", "I understand"), and on labels that make the AI the actor ("Copilot, summarize") where the user's verb should lead.</p>
       <H2 id="audit">The audit</H2>
       <Command text={'npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/'} />
-      <p>It writes <code>audit-report/index.html</code> with screenshots and exits 1 on an error. Each interaction finding names its rule and links its sources.</p>
+      <p>It writes <code>audit-report/index.html</code> with screenshots and exits 1 on an error. Every finding names its rule: its ID, its statement in full, its sources and the fix.</p>
+      <p>The report opens with two verdicts: the <b>theme</b> (applied, SDK components only, contrast in light and dark) and the <b>fit of each modality</b> (the components it needs, and whether its rule families were checked). The modalities come from the blueprint, else <code>--modality</code>, and choose the widths and checks that run. With <code>--blueprint</code> and its journeys, the report then follows each journey step by step, with each screen's screenshot and its findings drawn on it.</p>
       <H2 id="ai-checks">The AI checks</H2>
       <p>{AI_AUDIT_CHECKS.length} checks look only at AI markup (<code>data-piq-ai</code> and its companions), which the SDK's assistant components and Adaptive Cards emit and an app's own AI UI adds, so a page without it gets no AI finding: {AI_AUDIT_CHECKS.map((c, i) => <Fragment key={c}>{i ? ", " : ""}<code>{c}</code></Fragment>)}. With <code>--blueprint app.blueprint.json</code>, a screen showing AI markup must declare an AI role, and its roles select the agent checks.</p>
       <Command text="npx ux-builder-audit --blueprint app.blueprint.json --width 390 --width 1280 http://localhost:4173/" />
       <H2 id="blueprint">The blueprint check</H2>
       <Command text="npx ux-builder-blueprint check app.blueprint.json" />
       <p>It exits 1 on an error. In an existing app, <code>--baseline</code> lets the audit fail only on new findings.</p>
-      <Cite ids={["FEAT-004", "FEAT-008", "FEAT-011", "CONTRACT-005"]} />
+      <Cite ids={["FEAT-004", "FEAT-008", "FEAT-011", "FEAT-014", "FEAT-015", "CONTRACT-005"]} />
     </>
   );
 }
@@ -326,12 +348,16 @@ function Assess() {
       <H2 id="report">5. The report</H2>
       <p><code>assess merge</code> makes one finding per user problem, each with a stable ID and every piece of evidence. <code>assess propose</code> writes a change to a HELIX artifact as a patch, applied only by a person. Then:</p>
       <Command text="npx ux-builder-audit assess report ux-assessment/<run>" />
-      <p>It writes <code>report.html</code>, <code>report.md</code> and <code>evidence.json</code>: what was checked, seen and left uncertain. Every conclusion is labelled deterministic, observed, heuristic, SDK adoption or real user; confusion, trust and time saved are left for representative users. <code>assess compare</code> says which findings are new, persistent, resolved or regressed between two runs, and <code>assess gate --fail-on P1</code> fails CI on an open finding at that priority.</p>
+      <p>It writes <code>report.html</code>, <code>report.md</code> and <code>evidence.json</code>: what was checked, seen and left uncertain. Findings are grouped by journey, then the state it was walked in, then step, each with its rule's ID and full statement (or its heuristic and source), the evidence, a severity on Nielsen's 0 to 4 scale and the fix. <code>report.md</code> is a HELIX <i>usability-evaluation-report</i>. Every conclusion is labelled deterministic, observed, heuristic, SDK adoption or real user; confusion, trust and time saved are left for representative users. <code>assess compare</code> says which findings are new, persistent, resolved or regressed between two runs, and <code>assess gate --fail-on P1</code> fails CI on an open finding at that priority.</p>
+      <H2 id="video">6. Walkthrough videos</H2>
+      <p><code>assess video</code> replays each walked journey in a browser of its own, signed in as its role, with sensitive data masked from the first frame, and pauses at each finding. For every journey it writes an MP4 with the findings drawn in, captions and a chapter per step, and a player whose findings pop up, pause the video and link to the report. Each caption gives the problem in plain English, the rule and the fix. It needs <code>ffmpeg</code> on the path.</p>
+      <Command text="npx ux-builder-audit assess video --run <run> --pace slow" />
+      <p><code>--pace</code> is <code>slow</code>, <code>normal</code> (the default) or <code>fast</code>; a finding stays on screen long enough to read its caption.</p>
       <H2 id="example">Example: the theme builder assesses itself</H2>
       <p>This project's own guided builder has a manifest, <a href={`${REPO}/blob/main/apps/theme-builder/ux-assessment.yml`}><code>apps/theme-builder/ux-assessment.yml</code></a>: three journeys from its HELIX stories (logo to theme, US-015; refining with feedback, US-018; saving and adopting, US-019), run on the mock model and a throwaway repository, audited at 390 and 1280 pixels, report only. Its assessment of 21 October 2026 proposed three changes to the builder's stories, which wait for the operator's decision.</p>
       <details className="uxm-details"><summary>The whole manifest</summary><Command code text={THEME_BUILDER_MANIFEST.trim()} /></details>
       <p className="uxm-cite">A clean audit is not proof of usability or of full accessibility compliance, and passing functional tests do not show that usability criteria are met.</p>
-      <Cite ids={["FEAT-009", "FEAT-011", "ADR-026", "CONTRACT-006"]} />
+      <Cite ids={["FEAT-009", "FEAT-011", "FEAT-013", "FEAT-015", "ADR-026", "ADR-031", "ADR-033", "CONTRACT-006"]} />
     </>
   );
 }
@@ -395,7 +421,16 @@ function Tokens() {
       <p>Each theme declares the appearances it supports and a default. <code>data-appearance</code> chooses one; <code>ThemeProvider appearance="system"</code> follows the user's setting before first paint.</p>
       <H2 id="contrast">Contrast</H2>
       <p>Every text role must clear 4.5:1 against its ground in every theme and appearance. CI fails the build otherwise.</p>
-      <Cite ids={["ADR-015", "CONTRACT-001"]} />
+      <H2 id="diagrams">Diagrams and charts</H2>
+      <p>Every theme also carries the colours and shapes a diagram or chart draws with, so neither needs a raw hex:</p>
+      <ul>
+        <li><b>Status</b>: <code>--piq-color-status-positive</code>, <code>-caution</code>, <code>-negative</code> and <code>-info</code>, each with a <code>-subtle</code> fill.</li>
+        <li><b>Series</b>: <code>--piq-color-series-1</code> to <code>-8</code>. Slot <i>n</i> is the same hue family in every theme (1 blue, 2 orange, 3 aqua…), so a legend means the same thing on any site.</li>
+        <li><b>Structure</b>: three region tints for groups, three edge weights, and lifecycle tints for parts planned, decided or unknown.</li>
+        <li><b>Shape</b>: <code>--piq-size-diagram-stroke</code>, <code>-stroke-strong</code> and <code>--piq-radius-diagram-node</code>, which each design system may set.</li>
+      </ul>
+      <p>The contrast gate checks every pairing they draw, and that neighbouring series stay apart for readers with a colour-vision deficiency. Each <a href={THEME_PAGE}>theme's page</a> shows them. The availability colours (<code>state.*</code>) the <code>StatusPill</code> uses are a separate family.</p>
+      <Cite ids={["ADR-015", "CONTRACT-001", "FEAT-017"]} />
     </>
   );
 }
