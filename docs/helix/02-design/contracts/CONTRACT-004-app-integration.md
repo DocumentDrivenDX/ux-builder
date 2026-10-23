@@ -241,6 +241,12 @@ app that uses no pattern MUST NOT need `patterns` or `patterns.css`.
 | `PageHeader`, `FilterBar`, `FilterPanel`, `DescriptionList`, `Timeline`, `StatTile`, `ChartFrame`, `TabsSection`, `ConfirmDialog`, `StatePanel` | Regions (with `Pagination` from `.`) |
 | `AppShell`, `ErrorScreen`, `CollectionList`, `ListDetail`, `RecordDetail`, `FormPage`, `QuickEdit`, `Dashboard`, `ReportViewer`, `SettingsPage` | Screens |
 
+`LocalNav` is planned and optional (NAV-03, US-024-AC9; AR-2026-10-22 D-8):
+it is not in `@ux-builder/ui` yet, and an app may rely on it only from the
+release that ships it. It is wanted first for Praxis plug-ins, which are
+embedded apps, the modality FEAT-014 will add next. Until then, `Tabs` and
+`TabsSection` cover local navigation that swaps panels.
+
 Props are normative in `catalogue.json`, as for widgets. Every pattern follows
 these conventions:
 

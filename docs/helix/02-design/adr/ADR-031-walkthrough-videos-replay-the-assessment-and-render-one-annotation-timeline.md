@@ -2,7 +2,7 @@
 ddx:
   id: ADR-031
   type: adr
-  status: proposed
+  status: accepted
   links:
     - kind: informed_by
       to: ADR-026
@@ -18,7 +18,7 @@ ddx:
 
 | Date | Status | Deciders | Related | Confidence |
 |------|--------|----------|---------|------------|
-| 2026-10-21 | **Proposed** (operator 2026-10-21: "a full walkthrough of an application (all flows) using playwright and generate a video with annotation on usability problems it found and recommendations") | Operator | ADR-026, ADR-030, FEAT-009, FEAT-012, FEAT-013, CONTRACT-006 | Medium |
+| 2026-10-21 | **Accepted** 2026-10-23 (operator: "let's do ADR-031", AR-2026-10-22 D-9; built and released in `@ux-builder/audit` 0.3.0). Proposed 2026-10-21 (operator: "a full walkthrough of an application (all flows) using playwright and generate a video with annotation on usability problems it found and recommendations") | Operator | ADR-026, ADR-030, FEAT-009, FEAT-012, FEAT-013, CONTRACT-006 | Medium |
 
 ## Context
 
