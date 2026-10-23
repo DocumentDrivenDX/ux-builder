@@ -96,7 +96,7 @@ removes its criteria from `tools/coverage-exceptions.json`.
 | B-018 | Package skeleton, functions and CLI, network guard, design state, `state`, `status` (US-117) | CONTRACT-008 Package, Commands, Design state; STP-117 | None | `npm test --workspace @ux-builder/design` | Built 2026-10-23: US-117 cited; the workspace is in `npm run check`; the package stays private until B-025 |
 | B-019 | `init`, create-app `--mcp`, the skill installed in new and existing apps (US-114; US-115-AC1 to AC3) | ADR-036; STP-114, STP-115 | B-018 | design and create-app tests | Built 2026-10-23, with US-115-AC4 (init's refusal); `@ux-builder/design` 0.1.0 made public for the starter to depend on |
 | B-020 | Checkpoints, `mode`, `decide` fields and `--kind addition`, skill sections for them (US-118, US-119, US-121) | CONTRACT-008, CONTRACT-007 amendment; STP-118, STP-119, STP-121 | B-019 | design and trace tests | Built 2026-10-23 (US-121-AC2, AC3 wait for impact in B-033; the event field is decisionKind) |
-| B-021 | `check --diff`, `simplicity.delta-decided` (US-120) | CONTRACT-005 amendment; STP-120 | B-020 | ui tests; `npm run rules` | |
+| B-021 | `check --diff`, `simplicity.delta-decided` (US-120) | CONTRACT-005 amendment; STP-120 | B-020 | ui tests; `npm run rules` | Built 2026-10-23 (rule licence nngroup-terms added to the rules schema) |
 | B-022 | `docs/ux/` types, templates, examples, `validate` (US-123) | CONTRACT-008 Documents; STP-123 | B-018 | design tests | |
 | B-023 | `brief`, `principles.json`, project rules in `check` (US-122) | SD-006 Project rules; STP-122 | B-022 | design and ui tests | |
 | B-024 | `baseline` and routing an existing app (US-115-AC5, AC6) | SD-006 Baseline; STP-115 | B-022 | design tests | |

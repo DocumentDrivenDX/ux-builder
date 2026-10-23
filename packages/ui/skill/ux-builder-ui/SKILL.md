@@ -417,6 +417,7 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `journey.safeguarded` | always | blueprint `journey.safeguarded` | A journey step that takes a destructive action has its safeguard (undo or confirm), and one that takes a high-impact action has its approval. |
 | `journey.covers-errors` | always | blueprint `journey.covers-errors` | A journey through a screen that declares an error state has an alternate that covers that state. |
 | `journey.story-covered` | always | blueprint `journey.story-covered` | With a HELIX marker, every story a screen serves has a journey, and each journey's story and criteria exist in HELIX; the stories are read, never written. |
+| `simplicity.delta-decided` | always | blueprint `simplicity.delta-decided` | When a change adds a screen, a step, a required input or a decision to a journey, a recorded decision names the addition and answers why it is needed and what simpler option was considered. |
 | `theme.applied` | always | audit `theme-applied` | The page loads the declared theme's CSS and the theme's tokens resolve on the themed element. |
 | `theme.token-colors` | always | audit `token-colors` | Every colour the app draws is one of the theme's colour tokens, or a mix of two of them. |
 | `theme.token-fonts` | always | audit `token-fonts` | Text is set in the font families the theme names, through its type tokens. |

@@ -23532,6 +23532,33 @@
         ]
       },
       {
+        "id": "simplicity.delta-decided",
+        "title": "A journey grows only by decision",
+        "statement": "When a change adds a screen, a step, a required input or a decision to a journey, a recorded decision names the addition and answers why it is needed and what simpler option was considered.",
+        "rationale": "Each added step or input raises the interaction cost of the task; making the cost visible and deliberate keeps an app from growing more complicated one reasonable change at a time.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "simplicity.delta-decided"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: Interaction Cost",
+            "url": "https://www.nngroup.com/articles/interaction-cost-definition/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-018: guided design loop (GDL-11, GDL-12)",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
         "id": "theme.applied",
         "title": "The theme is applied",
         "statement": "The page loads the declared theme's CSS and the theme's tokens resolve on the themed element.",
@@ -24609,6 +24636,37 @@
                 "errorProne",
                 "risky"
               ]
+            },
+            "inputs": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "What the step asks of the user (FEAT-018 GDL-09): information the user must give, and information the system could infer or default",
+              "properties": {
+                "required": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "inferable": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "decision": {
+              "type": "string",
+              "minLength": 1,
+              "description": "A choice the user must make at this step (FEAT-018 GDL-09)"
+            },
+            "system": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Work the app does for the user at this step (FEAT-018 GDL-09)"
             }
           }
         },

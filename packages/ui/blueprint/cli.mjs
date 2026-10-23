@@ -34,12 +34,12 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { needsStories, readStories, skippedNote } from "./helix.mjs";
-import { checkBlueprint, skeleton } from "./index.mjs";
+import { checkBlueprint, complexityDelta, deltaFindings, skeleton } from "./index.mjs";
 import { propose, writeProposals } from "./propose.mjs";
 import { drawings, writeDrawings } from "./draw.mjs";
 
 const USAGE = `Usage:
-  ux-builder-blueprint check <file> [--json]
+  ux-builder-blueprint check <file> [--json] [--diff <base>]
   ux-builder-blueprint init [--kind app|view] [--out <file>]
   ux-builder-blueprint propose [<file>] [--out <dir>]
   ux-builder-blueprint draw [<file>] [--out <dir>]
@@ -50,7 +50,7 @@ const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 async function main(argv) {
   let parsed;
   try {
-    parsed = parseArgs({ args: argv, allowPositionals: true, options: { json: { type: "boolean" }, kind: { type: "string", default: "app" }, out: { type: "string" }, help: { type: "boolean", short: "h" } } });
+    parsed = parseArgs({ args: argv, allowPositionals: true, options: { json: { type: "boolean" }, diff: { type: "string" }, kind: { type: "string", default: "app" }, out: { type: "string" }, help: { type: "boolean", short: "h" } } });
   } catch (e) { console.error(`${e.message}\n${USAGE}`); return 2; }
   const { values, positionals: [command, file, ...rest] } = parsed;
   if (values.help) { console.log(USAGE); return 0; }
@@ -105,15 +105,48 @@ async function main(argv) {
   const helix = storied ? readStories(file) : null;
   const note = storied && !helix ? skippedNote(file) : null;
   const findings = checkBlueprint(bp, { helix });
+  // --diff: the complexity this blueprint adds over a base one (FEAT-018 GDL-12).
+  let delta = null;
+  if (values.diff) {
+    let base;
+    try { base = JSON.parse(readFileSync(values.diff, "utf8")); } catch (e) { console.error(`${values.diff}: ${e.message}`); return 2; }
+    delta = complexityDelta(base, bp);
+    findings.push(...deltaFindings(delta, await recordedDecisions(file)));
+  }
   const errors = findings.filter((f) => f.severity === "error").length;
   await traceCheck(file, findings);
-  if (values.json) { console.log(JSON.stringify(findings, null, 2)); if (note) console.error(`note: ${note}`); }
+  if (values.json) { console.log(JSON.stringify(delta ? { findings, delta } : findings, null, 2)); if (note) console.error(`note: ${note}`); }
   else {
+    if (delta) console.log(deltaText(values.diff, delta));
     for (const f of findings) console.log(`${f.severity.padEnd(7)} ${f.rule}  ${f.path || "/"}\n        ${f.message}\n        Fix: ${f.fix}`);
     if (note) console.log(`note    ${note}`);
     console.log(findings.length ? `${file}: ${errors} error${errors === 1 ? "" : "s"}, ${findings.length - errors} warning${findings.length - errors === 1 ? "" : "s"}` : `${file}: no findings`);
   }
   return errors ? 1 : 0;
+}
+
+/* The complexity delta in words: per journey, what was added and removed. */
+function deltaText(base, delta) {
+  const list = (o) => Object.entries(o).filter(([, v]) => v.length).map(([k, v]) => `${k} ${v.join(", ")}`).join("; ");
+  const lines = [`Complexity against ${base}:`];
+  if (delta.screens.added.length || delta.screens.removed.length) lines.push(`  app screens: +${delta.screens.added.length} -${delta.screens.removed.length}`);
+  for (const j of delta.journeys) {
+    lines.push(`  ${j.journey} (${j.status})`);
+    if (list(j.added)) lines.push(`    added:   ${list(j.added)}`);
+    if (list(j.removed)) lines.push(`    removed: ${list(j.removed)}`);
+  }
+  if (!delta.journeys.length) lines.push("  no journey changed");
+  return lines.join("\n");
+}
+
+/* Every decision recorded in the app's trace, when @ux-builder/trace is
+   installed and the app keeps one; none otherwise. */
+async function recordedDecisions(file) {
+  let trace;
+  try { trace = await import("@ux-builder/trace"); } catch { return []; }
+  const app = trace.findApp(dirname(resolve(file)));
+  if (!app) return [];
+  return trace.listEpisodes(app).flatMap((e) => trace.readEpisode(app, e.id)).filter((ev) => ev.kind === "decision");
 }
 
 /* The check, as a check event in the app's episode trace (FEAT-016 TRC-03,

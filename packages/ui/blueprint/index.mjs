@@ -20,6 +20,7 @@ const PATTERNS = [...catalogue.patterns, ...(catalogue.assistant ?? []).filter((
 const byId = new Map(RULES.map((r) => [r.id, r]));
 
 export { blueprintSchema, LIMITS as limits, RULES as rules, RECIPES as recipes };
+export { complexityDelta, deltaFindings, journeyLoad, stepKey } from "./complexity.mjs";
 export { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, expandModalities, modalityProblems };
 
 /* The checks this module runs, by the rule ID each reports. */
@@ -32,6 +33,8 @@ export const CHECKS = [
   // Flows and journeys (FEAT-012 FLW-02, JRN-02, JRN-03; flow.mjs): warnings, but flow.target-exists.
   "flow.reachable", "flow.no-dead-end", "flow.target-exists", "flow.primary-consistent",
   "journey.walkable", "journey.safeguarded", "journey.covers-errors", "journey.story-covered",
+  // The complexity a change adds (FEAT-018 GDL-12; complexity.mjs): run by check --diff, a warning.
+  "simplicity.delta-decided",
 ];
 const STATES = ["empty", "loading", "error"];
 

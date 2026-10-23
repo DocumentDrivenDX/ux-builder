@@ -227,6 +227,7 @@ export const LICENCES = {
   "apple-terms": { name: "Apple's terms of use", meaning: "Apple's website terms; no open content licence. Paraphrased and linked, never quoted.", quote: false },
   "google-terms": { name: "Google's terms of service", meaning: "Google's terms; no open content licence shown. Paraphrased and linked, never quoted.", quote: false },
   "microsoft-terms": { name: "Microsoft's terms of use", meaning: "Microsoft's terms; no open licence shown. Paraphrased and linked, never quoted.", quote: false },
+  "nngroup-terms": { name: "Nielsen Norman Group's terms of use", meaning: "Nielsen Norman Group's articles are copyright; no open licence shown. Paraphrased and linked, never quoted.", quote: false },
   "CC-BY-2.5": { name: "Creative Commons Attribution 2.5", meaning: "Open: a short quotation is allowed with attribution, credited in the notices.", quote: true },
   "CC-BY-4.0": { name: "Creative Commons Attribution 4.0", meaning: "Open: a short quotation is allowed with attribution, credited in the notices.", quote: true },
   "CC-BY-NC-SA-4.0": { name: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0", meaning: "Non-commercial and share-alike, so the rules paraphrase it and do not adapt it.", quote: false },

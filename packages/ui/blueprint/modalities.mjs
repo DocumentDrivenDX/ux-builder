@@ -72,5 +72,6 @@ export function expandModalities(names = DEFAULT_MODALITIES) {
 }
 
 /* Rule families that apply whatever the modality: the blueprint's own
-   validity (rulesFor with modalities keeps them; FEAT-014 MOD-06). */
-export const SHARED_FAMILIES = ["blueprint"];
+   validity, and the complexity a change adds (FEAT-018 GDL-12) (rulesFor
+   with modalities keeps them; FEAT-014 MOD-06). */
+export const SHARED_FAMILIES = ["blueprint", "simplicity"];
