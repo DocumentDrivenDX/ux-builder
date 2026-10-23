@@ -39,7 +39,7 @@ US-014-AC4 and US-031-AC5 wait on graded agent runs. An episode's goal, starting
 ## Acceptance Criteria
 
 - [ ] **US-111-AC1** — Given finished episodes in the store, when `--evals` runs, then each becomes a task with its goal, its starting commit's hash, its modality and the outcome to beat (checks to green, audit findings per rule, the assessment's open findings).
-- [ ] **US-111-AC2** — Given a task and an SDK version, when it is replayed by an agent, then the result records the same fields as the original outcome, side by side.
+- [ ] **US-111-AC2** — Given a task and an SDK version, when it is replayed by an agent, then the result records the same fields as the original outcome, side by side. *[Amended 2026-10-23 — AR-2026-10-22 D-5]* Until a replay runner exists, the replay follows the manual procedure in `docs/learning/replay-an-evaluation-task.md`, and `replay-result` refuses a result that does not follow its format, naming each problem.
 - [ ] **US-111-AC3** — Given a set of replays, when they are graded, then the report gives for each the share of components on SDK widgets and role tokens and the matching patterns used, as US-014-AC4 and US-031-AC5 measure.
 
 ## Edge Cases

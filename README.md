@@ -629,7 +629,9 @@ Maintainers learn from those bundles with `tools/learn.mjs`
 4. **Make evaluation tasks.** `--evals` writes `evals/<episode>.json` for
    each finished episode with a recorded starting commit (goal, commit,
    modality, outcome to beat) and lists the ones skipped. Replay a task with
-   an agent on the new SDK, record its result, then
+   an agent on the new SDK by the procedure in
+   [`docs/learning/replay-an-evaluation-task.md`](docs/learning/replay-an-evaluation-task.md),
+   which says where each field of the result comes from, then
    `node tools/learn.mjs replay-result --task <t> --result <r>` writes the
    two outcomes side by side, and
    `node tools/learn.mjs grade --tasks <dir> --results <dir>` reports each

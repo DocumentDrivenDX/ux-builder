@@ -143,7 +143,10 @@ enters this repository.
 TRC-11. `ux-builder-learn --evals` turns episodes into evaluation tasks: the
 goal, the starting commit and the outcome to beat. They can be replayed
 against a new SDK version and graded. That supplies the graded agent runs
-that US-014-AC4 and US-031-AC5 wait on.
+that US-014-AC4 and US-031-AC5 wait on. *[Amended 2026-10-23 — AR-2026-10-22
+D-5]* A maintainer replays a task by the manual procedure in
+`docs/learning/replay-an-evaluation-task.md`; a runner that does it with an
+agent is planned (bead `ux-builder-9f2522e0`).
 
 ## User Stories
 
