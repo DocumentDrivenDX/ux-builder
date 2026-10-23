@@ -23,7 +23,7 @@ ddx:
 **Contract ID**: CONTRACT-005 — Interaction rules and blueprint
 **Type**: data formats and library API (the rule catalogue, recipes, the blueprint file, findings, `@ux-builder/ui/blueprint` and the `ux-builder-blueprint` command)
 **Version**: v1 (from `@ux-builder/ui` 0.7.0)
-**Status**: accepted — 2026-10-20, with ADR-025
+**Status**: accepted — 2026-10-20, with ADR-025 Amended 2026-10-23 by FEAT-018: see CONTRACT-008, *Amendment to CONTRACT-005*.
 **Related**: FEAT-008, ADR-021 (size classes), ADR-024 (views), CONTRACT-004 (where the entry points, command, audit options and MCP tools are listed)
 
 ## Purpose

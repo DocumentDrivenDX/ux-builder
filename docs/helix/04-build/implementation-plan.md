@@ -10,6 +10,10 @@ ddx:
       to: SD-004
     - kind: informed_by
       to: TP-001
+    - kind: informed_by
+      to: FEAT-018
+    - kind: informed_by
+      to: SD-006
 ---
 
 # Build Plan
@@ -76,6 +80,41 @@ counsel's answer is still to come.
 | B-014 | US-069: the starter set from the installed templates, heading merge, prefill | ADR-027 5, 6; STP-069 | B-013 | `create-app/test/helix-docs.test.mjs` | |
 | B-015 | US-070, US-071: manifest, e2e test, scripts, guidance | ADR-027 7; STP-070, STP-071 | B-014 | `create-app/test/helix-wiring.test.mjs`; the starter e2e runs `assess:validate`, `assess collect` (0 warnings; US-001's criteria explicit) and `test:e2e` in the installed app | |
 | B-016 | README, CONTRACT-004, changeset (create-app minor) | CONTRACT-004 | B-015 | `npm run check`, starter e2e | |
+
+### FEAT-018: the guided design loop *[Added 2026-10-23]*
+
+Governing artifacts: FEAT-018; ADR-036 to ADR-039; CONTRACT-008 (and its
+amendments to CONTRACT-004 to CONTRACT-007); SD-006; US-114 to US-145;
+STP-114 to STP-145. Shared constraints for these slices: every command and
+test runs under the network guard (ADR-036 rule 3); the CLI is complete
+without MCP (ADR-036 rule 2); no new type is written into `docs/helix/`
+(ADR-036 rule 5); new dependencies pass `npm run licences`; each slice
+removes its criteria from `tools/coverage-exceptions.json`.
+
+| Slice | Story / Area | Governing Artifacts | Depends On | Validation Gate | Notes |
+|-------|---------------|---------------------|------------|-----------------|-------|
+| B-018 | Package skeleton, functions and CLI, network guard, design state, `state`, `status` (US-117) | CONTRACT-008 Package, Commands, Design state; STP-117 | None | `npm test --workspace @ux-builder/design` | Phase 1 start; adds the workspace to `npm run check` |
+| B-019 | `init`, create-app `--mcp`, the skill installed in new and existing apps (US-114; US-115-AC1 to AC3) | ADR-036; STP-114, STP-115 | B-018 | design and create-app tests | |
+| B-020 | Checkpoints, `mode`, `decide` fields and `--kind addition`, skill sections for them (US-118, US-119, US-121) | CONTRACT-008, CONTRACT-007 amendment; STP-118, STP-119, STP-121 | B-019 | design and trace tests | |
+| B-021 | `check --diff`, `simplicity.delta-decided` (US-120) | CONTRACT-005 amendment; STP-120 | B-020 | ui tests; `npm run rules` | |
+| B-022 | `docs/ux/` types, templates, examples, `validate` (US-123) | CONTRACT-008 Documents; STP-123 | B-018 | design tests | |
+| B-023 | `brief`, `principles.json`, project rules in `check` (US-122) | SD-006 Project rules; STP-122 | B-022 | design and ui tests | |
+| B-024 | `baseline` and routing an existing app (US-115-AC4 to AC6) | SD-006 Baseline; STP-115 | B-022 | design tests | |
+| B-025 | MCP wrappers and the parity test (US-116) | ADR-036 rule 2; STP-116 | B-018 to B-024 | mcp tests | Phase 1 exit: a fixture idea reaches `core-1` with no MCP |
+| B-026 | Hypotheses and evidence with masking (US-124, US-125) | ADR-039; STP-124, STP-125 | B-022 | design tests | Phase 2 |
+| B-027 | Jobs and its rules (US-126) | CONTRACT-008 type rules; STP-126 | B-026 | design tests | |
+| B-028 | `tasks[]`, `journeys[].task`, `simplify` (US-127, US-128) | CONTRACT-005 amendment; SD-006 Simplify; STP-127, STP-128 | B-021 | ui tests | |
+| B-029 | Alternatives, `score`, `compare` (US-129, US-130) | ADR-036 rule 7; SD-006 Score, Compare; STP-129, STP-130 | B-028 | ui tests | Phase 3 |
+| B-030 | `ux-decision`, `purpose` and `content`, `consistency.same-kind` (US-131 to US-133) | STP-131 to STP-133 | B-029 | design and ui tests; `npm run rules` | |
+| B-031 | Rubric data and predicted column (US-134) | SD-006 Rubric and sources; STP-134 | B-030 | design tests; `npm run rules` | Phase 3 exit |
+| B-032 | Exploratory prototypes, `no-prototype-import`, validated-prototype guidance, `ready` (US-135, US-136) | ADR-037; SD-006 Prototype, Readiness; STP-135, STP-136 | B-029 | ui tests (Chromium); design tests | Phase 4; may move ahead of B-029 with alternatives stubbed |
+| B-033 | ID graph, `trace`, `impact` (US-137) | SD-006 Impact; STP-137 | B-032, B-031 | design tests | Phase 4 exit |
+| B-034 | `assess heuristics`, `metrics.json`, finding `source` (US-138, US-139) | CONTRACT-006 amendment; STP-138, STP-139 | B-029 | audit tests | Phase 5 |
+| B-035 | Test kit, observations, transcripts, rubric observed column, report (US-140 to US-142) | ADR-039; STP-140 to STP-142 | B-034, B-031 | design tests | Phase 5 exit |
+| B-036 | Journey events, insights, experiments (US-143 to US-145) | ADR-038; CONTRACT-004 amendment; STP-143 to STP-145 | B-035 | ui and design tests | Phase 6 |
+
+Tracked as DDx beads labelled `feat:FEAT-018`, one per slice, under one
+epic per phase.
 
 ## Issue Decomposition
 

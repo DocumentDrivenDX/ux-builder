@@ -17,7 +17,7 @@ ddx:
 **Contract ID**: CONTRACT-006 — UX assessment
 **Type**: data formats, library API and command (the manifest, the run package and its records, `inspect()`, and `ux-builder-audit assess`)
 **Version**: v1 (from `@ux-builder/audit` 0.2.0)
-**Status**: draft — 2026-10-20, with ADR-026; amended 2026-10-21 to match the shipped `assess` commands and records (AR-2026-10-21 C1–C6); amended 2026-10-21 with the build of AI journeys (FEAT-011 step 6) and blueprint journeys (FEAT-012 step 3), see *AI and blueprint journeys*
+**Status**: draft — 2026-10-20, with ADR-026; amended 2026-10-21 to match the shipped `assess` commands and records (AR-2026-10-21 C1–C6); amended 2026-10-21 with the build of AI journeys (FEAT-011 step 6) and blueprint journeys (FEAT-012 step 3), see *AI and blueprint journeys* Amended 2026-10-23 by FEAT-018: see CONTRACT-008, *Amendment to CONTRACT-006*.
 **Related**: FEAT-009, ADR-026, CONTRACT-004 (the audit's library and command), CONTRACT-005 (rule IDs), HELIX's artifact schema and marker
 
 ## Purpose

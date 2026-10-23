@@ -85,6 +85,8 @@ cannot be re-themed.
   them, or by a recorded operator decision, not to be complete.
 - **Licences checked, nothing reported.** Every third-party licence is
   checked before release, and nothing the SDK ships reports usage.
+  *(Clarified 2026-10-23, ADR-038: ux-builder never sends data anywhere;
+  an app may route the SDK's journey events into its own systems.)*
 
 ## Where it is going
 
@@ -111,7 +113,9 @@ cannot be re-themed.
   carries them, it does not replace them.
 - Not a page builder or app framework: the SDK supplies screen patterns
   (structure, states, responsive behaviour); apps own their screens' content,
-  data, routing and domain logic.
+  data, routing and domain logic. *(2026-10-23, ADR-037: the guided design
+  loop's agent builds an app's screens with the SDK in the app's own code;
+  the SDK itself generates only disposable exploratory prototypes.)*
 - Not a chat library or AI runtime: it styles the library an app chooses and
   supplies accessible assistant patterns; the app chooses its model and
   runtime.

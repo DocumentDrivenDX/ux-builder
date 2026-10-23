@@ -32,6 +32,8 @@ ddx:
       to: concerns
     - kind: informs
       to: FEAT-017
+    - kind: informs
+      to: FEAT-018
 kind: product
 ---
 
@@ -73,6 +75,11 @@ kind: product
 > Evolved 2026-10-22 with FEAT-017 (diagram and data-visualization tokens,
 > milestone M2 of the operator's visuals PRD, `~/Documents/visuals/PRD.md`
 > §6.5): FR-73 and FR-74 under Theme composition, P1-12 and its sketch.
+>
+> Evolved 2026-10-23 with FEAT-018 and ADR-036 to ADR-039 (the operator: a
+> guided process in which an AI agent and a person design the simplest
+> experience that works, from ChatGPT's human–agent UX design proposal): the
+> "Guided design" subsystem (FR-75 to FR-88), P1-13 and its sketch.
 
 ## Summary
 
@@ -276,6 +283,13 @@ rules, so it invents colours and components.
     planned across DocumentDrivenDX (`@ux-builder/visuals`) draws in the
     theme with no colour of its own (operator, 2026-10-22; FR-73, FR-74,
     FEAT-017).
+13. A guided design loop: an agent leads a designer or developer through
+    defining an app's experience, understanding its users, modelling tasks,
+    comparing alternative flows, trying prototypes, testing with real users
+    and learning from production, with checkpoints where the person
+    decides, simplicity checked on every change, and agent predictions kept
+    apart from user evidence (operator, 2026-10-23; FR-75 to FR-88,
+    FEAT-018, ADR-036 to ADR-039).
 
 ### Nice to Have (P2)
 
@@ -617,6 +631,67 @@ rules, so it invents colours and components.
   results with no client content enter this repository. *(Added
   2026-10-22.)*
 
+### Subsystem: Guided design
+
+- **FR-75** — A dev-dependency package, `@ux-builder/design`, holds the
+  guide skill, the new artifact types' templates and prompts, and the
+  `ux-builder-design` command. Every capability works from the command
+  line through the agent's shell; MCP is optional and returns the same
+  results. Nothing is hosted, nothing is sent, and no model is called by
+  the package. *(Added 2026-10-23.)*
+- **FR-76** — A person starts the guide by asking their agent. A new app
+  gets it from the starter and begins at Define; an existing app runs
+  `init` and begins with a baseline of what exists. The guide works in a
+  full loop or, for everyday changes, in change mode. *(Added 2026-10-23.)*
+- **FR-77** — The guide keeps a committed design state, opens each session
+  with where things stand, and stops at checkpoints (the intended
+  experience, the interaction model, the validated experience; and before
+  significant changes, experiments and releases), recording each answer.
+  HELIX documents change only through proposals a person accepts.
+  *(Added 2026-10-23.)*
+- **FR-78** — The agent challenges requests that add complexity, records
+  five answers (goal, whether it is needed, the simplest alternative,
+  assumptions, how it will be validated) for every added destination,
+  screen, modal, required input or step, and the blueprint check reports
+  the complexity a change adds. *(Added 2026-10-23.)*
+- **FR-79** — An experience brief shows the product, users, outcome, jobs,
+  principles, constraints and open questions, each point marked
+  confirmed, assumed or hypothesis; principles a check can express become
+  project rules. *(Added 2026-10-23.)*
+- **FR-80** — New artifact types live in ux-builder for now: templates in
+  the package, documents in the app's `docs/ux/`, validated and linked to
+  the HELIX documents they relate to. *(Added 2026-10-23.)*
+- **FR-81** — User needs start as labelled hypotheses; research evidence
+  is stored as masked, pseudonymous excerpts and synthesized into a jobs
+  table that rates importance, evidence and confidence separately.
+  *(Added 2026-10-23.)*
+- **FR-82** — The blueprint models tasks (goal, trigger, inputs, system and
+  user actions, success, exceptions, subtasks), and the guide proposes
+  simplifications a person accepts. *(Added 2026-10-23.)*
+- **FR-83** — Alternative blueprints for the same tasks are checked,
+  scored, compared side by side with the agent's labelled judgments, and
+  the choice is recorded with its validation status. *(Added 2026-10-23.)*
+- **FR-84** — The blueprint covers the experience architecture (screen
+  purposes and content order), reports inconsistent handling of the same
+  interaction, and a nine-dimension rubric gives each alternative a
+  predicted value per dimension, never averaged, with task effectiveness
+  and accessibility as baselines. *(Added 2026-10-23.)*
+- **FR-85** — Disposable clickable prototypes are generated per
+  alternative; the chosen design is built in the app as a validated
+  prototype that passes a readiness check before production; a change in
+  plain words is traced to everything it affects and applied in one step.
+  *(Added 2026-10-23.)*
+- **FR-86** — The assessment runs a heuristic inspection pass and reports
+  agent-measured task effort per journey, labelled as diagnostic.
+  *(Added 2026-10-23.)*
+- **FR-87** — A usability test kit is generated from the journeys;
+  observations and consented transcripts are imported as human evidence;
+  the evaluation report shows predicted, agent-measured and observed
+  results together. *(Added 2026-10-23.)*
+- **FR-88** — The SDK emits journey events only to a sink the app
+  supplies; the guide reads exported production data, diagnoses problems
+  and runs experiments behind checkpoints. *(Added 2026-10-23.)*
+
 ## Acceptance Test Sketches
 
 | Requirement | Scenario | Input | Expected Output |
@@ -631,6 +706,7 @@ rules, so it invents colours and components.
 | P1-8 (FR-43–FR-45) | Create an app on HELIX | `npm create @ux-builder/app acme` online, then with `--helix-offline` | HELIX installed in `.claude/skills/helix/` with its version recorded; 8 HELIX documents typed and linked, plus `concerns.local.yml`; `assess validate` passes and `assess collect` reports 0 warnings with US-001's criteria explicit |
 | P1-9 (FR-46–FR-50) | Plan, check and assess an agent screen | A blueprint with an `agent` screen whose "Submit payment" action has no approval and which renders a `Wizard` inline at a 400 px column; the built screen streaming an unmarked answer with no Stop control; UI copy "I think this is right" | Blueprint findings for the missing approval and for the inline wizard's compact rules; audit findings for the missing disclosure and Stop control; one lint warning; the assessment's risky scenario stops at the approval |
 | P1-12 (FR-73, FR-74) | Diagram tokens in every theme | Every theme and preview pair, light and dark; a page drawing a status chip, a series legend, a region with a node, an edge in each weight and the three lifecycle tints with those tokens only | `npm run contrast` reports 0 failures; the audit reports no errors or warnings for that page in every theme and appearance; each theme's page lists every diagram token |
+| P1-13 (FR-75–FR-88) | Guide a new app to checkpoint 2 with no MCP | A fixture app created by the starter; no `.mcp.json`; a scripted agent answering the guide's questions; three alternative blueprints | The design state records `core-1` and `core-2`; `docs/ux/brief.md` and a `UXD-` record pass `validate`; `compare` marks the alternative with the fewest steps and required inputs; no network call is made |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context

@@ -45,7 +45,7 @@ ddx:
 **Contract ID**: CONTRACT-004 — App integration
 **Type**: library and CLI (the package entry points, React API, lint rules, audit command and MCP server an app builds on)
 **Version**: v1 (current releases: `@ux-builder/tokens` 1.6.0, `@ux-builder/ui` 0.6.3, `@ux-builder/create-app` 0.4.2, `@ux-builder/audit` 0.1.2, `@ux-builder/mcp` 0.3.1; each amendment below names the release it is normative from)
-**Status**: accepted — by the operator 2026-10-08, as written; matches the packages released that day. *Screen patterns* (below), an amendment of 2026-10-18 for FEAT-006 (ADR-020, ADR-021, ADR-022) accepted with those ADRs, shipped in `@ux-builder/ui` 0.6.0. The amendments for FEAT-008, FEAT-009 and FEAT-010 ship in `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0, `@ux-builder/mcp` 0.4.0 and `@ux-builder/create-app` 0.5.0.
+**Status**: accepted — by the operator 2026-10-08, as written; matches the packages released that day. *Screen patterns* (below), an amendment of 2026-10-18 for FEAT-006 (ADR-020, ADR-021, ADR-022) accepted with those ADRs, shipped in `@ux-builder/ui` 0.6.0. The amendments for FEAT-008, FEAT-009 and FEAT-010 ship in `@ux-builder/ui` 0.7.0, `@ux-builder/audit` 0.2.0, `@ux-builder/mcp` 0.4.0 and `@ux-builder/create-app` 0.5.0. Amended 2026-10-23 by FEAT-018: see CONTRACT-008, *Amendment to CONTRACT-004*.
 **Related**: FEAT-004 (SDK-01–18), FEAT-005 (DIST-01), CONTRACT-001 (token names), CONTRACT-003 (theme selection), ADR-011 (embedded views), ADR-016 (React first), ADR-017 (fonts)
 
 ## Purpose
