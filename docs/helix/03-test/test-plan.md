@@ -99,6 +99,12 @@ criteria; earlier features keep their tests where they are, traced by
 | FEAT-015: rules named on findings, the journey report, pace, HELIX UX types (US-100 to US-104) | — | Integration | Audit and assessment reports over fixture runs; `propose` drafts against fixture HELIX trees |
 | FEAT-016: the episode trace, export and learning (US-105 to US-111) | — | Unit and integration | `ux-builder-trace` and the tools' trace writes in temp repositories; export with no network; `tools/learn.mjs` over fixture bundles |
 | FEAT-017: diagram tokens, the gate and the theme page (US-112, US-113) | — | Contract and E2E | `npm run contrast` over every resolved theme; the theme page's diagram section in Playwright |
+| FEAT-018 phase 1: package, CLI, MCP parity, state, checkpoints, change mode, brief, `docs/ux/` (US-114 to US-123) | [[STP-114]] to [[STP-123]] | Integration | `ux-builder-design` against fixture apps under the network guard; skill text read from the installed skill |
+| FEAT-018 phase 2: hypotheses, evidence, jobs, tasks, simplify (US-124 to US-128) | [[STP-124]] to [[STP-128]] | Contract | `validate`, `evidence add` and blueprint commands over fixture research and blueprints |
+| FEAT-018 phase 3: alternatives, score, compare, decisions, architecture, consistency, rubric (US-129 to US-134) | [[STP-129]] to [[STP-134]] | Integration | Blueprint commands over three fixture alternatives; deterministic output compared byte for byte |
+| FEAT-018 phase 4: prototypes, readiness, trace and impact (US-135 to US-137) | [[STP-135]] to [[STP-137]] | Integration (Chromium) | Prototype pages clicked through; `impact` over a seeded ID graph |
+| FEAT-018 phase 5: heuristics, metrics, test kit, observations, report (US-138 to US-142) | [[STP-138]] to [[STP-142]] | Integration | Assessment fixtures; fixture observations and transcripts; no real participants |
+| FEAT-018 phase 6: journey events, insights, experiments (US-143 to US-145) | [[STP-143]] to [[STP-145]] | Unit and integration | Events captured by a test sink with network APIs stubbed to throw; fixture event exports |
 
 Every P0 criterion of an in-scope story maps to one layer here and to
 tests in its STP.
@@ -111,6 +117,7 @@ tests in its STP.
 4. US-058, then US-059.
 5. US-057: the skill and the MCP version fix, once the commands exist.
 6. Increments 2 and 3 (2026-10-21): US-060 and US-061, then US-063, US-064 and US-065, as the implementation plan's B-007 to B-012 order them.
+7. FEAT-018 (2026-10-23): phases 1 to 6 in order, as the implementation plan's B-018 to B-036 order them; phase 4's exploratory prototype may move ahead of phase 3.
 
 ## Infrastructure
 

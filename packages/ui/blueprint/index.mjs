@@ -20,6 +20,11 @@ const PATTERNS = [...catalogue.patterns, ...(catalogue.assistant ?? []).filter((
 const byId = new Map(RULES.map((r) => [r.id, r]));
 
 export { blueprintSchema, LIMITS as limits, RULES as rules, RECIPES as recipes };
+export { complexityDelta, deltaFindings, journeyLoad, stepKey } from "./complexity.mjs";
+export { PRINCIPLE_KINDS, principleFindings } from "./principles.mjs";
+export { simplify } from "./tasks.mjs";
+export { compareAlternatives, DIMENSIONS, score } from "./explore.mjs";
+import { checkTasks } from "./tasks.mjs";
 export { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, expandModalities, modalityProblems };
 
 /* The checks this module runs, by the rule ID each reports. */
@@ -32,6 +37,12 @@ export const CHECKS = [
   // Flows and journeys (FEAT-012 FLW-02, JRN-02, JRN-03; flow.mjs): warnings, but flow.target-exists.
   "flow.reachable", "flow.no-dead-end", "flow.target-exists", "flow.primary-consistent",
   "journey.walkable", "journey.safeguarded", "journey.covers-errors", "journey.story-covered",
+  // The complexity a change adds (FEAT-018 GDL-12; complexity.mjs): run by check --diff, a warning.
+  "simplicity.delta-decided",
+  // The task model (FEAT-018 GDL-22, GDL-23; tasks.mjs).
+  "journey.task-exists", "task.realized",
+  // The experience architecture (FEAT-018 GDL-32, GDL-34; tasks.mjs).
+  "screen.purpose", "consistency.same-kind",
 ];
 const STATES = ["empty", "loading", "error"];
 
@@ -214,7 +225,10 @@ export function checkBlueprint(bp, { helix } = {}) {
   const modality = (path) => path.length === 3 && path[0] === "supports" && path[1] === "modalities" && typeof valueAt(bp, path) === "string";
   for (const [path, msg] of schemaErrors) {
     if (modality(path) && msg.startsWith("must be one of")) { add("blueprint.valid", path, modalityProblems([valueAt(bp, path)])[0], `Use ${Object.keys(MODALITIES).map((m) => JSON.stringify(m)).join(", ")}; native apps are not supported yet.`); continue; }
-    add("blueprint.valid", path, msg.startsWith('"') ? `${msg}.` : `${ptr(path) || "The blueprint"} ${named(path, msg)}.`, "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005).");
+    // A task's problem names the task by its ID (US-127-AC2).
+    const task = path[0] === "tasks" && typeof path[1] === "number" ? bp.tasks?.[path[1]]?.id : null;
+    const where = task ? `Task ${task} (${ptr(path)})` : ptr(path) || "The blueprint";
+    add("blueprint.valid", path, msg.startsWith('"') ? `${msg}.` : `${where} ${named(path, msg)}.`, "Follow the blueprint schema (get_blueprint_schema, or CONTRACT-005).");
   }
   // supports.sizeClasses and inputs include what the modalities derive, or a warning names what is missing (US-098-AC4).
   const declared = Array.isArray(bp.supports?.modalities) ? bp.supports.modalities.filter((m) => MODALITIES[m]) : [];
@@ -361,6 +375,7 @@ export function checkBlueprint(bp, { helix } = {}) {
     if (on("view.one-task") && screens.length > 1) add("view.one-task", ["screens"], `A view has ${screens.length} screens; a view does one task.`, "Keep one screen; put further steps in modals or sections of it.");
   }
   checkFlow(bp, { add, on, helix });
+  checkTasks(bp, { add, on });
   const order = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
   return findings.sort((a, b) => order(a.path, b.path) || order(a.rule, b.rule));
 }

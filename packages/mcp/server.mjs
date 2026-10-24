@@ -61,6 +61,10 @@ try {
   const [manifest, report] = await Promise.all([import(at("manifest.mjs")), import(at("validate-report.mjs"))]);
   assess = { manifest, report, skill: readFileSync(require.resolve("@ux-builder/audit/skill/ux-builder-assess/SKILL.md"), "utf8") };
 } catch { /* no @ux-builder/audit, or an older one */ }
+// The guided design loop (FEAT-018, ADR-036): the app's @ux-builder/design, else ours if installed.
+// Optional: the design package's own CLI does everything these tools do.
+let designPkg = null;
+try { designPkg = await import(pathToFileURL(require.resolve("@ux-builder/design")).href); } catch { /* no @ux-builder/design */ }
 // The episode trace (FEAT-016), the app's @ux-builder/trace else ours.
 let trace = null;
 try { trace = await import(pathToFileURL(require.resolve("@ux-builder/trace")).href); } catch { /* no @ux-builder/trace */ }
@@ -130,7 +134,7 @@ export function answerSummary(result, cat) {
 /* createServer(s, bp, ux, hx, px, cc, { trace, appDir }): `trace` is
    @ux-builder/trace (null: no trace), `appDir` where the app is
    (default UX_BUILDER_APP, else the working directory). */
-export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyReader, px = proposer, cc = cards, { trace: tr = trace, appDir = process.env.UX_BUILDER_APP || process.cwd() } = {}) {
+export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyReader, px = proposer, cc = cards, { trace: tr = trace, appDir = process.env.UX_BUILDER_APP || process.cwd(), design = designPkg } = {}) {
   const { catalogue: cat, manifest, resolved } = s;
   const server = new McpServer({ name: "ux-builder", version: cat.packages["@ux-builder/ui"] }, {
     instructions: `The AI-UI SDK (@ux-builder/ui ${cat.packages["@ux-builder/ui"]}, @ux-builder/tokens ${cat.packages["@ux-builder/tokens"]}). Before writing UI in an app that uses it, read get_guidance. Rules: ${cat.rules.join(" ")}${tr ? " Record the build: start_episode before you change a screen, record_decision at every pattern choice, departure from the guidance and workaround, the trailer UX-Episode: <episode> on every commit, and end_episode when it is committed." : ""}`,
@@ -328,6 +332,31 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       const notes = storied && !helix ? [hx.skippedNote(process.cwd())] : [];
       return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings, ...(notes.length ? { notes } : {}) });
     });
+    if (bp.simplify) {
+      server.registerTool("simplify_blueprint", {
+        title: "Propose simplifications of the task model",
+        description: "Proposals that make the blueprint's tasks take less of their users (FEAT-018 GDL-24): inputs to infer, decisions to default, steps to combine, hops to remove, each with what it saves and what it assumes. Changes nothing; as `ux-builder-blueprint simplify --json` returns it.",
+        inputSchema: { blueprint: z.record(z.string(), z.unknown()).describe("The blueprint object (app.blueprint.json)") },
+      }, async ({ blueprint: b }) => ok(bp.simplify(b)));
+    }
+    if (bp.score) {
+      server.registerTool("score_blueprint", {
+        title: "Score a blueprint's journeys",
+        description: "Per journey, what it asks of its user, labelled predicted (FEAT-018 GDL-28): steps and the shortest path, screens, modals, required inputs, decisions, navigation hops, check findings, patterns reused and introduced; as `ux-builder-blueprint score --json` returns it.",
+        inputSchema: { blueprint: z.record(z.string(), z.unknown()).describe("The blueprint object") },
+      }, async ({ blueprint: b }) => ok(bp.score(b)));
+      server.registerTool("compare_blueprints", {
+        title: "Compare alternative blueprints",
+        description: "Scores two or more alternative blueprints for the same tasks and marks, per task and dimension, the best (FEAT-018 GDL-30). Refuses alternatives whose tasks differ. Returns the scores, the best per dimension and the comparison page's HTML; writes nothing.",
+        inputSchema: {
+          alternatives: z.array(z.object({ name: z.string(), blueprint: z.record(z.string(), z.unknown()) })).min(2).describe("The alternatives, each with its name"),
+          judgments: z.record(z.string(), z.array(z.object({ criterion: z.string(), value: z.string(), reasoning: z.string() }))).optional().describe("Preliminary design judgments per alternative"),
+        },
+      }, async ({ alternatives, judgments }) => {
+        const r = bp.compareAlternatives(alternatives, { judgments: judgments ?? {} });
+        return r.differ ? fail(`The alternatives do not cover the same tasks: ${r.differ.join(", ")}.`) : ok(r);
+      });
+    }
   }
 
   // HELIX proposals from the blueprint (FEAT-012 DRF-01, DRF-02; ADR-030): returned, never written or applied.
@@ -408,6 +437,40 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
     return { content: [{ type: "text", text: `${lines.join("\n")}\n${s.guidance()}` }] };
   });
 
+  // The guided design loop's tools (CONTRACT-008 MCP tools; ADR-036 rule 2): each wraps the
+  // function behind a ux-builder-design command and returns what its --json prints.
+  if (design) {
+    const at = () => design.findApp(appDir);
+    const run = (fn) => { try { return ok(fn()); } catch (e) { return fail(e.details ? `${e.message}\n${e.details.map((d) => `${d.path}: ${d.message}`).join("\n")}` : e.message); } };
+    server.registerTool("get_design_state", {
+      title: "Get the design state",
+      description: "The guided design loop's state (.ux-builder/design-state.json), or one field by path such as activity or assumptions[0].status; as `ux-builder-design state get --json` returns it.",
+      inputSchema: { path: z.string().optional().describe("A field, an index or a dotted path; omit for the whole state") },
+    }, async ({ path }) => run(() => design.stateGet(at(), { path })));
+    server.registerTool("update_design_state", {
+      title: "Update the design state",
+      description: "Write one field of the design state, checked against its schema; path[+] appends to a list (assumptions[+] gets the next A-<n> ID and status assumed). As `ux-builder-design state set --json` returns it.",
+      inputSchema: { path: z.string().describe("The field, e.g. next, or assumptions[+]"), value: z.any().describe("The JSON value to write") },
+    }, async ({ path, value }) => run(() => design.stateSet(at(), { path, value })));
+    server.registerTool("design_status", {
+      title: "Where the design loop stands",
+      description: "The activity, mode, chosen alternative, untested assumptions, open questions, checkpoints, next action and docs/ux documents; as `ux-builder-design status --json` returns it.",
+      inputSchema: {},
+    }, async () => run(() => design.status(at())));
+    if (design.impact) {
+      server.registerTool("design_impact", {
+        title: "What a change reaches",
+        description: "Everything a change described in plain words reaches: tasks, journeys, screens, patterns, prototype pages, test-kit tasks, findings and HELIX documents, and checkpointRequired when it touches something already tested. Changes nothing; as `ux-builder-design impact \"<change>\" --json` returns it.",
+        inputSchema: { change: z.string().describe("The change, in plain words") },
+      }, async ({ change }) => run(() => design.impact(at(), { change })));
+      server.registerTool("design_trace", {
+        title: "Trace an item",
+        description: "Everything linked to a job, task, journey, screen, decision, kit task or finding, upstream and downstream, each with its file; as `ux-builder-design trace <id> --json` returns it.",
+        inputSchema: { id: z.string().describe("A J-, T-, journey, screen, UXD-, TK-n#task or F- ID") },
+      }, async ({ id }) => run(() => design.trace(at(), { id })));
+    }
+  }
+
   // The episode trace's own tools (CONTRACT-007 MCP tools; US-105-AC2, US-107).
   if (tr) {
     const where = () => tr.findApp(appDir) ?? resolve(appDir);
@@ -439,6 +502,12 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
         departs: z.boolean().optional().describe("true when this departs from the guidance"),
         workaround: z.boolean().optional().describe("true when this works around a missing component"),
         screen: z.string().optional().describe("The blueprint screen ID, when the decision is about one"),
+        kind: z.enum(["addition", "checkpoint"]).optional().describe("addition: a new destination, screen, modal, required input or step; it then needs the five answers below"),
+        goal: z.string().optional().describe("For an addition: the user goal it supports"),
+        without: z.string().optional().describe("For an addition: whether the goal can be reached without it"),
+        simplest: z.string().optional().describe("For an addition: the simplest viable alternative"),
+        assumptions: list().describe("For an addition: what it assumes about user behaviour"),
+        validation: z.string().optional().describe("For an addition: how the team will know the result is better"),
       },
     }, async (d) => {
       try {

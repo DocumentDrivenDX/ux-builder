@@ -22,6 +22,7 @@
   "devDependencies": {
     "@playwright/test": "~1.63.0",
     "@ux-builder/audit": "__AUDIT__",
+    "@ux-builder/design": "__DESIGN__",
     "@ux-builder/trace": "__TRACE__",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^10.12.0",

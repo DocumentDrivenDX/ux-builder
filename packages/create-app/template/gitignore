@@ -8,3 +8,5 @@ ux-assessment/
 
 # The episode trace (.ux-builder/) is committed, but for the open episode's marker.
 __TRACE_IGNORE__
+# The real names behind research pseudonyms stay on this machine (ADR-039).
+.ux-builder/participants.local.json

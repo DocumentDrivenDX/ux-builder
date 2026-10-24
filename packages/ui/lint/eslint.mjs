@@ -206,7 +206,30 @@ const aiVoice = {
   },
 };
 
-const plugin = { meta: { name: "@ux-builder/ui/eslint" }, rules: { "no-hard-coded-values": rule, "no-foreign-ui": foreign, "no-inline-svg": inlineSvg, "ai-neutral-voice": aiVoice } };
+/* ux-builder/no-prototype-import (FEAT-018 GDL-42, ADR-037): exploratory
+   prototypes under prototype/ are disposable; app code never imports them. */
+const PROTOTYPE = /(^|\/)prototype\//;
+const noPrototypeImport = {
+  meta: {
+    type: "problem",
+    docs: { description: "Report an import from prototype/: exploratory prototypes are disposable and never app code (ADR-037)" },
+    schema: [],
+  },
+  create(context) {
+    const check = (node, source) => {
+      if (typeof source === "string" && PROTOTYPE.test(source)) context.report({ node, message: `"${source}" imports from prototype/: exploratory prototypes are disposable and never app code (ADR-037). Build the screen from the SDK's patterns instead.` });
+    };
+    return {
+      ImportDeclaration(node) { check(node, node.source.value); },
+      ExportNamedDeclaration(node) { if (node.source) check(node, node.source.value); },
+      ExportAllDeclaration(node) { check(node, node.source.value); },
+      ImportExpression(node) { if (node.source.type === "Literal") check(node, node.source.value); },
+      CallExpression(node) { if (node.callee.type === "Identifier" && node.callee.name === "require" && node.arguments[0]?.type === "Literal") check(node, node.arguments[0].value); },
+    };
+  },
+};
+
+const plugin = { meta: { name: "@ux-builder/ui/eslint" }, rules: { "no-hard-coded-values": rule, "no-foreign-ui": foreign, "no-inline-svg": inlineSvg, "ai-neutral-voice": aiVoice, "no-prototype-import": noPrototypeImport } };
 
 /* The recommended config (flat): the theme rules as errors and the voice rule
    as a warning (ADR-028 decision 5). no-hard-coded-values takes { theme } for
@@ -219,6 +242,7 @@ plugin.configs = {
       "ux-builder/no-foreign-ui": "error",
       "ux-builder/no-inline-svg": "error",
       "ux-builder/ai-neutral-voice": "warn",
+      "ux-builder/no-prototype-import": "error",
     },
   },
 };

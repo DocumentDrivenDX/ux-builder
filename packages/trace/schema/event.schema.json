@@ -159,7 +159,15 @@
         "relied": { "$ref": "#/$defs/strings", "description": "Rule IDs and story IDs" },
         "departs": { "type": "boolean" },
         "workaround": { "type": "boolean" },
-        "screen": { "$ref": "#/$defs/nullableString" }
+        "screen": { "$ref": "#/$defs/nullableString" },
+        "decisionKind": { "enum": ["addition", "checkpoint"], "description": "addition: a new destination, screen, modal, required input or step, with the five answers (FEAT-018 GDL-11); checkpoint: a checkpoint's answer (CONTRACT-008)" },
+        "checkpoint": { "enum": ["core-1", "core-2", "core-3", "significant-change", "experiment", "release"] },
+        "ux": { "type": "string", "pattern": "^UXD-[1-9][0-9]*$", "description": "The interaction decision record this event belongs to (docs/ux/decisions/)" },
+        "goal": { "type": "string" },
+        "without": { "type": "string" },
+        "simplest": { "type": "string" },
+        "assumptions": { "$ref": "#/$defs/strings" },
+        "validation": { "type": "string" }
       }
     },
     "transcript": {

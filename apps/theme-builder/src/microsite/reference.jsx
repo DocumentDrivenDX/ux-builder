@@ -142,7 +142,7 @@ export function Rules() {
         <Select label="Checked by" value={kind} onChange={(e) => setKind(e.target.value)} options={[ALL, ...kinds].map(option("Any check"))} />
       </FilterBar>
       <p className="uxm-hint" role="status" data-testid="rules-shown">{shown.length} of {rules.length} rules</p>
-      <DataTable caption="Interaction rules" rowKey="id" rows={shown} pageSize={100}
+      <DataTable caption="Interaction rules" rowKey="id" rows={shown} pageSize={Math.max(100, rules.length)}
         columns={[
           { key: "id", label: "Rule", sortable: true, render: (r) => <span id={`rule-${r.id}`}><code>{r.id}</code><br /><span className="uxm-hint">{r.severity}</span></span> },
           { key: "statement", label: "Statement", render: (r) => <><b>{r.title}.</b> {r.statement}</> },

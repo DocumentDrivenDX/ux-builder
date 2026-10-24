@@ -116,6 +116,11 @@ export const BLUEPRINT_NOTES = {
   propose: "Draft HELIX content from the blueprint as patches, a report and proposals.json; applies nothing.",
   draw: "Draw the IA map, flows and journeys as Mermaid and SVG.",
   wireframes: "Draw each screen's pattern at each supported size class as HTML and PNG, in a neutral theme.",
+  score: "Score each journey of a blueprint, labelled predicted: steps, screens, modals, required inputs, decisions, navigation hops, findings and patterns.",
+  compare: "Compare two or more alternative blueprints for the same tasks on one page, the best per task and dimension marked.",
+  alternative: "Make an alternative blueprint (new) or choose one, with its reason (choose), recorded in the design state.",
+  prototype: "Write a disposable, clickable prototype of a blueprint under prototype/ (one page per screen, state and size class, actions linked), optionally in other design systems; or archive one.",
+  simplify: "Propose ways to make the task model take less of its users: inputs to infer, decisions to default, steps to combine, hops to remove. Changes nothing.",
 };
 export function blueprintCommands() {
   const src = read("packages/ui/blueprint/cli.mjs");
@@ -174,6 +179,8 @@ export const NOTES = {
   "@ux-builder/ui ./eslint": "The ESLint plugin: no hard-coded values in JSX, and the AI voice rules",
   "@ux-builder/ui ./blueprint": "checkBlueprint, the interaction rules and the blueprint schema",
   "@ux-builder/ui ./blueprint/modalities": "The app modalities: each one's size classes, inputs, AI roles, components, rule families and audit widths",
+  "@ux-builder/ui ./blueprint/prototype": "Exploratory prototypes of a blueprint: writePrototype, prototypePages, archivePrototype and themeFor (FEAT-018)",
+  "@ux-builder/ui ./blueprint/propose": "HELIX proposals drafted from a blueprint as patches: propose and writeProposals",
   "@ux-builder/ui ./catalogue.json": "The machine-readable catalogue: widgets, patterns, tokens, icons, rules and recipes",
   "@ux-builder/ui ./AGENTS.md": "Guidance for AI coding agents, generated from the catalogue",
   "@ux-builder/ui ./skill/*": "The Claude Code skill for building on the SDK",
@@ -188,6 +195,9 @@ export const NOTES = {
   "@ux-builder/trace .": "The episode trace an app keeps while it is built: openEpisode, appendEvent, closeEpisode, attachTranscript, exportBundle and validateTrace (ux-builder-trace)",
   "@ux-builder/trace ./schema/*": "The JSON Schemas of a trace event, the export bundle and .ux-builder/config.json",
   "@ux-builder/trace ./package.json": "The package's own metadata",
+  "@ux-builder/design .": "The guided design loop's commands as functions: init, status, stateGet, stateSet and the design state (ux-builder-design)",
+  "@ux-builder/design ./schema/*": "The JSON Schema of the design state, .ux-builder/design-state.json",
+  "@ux-builder/design ./package.json": "The package's own metadata",
 };
 
 /* What a wildcard export matches today, from the package's files. */
@@ -224,6 +234,7 @@ export const LICENCES = {
   "apple-terms": { name: "Apple's terms of use", meaning: "Apple's website terms; no open content licence. Paraphrased and linked, never quoted.", quote: false },
   "google-terms": { name: "Google's terms of service", meaning: "Google's terms; no open content licence shown. Paraphrased and linked, never quoted.", quote: false },
   "microsoft-terms": { name: "Microsoft's terms of use", meaning: "Microsoft's terms; no open licence shown. Paraphrased and linked, never quoted.", quote: false },
+  "nngroup-terms": { name: "Nielsen Norman Group's terms of use", meaning: "Nielsen Norman Group's articles are copyright; no open licence shown. Paraphrased and linked, never quoted.", quote: false },
   "CC-BY-2.5": { name: "Creative Commons Attribution 2.5", meaning: "Open: a short quotation is allowed with attribution, credited in the notices.", quote: true },
   "CC-BY-4.0": { name: "Creative Commons Attribution 4.0", meaning: "Open: a short quotation is allowed with attribution, credited in the notices.", quote: true },
   "CC-BY-NC-SA-4.0": { name: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0", meaning: "Non-commercial and share-alike, so the rules paraphrase it and do not adapt it.", quote: false },

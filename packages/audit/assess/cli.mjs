@@ -11,6 +11,9 @@
      reset       run a fixture's reset between scenarios
      merge       merge findings of one user problem; give each a stable ID
      inspect     inspect a checkpoint: the agent's page in place, or a replay
+     heuristics  the heuristic inspection pass: one entry per walked screen and heuristic
+     hierarchy   is a page's content in the blueprint's priority order?
+     metrics     agent-measured task metrics per walked journey (metrics.json)
      validate-report  check a run package before handing it over
      propose     propose a change to a HELIX artifact for a finding (a patch; nothing applied)
      check-writes  list files under the HELIX root or the app changed during the run
@@ -61,6 +64,22 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
       a step marked highImpact, or the journey's scenarios.risky.step) it stops
       before that step. --scenario errorProne records whether the error is
       shown in place and whether recovery needs no restart.
+  heuristics <run-dir> [--blueprint f]
+          [--screen id --heuristic id (--finding F-id | --no-finding)]
+      Start (or extend) heuristics.json: an entry for every walked screen and
+      every heuristic of the pass (Nielsen's ten, error prevention and
+      recovery, information hierarchy, navigation complexity). With --screen
+      and --heuristic, record one result. Screens no step reached are listed
+      as not inspected.
+  hierarchy (--page <file.html|tree.yml>) [--screen id] [--blueprint f]
+      Check the page's content against the screen's screens[].content, highest
+      priority first; the screen is the page's data-piq-screen unless given.
+      Exit 1 names the first content out of order.
+  metrics <run-dir> [--blueprint f]
+      Write metrics.json: per walked journey, completion, interactions, moves
+      against the blueprint's shortest path, the path taken, backtracks,
+      failed actions, information not found, interface errors and time per
+      step, every one agent-measured.
   validate-report <run-dir>
       Check every record in a run package, that its evidence resolves, that
       findings relying on a conflicting HELIX ID are qualified, and that every
@@ -97,6 +116,53 @@ The ux-builder-assess skill (node_modules/@ux-builder/audit/skill/) says how
 an agent runs these as one assessment.`;
 
 const SUB = {
+  async heuristics(args) {
+    const { values: o, positionals: [dir] } = parseArgs({ args, allowPositionals: true, options: { blueprint: { type: "string" }, screen: { type: "string" }, heuristic: { type: "string" }, finding: { type: "string" }, "no-finding": { type: "boolean" } } });
+    if (!dir) { console.error(USAGE); return 2; }
+    const { recordResult, runBlueprint, startPass } = await import("./heuristics.mjs");
+    try {
+      if (o.screen || o.heuristic) {
+        if (!o.screen || !o.heuristic || !!o.finding === !!o["no-finding"]) { console.error("record a result with --screen, --heuristic and one of --finding F-id or --no-finding"); return 2; }
+        const e = recordResult(dir, { screen: o.screen, heuristic: o.heuristic, finding: o.finding ?? null });
+        console.log(`${e.screen} × ${e.heuristic}: ${e.finding ?? e.checked}`);
+        return 0;
+      }
+      const r = startPass(dir, { blueprint: runBlueprint(dir, o.blueprint) });
+      const open = r.entries.filter((e) => !e.finding && !e.checked).length;
+      console.log(`${dir}/heuristics.json: ${r.screens.length} walked screen${r.screens.length === 1 ? "" : "s"} × ${r.heuristics.length} heuristics; ${open} to record${r.notInspected.length ? `; not inspected: ${r.notInspected.join(", ")}` : ""}`);
+      return 0;
+    } catch (e) { console.error(e.message); return e.code === "usage" ? 2 : 1; }
+  },
+  async hierarchy(args) {
+    const { values: o } = parseArgs({ args, options: { page: { type: "string" }, screen: { type: "string" }, blueprint: { type: "string", default: "app.blueprint.json" }, json: { type: "boolean" } } });
+    const { existsSync, readFileSync } = await import("node:fs");
+    if (!o.page) { console.error(USAGE); return 2; }
+    for (const f of [o.page, o.blueprint]) if (!existsSync(f)) { console.error(`${f} does not exist`); return 2; }
+    const { informationHierarchy, pageScreenOf, pageText } = await import("./heuristics.mjs");
+    const text = readFileSync(o.page, "utf8");
+    const screen = o.screen ?? pageScreenOf(text);
+    const s = (JSON.parse(readFileSync(o.blueprint, "utf8")).screens ?? []).find((x) => x?.id === screen);
+    if (!s) { console.error(screen ? `${screen} is not a screen of ${o.blueprint}` : `${o.page} names no screen (data-piq-screen); give --screen`); return 2; }
+    if (!(s.content ?? []).length) { console.error(`${screen} declares no content (screens[].content): nothing to check`); return 2; }
+    const r = { screen, ...informationHierarchy(s.content, pageText(text)) };
+    if (o.json) console.log(JSON.stringify(r, null, 2));
+    else {
+      console.log(r.ok ? `${screen}: content in priority order (${r.shown.join(", ") || "none shown"})` : `${screen}: ${r.finding.message}`);
+      if (r.missing.length) console.log(`not found on the page: ${r.missing.join(", ")}`);
+    }
+    return r.ok ? 0 : 1;
+  },
+  async metrics(args) {
+    const { values: o, positionals: [dir] } = parseArgs({ args, allowPositionals: true, options: { blueprint: { type: "string" } } });
+    if (!dir) { console.error(USAGE); return 2; }
+    const { metrics } = await import("./metrics.mjs");
+    try {
+      const m = metrics(dir, { blueprint: o.blueprint });
+      for (const j of m.journeys) console.log(`${j.journey}: ${j.completed ? "completed" : `stopped at step ${j.stoppedAt?.n}`}, ${j.moves} moves (shortest ${j.shortestPath ?? "unknown"}), ${j.backtracks} backtracks, ${j.failedActions} failed actions — agent-measured`);
+      console.log(`Wrote ${dir}/metrics.json. ${m.note}`);
+      return 0;
+    } catch (e) { console.error(e.message); return e.code === "usage" ? 2 : 1; }
+  },
   async video(args) {
     const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, journey: { type: "string", multiple: true }, viewport: { type: "string", multiple: true }, pace: { type: "string", default: "normal" } } });
     const viewports = (o.viewport ?? []).map((v) => { const m = /^(\d+)x(\d+)$/.exec(v); return m && { width: Number(m[1]), height: Number(m[2]) }; });

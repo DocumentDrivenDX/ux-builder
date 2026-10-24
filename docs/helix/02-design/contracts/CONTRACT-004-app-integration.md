@@ -294,7 +294,7 @@ and `@ux-builder/create-app` 0.5.0. The formats are CONTRACT-005; this section l
 | Surface | Addition |
 |---|---|
 | `@ux-builder/ui` entry points | `@ux-builder/ui/blueprint`: `rulesFor`, `checkBlueprint`, `blueprintSchema`, `findRecipes`, `getRecipe`, `skeleton`, `rules`, `recipes`, `limits` (CONTRACT-005; its `CHECKS` and `nearestPattern` are internal) |
-| `@ux-builder/ui` command | `ux-builder-blueprint check <file> [--json]`, `ux-builder-blueprint init [--kind app\|view] [--out <file>]` (CONTRACT-005) |
+| `@ux-builder/ui` command | `ux-builder-blueprint check [<file>] [--json]`, `ux-builder-blueprint init [--kind app\|view] [--out <file>]` (CONTRACT-005) |
 | `catalogue.json` | `interaction`: `{ version, limits, rules[], recipes[], blueprintSchema }` (CONTRACT-005) |
 | `AGENTS.md`, skill | An "Interaction and screen rules" section: every rule's ID and statement, and the plan → check → build → lint → audit loop |
 | `@ux-builder/mcp` | Tools `get_rules` (`context?`, `sizeClasses?`, `inputs?`), `list_recipes` (`job?`, `kind?`), `get_recipe` (`id`), `get_blueprint_schema`, `check_blueprint` (`blueprint`); `get_guidance` includes the loop. `get_blueprint_schema` returns `{ schema, skeleton: { app, view } }`: the blueprint's JSON Schema and `skeleton("app")` and `skeleton("view")` |

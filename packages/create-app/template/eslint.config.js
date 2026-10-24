@@ -8,6 +8,7 @@ export default [{
     "ux-builder/no-hard-coded-values": ["error", { theme: "__THEME__" }],
     "ux-builder/no-foreign-ui": "error",
     "ux-builder/no-inline-svg": "error",
+    "ux-builder/no-prototype-import": "error",
     "ux-builder/ai-neutral-voice": "warn",
   },
 }];

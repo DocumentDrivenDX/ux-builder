@@ -18,12 +18,16 @@
 
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
+import { HEURISTICS } from "./heuristics.mjs";
 import { loadTypes } from "./helix.mjs";
+import { metricsLines } from "./metrics.mjs";
 import { catalogueRules, ruleOf, SEVERITY_WORDS, severityOf } from "./rules.mjs";
 
 const read = (dir, f) => (existsSync(join(dir, f)) ? JSON.parse(readFileSync(join(dir, f), "utf8")) : null);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const PRIORITIES = ["P0", "P1", "P2", "P3"];
+/* Every finding says where it came from (FEAT-018 GDL-58). */
+const ORIGIN = { agent: "agent recommendation", human: "human observation (verified)", "design-team": "design-team note (not user evidence)" };
 export const CAVEAT = "A clean audit is not proof of usability or of full accessibility compliance, and passing functional tests do not show that usability criteria are met.";
 
 function walk(dir, base = dir) {
@@ -43,7 +47,7 @@ export function load(dir) {
     run: read(dir, "run.json"), req: read(dir, "requirements.json"), trace: read(dir, "traceability.json"), baseline: read(dir, "baseline.json"),
     plan: read(dir, "plan.json"), coverage: read(dir, "coverage.json"), walk: read(dir, "walkthrough.json"), backlog: read(dir, "backlog.json"),
     proposals: read(dir, "proposals.json"), alignment: read(dir, "alignment.json"), comparison: read(dir, "comparison.json"),
-    video: read(dir, "video/video.json"),
+    video: read(dir, "video/video.json"), heuristics: read(dir, "heuristics.json"), metrics: read(dir, "metrics.json"),
   };
 }
 
@@ -166,7 +170,7 @@ function markdown(dir, r) {
     const sev = severityOf(f);
     const what = ruleOf(f, rules);
     L.push(`${"#".repeat(level)} ${f.priority} · severity ${sev} · ${f.title} (${f.id})`, "");
-    L.push(`**${f.finding_type}** · severity ${sev} (${SEVERITY_WORDS[sev]}) · ${f.journey_id} · ${f.state_id} · role ${f.role} · confidence ${f.confidence?.level} (${f.confidence?.reason}) · effort ${f.effort}${f.validation_work ? " · **validation work**" : ""}${(f.qualified ?? []).length ? ` · qualified: ${f.qualified.join(", ")}` : ""}`, "");
+    L.push(`**${ORIGIN[f.source ?? "agent"]}** · **${f.finding_type}** · severity ${sev} (${SEVERITY_WORDS[sev]}) · ${f.journey_id} · ${f.state_id} · role ${f.role} · confidence ${f.confidence?.level} (${f.confidence?.reason}) · effort ${f.effort}${f.validation_work ? " · **validation work**" : ""}${(f.qualified ?? []).length ? ` · qualified: ${f.qualified.join(", ")}` : ""}`, "");
     if (what?.kind === "rule") L.push(`- **Rule** \`${what.id}\`: ${what.statement}${what.sources.length ? ` Sources: ${what.sources.map((s) => `[${s.title}](${s.url})`).join(", ")}.` : ""}`);
     else if (what) L.push(`- **Heuristic**: ${what.name}${what.source ? ` — source: ${/^https?:/.test(what.source) ? `[${what.source}](${what.source})` : what.source}` : ""}`);
     else L.push("- **Rule**: none named (assess validate-report fails this finding: name the rule or the heuristic it breaks)");
@@ -208,6 +212,21 @@ function markdown(dir, r) {
     }
   }
   sec("findings", "Findings by journey", J);
+
+  // The heuristic pass (FEAT-018 GDL-50): every heuristic checked, with its findings or none.
+  if (r.heuristics) {
+    const h = r.heuristics;
+    const L = [`Each walked screen was checked against ${HEURISTICS.length} heuristics: ${HEURISTICS.map((x) => x.name).join("; ")}.`, ""];
+    for (const screen of h.screens ?? []) {
+      const es = (h.entries ?? []).filter((e) => e.screen === screen);
+      const hit = es.filter((e) => e.finding), clean = es.filter((e) => e.checked === "no finding"), open = es.length - hit.length - clean.length;
+      L.push(`- **${screen}**: ${hit.length ? hit.map((e) => `${e.heuristic} → ${e.finding}`).join(", ") : "no findings"}${clean.length ? `; checked, no finding: ${clean.map((e) => e.heuristic).join(", ")}` : ""}${open ? `; ${open} not yet recorded` : ""}`);
+    }
+    if ((h.notInspected ?? []).length) L.push("", `Not inspected (no step reached them; not clean): ${h.notInspected.join(", ")}.`);
+    sec("heuristics", "Heuristics checked", L);
+  }
+  // Task metrics (FEAT-018 GDL-52, GDL-53): agent-measured, and said so.
+  if (r.metrics) sec("metrics", "Task metrics (agent-measured)", metricsLines(r.metrics));
 
   const index = (list) => ordered(list).map((f) => `- [${f.priority} · severity ${severityOf(f)} · ${f.title} (${f.id})](#${f.id}) — ${f.journey_id} · ${f.state_id}`);
   if (obligations.length) sec("obligations", "Findings against the app's requirements", index(obligations));

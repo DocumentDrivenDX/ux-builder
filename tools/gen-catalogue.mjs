@@ -228,7 +228,9 @@ export function interaction() {
   const aiRoles = json("guidelines/schema/rules.schema.json").$defs.rule.properties.when.properties.aiRole.items.enum;
   // The app modalities and what each expands to (FEAT-014's matrix, packages/ui/blueprint/modalities.mjs).
   const modalities = Object.entries(MODALITIES).map(([name, m]) => ({ name, ...m }));
-  return { version: rules.version, limits: rules.limits, aiRoles, modalities, futureModalities: FUTURE_MODALITIES, rules: rules.rules, recipes: recipes.recipes, blueprintSchema };
+  // The UX quality rubric (FEAT-018 GDL-37): nine dimensions, two of them baselines.
+  const rubric = json("guidelines/rubric.json").dimensions;
+  return { version: rules.version, limits: rules.limits, aiRoles, modalities, futureModalities: FUTURE_MODALITIES, rules: rules.rules, recipes: recipes.recipes, rubric, blueprintSchema };
 }
 
 export function catalogue() {

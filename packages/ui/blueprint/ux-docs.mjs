@@ -53,7 +53,7 @@ export function wireframeSections(m, { bp, screen, id, isd }) {
     ...actions.map((a, i) => `| ${i + 3} | ${cell(a.label ?? a.id)} | control | ${cell(a.primary ? `The primary action: ${where(a)}` : where(a).charAt(0).toUpperCase() + where(a).slice(1))}${a.destructive ? ` (destructive: ${cell(a.destructive)})` : ""} | all | action \`${cell(a.id)}\` |`),
   ];
   return [
-    { heading: "Scope and Fidelity", text: [from(`screen \`${s.id}\``), `- **Screen**: ${s.title ?? s.id}`, "- **Fidelity**: mid", `- **Size classes**: ${sizes.join(", ")}`, `- **Pattern**: ${s.pattern ?? "none"}`].join("\n") },
+    { heading: "Scope and Fidelity", text: [from(`screen \`${s.id}\``), `- **Screen**: ${s.title ?? s.id}`, ...(s.purpose ? [`- **Purpose**: ${s.purpose}`] : []), "- **Fidelity**: mid", `- **Size classes**: ${sizes.join(", ")}`, `- **Pattern**: ${s.pattern ?? "none"}`, ...(list(s.content).length ? [`- **Content, highest priority first**: ${list(s.content).filter((c) => c?.label).map((c, i) => `${i + 1}. ${c.label}${c.kind ? ` (${c.kind})` : ""}`).join("; ")}`] : [])].join("\n") },
     { heading: "Layouts", text: [`<!-- Drawn by ux-builder-blueprint wireframes from the real pattern, in the plain theme. Copy each PNG from its output (blueprint-wireframes/) to assets/ under the name shown. -->`,
       ...sizes.flatMap((size) => ["", `### ${size}`, "", `![${id} ${size}](assets/${id}-${size}.png)`, "", `Source: \`blueprint-wireframes/${file("ideal", size)}\`.`])].join("\n").replace(/^\n/, "") },
     { heading: "Annotations", text: [from(`screen \`${s.id}\`'s actions`), "| # | Element | Kind | Annotation | Size classes | Links |", "|---|---|---|---|---|---|", ...rows].join("\n") },

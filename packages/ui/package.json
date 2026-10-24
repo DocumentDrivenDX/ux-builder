@@ -33,6 +33,8 @@
     "./eslint": "./lint/eslint.mjs",
     "./blueprint": "./blueprint/index.mjs",
     "./blueprint/modalities": "./blueprint/modalities.mjs",
+    "./blueprint/prototype": "./blueprint/prototype.mjs",
+    "./blueprint/propose": "./blueprint/propose.mjs",
     "./catalogue.json": "./catalogue.json",
     "./AGENTS.md": "./AGENTS.md",
     "./skill/*": "./skill/*",

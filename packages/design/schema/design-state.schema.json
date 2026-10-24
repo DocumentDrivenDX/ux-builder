@@ -1,0 +1,533 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://documentdrivendx.github.io/ux-builder/schema/design-state.schema.json",
+  "title": "Design state (CONTRACT-008)",
+  "description": "Where the guided design loop stands: .ux-builder/design-state.json, committed with the app (ADR-036 rule 6).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "activity",
+    "mode",
+    "startedFrom",
+    "checkpoints",
+    "questions",
+    "assumptions",
+    "alternatives",
+    "issues",
+    "experiments",
+    "faked",
+    "next"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "activity": {
+      "enum": [
+        "baseline",
+        "define",
+        "explore",
+        "experience",
+        "validate"
+      ]
+    },
+    "mode": {
+      "enum": [
+        "full",
+        "change"
+      ]
+    },
+    "modeReason": {
+      "type": "string"
+    },
+    "startedFrom": {
+      "enum": [
+        "new",
+        "existing"
+      ]
+    },
+    "checkpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "at"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "core-1",
+              "core-2",
+              "core-3",
+              "significant-change",
+              "experiment",
+              "release"
+            ]
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "declined",
+              "skipped"
+            ],
+            "description": "passed: the person said yes; declined: they said no or not yet (it never counts as passed); skipped: not asked, with a reason"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^Q-[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "open",
+              "answered"
+            ]
+          },
+          "answer": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "status",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^A-[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "assumed",
+              "hypothesis",
+              "confirmed",
+              "refuted",
+              "current-state"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "section": {
+            "enum": [
+              "product",
+              "users",
+              "outcome",
+              "jobs",
+              "principles",
+              "constraints"
+            ],
+            "description": "The brief section the point belongs to (FEAT-018 GDL-14)"
+          },
+          "confirm": {
+            "type": "string",
+            "description": "For a hypothesis: what would confirm it (an interview question, a test task, a metric)"
+          },
+          "dimension": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The rubric dimension whose prediction rests on it (FEAT-018 GDL-60): the evaluation report confirms or refutes it from what people did"
+          }
+        }
+      }
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "file",
+          "status"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "file": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "candidate",
+              "chosen",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "judgments": {
+            "type": "array",
+            "description": "The agent's preliminary design judgments of this alternative (FEAT-018 GDL-29); not measured results",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "criterion",
+                "value",
+                "reasoning"
+              ],
+              "properties": {
+                "criterion": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasoning": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "principles": {
+      "type": "array",
+      "description": "Experience principles (FEAT-018 GDL-16): each a rubric note, or a project rule ux-builder-blueprint check applies when it has a rule",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^PR-[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "assumed",
+              "hypothesis",
+              "refuted"
+            ]
+          },
+          "rule": {
+            "$ref": "#/$defs/principleRule"
+          }
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding",
+          "status"
+        ],
+        "properties": {
+          "finding": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "fixed",
+              "wont-fix"
+            ]
+          }
+        }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "description": "What the design team noticed trying a prototype (FEAT-018 GDL-43): never user evidence",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^O-[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "const": "design-team"
+          },
+          "alternative": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "consents": {
+      "type": "array",
+      "description": "Consent confirmed per test session before its transcript was analysed (ADR-039 decision 3; FEAT-018 GDL-56)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "session",
+          "confirmed",
+          "date"
+        ],
+        "properties": {
+          "session": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmed": {
+            "const": true
+          },
+          "by": {
+            "type": "string",
+            "minLength": 1
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "evidence": {
+            "type": "string",
+            "pattern": "^EV-[1-9][0-9]*$"
+          }
+        }
+      }
+    },
+    "experiments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^EXP-[1-9][0-9]*$"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "ended"
+            ]
+          },
+          "decision": {
+            "type": "string",
+            "pattern": "^UXD-[1-9][0-9]*$",
+            "description": "The decision record the experiment tests"
+          },
+          "variant": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The blueprint alternative shown to some people"
+          },
+          "result": {
+            "enum": [
+              "supported",
+              "not-supported"
+            ],
+            "description": "Set when it ends: the hypothesis against the result (FEAT-018 GDL-68)"
+          }
+        }
+      }
+    },
+    "diagnoses": {
+      "type": "array",
+      "description": "From an insight: the observation, at least two explanations, the hypothesis and the alternative that tests it (FEAT-018 GDL-66, GDL-67)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "insight",
+          "observation",
+          "explanations",
+          "hypothesis",
+          "alternative"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^D-[1-9][0-9]*$"
+          },
+          "insight": {
+            "type": "string",
+            "pattern": "^INS-\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "observation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "explanations": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "hypothesis": {
+            "type": "string",
+            "minLength": 1
+          },
+          "alternative": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "faked": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "what",
+          "where"
+        ],
+        "properties": {
+          "what": {
+            "type": "string"
+          },
+          "where": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "prototype": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "branch"
+      ],
+      "description": "The validated prototype (FEAT-018 GDL-44): built in the app's source on a branch, a prototype until checkpoint core-3",
+      "properties": {
+        "branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alternative": {
+          "type": "string"
+        }
+      }
+    },
+    "next": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "principleRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "no-step-before",
+            "max-required-inputs",
+            "max-steps",
+            "no-modal-in"
+          ]
+        },
+        "screens": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "no-step-before: screen IDs no journey may start on"
+        },
+        "patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "no-step-before: patterns no journey may start on"
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "journeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "no-modal-in: the journeys (all when absent)"
+        }
+      }
+    }
+  }
+}

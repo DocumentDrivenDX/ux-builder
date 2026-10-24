@@ -19,7 +19,8 @@
       "ux-builder/no-hard-coded-values",
       "ux-builder/no-foreign-ui",
       "ux-builder/no-inline-svg",
-      "ux-builder/ai-neutral-voice"
+      "ux-builder/ai-neutral-voice",
+      "ux-builder/no-prototype-import"
     ],
     "stylelint": "@ux-builder/ui/stylelint",
     "eslint": "@ux-builder/ui/eslint"
@@ -894,6 +895,23 @@
       "import": "import { Icon } from \"@ux-builder/ui\";"
     },
     {
+      "name": "JourneyProvider",
+      "type": "component",
+      "purpose": "Hands the app's own sink each journey event (journey-start, step, complete, abandon, error-shown, empty-result, no-results-search) for its own analytics: wrap the app, or the part a journey runs in. Without a sink it does nothing, and the SDK sends nothing anywhere.",
+      "props": [
+        {
+          "name": "sink",
+          "default": null
+        },
+        {
+          "name": "children",
+          "default": null
+        }
+      ],
+      "source": "src/journey/Journey.jsx",
+      "import": "import { JourneyProvider } from \"@ux-builder/ui\";"
+    },
+    {
       "name": "Logo",
       "type": "component",
       "purpose": "The active theme's logo, or its mark (variant=\"mark\"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour.",
@@ -1635,6 +1653,44 @@
       ],
       "source": "src/widgets/Tooltip.jsx",
       "import": "import { Tooltip } from \"@ux-builder/ui\";"
+    },
+    {
+      "name": "useJourneySignal",
+      "type": "hook",
+      "purpose": "For the SDK's own panels: report `type` for the current step while `when` holds. Outside a provider with a sink it does nothing.",
+      "props": [
+        {
+          "name": "type",
+          "default": null
+        },
+        {
+          "name": "when",
+          "default": "true"
+        }
+      ],
+      "source": "src/journey/Journey.jsx",
+      "import": "import { useJourneySignal } from \"@ux-builder/ui\";"
+    },
+    {
+      "name": "useJourneyStep",
+      "type": "hook",
+      "purpose": "Mark the screen a component renders as step `step` of `journeyId` (the blueprint's IDs). The screen is the given one, else the page's data-piq-screen.",
+      "props": [
+        {
+          "name": "journeyId",
+          "default": null
+        },
+        {
+          "name": "step",
+          "default": null
+        },
+        {
+          "name": "{ screen }",
+          "default": "{}"
+        }
+      ],
+      "source": "src/journey/Journey.jsx",
+      "import": "import { useJourneyStep } from \"@ux-builder/ui\";"
     },
     {
       "name": "useTheme",
@@ -23585,6 +23641,123 @@
         ]
       },
       {
+        "id": "journey.task-exists",
+        "title": "A journey realizes a task the blueprint has",
+        "statement": "A journey that names the task it realizes names one of the blueprint's tasks.",
+        "rationale": "A journey tied to a task that does not exist cannot be compared with other ways of doing that task.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "journey.task-exists"
+          }
+        ],
+        "severity": "error",
+        "sources": [
+          {
+            "title": "ux-builder FEAT-018: guided design loop (GDL-22, GDL-23)",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "simplicity.delta-decided",
+        "title": "A journey grows only by decision",
+        "statement": "When a change adds a screen, a step, a required input or a decision to a journey, a recorded decision names the addition and answers why it is needed and what simpler option was considered.",
+        "rationale": "Each added step or input raises the interaction cost of the task; making the cost visible and deliberate keeps an app from growing more complicated one reasonable change at a time.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "simplicity.delta-decided"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: Interaction Cost",
+            "url": "https://www.nngroup.com/articles/interaction-cost-definition/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-018: guided design loop (GDL-11, GDL-12)",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "task.realized",
+        "title": "Every task has a journey",
+        "statement": "Each task in the task model is realized by at least one journey, so the flow shows how the user accomplishes it.",
+        "rationale": "A task with no journey is a goal the design has not yet answered.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "task.realized"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder FEAT-018: guided design loop (GDL-22, GDL-23)",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "screen.purpose",
+        "title": "Every screen says what it is for",
+        "statement": "Once a blueprint models tasks or screen content, each screen states its purpose in a sentence, so its content can be ordered by what serves that purpose.",
+        "rationale": "A screen without a stated purpose collects whatever is added to it; its hierarchy then reflects history rather than the user's task.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "screen.purpose"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder FEAT-018: guided design loop (GDL-32 to GDL-34)",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "consistency.same-kind",
+        "title": "One kind of interaction, one way",
+        "statement": "Where tasks need the same kind of interaction, such as choosing a location, they reach it through screens with the same pattern, so people learn it once.",
+        "rationale": "Different interfaces for the same interaction make people relearn it and raise errors; consistency lets one learned way serve every task.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "consistency.same-kind"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (4, Consistency and standards)",
+            "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "ux-builder FEAT-018: guided design loop (GDL-32 to GDL-34)",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
         "id": "theme.applied",
         "title": "The theme is applied",
         "statement": "The page loads the declared theme's CSS and the theme's tokens resolve on the themed element.",
@@ -24215,6 +24388,178 @@
         ]
       }
     ],
+    "rubric": [
+      {
+        "id": "task-effectiveness",
+        "name": "Task effectiveness",
+        "question": "Can users accomplish their goals?",
+        "measures": [
+          "every journey walkable over the flow (journey.walkable)",
+          "every task realized by a journey (task.realized)",
+          "observed task completion"
+        ],
+        "baseline": true,
+        "sources": [
+          {
+            "title": "ISO 9241-11:2018 Ergonomics of human-system interaction, Part 11: Usability: definitions and concepts",
+            "url": "https://www.iso.org/standard/63500.html",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "task-efficiency",
+        "name": "Task efficiency",
+        "question": "How much effort does a task take?",
+        "measures": [
+          "steps against the shortest path",
+          "required inputs",
+          "observed time on task"
+        ],
+        "baseline": false,
+        "sources": [
+          {
+            "title": "ISO 9241-11:2018 Ergonomics of human-system interaction, Part 11: Usability: definitions and concepts",
+            "url": "https://www.iso.org/standard/63500.html",
+            "licence": "own",
+            "wording": "paraphrased"
+          },
+          {
+            "title": "Nielsen Norman Group: Interaction Cost",
+            "url": "https://www.nngroup.com/articles/interaction-cost-definition/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "cognitive-load",
+        "name": "Cognitive load",
+        "question": "How much must users understand or remember?",
+        "measures": [
+          "decisions per step",
+          "content items per screen",
+          "required inputs"
+        ],
+        "baseline": false,
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: Minimize Cognitive Load to Maximize Usability",
+            "url": "https://www.nngroup.com/articles/minimize-cognitive-load/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "discoverability",
+        "name": "Discoverability",
+        "question": "Can users find the functionality they need?",
+        "measures": [
+          "navigation hops between destinations",
+          "observed share who found the feature"
+        ],
+        "baseline": false,
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: Usability 101: Introduction to Usability",
+            "url": "https://www.nngroup.com/articles/usability-101-introduction-to-usability/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "learnability",
+        "name": "Learnability",
+        "question": "Can first-time users understand the interface?",
+        "measures": [
+          "agent judgment",
+          "observed completion without assistance"
+        ],
+        "baseline": false,
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: Usability 101: Introduction to Usability",
+            "url": "https://www.nngroup.com/articles/usability-101-introduction-to-usability/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "consistency",
+        "name": "Consistency",
+        "question": "Are interaction patterns predictable?",
+        "measures": [
+          "consistency.same-kind findings",
+          "patterns reused against introduced"
+        ],
+        "baseline": false,
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (4, Consistency and standards)",
+            "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "accessibility",
+        "name": "Accessibility",
+        "question": "Can users with different abilities complete their tasks?",
+        "measures": [
+          "audit errors (WCAG 2.2 and the interaction rules)"
+        ],
+        "baseline": true,
+        "sources": [
+          {
+            "title": "W3C Web Content Accessibility Guidelines (WCAG) 2.2",
+            "url": "https://www.w3.org/TR/WCAG22/",
+            "licence": "W3C",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "error-recovery",
+        "name": "Error recovery",
+        "question": "Can users easily recover from mistakes?",
+        "measures": [
+          "screens that declare an error state",
+          "tasks with exceptions"
+        ],
+        "baseline": false,
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (9, Help users recognize, diagnose, and recover from errors)",
+            "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "user-confidence",
+        "name": "User confidence",
+        "question": "Do users understand what the system is doing?",
+        "measures": [
+          "agent judgment",
+          "observed hesitation and assists"
+        ],
+        "baseline": false,
+        "sources": [
+          {
+            "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (1, Visibility of system status)",
+            "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+            "licence": "nngroup-terms",
+            "wording": "paraphrased"
+          }
+        ]
+      }
+    ],
     "blueprintSchema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://ux-builder.dev/schema/blueprint.schema.json",
@@ -24422,9 +24767,51 @@
                   "type": "string",
                   "pattern": "^US-[0-9]+$"
                 }
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1,
+                "description": "What the screen is for, in a sentence (FEAT-018 GDL-32)"
+              },
+              "content": {
+                "type": "array",
+                "description": "The information on the screen, highest priority first (FEAT-018 GDL-32)",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "label"
+                  ],
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "kind": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "For example data, action, help, status"
+                    }
+                  }
+                }
+              },
+              "interactionKinds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "The kinds of interaction the screen handles, such as choose-location (FEAT-018 GDL-34)"
               }
             }
           }
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/task"
+          },
+          "description": "The task model (FEAT-018 GDL-22)"
         },
         "journeys": {
           "type": "array",
@@ -24663,6 +25050,37 @@
                 "errorProne",
                 "risky"
               ]
+            },
+            "inputs": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "What the step asks of the user (FEAT-018 GDL-09): information the user must give, and information the system could infer or default",
+              "properties": {
+                "required": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "inferable": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "decision": {
+              "type": "string",
+              "minLength": 1,
+              "description": "A choice the user must make at this step (FEAT-018 GDL-09)"
+            },
+            "system": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Work the app does for the user at this step (FEAT-018 GDL-09)"
             }
           }
         },
@@ -24738,6 +25156,132 @@
                   }
                 }
               }
+            },
+            "task": {
+              "type": "string",
+              "pattern": "^T-[1-9][0-9]*$",
+              "description": "The task this journey realizes (FEAT-018 GDL-23)"
+            }
+          }
+        },
+        "task": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "goal",
+            "success"
+          ],
+          "description": "Something a user must accomplish (FEAT-018 GDL-22, CONTRACT-008 Amendment to CONTRACT-005)",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^T-[1-9][0-9]*$"
+            },
+            "goal": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The outcome the user wants"
+            },
+            "jobs": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^J-[1-9][0-9]*$"
+              },
+              "description": "The jobs it serves (docs/ux/jobs.md)"
+            },
+            "trigger": {
+              "type": "string",
+              "minLength": 1,
+              "description": "What starts it"
+            },
+            "inputs": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "required": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "optional": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "description": "Information the user must give, and information they may give or the system can infer or defer"
+            },
+            "systemActions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Work the system does automatically"
+            },
+            "userActions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Interactions the user must perform"
+            },
+            "success": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^US-[0-9]+-AC[0-9]+$"
+              },
+              "description": "The observable completion condition, as acceptance criteria"
+            },
+            "exceptions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Error and recovery scenarios"
+            },
+            "subtasks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "goal"
+                ],
+                "properties": {
+                  "goal": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "ways": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            },
+            "interactionKinds": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Kinds of interaction it needs, such as choose-location (FEAT-018 GDL-34)"
             }
           }
         }

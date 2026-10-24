@@ -1,0 +1,177 @@
+{
+  "$schema": "./schema/rubric.schema.json",
+  "version": 1,
+  "description": "The UX quality rubric (FEAT-018 GDL-37 to GDL-39, SD-006): nine dimensions, never averaged; task effectiveness and accessibility are baselines. Statements are ux-builder's own words; sources are paraphrased (ADR-025 rule 7).",
+  "dimensions": [
+    {
+      "id": "task-effectiveness",
+      "name": "Task effectiveness",
+      "question": "Can users accomplish their goals?",
+      "measures": [
+        "every journey walkable over the flow (journey.walkable)",
+        "every task realized by a journey (task.realized)",
+        "observed task completion"
+      ],
+      "baseline": true,
+      "sources": [
+        {
+          "title": "ISO 9241-11:2018 Ergonomics of human-system interaction, Part 11: Usability: definitions and concepts",
+          "url": "https://www.iso.org/standard/63500.html",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "task-efficiency",
+      "name": "Task efficiency",
+      "question": "How much effort does a task take?",
+      "measures": [
+        "steps against the shortest path",
+        "required inputs",
+        "observed time on task"
+      ],
+      "baseline": false,
+      "sources": [
+        {
+          "title": "ISO 9241-11:2018 Ergonomics of human-system interaction, Part 11: Usability: definitions and concepts",
+          "url": "https://www.iso.org/standard/63500.html",
+          "licence": "own",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "Nielsen Norman Group: Interaction Cost",
+          "url": "https://www.nngroup.com/articles/interaction-cost-definition/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "cognitive-load",
+      "name": "Cognitive load",
+      "question": "How much must users understand or remember?",
+      "measures": [
+        "decisions per step",
+        "content items per screen",
+        "required inputs"
+      ],
+      "baseline": false,
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: Minimize Cognitive Load to Maximize Usability",
+          "url": "https://www.nngroup.com/articles/minimize-cognitive-load/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "discoverability",
+      "name": "Discoverability",
+      "question": "Can users find the functionality they need?",
+      "measures": [
+        "navigation hops between destinations",
+        "observed share who found the feature"
+      ],
+      "baseline": false,
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: Usability 101: Introduction to Usability",
+          "url": "https://www.nngroup.com/articles/usability-101-introduction-to-usability/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "learnability",
+      "name": "Learnability",
+      "question": "Can first-time users understand the interface?",
+      "measures": [
+        "agent judgment",
+        "observed completion without assistance"
+      ],
+      "baseline": false,
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: Usability 101: Introduction to Usability",
+          "url": "https://www.nngroup.com/articles/usability-101-introduction-to-usability/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "consistency",
+      "name": "Consistency",
+      "question": "Are interaction patterns predictable?",
+      "measures": [
+        "consistency.same-kind findings",
+        "patterns reused against introduced"
+      ],
+      "baseline": false,
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (4, Consistency and standards)",
+          "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "accessibility",
+      "name": "Accessibility",
+      "question": "Can users with different abilities complete their tasks?",
+      "measures": [
+        "audit errors (WCAG 2.2 and the interaction rules)"
+      ],
+      "baseline": true,
+      "sources": [
+        {
+          "title": "W3C Web Content Accessibility Guidelines (WCAG) 2.2",
+          "url": "https://www.w3.org/TR/WCAG22/",
+          "licence": "W3C",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "error-recovery",
+      "name": "Error recovery",
+      "question": "Can users easily recover from mistakes?",
+      "measures": [
+        "screens that declare an error state",
+        "tasks with exceptions"
+      ],
+      "baseline": false,
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (9, Help users recognize, diagnose, and recover from errors)",
+          "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "user-confidence",
+      "name": "User confidence",
+      "question": "Do users understand what the system is doing?",
+      "measures": [
+        "agent judgment",
+        "observed hesitation and assists"
+      ],
+      "baseline": false,
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (1, Visibility of system status)",
+          "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        }
+      ]
+    }
+  ]
+}

@@ -56,8 +56,28 @@
             "description": "The usability heuristic the finding is about, when it breaks no catalogue rule (FEAT-015 RPT-01; CONTRACT-006 Journey-first report): its name and its source (a title or URL). A finding names a rule or a heuristic.",
             "type": "object",
             "additionalProperties": false,
-            "required": ["name", "source"],
-            "properties": { "name": { "type": "string", "minLength": 1 }, "source": { "type": "string", "minLength": 1 } }
+            "required": [
+              "name",
+              "source"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "source": {
+            "description": "Who found it (FEAT-018 GDL-55, GDL-58): agent (the assessment), human (a person testing with users) or design-team (notes from people trying a prototype; never counted as user evidence). Absent means agent.",
+            "enum": [
+              "agent",
+              "human",
+              "design-team"
+            ]
           },
           "severity": {
             "description": "Severity on Nielsen's 0 to 4 scale (0 not a problem, 4 a catastrophe). When absent the report derives it from priority: P0 4, P1 3, P2 2, P3 1.",
