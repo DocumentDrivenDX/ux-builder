@@ -1,5 +1,24 @@
 # @ux-builder/ui
 
+## 0.11.0
+
+### Minor Changes
+
+- b621adc: `ux-builder-blueprint alternative new|choose` makes alternative blueprints (`app.blueprint.<name>.json`) and records the choice and its reason in the design state; `score` gives each journey's predicted effort; `compare` writes one page comparing alternatives for the same tasks, marking the best per task and dimension, with the agent's judgments labelled preliminary. MCP gains `score_blueprint` and `compare_blueprints`.
+- 041e1b1: Screens may declare `purpose`, `content` (the information on them, highest priority first) and `interactionKinds`. New warnings: `screen.purpose` (once a blueprint models tasks or content) and `consistency.same-kind` (two tasks handle the same kind of interaction with different patterns). Wireframes show each screen's content in its order, and `propose`'s wireframe drafts list its purpose and content.
+- 73599b0: `ux-builder-blueprint check --diff <base>` reports the complexity a change adds per journey (screens, steps, required inputs and decisions added and removed) and warns, with the new rule `simplicity.delta-decided`, when a journey grows with no recorded decision naming the addition. Journey steps may declare `inputs` (`required`, `inferable`), `decision` and `system`. `complexityDelta`, `deltaFindings`, `journeyLoad` and `stepKey` are exported from `@ux-builder/ui/blueprint`.
+- 11e98a6: Blueprints may hold a task model, `tasks[]` (goal, jobs, trigger, inputs, system and user actions, success criteria, exceptions, subtasks, interaction kinds), and journeys name the task they realize. New checks: `journey.task-exists` (error) and `task.realized` (warning). `ux-builder-blueprint simplify` (and MCP `simplify_blueprint`) proposes inputs to infer, decisions to default, steps to combine and hops to remove, changing nothing.
+- 0e3e6e7: `@ux-builder/ui/blueprint/prototype` and `@ux-builder/ui/blueprint/propose` are exported for the guided design loop. MCP gains `design_impact` and `design_trace` when the app has `@ux-builder/design`. The site's rules table shows every rule on one page.
+- 75582cf: `ux-builder-blueprint check` applies an app's experience principles from `.ux-builder/principles.json` as project rules (`no-step-before`, `max-required-inputs`, `max-steps`, `no-modal-in`); each finding is `project.<PR-id>` and names the principle. `principleFindings` is exported from `@ux-builder/ui/blueprint`.
+- b719e23: `ux-builder-blueprint prototype --explore` writes a disposable, clickable prototype under `prototype/<name>/` (each screen, state and size class, with a prototype banner, a state and size switcher and every action linked), optionally once per `--design-system`; `--archive <name>` puts one away. The new lint rule `ux-builder/no-prototype-import` (on in the recommended config and in new apps) keeps app code from importing prototypes. Wireframes can render in any theme.
+- de6f614: The catalogue carries the UX quality rubric (`interaction.rubric`): nine dimensions, each with its question, measures and sources; task effectiveness and accessibility are baselines (FEAT-018).
+- 0cda9d7: Journey events (FEAT-018, ADR-038): `JourneyProvider` hands the app's own `sink` the moments a journey passes through — `journey-start`, `step`, `complete`, `abandon`, `error-shown`, `empty-result` and `no-results-search`, each with journey, screen and step IDs and a timestamp, never user content. `useJourneyStep(journeyId, step)` marks a step; `StatePanel` reports its error, empty and no-results states. No sink, no events; the SDK sends nothing anywhere.
+
+### Patch Changes
+
+- db0c69e: From trying the guided design loop end to end: `ux-builder-blueprint check` reads app.blueprint.json when no file is given, like the other commands; an exploratory prototype's own buttons and navigation lead where the blueprint says, not only the prototype bar's links; `ux-builder-trace decide` accepts `--assumption` as well as `--assumptions`.
+- 1e4ac6b: An exploratory prototype page says when the window shows another size class's layout than its own, and offers to open the page at its size class's width.
+
 ## 0.10.0
 
 ### Minor Changes

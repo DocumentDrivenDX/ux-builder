@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/audit",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "license": "MIT OR Apache-2.0",
   "description": "Audit a running app's use of the AI-UI SDK theme: switches it through every theme and appearance in Chromium and reports colours, fonts and radii that are not the theme's, restyled widgets, hand-drawn icons and loaders, other UI libraries, the favicon and logo, and contrast (FEAT-004 SDK-18); and a HELIX-aware UX assessment (FEAT-009): page-level inspection of an agent's browser state, journeys traced to HELIX documents and tests, and a recorded baseline.",
   "type": "module",
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@ux-builder/tokens": "^1.6.0",
-    "@ux-builder/ui": "^0.10.0",
+    "@ux-builder/ui": "^0.11.0",
     "ajv": "^8.20.0",
     "axe-core": "^4.14.0",
     "playwright": "~1.63.0",

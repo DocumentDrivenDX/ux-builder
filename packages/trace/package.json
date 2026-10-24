@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/trace",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT OR Apache-2.0",
   "description": "The episode trace (FEAT-016, CONTRACT-007): what ux-builder's tools write to an app while it is built or changed (episodes, events, masked transcripts), and the export bundle an owner shares by choice, with the ux-builder-trace command. It makes no network request.",
   "type": "module",

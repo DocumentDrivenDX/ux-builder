@@ -1,5 +1,33 @@
 # @ux-builder/create-app
 
+## 0.8.0
+
+### Minor Changes
+
+- 6774ee6: New apps get the guided design loop: `@ux-builder/design` as a dev dependency, the `ux-builder-design` skill and an empty design state, with `CLAUDE.md`, `AGENTS.md` and the Home screen pointing to `/ux-builder-design`. `--mcp` also writes `.mcp.json` for the ux-builder MCP server; without it none is written.
+- b719e23: `ux-builder-blueprint prototype --explore` writes a disposable, clickable prototype under `prototype/<name>/` (each screen, state and size class, with a prototype banner, a state and size switcher and every action linked), optionally once per `--design-system`; `--archive <name>` puts one away. The new lint rule `ux-builder/no-prototype-import` (on in the recommended config and in new apps) keeps app code from importing prototypes. Wireframes can render in any theme.
+
+### Patch Changes
+
+- Updated dependencies [d808143]
+- Updated dependencies [1c2759b]
+- Updated dependencies [b621adc]
+- Updated dependencies [041e1b1]
+- Updated dependencies [73599b0]
+- Updated dependencies [11e98a6]
+- Updated dependencies [eb4111f]
+- Updated dependencies [0e3e6e7]
+- Updated dependencies [db0c69e]
+- Updated dependencies [75582cf]
+- Updated dependencies [b719e23]
+- Updated dependencies [de6f614]
+- Updated dependencies [0cda9d7]
+- Updated dependencies [1e4ac6b]
+  - @ux-builder/audit@0.5.0
+  - @ux-builder/ui@0.11.0
+  - @ux-builder/trace@0.2.0
+  - @ux-builder/design@0.1.1
+
 ## 0.7.1
 
 ### Patch Changes

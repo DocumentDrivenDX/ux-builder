@@ -1,5 +1,27 @@
 # @ux-builder/audit
 
+## 0.5.0
+
+### Minor Changes
+
+- d808143: Each finding in the assessment report says where it came from: an agent recommendation, a human observation (verified), or a design-team note (not user evidence). `assess validate-report` refuses a finding labelled `source: human` that is not a real-user finding, and a design-team note typed real-user (FEAT-018 GDL-58).
+- 1c2759b: The assessment gains a heuristic inspection pass (`assess heuristics`, `heuristics.json`: every walked screen against Nielsen's ten heuristics, error prevention and recovery, information hierarchy and navigation complexity; `validate-report` fails a missing entry), an information-hierarchy check (`assess hierarchy`, also on exploratory prototype pages), and agent-measured task metrics (`assess metrics`, `metrics.json`, shown in the report with the statement that agents navigate differently from people). Walkthrough steps gain `screen`, `at`, `failed`, `notFound` and `error`; findings gain `source: agent | human | design-team` (FEAT-018).
+
+### Patch Changes
+
+- Updated dependencies [b621adc]
+- Updated dependencies [041e1b1]
+- Updated dependencies [73599b0]
+- Updated dependencies [11e98a6]
+- Updated dependencies [0e3e6e7]
+- Updated dependencies [db0c69e]
+- Updated dependencies [75582cf]
+- Updated dependencies [b719e23]
+- Updated dependencies [de6f614]
+- Updated dependencies [0cda9d7]
+- Updated dependencies [1e4ac6b]
+  - @ux-builder/ui@0.11.0
+
 ## 0.4.1
 
 ### Patch Changes

@@ -1,5 +1,32 @@
 # @ux-builder/mcp
 
+## 0.7.0
+
+### Minor Changes
+
+- b621adc: `ux-builder-blueprint alternative new|choose` makes alternative blueprints (`app.blueprint.<name>.json`) and records the choice and its reason in the design state; `score` gives each journey's predicted effort; `compare` writes one page comparing alternatives for the same tasks, marking the best per task and dimension, with the agent's judgments labelled preliminary. MCP gains `score_blueprint` and `compare_blueprints`.
+- 11e98a6: Blueprints may hold a task model, `tasks[]` (goal, jobs, trigger, inputs, system and user actions, success criteria, exceptions, subtasks, interaction kinds), and journeys name the task they realize. New checks: `journey.task-exists` (error) and `task.realized` (warning). `ux-builder-blueprint simplify` (and MCP `simplify_blueprint`) proposes inputs to infer, decisions to default, steps to combine and hops to remove, changing nothing.
+- eb4111f: Decisions can carry the five answers an addition needs (FEAT-018): `goal`, `without`, `simplest`, `assumptions` and `validation`. `ux-builder-trace decide --kind addition` and MCP `record_decision` with `kind: "addition"` refuse an addition with one missing. Checkpoint answers are recorded as decisions with `decisionKind: "checkpoint"`.
+- 0e3e6e7: `@ux-builder/ui/blueprint/prototype` and `@ux-builder/ui/blueprint/propose` are exported for the guided design loop. MCP gains `design_impact` and `design_trace` when the app has `@ux-builder/design`. The site's rules table shows every rule on one page.
+- 56f304b: When the app has `@ux-builder/design`, the server also offers `get_design_state`, `update_design_state` and `design_status`, each returning what the matching `ux-builder-design` command prints with `--json`. They are optional: the design package's CLI does the same.
+
+### Patch Changes
+
+- Updated dependencies [b621adc]
+- Updated dependencies [041e1b1]
+- Updated dependencies [73599b0]
+- Updated dependencies [11e98a6]
+- Updated dependencies [eb4111f]
+- Updated dependencies [0e3e6e7]
+- Updated dependencies [db0c69e]
+- Updated dependencies [75582cf]
+- Updated dependencies [b719e23]
+- Updated dependencies [de6f614]
+- Updated dependencies [0cda9d7]
+- Updated dependencies [1e4ac6b]
+  - @ux-builder/ui@0.11.0
+  - @ux-builder/trace@0.2.0
+
 ## 0.6.1
 
 ### Patch Changes
