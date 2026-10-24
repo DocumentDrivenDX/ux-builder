@@ -361,6 +361,74 @@
         "date",
         "history"
       ]
+    },
+    "rubric": {
+      "type": "object",
+      "required": [
+        "alternative",
+        "file",
+        "dimensions",
+        "recommendable"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "overall"
+            ]
+          },
+          {
+            "required": [
+              "average"
+            ]
+          },
+          {
+            "required": [
+              "total"
+            ]
+          },
+          {
+            "required": [
+              "score"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "baseline",
+              "predicted",
+              "observed"
+            ],
+            "properties": {
+              "predicted": {
+                "type": "object",
+                "required": [
+                  "value",
+                  "basis"
+                ],
+                "properties": {
+                  "basis": {
+                    "enum": [
+                      "computed",
+                      "judgment",
+                      "to validate"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -546,7 +546,9 @@ GDL-30. `blueprint compare` writes one HTML page for two or more
 alternatives: their flows and wireframes side by side, the scores with
 the best value per dimension marked, the agent's judgments, the rubric's
 predicted column (GDL-38) and each alternative's check findings. It is
-deterministic.
+deterministic. *(Built 2026-10-23: the rubric's predicted column is
+`ux-builder-design rubric --alternative <name>`, since the page is
+rendered by `@ux-builder/ui` without the design package.)*
 
 GDL-31. Each major UX decision is recorded as an **interaction decision
 record**: the question, the alternatives, the recommendation, the

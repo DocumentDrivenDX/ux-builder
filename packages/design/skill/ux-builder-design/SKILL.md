@@ -177,7 +177,12 @@ first, say), draft at least two alternatives and recommend one:
    They are preliminary judgments, not measured results; say so.
 3. `ux-builder-blueprint compare app.blueprint.<a>.json app.blueprint.<b>.json …`
    writes `blueprint-compare/compare.html`: open it for the person.
-4. Ask `core-2`. On their choice, run
+4. Run `ux-builder-design rubric --alternative <name>` for each: every
+   dimension's predicted value and its basis. Never average them, and never
+   recommend an alternative that fails a baseline (task effectiveness,
+   accessibility). Fill a dimension marked "to validate" with a judgment
+   only if you can give your reasoning; otherwise leave it for testing.
+5. Ask `core-2`. On their choice, run
    `ux-builder-blueprint alternative choose <name> --reason "<why>"` and
    record the decision (`ux-builder-design decision add`).
 

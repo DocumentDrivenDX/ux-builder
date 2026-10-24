@@ -98,8 +98,21 @@ export function checkRules({ rules, recipes, notices = "" }, k) {
   return problems;
 }
 
+/* The UX quality rubric (FEAT-018 GDL-37): its schema (nine dimensions,
+   each paraphrased with a cited source) and its two baselines. */
+export function checkRubric(rubric) {
+  const problems = [];
+  const v = new Ajv2020({ strict: true, allErrors: true }).compile(read("guidelines/schema/rubric.schema.json"));
+  if (!v(rubric)) for (const e of v.errors) problems.push(`rubric.json${e.instancePath}: ${e.message}`);
+  const ids = (rubric.dimensions ?? []).map((d) => d.id);
+  if (new Set(ids).size !== ids.length) problems.push("rubric.json: a dimension ID is used twice");
+  const baselines = (rubric.dimensions ?? []).filter((d) => d.baseline).map((d) => d.id).sort();
+  if (baselines.join() !== "accessibility,task-effectiveness") problems.push(`rubric.json: the baselines are task-effectiveness and accessibility, not ${baselines.join(", ") || "none"}`);
+  return problems;
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const problems = checkRules({ rules: read("guidelines/rules.json"), recipes: read("guidelines/recipes.json"), notices: readFileSync(join(ROOT, NOTICES), "utf8") }, await known());
+  const problems = [...checkRules({ rules: read("guidelines/rules.json"), recipes: read("guidelines/recipes.json"), notices: readFileSync(join(ROOT, NOTICES), "utf8") }, await known()), ...checkRubric(read("guidelines/rubric.json"))];
   if (problems.length) { for (const p of problems) console.error(`✗ ${p}`); process.exit(1); }
-  console.log(`interaction rules and recipes: ok (${read("guidelines/rules.json").rules.length} rules, ${read("guidelines/recipes.json").recipes.length} recipes)`);
+  console.log(`interaction rules, recipes and rubric: ok (${read("guidelines/rules.json").rules.length} rules, ${read("guidelines/recipes.json").recipes.length} recipes, ${read("guidelines/rubric.json").dimensions.length} rubric dimensions)`);
 }

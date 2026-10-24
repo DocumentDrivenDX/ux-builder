@@ -43,6 +43,8 @@ const COMMANDS = [
   ["validate", ["validate"], (app) => design.validate(app)],
   ["evidenceAdd", ["evidence", "add", "package.json", "--kind", "survey", "--date", "2026-10-23", "--source", "Survey tool export"], (app) => design.evidenceAdd(app, { file: "package.json", kind: "survey", date: "2026-10-23", source: "Survey tool export" })],
   ["evidenceList", ["evidence", "list"], (app) => design.evidenceList(app)],
+  ["rubric", ["rubric"], (app) => design.rubric(app)],
+  ["decisionAdd", ["decision", "add", "--question", "First?", "--option", "Map", "--option", "Search", "--choice", "Map", "--why", "Fewer steps"], (app) => design.decisionAdd(app, { question: "First?", options: ["Map", "Search"], choice: "Map", why: "Fewer steps" })],
 ];
 
 describe("US-116-AC1: every command's --json is its function's result, and fits its schema", () => {

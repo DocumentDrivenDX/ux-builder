@@ -23,6 +23,7 @@
     "brief.mjs",
     "research.mjs",
     "decisions.mjs",
+    "rubric.mjs",
     "documents.mjs",
     "cli.mjs",
     "artifacts",
