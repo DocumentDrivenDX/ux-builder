@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { checkBlueprint, skeleton } from "@ux-builder/ui/blueprint";
+import { CURRENT, layoutOf } from "@ux-builder/ui/blueprint/paths";
 import { scaffold, sdkVersions, themes } from "../index.mjs";
 import { bundle } from "./fixtures/helix-release.mjs";
 
@@ -25,13 +26,28 @@ const WEB = ["responsive-web"];
 describe("scaffold", () => {
   test("writes a React + Vite app on the SDK, on the chosen theme", () => {
     const r = scaffold(join(tmp, "acme"), { theme: "databricks", modalities: WEB });
-    assert.deepEqual(r.files, [".claude/settings.json", ".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "app.blueprint.json", "e2e/starter.spec.js", "eslint.config.js", "index.html", "package.json", "playwright.config.js", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/Home.jsx", "src/ThemeSwitch.jsx", "src/main.jsx", "vite.config.js"]);
+    assert.deepEqual(r.files, [".claude/settings.json", ".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "docs/ux-builder/blueprint/app.blueprint.json", "e2e/starter.spec.js", "eslint.config.js", "index.html", "package.json", "playwright.config.js", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/Home.jsx", "src/ThemeSwitch.jsx", "src/main.jsx", "vite.config.js"]);
     const pkg = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
     assert.equal(pkg.name, "acme");
     assert.match(readFileSync(join(r.dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="databricks" appearance="system"/);
     assert.match(readFileSync(join(r.dir, ".stylelintrc.json"), "utf8"), /"theme": "databricks"/);
     assert.match(readFileSync(join(r.dir, "CLAUDE.md"), "utf8"), /node_modules\/@ux-builder\/ui\/AGENTS\.md/);
     for (const f of r.files) assert.doesNotMatch(readFileSync(join(r.dir, f), "utf8"), /__[A-Z_]+__/, f);
+  });
+
+  // @covers US-149-AC6
+  test("US-149-AC6: the blueprint is at docs/ux-builder/blueprint/, and the app's scripts, the audit and the MCP server find it there", () => {
+    const r = scaffold(join(tmp, "layout"), { modalities: WEB });
+    assert.equal(CURRENT.blueprint, "docs/ux-builder/blueprint/app.blueprint.json");
+    assert.ok(existsSync(join(r.dir, CURRENT.blueprint)));
+    assert.ok(!existsSync(join(r.dir, "app.blueprint.json")));
+    const { scripts } = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
+    assert.equal(scripts["check:blueprint"], `ux-builder-blueprint check ${CURRENT.blueprint}`);
+    assert.match(scripts.audit, new RegExp(`--blueprint ${CURRENT.blueprint.replace(/\./g, "\\.")} `));
+    // The audit's manifest default and the MCP server's defaults are layoutOf(app).blueprint.
+    assert.equal(layoutOf(r.dir).blueprint, CURRENT.blueprint);
+    const check = spawnSync(process.execPath, [fileURLToPath(new URL("../../ui/blueprint/cli.mjs", import.meta.url)), "check"], { cwd: r.dir, encoding: "utf8" });
+    assert.equal(check.status, 0, check.stderr);
   });
 
   // @covers US-012-AC1
@@ -89,12 +105,12 @@ describe("US-051: a new app starts from a blueprint", () => {
   // @covers US-051-AC1
   test("AC1: the app has a blueprint that passes, a check:blueprint script and a CI step", () => {
     const r = scaffold(join(tmp, "planned"), { modalities: WEB });
-    const bp = JSON.parse(readFileSync(join(r.dir, "app.blueprint.json"), "utf8"));
+    const bp = JSON.parse(readFileSync(join(r.dir, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
     assert.equal(bp.name, "planned");
     assert.deepEqual(checkBlueprint(bp).filter((f) => f.severity === "error"), []);
     assert.deepEqual(checkBlueprint(bp), [], "and no warnings");
     const pkg = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
-    assert.equal(pkg.scripts["check:blueprint"], "ux-builder-blueprint check app.blueprint.json");
+    assert.equal(pkg.scripts["check:blueprint"], "ux-builder-blueprint check docs/ux-builder/blueprint/app.blueprint.json");
     assert.match(readFileSync(join(r.dir, ".github/workflows/ci.yml"), "utf8"), /- run: npm run check:blueprint/);
   });
 
@@ -104,7 +120,7 @@ describe("US-051: a new app starts from a blueprint", () => {
     writeFileSync(join(tmp, "plan.json"), JSON.stringify(plan, null, 2));
     const r = run("from-plan", "--blueprint", "plan.json");
     assert.equal(r.status, 0, r.stderr);
-    assert.deepEqual(JSON.parse(readFileSync(join(tmp, "from-plan/app.blueprint.json"), "utf8")), plan);
+    assert.deepEqual(JSON.parse(readFileSync(join(tmp, "from-plan/docs/ux-builder/blueprint/app.blueprint.json"), "utf8")), plan);
   });
 
   // @covers US-051-AC3

@@ -8,16 +8,16 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify as toYaml } from "yaml";
 import { recordDecision } from "@ux-builder/trace";
-import { DesignError, writeInApp } from "./app.mjs";
+import { DesignError, ux, writeInApp } from "./app.mjs";
 import { parseDocument } from "./documents.mjs";
 
-const DIR = "docs/ux/decisions";
+const docsDir = (app) => ux(app, "decisions");
 export const DECISION_STATUSES = ["not-tested", "tested", "refuted"];
 const list = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]).map(String).map((s) => s.trim()).filter(Boolean);
 const today = () => new Date().toISOString().slice(0, 10);
 
 function numbers(app) {
-  const dir = join(app, DIR);
+  const dir = join(app, docsDir(app));
   if (!existsSync(dir)) return [];
   return readdirSync(dir).map((n) => n.match(/^UXD-([1-9][0-9]*)\.md$/)?.[1]).filter(Boolean).map(Number);
 }
@@ -37,7 +37,7 @@ export function decisionAdd(app, { question, options, choice, why, assumptions, 
   if (!why?.trim()) throw new DesignError("decision add needs --why: the rationale");
   const id = `UXD-${Math.max(0, ...numbers(app)) + 1}`;
   const fields = { id, question: question.trim(), options, choice: choice.trim(), why: why.trim(), assumptions: list(assumptions), validation: validation?.trim() ?? "", status: "not-tested", links: list(links) };
-  const path = writeInApp(app, `${DIR}/${id}.md`, render(fields));
+  const path = writeInApp(app, `${docsDir(app)}/${id}.md`, render(fields));
   let trace = null;
   try {
     const e = recordDecision(app, { chose: fields.choice, why: fields.why, considered: options.filter((o) => o !== fields.choice), assumptions: fields.assumptions, validation: fields.validation || undefined, ux: id }, { by: "agent" });
@@ -48,7 +48,7 @@ export function decisionAdd(app, { question, options, choice, why, assumptions, 
 
 /* Read a record back into its fields. */
 function readRecord(app, id) {
-  const path = `${DIR}/${id}.md`;
+  const path = `${docsDir(app)}/${id}.md`;
   if (!existsSync(join(app, path))) throw new DesignError(`no decision ${id} (${path})`);
   const doc = parseDocument(readFileSync(join(app, path), "utf8"));
   const ux = doc.front?.ux ?? {};

@@ -77,7 +77,7 @@ describe("US-114: a new app gets the guided design loop", () => {
   });
 
   test("the blueprint the starter wrote is kept: init does not replace it", () => {
-    const bp = JSON.parse(readFileSync(join(app.dir, "app.blueprint.json"), "utf8"));
+    const bp = JSON.parse(readFileSync(join(app.dir, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
     assert.equal(bp.name, "rivers");
     assert.equal(app.design.blueprint, "exists");
   });

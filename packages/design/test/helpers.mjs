@@ -22,6 +22,8 @@ export function tempApp({ state = {} } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "ux-design-"));
   made.push(dir);
   writeFileSync(join(dir, "package.json"), JSON.stringify({ name: "sample-app", private: true }, null, 2) + "\n");
+  // The design work's folder (GDL-80): its blueprint goes in docs/ux-builder/blueprint/.
+  mkdirSync(join(dir, "docs/ux-builder/blueprint"), { recursive: true });
   if (state !== false) {
     mkdirSync(join(dir, ".ux-builder"), { recursive: true });
     writeFileSync(join(dir, ".ux-builder/design-state.json"), serialize({ ...emptyState(), ...state }));

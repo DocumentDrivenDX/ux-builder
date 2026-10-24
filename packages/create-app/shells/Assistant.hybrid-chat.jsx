@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Conversation } from "@ux-builder/ui/assistant";
 
-/* The app's assistant (app.blueprint.json, screen "assistant"): the SDK's
+/* The app's assistant (docs/ux-builder/blueprint/app.blueprint.json, screen "assistant"): the SDK's
    Conversation, empty, with its composer and AI disclosure. Its replies may
    carry Adaptive Cards ({ type: "adaptive-card", card } parts), drawn with
    SDK widgets in the app's theme; their actions arrive at onCardAction. Check

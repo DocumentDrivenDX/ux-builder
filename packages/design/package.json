@@ -33,6 +33,8 @@
     "experiments.mjs",
     "process.mjs",
     "review.mjs",
+    "modality.mjs",
+    "migrate.mjs",
     "glossary.json",
     "documents.mjs",
     "cli.mjs",

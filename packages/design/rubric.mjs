@@ -10,7 +10,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { checkBlueprint, score } from "@ux-builder/ui/blueprint";
-import { DesignError } from "./app.mjs";
+import { DesignError, bpFile } from "./app.mjs";
 import { latestInsights } from "./insights.mjs";
 import { observedDimensions, observedMeasures } from "./sessions.mjs";
 import { readState } from "./state.mjs";
@@ -24,7 +24,7 @@ const sum = (xs) => xs.reduce((a, b) => a + b, 0);
 
 /* The blueprint of an alternative: app.blueprint.<name>.json, or the app's own. */
 function blueprintOf(app, name) {
-  const file = name && name !== "current" ? `app.blueprint.${name}.json` : "app.blueprint.json";
+  const file = name && name !== "current" ? bpFile(app, name) : bpFile(app);
   const bp = readJson(join(app, file));
   if (!bp) throw new DesignError(`no ${file}${name ? `: make it with ux-builder-blueprint alternative new ${name}` : ""}`);
   return { file, bp };

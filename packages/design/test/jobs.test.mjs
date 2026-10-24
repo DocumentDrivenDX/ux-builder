@@ -14,9 +14,9 @@ const evidence = readFileSync(exampleFile("research-evidence"), "utf8");
 
 function app(rows, { ev = true } = {}) {
   const a = tempApp();
-  mkdirSync(join(a, "docs/ux/evidence"), { recursive: true });
-  writeFileSync(join(a, "docs/ux/jobs.md"), jobs(rows));
-  if (ev) writeFileSync(join(a, "docs/ux/evidence/EV-1.md"), evidence);
+  mkdirSync(join(a, "docs/ux-builder/evidence"), { recursive: true });
+  writeFileSync(join(a, "docs/ux-builder/jobs.md"), jobs(rows));
+  if (ev) writeFileSync(join(a, "docs/ux-builder/evidence/EV-1.md"), evidence);
   return a;
 }
 const v = (a) => { const r = cli(a, ["validate"]); return { status: r.status, out: r.stdout }; };
@@ -37,7 +37,7 @@ describe("US-126: jobs", () => {
   test("AC2: a job citing EV-9, which does not exist, fails naming the job and the source", () => {
     const r = v(app(["| J-1 | Discover nearby rivers | high | EV-1, EV-9 | high | confirmed |"]));
     assert.equal(r.status, 1);
-    assert.match(r.out, /docs\/ux\/jobs\.md: J-1: evidence EV-9 does not exist in docs\/ux\/evidence\//);
+    assert.match(r.out, /docs\/ux-builder\/jobs\.md: J-1: evidence EV-9 does not exist in docs\/ux-builder\/evidence\//);
   });
 
   // @covers US-126-AC3
@@ -50,21 +50,21 @@ describe("US-126: jobs", () => {
   // @covers US-126-AC4
   test("AC4: a task or a decision record citing a low-confidence job is warned about, naming the item and the job", () => {
     const a = app(["| J-1 | Discover nearby rivers | high | EV-1 | high | confirmed |", "| J-3 | Compare river conditions | medium | none | low | hypothesis |"]);
-    writeFileSync(join(a, "app.blueprint.json"), JSON.stringify({ tasks: [{ id: "T-2", goal: "Compare two rivers", jobs: ["J-3"] }] }));
-    mkdirSync(join(a, "docs/ux/decisions"), { recursive: true });
-    writeFileSync(join(a, "docs/ux/decisions/UXD-1.md"), readFileSync(exampleFile("ux-decision"), "utf8").replace("- Supports immediate exploration.", "- Supports immediate exploration and J-3."));
+    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ tasks: [{ id: "T-2", goal: "Compare two rivers", jobs: ["J-3"] }] }));
+    mkdirSync(join(a, "docs/ux-builder/decisions"), { recursive: true });
+    writeFileSync(join(a, "docs/ux-builder/decisions/UXD-1.md"), readFileSync(exampleFile("ux-decision"), "utf8").replace("- Supports immediate exploration.", "- Supports immediate exploration and J-3."));
     const r = v(a);
     assert.equal(r.status, 0, r.out);
-    assert.match(r.out, /warning app\.blueprint\.json: T-2 relies on J-3 \("Compare river conditions"\), whose confidence is low/);
-    assert.match(r.out, /warning docs\/ux\/decisions\/UXD-1\.md: UXD-1 relies on J-3 \("Compare river conditions"\), whose confidence is low/);
+    assert.match(r.out, /warning docs\/ux-builder\/blueprint\/app\.blueprint\.json: T-2 relies on J-3 \("Compare river conditions"\), whose confidence is low/);
+    assert.match(r.out, /warning docs\/ux-builder\/decisions\/UXD-1\.md: UXD-1 relies on J-3 \("Compare river conditions"\), whose confidence is low/);
   });
 
   // @covers US-126-AC5
   test("AC5: a task citing a job jobs.md lacks fails, naming the task and the ID", () => {
     const a = app(["| J-1 | Discover nearby rivers | high | EV-1 | high | confirmed |"]);
-    writeFileSync(join(a, "app.blueprint.json"), JSON.stringify({ tasks: [{ id: "T-1", goal: "Find a river", jobs: ["J-1", "J-7"] }] }));
+    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ tasks: [{ id: "T-1", goal: "Find a river", jobs: ["J-1", "J-7"] }] }));
     const r = v(a);
     assert.equal(r.status, 1);
-    assert.match(r.out, /app\.blueprint\.json: T-1 cites J-7, which docs\/ux\/jobs\.md does not have/);
+    assert.match(r.out, /docs\/ux-builder\/blueprint\/app\.blueprint\.json: T-1 cites J-7, which docs\/ux-builder\/jobs\.md does not have/);
   });
 });

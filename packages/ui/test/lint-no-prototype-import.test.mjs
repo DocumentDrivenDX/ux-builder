@@ -27,9 +27,11 @@ describe("US-135-AC4: no-prototype-import", () => {
       assert.equal(rest.length, 0, code);
       assert.equal(m?.ruleId, "ux-builder/no-prototype-import", code);
       assert.equal(m.severity, 2);
-      assert.match(m.message, /imports from prototype\/: exploratory prototypes are disposable and never app code \(ADR-037\)/);
+      assert.match(m.message, /imports from a prototype: exploratory prototypes are disposable and never app code \(ADR-037\)/);
     }
-    assert.match(lint('import x from "../prototype/a.js";')[0].message, /^"\.\.\/prototype\/a\.js" imports from prototype\//);
+    assert.match(lint('import x from "../prototype/a.js";')[0].message, /^"\.\.\/prototype\/a\.js" imports from a prototype/);
+    // Prototypes in docs/ux-builder/prototypes/ (FEAT-018 GDL-80) too.
+    assert.equal(lint('import m from "../docs/ux-builder/prototypes/map-first/map.compact.html";')[0]?.ruleId, "ux-builder/no-prototype-import");
   });
 
   test("other imports, including names that merely contain 'prototype', pass; the recommended config turns it on", () => {

@@ -86,7 +86,8 @@ that does not.
 ## Blueprint journeys
 
 A manifest journey may name a journey of the app's blueprint
-(`app.blueprint.json` beside the manifest, or the manifest's `blueprint`
+(`docs/ux-builder/blueprint/app.blueprint.json` beside the manifest, or `app.blueprint.json` in an app on the old
+layout, or the manifest's `blueprint`
 path) instead of restating it: `{ blueprint: J-review, role: reviewer, priority: critical }`.
 Its story, criteria, entry screen and steps come from the blueprint; giving
 `story`, `criteria` or `entry` as well is refused. `plan` lists its steps,
@@ -195,7 +196,7 @@ assessment.
    `--screen <id> --heuristic <id> --finding <F-id>` or `--no-finding`.
    `assess hierarchy --page <file>` checks a screen's content order against
    its `screens[].content`. The same pass runs on an exploratory prototype
-   (`prototype/<name>/`): serve it and inspect its pages like the app's; each
+   (`docs/ux-builder/prototypes/<name>/`): serve it and inspect its pages like the app's; each
    names its screen with `data-piq-screen`.
    **Task metrics.** `assess metrics <out>/<run>` writes `metrics.json`. Every
    number is agent-measured; never present it as how people will do.

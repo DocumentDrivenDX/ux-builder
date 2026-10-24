@@ -13,7 +13,7 @@ id:
   prefix: users
   pattern: "^users$"
   example: users
-output: docs/ux/users.md
+output: docs/ux-builder/users.md
 sections:
     - Users
 rules:

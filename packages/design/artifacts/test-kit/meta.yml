@@ -12,7 +12,7 @@ id:
   prefix: TK
   pattern: "^TK-[1-9][0-9]*$"
   example: TK-1
-output: docs/ux/tests/TK-<n>/kit.md
+output: docs/ux-builder/tests/TK-<n>/kit.md
 sections:
     - Scenarios
     - Success criteria

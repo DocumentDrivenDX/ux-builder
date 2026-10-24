@@ -12,7 +12,7 @@ id:
   prefix: INS
   pattern: "^INS-[0-9]{4}-[0-9]{2}-[0-9]{2}$"
   example: INS-2026-10-23
-output: docs/ux/insights/INS-<yyyy-mm-dd>.md
+output: docs/ux-builder/insights/INS-<yyyy-mm-dd>.md
 sections:
     - Sources
     - Journeys

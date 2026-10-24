@@ -17,8 +17,8 @@ const set = (a, path, value) => assert.equal(cli(a, ["state", "set", path, JSON.
 /* A chosen alternative, assumptions behind two predictions, a kit, an assessment run, and (unless observed is false) five sessions. */
 function evalApp({ observed = true } = {}) {
   const a = kitApp();
-  writeFileSync(join(a, "app.blueprint.map-first.json"), readFileSync(join(a, "app.blueprint.json")));
-  set(a, "alternatives[+]", { name: "map-first", file: "app.blueprint.map-first.json", status: "chosen", reason: "fewest steps", date: "2026-10-01" });
+  writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.map-first.json"), readFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json")));
+  set(a, "alternatives[+]", { name: "map-first", file: "docs/ux-builder/blueprint/app.blueprint.map-first.json", status: "chosen", reason: "fewest steps", date: "2026-10-01" });
   set(a, "assumptions[+]", { text: "Anglers find a river from the map alone", status: "hypothesis", evidence: [], dimension: "task-effectiveness" });
   set(a, "assumptions[+]", { text: "People need no help to find Saved", status: "assumed", evidence: [], dimension: "discoverability" });
   set(a, "assumptions[+]", { text: "Location is available", status: "assumed", evidence: [] });
@@ -42,7 +42,7 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     writeFileSync(join(a, "p2.txt"), "[00:01:00] P2: Which of these is public?\n");
     json(a, ["transcript", "add", "p2.txt", "--session", "S-2", "--kit", "TK-1", "--consent-confirmed", "--cite", "00:01:00"]);
     const r = json(a, ["report"]);
-    assert.equal(r.path, "docs/ux/evaluations/UER-1.md");
+    assert.equal(r.path, "docs/ux-builder/evaluations/UER-1.md");
     assert.equal(r.approach, "mixed");
     const t = readFileSync(join(a, r.path), "utf8");
     assert.match(t, /^---\nux:\n {2}id: UER-1\n {2}type: usability-evaluation-report\n {2}links:\n {4}- kind: informed_by\n {6}to: TK-1\n---/);
@@ -53,13 +53,13 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     assert.match(section(t, "Measures"), /- access points unclear \(3 sessions;/);
     assert.match(section(t, "Rubric"), /^\| Dimension \| Predicted \| Agent-measured \| Observed \|$/m);
     assert.match(section(t, "Rubric"), /\| Task efficiency \| .* \(computed\) \| 2 moves over the shortest paths; 1 backtracks \| median 95 s a task \|/);
-    assert.match(section(t, "Findings by journey"), new RegExp(`### J-find\\n\\n- \\*\\*${findingIdFor("TK-1", "P2", 1)}\\*\\* \\(human observation\\) Severity 3: access points unclear \\(did not complete in 240 s, 2 errors, 1 assist; "Could not tell which access point was public"\\)\\. Evidence: TK-1 task 1, P2 \\(docs/ux/tests/TK-1/findings\\.json\\); transcript EV-1\\.`));
+    assert.match(section(t, "Findings by journey"), new RegExp(`### J-find\\n\\n- \\*\\*${findingIdFor("TK-1", "P2", 1)}\\*\\* \\(human observation\\) Severity 3: access points unclear \\(did not complete in 240 s, 2 errors, 1 assist; "Could not tell which access point was public"\\)\\. Evidence: TK-1 task 1, P2 \\(docs/ux-builder/tests/TK-1/findings\\.json\\); transcript EV-1\\.`));
     assert.match(section(t, "Recommendations"), /^1\. Correct: access points unclear \(F-[0-9a-f]{8}, human observation\)\. Route it at checkpoint core-3: `ux-builder-design route F-[0-9a-f]{8}`\./m);
     assert.match(section(t, "Not tested"), /- Consistency: no human observation/);
     assert.match(section(t, "State coverage"), /\| J-find \| assessed \| not tested \| not tested \|/);
     // A second evaluation gets the next number and follows the first.
     const r2 = json(a, ["report"]);
-    assert.equal(r2.path, "docs/ux/evaluations/UER-2.md");
+    assert.equal(r2.path, "docs/ux-builder/evaluations/UER-2.md");
     assert.match(readFileSync(join(a, r2.path), "utf8"), / {4}- kind: follows\n {6}to: UER-1\n/);
   });
 
@@ -104,7 +104,7 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     const d = decisionAdd(a, { question: "Show the map first?", options: ["Map first", "List first"], choice: "Map first", why: "Fewer steps" });
     const f1 = findingIdFor("TK-1", "P2", 1), f2 = findingIdFor("TK-1", "P5", 2);
     let r = json(a, ["route", f1, f2, "--decision", d.id, "--status", "refuted"]);
-    assert.equal(r.patch, "helix-proposals/backlog/improvement-backlog.patch");
+    assert.equal(r.patch, "docs/ux-builder/helix-proposals/backlog/improvement-backlog.patch");
     assert.deepEqual(r.target, { path: "docs/helix/06-iterate/improvement-backlog.md", kind: "new" });
     const patch = readFileSync(join(a, r.patch), "utf8");
     assert.match(patch, /^--- \/dev\/null\n\+\+\+ b\/docs\/helix\/06-iterate\/improvement-backlog\.md/);
@@ -112,7 +112,7 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     assert.match(patch, new RegExp(`^\\+\\| 2 \\| P1 \\| saved list hidden \\|.*${f2} in UER-1`, "m"));
     assert.equal(r.decision.status, "refuted");
     assert.equal(r.decision.evidence, "UER-1");
-    assert.match(readFileSync(join(a, "docs/ux/decisions/UXD-1.md"), "utf8"), /status: refuted/);
+    assert.match(readFileSync(join(a, "docs/ux-builder/decisions/UXD-1.md"), "utf8"), /status: refuted/);
     assert.ok(!existsSync(join(a, "docs/helix/06-iterate/improvement-backlog.md")), "HELIX is changed only by applying the patch");
     // With an existing backlog, the rows go after its last row; a finding already listed is left out.
     mkdirSync(join(a, "docs/helix/06-iterate"), { recursive: true });
@@ -135,7 +135,7 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     writeFileSync(file, text.replace(/## Not tested[\s\S]*$/, "").replace("to: TK-1", "to: TK-9"));
     const v = cli(a, ["validate"]);
     assert.equal(v.status, 1);
-    assert.match(v.stdout, /docs\/ux\/evaluations\/UER-1\.md: missing the section "## Not tested"/);
-    assert.match(v.stdout, /docs\/ux\/evaluations\/UER-1\.md: link to TK-9 \(informed_by\) does not resolve/);
+    assert.match(v.stdout, /docs\/ux-builder\/evaluations\/UER-1\.md: missing the section "## Not tested"/);
+    assert.match(v.stdout, /docs\/ux-builder\/evaluations\/UER-1\.md: link to TK-9 \(informed_by\) does not resolve/);
   });
 });

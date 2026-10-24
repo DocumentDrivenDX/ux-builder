@@ -12,7 +12,7 @@ id:
   prefix: baseline
   pattern: "^baseline$"
   example: baseline
-output: docs/ux/baseline.md
+output: docs/ux-builder/baseline.md
 sections:
     - Screens
     - Journeys
