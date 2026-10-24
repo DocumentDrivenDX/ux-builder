@@ -9,7 +9,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { DesignError, writeInApp } from "./app.mjs";
 import { advance } from "./checkpoints.mjs";
-import { helixRoot, parseDocument, usersTable } from "./documents.mjs";
+import { businessRules, helixRoot, parseDocument, usersTable } from "./documents.mjs";
 import { readState, writeState } from "./state.mjs";
 
 const list = (x) => (Array.isArray(x) ? x : []);
@@ -98,11 +98,25 @@ export function kitTasks(app, bp, { journeys = [] } = {}) {
   const chosen = journeys.length ? all.filter((j) => journeys.includes(j.id)) : all;
   const us = stories(app);
   const tasks = new Map(list(bp.tasks).map((t) => [t.id, t]));
-  return chosen.map((j, i) => {
-    const goal = tasks.get(j.task)?.goal ?? us[j.story]?.title ?? j.id.replace(/^J-/, "").replace(/-/g, " ");
+  const goalOf = (j) => tasks.get(j.task)?.goal ?? us[j.story]?.title ?? j.id.replace(/^J-/, "").replace(/-/g, " ");
+  const out = chosen.map((j, i) => {
     const criteria = list(j.criteria).length ? list(j.criteria) : Object.keys(us[j.story]?.criteria ?? {});
-    return { n: i + 1, journey: j.id, goal: goalText(goal, bp), criteria: criteria.map((id) => ({ id, text: us[j.story]?.criteria?.[id] ?? null })), users: list(tasks.get(j.task)?.users) };
+    return { n: i + 1, journey: j.id, goal: goalText(goalOf(j), bp), criteria: criteria.map((id) => ({ id, text: us[j.story]?.criteria?.[id] ?? null })), users: list(tasks.get(j.task)?.users) };
   });
+  // A task per business rule the chosen journeys depend on (GDL-78), set in the rule's trigger situation.
+  const defined = businessRules(app).rules;
+  const designed = new Map(list(bp.businessRules).filter((r) => r?.id).map((r) => [r.id, r]));
+  const done = new Set();
+  for (const j of chosen) {
+    const ids = [...list(tasks.get(j.task)?.rules), ...list(j.steps).flatMap((st) => list(st?.rules))];
+    for (const id of ids) {
+      if (done.has(id) || !designed.get(id)?.trigger) continue;
+      done.add(id);
+      const trigger = goalText(designed.get(id).trigger, bp).replace(/[.]$/, "");
+      out.push({ n: out.length + 1, journey: j.id, rule: id, goal: `${goalText(goalOf(j), bp).replace(/[.]$/, "")}, and ${trigger}`, criteria: [{ id, text: defined[id]?.text ?? null }], users: list(tasks.get(j.task)?.users) });
+    }
+  }
+  return out;
 }
 
 /* Write a kit: TK-<n> after the last, or rewrite `id`, keeping an observation sheet already filled in. */

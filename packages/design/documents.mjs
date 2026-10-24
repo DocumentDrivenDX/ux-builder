@@ -240,6 +240,30 @@ export function jobsTable(app) {
   return out;
 }
 
+/* The business rules HELIX defines (GDL-78): lines "**BR-<n>** — <rule>"
+   in any HELIX document. { rules: { BR-n: { text, file } }, twice: [{ id, files }] }. */
+export function businessRules(app) {
+  const root = helixRoot(app);
+  const rules = {}, seen = {};
+  if (!root) return { rules, twice: [], helix: false };
+  for (const file of markdown(app, root)) {
+    for (const m of readFileSync(join(app, file), "utf8").matchAll(/\*\*(BR-[1-9][0-9]*)\*\*\s*[—:-]+\s*(.+)$/gm)) {
+      (seen[m[1]] ??= []).push(file);
+      rules[m[1]] ??= { text: m[2].trim(), file };
+    }
+  }
+  return { rules, twice: Object.entries(seen).filter(([, fs]) => new Set(fs).size > 1).map(([id, fs]) => ({ id, files: [...new Set(fs)] })), helix: true };
+}
+
+/* Where the blueprint cites each business rule: [{ rule, item, path }]. */
+export function ruleCitations(bp) {
+  const out = [];
+  for (const t of Array.isArray(bp?.tasks) ? bp.tasks : []) for (const r of t?.rules ?? []) out.push({ rule: r, item: t.id, kind: "task" });
+  for (const j of Array.isArray(bp?.journeys) ? bp.journeys : []) (j?.steps ?? []).forEach((st, i) => { for (const r of st?.rules ?? []) out.push({ rule: r, item: `${j.id} step ${i + 1}`, kind: "step", journey: j.id, screen: st.screen }); });
+  return out;
+}
+export const RULE_ANSWERS = [["trigger", "the situation that triggers it"], ["before", "how the user learns of it before acting"], ["blocked", "what they see when it blocks them"], ["recover", "how they recover"]];
+
 /* The target users table's rows: { U-n: { user, context, needs, jobs: [{ job, importance }], confidence, status } }. */
 export function usersTable(app) {
   const p = join(app, "docs/ux/users.md");
@@ -283,6 +307,16 @@ export function validate(app) {
     const text = readFileSync(join(app, d.path), "utf8");
     for (const j of new Set(text.match(/\bJ-[1-9][0-9]*\b/g) ?? [])) cites.push({ path: d.path, item: d.id, job: j });
   }
+  // Business rules (GDL-78): each cited rule is defined in HELIX, and how the user meets it is designed.
+  const br = businessRules(app);
+  const cited = ruleCitations(bp);
+  for (const c of cited) if (!br.rules[c.rule]) problems.push({ path: "app.blueprint.json", message: br.helix ? `${c.item} cites ${c.rule}, which no HELIX document defines (**${c.rule}** — <rule>)` : `${c.item} cites ${c.rule}, but the app has no HELIX to define it` });
+  for (const id of [...new Set(cited.map((c) => c.rule))]) {
+    const entry = (Array.isArray(bp?.businessRules) ? bp.businessRules : []).find((e) => e?.id === id);
+    const missing = RULE_ANSWERS.filter(([k]) => !String(entry?.[k] ?? "").trim()).map(([k, what]) => `${k} (${what})`);
+    if (missing.length) problems.push({ path: "app.blueprint.json", message: `${id}: how the user meets it is not designed; businessRules needs ${missing.join(", ")}` });
+  }
+  for (const t of br.twice) warnings.push({ path: t.files.join(", "), message: `${t.id} is defined in more than one HELIX document` });
   // What cites a target user: blueprint tasks (GDL-77).
   for (const t of Array.isArray(bp?.tasks) ? bp.tasks : []) for (const u of t?.users ?? []) {
     const user = users?.[u];

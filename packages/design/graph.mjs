@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { checkBlueprint, complexityDelta } from "@ux-builder/ui/blueprint";
 import { recordDecision } from "@ux-builder/trace";
 import { DesignError } from "./app.mjs";
-import { helixRoot, jobsTable, parseDocument, usersTable, uxDocuments } from "./documents.mjs";
+import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable, uxDocuments } from "./documents.mjs";
 import { readState } from "./state.mjs";
 import { kits, testKit } from "./testkit.mjs";
 
@@ -41,6 +41,13 @@ export function buildGraph(app) {
   // Target users (GDL-77): a user holds jobs, and tasks serve users.
   for (const [id, u] of Object.entries(usersTable(app) ?? {})) { node(id, "user", u.user, "docs/ux/users.md"); for (const h of u.jobs) edge(id, h.job); }
   for (const t of list(bp.tasks).filter((x) => x?.id)) { node(t.id, "task", t.goal, BP); for (const j of list(t.jobs)) edge(j, t.id); for (const u of list(t.users)) edge(u, t.id); }
+  // Business rules (GDL-78), defined in HELIX: a rule applies to the tasks and journey steps that cite it.
+  const rules = businessRules(app).rules;
+  for (const c of ruleCitations(bp)) {
+    node(c.rule, "rule", rules[c.rule]?.text ?? c.rule, rules[c.rule]?.file ?? null);
+    if (c.kind === "task") edge(c.rule, c.item);
+    else { edge(c.rule, c.journey); if (c.screen) edge(c.rule, `screen:${c.screen}`); }
+  }
   for (const s of list(bp.screens).filter((x) => x?.id)) {
     node(`screen:${s.id}`, "screen", s.title ?? s.id, BP);
     if (s.pattern) { node(`pattern:${s.pattern}`, "pattern", s.pattern, BP); edge(`screen:${s.id}`, `pattern:${s.pattern}`); }

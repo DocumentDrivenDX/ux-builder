@@ -161,6 +161,21 @@ blueprint, one per thing a user must accomplish, each with its goal, the
 jobs it serves, its trigger, required and optional inputs, system and user
 actions, success (acceptance criteria IDs), exceptions and subtasks with
 their alternative ways, and the target users it serves (`"users": ["U-1"]`).
+
+**Business rules.** A task often depends on the business's rules ("only
+stretches with public access can be saved"). Each is defined once in
+HELIX, as `**BR-<n>** — <rule>` (the PRD, a feature spec or the solution
+design's Business Rules; propose one there if it is missing). Cite it where
+it applies: `"rules": ["BR-1"]` on the task, and on the journey step where
+it bites. Then ask the person four questions and record the answers in the
+blueprint's `businessRules`:
+`{ "id": "BR-1", "trigger": "…", "before": "…", "blocked": "…", "recover": "…" }`:
+the situation that triggers it (in the user's words), how the user learns of
+it before acting, what they see when it stops them, and how they recover.
+A rule the user only meets as an error is a design problem; `validate`
+fails a cited rule without the four answers, and the test kit gives each
+rule a task set in its trigger.
+
 Name each journey's task (`"task": "T-<n>"`) and run
 `ux-builder-blueprint check`.
 

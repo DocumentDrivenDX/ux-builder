@@ -22,5 +22,5 @@ export { diagnose, experimentEnd, experimentStart } from "./experiments.mjs";
 export { DECISION_STATUSES, decisionAdd, decisionStatus } from "./decisions.mjs";
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml, principlesFile } from "./brief.mjs";
 export { EVIDENCE_KINDS, evidenceAdd, evidenceList, writeEvidence } from "./research.mjs";
-export { ARTIFACTS, documentTypes, jobsTable, usersTable, PERSONAL_PATTERNS, exampleFile, helixIds, helixRoot, parseDocument, pathFor, templateFile, uxDocuments, validate, validateDocument } from "./documents.mjs";
+export { ARTIFACTS, businessRules, documentTypes, jobsTable, RULE_ANSWERS, ruleCitations, usersTable, PERSONAL_PATTERNS, exampleFile, helixIds, helixRoot, parseDocument, pathFor, templateFile, uxDocuments, validate, validateDocument } from "./documents.mjs";
 export { ADOPT_SDK, init, installSkill, MCP_SERVER, SKILL_DIR, writeMcpConfig } from "./init.mjs";

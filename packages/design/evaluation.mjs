@@ -16,7 +16,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DesignError, writeInApp } from "./app.mjs";
 import { decisionStatus } from "./decisions.mjs";
-import { helixRoot, parseDocument, usersTable } from "./documents.mjs";
+import { businessRules, helixRoot, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
 import { rubric } from "./rubric.mjs";
 import { humanFindings, kitTranscripts, observedMeasures } from "./sessions.mjs";
 import { readState, writeState } from "./state.mjs";
@@ -169,6 +169,19 @@ export function report(app) {
   const stateOf = (j, s) => { const e = cov.find((x) => x.journey === j && new RegExp(s, "i").test(x.state)); return e ? e.status : "not tested"; };
   for (const j of list(bp.journeys)) L.push(`| ${j.id} | ${stateOf(j.id, "empty")} | ${stateOf(j.id, "loading")} | ${stateOf(j.id, "error")} |`);
   L.push("");
+  // Business rules (GDL-78): how people fared where each cited rule applied, from the kits' rule tasks.
+  const cited = [...new Set(ruleCitations(bp).map((c) => c.rule))];
+  const defined = businessRules(app).rules;
+  const ruleRows = cited.map((id) => {
+    const ts = kitTasks.filter((t) => t.criteria.split(/,\s*/).includes(id));
+    const fs = humans.filter((f) => ts.some((t) => t.kit === f.kit && t.n === f.task));
+    return { id, text: defined[id]?.text ?? "not defined in HELIX", ts, fs };
+  });
+  if (cited.length) {
+    L.push("## Business rules", "", "| Rule | Kit tasks | Completed | Problems seen |", "|---|---|---|---|");
+    for (const r of ruleRows) L.push(`| ${r.id}: ${cell(r.text)} | ${r.ts.map((t) => `${t.kit} task ${t.n}`).join(", ") || "none"} | ${r.fs.length ? `${r.fs.filter((f) => f.completed).length} of ${r.fs.length}` : "not tested"} | ${cell([...new Set(r.fs.map((f) => f.problem).filter(Boolean))].join("; ") || "none")} |`);
+    L.push("");
+  }
   L.push("## Recommendations", "");
   const recs = findings.filter((f) => f.severity >= 2);
   L.push(...(recs.length ? recs.map((f, i) => `${i + 1}. ${f.fix ?? `Correct: ${f.title}`} (${f.id}, ${f.label}). Route it at checkpoint core-3: \`ux-builder-design route ${f.id}\`.`) : ["1. None at severity 2 or above."]), "");
@@ -176,6 +189,7 @@ export function report(app) {
   const untested = [
     ...list(bp.journeys).filter((j) => !tested.has(j.id)).map((j) => `- ${j.id}: not tested with people${walked.has(j.id) ? " (walked by the agent only)" : ""}`),
     ...r.dimensions.filter((d) => !d.observed).map((d) => `- ${d.name}: no human observation${d.predicted.basis === "to validate" ? "; nothing predicted either" : ""}`),
+    ...ruleRows.filter((x) => !x.fs.length).map((x) => `- ${x.id}: no one met this business rule in a test${x.ts.length ? "" : " (no kit task for it)"}`),
   ];
   L.push(...(untested.length ? untested : ["- Everything planned was tested."]), "");
   const path = writeInApp(app, `${DIR}/${id}.md`, L.join("\n"));

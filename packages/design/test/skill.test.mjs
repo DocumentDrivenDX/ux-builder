@@ -147,3 +147,15 @@ describe("the skill needs no MCP (US-116)", () => {
     assert.match(SKILL, /never need it/);
   });
 });
+
+describe("business rules in the skill (US-147)", () => {
+  // @covers US-147-AC6
+  test("AC6: modelling tasks, the agent cites each business rule by ID and asks the person the four questions", () => {
+    const text = section("Model tasks");
+    assert.match(text, /\*\*Business rules\.\*\*/);
+    assert.match(text, /defined once in\nHELIX, as `\*\*BR-<n>\*\* — <rule>`/);
+    assert.match(text, /`"rules": \["BR-1"\]` on the task, and on the journey step where\nit bites/);
+    for (const k of ["trigger", "before", "blocked", "recover"]) assert.match(text, new RegExp(`"${k}": "…"`), k);
+    assert.match(text, /ask the person four questions/);
+  });
+});

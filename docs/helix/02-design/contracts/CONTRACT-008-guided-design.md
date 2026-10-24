@@ -174,6 +174,17 @@ Type-specific rules `validate` applies:
   `scenarios.md` gains a *For* column (the task's users), and
   `observations.csv` a `user` column, which `observe import` keeps on each
   finding and `report` breaks its measures down by.
+- Business rules *(2026-10-24, GDL-78)*: a rule is defined once in HELIX
+  as a line `**BR-<n>** — <rule>` (like an acceptance criterion). Blueprint
+  `tasks[].rules` and journey `steps[].rules` cite rule IDs; top-level
+  `businessRules[]` is `{ id, trigger, before, blocked, recover }` for each
+  cited rule. `validate` fails a cited rule HELIX does not define, and a
+  cited rule with no `businessRules` entry or one missing any of the four.
+  `test-kit` adds a task per cited rule (goal: the task's goal, in the
+  rule's `trigger` situation; success: the rule's ID); `report` lists each
+  rule with its kit tasks' results, and untested rules under *Not tested*;
+  `trace` and `impact` include rules (kind `rule`, file: the HELIX
+  document defining it).
 - `ux-decision`: status is `not-tested`, `tested` or `refuted`.
 
 The guide never writes these types into `docs/helix/`.
