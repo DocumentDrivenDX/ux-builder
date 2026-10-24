@@ -34,12 +34,13 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { needsStories, readStories, skippedNote } from "./helix.mjs";
-import { checkBlueprint, complexityDelta, deltaFindings, principleFindings, skeleton } from "./index.mjs";
+import { checkBlueprint, complexityDelta, deltaFindings, principleFindings, simplify, skeleton } from "./index.mjs";
 import { propose, writeProposals } from "./propose.mjs";
 import { drawings, writeDrawings } from "./draw.mjs";
 
 const USAGE = `Usage:
   ux-builder-blueprint check <file> [--json] [--diff <base>]
+  ux-builder-blueprint simplify [<file>] [--json]
   ux-builder-blueprint init [--kind app|view] [--out <file>]
   ux-builder-blueprint propose [<file>] [--out <dir>]
   ux-builder-blueprint draw [<file>] [--out <dir>]
@@ -61,6 +62,20 @@ async function main(argv) {
     if (existsSync(out)) { console.error(`${out} exists; not overwriting it.`); return 1; }
     writeFileSync(out, JSON.stringify(skeleton(values.kind), null, 2) + "\n");
     console.log(`Wrote ${out}. Describe your ${values.kind === "view" ? "view's screen" : "app's destinations and screens"}, then run: ux-builder-blueprint check ${out}`);
+    return 0;
+  }
+
+  if (command === "simplify") {
+    if (rest.length) { console.error(USAGE); return 2; }
+    const src = file ?? "app.blueprint.json";
+    let bp;
+    try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
+    const r = simplify(bp);
+    if (values.json) console.log(JSON.stringify(r, null, 2));
+    else {
+      for (const p of r.proposals) console.log(`${p.kind.padEnd(16)} ${p.task}${p.journey ? ` ${p.journey}` : ""}  ${p.at}\n                 ${p.change}\n                 Saves: ${Object.entries(p.saves).filter(([, n]) => n).map(([k, n]) => `${n} ${k}`).join(", ")}. Assumes: ${p.assumes}`);
+      console.log(r.message);
+    }
     return 0;
   }
 

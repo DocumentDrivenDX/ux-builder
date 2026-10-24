@@ -332,6 +332,13 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       const notes = storied && !helix ? [hx.skippedNote(process.cwd())] : [];
       return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings, ...(notes.length ? { notes } : {}) });
     });
+    if (bp.simplify) {
+      server.registerTool("simplify_blueprint", {
+        title: "Propose simplifications of the task model",
+        description: "Proposals that make the blueprint's tasks take less of their users (FEAT-018 GDL-24): inputs to infer, decisions to default, steps to combine, hops to remove, each with what it saves and what it assumes. Changes nothing; as `ux-builder-blueprint simplify --json` returns it.",
+        inputSchema: { blueprint: z.record(z.string(), z.unknown()).describe("The blueprint object (app.blueprint.json)") },
+      }, async ({ blueprint: b }) => ok(bp.simplify(b)));
+    }
   }
 
   // HELIX proposals from the blueprint (FEAT-012 DRF-01, DRF-02; ADR-030): returned, never written or applied.

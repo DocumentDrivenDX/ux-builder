@@ -116,6 +116,7 @@ export const BLUEPRINT_NOTES = {
   propose: "Draft HELIX content from the blueprint as patches, a report and proposals.json; applies nothing.",
   draw: "Draw the IA map, flows and journeys as Mermaid and SVG.",
   wireframes: "Draw each screen's pattern at each supported size class as HTML and PNG, in a neutral theme.",
+  simplify: "Propose ways to make the task model take less of its users: inputs to infer, decisions to default, steps to combine, hops to remove. Changes nothing.",
 };
 export function blueprintCommands() {
   const src = read("packages/ui/blueprint/cli.mjs");

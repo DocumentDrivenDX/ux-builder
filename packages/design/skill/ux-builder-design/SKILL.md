@@ -146,6 +146,23 @@ Update the jobs table as evidence arrives: rate importance and confidence
 separately; a job is confirmed only with an evidence source. Run
 `ux-builder-design validate` after each change.
 
+## Model tasks
+
+Draft the task model from the jobs and the stories: add `tasks[]` to the
+blueprint, one per thing a user must accomplish, each with its goal, the
+jobs it serves, its trigger, required and optional inputs, system and user
+actions, success (acceptance criteria IDs), exceptions and subtasks with
+their alternative ways. Name each journey's task (`"task": "T-<n>"`) and run
+`ux-builder-blueprint check`.
+
+Then run `ux-builder-blueprint simplify` and offer its proposals: inputs to
+infer, decisions to default, steps to combine, hops to remove. Apply only
+the ones the person accepts.
+
+Before Explore, ask the person to confirm the essential goals, as part of
+`core-1`, and record the answer:
+`ux-builder-design state checkpoint core-1 --answer "<their words>"`.
+
 ## Checkpoints
 
 Stop, ask the person one question, and wait for the answer at each

@@ -38,6 +38,7 @@ before(async () => {
 /* Arguments for the tools that need some; the others are called with none. */
 const ARGS = {
   update_design_state: { path: "next", value: "Compare flows" },
+  simplify_blueprint: { blueprint: skeleton("app") },
   get_theme: { name: "databricks" }, get_widget: { name: "Button" }, get_pattern: { name: "CollectionList" }, get_token: { name: "color.accent" },
   list_icons: { query: "pin" }, get_rules: { modalities: ["chat"] }, list_recipes: { job: "review and approve flagged time entries" }, get_recipe: { id: "review-queue" },
   check_blueprint: { blueprint: skeleton("app") }, check_card: { card: CLEAN }, get_guidance: { modalities: ["responsive-web"] },

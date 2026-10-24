@@ -176,8 +176,8 @@ name, question, measures[], baseline: boolean, sources[] }`. Baselines:
 
 ### MCP tools (optional)
 
-`get_design_state`, `update_design_state`, `design_status` (built), and
-`score_blueprint`, `compare_blueprints`, `simplify_blueprint`,
+`get_design_state`, `update_design_state`, `design_status`,
+`simplify_blueprint` (built), and `score_blueprint`, `compare_blueprints`,
 `design_impact`, `design_trace` as their commands are built. Each returns
 what the matching command's `--json` returns; `@ux-builder/mcp` loads
 `@ux-builder/design` from the app (else its own install) and registers them
