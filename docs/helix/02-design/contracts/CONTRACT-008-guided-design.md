@@ -144,6 +144,7 @@ sections from its template.
 | `baseline` | `baseline.md` | `baseline` | `artifacts/baseline/` |
 | `research-evidence` | `evidence/EV-<n>.md` | `EV-<n>` | `artifacts/research-evidence/` |
 | `jobs` | `jobs.md` | `jobs` (rows `J-<n>`) | `artifacts/jobs/` |
+| `users` | `users.md` | `users` (rows `U-<n>`) | `artifacts/users/` |
 | `ux-decision` | `decisions/UXD-<n>.md` | `UXD-<n>` | `artifacts/ux-decision/` |
 | `test-kit` | `tests/TK-<n>/kit.md` | `TK-<n>` | `artifacts/test-kit/` |
 | `usability-evaluation-report` | `evaluations/UER-<n>.md` | `UER-<n>` | `artifacts/usability-evaluation-report/`, from `docs/proposals/helix-ux-artifact-types` |
@@ -163,6 +164,16 @@ Type-specific rules `validate` applies:
   confidence (`low`, `medium`, `high`); confidence above `low` needs at
   least one evidence source. A task or decision citing a `low` job gets a
   warning.
+- `users` *(2026-10-24, GDL-77)*: each `U-<n>` row has the user, context,
+  needs, jobs (`J-<n> <importance>`, comma-separated, each job in
+  `jobs.md`), evidence, confidence and status (`hypothesis`, `confirmed`,
+  `current-state`), with the jobs table's evidence rules. When the file
+  exists, the brief's *Target users* is generated from it alone. A task's
+  `users` (`U-<n>`) must be rows here; a task citing a `low` user gets a
+  warning. The test kit's screener asks about each user and its context,
+  `scenarios.md` gains a *For* column (the task's users), and
+  `observations.csv` a `user` column, which `observe import` keeps on each
+  finding and `report` breaks its measures down by.
 - `ux-decision`: status is `not-tested`, `tested` or `refuted`.
 
 The guide never writes these types into `docs/helix/`.

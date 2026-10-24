@@ -489,6 +489,18 @@ GDL-21. Each job has a stable ID (`J-<n>`) so tasks, journeys and test
 results can trace to it. A job whose confidence is low is flagged wherever
 a design decision relies on it.
 
+GDL-77. **Structured target users** *(added 2026-10-24)*. The people the
+product is for are records, not a list of names: `docs/ux/users.md` holds a
+row per target user (`U-<n>`) with their context (where, on what device,
+with what expertise), their needs (accessibility needs and constraints),
+the jobs they hold with an importance for each (the same job can matter
+more to one user than another), and evidence, confidence and status rated
+as for jobs. They are evidence-backed segments, not personas with invented
+biographies. The brief's *Target users* is generated from them; tasks name
+the users they serve; the test kit's screener and scenarios, the
+observation sheet and the evaluation report are organized by them; and
+`trace` follows a user to its jobs, tasks and journeys.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each
@@ -886,6 +898,10 @@ The proposal's seven connected artifacts, and its rubric:
 - [US-143 — Send journey events to the app's own analytics](../user-stories/US-143-send-journey-events-to-the-apps-own-analytics.md)
 - [US-144 — Read production insights per journey](../user-stories/US-144-read-production-insights-per-journey.md)
 - [US-145 — Run an experiment through its checkpoints](../user-stories/US-145-run-an-experiment-through-its-checkpoints.md)
+
+**Amendment, 2026-10-24**
+
+- [US-146 — Describe target users with their context and evidence](../user-stories/US-146-describe-target-users-with-their-context-and-evidence.md)
 
 ## Edge Cases and Error Handling
 

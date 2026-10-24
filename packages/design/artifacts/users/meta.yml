@@ -1,0 +1,20 @@
+# Target users: a docs/ux type of the guided design loop (FEAT-018 GDL-77, CONTRACT-008).
+# Stage 1 home; mapped into HELIX in stage 2.
+
+type: users
+name: Target users
+description: |
+  The people the product is for, as evidence-backed records: each
+  user's context, needs and the jobs they hold with an importance for
+  each, rated for evidence and confidence like the jobs. Segments, not
+  personas with invented biographies. The brief's Target users, tasks,
+  test kits and reports are organized by them.
+id:
+  prefix: users
+  pattern: "^users$"
+  example: users
+output: docs/ux/users.md
+sections:
+    - Users
+rules:
+    - users

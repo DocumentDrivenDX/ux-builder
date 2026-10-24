@@ -16,7 +16,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DesignError, writeInApp } from "./app.mjs";
 import { decisionStatus } from "./decisions.mjs";
-import { helixRoot, parseDocument } from "./documents.mjs";
+import { helixRoot, parseDocument, usersTable } from "./documents.mjs";
 import { rubric } from "./rubric.mjs";
 import { humanFindings, kitTranscripts, observedMeasures } from "./sessions.mjs";
 import { readState, writeState } from "./state.mjs";
@@ -140,6 +140,12 @@ export function report(app) {
   if (m) for (const t of m.tasks) L.push(`| ${t.kit} task ${t.task} (${t.journey}) | ${pct(t.completionRate)} completed, median ${t.medianSeconds ?? "–"} s, ${pct(t.errorRate)} with errors, ${t.assists} assist${t.assists === 1 ? "" : "s"} (${t.sessions} sessions) |`);
   else L.push("| Human measures | No human evidence yet |");
   for (const j of list(run?.metrics?.journeys)) L.push(`| ${j.journey} (agent-measured) | ${j.completed ? "completed" : `stopped at step ${j.stoppedAt?.n}`}, ${j.moves} moves against a shortest ${j.shortestPath ?? "unknown"}, ${j.backtracks} backtracks |`);
+  // By target user (GDL-77), when the observation sheet recorded the user each participant matched.
+  if (m?.byUser.length) {
+    const users = usersTable(app) ?? {};
+    L.push("", "By target user:", "", "| User | Attempts | Completed | Median time | With errors | Assists |", "|---|---|---|---|---|---|",
+      ...m.byUser.map((u) => `| ${u.user ? `${u.user}${users[u.user] ? ` ${cell(users[u.user].user)}` : ""}` : "not recorded"} | ${u.attempts} (${u.sessions} sessions) | ${pct(u.completionRate)} | ${u.medianSeconds ?? "–"} s | ${pct(u.errorRate)} | ${u.assists} |`));
+  }
   if (m?.recurring.length) L.push("", "Problems seen in two or more sessions:", "", ...m.recurring.map((p) => `- ${p.problem} (${p.sessions} sessions; ${p.findings.join(", ")})`));
   L.push("");
   L.push("## Rubric", "", "| Dimension | Predicted | Agent-measured | Observed |", "|---|---|---|---|");

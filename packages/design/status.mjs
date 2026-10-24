@@ -2,7 +2,7 @@
    GDL-76): where the loop stands, in plain words, for the agent opening a
    session or a person without one. */
 
-import { jobsTable, uxDocuments } from "./documents.mjs";
+import { jobsTable, usersTable, uxDocuments } from "./documents.mjs";
 import { FIRST_STEP } from "./checkpoints.mjs";
 import { readState } from "./state.mjs";
 
@@ -37,6 +37,8 @@ export function status(app) {
     runningExperiments: s.experiments.filter((e) => e.status === "running").map((e) => e.id),
     next: s.next,
     jobs: jobsSummary(app, s),
+    // Target users by status, from docs/ux/users.md (GDL-77); null without one.
+    users: (() => { const t = usersTable(app); if (!t) return null; const byStatus = {}; for (const u of Object.values(t)) byStatus[u.status] = (byStatus[u.status] ?? 0) + 1; return { from: "docs/ux/users.md", byStatus }; })(),
     // The validated prototype is a prototype until core-3 says it goes to production (ADR-037 rule 4).
     prototype: s.prototype ? { branch: s.prototype.branch, status: s.checkpoints.filter((c) => c.id === "core-3").at(-1)?.status === "passed" ? "production" : "validated" } : null,
     documents: uxDocuments(app),
@@ -64,6 +66,7 @@ export function summary(r) {
   if (declined.length) lines.push(`Checkpoints declined (no or not yet): ${declined.join(", ")}.`);
   const counts = Object.entries(r.jobs.byStatus).map(([k, n]) => `${n} ${k}`);
   if (counts.length) lines.push(`Jobs: ${counts.join(", ")}.`);
+  if (r.users) lines.push(`Target users: ${Object.entries(r.users.byStatus).map(([k, n]) => `${n} ${k}`).join(", ")}.`);
   if (r.prototype) lines.push(`Prototype: ${r.prototype.status === "validated" ? `the validated prototype on ${r.prototype.branch} is still a prototype (core-3 ${latest.get("core-3") === "declined" ? "answered not yet" : "not answered"})` : `${r.prototype.branch} went to production at core-3`}.`);
   if (r.openIssues) lines.push(`${plural(r.openIssues, "usability issue is", "usability issues are")} open.`);
   if (r.runningExperiments.length) lines.push(`Running: ${r.runningExperiments.join(", ")}.`);

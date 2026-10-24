@@ -663,8 +663,10 @@ rules, so it invents colours and components.
   the HELIX documents they relate to. *(Added 2026-10-23.)*
 - **FR-81** — User needs start as labelled hypotheses; research evidence
   is stored as masked, pseudonymous excerpts and synthesized into a jobs
-  table that rates importance, evidence and confidence separately.
-  *(Added 2026-10-23.)*
+  table that rates importance, evidence and confidence separately. Target
+  users are evidence-backed records with their context, needs and the jobs
+  they hold, which the brief, tasks, tests and reports are organized by.
+  *(Added 2026-10-23; target users 2026-10-24.)*
 - **FR-82** — The blueprint models tasks (goal, trigger, inputs, system and
   user actions, success, exceptions, subtasks), and the guide proposes
   simplifications a person accepts. *(Added 2026-10-23.)*
