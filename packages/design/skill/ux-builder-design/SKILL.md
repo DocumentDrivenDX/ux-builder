@@ -119,6 +119,33 @@ Then run `ux-builder-design brief` and open `docs/ux/brief.html` for the
 person. Regenerate the brief whenever its sources change: the PRD, the
 stories or the design state. Ask `core-1` on the brief.
 
+## Understand users
+
+**Hypotheses first.** From the brief and what you know of the domain,
+propose the user segments, jobs to be done, motivations, frustrations,
+usage contexts and accessibility needs. Mark every item *hypothesis*, with
+no evidence: write the jobs into `docs/ux/jobs.md` from its template with
+status hypothesis, confidence low and evidence none.
+
+**Then evidence.** When the person supplies research (interview notes or
+transcripts, analytics exports, support tickets, surveys, observations),
+record each source with `ux-builder-design evidence add <file> --kind
+<kind> --source "<where it is kept>"`. Add to its record only the short
+excerpts your synthesis relies on, by pseudonym (P1, P2), masked; the
+owner may list each pseudonym's real name in
+`.ux-builder/participants.local.json` (kept out of git) so `validate` can
+catch one that slips in. Then
+report, each point citing the evidence IDs (EV-<n>) behind it:
+- repeated frustrations;
+- common task sequences;
+- unmet needs;
+- differences between segments;
+- conflicts between what users say and what they do.
+
+Update the jobs table as evidence arrives: rate importance and confidence
+separately; a job is confirmed only with an evidence source. Run
+`ux-builder-design validate` after each change.
+
 ## Checkpoints
 
 Stop, ask the person one question, and wait for the answer at each

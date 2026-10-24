@@ -55,25 +55,62 @@ function tableRows(body, heading) {
   return rows.slice(2);
 }
 
-/* Type-specific rules named in meta.yml. */
+/* Personal data an excerpt must not hold (ADR-039), beside the trace's
+   secret patterns. */
+export const PERSONAL_PATTERNS = [
+  ["email address", /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/],
+  ["phone number", /(?:\+\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)|\d{2,4})[\s.-]\d{3,4}[\s.-]\d{3,4}\b/],
+];
+
+/* Real names the owner keeps out of git: .ux-builder/participants.local.json, { "P1": "name" }. */
+function localNames(appDir) {
+  if (!appDir) return {};
+  try { return JSON.parse(readFileSync(join(appDir, ".ux-builder/participants.local.json"), "utf8")) ?? {}; } catch { return {}; }
+}
+
+/* The excerpt lines of a document: [{ line, text }]. */
+function excerptLines(body) {
+  const lines = body.split("\n");
+  const start = lines.findIndex((l) => /^## Excerpts\s*$/i.test(l));
+  if (start < 0) return [];
+  const out = [];
+  for (let i = start + 1; i < lines.length && !lines[i].startsWith("## "); i++) if (lines[i].trim().startsWith("-")) out.push({ line: i + 1, text: lines[i] });
+  return out;
+}
+
+/* Type-specific rules named in meta.yml. Each returns problems, or
+   { problems, warnings, notes }. */
 const RULES = {
   participants(doc, ux) {
-    const p = ux.participants;
-    if (!p || typeof p !== "object" || !Object.keys(p).length) return ["research-evidence needs participants: pseudonyms such as P1, each with a role and no name"];
+    const p = ux.participants ?? {};
+    if (typeof p !== "object" || Array.isArray(p)) return ["participants maps pseudonyms (P1, P2) to roles"];
     const bad = Object.keys(p).filter((k) => !/^P[1-9][0-9]*$/.test(k));
-    const used = [...doc.body.matchAll(/^\s*-\s*(P[0-9]+):/gm)].map((m) => m[1]).filter((k) => !(k in p));
+    const used = excerptLines(doc.body).map((e) => e.text.match(/^\s*-\s*(P[0-9]+):/)?.[1]).filter((k) => k && !(k in p));
     return [...bad.map((k) => `participant "${k}" is not a pseudonym (P1, P2, …)`), ...[...new Set(used)].map((k) => `excerpt by ${k}, who is not listed under participants`)];
   },
   masked(doc, ux, { appDir }) {
-    return findSecrets(doc.body, { appDir }).map((h) => `line ${h.line} of the body holds an unmasked ${h.kind}; mask it (ADR-039)`);
+    const out = findSecrets(doc.body, { appDir }).map((h) => `line ${h.line} of the body holds an unmasked ${h.kind}; mask it (ADR-039)`);
+    const names = localNames(appDir);
+    for (const e of excerptLines(doc.body)) {
+      for (const [what, re] of PERSONAL_PATTERNS) if (re.test(e.text)) out.push(`the excerpt on line ${e.line} holds ${/^[aeiou]/.test(what) ? "an" : "a"} ${what}; mask it (ADR-039)`);
+      for (const [p, name] of Object.entries(names)) if (typeof name === "string" && name.trim() && e.text.toLowerCase().includes(name.trim().toLowerCase())) out.push(`the excerpt on line ${e.line} names a participant; use the pseudonym ${p} (ADR-039)`);
+    }
+    return out;
   },
   "decision-status"(doc, ux) {
     return ["not-tested", "tested", "refuted"].includes(ux.status) ? [] : [`status is "${ux.status ?? ""}"; use not-tested, tested or refuted`];
   },
   jobs(doc, ux, { known }) {
-    const out = [];
+    const out = [], notes = [];
+    const seen = new Set();
     for (const [id, job, importance, evidence, confidence, status] of tableRows(doc.body, "Jobs")) {
       if (!/^J-[1-9][0-9]*$/.test(id ?? "")) { out.push(`job row "${id}" needs an ID J-<n>`); continue; }
+      if (seen.has(id)) out.push(`${id} is used by more than one job`);
+      seen.add(id);
+      if (status === "hypothesis") {
+        if ((evidence ?? "").match(/EV-[1-9][0-9]*/)) out.push(`${id}: evidence lists a source, but status is hypothesis; a hypothesis has no evidence (mark it confirmed, or clear evidence)`);
+        else notes.push(`${id} is a hypothesis: ${job}`);
+      }
       for (const [field, v] of [["importance", importance], ["confidence", confidence]]) if (!["high", "medium", "low"].includes(v)) out.push(`${id}: ${field} is "${v ?? ""}"; use high, medium or low`);
       const sources = (evidence ?? "").match(/EV-[1-9][0-9]*/g) ?? [];
       if (confidence && confidence !== "low" && !sources.length) out.push(`${id}: confidence ${confidence} needs at least one evidence source (EV-<n>)`);
@@ -82,7 +119,7 @@ const RULES = {
       if (!job) out.push(`${id}: the job is empty`);
     }
     if (!tableRows(doc.body, "Jobs").length) out.push("the Jobs table has no rows");
-    return out;
+    return { problems: out, notes };
   },
 };
 
@@ -112,7 +149,11 @@ export function validateDocument(text, { path = null, known = null, appDir } = {
     if (!l || typeof l !== "object" || !l.kind || !l.to) { add("each link needs kind and to"); continue; }
     if (known && !known.has(String(l.to))) add(`link to ${l.to} (${l.kind}) does not resolve to a docs/ux document or a HELIX document`);
   }
-  for (const r of meta.rules ?? []) for (const m of RULES[r]?.(doc, ux, { known, appDir }) ?? [`unknown rule ${r} in ${ux.type}'s meta.yml`]) add(m);
+  for (const r of meta.rules ?? []) {
+    const got = RULES[r]?.(doc, ux, { known, appDir }) ?? [`unknown rule ${r} in ${ux.type}'s meta.yml`];
+    for (const m of Array.isArray(got) ? got : got.problems ?? []) add(m);
+    if (!Array.isArray(got)) for (const n of got.notes ?? []) problems.push({ message: n, level: "note" });
+  }
   return problems;
 }
 
@@ -155,19 +196,49 @@ export function uxDocuments(app) {
   });
 }
 
-/* ux-builder-design validate: every docs/ux document. */
+/* The jobs table's rows: { id: { job, confidence, status } }. */
+export function jobsTable(app) {
+  const p = join(app, "docs/ux/jobs.md");
+  if (!existsSync(p)) return null;
+  const out = {};
+  for (const [id, job, importance, evidence, confidence, status] of tableRows(parseDocument(readFileSync(p, "utf8")).body, "Jobs")) if (id) out[id] = { job, importance, evidence, confidence, status };
+  return out;
+}
+
+/* ux-builder-design validate: every docs/ux document, and what cites the
+   jobs (blueprint tasks, decision records). Problems fail it; warnings and
+   notes are reported. */
 export function validate(app) {
   const documents = uxDocuments(app);
   const known = new Set([...documents.map((d) => d.id).filter(Boolean), ...helixIds(app)]);
+  const jobs = jobsTable(app);
   // A jobs table's rows are linkable by their J- IDs.
-  for (const d of documents.filter((x) => x.type === "jobs")) for (const [id] of tableRows(parseDocument(readFileSync(join(app, d.path), "utf8")).body, "Jobs")) if (id) known.add(id);
-  const problems = [];
+  for (const id of Object.keys(jobs ?? {})) known.add(id);
+  const problems = [], warnings = [], notes = [];
   for (const d of documents) {
-    for (const p of validateDocument(readFileSync(join(app, d.path), "utf8"), { path: d.path, known, appDir: app })) problems.push({ path: d.path, ...p });
+    for (const p of validateDocument(readFileSync(join(app, d.path), "utf8"), { path: d.path, known, appDir: app })) {
+      const { level, ...rest } = p;
+      (level === "note" ? notes : problems).push({ path: d.path, ...rest });
+    }
   }
   const ids = documents.map((d) => d.id).filter(Boolean);
   for (const id of new Set(ids.filter((x, i) => ids.indexOf(x) !== i))) problems.push({ path: documents.filter((d) => d.id === id).map((d) => d.path).join(", "), message: `ID ${id} is used by more than one document` });
-  return { documents, problems, valid: problems.length === 0 };
+
+  // What cites a job: blueprint tasks (T-<n>) and decision records (UXD-<n>).
+  const cites = [];
+  let bp = null;
+  try { bp = JSON.parse(readFileSync(join(app, "app.blueprint.json"), "utf8")); } catch { /* no blueprint */ }
+  for (const t of Array.isArray(bp?.tasks) ? bp.tasks : []) for (const j of t?.jobs ?? []) cites.push({ path: "app.blueprint.json", item: t.id, job: j });
+  for (const d of documents.filter((x) => x.type === "ux-decision")) {
+    const text = readFileSync(join(app, d.path), "utf8");
+    for (const j of new Set(text.match(/\bJ-[1-9][0-9]*\b/g) ?? [])) cites.push({ path: d.path, item: d.id, job: j });
+  }
+  for (const c of cites) {
+    const job = jobs?.[c.job];
+    if (!job) { problems.push({ path: c.path, message: `${c.item} cites ${c.job}, which docs/ux/jobs.md does not have` }); continue; }
+    if (job.confidence === "low") warnings.push({ path: c.path, message: `${c.item} relies on ${c.job} ("${job.job}"), whose confidence is low` });
+  }
+  return { documents, problems, warnings, notes, valid: problems.length === 0 };
 }
 
 export const exampleFile = (type) => join(ARTIFACTS, type, "example.md");

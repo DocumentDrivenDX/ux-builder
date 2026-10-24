@@ -101,8 +101,8 @@ removes its criteria from `tools/coverage-exceptions.json`.
 | B-023 | `brief`, `principles.json`, project rules in `check` (US-122) | SD-006 Project rules; STP-122 | B-022 | design and ui tests | Built 2026-10-23 (principles kept in the design state; brief writes principles.json) |
 | B-024 | `baseline` and routing an existing app (US-115-AC5, AC6) | SD-006 Baseline; STP-115 | B-022 | design tests | Built 2026-10-23 |
 | B-025 | MCP wrappers and the parity test (US-116) | ADR-036 rule 2; STP-116 | B-018 to B-024 | mcp tests | Built 2026-10-23: phase 1 exit met (the guide reaches core-1 with no MCP: CLI parity and the network guard); Phase 1 exit: a fixture idea reaches `core-1` with no MCP |
-| B-026 | Hypotheses and evidence with masking (US-124, US-125) | ADR-039; STP-124, STP-125 | B-022 | design tests | Phase 2 |
-| B-027 | Jobs and its rules (US-126) | CONTRACT-008 type rules; STP-126 | B-026 | design tests | |
+| B-026 | Hypotheses and evidence with masking (US-124, US-125) | ADR-039; STP-124, STP-125 | B-022 | design tests | Built 2026-10-23 (real names checked from .ux-builder/participants.local.json, kept out of git); Phase 2 |
+| B-027 | Jobs and its rules (US-126) | CONTRACT-008 type rules; STP-126 | B-026 | design tests | Built 2026-10-23 with B-026 |
 | B-028 | `tasks[]`, `journeys[].task`, `simplify` (US-127, US-128) | CONTRACT-005 amendment; SD-006 Simplify; STP-127, STP-128 | B-021 | ui tests | |
 | B-029 | Alternatives, `score`, `compare` (US-129, US-130) | ADR-036 rule 7; SD-006 Score, Compare; STP-129, STP-130 | B-028 | ui tests | Phase 3 |
 | B-030 | `ux-decision`, `purpose` and `content`, `consistency.same-kind` (US-131 to US-133) | STP-131 to STP-133 | B-029 | design and ui tests; `npm run rules` | |

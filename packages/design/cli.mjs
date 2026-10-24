@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { baseline, brief, checkpoint, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { baseline, brief, checkpoint, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -37,6 +37,12 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   brief [--name <product>]
       write the experience brief (docs/ux/brief.md and brief.html) from the
       HELIX PRD and stories and the design state, and .ux-builder/principles.json.
+  evidence add <file> --kind interview|analytics|support|survey|observation
+               [--date YYYY-MM-DD] [--source <where it is kept>] [--title <t>]
+      record a research source as docs/ux/evidence/EV-<n>.md: where it is kept,
+      never its text; add the masked excerpts the synthesis cites.
+  evidence list
+      each source's ID, kind, date, source and excerpts cited.
   validate
       check every document in docs/ux/: frontmatter, ID, place, sections,
       links and its type's rules. Exits 1 on a problem.
@@ -62,7 +68,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -111,9 +117,25 @@ async function main(argv) {
     print(r, values.json, [`Wrote ${r.written.join(", ")}.`, ...r.notes].join("\n"));
     return 0;
   }
+  if (command === "evidence") {
+    const [sub, file] = rest;
+    if (sub === "add") {
+      const r = evidenceAdd(app, { file, kind: values.kind, date: values.date, source: values.source, title: values.title });
+      print(r, values.json, `Wrote ${r.path} (${r.kind}). Add the excerpts the synthesis cites, masked, by pseudonym.`);
+      return 0;
+    }
+    if (sub === "list") {
+      const r = evidenceList(app);
+      print(r, values.json, r.evidence.length ? r.evidence.map((e) => `${e.id}  ${e.kind}  ${e.date}  ${e.excerpts} excerpt${e.excerpts === 1 ? "" : "s"}  ${e.source}`).join("\n") : "No evidence yet.");
+      return 0;
+    }
+    throw new DesignError(`unknown evidence command "${sub ?? ""}": use add or list`);
+  }
   if (command === "validate") {
     const r = validate(app);
-    print(r, values.json, r.valid ? `docs/ux/: ${r.documents.length} document${r.documents.length === 1 ? "" : "s"}, no problems.` : r.problems.map((p) => `${p.path}: ${p.message}`).join("\n"));
+    const lines = [...r.problems.map((p) => `${p.path}: ${p.message}`), ...r.warnings.map((p) => `warning ${p.path}: ${p.message}`), ...r.notes.map((p) => `note    ${p.path}: ${p.message}`)];
+    if (r.valid) lines.push(`docs/ux/: ${r.documents.length} document${r.documents.length === 1 ? "" : "s"}, no problems.`);
+    print(r, values.json, lines.join("\n"));
     return r.valid ? 0 : 1;
   }
   if (command === "mode") {

@@ -144,9 +144,14 @@ sections from its template.
 | `experiment` | `experiments/EXP-<n>.md` | `EXP-<n>` | `artifacts/experiment/` |
 
 Type-specific rules `validate` applies:
-- `research-evidence`: frontmatter `participants` maps pseudonyms to
-  nothing identifying; an excerpt containing an unmasked secret pattern or
-  a name the owner listed in `.ux-builder/config.json` `redact` fails.
+- `research-evidence`: frontmatter `participants` maps pseudonyms (`P<n>`)
+  to roles, nothing identifying; an excerpt by a pseudonym not listed fails;
+  an excerpt containing an unmasked secret pattern, an email address, a
+  phone number, a `.ux-builder/config.json` `redact` match, or a real name
+  the owner listed in `.ux-builder/participants.local.json` (`{ "P1":
+  "<name>" }`, kept out of git) fails. `evidence add` takes `--kind`
+  interview, analytics, support, survey or observation; `transcript add`
+  records kind `transcript`.
 - `jobs`: each `J-<n>` row has importance, evidence (source IDs) and
   confidence (`low`, `medium`, `high`); confidence above `low` needs at
   least one evidence source. A task or decision citing a `low` job gets a

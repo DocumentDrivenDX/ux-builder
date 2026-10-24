@@ -2,11 +2,22 @@
    GDL-76): where the loop stands, in plain words, for the agent opening a
    session or a person without one. */
 
-import { uxDocuments } from "./documents.mjs";
+import { jobsTable, uxDocuments } from "./documents.mjs";
 import { readState } from "./state.mjs";
 
 const ACTIVITY = { baseline: "Baseline", define: "Define", explore: "Explore", experience: "Experience", validate: "Validate" };
 const UNTESTED = new Set(["assumed", "hypothesis", "current-state"]);
+
+/* Jobs by status, from docs/ux/jobs.md, else the design state's job
+   points; and each hypothesis with its confidence (low, or none yet). */
+function jobsSummary(app, s) {
+  const table = jobsTable(app);
+  const rows = table ? Object.entries(table).map(([id, j]) => ({ id, status: j.status, confidence: j.confidence || null }))
+    : s.assumptions.filter((a) => a.section === "jobs" && a.status !== "refuted").map((a) => ({ id: a.id, status: a.status, confidence: null }));
+  const byStatus = {};
+  for (const r of rows) byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
+  return { from: table ? "docs/ux/jobs.md" : "design state", byStatus, hypotheses: rows.filter((r) => r.status === "hypothesis").map(({ id, confidence }) => ({ id, confidence })) };
+}
 
 export function status(app) {
   const s = readState(app);
@@ -24,6 +35,7 @@ export function status(app) {
     openIssues: s.issues.filter((i) => i.status === "open").length,
     runningExperiments: s.experiments.filter((e) => e.status === "running").map((e) => e.id),
     next: s.next,
+    jobs: jobsSummary(app, s),
     documents: uxDocuments(app),
   };
   result.text = summary(result);
@@ -43,6 +55,8 @@ export function summary(r) {
   const skipped = r.checkpoints.filter((c) => c.status === "skipped").map((c) => c.id);
   if (passed.length) lines.push(`Checkpoints passed: ${passed.join(", ")}.`);
   if (skipped.length) lines.push(`Checkpoints skipped: ${skipped.join(", ")}.`);
+  const counts = Object.entries(r.jobs.byStatus).map(([k, n]) => `${n} ${k}`);
+  if (counts.length) lines.push(`Jobs: ${counts.join(", ")}.`);
   if (r.openIssues) lines.push(`${plural(r.openIssues, "usability issue is", "usability issues are")} open.`);
   if (r.runningExperiments.length) lines.push(`Running: ${r.runningExperiments.join(", ")}.`);
   lines.push(r.next ? `Next: ${r.next}` : "Next: not set.");

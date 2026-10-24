@@ -36,7 +36,7 @@ describe("the docs/ux types", () => {
     const examples = CONTRACT.map((type) => ({ type, text: readFileSync(exampleFile(type), "utf8") }));
     const known = new Set(["prd", "jobs", "J-1", "J-2", "J-3", "J-4", ...examples.map((e) => String(parseDocument(e.text).front.ux.id))]);
     for (const { type, text } of examples) {
-      assert.deepEqual(validateDocument(text, { known }), [], type);
+      assert.deepEqual(validateDocument(text, { known }).filter((p) => p.level !== "note"), [], type);
       assert.equal(parseDocument(text).front.ux.type, type);
     }
   });

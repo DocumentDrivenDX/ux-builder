@@ -65,7 +65,8 @@
         "runningExperiments",
         "next",
         "documents",
-        "text"
+        "text",
+        "jobs"
       ],
       "properties": {
         "activity": {
@@ -257,6 +258,8 @@
       "required": [
         "documents",
         "problems",
+        "warnings",
+        "notes",
         "valid"
       ],
       "properties": {
@@ -283,6 +286,59 @@
         },
         "valid": {
           "type": "boolean"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "message"
+            ]
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "message"
+            ]
+          }
+        }
+      }
+    },
+    "evidenceAdd": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "kind",
+        "date",
+        "source",
+        "file"
+      ]
+    },
+    "evidenceList": {
+      "type": "object",
+      "required": [
+        "evidence"
+      ],
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "date",
+              "source",
+              "excerpts",
+              "path"
+            ]
+          }
         }
       }
     }

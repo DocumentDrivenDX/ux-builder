@@ -37,7 +37,11 @@ anything is written, using the trace's masking.
 2. **Masked and pseudonymous.** Everything stored passes through the
    trace's masking (`@ux-builder/trace` `mask`), plus the app's
    `.ux-builder/config.json` redact patterns. Participants appear only as
-   pseudonyms (`P1`, `P2`).
+   pseudonyms (`P1`, `P2`). To catch a real name slipping into an excerpt,
+   the owner may list each pseudonym's name in
+   `.ux-builder/participants.local.json`, which is kept out of git;
+   `validate` fails an excerpt that contains one. Email addresses and phone
+   numbers in an excerpt fail too.
 3. **Consent recorded per session.** `transcript add` refuses a session
    without `--consent-confirmed`; the confirmation, who gave it and when
    are recorded with the excerpt.

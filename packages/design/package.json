@@ -21,6 +21,7 @@
     "init.mjs",
     "baseline.mjs",
     "brief.mjs",
+    "research.mjs",
     "documents.mjs",
     "cli.mjs",
     "artifacts",
