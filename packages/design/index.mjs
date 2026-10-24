@@ -9,7 +9,7 @@ export const VERSION = JSON.parse(readFileSync(new URL("./package.json", import.
 export { DesignError, findApp, writeInApp } from "./app.mjs";
 export { canonical, emptyState, hasState, parsePath, readState, SCHEMA, serialize, STATE_FILE, stateGet, stateSet, validateState, writeState } from "./state.mjs";
 export { status, summary } from "./status.mjs";
-export { checkpoint, CHECKPOINTS, setMode } from "./checkpoints.mjs";
+export { checkpoint, CHECKPOINTS, FIRST_STEP, setMode } from "./checkpoints.mjs";
 export { baseline } from "./baseline.mjs";
 export { applyImpact, buildGraph, impact, summaryOf, trace } from "./graph.mjs";
 export { goalText, kits, kitTasks, OBSERVATION_COLUMNS, testKit } from "./testkit.mjs";

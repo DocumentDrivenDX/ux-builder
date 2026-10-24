@@ -49,6 +49,11 @@ describe("US-135: exploratory prototypes", () => {
     assert.match(detail, /<a href="javascript:history\.back\(\)" data-action="back">Back \(back\)<\/a>/);
     assert.match(detail, /<span data-action="maps">Directions \(leaves the app\)<\/span>/);
     assert.match(readFileSync(join(dir, "prototype/map-first/index.html"), "utf8"), /url=map\.compact\.html/);
+    // The page's own controls lead where the bar's links do: a button named as an action, and the navigation's destinations.
+    const go = JSON.parse(map.match(/const go = (\{.*?\});/)[1]);
+    assert.equal(go["Open river"], "detail.compact.html");
+    assert.equal(go["Try again"], "map.error.compact.html");
+    assert.equal(JSON.parse(detail.match(/const go = (\{.*?\});/)[1]).Back, "back");
   });
 
   // @covers US-135-AC2

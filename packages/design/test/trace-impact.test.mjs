@@ -99,6 +99,20 @@ describe("US-137: trace and impact", () => {
     assert.equal(readFileSync(join(a, "docs/helix/02-design/wireframes/WF-001-activity.md"), "utf8").includes("activity"), true, "HELIX documents are not edited");
     assert.equal(currentEpisode(a), episode);
     assert.match(readEpisode(a, episode).at(-1).chose, /^Applied: Remove the activity selection/);
+    assert.match(out.summary, /Proposed to HELIX: \d+ patch/, "the summary says what was proposed");
+  });
+
+  // @covers US-137-AC3
+  test("AC3: once an alternative is chosen, app.blueprint.json is that alternative, and its prototype is regenerated too", async () => {
+    const a = app();
+    put(a, "prototype/map-first/map.compact.html", "<html></html>");
+    put(a, ".ux-builder/design-state.json", JSON.stringify({ ...JSON.parse(readFileSync(join(a, ".ux-builder/design-state.json"), "utf8")), alternatives: [{ name: "map-first", file: "app.blueprint.map-first.json", status: "chosen" }] }));
+    const next = structuredClone(BP);
+    next.screens[2].title = "River details";
+    writeFileSync(join(a, "next.json"), JSON.stringify(next));
+    const r = JSON.parse(cli(a, ["impact", "Rename the river screen", "--apply", "--set", "next.json", "--json"]).stdout);
+    assert.ok(r.regenerated.includes("prototype/map-first/"), r.regenerated.join(", "));
+    assert.match(readFileSync(join(a, "prototype/map-first/detail.compact.html"), "utf8"), /River details/);
   });
 
   // @covers US-137-AC4

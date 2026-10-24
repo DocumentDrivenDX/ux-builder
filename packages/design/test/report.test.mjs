@@ -73,6 +73,11 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     assert.deepEqual(s.map((x) => [x.id, x.status]), [["A-1", "refuted"], ["A-2", "confirmed"], ["A-3", "assumed"]]);
     assert.deepEqual(s[0].evidence, ["UER-1", "TK-1"]);
     assert.match(t, /- A-1 \(task-effectiveness\): hypothesis → refuted/);
+    // A baseline people contradicted is not met, whatever was predicted.
+    const rub = json(a, ["rubric"]);
+    assert.equal(rub.recommendable, false);
+    assert.equal(rub.notRecommendable, "people contradicted the baseline task-effectiveness");
+    assert.match(t, /Not recommendable: people contradicted the baseline task-effectiveness\./);
   });
 
   // @covers US-142-AC3

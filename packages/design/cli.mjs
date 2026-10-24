@@ -24,8 +24,9 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   state set <path> <json>
       write one field, checked against the schema. <path>[+] appends to a
       list: state set 'assumptions[+]' '{"text":"Location is available"}'.
-  state checkpoint <id> (--answer <text> | --skip --reason <text>)
-      record the person's answer at a checkpoint, or a skip and why, in the
+  state checkpoint <id> (--answer <text> [--declined] | --skip --reason <text>)
+      record the person's answer at a checkpoint (--declined when it is no or
+      not yet: it never counts as passed), or a skip and why, in the
       state and the trace. <id>: core-1, core-2, core-3, significant-change,
       experiment, release.
   mode full|change [--why <text>]
@@ -115,6 +116,20 @@ function print(result, json, text) {
   process.stdout.write(json ? JSON.stringify(result, null, 2) + "\n" : `${text}\n`);
 }
 
+/* Items as lines, a prototype's pages grouped by screen: one line for its
+   states and size classes, not one per page (--json keeps every page). */
+function itemLines(items, { labels = false } = {}) {
+  const out = [], pages = new Map();
+  for (const n of items) {
+    const m = n.kind === "prototype page" && /^prototype\/(.+)\/([a-z0-9-]+)(?:\.[a-z-]+)?\.[a-z-]+\.html$/i.exec(n.file ?? "");
+    if (!m) { out.push(`  ${n.kind.padEnd(15)} ${n.id}${labels && n.label && n.label !== n.id ? `  ${n.label}` : ""}${n.file ? `  (${n.file})` : ""}`); continue; }
+    const key = `${m[1]}\u0000${m[2]}`;
+    if (!pages.has(key)) { pages.set(key, 0); out.push(key); }
+    pages.set(key, pages.get(key) + 1);
+  }
+  return out.map((l) => (pages.has(l) ? (([dir, screen]) => `  ${"prototype pages".padEnd(15)} ${screen}: ${pages.get(l)} page${pages.get(l) === 1 ? "" : "s"}  (prototype/${dir}/)`)(l.split("\u0000")) : l));
+}
+
 function parseJson(text, what) {
   try { return JSON.parse(text); } catch {
     throw new DesignError(`${what} is not JSON: ${text}`);
@@ -125,7 +140,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -158,8 +173,8 @@ async function main(argv) {
       return 0;
     }
     if (sub === "checkpoint") {
-      const r = checkpoint(app, { id: path, answer: values.answer, skip: values.skip, reason: values.reason });
-      print(r, values.json, `Checkpoint ${r.checkpoint.id} ${r.checkpoint.status}${r.trace ? ` (trace ${r.trace.episode})` : ""}.`);
+      const r = checkpoint(app, { id: path, answer: values.answer, skip: values.skip, declined: values.declined, reason: values.reason });
+      print(r, values.json, `Checkpoint ${r.checkpoint.id} ${r.checkpoint.status}${r.trace ? ` (trace ${r.trace.episode})` : ""}.${r.moved ? `\nNow ${r.activity}. Next: ${r.next}` : ""}`);
       return 0;
     }
     throw new DesignError(`unknown state command "${sub ?? ""}": use get, set or checkpoint`);
@@ -176,8 +191,7 @@ async function main(argv) {
   }
   if (command === "trace") {
     const r = trace(app, { id: rest[0] });
-    const line = (n) => `  ${n.kind.padEnd(15)} ${n.id}${n.label && n.label !== n.id ? `  ${n.label}` : ""}${n.file ? `  (${n.file})` : ""}`;
-    print(r, values.json, [`${r.item.kind} ${r.item.id}`, "Upstream:", ...(r.upstream.length ? r.upstream.map(line) : ["  none"]), "Downstream:", ...(r.downstream.length ? r.downstream.map(line) : ["  none"])].join("\n"));
+    print(r, values.json, [`${r.item.kind} ${r.item.id}`, "Upstream:", ...(r.upstream.length ? itemLines(r.upstream, { labels: true }) : ["  none"]), "Downstream:", ...(r.downstream.length ? itemLines(r.downstream, { labels: true }) : ["  none"])].join("\n"));
     return 0;
   }
   if (command === "impact") {
@@ -187,8 +201,7 @@ async function main(argv) {
       return r.applied ? 0 : 1;
     }
     const r = impact(app, { change: rest[0] });
-    const line = (n) => `  ${n.kind.padEnd(15)} ${n.id}${n.file ? `  (${n.file})` : ""}`;
-    print(r, values.json, [`Change: ${r.change}`, `Reaches ${r.affected.length} item${r.affected.length === 1 ? "" : "s"}:`, ...r.affected.map(line), ...(r.checkpointRequired ? [`Checkpoint ${r.checkpointRequired} needed: ${r.because}.`] : [])].join("\n"));
+    print(r, values.json, [`Change: ${r.change}`, `Reaches ${r.affected.length} item${r.affected.length === 1 ? "" : "s"}:`, ...itemLines(r.affected), ...(r.checkpointRequired ? [`Checkpoint ${r.checkpointRequired} needed: ${r.because}.`] : [])].join("\n"));
     return 0;
   }
   if (command === "test-kit") {
@@ -200,7 +213,7 @@ async function main(argv) {
     const [sub, file] = rest;
     if (sub !== "import") throw new DesignError(`unknown observe command "${sub ?? ""}": use import`);
     const r = observeImport(app, { file, kit: values.kit });
-    print(r, values.json, [`Imported ${r.imported} observation${r.imported === 1 ? "" : "s"} into ${r.path} (${r.sessions.join(", ") || "no sessions"}).`, ...r.skipped.map((x) => `skipped row ${x.row}: ${x.reason}`)].join("\n"));
+    print(r, values.json, [`Imported ${r.imported} observation${r.imported === 1 ? "" : "s"} into ${r.path} (${r.sessions.join(", ") || "no sessions"}).`, ...(r.rewritten ? [`Rewrote ${r.rewritten} with pseudonyms; the real names are only in .ux-builder/participants.local.json, kept out of git.`] : []), ...r.skipped.map((x) => `skipped row ${x.row}: ${x.reason}`)].join("\n"));
     return 0;
   }
   if (command === "transcript") {
@@ -223,7 +236,7 @@ async function main(argv) {
   if (command === "insights") {
     const r = insights(app, { events: rest[0], support: values.support, feedback: values.feedback, date: values.date });
     const pct = (j) => (j.started ? `${Math.round((j.completed / j.started) * 100)}%` : "–");
-    print(r, values.json, [`Wrote ${r.path}: ${r.events} events.`, ...r.journeys.map((j) => `  ${j.journey}: ${j.completed} of ${j.started} completed (${pct(j)}), ${j.failedSearches} failed searches`), ...r.unmatched.map((u) => `  unmatched: ${u.journey} (${u.events} events; not in the blueprint)`), ...r.jobs.map((j) => `  ${j.job} now cites ${j.evidence.join(", ")} (${j.confidence}, ${j.status})`)].join("\n"));
+    print(r, values.json, [`Wrote ${r.path}: ${r.events} events.`, ...r.journeys.map((j) => `  ${j.journey}: ${j.completed} of ${j.started} completed (${pct(j)}), ${j.failedSearches} failed searches`), ...r.unmatched.map((u) => `  unmatched: ${u.journey} (${u.events} event${u.events === 1 ? "" : "s"}; not in the blueprint)`), ...r.jobs.map((j) => `  ${j.job} now cites ${j.evidence.join(", ")} (${j.confidence}, ${j.status})`)].join("\n"));
     return 0;
   }
   if (command === "diagnose") {

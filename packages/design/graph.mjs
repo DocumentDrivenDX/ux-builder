@@ -169,9 +169,11 @@ export async function applyImpact(app, { change, set } = {}) {
   const delta = complexityDelta(before, next);
   if (errors.length) return { applied: false, change: reached.change, errors, delta, regenerated: [], proposals: null, summary: summaryOf(reached, delta, [], errors) };
   const regenerated = [];
-  // The prototypes of the app's own blueprint (prototype/current*).
+  // The prototypes of the app's own blueprint: prototype/current*, and the chosen alternative's, which app.blueprint.json now is.
+  let chosen = null;
+  try { chosen = readState(app).alternatives.find((a) => a.status === "chosen")?.name ?? null; } catch { /* no design state */ }
   const { writePrototype } = await import("@ux-builder/ui/blueprint/prototype");
-  for (const dir of existsSync(join(app, "prototype")) ? readdirSync(join(app, "prototype")).filter((n) => /^current(-[a-z0-9-]+)?$/.test(n)) : []) {
+  for (const dir of existsSync(join(app, "prototype")) ? readdirSync(join(app, "prototype")).filter((n) => /^current(-[a-z0-9-]+)?$/.test(n) || (chosen && (n === chosen || n.startsWith(`${chosen}-`)))) : []) {
     // The theme it was drawn in: its assets hold that theme's CSS beside ui.css and patterns.css.
     const assetsDir = join(app, "prototype", dir, "assets");
     const theme = (existsSync(assetsDir) ? readdirSync(assetsDir) : []).find((f) => f.endsWith(".css") && !["ui.css", "patterns.css"].includes(f))?.replace(/\.css$/, "") ?? "plain";
@@ -187,11 +189,11 @@ export async function applyImpact(app, { change, set } = {}) {
     if (r.marker) { writeProposals(r, join(app, "helix-proposals")); proposals = { patches: r.proposals.length, drafts: r.drafts.length, dir: "helix-proposals/" }; }
   }
   try { recordDecision(app, { chose: `Applied: ${reached.change}`, why: `The person accepted the change after reviewing its impact (${reached.affected.length} items).`, relied: reached.matched.map((m) => m.id) }, { by: "agent" }); } catch (e) { process.emitWarning(`the change was not written to the trace: ${e.message}`); }
-  return { applied: true, change: reached.change, errors: [], delta, regenerated, proposals, summary: summaryOf(reached, delta, regenerated, []) };
+  return { applied: true, change: reached.change, errors: [], delta, regenerated, proposals, summary: summaryOf(reached, delta, regenerated, [], proposals) };
 }
 
 /* One summary of a change: what it reached, the complexity per journey, what was regenerated. */
-export function summaryOf(reached, delta, regenerated, errors) {
+export function summaryOf(reached, delta, regenerated, errors, proposals = null) {
   const lines = [`Change: ${reached.change}`];
   if (errors.length) {
     lines.push(`The blueprint check fails (${errors.length} error${errors.length === 1 ? "" : "s"}); nothing was regenerated. Fix app.blueprint.json:`);
@@ -203,5 +205,6 @@ export function summaryOf(reached, delta, regenerated, errors) {
   }
   if (!delta.journeys.length) lines.push("  No journey changed.");
   if (regenerated.length) lines.push(`Regenerated: ${regenerated.join(", ")}`);
+  if (proposals?.patches || proposals?.drafts) lines.push(`Proposed to HELIX: ${proposals.patches} patch${proposals.patches === 1 ? "" : "es"}${proposals.drafts ? ` and ${proposals.drafts} draft${proposals.drafts === 1 ? "" : "s"}` : ""} in ${proposals.dir}; nothing in HELIX is changed until the person applies them.`);
   return lines.join("\n");
 }

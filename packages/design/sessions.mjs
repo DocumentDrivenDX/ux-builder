@@ -7,7 +7,7 @@
 
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { extname, isAbsolute, join } from "node:path";
+import { extname, isAbsolute, join, relative, sep } from "node:path";
 import { mask } from "@ux-builder/trace";
 import { DesignError, writeInApp } from "./app.mjs";
 import { PERSONAL_PATTERNS } from "./documents.mjs";
@@ -39,8 +39,10 @@ export function parseCsv(text) {
 }
 
 /* The pseudonyms in use, and a way to name a participant by one. */
-function pseudonyms(app) {
+function pseudonyms(app, { reserved = [] } = {}) {
   const known = readJson(join(app, PARTICIPANTS)) ?? {};
+  // Pseudonyms the input already uses for other people are never handed out again.
+  const taken = new Set(reserved.filter((x) => PSEUDONYM.test(x)));
   let changed = false;
   const of = (who) => {
     const w = String(who ?? "").trim();
@@ -48,7 +50,9 @@ function pseudonyms(app) {
     if (PSEUDONYM.test(w)) return w;
     const hit = Object.entries(known).find(([, name]) => String(name).trim().toLowerCase() === w.toLowerCase());
     if (hit) return hit[0];
-    const p = `P${Math.max(0, ...Object.keys(known).map((k) => Number(k.slice(1)) || 0)) + 1}`;
+    let n = 1;
+    while (known[`P${n}`] !== undefined || taken.has(`P${n}`)) n++;
+    const p = `P${n}`;
     known[p] = w; changed = true;
     return p;
   };
@@ -101,7 +105,7 @@ export function observeImport(app, { file, kit } = {}) {
     const cols = head.map((h) => h.trim().toLowerCase());
     rows = body.map((r) => Object.fromEntries(cols.map((c, i) => [c, r[i] ?? ""])));
   }
-  const people = pseudonyms(app);
+  const people = pseudonyms(app, { reserved: rows.map((r) => String(r.participant ?? "").trim()) });
   // Real names in the sheet are masked out of every remark, before anything is written.
   const sheetNames = rows.map((r) => String(r.participant ?? "").trim()).filter((w) => w && !PSEUDONYM.test(w));
   const findings = [], skipped = [];
@@ -123,13 +127,25 @@ export function observeImport(app, { file, kit } = {}) {
     findings.push(o);
   }
   people.save();
+  // A sheet kept in the app (and so in git) keeps only pseudonyms and masked remarks.
+  const rel = relative(app, path).split(sep).join("/");
+  let rewritten = null;
+  if (!rel.startsWith("..") && rel.startsWith("docs/ux/") && /\.csv$/i.test(rel) && sheetNames.length) {
+    const names = people.names();
+    const [head, ...body] = parseCsv(text);
+    const cols = head.map((h) => h.trim().toLowerCase());
+    const at = (c) => cols.indexOf(c);
+    const cellOut = (v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v ?? ""));
+    const lines = [head.join(","), ...body.map((r) => r.map((v, i) => (i === at("participant") ? people.of(v) ?? v : ["remark", "problem"].includes(cols[i]) ? maskPersonal(v, { app, names }) : v)).map(cellOut).join(","))];
+    rewritten = writeInApp(app, rel, lines.join("\n") + "\n");
+  }
   const out = `docs/ux/tests/${kit}/findings.json`;
   const was = readJson(join(app, out)) ?? {};
   const fresh = new Set(findings.map((f) => f.id));
   const all = [...(was.findings ?? []).filter((f) => !fresh.has(f.id)), ...findings].sort((a, b) => (a.task ?? 0) - (b.task ?? 0) || String(a.participant ?? "").localeCompare(String(b.participant ?? ""), "en", { numeric: true }) || (a.id < b.id ? -1 : 1));
   const sessions = [...new Set(all.filter((f) => f.source === "human").map((f) => f.participant))].sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
   writeInApp(app, out, JSON.stringify({ kit, sessions, findings: all }, null, 2) + "\n");
-  return { kit, path: out, imported: findings.length, findings, skipped, sessions };
+  return { kit, path: out, imported: findings.length, findings, skipped, sessions, ...(rewritten ? { rewritten } : {}) };
 }
 
 const MEDIA = new Set([".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".oga", ".opus", ".mp4", ".mov", ".m4v", ".webm", ".mkv", ".avi", ".wmv"]);

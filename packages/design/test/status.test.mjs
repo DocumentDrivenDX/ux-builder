@@ -61,7 +61,7 @@ describe("status", () => {
     const app = tempApp();
     const r = cli(app, ["status"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /^Define, in the full loop\.\nNo alternative is chosen yet\.\nNo untested assumptions\.\nNo open questions\.\nNext: not set\.\n$/);
+    assert.match(r.stdout, /^Define, in the full loop\.\nNo alternative is chosen yet\.\nNo untested assumptions\.\nNo open questions\.\nNext \(not set; the activity.s first step\): Interview the person about what users must accomplish, then draft the brief and ask core-1\.\n$/);
   });
 
   test("status finds the app from a folder below it", () => {

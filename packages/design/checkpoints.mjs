@@ -17,30 +17,56 @@ export const CHECKPOINTS = {
   release: "a production release of a changed experience",
 };
 
+/* The activity each passed core checkpoint moves the loop to, and what the
+   guide does there first: the loop moves on only forward. */
+const ORDER = ["baseline", "define", "explore", "experience", "validate"];
+const AFTER = { "core-1": "explore", "core-2": "experience" };
+export const FIRST_STEP = {
+  baseline: "Go through docs/ux/baseline.md with the person and ask what to improve",
+  define: "Interview the person about what users must accomplish, then draft the brief and ask core-1",
+  explore: "Draft at least two alternatives for the open questions, compare them and ask core-2",
+  experience: "Prototype the chosen design for the person to try; then build the validated prototype",
+  validate: "Write a test kit and test the design with people",
+};
+
 /* Write the checkpoint to the trace; a trace that cannot be written warns
    and never stops the checkpoint being recorded (as ADR-035 rule 2 asks). */
-function traceCheckpoint(app, id, { answer, skip, reason }) {
+function traceCheckpoint(app, id, { answer, skip, declined, reason }) {
   try {
     return recordDecision(app, skip
       ? { chose: `Skipped checkpoint ${id}`, why: reason, kind: "checkpoint", checkpoint: id }
-      : { chose: answer, why: `The person's answer at checkpoint ${id}: ${CHECKPOINTS[id]}.`, kind: "checkpoint", checkpoint: id }, { by: "agent" });
+      : { chose: answer, why: `The person's answer at checkpoint ${id}: ${CHECKPOINTS[id]}${declined ? " (declined: not yet)" : ""}.`, kind: "checkpoint", checkpoint: id }, { by: "agent" });
   } catch (e) {
     process.emitWarning(`the checkpoint was not written to the trace: ${e.message}`);
     return null;
   }
 }
 
-export function checkpoint(app, { id, answer, skip = false, reason, now = new Date().toISOString() } = {}) {
+export function checkpoint(app, { id, answer, skip = false, declined = false, reason, now = new Date().toISOString() } = {}) {
   if (!Object.hasOwn(CHECKPOINTS, id)) throw new DesignError(`"${id ?? ""}" is not a checkpoint; use one of ${Object.keys(CHECKPOINTS).join(", ")}`);
   if (skip && answer) throw new DesignError("give --answer or --skip, not both");
+  if (skip && declined) throw new DesignError("--declined goes with --answer: the person said no or not yet");
   if (skip && !reason?.trim()) throw new DesignError(`skipping ${id} needs --reason: why the person chose to go on without it`);
   if (!skip && !answer?.trim()) throw new DesignError(`checkpoint ${id} needs --answer <the person's answer>, or --skip --reason <why>`);
   const state = structuredClone(readState(app));
-  const entry = skip ? { id, status: "skipped", reason: reason.trim(), at: now } : { id, status: "passed", answer: answer.trim(), at: now };
+  // A "no" or "not yet" is an answer too, but it never counts as passed.
+  const entry = skip ? { id, status: "skipped", reason: reason.trim(), at: now } : { id, status: declined ? "declined" : "passed", answer: answer.trim(), at: now };
   state.checkpoints.push(entry);
+  // A passed core checkpoint moves the loop on, and a next action that waited on it gives way.
+  const to = entry.status === "passed" && AFTER[id];
+  const moved = to && advance(state, to);
   writeState(app, state);
-  const event = traceCheckpoint(app, id, { answer, skip, reason });
-  return { checkpoint: entry, about: CHECKPOINTS[id], trace: event ? { episode: event.episode, seq: event.seq } : null };
+  const event = traceCheckpoint(app, id, { answer, skip, declined, reason });
+  return { checkpoint: entry, about: CHECKPOINTS[id], activity: state.activity, ...(moved ? { moved: true } : {}), next: state.next, trace: event ? { episode: event.episode, seq: event.seq } : null };
+}
+
+/* Move the loop on to `to` when it is behind, replacing a next action that
+   waited on a checkpoint already passed. Returns whether it moved. */
+export function advance(state, to) {
+  if (ORDER.indexOf(to) <= ORDER.indexOf(state.activity)) return false;
+  state.activity = to;
+  if (!state.next || state.checkpoints.some((c) => c.status === "passed" && state.next.includes(c.id)) || Object.values(FIRST_STEP).includes(state.next)) state.next = FIRST_STEP[to];
+  return true;
 }
 
 export function setMode(app, { mode, why } = {}) {

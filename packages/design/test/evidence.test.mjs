@@ -56,7 +56,7 @@ describe("US-125: evidence", () => {
     assert.equal(r.status, 1);
     assert.match(r.stdout, /EV-1\.md: the excerpt on line \d+ holds an email address; mask it \(ADR-039\)/);
     assert.match(r.stdout, /EV-1\.md: the excerpt on line \d+ holds a phone number; mask it \(ADR-039\)/);
-    assert.match(r.stdout, /EV-1\.md: line \d+ of the body holds an unmasked api-key; mask it \(ADR-039\)/);
+    assert.match(r.stdout, /EV-1\.md: line \d+ holds an unmasked api-key; mask it \(ADR-039\)/);
     record(app, ['P1: "Write to me at [masked:email]"', 'P1: "Call [masked:phone] if the gate is shut"', 'P1: "my key is [masked:api-key]"']);
     r = cli(app, ["validate"]);
     assert.equal(r.status, 0, r.stdout);
@@ -70,6 +70,12 @@ describe("US-125: evidence", () => {
     let r = cli(app, ["validate"]);
     assert.equal(r.status, 1);
     assert.match(r.stdout, /names a participant; use the pseudonym P1 \(ADR-039\)/);
+    // A first name alone is caught too, and the line is the file's own line number.
+    record(app, ['P1: "Sam here, I fish the Clackamas"']);
+    r = cli(app, ["validate"]);
+    assert.equal(r.status, 1);
+    const line = readFileSync(join(app, "docs/ux/evidence/EV-1.md"), "utf8").split("\n").findIndex((l) => l.includes("Sam here")) + 1;
+    assert.match(r.stdout, new RegExp(`the excerpt on line ${line} names a participant`));
     record(app, ['P1: "P1 here, I fish the Clackamas"']);
     r = cli(app, ["validate"]);
     assert.equal(r.status, 0, r.stdout);

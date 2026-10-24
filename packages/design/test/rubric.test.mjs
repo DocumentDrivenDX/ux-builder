@@ -61,6 +61,9 @@ describe("US-134: the rubric's predicted side", () => {
     // With no audit report, accessibility is to validate too, and is not counted as a failure.
     assert.deepEqual(dim(r, "accessibility").predicted, { value: "to validate", basis: "to validate" });
     assert.equal(r.recommendable, true);
+    // But an unchecked baseline is not a passed one, and the text says so.
+    assert.deepEqual(r.unchecked, ["accessibility"]);
+    assert.match(cli(app({ audit: null }), ["rubric"]).stdout, /Recommendable: no baseline fails\. Accessibility is not checked yet \(run the audit: npm run audit\)\./);
   });
 
   // @covers US-134-AC4

@@ -102,7 +102,11 @@ export function rubric(app, { alternative } = {}) {
   // Per kit task across sessions, and the problems seen in two or more (FEAT-018 GDL-57).
   const m = Object.keys(observed).length ? observedMeasures(app) : null;
   const fails = dimensions.filter((d) => d.baseline && d.fails).map((d) => d.id);
-  return { alternative: name, file, dimensions: dimensions.map(({ fails: _, ...d }) => d), recommendable: fails.length === 0, ...(fails.length ? { notRecommendable: `fails the baseline${fails.length > 1 ? "s" : ""} ${fails.join(" and ")}` } : {}), observedTasks: m?.tasks ?? [], recurring: m?.recurring ?? [] };
+  // A baseline with nothing predicted is not passed: it is unchecked.
+  const unchecked = dimensions.filter((d) => d.baseline && d.predicted.basis === "to validate").map((d) => d.id);
+  // What people did outweighs the prediction: a baseline they contradicted is not met.
+  const contradicted = dimensions.filter((d) => d.baseline && d.observed?.verdict === "contradicts").map((d) => d.id);
+  return { alternative: name, file, dimensions: dimensions.map(({ fails: _, ...d }) => d), recommendable: fails.length === 0 && contradicted.length === 0, ...(unchecked.length ? { unchecked } : {}), ...(contradicted.length ? { contradictedBaselines: contradicted } : {}), ...(fails.length || contradicted.length ? { notRecommendable: [fails.length ? `fails the baseline${fails.length > 1 ? "s" : ""} ${fails.join(" and ")}` : null, contradicted.length ? `people contradicted the baseline${contradicted.length > 1 ? "s" : ""} ${contradicted.join(" and ")}` : null].filter(Boolean).join("; ") } : {}), observedTasks: m?.tasks ?? [], recurring: m?.recurring ?? [] };
 }
 
 export function rubricText(r) {
@@ -113,6 +117,7 @@ export function rubricText(r) {
     for (const t of r.observedTasks) lines.push(`  ${t.kit} task ${t.task} (${t.journey}): ${Math.round(t.completionRate * 100)}% completed, median ${t.medianSeconds ?? "–"} s, ${Math.round(t.errorRate * 100)}% with errors, ${t.assists} assist${t.assists === 1 ? "" : "s"} (${t.sessions} sessions)`);
     for (const p of r.recurring) lines.push(`  Seen in ${p.sessions} sessions: ${p.problem}`);
   }
-  lines.push(r.recommendable ? "Recommendable: no baseline fails. No overall score is given." : `Not recommendable: ${r.notRecommendable}.`);
+  const pending = r.unchecked?.length ? ` ${r.unchecked.join(" and ").replace(/^./, (c) => c.toUpperCase())} ${r.unchecked.length === 1 ? "is" : "are"} not checked yet${r.unchecked.includes("accessibility") ? " (run the audit: npm run audit)" : ""}.` : "";
+  lines.push(r.recommendable ? `Recommendable: no baseline fails.${pending} No overall score is given.` : `Not recommendable: ${r.notRecommendable}.`);
   return lines.join("\n");
 }

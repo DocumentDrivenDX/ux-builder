@@ -134,7 +134,7 @@ export function insights(app, { events: file, support, feedback, date = today() 
   L.push("## Sources", "", ...sources.map((s) => `- ${s.id} (${s.kind}): \`${s.file}\`${s.entries != null ? `, ${s.entries} entries, ${s.linked} linked to a journey` : `, ${events.length} events`}; read from the owner's export, nothing fetched`), "");
   L.push("## Journeys", "", "| Journey | Started | Completed | Completion | Most abandoned step | Failed searches | Errors shown | Feature use | Seconds per step |", "|---|---|---|---|---|---|---|---|---|");
   for (const j of journeys) L.push(`| ${j.journey} | ${j.started} | ${j.completed} | ${pct(j.completed, j.started)} | ${mostAbandoned(j)} | ${j.failedSearches} | ${j.errors} | ${Object.entries(j.features).map(([s, n]) => `${s} ${n}`).join(", ") || "–"} | ${Object.entries(j.secondsPerStep).map(([k, s]) => `${k}: ${s}`).join(", ") || "–"} |`);
-  L.push("", "## Unmatched events", "", ...(unmatched.length ? unmatched.map((u) => `- ${u.journey}: ${u.events} events name a journey the blueprint does not have`) : ["- None."]), "");
+  L.push("", "## Unmatched events", "", ...(unmatched.length ? unmatched.map((u) => `- ${u.journey}: ${u.events} event${u.events === 1 ? "" : "s"} name${u.events === 1 ? "s" : ""} a journey the blueprint does not have`) : ["- None."]), "");
   if (linked.length) L.push("## Support and feedback", "", ...linked.map((l) => `- ${l.evidence} (${l.kind}) [${l.journeys.join(", ")}]: "${l.text}"`), "");
   L.push("## Diagnosis", "", "- None yet. Record one with `ux-builder-design diagnose --insight " + id + "`: the observation, at least two explanations, the hypothesis and the alternative that tests it.", "");
   const path = writeInApp(app, `${DIR}/${id}.md`, L.join("\n"));

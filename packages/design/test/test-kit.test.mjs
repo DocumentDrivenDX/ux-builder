@@ -8,6 +8,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { testKit } from "../index.mjs";
+import { goalText } from "../index.mjs";
 import { cli } from "./helpers.mjs";
 import { kitApp } from "./kit-fixture.mjs";
 
@@ -38,6 +39,10 @@ describe("US-140: get a usability test kit from the journeys", () => {
     assert.match(rows[0], /You want to find a river to fish this weekend\. Show me how you would do that\./);
     for (const row of rows) for (const w of ["River map", "River details", "Saved", "CollectionList", "RecordDetail", "Open river details", "Save river", "map", "detail"]) assert.ok(!new RegExp(`\\b${w}\\b`).test(row), `"${w}" in: ${row}`);
     assert.ok(!/River map|Open river details/.test(readFileSync(join(a, kit.dir, "script.md"), "utf8")));
+    // A one-word title or label is the user's own word too, and the goal is said to them, in the second person.
+    const bp = { screens: [{ id: "river", title: "River", pattern: "RecordDetail", actions: [{ id: "back", label: "Back" }] }, { id: "saved", title: "Saved", pattern: "CollectionList" }] };
+    assert.equal(goalText("Go back to a river I saved", bp), "go back to a river you saved");
+    assert.equal(goalText("Find a river with public access near me", bp), "find a river with public access near you");
   });
 
   // @covers US-140-AC3
@@ -72,8 +77,8 @@ describe("US-140: get a usability test kit from the journeys", () => {
     const a = kitApp();
     const kit = testKit(a);
     const screener = readFileSync(join(a, kit.dir, "screener.md"), "utf8");
-    assert.match(screener, /- Are you weekend anglers new to the area\?/);
-    assert.match(screener, /- Are you fly-fishing guides\?/);
+    assert.match(screener, /- Does this describe you: weekend anglers new to the area\? \(yes \/ no\)/);
+    assert.match(screener, /- Does this describe you: fly-fishing guides\? \(yes \/ no\)/);
     const sheet = readFileSync(join(a, kit.dir, "observations.csv"), "utf8").trim().split("\n");
     assert.deepEqual(sheet[0].split(","), ["participant", "task", "completed", "seconds", "errors", "assists", "remark", "problem"]);
     assert.deepEqual(sheet.slice(1).map((l) => l.split(",")[1]), ["1", "2"]);

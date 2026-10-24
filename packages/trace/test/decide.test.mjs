@@ -31,6 +31,10 @@ describe("decide with the five answers", () => {
     assert.equal(d.validation, "Compare task time with the list in a test");
     assert.deepEqual(validateEvent(d), []);
     assert.ok(!readFileSync(join(app, ".ux-builder/trace", `${d.episode}.jsonl`), "utf8").includes(SECRETS.github));
+    // --assumption, as ux-builder-design decision add spells it, is the same as --assumptions.
+    const alias = cli(app, ["decide", "--kind", "addition", "--chose", "A list", "--why", "Faster", ...FIVE.map((x) => (x === "--assumptions" ? "--assumption" : x))]);
+    assert.equal(alias.status, 0, alias.stderr);
+    assert.deepEqual(readEpisode(app, currentEpisode(app)).at(-1).assumptions, ["Location is available", "People fish near home"]);
   });
 
   // @covers US-119-AC3

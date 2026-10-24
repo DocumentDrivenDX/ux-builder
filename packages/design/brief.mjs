@@ -49,6 +49,8 @@ function under(body, heading) {
 }
 
 const sentence = (text) => (text.match(/^[^.!?]*[.!?]/)?.[0] ?? text).trim();
+/* Text still the template's: a [placeholder] (a Markdown link is not one). */
+const placeholder = (text) => /\[/.test(String(text).replace(/\[[^\]]*\]\([^)]*\)/g, ""));
 
 /* What the PRD and stories say, as confirmed points by section. */
 function fromHelix(docs) {
@@ -57,9 +59,10 @@ function fromHelix(docs) {
   if (prd) {
     const title = prd.body.match(/^# (.+)$/m)?.[1]?.replace(/^Product Requirements Document\s*[—-]\s*/i, "").trim();
     const summary = under(prd.body, "Summary").filter((l) => l.trim() && !l.startsWith(">") && !l.startsWith("|")).join(" ").trim();
-    if (title || summary) points.product.push({ text: [title, summary && sentence(summary)].filter(Boolean).join(": "), status: "confirmed", from: "prd" });
-    for (const [, who] of prd.body.matchAll(/^### (?:Primary|Secondary) Persona: (.+)$/gm)) points.users.push({ text: who.trim(), status: "confirmed", from: "prd" });
-    for (const l of under(prd.body, "Constraints")) { const m = l.match(/^\s*[-*] (.+)$/); if (m) points.constraints.push({ text: m[1].replace(/\*\*/g, "").trim(), status: "confirmed", from: "prd" }); }
+    const lead = [title && !/^Product Requirements Document$/i.test(title) ? title : null, summary && sentence(summary)].filter((x) => x && !placeholder(x)).join(": ");
+    if (lead) points.product.push({ text: lead, status: "confirmed", from: "prd" });
+    for (const [, who] of prd.body.matchAll(/^### (?:Primary|Secondary) Persona: (.+)$/gm)) if (!placeholder(who)) points.users.push({ text: who.trim(), status: "confirmed", from: "prd" });
+    for (const l of under(prd.body, "Constraints")) { const m = l.match(/^\s*[-*] (.+)$/); if (m && !placeholder(m[1])) points.constraints.push({ text: m[1].replace(/\*\*/g, "").trim(), status: "confirmed", from: "prd" }); }
   }
   for (const d of docs.filter((x) => /^US-\d+$/.test(String(x.front?.ddx?.id ?? "")))) {
     const t = d.body.match(/^# (US-\d+): (.+)$/m);

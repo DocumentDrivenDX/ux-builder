@@ -8,7 +8,9 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { DesignError, writeInApp } from "./app.mjs";
+import { advance } from "./checkpoints.mjs";
 import { helixRoot, parseDocument } from "./documents.mjs";
+import { readState, writeState } from "./state.mjs";
 
 const list = (x) => (Array.isArray(x) ? x : []);
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
@@ -42,22 +44,31 @@ function stories(app) {
   return out;
 }
 
-/* Words from the blueprint a participant must not be given: screen IDs and
-   titles, pattern names, action labels and IDs. */
+/* Words from the blueprint a participant must not be given: pattern names,
+   and screen titles and action labels of two words or more ("River map",
+   "Save river"). A one-word title or label ("River", "Back", "Saved") is
+   also the user's own language, so the goal keeps it. */
 function interfaceWords(bp) {
   const words = new Set();
   for (const s of list(bp.screens)) {
-    for (const w of [s?.id, s?.title, s?.pattern, ...list(s?.actions).flatMap((a) => [a?.label, a?.id])]) if (typeof w === "string" && w.trim().length > 2) words.add(w.trim());
+    for (const w of [s?.pattern, s?.title, ...list(s?.actions).map((a) => a?.label)]) {
+      if (typeof w !== "string" || !w.trim()) continue;
+      if (w === s?.pattern || /\s/.test(w.trim()) || /[a-z][A-Z]/.test(w)) words.add(w.trim());
+    }
   }
   return [...words].sort((a, b) => b.length - a.length);
 }
+
+/* The goal said to the participant: first person becomes second. */
+const PERSON = [[/\bI am\b/g, "you are"], [/\bI'm\b/g, "you're"], [/\bI\b/g, "you"], [/\bme\b/gi, "you"], [/\bmy\b/gi, "your"], [/\bmine\b/gi, "yours"], [/\bmyself\b/gi, "yourself"]];
+const secondPerson = (text) => PERSON.reduce((t, [re, to]) => t.replace(re, to), text);
 
 /* A goal in the user's words: the interface words taken out. */
 export function goalText(goal, bp) {
   let text = String(goal);
   // The word goes with the preposition and article that lead to it: "on the River map".
   for (const w of interfaceWords(bp)) text = text.replace(new RegExp(`(?:\\b(?:on|in|from|at|with|using|via|through)\\s+)?(?:\\b(?:the|a|an)\\s+)?\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), "");
-  text = text.replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").trim();
+  text = secondPerson(text).replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").trim();
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
@@ -104,7 +115,7 @@ export function testKit(app, { journeys = [], id } = {}) {
     ...tasks.map((t) => `| ${t.n} | ${t.journey} | You want to ${cell(t.goal)}. Show me how you would do that. | ${t.criteria.map((c) => c.id).join(", ") || MISSING} |`), ""].join("\n");
   const script = ["# Facilitator script", "", "1. Thank the participant. Say we are testing the design, not them, and ask them to think aloud.", "2. Confirm consent (consent.md) before starting.", ...tasks.map((t, i) => `${i + 3}. Read task ${t.n}: "You want to ${t.goal}." Do not point at the screen or name anything on it.`), `${tasks.length + 3}. If the participant is stuck for two minutes, give one hint and mark an assist.`, `${tasks.length + 4}. After each task, ask: "How sure are you that it worked?"`, `${tasks.length + 5}. Thank them; note anything they said after the tasks.`, ""].join("\n");
   const consent = ["# Consent", "", "We are testing a design, not you. We take notes during the session; we do not record audio or video unless you agree separately.", "Notes use a pseudonym (P1, P2) and never your name. You can stop at any time, and ask us to delete your notes.", "", "Confirm consent for each session before importing its notes (`ux-builder-design transcript add --consent-confirmed`).", ""].join("\n");
-  const screener = ["# Screener", "", ...(users.length ? ["Recruit people who match one of these target users (from the experience brief):", "", ...users.map((u) => `- Are you ${u.charAt(0).toLowerCase() + u.slice(1)}?`)] : ["The experience brief names no target users yet: write the screener questions from the PRD's personas."]), "", "Leave out anyone who works on this product.", ""].join("\n");
+  const screener = ["# Screener", "", ...(users.length ? ["Recruit people who match one of these target users (from the experience brief):", "", ...users.map((u) => `- Does this describe you: ${u.charAt(0).toLowerCase() + u.slice(1)}? (yes / no)`)] : ["The experience brief names no target users yet: write the screener questions from the PRD's personas."]), "", "Leave out anyone who works on this product.", ""].join("\n");
   const sheet = [OBSERVATION_COLUMNS.join(","), ...tasks.map((t) => ["", t.n, ...OBSERVATION_COLUMNS.slice(2).map(() => "")].map(csv).join(","))].join("\n") + "\n";
   const kitMd = ["---", "ux:", `  id: ${kit}`, "  type: test-kit", "---", "", `# ${kit}: ${tasks.map((t) => t.journey).join(", ")}`, "", "## Scenarios", "", "See `scenarios.md`.", "", ...tasks.map((t) => `- Task ${t.n} (${t.journey}): you want to ${t.goal}.`), "", "## Success criteria", "", ...tasks.map((t) => `- Task ${t.n}: ${t.criteria.map((c) => c.id).join(", ") || MISSING}`), "", "## Facilitator script", "", "See `script.md`.", "", "## Consent", "", "See `consent.md`.", "", "## Screener", "", "See `screener.md`.", "", "## Observation sheet", "", `\`observations.csv\`: ${OBSERVATION_COLUMNS.join(", ")}; one row per task and participant.`, ""].join("\n");
   const written = [
@@ -114,6 +125,8 @@ export function testKit(app, { journeys = [], id } = {}) {
   const sheetPath = join(app, dir, "observations.csv");
   const filled = existsSync(sheetPath) && readFileSync(sheetPath, "utf8").split("\n").slice(1).some((l) => /^[^,]+,/.test(l) && !l.startsWith(","));
   if (!filled) written.push(writeInApp(app, `${dir}/observations.csv`, sheet));
+  // A test kit means the loop is validating.
+  try { const state = readState(app); if (advance(state, "validate")) writeState(app, state); } catch { /* no design state */ }
   const warnings = tasks.filter((t) => !t.criteria.length).map((t) => `${t.journey} names no acceptance criteria: task ${t.n} has no success criteria`);
   return { id: kit, dir, tasks, written, users, warnings };
 }

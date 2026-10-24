@@ -88,12 +88,14 @@ const RULES = {
     const used = excerptLines(doc.body).map((e) => e.text.match(/^\s*-\s*(P[0-9]+):/)?.[1]).filter((k) => k && !(k in p));
     return [...bad.map((k) => `participant "${k}" is not a pseudonym (P1, P2, …)`), ...[...new Set(used)].map((k) => `excerpt by ${k}, who is not listed under participants`)];
   },
-  masked(doc, ux, { appDir }) {
-    const out = findSecrets(doc.body, { appDir }).map((h) => `line ${h.line} of the body holds an unmasked ${h.kind}; mask it (ADR-039)`);
+  masked(doc, ux, { appDir, offset = 0 }) {
+    const out = findSecrets(doc.body, { appDir }).map((h) => `line ${h.line + offset} holds an unmasked ${h.kind}; mask it (ADR-039)`);
     const names = localNames(appDir);
-    for (const e of excerptLines(doc.body)) {
+    for (const e of excerptLines(doc.body).map((x) => ({ ...x, line: x.line + offset }))) {
       for (const [what, re] of PERSONAL_PATTERNS) if (re.test(e.text)) out.push(`the excerpt on line ${e.line} holds ${/^[aeiou]/.test(what) ? "an" : "a"} ${what}; mask it (ADR-039)`);
-      for (const [p, name] of Object.entries(names)) if (typeof name === "string" && name.trim() && e.text.toLowerCase().includes(name.trim().toLowerCase())) out.push(`the excerpt on line ${e.line} names a participant; use the pseudonym ${p} (ADR-039)`);
+      // The whole name, or a first or last name on its own (as masking replaces them).
+      const named = (name) => [name.trim(), ...name.trim().split(/\s+/).filter((w) => w.length > 2)].some((w) => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(e.text));
+      for (const [p, name] of Object.entries(names)) if (typeof name === "string" && name.trim() && named(name)) out.push(`the excerpt on line ${e.line} names a participant; use the pseudonym ${p} (ADR-039)`);
     }
     return out;
   },
@@ -150,7 +152,9 @@ export function validateDocument(text, { path = null, known = null, appDir } = {
     if (known && !known.has(String(l.to))) add(`link to ${l.to} (${l.kind}) does not resolve to a docs/ux document or a HELIX document`);
   }
   for (const r of meta.rules ?? []) {
-    const got = RULES[r]?.(doc, ux, { known, appDir }) ?? [`unknown rule ${r} in ${ux.type}'s meta.yml`];
+    // Lines are counted from the top of the file, past the frontmatter.
+    const offset = text.split("\n").length - doc.body.split("\n").length;
+    const got = RULES[r]?.(doc, ux, { known, appDir, offset }) ?? [`unknown rule ${r} in ${ux.type}'s meta.yml`];
     for (const m of Array.isArray(got) ? got : got.problems ?? []) add(m);
     if (!Array.isArray(got)) for (const n of got.notes ?? []) problems.push({ message: n, level: "note" });
   }

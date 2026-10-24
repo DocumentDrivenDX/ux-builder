@@ -3,7 +3,8 @@
    wireframes' pattern rendering. Each page is one screen in one state at
    one size class, with a banner naming the design question it answers, a
    switcher for its states and size classes, and a link for every action to
-   where it leads. It lives under prototype/, outside the app's source, and
+   where it leads; the page's own buttons and navigation lead there too.
+   It lives under prototype/, outside the app's source, and
    never becomes app code (the ux-builder/no-prototype-import lint rule). */
 
 import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
@@ -45,6 +46,22 @@ function bar(bp, page, { question, statesOf, sizes }) {
 </header>`;
 }
 
+/* What the page's own controls do: a click on a button or link whose name
+   is an action's label (or a destination's) goes where the bar's link
+   goes, so a person can use the page itself, not only the bar. */
+function wiring(bp, page) {
+  const s = list(bp.screens).find((x) => x?.id === page.screen) ?? {};
+  const go = {};
+  for (const d of list(bp.destinations)) if (d?.label && d?.screen) go[d.label] = fileOf(d.screen, "ideal", page.sizeClass);
+  for (const a of list(s.actions)) {
+    if (typeof a?.to !== "string" || !a.label) continue;
+    if (a.to === "back") go[a.label] = "back";
+    else if (a.to.startsWith("state:")) go[a.label] = fileOf(page.screen, a.to.slice(6), page.sizeClass);
+    else if (a.to !== "external" && !a.to.startsWith("modal:")) go[a.label] = fileOf(a.to, "ideal", page.sizeClass);
+  }
+  return `<script>(() => { const go = ${JSON.stringify(go).replace(/</g, "\\u003c")}; document.addEventListener("click", (e) => { const el = e.target.closest("button, a, [role=button], [role=link]"); if (!el || el.closest(".proto-bar")) return; const to = go[(el.getAttribute("aria-label") || el.textContent || "").trim()]; if (!to) return; e.preventDefault(); if (to === "back") history.back(); else location.href = to; }, true); })();</script>`;
+}
+
 /* The prototype's pages: [{ file, html, screen, state, sizeClass }]. */
 export async function prototypePages(bp, { question, theme = "plain" } = {}) {
   const pages = await wireframes(bp, { theme });
@@ -54,7 +71,8 @@ export async function prototypePages(bp, { question, theme = "plain" } = {}) {
     file: p.file, screen: p.screen, state: p.state, sizeClass: p.sizeClass,
     html: p.html
       .replace(/<title>([^<]*) — ([a-z]+) wireframe<\/title>/, "<title>$1 — $2 prototype</title>")
-      .replace("<body>", `<body data-piq-screen="${esc(p.screen)}" data-prototype="exploratory">\n${bar(bp, p, { question, statesOf, sizes })}`),
+      .replace("<body>", `<body data-piq-screen="${esc(p.screen)}" data-prototype="exploratory">\n${bar(bp, p, { question, statesOf, sizes })}`)
+      .replace("</body>", `${wiring(bp, p)}\n</body>`),
   }));
 }
 

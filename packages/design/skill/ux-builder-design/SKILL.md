@@ -283,9 +283,12 @@ fails, nothing is regenerated: fix the blueprint and apply again. Use
 
 Stop, ask the person one question, and wait for the answer at each
 checkpoint. Record it at once:
-`ux-builder-design state checkpoint <id> --answer "<their words>"`, or, if
-they choose to go on without deciding,
-`state checkpoint <id> --skip --reason "<why>"`.
+`ux-builder-design state checkpoint <id> --answer "<their words>"`. If the
+answer is no or not yet, add `--declined`: it is recorded, and never counts
+as passed. If they choose to go on without deciding,
+`state checkpoint <id> --skip --reason "<why>"`. A passed `core-1` moves the
+loop to Explore and `core-2` to Experience; writing a test kit moves it to
+Validate.
 
 Three core checkpoints:
 - `core-1`, after Define: "Is this the outcome, and is this how we'll know

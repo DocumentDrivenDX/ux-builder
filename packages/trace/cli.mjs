@@ -22,6 +22,7 @@ Usage: ux-builder-trace <command> [options] [--dir <app>]
       (transcript_path, session_id, cwd).
   decide --chose <what> --why <why> [--considered <x>]... [--relied <rule or US-n>]...
          [--kind addition --goal <g> --without <w> --simplest <s> --assumptions <a>... --validation <v>]
+         (--assumption is the same as --assumptions, as ux-builder-design decision add spells it)
          [--screen id] [--departs] [--workaround]
       record a decision: each pattern choice, departure from the guidance and
       workaround for a missing component (as MCP record_decision does). An
@@ -75,7 +76,7 @@ async function main(argv) {
   const opts = {
     start: { goal: { type: "string" }, story: { type: "string", multiple: true }, screen: { type: "string", multiple: true }, journey: { type: "string", multiple: true }, agent: { type: "string" }, model: { type: "string" }, trigger: { type: "string" }, "no-transcripts": { type: "boolean" } },
     "attach-transcript": { file: { type: "string" }, agent: { type: "string" } },
-    decide: { chose: { type: "string" }, why: { type: "string" }, considered: { type: "string", multiple: true }, relied: { type: "string", multiple: true }, screen: { type: "string" }, departs: { type: "boolean" }, workaround: { type: "boolean" }, kind: { type: "string" }, goal: { type: "string" }, without: { type: "string" }, simplest: { type: "string" }, assumptions: { type: "string", multiple: true }, validation: { type: "string" } },
+    decide: { chose: { type: "string" }, why: { type: "string" }, considered: { type: "string", multiple: true }, relied: { type: "string", multiple: true }, screen: { type: "string" }, departs: { type: "boolean" }, workaround: { type: "boolean" }, kind: { type: "string" }, goal: { type: "string" }, without: { type: "string" }, simplest: { type: "string" }, assumptions: { type: "string", multiple: true }, assumption: { type: "string", multiple: true }, validation: { type: "string" } },
     lint: { eslint: { type: "string", multiple: true }, stylelint: { type: "string", multiple: true } },
     end: { status: { type: "string" }, assessment: { type: "string" } },
     status: {},
@@ -131,7 +132,7 @@ async function main(argv) {
   if (cmd === "decide") {
     const dir = appDir(values.dir ?? process.cwd());
     try {
-      const e = recordDecision(dir, { chose: values.chose, why: values.why, considered: values.considered, relied: values.relied, screen: values.screen, departs: values.departs, workaround: values.workaround, kind: values.kind, goal: values.goal, without: values.without, simplest: values.simplest, assumptions: values.assumptions, validation: values.validation });
+      const e = recordDecision(dir, { chose: values.chose, why: values.why, considered: values.considered, relied: values.relied, screen: values.screen, departs: values.departs, workaround: values.workaround, kind: values.kind, goal: values.goal, without: values.without, simplest: values.simplest, assumptions: [...(values.assumptions ?? []), ...(values.assumption ?? [])], validation: values.validation });
       if (!e) return 1;
       process.stdout.write(`Recorded the decision in ${e.episode}\n`);
       return 0;

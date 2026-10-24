@@ -134,7 +134,7 @@ not part of this contract, and they may change in any release.
 
 | Command | Behaviour | Exit |
 |---|---|---|
-| `check <file> [--json]` | Prints findings (or JSON) | 0 no errors; 1 an error finding; 2 usage or unreadable file |
+| `check [<file>] [--json]` | Prints findings (or JSON) for the file, or app.blueprint.json | 0 no errors; 1 an error finding; 2 usage or unreadable file |
 | `init [--kind app\|view] [--out <file>]` | Writes `skeleton(kind)` to `app.blueprint.json` (or `--out`); refuses to overwrite | 0 written; 1 exists; 2 usage |
 
 ## AI and agent experience *[Amended 2026-10-21 — planned, FEAT-011, ADR-028]*

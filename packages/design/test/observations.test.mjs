@@ -58,6 +58,14 @@ describe("US-141: import observations and consented transcripts", () => {
     assert.equal(r.findings.find((f) => f.task === 2).remark, "P1 family uses it too");
     // The real name is kept out of git, beside the pseudonym.
     assert.deepEqual(JSON.parse(readFileSync(join(a, ".ux-builder/participants.local.json"), "utf8")), { P1: "Maria Lopez" });
+    // A name next to pseudonyms the sheet already uses never takes one of theirs; the kit's own sheet keeps only pseudonyms.
+    writeFileSync(join(a, "docs/ux/tests/TK-1/observations.csv"), "participant,task,completed,remark\nP2,1,yes,fine\nTom Reyes,1,no,Tom got lost\nP3,1,yes,\n");
+    const mixed = json(a, ["observe", "import", "docs/ux/tests/TK-1/observations.csv", "--kit", "TK-1"]);
+    assert.deepEqual(mixed.findings.map((f) => f.participant).sort(), ["P2", "P3", "P4"], "three people, three pseudonyms: P1 is Maria, P2 and P3 the sheet's own");
+    assert.equal(mixed.rewritten, "docs/ux/tests/TK-1/observations.csv");
+    const sheet = readFileSync(join(a, "docs/ux/tests/TK-1/observations.csv"), "utf8");
+    assert.ok(!/Tom|Reyes/.test(sheet), sheet);
+    assert.match(sheet, /^P4,1,no,P4 got lost$/m);
   });
 
   // @covers US-141-AC3

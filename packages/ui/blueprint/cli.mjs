@@ -18,7 +18,7 @@
    Each check is also a check event in the app's episode trace (FEAT-016)
    when @ux-builder/trace is installed and .ux-builder/ is above the file.
 
-   propose, draw and wireframes read app.blueprint.json when no file is
+   check, propose, draw and wireframes read app.blueprint.json when no file is
    given (FEAT-012 DRF-01, DRW-01, DRW-02; FEAT-015 RPT-09). propose writes
    HELIX proposals as patches, a report and proposals.json, and applies
    nothing; for HELIX UX types the installed HELIX does not define, it names
@@ -39,7 +39,7 @@ import { propose, writeProposals } from "./propose.mjs";
 import { drawings, writeDrawings } from "./draw.mjs";
 
 const USAGE = `Usage:
-  ux-builder-blueprint check <file> [--json] [--diff <base>]
+  ux-builder-blueprint check [<file>] [--json] [--diff <base>]
   ux-builder-blueprint simplify [<file>] [--json]
   ux-builder-blueprint score [<file>] [--json]
   ux-builder-blueprint compare <file> <file> [<file>...] [--out <dir>]
@@ -57,7 +57,7 @@ async function main(argv) {
   try {
     parsed = parseArgs({ args: argv, allowPositionals: true, options: { json: { type: "boolean" }, diff: { type: "string" }, reason: { type: "string" }, explore: { type: "boolean" }, archive: { type: "string" }, alternative: { type: "string" }, "design-system": { type: "string", multiple: true }, question: { type: "string" }, kind: { type: "string", default: "app" }, out: { type: "string" }, help: { type: "boolean", short: "h" } } });
   } catch (e) { console.error(`${e.message}\n${USAGE}`); return 2; }
-  const { values, positionals: [command, file, ...rest] } = parsed;
+  let { values, positionals: [command, file, ...rest] } = parsed;
   if (values.help) { console.log(USAGE); return 0; }
 
   if (command === "init") {
@@ -212,7 +212,9 @@ async function main(argv) {
     return 0;
   }
 
-  if (command !== "check" || !file || rest.length) { console.error(USAGE); return 2; }
+  if (command !== "check" || rest.length) { console.error(USAGE); return 2; }
+  // Like the other commands, check reads app.blueprint.json when no file is given.
+  file ??= "app.blueprint.json";
   let bp;
   try { bp = JSON.parse(readFileSync(file, "utf8")); } catch (e) { console.error(`${file}: ${e.message}`); return 2; }
   const storied = needsStories(bp);

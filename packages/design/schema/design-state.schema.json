@@ -71,8 +71,10 @@
           "status": {
             "enum": [
               "passed",
+              "declined",
               "skipped"
-            ]
+            ],
+            "description": "passed: the person said yes; declined: they said no or not yet (it never counts as passed); skipped: not asked, with a reason"
           },
           "answer": {
             "type": "string"

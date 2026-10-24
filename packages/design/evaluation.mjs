@@ -145,7 +145,7 @@ export function report(app) {
     const name = d.observed?.verdict === "contradicts" ? `**${d.name}**` : d.name;
     L.push(`| ${name}${d.baseline ? " (baseline)" : ""} | ${cell(d.predicted.value)} (${d.predicted.basis}) | ${cell(measured[d.id] ?? "–")} | ${cell(obs)} |`);
   }
-  L.push("", r.recommendable ? "No baseline fails; no overall score is given." : `Not recommendable: ${r.notRecommendable}.`);
+  L.push("", r.recommendable ? `No baseline fails${r.unchecked?.length ? `; not checked yet: ${r.unchecked.join(", ")}` : ""}; no overall score is given.` : `Not recommendable: ${r.notRecommendable}.`);
   if (changed.length) L.push("", "Assumptions updated from what people did:", "", ...changed.map((c) => `- ${c.id} (${c.dimension}): ${c.from} → ${c.to}`));
   L.push("");
   L.push("## Findings by journey", "");

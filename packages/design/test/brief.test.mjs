@@ -52,6 +52,12 @@ describe("brief", () => {
     // The page the person reads, and the checkable principles.
     assert.match(readFileSync(join(app, "docs/ux/brief.html"), "utf8"), /<h1>Experience brief: River Path<\/h1>[\s\S]*<span class="status status-hypothesis">hypothesis<\/span>/);
     assert.deepEqual(JSON.parse(readFileSync(join(app, ".ux-builder/principles.json"), "utf8")), { principles: [{ id: "PR-1", text: "No mandatory account creation", rule: { kind: "no-step-before", screens: ["sign-in"] } }, { id: "PR-2", text: "Progressive disclosure" }] });
+    // A PRD still the template (a fresh HELIX app's) gives no points: its [placeholders] are not confirmed facts.
+    put(app, "docs/helix/01-frame/prd.md", "---\nddx:\n  id: prd\n  type: prd\n---\n\n# Product Requirements Document\n\n## Summary\n\n[This section should work as a standalone 1-pager.]\n\n## Users and Scope\n\n### Primary Persona: [Name]\n\n## Constraints, Assumptions, Dependencies\n\n### Constraints\n\n- Technical: [Platform or technology limits]\n- Works offline, see [the spec](https://example.com/spec)\n");
+    cli(app, ["brief"]);
+    const fresh = readFileSync(join(app, "docs/ux/brief.md"), "utf8");
+    assert.doesNotMatch(fresh, /\[(Name|Platform|This section)|Product Requirements Document \[/);
+    assert.match(fresh, /- Works offline, see \[the spec\]\(https:\/\/example\.com\/spec\) \[confirmed\]/, "a Markdown link is not a placeholder");
   });
 
   // @covers US-122-AC2

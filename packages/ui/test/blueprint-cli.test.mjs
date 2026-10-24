@@ -57,6 +57,9 @@ describe("US-052: adopting the rules in an existing app", () => {
     assert.equal(run(["check", "broken.json"], dir).status, 2);
     assert.equal(run(["check", "missing.json"], dir).status, 2);
     assert.equal(run([], dir).status, 2);
+    // With no file, check reads app.blueprint.json, as the other commands do.
+    writeFileSync(join(dir, "app.blueprint.json"), JSON.stringify(warning));
+    assert.equal(run(["check"], dir).status, 0);
   });
 });
 
