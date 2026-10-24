@@ -183,6 +183,22 @@ assessment.
    evidence cites no step's checkpoint, and `severity` (Nielsen's 0 to 4) when
    it differs from what its priority implies (P0 4, P1 3, P2 2, P3 1). Then
    `assess merge --run <R-id>` gives each a stable ID and merges duplicates.
+   Give each step its `screen` and `at` (when you took it), and mark
+   `failed: true`, `notFound: "<what you looked for>"` or `error: "<what the
+   screen said>"` where they happened: the task metrics come from them. A
+   finding you did not find yourself carries `source` (`human`, or
+   `design-team` for notes from people trying a prototype, never user
+   evidence).
+   **Heuristic pass.** `assess heuristics <out>/<run>` lists every walked
+   screen × heuristic (Nielsen's ten, error prevention and recovery,
+   information hierarchy, navigation complexity). Check each, and record it:
+   `--screen <id> --heuristic <id> --finding <F-id>` or `--no-finding`.
+   `assess hierarchy --page <file>` checks a screen's content order against
+   its `screens[].content`. The same pass runs on an exploratory prototype
+   (`prototype/<name>/`): serve it and inspect its pages like the app's; each
+   names its screen with `data-piq-screen`.
+   **Task metrics.** `assess metrics <out>/<run>` writes `metrics.json`. Every
+   number is agent-measured; never present it as how people will do.
 7. **Proposals.** For each finding worth a HELIX change:
    `assess propose --run <R-id> --finding <F-id> --target <US-…>` (or
    `--new user-stories --title …`) `--kind unmet-criterion|new-requirement|scope

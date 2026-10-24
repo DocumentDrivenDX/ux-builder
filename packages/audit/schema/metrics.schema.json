@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/metrics.schema.json",
+  "title": "ux-builder assessment record: metrics (CONTRACT-006, amended by CONTRACT-008)",
+  "description": "Task metrics per walked journey, agent-measured (FEAT-018 GDL-52, GDL-53). Moves count screen changes on the main path; the shortest path is the blueprint's.",
+  "type": "object",
+  "required": ["schema", "version", "label", "note", "journeys"],
+  "properties": {
+    "schema": { "const": "metrics" },
+    "version": { "const": 1 },
+    "label": { "const": "agent-measured" },
+    "note": { "type": "string", "minLength": 1 },
+    "journeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["journey", "label", "completed", "interactions", "moves", "shortestPath", "extraInteractions", "pathTaken", "backtracks", "failedActions", "informationNotFound", "interfaceErrors", "timePerStep"],
+        "properties": {
+          "journey": { "type": "string", "pattern": "^J-" },
+          "blueprint": { "type": "string" },
+          "label": { "const": "agent-measured" },
+          "completed": { "type": "boolean" },
+          "stoppedAt": { "type": ["object", "null"], "properties": { "n": { "type": "integer" }, "action": { "type": "string" }, "screen": { "type": ["string", "null"] }, "reason": { "type": "string" } } },
+          "interactions": { "type": "integer", "minimum": 0 },
+          "moves": { "type": "integer", "minimum": 0 },
+          "shortestPath": { "type": ["integer", "null"], "minimum": 0 },
+          "extraInteractions": { "type": ["integer", "null"], "minimum": 0 },
+          "pathTaken": { "type": "array", "items": { "type": "string" } },
+          "backtracks": { "type": "integer", "minimum": 0 },
+          "failedActions": { "type": "integer", "minimum": 0 },
+          "informationNotFound": { "type": "array", "items": { "type": "object", "required": ["n", "what"] } },
+          "interfaceErrors": { "type": "array", "items": { "type": "object", "required": ["n", "error"] } },
+          "timePerStep": { "type": "array", "items": { "type": "object", "required": ["n", "seconds"], "properties": { "n": { "type": "integer" }, "seconds": { "type": ["number", "null"] } } } }
+        }
+      }
+    }
+  }
+}
