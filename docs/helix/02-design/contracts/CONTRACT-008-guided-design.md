@@ -171,10 +171,13 @@ name, question, measures[], baseline: boolean, sources[] }`. Baselines:
 
 ### MCP tools (optional)
 
-`get_design_state`, `update_design_state`, `design_status`,
+`get_design_state`, `update_design_state`, `design_status` (built), and
 `score_blueprint`, `compare_blueprints`, `simplify_blueprint`,
-`design_impact`, `design_trace`. Each returns what the matching command's
-`--json` returns.
+`design_impact`, `design_trace` as their commands are built. Each returns
+what the matching command's `--json` returns; `@ux-builder/mcp` loads
+`@ux-builder/design` from the app (else its own install) and registers them
+only when it is there. Every command's `--json` output is described by
+`schema/output.schema.json`.
 
 ## Amendment to CONTRACT-005 (blueprint) *[FEAT-018]*
 

@@ -91,8 +91,7 @@ async function main(argv) {
     if (sub === "set") {
       if (!path || value === undefined) throw new DesignError("usage: state set <path> <json>");
       const r = stateSet(app, { path, value: parseJson(value, "the value") });
-      const out = { path: r.path, value: r.value };
-      print(out, values.json, `${path} set.`);
+      print(r, values.json, `${path} set.`);
       return 0;
     }
     if (sub === "checkpoint") {

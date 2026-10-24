@@ -131,3 +131,19 @@ describe("starting in an existing app (US-115)", () => {
     assert.match(s, /\*\*a new feature\*\* → Define/);
   });
 });
+
+describe("the skill needs no MCP (US-116)", () => {
+  // @covers US-116-AC3
+  test("every command it names is a ux-builder-design or ux-builder-blueprint command CONTRACT-008 lists, and no step needs an MCP tool", () => {
+    const contract = readFileSync(new URL("../../../docs/helix/02-design/contracts/CONTRACT-008-guided-design.md", import.meta.url), "utf8");
+    const listed = new Set([...contract.matchAll(/^\| `([a-z-]+)(?: [^`|]*)?`/gm)].map((m) => m[1]));
+    const named = [...SKILL.matchAll(/ux-builder-design ([a-z-]+)/g)].map((m) => m[1]);
+    assert.ok(named.length >= 8, named.join(" "));
+    for (const c of new Set(named)) assert.ok(listed.has(c), `the skill names ux-builder-design ${c}, which CONTRACT-008 does not list`);
+    for (const c of new Set([...SKILL.matchAll(/ux-builder-blueprint ([a-z-]+)/g)].map((m) => m[1]))) assert.ok(["check", "propose", "init", "draw", "wireframes", "score", "compare", "simplify", "alternative", "prototype"].includes(c), c);
+    // An MCP tool is only ever offered beside a command or file that does the same.
+    const MCP = /\b(get_rules|get_design_state|update_design_state|design_status|record_decision|start_episode|end_episode|check_blueprint|list_recipes)\b/;
+    for (const line of SKILL.split("\n").filter((l) => MCP.test(l))) assert.match(line, / or /, `an MCP tool with no alternative: ${line}`);
+    assert.match(SKILL, /never need it/);
+  });
+});

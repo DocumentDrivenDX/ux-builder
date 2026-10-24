@@ -27,3 +27,26 @@ describe("@ux-builder/design's package", () => {
     for (const f of ["cli.mjs", "index.mjs", "init.mjs", "checkpoints.mjs", "documents.mjs", "schema", "skill", "artifacts"]) assert.ok(PKG.files.includes(f), f);
   });
 });
+
+describe("no network, no model (US-116-AC4)", () => {
+  // @covers US-116-AC4
+  test("nothing in the package imports an HTTP client or a model SDK, and the commands run with networking blocked", async () => {
+    const { readdirSync } = await import("node:fs");
+    const src = readdirSync(at(".")).filter((f) => f.endsWith(".mjs"));
+    assert.ok(src.length >= 8);
+    const BANNED = /from\s+["'](node:)?(http|https|http2|net|tls|dgram|undici|axios|node-fetch|got|openai|@anthropic-ai\/[^"']+|@google\/generative-ai|ollama)["']/;
+    for (const f of src) {
+      const text = readFileSync(at(f), "utf8");
+      assert.doesNotMatch(text, BANNED, f);
+      assert.doesNotMatch(text, /\bfetch\(|XMLHttpRequest|sendBeacon/, f);
+    }
+    // Every CLI test runs with node --import test/guard.mjs, which makes any network API throw (helpers.mjs);
+    // this run proves the guard is in place for a child process too.
+    const { cli, tempApp } = await import("./helpers.mjs");
+    const app = tempApp();
+    for (const args of [["status"], ["state", "get"], ["brief"], ["validate"]]) assert.equal(cli(app, args).status, 0, args.join(" "));
+    const { spawnSync } = await import("node:child_process");
+    const probe = spawnSync(process.execPath, ["--import", at("test/guard.mjs"), "-e", "fetch('https://example.com').catch((e) => { console.log(e.message); })"], { encoding: "utf8" });
+    assert.match(probe.stdout + probe.stderr, /network use is blocked/);
+  });
+});

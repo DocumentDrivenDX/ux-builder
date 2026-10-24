@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://documentdrivendx.github.io/ux-builder/schema/design-output.schema.json",
+  "title": "ux-builder-design --json output (CONTRACT-008 Commands)",
+  "description": "What each command prints with --json; its exported function returns the same object.",
+  "$defs": {
+    "init": {
+      "type": "object",
+      "required": [
+        "app",
+        "startedFrom",
+        "blueprint",
+        "sdk",
+        "mcp",
+        "written",
+        "notes"
+      ],
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "startedFrom": {
+          "enum": [
+            "new",
+            "existing"
+          ]
+        },
+        "blueprint": {
+          "enum": [
+            "exists",
+            "written"
+          ]
+        },
+        "sdk": {
+          "type": "boolean"
+        },
+        "mcp": {
+          "type": "boolean"
+        },
+        "written": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "object",
+      "required": [
+        "activity",
+        "mode",
+        "startedFrom",
+        "chosen",
+        "untestedAssumptions",
+        "openQuestions",
+        "checkpoints",
+        "openIssues",
+        "runningExperiments",
+        "next",
+        "documents",
+        "text"
+      ],
+      "properties": {
+        "activity": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string"
+        },
+        "chosen": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "untestedAssumptions": {
+          "type": "integer"
+        },
+        "openQuestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "status"
+            ]
+          }
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "type",
+              "id"
+            ]
+          }
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "stateGet": {
+      "type": "object",
+      "required": [
+        "path",
+        "value"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "stateSet": {
+      "type": "object",
+      "required": [
+        "path",
+        "value"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "checkpoint",
+        "about",
+        "trace"
+      ],
+      "properties": {
+        "checkpoint": {
+          "type": "object",
+          "required": [
+            "id",
+            "status",
+            "at"
+          ]
+        },
+        "about": {
+          "type": "string"
+        },
+        "trace": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "mode": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "full",
+            "change"
+          ]
+        },
+        "why": {
+          "type": "string"
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "required": [
+        "written",
+        "run",
+        "screens",
+        "journeys",
+        "stories",
+        "findings",
+        "drafted"
+      ],
+      "properties": {
+        "written": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "drafted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "brief": {
+      "type": "object",
+      "required": [
+        "written",
+        "sections",
+        "notes",
+        "helix"
+      ],
+      "properties": {
+        "written": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "key",
+              "heading",
+              "points"
+            ]
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "helix": {
+          "type": "boolean"
+        }
+      }
+    },
+    "validate": {
+      "type": "object",
+      "required": [
+        "documents",
+        "problems",
+        "valid"
+      ],
+      "properties": {
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "type",
+              "id"
+            ]
+          }
+        },
+        "problems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "message"
+            ]
+          }
+        },
+        "valid": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

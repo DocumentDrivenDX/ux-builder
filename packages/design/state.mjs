@@ -151,5 +151,5 @@ export function stateSet(app, { path, value, now = new Date().toISOString() } = 
     written = value;
   }
   writeState(app, state);
-  return { path, value: written, state };
+  return { path, value: written };
 }
