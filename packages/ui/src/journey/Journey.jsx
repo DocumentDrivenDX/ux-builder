@@ -6,7 +6,7 @@
    no events: nothing is emitted or stored. The SDK sends nothing anywhere;
    where events go is the app's code. */
 
-import { createContext, useContext, useEffect, useLayoutEffect, useMemo } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 
 const JourneyContext = createContext(null);
 
@@ -38,7 +38,11 @@ function tracker(sink) {
    own analytics: wrap the app, or the part a journey runs in. Without a sink
    it does nothing, and the SDK sends nothing anywhere. */
 export function JourneyProvider({ sink, children }) {
-  const t = useMemo(() => (typeof sink === "function" ? tracker(sink) : null), [sink]);
+  // The latest sink, so an inline function (a new one each render) keeps the same tracker and its journeys.
+  const latest = useRef(sink);
+  latest.current = sink;
+  const on = typeof sink === "function";
+  const t = useMemo(() => (on ? tracker((e) => latest.current?.(e)) : null), [on]);
   useEffect(() => () => t?.end(), [t]);
   return <JourneyContext.Provider value={t}>{children}</JourneyContext.Provider>;
 }

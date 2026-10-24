@@ -60,6 +60,11 @@ describe("US-143: send journey events to the app's own analytics", () => {
     ]);
     for (const e of events) assert.ok(!Number.isNaN(Date.parse(e.at)) && e.at.endsWith("Z"), e.at);
     for (const e of events) assert.deepEqual(Object.keys(e).sort(), ["at", "journey", "screen", "step", "type"], "no user content");
+    // A sink written inline, a new function each render, keeps the journey: nothing restarts or is abandoned.
+    const more = [];
+    act(() => root.render(h(App, { sink: (e) => more.push(e), start: "map" })));
+    act(() => root.render(h(App, { sink: (e) => more.push(e), start: "map" })));
+    assert.deepEqual(more, []);
   });
 
   // @covers US-143-AC2
