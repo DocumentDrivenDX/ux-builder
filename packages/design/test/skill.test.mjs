@@ -136,7 +136,7 @@ describe("the skill needs no MCP (US-116)", () => {
   // @covers US-116-AC3
   test("every command it names is a ux-builder-design or ux-builder-blueprint command CONTRACT-008 lists, and no step needs an MCP tool", () => {
     const contract = readFileSync(new URL("../../../docs/helix/02-design/contracts/CONTRACT-008-guided-design.md", import.meta.url), "utf8");
-    const listed = new Set([...contract.matchAll(/^\| `([a-z-]+)(?: [^`|]*)?`/gm)].map((m) => m[1]));
+    const listed = new Set([...contract.matchAll(/^\| `([a-z-]+)(?: (?:[^`|]|\\\|)*)?`/gm)].map((m) => m[1]));
     const named = [...SKILL.matchAll(/ux-builder-design ([a-z-]+)/g)].map((m) => m[1]);
     assert.ok(named.length >= 8, named.join(" "));
     for (const c of new Set(named)) assert.ok(listed.has(c), `the skill names ux-builder-design ${c}, which CONTRACT-008 does not list`);

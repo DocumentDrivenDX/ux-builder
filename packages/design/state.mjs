@@ -12,7 +12,8 @@ export const SCHEMA = JSON.parse(readFileSync(new URL("./schema/design-state.sch
 
 let validator;
 function compiled() {
-  if (!validator) validator = new Ajv2020({ allErrors: true, strict: false }).compile(SCHEMA);
+  // Formats (date-time) are not checked: the commands write them, and ajv-formats would be one more dependency.
+  if (!validator) validator = new Ajv2020({ allErrors: true, strict: false, validateFormats: false }).compile(SCHEMA);
   return validator;
 }
 
@@ -111,7 +112,7 @@ export function stateGet(app, { path } = {}) {
 }
 
 /* Fields an appended item gets when the agent leaves them out. */
-const NEXT_ID = { assumptions: "A", questions: "Q", experiments: "EXP", principles: "PR" };
+const NEXT_ID = { assumptions: "A", questions: "Q", experiments: "EXP", principles: "PR", observations: "O" };
 function withDefaults(list, items, item, now) {
   if (!item || typeof item !== "object" || Array.isArray(item)) return item;
   const out = { ...item };
@@ -123,6 +124,7 @@ function withDefaults(list, items, item, now) {
   if (list === "assumptions") { out.status ??= "assumed"; out.evidence ??= []; }
   if (list === "questions") out.status ??= "open";
   if (list === "principles") out.status ??= "assumed";
+  if (list === "observations") out.source ??= "design-team";
   if (list === "alternatives") out.status ??= "candidate";
   if (list === "issues") out.status ??= "open";
   if (list === "experiments") out.status ??= "running";
@@ -135,7 +137,9 @@ export function stateSet(app, { path, value, now = new Date().toISOString() } = 
   if (!keys.length) throw new DesignError("state set needs a path");
   const state = structuredClone(readState(app));
   let parent = state;
-  for (const key of keys.slice(0, -1)) {
+  for (const [i, key] of keys.slice(0, -1).entries()) {
+    // Appending to an optional list the state does not have yet starts it.
+    if (parent[key] == null && keys[i + 1] === "+" && i === 0 && SCHEMA.properties[key]?.type === "array") parent[key] = [];
     if (key === "+" || parent[key] == null) throw new DesignError(`no value at "${path}"`);
     parent = parent[key];
   }

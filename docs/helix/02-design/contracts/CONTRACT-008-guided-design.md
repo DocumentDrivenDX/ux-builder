@@ -123,6 +123,8 @@ input or a refusal (named on stderr).
 | `issues[]` | `{ finding, status: open\|fixed\|wont-fix }` | Unresolved usability issues |
 | `experiments[]` | `{ id, status: running\|ended }` | |
 | `faked[]` | `{ what, where }` | Data and error handling a prototype faked |
+| `prototype` | `{ branch, alternative? }` | The validated prototype's branch; `status` reports it `validated` until `core-3` passes, then `production` |
+| `observations[]` | `{ id: "O-<n>", text, source: design-team, alternative? }` | What the design team noticed trying a prototype; never user evidence |
 | `next` | string | The next action the guide proposes |
 
 ### Documents in `docs/ux/`

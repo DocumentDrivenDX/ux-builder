@@ -41,9 +41,9 @@ const noop = () => {};
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /* The SDK's CSS a wireframe links, by its name under assets/. */
-export function assets() {
+export function assets(theme = THEME) {
   return {
-    "plain.css": require.resolve(`@ux-builder/tokens/themes/${THEME}.css`),
+    [`${theme}.css`]: require.resolve(`@ux-builder/tokens/themes/${theme}.css`),
     "ui.css": join(HERE, "../dist/ui.css"),
     "patterns.css": join(HERE, "../dist/patterns.css"),
   };
@@ -130,13 +130,13 @@ function screenElement(s, lib) {
 const box = (s, state = "ideal") => `<div class="wf-unknown" role="img" aria-label="${esc(`${s.title ?? s.id}${state === "ideal" ? "" : ` (${state})`}: ${s.pattern ?? "no pattern"}`)}" style="display:grid;place-items:center;min-block-size:240px;margin:var(--piq-space-4);border:2px dashed var(--piq-color-border);border-radius:var(--piq-radius-md, 8px);color:var(--piq-color-text);font:var(--piq-font-body, inherit)"><p><strong>${esc(s.title ?? s.id)}</strong><br>${esc(s.pattern ?? "no pattern")}: not a pattern in @ux-builder/ui ${esc(catalogue.packages["@ux-builder/ui"])}</p></div>`;
 
 /* The page around a screen: the theme and the SDK's CSS, nothing else. */
-const page = (title, sizeClass, body) => `<!doctype html>
-<html lang="en" data-theme="${THEME}" data-appearance="light" data-size-class="${sizeClass}">
+const page = (title, sizeClass, body, theme = THEME) => `<!doctype html>
+<html lang="en" data-theme="${theme}" data-appearance="light" data-size-class="${sizeClass}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)} — ${sizeClass} wireframe</title>
-<link rel="stylesheet" href="assets/plain.css">
+<link rel="stylesheet" href="assets/${theme}.css">
 <link rel="stylesheet" href="assets/ui.css">
 <link rel="stylesheet" href="assets/patterns.css">
 <style>body { margin: 0; background: var(--piq-color-ground); color: var(--piq-color-text); font-family: var(--piq-font-body); }</style>
@@ -159,7 +159,7 @@ async function library() {
 
 /* The wireframes of a blueprint: one page per screen, state and supported
    size class, in blueprint order (the ideal state first). */
-export async function wireframes(bp) {
+export async function wireframes(bp, { theme = THEME } = {}) {
   const lib = await library();
   const { h, render, P } = lib;
   const sizes = sizesOf(bp);
@@ -192,7 +192,7 @@ export async function wireframes(bp) {
         markup = `<main>${box({ ...s, pattern: `${s.pattern} (could not be drawn: ${e.message})` }, state)}</main>`;
       }
       const name = state === "ideal" ? s.id : `${s.id}.${state}`;
-      for (const size of sizes) out.push({ screen: s.id, state, drawnBy: known ? by : null, pattern: s.pattern ?? null, known, sizeClass: size, width: WIDTHS[size] ?? 1024, file: `${name}.${size}.html`, html: page(state === "ideal" ? s.title ?? s.id : `${s.title ?? s.id} (${state})`, size, markup) });
+      for (const size of sizes) out.push({ screen: s.id, state, drawnBy: known ? by : null, pattern: s.pattern ?? null, known, sizeClass: size, width: WIDTHS[size] ?? 1024, file: `${name}.${size}.html`, html: page(state === "ideal" ? s.title ?? s.id : `${s.title ?? s.id} (${state})`, size, markup, theme) });
     }
   }
   return out;

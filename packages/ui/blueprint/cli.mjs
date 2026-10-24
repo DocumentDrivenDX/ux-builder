@@ -44,6 +44,7 @@ const USAGE = `Usage:
   ux-builder-blueprint score [<file>] [--json]
   ux-builder-blueprint compare <file> <file> [<file>...] [--out <dir>]
   ux-builder-blueprint alternative (new <name> | choose <name> --reason <text>)
+  ux-builder-blueprint prototype (--explore [--alternative <name>] [--design-system <ds>]... [--question <q>] | --archive <name>)
   ux-builder-blueprint init [--kind app|view] [--out <file>]
   ux-builder-blueprint propose [<file>] [--out <dir>]
   ux-builder-blueprint draw [<file>] [--out <dir>]
@@ -54,7 +55,7 @@ const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 async function main(argv) {
   let parsed;
   try {
-    parsed = parseArgs({ args: argv, allowPositionals: true, options: { json: { type: "boolean" }, diff: { type: "string" }, reason: { type: "string" }, kind: { type: "string", default: "app" }, out: { type: "string" }, help: { type: "boolean", short: "h" } } });
+    parsed = parseArgs({ args: argv, allowPositionals: true, options: { json: { type: "boolean" }, diff: { type: "string" }, reason: { type: "string" }, explore: { type: "boolean" }, archive: { type: "string" }, alternative: { type: "string" }, "design-system": { type: "string", multiple: true }, question: { type: "string" }, kind: { type: "string", default: "app" }, out: { type: "string" }, help: { type: "boolean", short: "h" } } });
   } catch (e) { console.error(`${e.message}\n${USAGE}`); return 2; }
   const { values, positionals: [command, file, ...rest] } = parsed;
   if (values.help) { console.log(USAGE); return 0; }
@@ -127,6 +128,39 @@ async function main(argv) {
       d.design.stateSet(d.app, { path: "alternatives", value: alternatives });
     }
     console.log(`${main} is now ${name}${d ? "; the design state records the choice" : ""}.`);
+    return 0;
+  }
+
+  if (command === "prototype") {
+    if (file || rest.length) { console.error(USAGE); return 2; }
+    const { archivePrototype, themeFor, writePrototype } = await import("./prototype.mjs");
+    if (values.archive) {
+      const to = archivePrototype(values.archive);
+      if (!to) { console.error(`No prototype/${values.archive}/ to archive.`); return 1; }
+      console.log(`Moved prototype/${values.archive}/ to ${to}/.`);
+      return 0;
+    }
+    if (!values.explore) { console.error(`prototype needs --explore (or --archive <name>)\n${USAGE}`); return 2; }
+    const name = values.alternative ?? "current";
+    const src = values.alternative ? `app.blueprint.${values.alternative}.json` : "app.blueprint.json";
+    let bp;
+    try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
+    const errors = checkBlueprint(bp).filter((f) => f.severity === "error");
+    if (errors.length) {
+      for (const f of errors) console.error(`error   ${f.rule}  ${f.path || "/"}\n        ${f.message}`);
+      console.error(`${src} has ${errors.length} error${errors.length === 1 ? "" : "s"}: fix them before prototyping. Nothing was written.`);
+      return 1;
+    }
+    const d = await designState(src);
+    const question = values.question ?? d?.state?.questions?.find((q) => q.status === "open")?.text ?? `What is it like to use ${name}?`;
+    const systems = values["design-system"] ?? [];
+    const targets = systems.length ? systems.map((ds) => ({ dir: `${name}-${ds}`, theme: themeFor(ds), ds })) : [{ dir: name, theme: "plain" }];
+    const missing = targets.filter((t) => !t.theme);
+    if (missing.length) { console.error(`No theme shows the design system ${missing.map((t) => t.ds).join(", ")}.`); return 2; }
+    const written = [];
+    for (const t of targets) written.push(await writePrototype(bp, { dir: t.dir, question, theme: t.theme }));
+    if (values.json) console.log(JSON.stringify({ question, prototypes: written }, null, 2));
+    else for (const w of written) console.log(`${w.dir}/: ${w.pages} pages (${w.theme}); open ${w.dir}/index.html. A prototype, never app code.`);
     return 0;
   }
 

@@ -290,6 +290,35 @@
         }
       }
     },
+    "observations": {
+      "type": "array",
+      "description": "What the design team noticed trying a prototype (FEAT-018 GDL-43): never user evidence",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^O-[1-9][0-9]*$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "const": "design-team"
+          },
+          "alternative": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "experiments": {
       "type": "array",
       "items": {
@@ -329,6 +358,23 @@
           "where": {
             "type": "string"
           }
+        }
+      }
+    },
+    "prototype": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "branch"
+      ],
+      "description": "The validated prototype (FEAT-018 GDL-44): built in the app's source on a branch, a prototype until checkpoint core-3",
+      "properties": {
+        "branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alternative": {
+          "type": "string"
         }
       }
     },

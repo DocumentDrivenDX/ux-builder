@@ -66,7 +66,8 @@
         "next",
         "documents",
         "text",
-        "jobs"
+        "jobs",
+        "prototype"
       ],
       "properties": {
         "activity": {
@@ -429,6 +430,15 @@
           }
         }
       }
+    },
+    "ready": {
+      "type": "object",
+      "required": [
+        "for",
+        "checks",
+        "ready",
+        "next"
+      ]
     }
   }
 }

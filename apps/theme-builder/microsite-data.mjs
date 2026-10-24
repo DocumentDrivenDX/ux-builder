@@ -119,6 +119,7 @@ export const BLUEPRINT_NOTES = {
   score: "Score each journey of a blueprint, labelled predicted: steps, screens, modals, required inputs, decisions, navigation hops, findings and patterns.",
   compare: "Compare two or more alternative blueprints for the same tasks on one page, the best per task and dimension marked.",
   alternative: "Make an alternative blueprint (new) or choose one, with its reason (choose), recorded in the design state.",
+  prototype: "Write a disposable, clickable prototype of a blueprint under prototype/ (one page per screen, state and size class, actions linked), optionally in other design systems; or archive one.",
   simplify: "Propose ways to make the task model take less of its users: inputs to infer, decisions to default, steps to combine, hops to remove. Changes nothing.",
 };
 export function blueprintCommands() {

@@ -24,6 +24,7 @@
     "research.mjs",
     "decisions.mjs",
     "rubric.mjs",
+    "ready.mjs",
     "documents.mjs",
     "cli.mjs",
     "artifacts",

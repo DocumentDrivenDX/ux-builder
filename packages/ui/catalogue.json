@@ -19,7 +19,8 @@
       "ux-builder/no-hard-coded-values",
       "ux-builder/no-foreign-ui",
       "ux-builder/no-inline-svg",
-      "ux-builder/ai-neutral-voice"
+      "ux-builder/ai-neutral-voice",
+      "ux-builder/no-prototype-import"
     ],
     "stylelint": "@ux-builder/ui/stylelint",
     "eslint": "@ux-builder/ui/eslint"

@@ -11,6 +11,7 @@ export { canonical, emptyState, hasState, parsePath, readState, SCHEMA, serializ
 export { status, summary } from "./status.mjs";
 export { checkpoint, CHECKPOINTS, setMode } from "./checkpoints.mjs";
 export { baseline } from "./baseline.mjs";
+export { ready, readyText } from "./ready.mjs";
 export { observedFor, RUBRIC, rubric, rubricText } from "./rubric.mjs";
 export { DECISION_STATUSES, decisionAdd, decisionStatus } from "./decisions.mjs";
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml, principlesFile } from "./brief.mjs";

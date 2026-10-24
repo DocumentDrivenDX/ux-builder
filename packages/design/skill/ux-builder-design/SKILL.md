@@ -199,6 +199,26 @@ reports `consistency.same-kind` otherwise. Then draw and propose:
 `ux-builder-blueprint wireframes` shows each screen's content in its order,
 and `propose` carries purposes and content into the wireframe drafts.
 
+## Experience prototypes
+
+**Exploratory prototypes** answer one design question each:
+`ux-builder-blueprint prototype --explore --alternative <name> --question "<the question>"`
+writes `prototype/<name>/`; open its `index.html` for the person. Add
+`--design-system <ds>` (twice for two) to compare presentation as well as
+flow. Ask what they noticed and record each note as a design-team
+observation, never as user evidence:
+`state set 'observations[+]' '{"text":"…","alternative":"<name>"}'`.
+When the question is answered, `prototype --archive <name>`. App code never
+imports from `prototype/` (the `ux-builder/no-prototype-import` lint rule).
+
+**The validated prototype** is the chosen design built in the app's source,
+on a branch, from the SDK's patterns, in the app's theme, with realistic
+sample data. Record its branch (`state set prototype '{"branch":"<branch>"}'`)
+and everything it fakes (`state set 'faked[+]' '{"what":"…","where":"…"}'`).
+Before test users see it, run `ux-builder-design ready --for testing`;
+before it becomes production code, `ux-builder-design ready` and then ask
+`core-3`. It stays a prototype until `core-3` is answered.
+
 ## Checkpoints
 
 Stop, ask the person one question, and wait for the answer at each

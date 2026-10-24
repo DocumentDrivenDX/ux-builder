@@ -36,6 +36,8 @@ export function status(app) {
     runningExperiments: s.experiments.filter((e) => e.status === "running").map((e) => e.id),
     next: s.next,
     jobs: jobsSummary(app, s),
+    // The validated prototype is a prototype until core-3 says it goes to production (ADR-037 rule 4).
+    prototype: s.prototype ? { branch: s.prototype.branch, status: s.checkpoints.some((c) => c.id === "core-3" && c.status === "passed") ? "production" : "validated" } : null,
     documents: uxDocuments(app),
   };
   result.text = summary(result);
@@ -57,6 +59,7 @@ export function summary(r) {
   if (skipped.length) lines.push(`Checkpoints skipped: ${skipped.join(", ")}.`);
   const counts = Object.entries(r.jobs.byStatus).map(([k, n]) => `${n} ${k}`);
   if (counts.length) lines.push(`Jobs: ${counts.join(", ")}.`);
+  if (r.prototype) lines.push(`Prototype: ${r.prototype.status === "validated" ? `the validated prototype on ${r.prototype.branch} is still a prototype (core-3 not answered)` : `${r.prototype.branch} went to production at core-3`}.`);
   if (r.openIssues) lines.push(`${plural(r.openIssues, "usability issue is", "usability issues are")} open.`);
   if (r.runningExperiments.length) lines.push(`Running: ${r.runningExperiments.join(", ")}.`);
   lines.push(r.next ? `Next: ${r.next}` : "Next: not set.");
