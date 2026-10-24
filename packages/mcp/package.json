@@ -21,7 +21,7 @@
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@ux-builder/tokens": "^1.4.0",
     "@ux-builder/trace": "^0.2.0",
-    "@ux-builder/ui": "^0.11.0",
+    "@ux-builder/ui": "^0.11.1",
     "zod": "^4.6.5"
   },
   "publishConfig": {
@@ -33,6 +33,6 @@
     "directory": "packages/mcp"
   },
   "devDependencies": {
-    "@ux-builder/design": "^0.1.1"
+    "@ux-builder/design": "^0.2.0"
   }
 }

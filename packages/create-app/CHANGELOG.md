@@ -1,5 +1,13 @@
 # @ux-builder/create-app
 
+## 0.8.1
+
+### Patch Changes
+
+- Updated dependencies [4887401]
+  - @ux-builder/design@0.2.0
+  - @ux-builder/ui@0.11.1
+
 ## 0.8.0
 
 ### Minor Changes
