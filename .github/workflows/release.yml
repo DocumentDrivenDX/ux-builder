@@ -98,12 +98,17 @@ jobs:
       # a tag and a GitHub release per package.
       # v2 is the action for Changesets CLI v3, which this repository uses: v1 reads
       # CLI v2's "New tag:" output, so with CLI v3 it published but pushed no tags
-      # and created no releases. v2 pushes them through the GitHub API, signed,
-      # with the workflow's own token.
+      # and created no releases.
+      # Tags go up with git, not the GitHub API: through the API, v2 creates each tag at
+      # the commit that started the run (the merge), not at the Version Packages commit
+      # this run made and pushed, so a tag named a version its commit did not have
+      # (2026-10-24). With git it pushes the tags changeset publish made on the checked-out
+      # commit, using the workflow's own token; each GitHub release is then made on its tag.
       - if: steps.push.outputs.moved != 'true'
         uses: changesets/action@v2
         with:
           publish-script: npx changeset publish
           create-github-releases: true
+          push-with-git-cli: true
         env:
           NPM_CONFIG_PROVENANCE: "true"

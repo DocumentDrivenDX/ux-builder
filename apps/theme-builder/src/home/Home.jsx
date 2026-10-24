@@ -1,5 +1,5 @@
 import { Button, Card, ChoicePicker, DataTable, Icon, Notice, ProgressBar, Select, StatusPill, Switch, TextField, ThemeProvider } from "@ux-builder/ui";
-import { iconArrowRight, iconBell, iconBot, iconCheck, iconCopy, iconHistory, iconPackage, iconPalette, iconPlug, iconScanEye, iconShieldCheck, iconSparkles, iconTerminal, iconWand2 } from "@ux-builder/ui/icons";
+import { iconArrowRight, iconBell, iconBot, iconCheck, iconCopy, iconHistory, iconPackage, iconPalette, iconPencilRuler, iconPlug, iconScanEye, iconShieldCheck, iconSparkles, iconTerminal, iconWand2 } from "@ux-builder/ui/icons";
 import catalogue from "@ux-builder/ui/catalogue.json";
 import { useState } from "react";
 import { ROOT } from "../site-root.js";
@@ -22,6 +22,7 @@ import createPkg from "../../../../packages/create-app/package.json";
 import auditPkg from "../../../../packages/audit/package.json";
 import mcpPkg from "../../../../packages/mcp/package.json";
 import tracePkg from "../../../../packages/trace/package.json";
+import designPkg from "../../../../packages/design/package.json";
 
 /* The GitHub Pages home page's sections (tools/build-pages.mjs), shown by the
    site's shell (microsite/Site.jsx). They wear the SDK's own
@@ -58,6 +59,7 @@ export const PACKAGES = [
   { pkg: auditPkg, icon: iconScanEye, what: "Drives the running app through every theme in light and dark and reports anything off-theme; assesses a HELIX app's journeys." },
   { pkg: mcpPkg, icon: iconPlug, what: "The SDK over MCP: themes, widgets, tokens, icons and rules, and checks of blueprints and cards, for any coding agent." },
   { pkg: tracePkg, icon: iconHistory, what: "The episode trace each build of an app leaves in its repository, and the export its owner shares only by choice." },
+  { pkg: designPkg, icon: iconPencilRuler, what: "The guided design loop: an agent leads you from intent to a tested design, stopping for your decision at each checkpoint, with the brief, alternatives, prototypes, tests with people and production insights." },
 ];
 
 export function Copy({ text, label = "Copy" }) {

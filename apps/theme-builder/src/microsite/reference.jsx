@@ -68,7 +68,7 @@ function Options({ caption, options }) {
 }
 
 export function Cli() {
-  const { createApp, audit, assess, blueprint, mcp } = cli;
+  const { createApp, audit, assess, blueprint, design, mcp } = cli;
   return (
     <>
       <p className="uxm-lede">Every option, subcommand and MCP tool, generated from the commands' own definitions and the MCP server's own tool list when this site is built.</p>
@@ -99,6 +99,14 @@ export function Cli() {
         <tbody>{blueprint.commands.map((c) => <tr key={c.name}><td><code>{c.call}</code></td><td>{c.text}</td></tr>)}</tbody>
       </table>
       <Generated><code>ux-builder-blueprint --help</code> (<code>packages/ui/blueprint/cli.mjs</code>)</Generated>
+
+      <H2 id="design">ux-builder-design</H2>
+      <p>The guided design loop's deterministic work, from <code>@ux-builder/design</code>; the <code>ux-builder-design</code> skill says how an agent leads a person through it. See <a href={href("start", "design")}>Design the UX with your agent</a>.</p>
+      <table className="uxm-table" aria-label="ux-builder-design commands">
+        <thead><tr><th scope="col">Command</th><th scope="col">What it does</th></tr></thead>
+        <tbody>{design.commands.map((c) => <tr key={c.call}><td><code>{c.call}</code></td><td>{sentence(c.text)}</td></tr>)}</tbody>
+      </table>
+      <Generated><code>ux-builder-design --help</code> (<code>packages/design/cli.mjs</code>)</Generated>
 
       <H2 id="mcp">ux-builder-mcp tools</H2>
       <p>{mcp.tools.length} tools and {mcp.resources.length} resources (<Fragment>{mcp.resources.map((r, i) => <Fragment key={r.uri}>{i ? ", " : ""}<code>{r.uri}</code></Fragment>)}</Fragment>), as the server lists them to a client.</p>

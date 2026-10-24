@@ -7,8 +7,9 @@
      cli        npm create @ux-builder/app's and ux-builder-audit's options,
                 from each command's own header and parseArgs definitions; the
                 audit's checks (RULES); the assess subcommands, from their
-                header and --help; ux-builder-blueprint's commands, from its
-                --help; every MCP tool, from the server's own listTools
+                header and --help; ux-builder-blueprint's and
+                ux-builder-design's commands, from their --help; every MCP
+                tool, from the server's own listTools
      packages   every public package's entry points, from its package.json
                 exports (with a one-line note each, NOTES below)
      rules      the interaction rules, from @ux-builder/ui's catalogue
@@ -130,6 +131,28 @@ export function blueprintCommands() {
   return { commands, handled };
 }
 
+/* ux-builder-design's commands, from its --help: each "  <command> …" line
+   and the indented lines under it, which say what it does. */
+export function designCommands() {
+  const src = read("packages/design/cli.mjs");
+  const usage = run("packages/design/cli.mjs", ["--help"]);
+  const body = usage.slice(usage.indexOf("\n\n") + 2, usage.indexOf("\nOptions:"));
+  const commands = [];
+  for (const line of body.split("\n")) {
+    const call = line.match(/^ {2}([a-z][a-z-]*)(.*)$/);
+    const more = line.match(/^ {4,}(\S.*)$/);
+    if (call) commands.push({ name: call[1], call: `ux-builder-design ${call[1]}${call[2]}`.trim(), text: "" });
+    else if (more && commands.length) {
+      const c = commands.at(-1);
+      // Continuation lines of a long call are its options; the rest say what it does.
+      if (!c.text && /^[[<(-]|^--|^\(/.test(more[1])) c.call += ` ${more[1]}`;
+      else c.text = `${c.text} ${more[1]}`.trim();
+    }
+  }
+  const handled = [...new Set([...src.matchAll(/command === "([a-z-]+)"/g)].map((m) => m[1]))];
+  return { commands, handled };
+}
+
 /* Every MCP tool, as the server lists it to a client. */
 export async function mcpTools() {
   const { createServer } = await import(pathToFileURL(join(REPO, "packages/mcp/server.mjs")).href);
@@ -195,7 +218,7 @@ export const NOTES = {
   "@ux-builder/trace .": "The episode trace an app keeps while it is built: openEpisode, appendEvent, closeEpisode, attachTranscript, exportBundle and validateTrace (ux-builder-trace)",
   "@ux-builder/trace ./schema/*": "The JSON Schemas of a trace event, the export bundle and .ux-builder/config.json",
   "@ux-builder/trace ./package.json": "The package's own metadata",
-  "@ux-builder/design .": "The guided design loop's commands as functions: init, status, stateGet, stateSet and the design state (ux-builder-design)",
+  "@ux-builder/design .": "The guided design loop's commands as functions, from init and the design state to brief, rubric, test-kit, report, insights and experiments (ux-builder-design)",
   "@ux-builder/design ./schema/*": "The JSON Schema of the design state, .ux-builder/design-state.json",
   "@ux-builder/design ./package.json": "The package's own metadata",
 };
@@ -325,7 +348,7 @@ export function notices() {
 export async function micrositeData() {
   const rs = rules();
   return {
-    cli: { createApp: createAppOptions(), audit: await auditOptions(), assess: assessCommands(), blueprint: blueprintCommands(), mcp: await mcpTools() },
+    cli: { createApp: createAppOptions(), audit: await auditOptions(), assess: assessCommands(), blueprint: blueprintCommands(), design: designCommands(), mcp: await mcpTools() },
     packages: packages(), rules: rs, sources: sources(rs), licences: LICENCES, cards: await cards(), coverage: await coverage(), notices: notices(),
   };
 }
