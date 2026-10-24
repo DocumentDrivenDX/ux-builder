@@ -105,6 +105,7 @@ criteria; earlier features keep their tests where they are, traced by
 | FEAT-018 phase 4: prototypes, readiness, trace and impact (US-135 to US-137) | [[STP-135]] to [[STP-137]] | Integration (Chromium) | Prototype pages clicked through; `impact` over a seeded ID graph |
 | FEAT-018 phase 5: heuristics, metrics, test kit, observations, report (US-138 to US-142) | [[STP-138]] to [[STP-142]] | Integration | Assessment fixtures; fixture observations and transcripts; no real participants |
 | FEAT-018 phase 6: journey events, insights, experiments (US-143 to US-145) | [[STP-143]] to [[STP-145]] | Unit and integration | Events captured by a test sink with network APIs stubbed to throw; fixture event exports |
+| FEAT-018 amendment: structured target users (US-146) | [[STP-146]] | Integration | `validate`, `brief`, `test-kit`, `report` and `trace` over fixture apps with `users.md` |
 
 Every P0 criterion of an in-scope story maps to one layer here and to
 tests in its STP.

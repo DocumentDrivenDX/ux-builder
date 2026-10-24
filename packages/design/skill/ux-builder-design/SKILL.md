@@ -125,7 +125,13 @@ stories or the design state. Ask `core-1` on the brief.
 propose the user segments, jobs to be done, motivations, frustrations,
 usage contexts and accessibility needs. Mark every item *hypothesis*, with
 no evidence: write the jobs into `docs/ux/jobs.md` from its template with
-status hypothesis, confidence low and evidence none.
+status hypothesis, confidence low and evidence none, and the target users
+into `docs/ux/users.md`: one row per user segment (`U-<n>`) with its
+context (where, on what, with what expertise), its needs (accessibility
+needs and constraints), the jobs it holds with an importance for each
+(`J-1 high, J-2 low`), evidence none, confidence low, status hypothesis.
+Describe segments, never invented people: no names, ages or biographies.
+The brief's Target users then comes from this file alone.
 
 **Then evidence.** When the person supplies research (interview notes or
 transcripts, analytics exports, support tickets, surveys, observations),
@@ -144,7 +150,7 @@ report, each point citing the evidence IDs (EV-<n>) behind it:
 - differences between segments;
 - conflicts between what users say and what they do.
 
-Update the jobs table as evidence arrives: rate importance and confidence
+Update the jobs and users tables as evidence arrives: rate importance and confidence
 separately; a job is confirmed only with an evidence source. Run
 `ux-builder-design validate` after each change.
 
@@ -154,7 +160,8 @@ Draft the task model from the jobs and the stories: add `tasks[]` to the
 blueprint, one per thing a user must accomplish, each with its goal, the
 jobs it serves, its trigger, required and optional inputs, system and user
 actions, success (acceptance criteria IDs), exceptions and subtasks with
-their alternative ways. Name each journey's task (`"task": "T-<n>"`) and run
+their alternative ways, and the target users it serves (`"users": ["U-1"]`).
+Name each journey's task (`"task": "T-<n>"`) and run
 `ux-builder-blueprint check`.
 
 Then run `ux-builder-blueprint simplify` and offer its proposals: inputs to
@@ -235,7 +242,9 @@ control name), success criteria, a script, a consent note, a screener and
 - `observe import <sheet> --kit TK-<n>`: each row a finding with
   `source: human`, by pseudonym, remarks masked. Name a problem in the same
   words in every row it was seen (the `problem` column), so recurring
-  problems are counted.
+  problems are counted, and the target user each participant matched in the
+  screener (the `user` column, `U-<n>`), so the report breaks results down
+  by user.
 - `transcript add <file> --session <id> --kit TK-<n> --consent-confirmed --cite <time>...`:
   only after the person confirms that session's consent; you keep only the
   cited lines, masked. Never take a recording.
@@ -324,6 +333,7 @@ showing a finished one):
 | baseline | `docs/ux/baseline.md` |
 | research-evidence | `docs/ux/evidence/EV-<n>.md` |
 | jobs | `docs/ux/jobs.md` |
+| users | `docs/ux/users.md` |
 | ux-decision | `docs/ux/decisions/UXD-<n>.md` |
 | test-kit | `docs/ux/tests/TK-<n>/kit.md` |
 | usability-evaluation-report | `docs/ux/evaluations/UER-<n>.md` |

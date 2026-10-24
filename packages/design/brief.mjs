@@ -7,7 +7,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { writeInApp } from "./app.mjs";
-import { helixRoot, parseDocument } from "./documents.mjs";
+import { helixRoot, parseDocument, usersTable } from "./documents.mjs";
 import { readState } from "./state.mjs";
 
 export const BRIEF_SECTIONS = [
@@ -86,15 +86,22 @@ export function briefContent(app) {
   for (const p of state.principles ?? []) if (p.status !== "refuted") points.principles.push({ text: p.text, status: p.status, id: p.id, rule: p.rule?.kind });
   for (const q of state.questions) if (q.status === "open") points.questions.push({ text: `${q.id}: ${q.text}`, status: null });
   const notes = [];
+  // Target users described in docs/ux/users.md are the only source of the section (GDL-77).
+  const users = usersTable(app);
+  if (users) {
+    points.users = Object.entries(users).map(([id, u]) => ({ text: `${u.user} (${id}): ${u.context}`, status: u.status, id, confirm: "research evidence about these users (ux-builder-design evidence add), cited in docs/ux/users.md" }));
+    notes.push("Target users are from docs/ux/users.md.");
+  }
   if (!helix) notes.push("HELIX was not found (no .helix.yml): the brief is built from the design state alone.");
   else if (!prd) notes.push("HELIX has no PRD yet: the brief is built from the stories and the design state.");
-  return { sections: BRIEF_SECTIONS.map(([key, heading]) => ({ key, heading, points: points[key] })), helix, prd, notes };
+  return { sections: BRIEF_SECTIONS.map(([key, heading]) => ({ key, heading, points: points[key] })), helix, prd, users: !!users, notes };
 }
 
 function markdown(content, name) {
   const lines = [];
   lines.push("---", "ux:", "  id: brief", "  type: experience-brief");
-  if (content.prd) lines.push("  links:", "    - kind: informed_by", "      to: prd");
+  const links = [content.prd && "prd", content.users && "users"].filter(Boolean);
+  if (links.length) lines.push("  links:", ...links.flatMap((to) => ["    - kind: informed_by", `      to: ${to}`]));
   lines.push("---", "", `# Experience brief${name ? `: ${name}` : ""}`, "");
   for (const s of content.sections) {
     lines.push(`## ${s.heading}`, "");

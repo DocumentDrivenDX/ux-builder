@@ -122,6 +122,8 @@ export function observeImport(app, { file, kit } = {}) {
       completed: yes(r.completed), seconds: num(r.seconds ?? r.time), errors: num(r.errors) ?? 0, assists: num(r.assists) ?? 0,
       remark: maskPersonal(r.remark ?? "", { app, names }),
       ...(String(r.problem ?? "").trim() ? { problem: maskPersonal(r.problem, { app, names }).trim() } : {}),
+      // The target user the participant matched in the screener (GDL-77).
+      ...(/^U-[1-9][0-9]*$/.test(String(r.user ?? "").trim()) ? { user: String(r.user).trim() } : {}),
     };
     o.severity = severityOf(o);
     o.title = o.problem ?? (o.completed ? `${participant} completed task ${task}` : `${participant} did not complete task ${task}`);
@@ -224,7 +226,12 @@ export function observedMeasures(app) {
   }
   const recurring = [...byProblem.values()].filter((e) => e.sessions.size >= 2).map((e) => ({ problem: e.problem, sessions: e.sessions.size, tasks: [...e.tasks].sort(), findings: e.findings.sort() })).sort((a, b) => b.sessions - a.sessions || a.problem.localeCompare(b.problem));
   const sessions = new Set(fs.map((f) => `${f.kit}/${f.participant}`)).size;
-  return { sessions, attempts: fs.length, tasks, recurring, kits: [...new Set(fs.map((f) => f.kit))].sort() };
+  // By target user, when the sheet recorded one; rows with none are "not recorded".
+  const byUser = fs.some((f) => f.user) ? [...new Set(fs.map((f) => f.user ?? null))].sort((a, b) => (a === null) - (b === null) || String(a).localeCompare(String(b), "en", { numeric: true })).map((user) => {
+    const xs = fs.filter((f) => (f.user ?? null) === user);
+    return { user, sessions: new Set(xs.map((f) => `${f.kit}/${f.participant}`)).size, attempts: xs.length, completionRate: rate(xs.filter((f) => f.completed).length, xs.length), medianSeconds: median(xs.map((f) => f.seconds).filter((x) => x != null)), errorRate: rate(xs.filter((f) => f.errors > 0).length, xs.length), assists: xs.reduce((a, f) => a + (f.assists ?? 0), 0) };
+  }) : [];
+  return { sessions, attempts: fs.length, tasks, recurring, byUser, kits: [...new Set(fs.map((f) => f.kit))].sort() };
 }
 
 /* The rubric's observed side, from human findings (FEAT-018 GDL-59):

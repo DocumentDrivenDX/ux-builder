@@ -630,6 +630,14 @@
           },
           "description": "The jobs it serves (docs/ux/jobs.md)"
         },
+        "users": {
+          "type": "array",
+          "description": "The target users this task serves, by ID from docs/ux/users.md (FEAT-018 GDL-77)",
+          "items": {
+            "type": "string",
+            "pattern": "^U-[1-9][0-9]*$"
+          }
+        },
         "trigger": {
           "type": "string",
           "minLength": 1,

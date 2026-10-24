@@ -80,7 +80,7 @@ describe("US-140: get a usability test kit from the journeys", () => {
     assert.match(screener, /- Does this describe you: weekend anglers new to the area\? \(yes \/ no\)/);
     assert.match(screener, /- Does this describe you: fly-fishing guides\? \(yes \/ no\)/);
     const sheet = readFileSync(join(a, kit.dir, "observations.csv"), "utf8").trim().split("\n");
-    assert.deepEqual(sheet[0].split(","), ["participant", "task", "completed", "seconds", "errors", "assists", "remark", "problem"]);
+    assert.deepEqual(sheet[0].split(","), ["participant", "task", "completed", "seconds", "errors", "assists", "remark", "problem", "user"]);
     assert.deepEqual(sheet.slice(1).map((l) => l.split(",")[1]), ["1", "2"]);
   });
 });
