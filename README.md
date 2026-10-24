@@ -663,7 +663,7 @@ version on `main` that isn't on npm yet.
 
 It publishes with [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
 (OIDC), so no npm token is stored anywhere. That needs a one-time setting:
-each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`, `trace`)
+each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`, `trace`, `design`)
 lists GitHub Actions, `DocumentDrivenDX/ux-builder`, workflow `release.yml` as
 a trusted publisher on npmjs.com. A brand-new package has to
 be published once by hand before a trusted publisher can be added to it.
