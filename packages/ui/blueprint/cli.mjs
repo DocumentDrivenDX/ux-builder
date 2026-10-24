@@ -30,17 +30,20 @@
    state; it exits 2 when the PNGs cannot be drawn (no Playwright or
    Chromium), with the HTML still written. */
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { needsStories, readStories, skippedNote } from "./helix.mjs";
-import { checkBlueprint, complexityDelta, deltaFindings, principleFindings, simplify, skeleton } from "./index.mjs";
+import { checkBlueprint, compareAlternatives, complexityDelta, deltaFindings, principleFindings, score, simplify, skeleton } from "./index.mjs";
 import { propose, writeProposals } from "./propose.mjs";
 import { drawings, writeDrawings } from "./draw.mjs";
 
 const USAGE = `Usage:
   ux-builder-blueprint check <file> [--json] [--diff <base>]
   ux-builder-blueprint simplify [<file>] [--json]
+  ux-builder-blueprint score [<file>] [--json]
+  ux-builder-blueprint compare <file> <file> [<file>...] [--out <dir>]
+  ux-builder-blueprint alternative (new <name> | choose <name> --reason <text>)
   ux-builder-blueprint init [--kind app|view] [--out <file>]
   ux-builder-blueprint propose [<file>] [--out <dir>]
   ux-builder-blueprint draw [<file>] [--out <dir>]
@@ -51,7 +54,7 @@ const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 async function main(argv) {
   let parsed;
   try {
-    parsed = parseArgs({ args: argv, allowPositionals: true, options: { json: { type: "boolean" }, diff: { type: "string" }, kind: { type: "string", default: "app" }, out: { type: "string" }, help: { type: "boolean", short: "h" } } });
+    parsed = parseArgs({ args: argv, allowPositionals: true, options: { json: { type: "boolean" }, diff: { type: "string" }, reason: { type: "string" }, kind: { type: "string", default: "app" }, out: { type: "string" }, help: { type: "boolean", short: "h" } } });
   } catch (e) { console.error(`${e.message}\n${USAGE}`); return 2; }
   const { values, positionals: [command, file, ...rest] } = parsed;
   if (values.help) { console.log(USAGE); return 0; }
@@ -62,6 +65,68 @@ async function main(argv) {
     if (existsSync(out)) { console.error(`${out} exists; not overwriting it.`); return 1; }
     writeFileSync(out, JSON.stringify(skeleton(values.kind), null, 2) + "\n");
     console.log(`Wrote ${out}. Describe your ${values.kind === "view" ? "view's screen" : "app's destinations and screens"}, then run: ux-builder-blueprint check ${out}`);
+    return 0;
+  }
+
+  if (command === "score") {
+    if (rest.length) { console.error(USAGE); return 2; }
+    const src = file ?? "app.blueprint.json";
+    let bp;
+    try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
+    const scores = score(bp);
+    if (values.json) console.log(JSON.stringify(scores, null, 2));
+    else for (const s of scores) console.log(`${s.journey}${s.task ? ` (${s.task})` : ""}, predicted: ${s.steps} steps (shortest ${s.shortestPath ?? "?"}), ${s.screens} screens, ${s.modals} modals, ${s.requiredInputs} required inputs, ${s.decisions} decisions, ${s.hops} hops, ${s.findings} findings, patterns ${s.patterns.reused} reused / ${s.patterns.introduced} introduced`);
+    return 0;
+  }
+
+  if (command === "compare") {
+    const files = [file, ...rest].filter(Boolean);
+    if (files.length < 2) { console.error(`compare needs two or more blueprints\n${USAGE}`); return 2; }
+    const alternatives = [];
+    for (const f of files) {
+      try { alternatives.push({ name: alternativeName(f), file: f, blueprint: JSON.parse(readFileSync(f, "utf8")) }); } catch (e) { console.error(`${f}: ${e.message}`); return 2; }
+    }
+    const design = await designState(files[0]);
+    const judgments = Object.fromEntries((design?.state?.alternatives ?? []).map((a) => [a.name, a.judgments ?? []]));
+    const r = compareAlternatives(alternatives, { judgments, title: `Comparing ${alternatives.map((a) => a.name).join(", ")}` });
+    if (r.differ) {
+      console.error(`The alternatives do not cover the same tasks: ${r.differ.join(", ")}. ${r.missing.map((m) => `${m.name} lacks ${m.lacks.join(", ")}`).join("; ")}.`);
+      return 1;
+    }
+    const out = values.out ?? "blueprint-compare";
+    mkdirSync(out, { recursive: true });
+    writeFileSync(join(out, "compare.html"), r.html);
+    if (values.json) console.log(JSON.stringify({ file: join(out, "compare.html"), scores: r.scores, best: r.best }, null, 2));
+    else console.log(`${join(out, "compare.html")}: ${alternatives.length} alternatives, best per task and dimension marked.`);
+    return 0;
+  }
+
+  if (command === "alternative") {
+    const [name] = rest;
+    if (!["new", "choose"].includes(file) || !/^[a-z0-9][a-z0-9-]*$/.test(name ?? "")) { console.error(`alternative new <name> or alternative choose <name> --reason <text>; a name is lowercase letters, digits and hyphens\n${USAGE}`); return 2; }
+    const main = "app.blueprint.json", alt = `app.blueprint.${name}.json`;
+    if (file === "new") {
+      if (!existsSync(main)) { console.error(`No ${main} here to copy.`); return 2; }
+      if (existsSync(alt)) { console.error(`${alt} exists; not overwriting it.`); return 1; }
+      writeFileSync(alt, readFileSync(main, "utf8"));
+      const d = await designState(main);
+      if (d && !d.state.alternatives.some((a) => a.name === name)) d.design.stateSet(d.app, { path: "alternatives[+]", value: { name, file: alt, status: "candidate" } });
+      console.log(`Wrote ${alt}, a copy of ${main}. Change it, then: ux-builder-blueprint check ${alt}`);
+      return 0;
+    }
+    if (!values.reason?.trim()) { console.error(`alternative choose needs --reason: why ${name} is chosen. Nothing was changed.`); return 1; }
+    if (!existsSync(alt)) { console.error(`No ${alt}: create it with ux-builder-blueprint alternative new ${name}.`); return 1; }
+    writeFileSync(main, readFileSync(alt, "utf8"));
+    const d = await designState(main);
+    if (d) {
+      const date = new Date().toISOString().slice(0, 10);
+      const others = readdirSync(".").map((f) => f.match(/^app\.blueprint\.([a-z0-9][a-z0-9-]*)\.json$/)?.[1]).filter(Boolean);
+      const known = new Map(d.state.alternatives.map((a) => [a.name, a]));
+      const names = [...new Set([...known.keys(), ...others])].sort();
+      const alternatives = names.map((n) => ({ ...(known.get(n) ?? { name: n, file: `app.blueprint.${n}.json` }), status: n === name ? "chosen" : "rejected", reason: n === name ? values.reason.trim() : `${name} was chosen: ${values.reason.trim()}`, date }));
+      d.design.stateSet(d.app, { path: "alternatives", value: alternatives });
+    }
+    console.log(`${main} is now ${name}${d ? "; the design state records the choice" : ""}.`);
     return 0;
   }
 
@@ -154,6 +219,22 @@ function deltaText(base, delta) {
   }
   if (!delta.journeys.length) lines.push("  no journey changed");
   return lines.join("\n");
+}
+
+/* An alternative's name from its file: app.blueprint.<name>.json, else "current". */
+function alternativeName(f) {
+  const m = basename(f).match(/^app\.blueprint\.([a-z0-9][a-z0-9-]*)\.json$/);
+  return m ? m[1] : basename(f) === "app.blueprint.json" ? "current" : basename(f).replace(/\.json$/, "");
+}
+
+/* The guided design loop's state for the app above a blueprint, through
+   @ux-builder/design when it is installed: { design, app, state }, or null. */
+async function designState(file) {
+  let design;
+  try { design = await import("@ux-builder/design"); } catch { return null; }
+  const app = design.findApp(dirname(resolve(file)));
+  if (!design.hasState(app)) return null;
+  return { design, app, state: design.readState(app) };
 }
 
 /* The app's principles: .ux-builder/principles.json in the nearest folder at

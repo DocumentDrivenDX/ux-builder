@@ -339,6 +339,24 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
         inputSchema: { blueprint: z.record(z.string(), z.unknown()).describe("The blueprint object (app.blueprint.json)") },
       }, async ({ blueprint: b }) => ok(bp.simplify(b)));
     }
+    if (bp.score) {
+      server.registerTool("score_blueprint", {
+        title: "Score a blueprint's journeys",
+        description: "Per journey, what it asks of its user, labelled predicted (FEAT-018 GDL-28): steps and the shortest path, screens, modals, required inputs, decisions, navigation hops, check findings, patterns reused and introduced; as `ux-builder-blueprint score --json` returns it.",
+        inputSchema: { blueprint: z.record(z.string(), z.unknown()).describe("The blueprint object") },
+      }, async ({ blueprint: b }) => ok(bp.score(b)));
+      server.registerTool("compare_blueprints", {
+        title: "Compare alternative blueprints",
+        description: "Scores two or more alternative blueprints for the same tasks and marks, per task and dimension, the best (FEAT-018 GDL-30). Refuses alternatives whose tasks differ. Returns the scores, the best per dimension and the comparison page's HTML; writes nothing.",
+        inputSchema: {
+          alternatives: z.array(z.object({ name: z.string(), blueprint: z.record(z.string(), z.unknown()) })).min(2).describe("The alternatives, each with its name"),
+          judgments: z.record(z.string(), z.array(z.object({ criterion: z.string(), value: z.string(), reasoning: z.string() }))).optional().describe("Preliminary design judgments per alternative"),
+        },
+      }, async ({ alternatives, judgments }) => {
+        const r = bp.compareAlternatives(alternatives, { judgments: judgments ?? {} });
+        return r.differ ? fail(`The alternatives do not cover the same tasks: ${r.differ.join(", ")}.`) : ok(r);
+      });
+    }
   }
 
   // HELIX proposals from the blueprint (FEAT-012 DRF-01, DRF-02; ADR-030): returned, never written or applied.

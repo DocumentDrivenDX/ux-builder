@@ -163,6 +163,24 @@ Before Explore, ask the person to confirm the essential goals, as part of
 `core-1`, and record the answer:
 `ux-builder-design state checkpoint core-1 --answer "<their words>"`.
 
+## Explore alternatives
+
+For every open question about the interaction model (search first or map
+first, say), draft at least two alternatives and recommend one:
+1. `ux-builder-blueprint alternative new <name>` copies the blueprint to
+   `app.blueprint.<name>.json`; change it to the alternative and run
+   `ux-builder-blueprint check app.blueprint.<name>.json`.
+2. Record your design judgments of each, against criteria that fit the
+   product (initial effort, support for exploration, required knowledge,
+   mobile fit…), each with its reasoning, in the design state:
+   `state set 'alternatives[<i>].judgments' '[{"criterion":"…","value":"…","reasoning":"…"}]'`.
+   They are preliminary judgments, not measured results; say so.
+3. `ux-builder-blueprint compare app.blueprint.<a>.json app.blueprint.<b>.json …`
+   writes `blueprint-compare/compare.html`: open it for the person.
+4. Ask `core-2`. On their choice, run
+   `ux-builder-blueprint alternative choose <name> --reason "<why>"` and
+   record the decision (`ux-builder-design decision add`).
+
 ## Checkpoints
 
 Stop, ask the person one question, and wait for the answer at each

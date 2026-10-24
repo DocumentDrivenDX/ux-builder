@@ -104,7 +104,7 @@ removes its criteria from `tools/coverage-exceptions.json`.
 | B-026 | Hypotheses and evidence with masking (US-124, US-125) | ADR-039; STP-124, STP-125 | B-022 | design tests | Built 2026-10-23 (real names checked from .ux-builder/participants.local.json, kept out of git); Phase 2 |
 | B-027 | Jobs and its rules (US-126) | CONTRACT-008 type rules; STP-126 | B-026 | design tests | Built 2026-10-23 with B-026 |
 | B-028 | `tasks[]`, `journeys[].task`, `simplify` (US-127, US-128) | CONTRACT-005 amendment; SD-006 Simplify; STP-127, STP-128 | B-021 | ui tests | Built 2026-10-23: phase 2 exit met (fixture research gives a valid jobs table) |
-| B-029 | Alternatives, `score`, `compare` (US-129, US-130) | ADR-036 rule 7; SD-006 Score, Compare; STP-129, STP-130 | B-028 | ui tests | Phase 3 |
+| B-029 | Alternatives, `score`, `compare` (US-129, US-130) | ADR-036 rule 7; SD-006 Score, Compare; STP-129, STP-130 | B-028 | ui tests | Built 2026-10-23 (compare and alternative refusals exit 1, the blueprint command's convention); Phase 3 |
 | B-030 | `ux-decision`, `purpose` and `content`, `consistency.same-kind` (US-131 to US-133) | STP-131 to STP-133 | B-029 | design and ui tests; `npm run rules` | |
 | B-031 | Rubric data and predicted column (US-134) | SD-006 Rubric and sources; STP-134 | B-030 | design tests; `npm run rules` | Phase 3 exit |
 | B-032 | Exploratory prototypes, `no-prototype-import`, validated-prototype guidance, `ready` (US-135, US-136) | ADR-037; SD-006 Prototype, Readiness; STP-135, STP-136 | B-029 | ui tests (Chromium); design tests | Phase 4; may move ahead of B-029 with alternatives stubbed |

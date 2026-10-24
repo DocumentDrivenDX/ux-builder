@@ -23,6 +23,7 @@ export { blueprintSchema, LIMITS as limits, RULES as rules, RECIPES as recipes }
 export { complexityDelta, deltaFindings, journeyLoad, stepKey } from "./complexity.mjs";
 export { PRINCIPLE_KINDS, principleFindings } from "./principles.mjs";
 export { simplify } from "./tasks.mjs";
+export { compareAlternatives, DIMENSIONS, score } from "./explore.mjs";
 import { checkTasks } from "./tasks.mjs";
 export { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, expandModalities, modalityProblems };
 

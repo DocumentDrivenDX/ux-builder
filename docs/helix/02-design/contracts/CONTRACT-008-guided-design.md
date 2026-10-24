@@ -118,7 +118,7 @@ input or a refusal (named on stderr).
 | `checkpoints[]` | `{ id, status: passed\|skipped, answer?, reason?, at }` | `id`: `core-1`, `core-2`, `core-3`, `significant-change`, `experiment`, `release` |
 | `questions[]` | `{ id, text, status: open\|answered, answer? }` | Open questions |
 | `assumptions[]` | `{ id: "A-<n>", text, status: assumed\|hypothesis\|confirmed\|refuted\|current-state, evidence[], section?, confirm? }` | `current-state` marks a baseline item, shown as *current state, assumed* |
-| `alternatives[]` | `{ name, file, status: candidate\|chosen\|rejected, reason? }` | |
+| `alternatives[]` | `{ name, file, status: candidate\|chosen\|rejected, reason?, date?, judgments?: [{ criterion, value, reasoning }] }` | Judgments are preliminary, shown on the comparison page |
 | `principles[]` | `{ id: "PR-<n>", text, status: confirmed\|assumed\|hypothesis\|refuted, rule? }` | Experience principles; one with a `rule` becomes a project rule (Project principles) |
 | `issues[]` | `{ finding, status: open\|fixed\|wont-fix }` | Unresolved usability issues |
 | `experiments[]` | `{ id, status: running\|ended }` | |
@@ -177,7 +177,7 @@ name, question, measures[], baseline: boolean, sources[] }`. Baselines:
 ### MCP tools (optional)
 
 `get_design_state`, `update_design_state`, `design_status`,
-`simplify_blueprint` (built), and `score_blueprint`, `compare_blueprints`,
+`simplify_blueprint`, `score_blueprint`, `compare_blueprints` (built), and
 `design_impact`, `design_trace` as their commands are built. Each returns
 what the matching command's `--json` returns; `@ux-builder/mcp` loads
 `@ux-builder/design` from the app (else its own install) and registers them
@@ -249,7 +249,8 @@ interaction decision record carries `ux: "UXD-<n>"`.
 | `state set` with a value the schema rejects | Exit 2, the schema error named; nothing written |
 | `init` where a design state exists | Exit 2, "design state exists"; nothing written |
 | `transcript add` without `--consent-confirmed` | Exit 2, refusal; nothing written |
-| `compare` on alternatives with different task sets | Exit 2, the differing tasks named |
+| `compare` on alternatives with different task sets | Exit 1, the differing tasks named (a refusal; the blueprint command's convention, as `init` on an existing file) |
+| `alternative new` on an existing file, or `alternative choose` without `--reason` | Exit 1, naming the file or the missing reason; nothing changed |
 | `impact --apply` when the changed blueprint fails `check` | Exit 1; prototypes and the test kit are not regenerated |
 | `validate` on a document missing a template section | Exit 1, the document and section named |
 | `insights` with events naming an unknown journey | Exit 0; those events reported as unmatched |

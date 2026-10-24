@@ -198,6 +198,37 @@
           },
           "reason": {
             "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "judgments": {
+            "type": "array",
+            "description": "The agent's preliminary design judgments of this alternative (FEAT-018 GDL-29); not measured results",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "criterion",
+                "value",
+                "reasoning"
+              ],
+              "properties": {
+                "criterion": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasoning": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
           }
         }
       }

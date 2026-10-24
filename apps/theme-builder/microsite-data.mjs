@@ -116,6 +116,9 @@ export const BLUEPRINT_NOTES = {
   propose: "Draft HELIX content from the blueprint as patches, a report and proposals.json; applies nothing.",
   draw: "Draw the IA map, flows and journeys as Mermaid and SVG.",
   wireframes: "Draw each screen's pattern at each supported size class as HTML and PNG, in a neutral theme.",
+  score: "Score each journey of a blueprint, labelled predicted: steps, screens, modals, required inputs, decisions, navigation hops, findings and patterns.",
+  compare: "Compare two or more alternative blueprints for the same tasks on one page, the best per task and dimension marked.",
+  alternative: "Make an alternative blueprint (new) or choose one, with its reason (choose), recorded in the design state.",
   simplify: "Propose ways to make the task model take less of its users: inputs to infer, decisions to default, steps to combine, hops to remove. Changes nothing.",
 };
 export function blueprintCommands() {
