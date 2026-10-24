@@ -41,6 +41,8 @@ export const CHECKS = [
   "simplicity.delta-decided",
   // The task model (FEAT-018 GDL-22, GDL-23; tasks.mjs).
   "journey.task-exists", "task.realized",
+  // The experience architecture (FEAT-018 GDL-32, GDL-34; tasks.mjs).
+  "screen.purpose", "consistency.same-kind",
 ];
 const STATES = ["empty", "loading", "error"];
 

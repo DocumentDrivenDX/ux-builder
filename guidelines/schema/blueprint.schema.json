@@ -204,6 +204,41 @@
               "type": "string",
               "pattern": "^US-[0-9]+$"
             }
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the screen is for, in a sentence (FEAT-018 GDL-32)"
+          },
+          "content": {
+            "type": "array",
+            "description": "The information on the screen, highest priority first (FEAT-018 GDL-32)",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "label"
+              ],
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "For example data, action, help, status"
+                }
+              }
+            }
+          },
+          "interactionKinds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "The kinds of interaction the screen handles, such as choose-location (FEAT-018 GDL-34)"
           }
         }
       }

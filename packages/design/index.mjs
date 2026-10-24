@@ -11,6 +11,7 @@ export { canonical, emptyState, hasState, parsePath, readState, SCHEMA, serializ
 export { status, summary } from "./status.mjs";
 export { checkpoint, CHECKPOINTS, setMode } from "./checkpoints.mjs";
 export { baseline } from "./baseline.mjs";
+export { DECISION_STATUSES, decisionAdd, decisionStatus } from "./decisions.mjs";
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml, principlesFile } from "./brief.mjs";
 export { EVIDENCE_KINDS, evidenceAdd, evidenceList, writeEvidence } from "./research.mjs";
 export { ARTIFACTS, documentTypes, jobsTable, PERSONAL_PATTERNS, exampleFile, helixIds, helixRoot, parseDocument, pathFor, templateFile, uxDocuments, validate, validateDocument } from "./documents.mjs";

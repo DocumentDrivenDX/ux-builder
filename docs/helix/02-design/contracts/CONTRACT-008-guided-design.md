@@ -193,8 +193,9 @@ only when it is there. Every command's `--json` output is described by
 - `journeys[].task`: the `T-` ID a journey realizes.
 - `journeys[].steps[]` may add `inputs: { required[], inferable[] }`,
   `decision`, `system`.
-- `screens[].purpose` (string) and `screens[].content` (objects `{ label,
-  kind? }`, highest priority first).
+- `screens[].purpose` (string), `screens[].content` (objects `{ label,
+  kind? }`, highest priority first) and `screens[].interactionKinds`
+  (strings, such as `choose-location`).
 - Alternatives: `app.blueprint.<name>.json`, each a complete blueprint.
   `alternative new` refuses to overwrite an existing file;
   `alternative choose` requires `--reason`.
@@ -205,8 +206,9 @@ only when it is there. Every command's `--json` output is described by
   and `prototype --archive <name>` (moves it to `prototype/.archive/`),
   `check --diff <base>`.
 - Rules added: `simplicity.delta-decided` (a journey grows without a
-  recorded decision), `consistency.same-kind` (one interaction kind, two
-  patterns or flows).
+  recorded decision), `journey.task-exists`, `task.realized`,
+  `screen.purpose` (once the blueprint models tasks or content) and
+  `consistency.same-kind` (one interaction kind, two patterns).
 - Lint rule added: `ux-builder/no-prototype-import`.
 
 ## Amendment to CONTRACT-006 (assessment) *[FEAT-018]*

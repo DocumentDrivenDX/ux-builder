@@ -2762,6 +2762,54 @@
       ]
     },
     {
+      "id": "screen.purpose",
+      "title": "Every screen says what it is for",
+      "statement": "Once a blueprint models tasks or screen content, each screen states its purpose in a sentence, so its content can be ordered by what serves that purpose.",
+      "rationale": "A screen without a stated purpose collects whatever is added to it; its hierarchy then reflects history rather than the user's task.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "screen.purpose"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder FEAT-018: guided design loop (GDL-32 to GDL-34)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "consistency.same-kind",
+      "title": "One kind of interaction, one way",
+      "statement": "Where tasks need the same kind of interaction, such as choosing a location, they reach it through screens with the same pattern, so people learn it once.",
+      "rationale": "Different interfaces for the same interaction make people relearn it and raise errors; consistency lets one learned way serve every task.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "consistency.same-kind"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (4, Consistency and standards)",
+          "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-018: guided design loop (GDL-32 to GDL-34)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
       "id": "theme.applied",
       "title": "The theme is applied",
       "statement": "The page loads the declared theme's CSS and the theme's tokens resolve on the themed element.",

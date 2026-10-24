@@ -415,6 +415,8 @@ How screens fit together and behave: navigation by size, modals, safeguards, sta
 | `journey.task-exists` | always | blueprint `journey.task-exists` | A journey that names the task it realizes names one of the blueprint's tasks. |
 | `simplicity.delta-decided` | always | blueprint `simplicity.delta-decided` | When a change adds a screen, a step, a required input or a decision to a journey, a recorded decision names the addition and answers why it is needed and what simpler option was considered. |
 | `task.realized` | always | blueprint `task.realized` | Each task in the task model is realized by at least one journey, so the flow shows how the user accomplishes it. |
+| `screen.purpose` | always | blueprint `screen.purpose` | Once a blueprint models tasks or screen content, each screen states its purpose in a sentence, so its content can be ordered by what serves that purpose. |
+| `consistency.same-kind` | always | blueprint `consistency.same-kind` | Where tasks need the same kind of interaction, such as choosing a location, they reach it through screens with the same pattern, so people learn it once. |
 | `theme.applied` | always | audit `theme-applied` | The page loads the declared theme's CSS and the theme's tokens resolve on the themed element. |
 | `theme.token-colors` | always | audit `token-colors` | Every colour the app draws is one of the theme's colour tokens, or a mix of two of them. |
 | `theme.token-fonts` | always | audit `token-fonts` | Text is set in the font families the theme names, through its type tokens. |

@@ -181,7 +181,9 @@ export async function wireframes(bp) {
         }
         known = !!el;
         // In a Page, as an app builds each screen (the starter's guide).
-        const content = el ? render(h(P.Page, null, el)) : box(s, state);
+        // The screen's content, highest priority first (FEAT-018 GDL-35), before the placeholder.
+        const order = Array.isArray(s.content) && s.content.length ? `<section class="wf-content" aria-label="Content, highest priority first" style="margin:var(--piq-space-4);padding:var(--piq-space-3);border:1px dashed var(--piq-color-border);color:var(--piq-color-text);font:var(--piq-font-body, inherit)"><p><strong>Content, highest priority first</strong></p><ol>${s.content.filter((c) => c?.label).map((c) => `<li>${esc(c.label)}${c.kind ? ` <small>(${esc(c.kind)})</small>` : ""}</li>`).join("")}</ol></section>` : "";
+        const content = order + (el ? render(h(P.Page, null, el)) : box(s, state));
         const marked = state === "ideal" ? content : `<div data-state="${esc(state)}" data-drawn-by="${known ? by : "box"}">${content}</div>`;
         // A view is drawn without a shell; the host provides it.
         markup = bp.kind === "view" || !nav.length ? `<main>${marked}</main>` : render(h(P.AppShell, { nav, current: dests.find((d) => d.screen === s.id)?.id ?? null, brand: h("strong", null, bp.name ?? "App") }, h("div", { dangerouslySetInnerHTML: { __html: marked } })));

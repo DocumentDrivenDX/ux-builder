@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { baseline, brief, checkpoint, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { baseline, brief, checkpoint, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -43,6 +43,11 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       never its text; add the masked excerpts the synthesis cites.
   evidence list
       each source's ID, kind, date, source and excerpts cited.
+  decision add --question <q> --option <o> --option <o>... --choice <o> --why <text>
+               [--assumption <a>]... [--validation <how it will be tested>] [--link <HELIX ID>]...
+      write docs/ux/decisions/UXD-<n>.md, status not-tested, and a decision in the trace.
+  decision status <UXD-n> tested|refuted [--evidence <id>]
+      update a decision's validation status, keeping the earlier one in its history.
   validate
       check every document in docs/ux/: frontmatter, ID, place, sections,
       links and its type's rules. Exits 1 on a problem.
@@ -68,7 +73,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -116,6 +121,20 @@ async function main(argv) {
     const r = brief(app, { name: values.name });
     print(r, values.json, [`Wrote ${r.written.join(", ")}.`, ...r.notes].join("\n"));
     return 0;
+  }
+  if (command === "decision") {
+    const [sub, id, status] = rest;
+    if (sub === "add") {
+      const r = decisionAdd(app, { question: values.question, options: values.option, choice: values.choice, why: values.why, assumptions: values.assumption, validation: values.validation, links: values.link });
+      print(r, values.json, `Wrote ${r.path} (${r.status}).`);
+      return 0;
+    }
+    if (sub === "status") {
+      const r = decisionStatus(app, { id, status, evidence: values.evidence });
+      print(r, values.json, `${r.id} is ${r.status}${r.evidence ? ` (evidence ${r.evidence})` : ""}.`);
+      return 0;
+    }
+    throw new DesignError(`unknown decision command "${sub ?? ""}": use add or status`);
   }
   if (command === "evidence") {
     const [sub, file] = rest;

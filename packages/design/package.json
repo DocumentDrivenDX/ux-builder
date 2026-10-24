@@ -22,6 +22,7 @@
     "baseline.mjs",
     "brief.mjs",
     "research.mjs",
+    "decisions.mjs",
     "documents.mjs",
     "cli.mjs",
     "artifacts",

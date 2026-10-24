@@ -341,6 +341,26 @@
           }
         }
       }
+    },
+    "decisionAdd": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "status",
+        "trace"
+      ]
+    },
+    "decisionStatus": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "status",
+        "evidence",
+        "date",
+        "history"
+      ]
     }
   }
 }

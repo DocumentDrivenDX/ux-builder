@@ -7,8 +7,9 @@
 const list = (x) => (Array.isArray(x) ? x : []);
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
-/* journey.task-exists and task.realized. */
+/* journey.task-exists, task.realized, screen.purpose and consistency.same-kind. */
 export function checkTasks(bp, { add, on }) {
+  checkArchitecture(bp, { add, on });
   const tasks = list(bp?.tasks).filter((t) => t && typeof t === "object");
   const ids = new Set(tasks.map((t) => t.id).filter(Boolean));
   const realized = new Set();
@@ -20,6 +21,41 @@ export function checkTasks(bp, { add, on }) {
   tasks.forEach((t, i) => {
     if (t.id && on("task.realized") && !realized.has(t.id)) add("task.realized", ["tasks", i], `${t.id} ("${t.goal ?? ""}") is realized by no journey.`, `Add a journey with "task": "${t.id}", or remove the task.`);
   });
+}
+
+/* screen.purpose (once the blueprint models tasks or content) and
+   consistency.same-kind (the same interaction kind, one pattern). */
+function checkArchitecture(bp, { add, on }) {
+  const screens = list(bp?.screens).map((s, i) => ({ s, i })).filter(({ s }) => s && typeof s === "object" && s.id);
+  const guided = list(bp?.tasks).length > 0 || screens.some(({ s }) => s.purpose || Array.isArray(s.content));
+  if (guided && on("screen.purpose")) {
+    for (const { s, i } of screens) if (!s.purpose) add("screen.purpose", ["screens", i], `${s.title ?? s.id} has no purpose.`, `Add "purpose": what ${s.title ?? s.id} is for, in a sentence; then order its "content" by it.`);
+  }
+  if (!on("consistency.same-kind")) return;
+  // For each kind: which tasks reach it, on which screen and pattern.
+  const byId = new Map(screens.map(({ s }) => [s.id, s]));
+  const uses = new Map();
+  for (const t of list(bp?.tasks).filter((x) => x?.id)) {
+    const journeyScreens = list(bp?.journeys).filter((j) => j?.task === t.id).flatMap((j) => list(j.steps).map((st) => st?.screen)).filter((id) => byId.has(id));
+    for (const kind of list(t.interactionKinds)) {
+      const screen = journeyScreens.find((id) => list(byId.get(id).interactionKinds).includes(kind));
+      if (!screen) continue;
+      if (!uses.has(kind)) uses.set(kind, []);
+      uses.get(kind).push({ task: t.id, screen, pattern: byId.get(screen).pattern });
+    }
+  }
+  for (const [kind, us] of uses) {
+    const counts = new Map();
+    for (const u of us) counts.set(u.pattern, (counts.get(u.pattern) ?? 0) + 1);
+    if (counts.size < 2) continue;
+    // The pattern most tasks use; a tie goes to the first in blueprint order.
+    const recommended = [...counts.entries()].sort((a, b) => b[1] - a[1] || us.findIndex((u) => u.pattern === a[0]) - us.findIndex((u) => u.pattern === b[0]))[0][0];
+    const main = us.find((u) => u.pattern === recommended);
+    for (const u of us.filter((x) => x.pattern !== recommended)) {
+      const i = screens.find(({ s }) => s.id === u.screen).i;
+      add("consistency.same-kind", ["screens", i], `${u.task} handles ${kind} on ${u.screen} (${u.pattern}), but ${main.task} handles it on ${main.screen} (${recommended}).`, `Use ${recommended} for ${kind} on ${u.screen} too, so people learn it once.`);
+    }
+  }
 }
 
 /* Proposals that make a task take less: [{ task, journey?, kind, at, change, saves, assumes }]. */

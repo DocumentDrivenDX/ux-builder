@@ -181,6 +181,19 @@ first, say), draft at least two alternatives and recommend one:
    `ux-builder-blueprint alternative choose <name> --reason "<why>"` and
    record the decision (`ux-builder-design decision add`).
 
+## Design the structure
+
+From the chosen flow, generate the information architecture, the
+interaction design and the interface design together, not one after
+another. For every screen, fill its `purpose` (what it is for, in a
+sentence) and its `content` (the information on it, highest priority first,
+each `{ "label": "…", "kind": "data" }`), and name the `interactionKinds` it
+handles (for example `choose-location`). Where two tasks need the same kind
+of interaction, use the same pattern for both: `ux-builder-blueprint check`
+reports `consistency.same-kind` otherwise. Then draw and propose:
+`ux-builder-blueprint wireframes` shows each screen's content in its order,
+and `propose` carries purposes and content into the wireframe drafts.
+
 ## Checkpoints
 
 Stop, ask the person one question, and wait for the answer at each
