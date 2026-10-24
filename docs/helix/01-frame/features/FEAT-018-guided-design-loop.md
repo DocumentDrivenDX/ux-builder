@@ -32,7 +32,7 @@ development. Stage 1 of the operator's plan: new artifact templates and
 prompts live in ux-builder; mapping them into HELIX is stage 2, after the
 concept is tested. Stage 1 built (2026-10-23): all six phases, B-018 to
 B-036, every acceptance criterion cited by a test. Open: stage 2 (the
-HELIX mapping) and decision D-11.
+HELIX mapping), after a trial in a real app with real people (D-11).
 **Priority**: P1
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: Guided design (new); Interaction and
@@ -948,10 +948,12 @@ proposed"). Each is recorded in an ADR.
 | D-9 | The design state is committed in the app's repository | ADR-036 |
 | D-10 | Rubric and new rules cite published sources, paraphrased, under ADR-025 rule 7; the candidate sources are listed in SD-006 and pass `npm run rules` | SD-006 |
 
-**D-11, priority against open work** (FEAT-005, FEAT-013's remaining
-check, the FEAT-016 learning store), had no proposed answer and is still
-the operator's to set. The beads are filed at priority 2, below the open
-release work.
+**D-11, priority against open work**, set by the operator on 2026-10-24,
+after stage 1 was built: first FEAT-005's release work (publish on merge,
+ADR-034), since nothing new reaches users without it; then FEAT-016,
+learning from builds; then FEAT-018 stage 2, the HELIX mapping, only after
+the guide has been used in a real app with real people; FEAT-013's
+remaining comprehension check last. Bead priorities follow that order.
 
 ## Dependencies
 
