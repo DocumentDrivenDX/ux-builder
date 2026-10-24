@@ -4,10 +4,19 @@
   "license": "MIT OR Apache-2.0",
   "description": "An MCP server that gives AI agents the AI-UI SDK's catalogue: themes, brands, design systems, widgets with props, tokens with purposes, icons and guidance (FEAT-004 SDK-14).",
   "type": "module",
-  "bin": { "ux-builder-mcp": "./server.mjs" },
-  "exports": { ".": "./server.mjs" },
-  "files": ["server.mjs", "THIRD-PARTY-NOTICES.md"],
-  "scripts": { "test": "node --test 'test/*.test.mjs'" },
+  "bin": {
+    "ux-builder-mcp": "./server.mjs"
+  },
+  "exports": {
+    ".": "./server.mjs"
+  },
+  "files": [
+    "server.mjs",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@ux-builder/tokens": "^1.4.0",
@@ -15,6 +24,15 @@
     "@ux-builder/ui": "^0.10.0",
     "zod": "^4.6.5"
   },
-  "publishConfig": { "access": "public" },
-  "repository": { "type": "git", "url": "git+https://github.com/DocumentDrivenDX/ux-builder.git", "directory": "packages/mcp" }
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DocumentDrivenDX/ux-builder.git",
+    "directory": "packages/mcp"
+  },
+  "devDependencies": {
+    "@ux-builder/design": "^0.1.0"
+  }
 }

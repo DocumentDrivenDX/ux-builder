@@ -296,14 +296,29 @@ export function recordCheck(appDir, check, fields = {}, { by = BY } = {}) {
 /* Write a `decision` event (US-107-AC1, AC2): `chose` and `why` are required.
    Throws TraceError MISSING naming the field, writing nothing, when one is
    absent; `why` and every other string are masked when written. */
-export function recordDecision(appDir, { chose, considered, why, relied, departs, workaround, screen } = {}, { by = "agent" } = {}) {
+export const ADDITION_FIELDS = ["goal", "without", "simplest", "assumptions", "validation"];
+export const DECISION_KINDS = ["addition", "checkpoint"];
+
+export function recordDecision(appDir, { chose, considered, why, relied, departs, workaround, screen, kind, checkpoint, goal, without, simplest, assumptions, validation, ux } = {}, { by = "agent" } = {}) {
   for (const [name, v] of [["chose", chose], ["why", why]]) {
     if (typeof v !== "string" || !v.trim()) throw new TraceError(`record_decision needs "${name}": ${name === "chose" ? "what you chose" : "why, in a sentence"}. Nothing was written.`, "MISSING", { field: name });
   }
-  const list = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]).map(String);
+  if (kind != null && !DECISION_KINDS.includes(kind)) throw new TraceError(`kind is one of ${DECISION_KINDS.join(", ")}. Nothing was written.`, "MISSING", { field: "kind" });
+  const list = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]).map(String).filter((s) => s.trim());
+  const text = (x) => (typeof x === "string" && x.trim() ? x.trim() : null);
+  // An addition (a destination, screen, modal, required input or step) answers the five questions (FEAT-018 GDL-11).
+  const five = { goal: text(goal), without: text(without), simplest: text(simplest), assumptions: list(assumptions), validation: text(validation) };
+  if (kind === "addition") {
+    const missing = ADDITION_FIELDS.find((f) => (f === "assumptions" ? !five.assumptions.length : !five[f]));
+    if (missing) throw new TraceError(`an addition needs "${missing}": the five answers are goal, without, simplest, assumptions and validation. Nothing was written.`, "MISSING", { field: missing });
+  }
   const event = appendEvent(appDir, "decision", {
     chose: chose.trim(), considered: list(considered), why: why.trim(), relied: list(relied), departs: !!departs, workaround: !!workaround,
     ...(screen ? { screen: String(screen) } : {}),
+    ...(kind ? { decisionKind: kind } : {}),
+    ...(checkpoint ? { checkpoint: String(checkpoint) } : {}),
+    ...(ux ? { ux: String(ux) } : {}),
+    ...Object.fromEntries(Object.entries(five).filter(([, v]) => (Array.isArray(v) ? v.length : v != null))),
   }, { by });
   return event;
 }

@@ -53,6 +53,11 @@
                   "type": "string",
                   "minLength": 1
                 },
+                "screen": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The blueprint screen the step was on (FEAT-018 GDL-50: the screens the heuristic pass covers)"
+                },
                 "url": {
                   "type": "string"
                 },
@@ -260,6 +265,24 @@
                   "description": "The blueprint alternate (plan.json alternates[].n) this step belongs to; absent for the main path.",
                   "type": "integer",
                   "minimum": 1
+                },
+                "at": {
+                  "type": "string",
+                  "description": "When the step was taken (ISO 8601), for time per step (FEAT-018 GDL-52)"
+                },
+                "failed": {
+                  "type": "boolean",
+                  "description": "The action did not do what the agent expected (FEAT-018 GDL-52)"
+                },
+                "notFound": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Information the agent looked for here and did not find (FEAT-018 GDL-52)"
+                },
+                "error": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "An interface error the screen showed (FEAT-018 GDL-52)"
                 }
               }
             }

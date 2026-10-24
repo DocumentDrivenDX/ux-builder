@@ -16,18 +16,20 @@
    walkthrough videos (FEAT-013; CONTRACT-006 "Walkthrough videos"): steps
    that can be replayed, secrets only by reference, plain-English findings,
    and annotations that show only findings of the backlog, at the
-   checkpoints they cite, never after a chapter stopped.
+   checkpoints they cite, never after a chapter stopped. With a heuristic
+   pass (FEAT-018 GDL-50): an entry for every walked screen and heuristic.
    Returns the problems; writes nothing. */
 
 import Ajv2020 from "ajv/dist/2020.js";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
+import { missing, walkedScreens } from "./heuristics.mjs";
 import { SECRETS } from "./manifest.mjs";
 import { findingId } from "./plan.mjs";
 
 const own = createRequire(import.meta.url);
-const RECORDS = ["run", "requirements", "traceability", "alignment", "baseline", "plan", "coverage", "walkthrough", "backlog", "proposals", "comparison", "evidence"];
+const RECORDS = ["run", "requirements", "traceability", "alignment", "baseline", "plan", "coverage", "walkthrough", "backlog", "proposals", "comparison", "evidence", "heuristics", "metrics"];
 const json = (f) => JSON.parse(readFileSync(f, "utf8"));
 
 /* The app's installed catalogue, for component names (FND-02). */
@@ -52,6 +54,7 @@ export function jargon(text, catalogue) {
   }
   return found;
 }
+const findingsOf = (got) => got.backlog?.findings ?? [];
 const sentences = (t) => t.trim().split(/(?<=[.!?])\s+(?=\S)/).filter(Boolean).length;
 
 export function validateReport(dir) {
@@ -96,6 +99,13 @@ export function validateReport(dir) {
     if (hasVideo && !s.do) add("walkthrough.json", at, `step ${s.n} of ${j.id} is not replayable: record the browser action it took as "do" (goto, click, fill, press or waitFor)`);
   }
 
+  // The heuristic pass (FEAT-018 GDL-50; US-138-AC2): every heuristic for every walked screen.
+  if (got.heuristics) {
+    const ids = new Set(findingsOf(got).map((f) => f.id));
+    for (const m of missing(got.heuristics, walkedScreens(dir))) add("heuristics.json", "/entries", `${m.screen} × ${m.heuristic} has no entry: record a finding or checked: no finding (assess heuristics --screen ${m.screen} --heuristic ${m.heuristic})`);
+    for (const [i, e] of got.heuristics.entries.entries()) if (e.finding && !ids.has(e.finding)) add("heuristics.json", `/entries/${i}/finding`, `${e.finding} is not a finding in the backlog`);
+  }
+
   // Findings (FND-01 to FND-04, COV-02, COV-03, TRC-03).
   const findings = got.backlog?.findings ?? [];
   const conflicted = new Set((got.alignment?.conflicts ?? []).flatMap((c) => c.ids ?? []));
@@ -116,6 +126,9 @@ export function validateReport(dir) {
     if (!f.source_refs?.length && !proposed) add("backlog.json", at, `${f.id} cites no requirement and proposes no criterion`);
     if (f.finding_type === "heuristic" && !proposed) add("backlog.json", `${at}/expected_behavior_or_proposed_requirement`, `${f.id} is a heuristic concern: state it as "Proposed criterion: …", a recommendation, not an existing obligation`);
     if (f.finding_type === "real-user" && !(f.evidence_refs ?? []).some((r) => r.startsWith("evidence/real-user/"))) add("backlog.json", at, `${f.id} is typed real-user without evidence from real users (evidence/real-user/…)`);
+    // A human observation is never an agent recommendation, and a design-team note is never user evidence (FEAT-018 GDL-58).
+    if (f.source === "human" && f.finding_type !== "real-user") add("backlog.json", `${at}/source`, `${f.id} says source: human but is typed ${f.finding_type}; an agent recommendation is never labelled a human observation (type it real-user, with evidence from people, or drop source)`);
+    if (f.source === "design-team" && f.finding_type === "real-user") add("backlog.json", `${at}/source`, `${f.id} is a design-team note typed real-user; notes from people trying a prototype are never user evidence`);
     // Every finding names the rule or the heuristic it breaks (FEAT-015 RPT-01; US-102-AC4).
     if (!f.rule && !f.heuristic?.name) add("backlog.json", at, `${f.id} names neither a rule nor a heuristic: give rule (a catalogue rule ID, e.g. modal.dismiss) or heuristic ({ name, source }, e.g. { "name": "Visibility of system status", "source": "Nielsen's 10 usability heuristics" })`);
     // A finding of an AI journey names the AI rule or heuristic it is about (FEAT-011 AIX-03; US-082-AC2).

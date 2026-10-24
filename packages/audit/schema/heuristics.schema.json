@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ux-builder.dev/schema/heuristics.schema.json",
+  "title": "ux-builder assessment record: heuristics (CONTRACT-006, amended by CONTRACT-008)",
+  "description": "The heuristic inspection pass (FEAT-018 GDL-50, GDL-51): an entry for every walked screen and every heuristic of the pass, each a finding or checked: no finding.",
+  "type": "object",
+  "required": ["schema", "version", "heuristics", "screens", "entries"],
+  "properties": {
+    "schema": { "const": "heuristics" },
+    "version": { "const": 1 },
+    "heuristics": {
+      "type": "array",
+      "items": { "type": "object", "required": ["id", "name", "source"], "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "source": { "type": "string" } } }
+    },
+    "screens": { "description": "The walked screens", "type": "array", "items": { "type": "string" } },
+    "notInspected": { "description": "The blueprint's screens no step reached: not inspected, never clean", "type": "array", "items": { "type": "string" } },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["screen", "heuristic"],
+        "properties": {
+          "screen": { "type": "string", "minLength": 1 },
+          "heuristic": { "type": "string", "minLength": 1 },
+          "finding": { "type": "string", "pattern": "^F-" },
+          "checked": { "const": "no finding" }
+        }
+      }
+    }
+  }
+}

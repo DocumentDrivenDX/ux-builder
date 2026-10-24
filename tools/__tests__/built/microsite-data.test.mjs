@@ -39,7 +39,7 @@ describe("Reference: command line and MCP", () => {
   test("ux-builder-blueprint: every command from --help, each with a note, and every command the CLI handles", () => {
     const { commands, handled } = d.cli.blueprint;
     const names = commands.map((c) => c.name);
-    assert.deepEqual(names, ["check", "init", "propose", "draw", "wireframes"]);
+    assert.deepEqual(names, ["check", "simplify", "score", "compare", "alternative", "prototype", "init", "propose", "draw", "wireframes"]);
     for (const c of commands) assert.ok(c.text, c.name);
     for (const h of handled) assert.ok(names.includes(h), h);
   });

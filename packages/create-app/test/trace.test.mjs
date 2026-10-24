@@ -87,7 +87,8 @@ describe("US-106: the trace is committed, and holds no source", () => {
   // @covers US-106-AC5
   test("AC5: .gitignore ignores only .ux-builder/trace/current of the trace", () => {
     const lines = readFileSync(join(dir, ".gitignore"), "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
-    const trace = lines.filter((l) => /^\.?ux-builder|^\.?\*/.test(l));
+    // The trace's own folders; .ux-builder/ also holds the design loop's files (FEAT-018), checked below.
+    const trace = lines.filter((l) => /^\.?ux-builder\/(trace|transcripts)|^\.?ux-builder\/?$|^\.?\*/.test(l));
     assert.deepEqual(trace, GITIGNORE_LINES);
     assert.deepEqual(GITIGNORE_LINES, [".ux-builder/trace/current"]);
     // git agrees: the episode is committed, current is not.
@@ -96,6 +97,9 @@ describe("US-106: the trace is committed, and holds no source", () => {
     assert.equal(ignored(".ux-builder/trace/current"), true);
     assert.equal(ignored(`.ux-builder/trace/E-${today()}-create.jsonl`), false);
     assert.equal(ignored(".ux-builder/transcripts/E-1/1.jsonl"), false);
+    // The design loop's state is committed; the real names behind research pseudonyms are not (ADR-039).
+    assert.equal(ignored(".ux-builder/design-state.json"), false);
+    assert.equal(ignored(".ux-builder/participants.local.json"), true);
     assert.equal(ignored(".ux-builder/config.json"), false);
   });
 

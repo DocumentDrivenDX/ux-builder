@@ -1,0 +1,24 @@
+# Interaction decision record: a docs/ux type of the guided design loop (FEAT-018, CONTRACT-008).
+# Stage 1 home; mapped into HELIX in stage 2.
+
+type: ux-decision
+name: Interaction decision record
+description: |
+  One major UX decision: the question, the alternatives, the
+  recommendation and why, what it assumes, and its validation status, so
+  the reason survives later iterations. Maps to a HELIX ADR or solution
+  approach in stage 2 (H-3).
+id:
+  prefix: UXD
+  pattern: "^UXD-[1-9][0-9]*$"
+  example: UXD-1
+output: docs/ux/decisions/UXD-<n>.md
+sections:
+    - Question
+    - Alternatives
+    - Recommendation
+    - Rationale
+    - Assumptions
+    - Validation
+rules:
+    - decision-status

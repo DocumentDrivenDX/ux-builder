@@ -26,3 +26,4 @@ export { ThemeProvider, resolveAppearance, useTheme } from "./ThemeProvider.jsx"
 export { ICON_NAMES, Icon, iconSetFor, pickGlyph, registerIcons } from "./icons/Icon.jsx";
 export { Logo, brandTitleFor } from "./brand/Logo.jsx";
 export { Favicon, applyFavicon } from "./brand/favicon.js";
+export { JourneyProvider, useJourneySignal, useJourneyStep } from "./journey/Journey.jsx";

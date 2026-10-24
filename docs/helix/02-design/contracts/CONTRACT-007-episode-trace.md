@@ -17,7 +17,7 @@ ddx:
 **Contract ID**: CONTRACT-007 — Episode trace
 **Type**: data formats and command (the trace in an app, the export bundle, `ux-builder-trace`, the MCP tools that write to it)
 **Version**: v1 (planned, `@ux-builder/trace` 0.1.0)
-**Status**: draft — 2026-10-22, with ADR-035; amended 2026-10-22 with the build (`start.commit`, `change.parent`, the `outcome` shapes)
+**Status**: draft — 2026-10-22, with ADR-035; amended 2026-10-22 with the build (`start.commit`, `change.parent`, the `outcome` shapes) Amended 2026-10-23 by FEAT-018: see CONTRACT-008, *Amendment to CONTRACT-007*.
 **Related**: FEAT-016, ADR-035, ADR-023 rule 8, CONTRACT-004 (the MCP server and the audit), CONTRACT-006 (the assessment's run package and redaction)
 
 ## Purpose

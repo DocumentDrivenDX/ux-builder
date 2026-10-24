@@ -2735,6 +2735,123 @@
       ]
     },
     {
+      "id": "journey.task-exists",
+      "title": "A journey realizes a task the blueprint has",
+      "statement": "A journey that names the task it realizes names one of the blueprint's tasks.",
+      "rationale": "A journey tied to a task that does not exist cannot be compared with other ways of doing that task.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "journey.task-exists"
+        }
+      ],
+      "severity": "error",
+      "sources": [
+        {
+          "title": "ux-builder FEAT-018: guided design loop (GDL-22, GDL-23)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "simplicity.delta-decided",
+      "title": "A journey grows only by decision",
+      "statement": "When a change adds a screen, a step, a required input or a decision to a journey, a recorded decision names the addition and answers why it is needed and what simpler option was considered.",
+      "rationale": "Each added step or input raises the interaction cost of the task; making the cost visible and deliberate keeps an app from growing more complicated one reasonable change at a time.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "simplicity.delta-decided"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: Interaction Cost",
+          "url": "https://www.nngroup.com/articles/interaction-cost-definition/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-018: guided design loop (GDL-11, GDL-12)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "task.realized",
+      "title": "Every task has a journey",
+      "statement": "Each task in the task model is realized by at least one journey, so the flow shows how the user accomplishes it.",
+      "rationale": "A task with no journey is a goal the design has not yet answered.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "task.realized"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder FEAT-018: guided design loop (GDL-22, GDL-23)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "screen.purpose",
+      "title": "Every screen says what it is for",
+      "statement": "Once a blueprint models tasks or screen content, each screen states its purpose in a sentence, so its content can be ordered by what serves that purpose.",
+      "rationale": "A screen without a stated purpose collects whatever is added to it; its hierarchy then reflects history rather than the user's task.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "screen.purpose"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder FEAT-018: guided design loop (GDL-32 to GDL-34)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
+      "id": "consistency.same-kind",
+      "title": "One kind of interaction, one way",
+      "statement": "Where tasks need the same kind of interaction, such as choosing a location, they reach it through screens with the same pattern, so people learn it once.",
+      "rationale": "Different interfaces for the same interaction make people relearn it and raise errors; consistency lets one learned way serve every task.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "consistency.same-kind"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design (4, Consistency and standards)",
+          "url": "https://www.nngroup.com/articles/ten-usability-heuristics/",
+          "licence": "nngroup-terms",
+          "wording": "paraphrased"
+        },
+        {
+          "title": "ux-builder FEAT-018: guided design loop (GDL-32 to GDL-34)",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
       "id": "theme.applied",
       "title": "The theme is applied",
       "statement": "The page loads the declared theme's CSS and the theme's tokens resolve on the themed element.",

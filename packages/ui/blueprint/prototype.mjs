@@ -1,0 +1,108 @@
+/* Exploratory prototypes (FEAT-018 GDL-40 to GDL-42; ADR-037): a
+   disposable, clickable prototype of a blueprint, generated from the
+   wireframes' pattern rendering. Each page is one screen in one state at
+   one size class, with a banner naming the design question it answers, a
+   switcher for its states and size classes, and a link for every action to
+   where it leads; the page's own buttons and navigation lead there too.
+   When the window is not that size class's width, the bar says so and
+   offers to open the page at it.
+   It lives under prototype/, outside the app's source, and
+   never becomes app code (the ux-builder/no-prototype-import lint rule). */
+
+import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { join } from "node:path";
+import { assets, WIDTHS, wireframes } from "./wireframes.mjs";
+
+const require = createRequire(import.meta.url);
+const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const list = (x) => (Array.isArray(x) ? x : []);
+
+/* The theme that shows a design system: the first theme on it, by name. */
+export function themeFor(designSystem) {
+  const { themes } = JSON.parse(readFileSync(require.resolve("@ux-builder/tokens/manifest.json"), "utf8"));
+  return themes.filter((t) => t.designSystem === designSystem).map((t) => t.name).sort()[0] ?? null;
+}
+
+/* Each size class's window widths, [from, below] (the SDK's SIZE_CLASSES). */
+const RANGES = { compact: [0, 600], medium: [600, 840], expanded: [840, 1200], large: [1200, 1600], "extra-large": [1600, null] };
+const fileOf = (screen, state, size) => `${state === "ideal" ? screen : `${screen}.${state}`}.${size}.html`;
+
+/* The bar a person uses: the banner, then this screen's states and the size classes, then its actions. */
+function bar(bp, page, { question, statesOf, sizes }) {
+  const s = list(bp.screens).find((x) => x?.id === page.screen) ?? {};
+  const state = (to) => `<a href="${esc(fileOf(page.screen, to, page.sizeClass))}"${to === page.state ? ' aria-current="page"' : ""}>${esc(to)}</a>`;
+  const size = (to) => `<a href="${esc(fileOf(page.screen, page.state, to))}"${to === page.sizeClass ? ' aria-current="page"' : ""}>${esc(to)}</a>`;
+  const action = (a) => {
+    const label = esc(a.label ?? a.id);
+    if (typeof a.to !== "string") return `<span>${label}</span>`;
+    if (a.to === "back") return `<a href="javascript:history.back()" data-action="${esc(a.id)}">${label} (back)</a>`;
+    if (a.to === "external") return `<span data-action="${esc(a.id)}">${label} (leaves the app)</span>`;
+    if (a.to.startsWith("state:")) return `<a href="${esc(fileOf(page.screen, a.to.slice(6), page.sizeClass))}" data-action="${esc(a.id)}">${label}</a>`;
+    if (a.to.startsWith("modal:")) return `<span data-action="${esc(a.id)}">${label} (opens ${esc(a.to.slice(6))})</span>`;
+    return `<a href="${esc(fileOf(a.to, "ideal", page.sizeClass))}" data-action="${esc(a.id)}">${label}</a>`;
+  };
+  return `<header class="proto-bar" style="position:sticky;top:0;z-index:10;padding:var(--piq-space-2) var(--piq-space-4);background:var(--piq-color-surface);border-block-end:2px dashed var(--piq-color-border);color:var(--piq-color-text);font:var(--piq-font-body, inherit)">
+<p class="proto-banner" role="note"><strong>Prototype</strong>, not the app: ${esc(question)}</p>
+<nav aria-label="States"><span>State:</span> ${statesOf(page.screen).map(state).join(" · ")}</nav>
+<nav aria-label="Size classes"><span>Size:</span> ${sizes.map(size).join(" · ")}</nav>
+<nav aria-label="Actions"><span>Actions:</span> ${list(s.actions).map(action).join(" · ") || "<span>none</span>"}</nav>
+<p class="proto-width" role="status" data-size-class="${esc(page.sizeClass)}" data-min="${RANGES[page.sizeClass]?.[0] ?? 0}" data-max="${RANGES[page.sizeClass]?.[1] ?? ""}" data-width="${WIDTHS[page.sizeClass] ?? 1024}" hidden></p>
+</header>
+<script>(() => { const p = document.querySelector(".proto-width"); const min = +p.dataset.min, max = p.dataset.max ? +p.dataset.max : Infinity, w = +p.dataset.width; const check = () => { const fits = innerWidth >= min && innerWidth < max; p.hidden = fits; if (!fits) p.innerHTML = "This window is " + innerWidth + " px wide, so it shows another size class's layout, not " + p.dataset.sizeClass + ". <a href=\\"#\\" data-open>Open it " + w + " px wide</a>, or resize the window."; }; check(); addEventListener("resize", check); p.addEventListener("click", (e) => { if (e.target.closest("[data-open]")) { e.preventDefault(); open(location.href, "_blank", "popup,width=" + w + ",height=" + Math.min(screen.availHeight || 900, 900)); } }); })();</script>`;
+}
+
+/* What the page's own controls do: a click on a button or link whose name
+   is an action's label (or a destination's) goes where the bar's link
+   goes, so a person can use the page itself, not only the bar. */
+function wiring(bp, page) {
+  const s = list(bp.screens).find((x) => x?.id === page.screen) ?? {};
+  const go = {};
+  for (const d of list(bp.destinations)) if (d?.label && d?.screen) go[d.label] = fileOf(d.screen, "ideal", page.sizeClass);
+  for (const a of list(s.actions)) {
+    if (typeof a?.to !== "string" || !a.label) continue;
+    if (a.to === "back") go[a.label] = "back";
+    else if (a.to.startsWith("state:")) go[a.label] = fileOf(page.screen, a.to.slice(6), page.sizeClass);
+    else if (a.to !== "external" && !a.to.startsWith("modal:")) go[a.label] = fileOf(a.to, "ideal", page.sizeClass);
+  }
+  return `<script>(() => { const go = ${JSON.stringify(go).replace(/</g, "\\u003c")}; document.addEventListener("click", (e) => { const el = e.target.closest("button, a, [role=button], [role=link]"); if (!el || el.closest(".proto-bar")) return; const to = go[(el.getAttribute("aria-label") || el.textContent || "").trim()]; if (!to) return; e.preventDefault(); if (to === "back") history.back(); else location.href = to; }, true); })();</script>`;
+}
+
+/* The prototype's pages: [{ file, html, screen, state, sizeClass }]. */
+export async function prototypePages(bp, { question, theme = "plain" } = {}) {
+  const pages = await wireframes(bp, { theme });
+  const sizes = [...new Set(pages.map((p) => p.sizeClass))];
+  const statesOf = (screen) => [...new Set(pages.filter((p) => p.screen === screen).map((p) => p.state))];
+  return pages.map((p) => ({
+    file: p.file, screen: p.screen, state: p.state, sizeClass: p.sizeClass,
+    html: p.html
+      .replace(/<title>([^<]*) — ([a-z]+) wireframe<\/title>/, "<title>$1 — $2 prototype</title>")
+      .replace("<body>", `<body data-piq-screen="${esc(p.screen)}" data-prototype="exploratory">\n${bar(bp, p, { question, statesOf, sizes })}`)
+      .replace("</body>", `${wiring(bp, p)}\n</body>`),
+  }));
+}
+
+/* Write prototype/<dir>/: the pages, their assets and an index that opens the entry screen. */
+export async function writePrototype(bp, { root = "prototype", dir, question, theme = "plain" }) {
+  const pages = await prototypePages(bp, { question, theme });
+  const out = join(root, dir);
+  rmSync(out, { recursive: true, force: true });
+  mkdirSync(join(out, "assets"), { recursive: true });
+  for (const [name, from] of Object.entries(assets(theme))) cpSync(from, join(out, "assets", name));
+  for (const p of pages) writeFileSync(join(out, p.file), p.html);
+  const entry = list(bp.destinations)[0]?.screen ?? list(bp.screens)[0]?.id;
+  const first = pages.find((p) => p.screen === entry && p.state === "ideal") ?? pages[0];
+  writeFileSync(join(out, "index.html"), `<!doctype html>\n<meta charset="utf-8">\n<title>Prototype</title>\n<meta http-equiv="refresh" content="0; url=${esc(first?.file ?? "")}">\n<p><a href="${esc(first?.file ?? "")}">Open the prototype</a></p>\n`);
+  return { dir: out, pages: pages.length, entry: first?.file ?? null, theme };
+}
+
+/* Move prototype/<name>/ under prototype/.archive/ once its question is answered. */
+export function archivePrototype(name, { root = "prototype" } = {}) {
+  const from = join(root, name);
+  if (!existsSync(from)) return null;
+  const to = join(root, ".archive", name);
+  mkdirSync(join(root, ".archive"), { recursive: true });
+  rmSync(to, { recursive: true, force: true });
+  renameSync(from, to);
+  return to;
+}

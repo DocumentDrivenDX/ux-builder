@@ -62,7 +62,9 @@ ddx:
    destinations and screens. The validator applies every rule whose check is
    `blueprint` and whose conditions meet the blueprint's declared support. It
    ships as `@ux-builder/ui/blueprint` and the `ux-builder-blueprint` command.
-   The SDK does not generate screen code from it.
+   The SDK does not generate screen code from it. *[Amended 2026-10-23 by
+   ADR-037: disposable exploratory prototypes are generated outside the
+   app's source; app code still is not.]*
 4. **The audit checks the same rules by ID.** New audit checks name the rule
    they enforce; the report carries the rule's sources. They are warnings for
    one minor release (as SDK-20's were). A findings **baseline**

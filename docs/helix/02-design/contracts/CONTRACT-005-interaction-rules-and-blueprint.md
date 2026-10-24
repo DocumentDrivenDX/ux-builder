@@ -23,7 +23,7 @@ ddx:
 **Contract ID**: CONTRACT-005 — Interaction rules and blueprint
 **Type**: data formats and library API (the rule catalogue, recipes, the blueprint file, findings, `@ux-builder/ui/blueprint` and the `ux-builder-blueprint` command)
 **Version**: v1 (from `@ux-builder/ui` 0.7.0)
-**Status**: accepted — 2026-10-20, with ADR-025
+**Status**: accepted — 2026-10-20, with ADR-025 Amended 2026-10-23 by FEAT-018: see CONTRACT-008, *Amendment to CONTRACT-005*.
 **Related**: FEAT-008, ADR-021 (size classes), ADR-024 (views), CONTRACT-004 (where the entry points, command, audit options and MCP tools are listed)
 
 ## Purpose
@@ -134,7 +134,7 @@ not part of this contract, and they may change in any release.
 
 | Command | Behaviour | Exit |
 |---|---|---|
-| `check <file> [--json]` | Prints findings (or JSON) | 0 no errors; 1 an error finding; 2 usage or unreadable file |
+| `check [<file>] [--json]` | Prints findings (or JSON) for the file, or app.blueprint.json | 0 no errors; 1 an error finding; 2 usage or unreadable file |
 | `init [--kind app\|view] [--out <file>]` | Writes `skeleton(kind)` to `app.blueprint.json` (or `--out`); refuses to overwrite | 0 written; 1 exists; 2 usage |
 
 ## AI and agent experience *[Amended 2026-10-21 — FEAT-011, ADR-028]*

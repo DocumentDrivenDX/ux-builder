@@ -115,7 +115,18 @@ checkBlueprint(JSON.parse(readFileSync("app.blueprint.json", "utf8")));         
 The command `ux-builder-blueprint` does the same from a shell:
 `ux-builder-blueprint init [--kind app|view]` writes a starting
 `app.blueprint.json`, and `ux-builder-blueprint check app.blueprint.json`
-prints each finding and exits 1 on an error. From a blueprint's actions
+prints each finding and exits 1 on an error. `check <file> --diff <base>`
+also reports the complexity the change adds over a base blueprint: per
+journey, the screens, steps, required inputs and decisions added and
+removed, and a `simplicity.delta-decided` warning for a journey that grows
+with no recorded decision naming the addition (FEAT-018). With `--json` it
+prints `{ findings, delta }`. When the app has `.ux-builder/principles.json`
+(written by `ux-builder-design brief`), `check` also applies each principle
+that carries a rule as a project rule, `project.<PR-id>`. A blueprint may
+hold a task model, `tasks[]`, with journeys naming the task they realize;
+`ux-builder-blueprint simplify` proposes inputs to infer, decisions to
+default, steps to combine and hops to remove, and changes nothing
+(FEAT-018). From a blueprint's actions
 and journeys (FEAT-012), `ux-builder-blueprint propose` drafts HELIX
 content as patches it never applies, `draw` writes the IA map, flow and
 journey diagrams as Mermaid and SVG, and `wireframes` renders each screen's
