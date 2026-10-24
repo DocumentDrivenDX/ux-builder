@@ -1,5 +1,5 @@
 /* ux-builder-design rubric (CONTRACT-008 Rubric, FEAT-018 GDL-37 to GDL-39,
-   GDL-59; SD-006 Rubric): an alternative's UX quality, dimension by
+   GDL-57, GDL-59; SD-006 Rubric): an alternative's UX quality, dimension by
    dimension. Each predicted value says its basis: computed from the
    blueprint, the check and the audit, a judgment the agent recorded with
    its reasoning, or "to validate" when there is neither. The observed side
@@ -11,6 +11,7 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { checkBlueprint, score } from "@ux-builder/ui/blueprint";
 import { DesignError } from "./app.mjs";
+import { observedDimensions, observedMeasures } from "./sessions.mjs";
 import { readState } from "./state.mjs";
 
 const require = createRequire(import.meta.url);
@@ -57,11 +58,14 @@ function computed(bp, app) {
   return out;
 }
 
-/* Observed values per dimension, from imported human observations (B-035
-   adds them): { [dimension]: { value, evidence } }. */
-export function observedFor(app, alternative) {
-  const store = readJson(join(app, ".ux-builder/observed.json"));
-  return store?.[alternative ?? "current"] ?? {};
+/* Observed values per dimension, from the human findings the test kits
+   imported: { [dimension]: { value, evidence, verdict } }. They are of the
+   app (or validated prototype) people tried: the current blueprint, and
+   the chosen alternative. */
+export function observedFor(app, alternative, predicted = {}) {
+  let chosen = null;
+  try { chosen = readState(app).alternatives.find((a) => a.status === "chosen")?.name ?? null; } catch { /* no design state */ }
+  return [undefined, "current", chosen].includes(alternative) ? observedDimensions(app, predicted) : {};
 }
 
 /* ux-builder-design rubric [--alternative <name>]. */
@@ -72,7 +76,7 @@ export function rubric(app, { alternative } = {}) {
   try { judgments = list(readState(app).alternatives.find((a) => a.name === name)?.judgments); } catch { /* no design state */ }
   const judged = (d) => judgments.find((j) => [d.id, d.name.toLowerCase()].includes(String(j.criterion).trim().toLowerCase()));
   const calc = computed(bp, app);
-  const observed = observedFor(app, name);
+  const observed = observedFor(app, name, calc);
   const dimensions = RUBRIC.map((d) => {
     const c = calc[d.id];
     const j = judged(d);
@@ -81,13 +85,20 @@ export function rubric(app, { alternative } = {}) {
       : { value: "to validate", basis: "to validate" };
     return { id: d.id, name: d.name, question: d.question, baseline: d.baseline, predicted, observed: observed[d.id] ?? null, ...(c?.fails ? { fails: true } : {}) };
   });
+  // Per kit task across sessions, and the problems seen in two or more (FEAT-018 GDL-57).
+  const m = Object.keys(observed).length ? observedMeasures(app) : null;
   const fails = dimensions.filter((d) => d.baseline && d.fails).map((d) => d.id);
-  return { alternative: name, file, dimensions: dimensions.map(({ fails: _, ...d }) => d), recommendable: fails.length === 0, ...(fails.length ? { notRecommendable: `fails the baseline${fails.length > 1 ? "s" : ""} ${fails.join(" and ")}` } : {}) };
+  return { alternative: name, file, dimensions: dimensions.map(({ fails: _, ...d }) => d), recommendable: fails.length === 0, ...(fails.length ? { notRecommendable: `fails the baseline${fails.length > 1 ? "s" : ""} ${fails.join(" and ")}` } : {}), observedTasks: m?.tasks ?? [], recurring: m?.recurring ?? [] };
 }
 
 export function rubricText(r) {
   const lines = [`${r.alternative} (${r.file}), predicted:`];
-  for (const d of r.dimensions) lines.push(`  ${d.name}${d.baseline ? " (baseline)" : ""}: ${d.predicted.value} [${d.predicted.basis}${d.predicted.reasoning ? `: ${d.predicted.reasoning}` : ""}]${d.observed ? `; observed: ${d.observed.value}` : ""}`);
+  for (const d of r.dimensions) lines.push(`  ${d.name}${d.baseline ? " (baseline)" : ""}: ${d.predicted.value} [${d.predicted.basis}${d.predicted.reasoning ? `: ${d.predicted.reasoning}` : ""}]${d.observed ? `; observed: ${d.observed.value}${d.observed.verdict === "contradicts" ? " (contradicts the prediction)" : ""}` : ""}`);
+  if (r.observedTasks.length) {
+    lines.push("Observed per task:");
+    for (const t of r.observedTasks) lines.push(`  ${t.kit} task ${t.task} (${t.journey}): ${Math.round(t.completionRate * 100)}% completed, median ${t.medianSeconds ?? "–"} s, ${Math.round(t.errorRate * 100)}% with errors, ${t.assists} assist${t.assists === 1 ? "" : "s"} (${t.sessions} sessions)`);
+    for (const p of r.recurring) lines.push(`  Seen in ${p.sessions} sessions: ${p.problem}`);
+  }
   lines.push(r.recommendable ? "Recommendable: no baseline fails. No overall score is given." : `Not recommendable: ${r.notRecommendable}.`);
   return lines.join("\n");
 }

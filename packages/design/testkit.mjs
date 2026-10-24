@@ -12,7 +12,9 @@ import { helixRoot, parseDocument } from "./documents.mjs";
 
 const list = (x) => (Array.isArray(x) ? x : []);
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
-export const OBSERVATION_COLUMNS = ["participant", "task", "completed", "seconds", "errors", "assists", "remark"];
+/* problem: a short name for a problem seen, in the same words across sessions, so recurring problems are counted. */
+export const OBSERVATION_COLUMNS = ["participant", "task", "completed", "seconds", "errors", "assists", "remark", "problem"];
+const MISSING = "missing: the journey names no acceptance criteria";
 
 function kitNumbers(app) {
   const dir = join(app, "docs/ux/tests");
@@ -53,7 +55,8 @@ function interfaceWords(bp) {
 /* A goal in the user's words: the interface words taken out. */
 export function goalText(goal, bp) {
   let text = String(goal);
-  for (const w of interfaceWords(bp)) text = text.replace(new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), "");
+  // The word goes with the preposition and article that lead to it: "on the River map".
+  for (const w of interfaceWords(bp)) text = text.replace(new RegExp(`(?:\\b(?:on|in|from|at|with|using|via|through)\\s+)?(?:\\b(?:the|a|an)\\s+)?\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), "");
   text = text.replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").trim();
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
@@ -98,12 +101,12 @@ export function testKit(app, { journeys = [], id } = {}) {
   const dir = `docs/ux/tests/${kit}`;
   const users = targetUsers(app);
   const scenarios = ["# Scenarios", "", "Read each goal to the participant as written. Never name a screen, a button or a menu.", "", "| Task | Journey | Goal given to the participant | Success criteria |", "|---|---|---|---|",
-    ...tasks.map((t) => `| ${t.n} | ${t.journey} | You want to ${cell(t.goal)}. Show me how you would do that. | ${t.criteria.map((c) => c.id).join(", ") || "none named"} |`), ""].join("\n");
+    ...tasks.map((t) => `| ${t.n} | ${t.journey} | You want to ${cell(t.goal)}. Show me how you would do that. | ${t.criteria.map((c) => c.id).join(", ") || MISSING} |`), ""].join("\n");
   const script = ["# Facilitator script", "", "1. Thank the participant. Say we are testing the design, not them, and ask them to think aloud.", "2. Confirm consent (consent.md) before starting.", ...tasks.map((t, i) => `${i + 3}. Read task ${t.n}: "You want to ${t.goal}." Do not point at the screen or name anything on it.`), `${tasks.length + 3}. If the participant is stuck for two minutes, give one hint and mark an assist.`, `${tasks.length + 4}. After each task, ask: "How sure are you that it worked?"`, `${tasks.length + 5}. Thank them; note anything they said after the tasks.`, ""].join("\n");
   const consent = ["# Consent", "", "We are testing a design, not you. We take notes during the session; we do not record audio or video unless you agree separately.", "Notes use a pseudonym (P1, P2) and never your name. You can stop at any time, and ask us to delete your notes.", "", "Confirm consent for each session before importing its notes (`ux-builder-design transcript add --consent-confirmed`).", ""].join("\n");
   const screener = ["# Screener", "", ...(users.length ? ["Recruit people who match one of these target users (from the experience brief):", "", ...users.map((u) => `- Are you ${u.charAt(0).toLowerCase() + u.slice(1)}?`)] : ["The experience brief names no target users yet: write the screener questions from the PRD's personas."]), "", "Leave out anyone who works on this product.", ""].join("\n");
-  const sheet = [OBSERVATION_COLUMNS.join(","), ...tasks.map((t) => ["", t.n, "", "", "", "", ""].map(csv).join(","))].join("\n") + "\n";
-  const kitMd = ["---", "ux:", `  id: ${kit}`, "  type: test-kit", "---", "", `# ${kit}: ${tasks.map((t) => t.journey).join(", ")}`, "", "## Scenarios", "", "See `scenarios.md`.", "", ...tasks.map((t) => `- Task ${t.n} (${t.journey}): you want to ${t.goal}.`), "", "## Success criteria", "", ...tasks.map((t) => `- Task ${t.n}: ${t.criteria.map((c) => c.id).join(", ") || "none named"}`), "", "## Facilitator script", "", "See `script.md`.", "", "## Consent", "", "See `consent.md`.", "", "## Screener", "", "See `screener.md`.", "", "## Observation sheet", "", `\`observations.csv\`: ${OBSERVATION_COLUMNS.join(", ")}; one row per task and participant.`, ""].join("\n");
+  const sheet = [OBSERVATION_COLUMNS.join(","), ...tasks.map((t) => ["", t.n, ...OBSERVATION_COLUMNS.slice(2).map(() => "")].map(csv).join(","))].join("\n") + "\n";
+  const kitMd = ["---", "ux:", `  id: ${kit}`, "  type: test-kit", "---", "", `# ${kit}: ${tasks.map((t) => t.journey).join(", ")}`, "", "## Scenarios", "", "See `scenarios.md`.", "", ...tasks.map((t) => `- Task ${t.n} (${t.journey}): you want to ${t.goal}.`), "", "## Success criteria", "", ...tasks.map((t) => `- Task ${t.n}: ${t.criteria.map((c) => c.id).join(", ") || MISSING}`), "", "## Facilitator script", "", "See `script.md`.", "", "## Consent", "", "See `consent.md`.", "", "## Screener", "", "See `screener.md`.", "", "## Observation sheet", "", `\`observations.csv\`: ${OBSERVATION_COLUMNS.join(", ")}; one row per task and participant.`, ""].join("\n");
   const written = [
     writeInApp(app, `${dir}/kit.md`, kitMd), writeInApp(app, `${dir}/scenarios.md`, scenarios), writeInApp(app, `${dir}/script.md`, script),
     writeInApp(app, `${dir}/consent.md`, consent), writeInApp(app, `${dir}/screener.md`, screener),
@@ -111,7 +114,8 @@ export function testKit(app, { journeys = [], id } = {}) {
   const sheetPath = join(app, dir, "observations.csv");
   const filled = existsSync(sheetPath) && readFileSync(sheetPath, "utf8").split("\n").slice(1).some((l) => /^[^,]+,/.test(l) && !l.startsWith(","));
   if (!filled) written.push(writeInApp(app, `${dir}/observations.csv`, sheet));
-  return { id: kit, dir, tasks, written, users };
+  const warnings = tasks.filter((t) => !t.criteria.length).map((t) => `${t.journey} names no acceptance criteria: task ${t.n} has no success criteria`);
+  return { id: kit, dir, tasks, written, users, warnings };
 }
 
 /* The kits in the app. */

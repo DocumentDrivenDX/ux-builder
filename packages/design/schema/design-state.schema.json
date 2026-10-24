@@ -167,6 +167,11 @@
           "confirm": {
             "type": "string",
             "description": "For a hypothesis: what would confirm it (an interview question, a test task, a metric)"
+          },
+          "dimension": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The rubric dimension whose prediction rests on it (FEAT-018 GDL-60): the evaluation report confirms or refutes it from what people did"
           }
         }
       }
@@ -315,6 +320,40 @@
           },
           "alternative": {
             "type": "string"
+          }
+        }
+      }
+    },
+    "consents": {
+      "type": "array",
+      "description": "Consent confirmed per test session before its transcript was analysed (ADR-039 decision 3; FEAT-018 GDL-56)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "session",
+          "confirmed",
+          "date"
+        ],
+        "properties": {
+          "session": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confirmed": {
+            "const": true
+          },
+          "by": {
+            "type": "string",
+            "minLength": 1
+          },
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "evidence": {
+            "type": "string",
+            "pattern": "^EV-[1-9][0-9]*$"
           }
         }
       }

@@ -43,7 +43,7 @@ ddx:
 - [ ] **US-140-AC1** — Given a blueprint with journeys tied to stories, when `ux-builder-design test-kit` runs, then it writes `docs/ux/tests/TK-<n>/` with `scenarios.md`, `script.md`, `consent.md`, `screener.md` and `observations.csv`, numbering the kit after the last one.
 - [ ] **US-140-AC2** — Given a journey whose steps name screens and actions, when its scenario is written, then the scenario states the user's goal with no screen, pattern or control names from the blueprint.
 - [ ] **US-140-AC3** — Given a journey tied to acceptance criteria, when the kit is written, then each scenario lists its success criteria from those criteria by ID.
-- [ ] **US-140-AC4** — Given `--journey` given, when the kit is written, then only the named journeys are in it; an unknown journey ID exits 1 naming it.
+- [ ] **US-140-AC4** — Given `--journey` given, when the kit is written, then only the named journeys are in it; an unknown journey ID exits 2 naming it.
 - [ ] **US-140-AC5** — Given a brief listing target users, when the kit is written, then `screener.md` asks about those users, and `observations.csv` has one row per task with columns for participant, completed, time, errors, assists and remark.
 
 ## Edge Cases
@@ -57,7 +57,7 @@ ddx:
 | AC1 | US-140-AC1 | a blueprint with journeys tied to stories | `ux-builder-design test-kit` runs | it writes `docs/ux/tests/TK-<n>/` with `scenarios.md`, `script.md`, `consent.md`, `screener.md` and `observations.csv`, numbering the kit after the last one |
 | AC2 | US-140-AC2 | a journey whose steps name screens and actions | its scenario is written | the scenario states the user's goal with no screen, pattern or control names from the blueprint |
 | AC3 | US-140-AC3 | a journey tied to acceptance criteria | the kit is written | each scenario lists its success criteria from those criteria by ID |
-| AC4 | US-140-AC4 | `--journey` given | the kit is written | only the named journeys are in it; an unknown journey ID exits 1 naming it |
+| AC4 | US-140-AC4 | `--journey` given | the kit is written | only the named journeys are in it; an unknown journey ID exits 2 naming it |
 | AC5 | US-140-AC5 | a brief listing target users | the kit is written | `screener.md` asks about those users, and `observations.csv` has one row per task with columns for participant, completed, time, errors, assists and remark |
 
 ## Dependencies

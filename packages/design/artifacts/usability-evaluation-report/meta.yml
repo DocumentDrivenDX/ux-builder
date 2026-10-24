@@ -6,7 +6,7 @@ name: UX evaluation report
 description: |
   One evaluation's results: method, tasks, measures, the rubric with
   predicted and observed columns, findings by journey, state coverage
-  and recommendations. From the usability-evaluation-report type
+  recommendations and what was not tested. From the usability-evaluation-report type
   proposed to HELIX (docs/proposals/helix-ux-artifact-types); it becomes
   HELIX's type in stage 2 (H-1).
 id:
@@ -24,4 +24,5 @@ sections:
     - Findings by journey
     - State coverage
     - Recommendations
+    - Not tested
 rules: []

@@ -90,11 +90,12 @@ camelCase that returns the `--json` object.
 | `decision status <UXD-n> tested\|refuted [--evidence <id>]` | Updates a decision's validation status | that record |
 | `impact "<change>" [--apply]` | Lists every artifact the change reaches, and `checkpointRequired: "significant-change"` when the change touches an item whose decision is `tested`; with `--apply`, makes the blueprint change, regenerates prototypes and the test kit, writes `propose` patches and a decision | listed files, with `--apply` |
 | `trace <id>` | Everything linked to a `J-`, `T-`, journey, screen, `UXD-`, `TK-` or `F-` ID, upstream and down | nothing |
-| `test-kit [--journey <id>]...` | Writes a usability test kit from the journeys | `docs/ux/tests/TK-<n>/` |
-| `observe import <file> --kit <TK-n>` | Imports observations (CSV or JSON) as human findings | `docs/ux/tests/TK-<n>/findings.json` |
-| `transcript add <file> --session <id> --consent-confirmed [--by <name>]` | Records a session transcript's masked excerpts | `docs/ux/evidence/EV-<n>.md` |
-| `rubric [--alternative <name>]` | The rubric with predicted and observed columns | nothing |
-| `report` | Writes the UX evaluation report | `docs/ux/evaluations/UER-<n>.md` |
+| `test-kit [--journey <id>]...` | Writes a usability test kit from the journeys; `observations.csv` has the columns participant, task, completed, seconds, errors, assists, remark, problem (a problem's name in the same words across sessions); a journey with no criteria is warned about | `docs/ux/tests/TK-<n>/` |
+| `observe import <file> --kit <TK-n>` | Imports observations (CSV or JSON) as findings with `source: human`, one per participant and task, ID `F-` + 8 hex of kit, pseudonym and task (stable on re-import); real names, email addresses and phone numbers masked before writing, names kept in `.ux-builder/participants.local.json`; rows for a task not in the kit reported and skipped | `docs/ux/tests/TK-<n>/findings.json` |
+| `transcript add <file> --session <id> --consent-confirmed [--by <name>] [--cite <time>]...` | Records the masked lines cited by timestamp, by pseudonym, as kind `transcript` with the session and consent, and the consent in the design state's `consents[]`; refuses audio and video files | `docs/ux/evidence/EV-<n>.md` |
+| `rubric [--alternative <name>]` | The rubric with predicted and observed columns; with observations, `observedTasks[]` (per kit task: completion rate, median seconds, error rate, assists) and `recurring[]` (problems seen in two or more sessions) | nothing |
+| `report` | Writes the UX evaluation report: method, tasks, measures, the rubric (predicted, agent-measured, observed), findings by journey labelled human observation or agent recommendation, recommendations and what was not tested; links the kits and the earlier report (`follows`). An observed `contradicts` verdict highlights the dimension and moves assumptions with that `dimension` to `refuted`; `supports` moves them to `confirmed`; with no human observation nothing changes | `docs/ux/evaluations/UER-<n>.md` |
+| `route <F-id>... [--decision <UXD-n> --status tested\|refuted]` | The findings chosen at `core-3` as a proposed patch adding rows to HELIX's improvement backlog (an existing `improvement-backlog` document, else a new one at `<root>/06-iterate/improvement-backlog.md`); with `--decision`, `decision status` with the latest report as evidence | `helix-proposals/backlog/improvement-backlog.patch` |
 | `ready [--for testing\|production]` | `--for testing`: the validated prototype passes lint, `check:blueprint` and the audit. `--for production` (default): also every covered criterion cited by a test, and the faked data and error handling listed, before checkpoint `core-3` (ADR-037 rule 4) | nothing |
 | `insights <events.jsonl> [--support <file>] [--feedback <file>]` | Per-journey production insights | `docs/ux/insights/INS-<yyyy-mm-dd>.md` |
 | `experiment start --decision <UXD-n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>` | Opens an experiment after the `experiment` checkpoint | `docs/ux/experiments/EXP-<n>.md` |
@@ -117,7 +118,7 @@ input or a refusal (named on stderr).
 | `startedFrom` | `new`, `existing` | |
 | `checkpoints[]` | `{ id, status: passed\|skipped, answer?, reason?, at }` | `id`: `core-1`, `core-2`, `core-3`, `significant-change`, `experiment`, `release` |
 | `questions[]` | `{ id, text, status: open\|answered, answer? }` | Open questions |
-| `assumptions[]` | `{ id: "A-<n>", text, status: assumed\|hypothesis\|confirmed\|refuted\|current-state, evidence[], section?, confirm? }` | `current-state` marks a baseline item, shown as *current state, assumed* |
+| `assumptions[]` | `{ id: "A-<n>", text, status: assumed\|hypothesis\|confirmed\|refuted\|current-state, evidence[], section?, confirm?, dimension? }` | `current-state` marks a baseline item, shown as *current state, assumed* |
 | `alternatives[]` | `{ name, file, status: candidate\|chosen\|rejected, reason?, date?, judgments?: [{ criterion, value, reasoning }] }` | Judgments are preliminary, shown on the comparison page |
 | `principles[]` | `{ id: "PR-<n>", text, status: confirmed\|assumed\|hypothesis\|refuted, rule? }` | Experience principles; one with a `rule` becomes a project rule (Project principles) |
 | `issues[]` | `{ finding, status: open\|fixed\|wont-fix }` | Unresolved usability issues |
@@ -125,6 +126,7 @@ input or a refusal (named on stderr).
 | `faked[]` | `{ what, where }` | Data and error handling a prototype faked |
 | `prototype` | `{ branch, alternative? }` | The validated prototype's branch; `status` reports it `validated` until `core-3` passes, then `production` |
 | `observations[]` | `{ id: "O-<n>", text, source: design-team, alternative? }` | What the design team noticed trying a prototype; never user evidence |
+| `consents[]` | `{ session, confirmed: true, by?, date, evidence? }` | Consent confirmed per test session before its transcript was analysed (ADR-039) |
 | `next` | string | The next action the guide proposes |
 
 ### Documents in `docs/ux/`
@@ -175,6 +177,14 @@ the principle. One without a `rule` is a rubric note.
 copied into the catalogue like the rules. Nine dimensions, each `{ id,
 name, question, measures[], baseline: boolean, sources[] }`. Baselines:
 `task-effectiveness`, `accessibility`. Sources follow ADR-025 rule 7.
+
+The observed side comes from imported human findings: `{ value, evidence:
+[TK-…], verdict: supports | contradicts | null }`. The guide's thresholds,
+stated with each value: task effectiveness is contradicted under 80% of
+attempts completed (when the prediction says every journey is walkable),
+discoverability when half or more of attempts needed help, error recovery
+when fewer than half of attempts with an error still completed; task
+efficiency reports the median time with no verdict.
 
 ### MCP tools (optional)
 
@@ -252,7 +262,9 @@ interaction decision record carries `ux: "UXD-<n>"`.
 |---|---|
 | `state set` with a value the schema rejects | Exit 2, the schema error named; nothing written |
 | `init` where a design state exists | Exit 2, "design state exists"; nothing written |
-| `transcript add` without `--consent-confirmed` | Exit 2, refusal; nothing written |
+| `transcript add` without `--consent-confirmed`, or with an audio or video file | Exit 2, refusal; nothing written |
+| `test-kit --journey` naming a journey the blueprint lacks | Exit 2, naming it; nothing written |
+| `route` naming a finding in no kit and not in the latest assessment run | Exit 2, naming it; nothing written |
 | `compare` on alternatives with different task sets | Exit 1, the differing tasks named (a refusal; the blueprint command's convention, as `init` on an existing file) |
 | `alternative new` on an existing file, or `alternative choose` without `--reason` | Exit 1, naming the file or the missing reason; nothing changed |
 | `impact --apply` when the changed blueprint fails `check` | Exit 1; prototypes and the test kit are not regenerated |

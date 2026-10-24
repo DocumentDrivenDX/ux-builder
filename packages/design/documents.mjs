@@ -190,7 +190,8 @@ export function helixIds(app) {
 /* Every docs/ux document: { path, type, id } (type and id null when the
    frontmatter does not say). */
 export function uxDocuments(app) {
-  return markdown(app, "docs/ux").map((path) => {
+  // A test kit is its kit.md; scenarios, script, consent and screener are its parts, not documents of their own.
+  return markdown(app, "docs/ux").filter((path) => !/^docs\/ux\/tests\/TK-[^/]+\/(?!kit\.md$)[^/]+\.md$/.test(path)).map((path) => {
     const ux = parseDocument(readFileSync(join(app, path), "utf8")).front?.ux;
     return { path, type: ux?.type ?? null, id: ux?.id != null ? String(ux.id) : null };
   });

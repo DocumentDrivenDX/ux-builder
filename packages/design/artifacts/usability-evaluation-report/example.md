@@ -54,3 +54,8 @@ ux:
 ## Recommendations
 
 1. Show access points on the map (improvement backlog).
+
+## Not tested
+
+- J-find error state: not walked with people.
+- Consistency: no human observation.

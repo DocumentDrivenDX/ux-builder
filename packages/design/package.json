@@ -27,6 +27,8 @@
     "ready.mjs",
     "graph.mjs",
     "testkit.mjs",
+    "sessions.mjs",
+    "evaluation.mjs",
     "documents.mjs",
     "cli.mjs",
     "artifacts",

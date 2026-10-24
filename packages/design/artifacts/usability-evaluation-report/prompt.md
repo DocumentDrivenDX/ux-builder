@@ -7,4 +7,4 @@ success rates; five participants are not a population. Label every finding as
 a human observation or an agent recommendation. In the rubric, keep predicted
 and observed side by side and never average them.
 
-Use `template.md`; `example.md` shows a finished one. `ux-builder-design validate` checks it.
+`ux-builder-design report` drafts it from the design state, the rubric, the latest assessment run and the test kits; say what was not tested. Use `template.md`; `example.md` shows a finished one. `ux-builder-design validate` checks it.

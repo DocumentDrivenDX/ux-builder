@@ -126,6 +126,9 @@ export function validateReport(dir) {
     if (!f.source_refs?.length && !proposed) add("backlog.json", at, `${f.id} cites no requirement and proposes no criterion`);
     if (f.finding_type === "heuristic" && !proposed) add("backlog.json", `${at}/expected_behavior_or_proposed_requirement`, `${f.id} is a heuristic concern: state it as "Proposed criterion: …", a recommendation, not an existing obligation`);
     if (f.finding_type === "real-user" && !(f.evidence_refs ?? []).some((r) => r.startsWith("evidence/real-user/"))) add("backlog.json", at, `${f.id} is typed real-user without evidence from real users (evidence/real-user/…)`);
+    // A human observation is never an agent recommendation, and a design-team note is never user evidence (FEAT-018 GDL-58).
+    if (f.source === "human" && f.finding_type !== "real-user") add("backlog.json", `${at}/source`, `${f.id} says source: human but is typed ${f.finding_type}; an agent recommendation is never labelled a human observation (type it real-user, with evidence from people, or drop source)`);
+    if (f.source === "design-team" && f.finding_type === "real-user") add("backlog.json", `${at}/source`, `${f.id} is a design-team note typed real-user; notes from people trying a prototype are never user evidence`);
     // Every finding names the rule or the heuristic it breaks (FEAT-015 RPT-01; US-102-AC4).
     if (!f.rule && !f.heuristic?.name) add("backlog.json", at, `${f.id} names neither a rule nor a heuristic: give rule (a catalogue rule ID, e.g. modal.dismiss) or heuristic ({ name, source }, e.g. { "name": "Visibility of system status", "source": "Nielsen's 10 usability heuristics" })`);
     // A finding of an AI journey names the AI rule or heuristic it is about (FEAT-011 AIX-03; US-082-AC2).

@@ -219,6 +219,36 @@ Before test users see it, run `ux-builder-design ready --for testing`;
 before it becomes production code, `ux-builder-design ready` and then ask
 `core-3`. It stays a prototype until `core-3` is answered.
 
+## Validate with people
+
+Inspect before anyone sees it: run the assessment's heuristic pass on the
+prototype (`ux-builder-audit assess heuristics`), and fix what it finds.
+Its task metrics are agent-measured; never present them as how people do.
+
+Then test with people. `ux-builder-design test-kit` writes
+`docs/ux/tests/TK-<n>/`: scenarios as the user's goals (never a screen or
+control name), success criteria, a script, a consent note, a screener and
+`observations.csv`. The person runs the sessions. Afterwards:
+
+- `observe import <sheet> --kit TK-<n>`: each row a finding with
+  `source: human`, by pseudonym, remarks masked. Name a problem in the same
+  words in every row it was seen (the `problem` column), so recurring
+  problems are counted.
+- `transcript add <file> --session <id> --consent-confirmed --cite <time>...`:
+  only after the person confirms that session's consent; you keep only the
+  cited lines, masked. Never take a recording.
+- `rubric`: the observed column beside the predicted one, per task
+  completion, median time, errors, assists, and the problems seen twice.
+- `report`: `docs/ux/evaluations/UER-<n>.md`. A prediction the people
+  contradicted is highlighted, and the assumptions behind it (those with a
+  `dimension`) become refuted. Say plainly what was not tested.
+
+At `core-3`, the person chooses which findings to fix:
+`route <F-id>... [--decision UXD-<n> --status tested|refuted]` writes them as
+a proposed patch to HELIX's improvement backlog. Label every finding you
+report as a human observation or your recommendation; never pass yours off
+as what people did.
+
 ## Change what exists
 
 When the person asks for a change ("remove the activity selection before

@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -57,6 +57,23 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       prototypes and kits regenerated, HELIX only as proposals, a decision.
   test-kit [--journey <id>]...
       a usability test kit in docs/ux/tests/TK-<n>/ from the journeys.
+  observe import <file> --kit <TK-n>
+      import a filled observation sheet (CSV or JSON) as findings with
+      source: human, one per participant and task, by pseudonym, remarks
+      masked; into docs/ux/tests/<TK-n>/findings.json.
+  transcript add <file> --session <id> --consent-confirmed [--by <name>] [--cite <time>]...
+      record a session transcript's masked, cited excerpts (the lines at the
+      cited timestamps) as docs/ux/evidence/EV-<n>.md, and the consent in the
+      design state. Refuses without --consent-confirmed, and refuses recordings.
+  report
+      write the UX evaluation report, docs/ux/evaluations/UER-<n>.md: method,
+      tasks, measures, the rubric (predicted, agent-measured, observed),
+      findings by journey labelled human or agent, recommendations and what
+      was not tested. A contradicted prediction refutes its assumptions.
+  route <F-id>... [--decision <UXD-n> --status tested|refuted]
+      the findings the person chose at checkpoint core-3 as a proposed patch
+      to HELIX's improvement backlog (helix-proposals/backlog/); with
+      --decision, the decision record's new status.
   ready [--for testing|production]
       is the validated prototype ready? testing: lint, check:blueprint and the
       audit pass. production (default): also every criterion its journeys
@@ -91,7 +108,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -159,7 +176,31 @@ async function main(argv) {
   }
   if (command === "test-kit") {
     const r = testKit(app, { journeys: values.journey ?? [] });
-    print(r, values.json, `Wrote ${r.dir}/: ${r.tasks.length} task${r.tasks.length === 1 ? "" : "s"} (${r.tasks.map((t) => t.journey).join(", ")}).`);
+    print(r, values.json, [`Wrote ${r.dir}/: ${r.tasks.length} task${r.tasks.length === 1 ? "" : "s"} (${r.tasks.map((t) => t.journey).join(", ")}).`, ...r.warnings.map((w) => `warning: ${w}`)].join("\n"));
+    return 0;
+  }
+  if (command === "observe") {
+    const [sub, file] = rest;
+    if (sub !== "import") throw new DesignError(`unknown observe command "${sub ?? ""}": use import`);
+    const r = observeImport(app, { file, kit: values.kit });
+    print(r, values.json, [`Imported ${r.imported} observation${r.imported === 1 ? "" : "s"} into ${r.path} (${r.sessions.join(", ") || "no sessions"}).`, ...r.skipped.map((x) => `skipped row ${x.row}: ${x.reason}`)].join("\n"));
+    return 0;
+  }
+  if (command === "transcript") {
+    const [sub, file] = rest;
+    if (sub !== "add") throw new DesignError(`unknown transcript command "${sub ?? ""}": use add`);
+    const r = transcriptAdd(app, { file, session: values.session, consentConfirmed: values["consent-confirmed"], by: values.by, cite: values.cite ?? [], date: values.date });
+    print(r, values.json, `Wrote ${r.path}: ${r.excerpts} cited excerpt${r.excerpts === 1 ? "" : "s"} from session ${r.session}, masked; consent recorded.${r.excerpts ? "" : " Cite the lines the synthesis relies on with --cite <time>."}`);
+    return 0;
+  }
+  if (command === "report") {
+    const r = report(app);
+    print(r, values.json, [`Wrote ${r.path} (${r.approach}${r.follows ? `, follows ${r.follows}` : ""}).`, r.observed ? null : "No human evidence yet: the observed column says so.", ...r.contradicted.map((d) => `Contradicted: ${d}`), ...r.assumptions.map((a) => `${a.id}: ${a.from} → ${a.to}`)].filter(Boolean).join("\n"));
+    return 0;
+  }
+  if (command === "route") {
+    const r = route(app, { findings: rest, decision: values.decision, status: values.status });
+    print(r, values.json, [`Wrote ${r.patch}: ${r.findings.join(", ")} for ${r.target.path} (${r.target.kind}). Apply it through HELIX.`, ...(r.decision ? [`${r.decision.id} is ${r.decision.status}.`] : [])].join("\n"));
     return 0;
   }
   if (command === "ready") {

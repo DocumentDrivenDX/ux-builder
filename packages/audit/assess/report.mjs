@@ -26,6 +26,8 @@ import { catalogueRules, ruleOf, SEVERITY_WORDS, severityOf } from "./rules.mjs"
 const read = (dir, f) => (existsSync(join(dir, f)) ? JSON.parse(readFileSync(join(dir, f), "utf8")) : null);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const PRIORITIES = ["P0", "P1", "P2", "P3"];
+/* Every finding says where it came from (FEAT-018 GDL-58). */
+const ORIGIN = { agent: "agent recommendation", human: "human observation (verified)", "design-team": "design-team note (not user evidence)" };
 export const CAVEAT = "A clean audit is not proof of usability or of full accessibility compliance, and passing functional tests do not show that usability criteria are met.";
 
 function walk(dir, base = dir) {
@@ -168,7 +170,7 @@ function markdown(dir, r) {
     const sev = severityOf(f);
     const what = ruleOf(f, rules);
     L.push(`${"#".repeat(level)} ${f.priority} · severity ${sev} · ${f.title} (${f.id})`, "");
-    L.push(`**${f.finding_type}** · severity ${sev} (${SEVERITY_WORDS[sev]}) · ${f.journey_id} · ${f.state_id} · role ${f.role} · confidence ${f.confidence?.level} (${f.confidence?.reason}) · effort ${f.effort}${f.validation_work ? " · **validation work**" : ""}${(f.qualified ?? []).length ? ` · qualified: ${f.qualified.join(", ")}` : ""}`, "");
+    L.push(`**${ORIGIN[f.source ?? "agent"]}** · **${f.finding_type}** · severity ${sev} (${SEVERITY_WORDS[sev]}) · ${f.journey_id} · ${f.state_id} · role ${f.role} · confidence ${f.confidence?.level} (${f.confidence?.reason}) · effort ${f.effort}${f.validation_work ? " · **validation work**" : ""}${(f.qualified ?? []).length ? ` · qualified: ${f.qualified.join(", ")}` : ""}`, "");
     if (what?.kind === "rule") L.push(`- **Rule** \`${what.id}\`: ${what.statement}${what.sources.length ? ` Sources: ${what.sources.map((s) => `[${s.title}](${s.url})`).join(", ")}.` : ""}`);
     else if (what) L.push(`- **Heuristic**: ${what.name}${what.source ? ` — source: ${/^https?:/.test(what.source) ? `[${what.source}](${what.source})` : what.source}` : ""}`);
     else L.push("- **Rule**: none named (assess validate-report fails this finding: name the rule or the heuristic it breaks)");

@@ -15,6 +15,8 @@ export { applyImpact, buildGraph, impact, summaryOf, trace } from "./graph.mjs";
 export { goalText, kits, kitTasks, OBSERVATION_COLUMNS, testKit } from "./testkit.mjs";
 export { ready, readyText } from "./ready.mjs";
 export { observedFor, RUBRIC, rubric, rubricText } from "./rubric.mjs";
+export { findingIdFor, humanFindings, maskPersonal, observedDimensions, observedMeasures, observeImport, parseCsv, transcriptAdd, transcriptLines } from "./sessions.mjs";
+export { evaluationFindings, report, route } from "./evaluation.mjs";
 export { DECISION_STATUSES, decisionAdd, decisionStatus } from "./decisions.mjs";
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml, principlesFile } from "./brief.mjs";
 export { EVIDENCE_KINDS, evidenceAdd, evidenceList, writeEvidence } from "./research.mjs";
