@@ -8,7 +8,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { decisionAdd, readState } from "../index.mjs";
-import { cli } from "./helpers.mjs";
+import { approveAll, cli } from "./helpers.mjs";
 import { kitApp } from "./kit-fixture.mjs";
 
 const json = (a, args) => { const r = cli(a, [...args, "--json"]); assert.equal(r.status, 0, r.stderr); return JSON.parse(r.stdout); };
@@ -66,6 +66,7 @@ describe("US-145: run an experiment through its checkpoints", () => {
   test("AC3: after the checkpoint, experiment start writes EXP-<n>.md with the variant, metric, guardrails and duration, running in the design state", () => {
     const a = expApp();
     json(a, DIAG);
+    approveAll(a);
     assert.equal(cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes, two weeks on 10% of people"]).status, 0);
     const r = JSON.parse(start(a, "--json").stdout);
     assert.equal(r.path, "docs/ux/experiments/EXP-1.md");
@@ -86,7 +87,7 @@ describe("US-145: run an experiment through its checkpoints", () => {
   test("AC4: experiment end compares task success and each guardrail, records the result against the hypothesis and asks release", () => {
     const a = expApp();
     json(a, DIAG);
-    cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes"]);
+    approveAll(a); cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes"]);
     start(a);
     writeFileSync(join(a, "result.json"), JSON.stringify({ metric: "find-completion", control: 0.5, variant: 0.68, guardrails: [{ metric: "time-to-river", control: 42, variant: 38, better: "lower" }] }));
     const r = json(a, ["experiment", "end", "EXP-1", "--result", "result.json"]);
@@ -101,14 +102,14 @@ describe("US-145: run an experiment through its checkpoints", () => {
     assert.equal(s.next, r.next);
     // A guardrail that got worse: the hypothesis is not supported, whatever the success metric did.
     const b = expApp();
-    json(b, DIAG); cli(b, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(b);
+    json(b, DIAG); approveAll(b); cli(b, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(b);
     writeFileSync(join(b, "result.json"), JSON.stringify({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 42, variant: 60, better: "lower" }] }));
     const w = json(b, ["experiment", "end", "EXP-1", "--result", "result.json"]);
     assert.equal(w.hypothesis, "not supported: a guardrail got worse");
     assert.match(w.next, /Keep the current design, or try another alternative\?/);
     // A change within the guardrail's tolerance holds: the result's own, else HELIX's metric definition's.
     const c = expApp();
-    json(c, DIAG); cli(c, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(c);
+    json(c, DIAG); approveAll(c); cli(c, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(c);
     writeFileSync(join(c, "result.json"), JSON.stringify({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 40, variant: 43, better: "lower", tolerance: "10%" }] }));
     const tol = json(c, ["experiment", "end", "EXP-1", "--result", "result.json"]);
     assert.equal(tol.supported, true);
@@ -116,7 +117,7 @@ describe("US-145: run an experiment through its checkpoints", () => {
     const e = expApp();
     mkdirSync(join(e, "docs/helix/06-iterate/metrics"), { recursive: true });
     writeFileSync(join(e, "docs/helix/06-iterate/metrics/time-to-river.yaml"), "name: time-to-river\nunit: seconds\ndirection: lower\ntolerance: 2s\n");
-    json(e, DIAG); cli(e, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(e);
+    json(e, DIAG); approveAll(e); cli(e, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(e);
     writeFileSync(join(e, "result.json"), JSON.stringify({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 40, variant: 43, better: "lower" }] }));
     assert.equal(json(e, ["experiment", "end", "EXP-1", "--result", "result.json"]).supported, false);
     assert.match(readFileSync(join(e, "docs/ux/experiments/EXP-1.md"), "utf8"), /\(got worse by more than the tolerance 2s; lower is better\)/);
@@ -127,7 +128,7 @@ describe("US-145: run an experiment through its checkpoints", () => {
     const a = expApp();
     mkdirSync(join(a, "docs/helix/06-iterate/metrics"), { recursive: true });
     writeFileSync(join(a, "docs/helix/06-iterate/metrics/time-to-river.yaml"), "name: time-to-river\nunit: seconds\ndirection: lower\n");
-    cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes"]);
+    approveAll(a); cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes"]);
     const r = JSON.parse(start(a, "--json").stdout);
     assert.deepEqual(r.proposed, ["helix-proposals/metrics/find-completion.patch"]);
     const patch = readFileSync(join(a, r.proposed[0]), "utf8");

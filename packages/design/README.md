@@ -29,6 +29,7 @@ lists each one's options.
 
 | Stage | Commands |
 |---|---|
+| Follow along | `overview` (the eight steps), `step next`, `explain <term>`, `review` (`show`, `feedback`, `respond`, `approve`): each item is shown inline and approved by the person before moving on |
 | Set up | `init [--mcp]`, `status`, `state get [<path>]`, `state set <path> <json>`, `state checkpoint <id> --answer …`, `mode full\|change` |
 | Define | `baseline` (an existing app's first session), `brief`, `evidence add\|list`, `evidence excerpt add`, `validate` |
 | Explore and decide | `decision add\|status`, `rubric [--alternative <name>]`; alternatives, scores, comparisons and prototypes come from `ux-builder-blueprint` |

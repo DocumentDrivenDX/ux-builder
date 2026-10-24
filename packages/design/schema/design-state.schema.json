@@ -32,6 +32,12 @@
         "validate"
       ]
     },
+    "step": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 8,
+      "description": "The step of the current mode the person is on; 0 is an existing app's baseline (FEAT-018 GDL-79)"
+    },
     "mode": {
       "enum": [
         "full",
@@ -85,6 +91,79 @@
           "at": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "description": "The person's approvals: each item approved in a given form (FEAT-018 GDL-79)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "item",
+          "hash",
+          "answer",
+          "at"
+        ],
+        "properties": {
+          "item": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hash": {
+            "type": "string",
+            "minLength": 1
+          },
+          "answer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "feedback": {
+      "type": "array",
+      "description": "The person's feedback on an item, and how it was addressed (FEAT-018 GDL-79)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "item",
+          "text",
+          "status",
+          "at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^FB-[1-9][0-9]*$"
+          },
+          "item": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "open",
+              "addressed"
+            ]
+          },
+          "response": {
+            "type": "string",
+            "minLength": 1
+          },
+          "at": {
+            "type": "string"
           }
         }
       }

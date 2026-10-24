@@ -8,7 +8,7 @@ import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "n
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { exampleFile, validate, writeInApp } from "../index.mjs";
-import { cli, tempApp } from "./helpers.mjs";
+import { approveAll, cli, tempApp } from "./helpers.mjs";
 
 const put = (app, path, text) => { mkdirSync(join(app, path, ".."), { recursive: true }); writeFileSync(join(app, path), text); };
 const example = (type) => readFileSync(exampleFile(type), "utf8");
@@ -87,6 +87,7 @@ describe("validate", () => {
       ["mode", "change"],
       ["validate"],
     ];
+    approveAll(app);
     for (const args of runs) assert.equal(cli(app, args).status, 0, args.join(" "));
     assert.deepEqual(snapshot(join(app, "docs/helix")), before);
     // And the write fence refuses it outright.

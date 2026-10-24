@@ -24,11 +24,61 @@ that add complexity without measurable user value.
 
 1. Run `ux-builder-design status`. If it says there is no design state, the
    app has not started the loop.
-2. Tell the person where things stand in two or three sentences, from the
-   status: the activity, what is chosen, how many assumptions are untested,
-   the open questions and the next action. For example: "Map first is
-   chosen. Two assumptions are untested. Next: test with users."
-3. Ask whether to continue with the next action or do something else.
+2. **In the first session** (no checkpoint answered, nothing approved yet),
+   start with an overview, before any question: run
+   `ux-builder-design overview` and tell the person, in your own words, the
+   eight steps, what they will do in each, what comes out, and that you
+   will stop for their decision at each checkpoint and for their approval of
+   everything you produce. Keep it short; ask if they have questions.
+3. Otherwise tell the person where things stand in two or three sentences,
+   starting with the step: "Step 4 of 8: Explore alternatives. Map first is
+   chosen. Two assumptions are untested. Three items await your review."
+4. If items await review, review them first (*Review and approval*).
+   Then ask whether to continue with the next action or do something else.
+
+## Where the person is
+
+Say which step the person is on whenever you start a step or come back to
+one: "Step 2 of 8: Understand users." (`status` gives it; change mode has
+its own four steps, "Change mode, step 2 of 4: Impact"). When a step's
+work is done and approved, run `ux-builder-design step next` and say what
+the next step is and what it will ask of them.
+
+## Explaining terms
+
+The person may not know the vocabulary. The first time a term comes up in
+a session (blueprint, user story, acceptance criterion, job to be done,
+target user, task, journey, business rule, alternative, rubric, prototype,
+checkpoint and the rest), say what it means and why it is valuable, in a
+sentence or two, before using it: `ux-builder-design explain <term>` has
+the wording, and `explain --step <n>` lists the terms a step introduces.
+Explain in plain words, with an example from their product. Don't explain
+the same term twice in a session unless they ask.
+
+## Review and approval
+
+Everything you produce is reviewed by the person before you move on: each
+target user, job, user story, task, business rule, journey, alternative,
+decision, screen, test kit, report, insight and experiment. Files are
+where the work is kept; the conversation is where it is reviewed. Never
+send the person to a file instead.
+
+1. `ux-builder-design review` lists what awaits review, in order.
+2. Take **one item at a time**. Show it **inline in the conversation**:
+   `review show <item>` gives its content; present it readably (a story as
+   its story and criteria, a task as its goal, users, steps and rules),
+   with any term explained.
+3. Ask for feedback: "Does this match what you mean? Anything to change?"
+4. Record any feedback in their words: `review feedback <item> --text "…"`.
+   Make the change, record what you changed (`review respond <FB-n> --text
+   "…"`), and show the item again.
+5. When they approve, record it in their words:
+   `review approve <item> --answer "…"`. Only then show the next item.
+
+Don't batch items into one message, and don't take silence or "looks
+fine" about several items as approval of each. An item changed after its
+approval goes back on the list. Checkpoints and `step next` refuse while
+items of their steps await review.
 
 Record what you learn as you go, with `ux-builder-design state set`:
 - an assumption: `state set 'assumptions[+]' '{"text":"…"}'` (it gets an
@@ -63,7 +113,9 @@ stages inside them without being asked.
 
 The person works with the evolving experience, not with the documents: the
 brief, the comparison, the prototype and the evidence. You keep the
-documents up to date behind it, and never ask the person to edit one.
+documents up to date behind it, and never ask the person to edit one; you
+show them each item's content in the conversation for their review and
+approval (*Review and approval*).
 
 ## What you draw on
 

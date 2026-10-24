@@ -1,0 +1,5 @@
+---
+"@ux-builder/design": minor
+---
+
+The guided conversation (FEAT-018 GDL-79): `overview` gives the eight steps up front; `status` leads with "Step n of 8" (change mode has four, an existing app's baseline comes before step 1) and `step next` moves on; `explain <term>` says what a term means and why it is valuable, from a glossary in the package; and every item the guide produces (each target user, job, story, task, business rule, journey, alternative, decision, screen, kit, report, insight and experiment) awaits the person's review: `review` lists them, `review show` gives the content to present inline, feedback and how it was addressed are recorded, `review approve` records the person's words and is refused while feedback is open, an item changed after approval is listed again, and checkpoints and `step next` refuse while items of their steps await review. The skill opens a first session with the overview, says which step the person is on, explains terms the first time they come up, and shows items one at a time for approval.

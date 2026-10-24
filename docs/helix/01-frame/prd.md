@@ -649,6 +649,10 @@ rules, so it invents colours and components.
   significant changes, experiments and releases), recording each answer.
   HELIX documents change only through proposals a person accepts.
   *(Added 2026-10-23.)*
+  The guide opens with an overview, says which step of eight the person is
+  on, explains its terms, and has the person review and approve each item
+  it produces, inline and one at a time, before moving on. *(Added
+  2026-10-24.)*
 - **FR-78** — The agent challenges requests that add complexity, records
   five answers (goal, whether it is needed, the simplest alternative,
   assumptions, how it will be validated) for every added destination,

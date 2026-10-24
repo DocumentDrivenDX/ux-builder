@@ -103,6 +103,14 @@ camelCase that returns the `--json` object.
 | `experiment start --decision <UXD-n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>` | Opens an experiment, only with one more passed `experiment` checkpoint than experiments started; its hypothesis from the latest diagnosis of that variant. Metrics with no `<root>/06-iterate/metrics/<name>.yaml` are proposed as metric-definition patches | `docs/ux/experiments/EXP-<n>.md`, `helix-proposals/metrics/<name>.patch` |
 | `experiment end <EXP-n> --result <file>` | Compares the success metric (`control`, `variant`) and each guardrail (`{ metric, control, variant, better: lower\|higher }`), records the hypothesis as supported only when the metric improved and every guardrail held (a guardrail holds unless it got worse by more than its `tolerance`: the result's, else the HELIX metric definition's; a number, a percent of the control, or a number with a unit), and sets `next` to ask `release` | that record |
 | `validate` | Checks every `docs/ux/` document's frontmatter, ID, template sections and links | nothing |
+| `overview` | The eight steps (1 Define intent, 2 Understand users, 3 Model tasks, 4 Explore alternatives, 5 Design the structure, 6 Prototype, 7 Test with people, 8 Refine and improve), each with what the person does, what comes out, its terms and the checkpoint closing it; and change mode's four steps | nothing |
+| `step next\|<n>` | Moves the loop to the next (or the given) step of its mode, setting the activity; `next` refuses while items of the current step await review | the state's `step` |
+| `explain [<term>] [--step <n>]` | What a term means and why it is valuable, from `glossary.json`; with `--step`, the terms that step introduces; with neither, every term. An unknown term exits 2 listing the known ones | nothing |
+| `review [list]` | Every item not approved in its current form, in step order: `user:U-n`, `job:J-n`, `evidence:EV-n`, `brief`, `story:US-n` (stories the blueprint's journeys cite), `task:T-n`, `rule:BR-n`, `journey:J-x`, `alternative:<name>`, `decision:UXD-n`, `screen:<id>`, `kit:TK-n`, `report:UER-n`, `insight:INS-date`, `experiment:EXP-n` | nothing |
+| `review show <item>` | The item's content, to present inline in the conversation | nothing |
+| `review feedback <item> --text <their words>` | Records the person's feedback, `FB-<n>`, open | the state's `feedback[]` |
+| `review respond <FB-n> --text <what changed>` | Records how the feedback was addressed | that entry |
+| `review approve <item> --answer <their words>` | Records the approval with the item's content hash; refused (exit 2) while the item has open feedback | the state's `reviews[]` |
 
 Exit codes: 0 done; 1 a check failed or a finding at error severity; 2 bad
 input or a refusal (named on stderr).
@@ -130,6 +138,9 @@ input or a refusal (named on stderr).
 | `prototype` | `{ branch, alternative? }` | The validated prototype's branch; `status` reports it `validated` until `core-3` passes, then `production` |
 | `observations[]` | `{ id: "O-<n>", text, source: design-team, alternative? }` | What the design team noticed trying a prototype; never user evidence |
 | `consents[]` | `{ session, confirmed: true, by?, date, evidence? }` | Consent confirmed per test session before its transcript was analysed (ADR-039) |
+| `step` | integer | The step of the current mode the person is on (0: an existing app's baseline) |
+| `reviews[]` | `{ item, hash, answer, at }` | Approvals: the person's words and the content approved; an item whose content changes needs approving again |
+| `feedback[]` | `{ id: "FB-<n>", item, text, status: open\|addressed, response?, at }` | The person's feedback on an item, and how it was addressed |
 | `next` | string | The next action the guide proposes |
 
 ### Documents in `docs/ux/`
@@ -304,6 +315,8 @@ interaction decision record carries `ux: "UXD-<n>"`.
 | `validate` on a document missing a template section | Exit 1, the document and section named |
 | `insights` with events naming an unknown journey | Exit 0; those events reported as unmatched |
 | `experiment start` without a passed `experiment` checkpoint | Exit 2, refusal |
+| A checkpoint answered while items of the steps it closes await review (`core-1`: steps 1 to 3; `core-2`: step 4; `core-3`: steps 5 to 7; `experiment`, `release`: step 8), or `step next` while the current step's do | Exit 2 naming the items; nothing recorded (a skip with a reason still records) |
+| `review approve` with open feedback on the item | Exit 2 naming the feedback |
 | `diagnose` with fewer than two explanations, or an unknown alternative | Exit 2; nothing written |
 
 ## Validation Checklist

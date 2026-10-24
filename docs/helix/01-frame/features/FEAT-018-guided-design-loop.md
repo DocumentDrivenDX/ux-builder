@@ -514,6 +514,35 @@ says how people fared with each rule and which were not tested, and
 `trace` and `impact` follow a rule to the tasks, journeys and screens it
 applies to.
 
+GDL-79. **A guided conversation the person can follow and control**
+*(added 2026-10-24, from the operator)*:
+- **Overview first.** A first session opens with an overview of the
+  process: its eight steps (1 Define intent, 2 Understand users, 3 Model
+  tasks, 4 Explore alternatives, 5 Design the structure, 6 Prototype,
+  7 Test with people, 8 Refine and improve), what the person does in each,
+  what comes out of it and the checkpoint that closes it
+  (`ux-builder-design overview`).
+- **Where you are.** Every step the guide takes says where the person is:
+  "Step 3 of 8: Model tasks". Change mode has its own four steps
+  (challenge, impact, decide, apply); an existing app's baseline comes
+  before step 1. `status` leads with it, and `step next` moves on.
+- **Terms explained.** The first time a term comes up (blueprint, user
+  story, acceptance criterion, job to be done, target user, task, journey,
+  business rule, alternative, prototype, checkpoint, rubric and the
+  others), the guide says what it means and why it is valuable, in a
+  sentence or two from the package's glossary (`ux-builder-design
+  explain`).
+- **Review and approve each item.** Every item the guide produces (each
+  target user, job, user story, task, business rule, journey, alternative,
+  screen, decision, test kit, report, insight and experiment) awaits the
+  person's review until they approve it. The guide shows each one inline
+  in the conversation, one at a time, asks for feedback, addresses it and
+  records how, and asks for an explicit approval before showing the next.
+  Approval is refused while feedback on the item is unaddressed, an item
+  changed after approval needs approving again, and a checkpoint does not
+  pass while items of the steps it closes await review. Files are where
+  the work is kept; the conversation is where it is reviewed.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each
@@ -916,6 +945,7 @@ The proposal's seven connected artifacts, and its rubric:
 
 - [US-146 — Describe target users with their context and evidence](../user-stories/US-146-describe-target-users-with-their-context-and-evidence.md)
 - [US-147 — Design how users meet each business rule](../user-stories/US-147-design-how-users-meet-each-business-rule.md)
+- [US-148 — Follow the guide step by step, and approve each item](../user-stories/US-148-follow-the-guide-step-by-step-and-approve-each-item.md)
 
 ## Edge Cases and Error Handling
 

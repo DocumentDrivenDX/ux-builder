@@ -9,7 +9,7 @@ import { join } from "node:path";
 import { describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { writeInApp } from "../index.mjs";
-import { cli, tempApp } from "./helpers.mjs";
+import { approveAll, cli, tempApp } from "./helpers.mjs";
 
 /* An app with a validated prototype: scripts that pass or fail, a blueprint
    whose journey covers two criteria, an audit report and its tests. */
@@ -31,6 +31,7 @@ describe("US-136: the validated prototype", () => {
     const a = app();
     assert.deepEqual(JSON.parse(cli(a, ["status", "--json"]).stdout).prototype, { branch: "prototype/map-first", status: "validated" });
     assert.match(cli(a, ["status"]).stdout, /Prototype: the validated prototype on prototype\/map-first is still a prototype \(core-3 not answered\)\./);
+    approveAll(a);
     assert.equal(cli(a, ["state", "checkpoint", "core-3", "--answer", "Yes, build it"]).status, 0);
     assert.deepEqual(JSON.parse(cli(a, ["status", "--json"]).stdout).prototype, { branch: "prototype/map-first", status: "production" });
   });

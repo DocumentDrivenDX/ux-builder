@@ -6,6 +6,8 @@
 
 import { recordDecision } from "@ux-builder/trace";
 import { DesignError } from "./app.mjs";
+import { CLOSES, firstOf } from "./process.mjs";
+import { pendingReviews } from "./review.mjs";
 import { readState, writeState } from "./state.mjs";
 
 export const CHECKPOINTS = {
@@ -48,6 +50,11 @@ export function checkpoint(app, { id, answer, skip = false, declined = false, re
   if (skip && declined) throw new DesignError("--declined goes with --answer: the person said no or not yet");
   if (skip && !reason?.trim()) throw new DesignError(`skipping ${id} needs --reason: why the person chose to go on without it`);
   if (!skip && !answer?.trim()) throw new DesignError(`checkpoint ${id} needs --answer <the person's answer>, or --skip --reason <why>`);
+  // A checkpoint is not passed while items of the steps it closes await the person's review (GDL-79).
+  if (!skip && !declined && CLOSES[id]) {
+    const waiting = pendingReviews(app, { steps: CLOSES[id] });
+    if (waiting.length) throw new DesignError(`checkpoint ${id} cannot be passed yet: ${waiting.length} item${waiting.length === 1 ? "" : "s"} await${waiting.length === 1 ? "s" : ""} the person's review: ${waiting.map((w) => w.id).join(", ")}. Show each inline, one at a time, and record the approval (ux-builder-design review approve <item> --answer "<their words>"). Nothing was recorded.`);
+  }
   const state = structuredClone(readState(app));
   // A "no" or "not yet" is an answer too, but it never counts as passed.
   const entry = skip ? { id, status: "skipped", reason: reason.trim(), at: now } : { id, status: declined ? "declined" : "passed", answer: answer.trim(), at: now };
@@ -65,6 +72,7 @@ export function checkpoint(app, { id, answer, skip = false, declined = false, re
 export function advance(state, to) {
   if (ORDER.indexOf(to) <= ORDER.indexOf(state.activity)) return false;
   state.activity = to;
+  if (state.mode !== "change") state.step = firstOf(to);
   if (!state.next || state.checkpoints.some((c) => c.status === "passed" && state.next.includes(c.id)) || Object.values(FIRST_STEP).includes(state.next)) state.next = FIRST_STEP[to];
   return true;
 }
@@ -72,6 +80,8 @@ export function advance(state, to) {
 export function setMode(app, { mode, why } = {}) {
   if (!["full", "change"].includes(mode)) throw new DesignError(`mode is full or change, not "${mode ?? ""}"`);
   const state = structuredClone(readState(app));
+  // Each mode has its own steps: change mode starts at its first; the full loop resumes at its activity's.
+  if (state.mode !== mode) state.step = mode === "change" ? 1 : firstOf(state.activity);
   state.mode = mode;
   if (why?.trim()) state.modeReason = why.trim(); else delete state.modeReason;
   writeState(app, state);

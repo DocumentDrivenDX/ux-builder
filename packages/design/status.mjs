@@ -4,6 +4,8 @@
 
 import { jobsTable, usersTable, uxDocuments } from "./documents.mjs";
 import { FIRST_STEP } from "./checkpoints.mjs";
+import { progress } from "./process.mjs";
+import { pendingReviews } from "./review.mjs";
 import { readState } from "./state.mjs";
 
 const ACTIVITY = { baseline: "Baseline", define: "Define", explore: "Explore", experience: "Experience", validate: "Validate" };
@@ -25,7 +27,11 @@ export function status(app) {
   const chosen = s.alternatives.find((a) => a.status === "chosen") ?? null;
   const untested = s.assumptions.filter((a) => UNTESTED.has(a.status));
   const open = s.questions.filter((q) => q.status === "open");
+  const pending = pendingReviews(app);
   const result = {
+    // Where the person is, and what awaits their review (GDL-79).
+    progress: progress(s),
+    awaitingReview: pending.map((p) => p.id),
     activity: s.activity,
     mode: s.mode,
     startedFrom: s.startedFrom,
@@ -53,7 +59,8 @@ export function summary(r) {
   const lines = [];
   // Only the latest answer at a checkpoint stands: a decline after a pass, or a pass after a decline.
   const latest = new Map(r.checkpoints.map((c) => [c.id, c.status]));
-  lines.push(`${ACTIVITY[r.activity]}, in ${r.mode === "change" ? "change mode" : "the full loop"}${r.startedFrom === "existing" ? ", in an existing app" : ""}.`);
+  lines.push(`${r.progress.text} (${ACTIVITY[r.activity]}, in ${r.mode === "change" ? "change mode" : "the full loop"}${r.startedFrom === "existing" ? ", in an existing app" : ""}).`);
+  if (r.awaitingReview.length) lines.push(`Awaiting your review: ${r.awaitingReview.length} item${r.awaitingReview.length === 1 ? "" : "s"} (${r.awaitingReview.slice(0, 5).join(", ")}${r.awaitingReview.length > 5 ? ", …" : ""}).`);
   lines.push(r.chosen ? `${r.chosen} is chosen.` : "No alternative is chosen yet.");
   lines.push(r.untestedAssumptions ? `${plural(r.untestedAssumptions, "assumption is", "assumptions are")} untested.` : "No untested assumptions.");
   if (r.openQuestions.length) lines.push(`Open ${r.openQuestions.length === 1 ? "question" : "questions"}: ${r.openQuestions.join("; ")}`);

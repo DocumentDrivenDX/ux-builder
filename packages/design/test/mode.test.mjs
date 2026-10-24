@@ -16,14 +16,14 @@ describe("mode", () => {
     assert.equal(r.status, 0, r.stderr);
     assert.equal(readState(app).mode, "change");
     assert.equal(readState(app).modeReason, "Adding a filter to the list");
-    assert.match(cli(app, ["status"]).stdout, /^Define, in change mode\./);
+    assert.match(cli(app, ["status"]).stdout, /^Change mode, step 1 of 4: Challenge \(Define, in change mode\)\./);
     assert.equal(JSON.parse(cli(app, ["status", "--json"]).stdout).mode, "change");
 
     r = cli(app, ["mode", "full"]);
     assert.equal(r.status, 0, r.stderr);
     assert.equal(readState(app).mode, "full");
     assert.equal(readState(app).modeReason, undefined);
-    assert.match(cli(app, ["status"]).stdout, /^Define, in the full loop\./);
+    assert.match(cli(app, ["status"]).stdout, /^Step 1 of 8: Define intent \(Define, in the full loop\)\./);
   });
 
   test("any other mode is refused with exit 2", () => {

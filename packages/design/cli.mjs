@@ -5,12 +5,32 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
 Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
 
+  overview
+      the process in eight steps: what you do in each, what comes out, the
+      terms it introduces and the checkpoint that closes it.
+  step next|<n>
+      move to the next (or the given) step; next refuses while items of the
+      current step await review.
+  explain [<term>] [--step <n>]
+      what a term means and why it is valuable; --step: the terms a step
+      introduces; with neither, every term.
+  review [list]
+      every item not yet approved in its current form, in step order.
+  review show <item>
+      the item's content, to present inline in the conversation.
+  review feedback <item> --text <their words>
+      record the person's feedback on an item (FB-<n>).
+  review respond <FB-n> --text <what changed>
+      record how the feedback was addressed.
+  review approve <item> --answer <their words>
+      record the person's approval of the item as it is now; refused while
+      its feedback is open.
   init [--mcp]
       put the guide in this app: the skill in .claude/skills/ux-builder-design/,
       an empty design state, a starting blueprint if there is none, and with
@@ -145,7 +165,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, at: { type: "string" }, role: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, at: { type: "string" }, role: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -159,6 +179,50 @@ async function main(argv) {
 
   const app = values.app ? findApp(values.app) : findApp();
 
+  if (command === "overview") {
+    const r = overview();
+    print(r, values.json, overviewText(r));
+    return 0;
+  }
+  if (command === "explain") {
+    const r = explain({ term: rest.join(" ") || undefined, step: values.step });
+    print(r, values.json, explainText(r));
+    return 0;
+  }
+  if (command === "step") {
+    const r = setStep(app, { to: rest[0], pending: (n) => pendingReviews(app, { steps: [n] }).map((p) => p.id) });
+    print(r, values.json, `${r.text}.`);
+    return 0;
+  }
+  if (command === "review") {
+    const [sub = "list", target] = rest;
+    if (sub === "list") {
+      const r = reviewList(app);
+      print(r, values.json, r.count ? [`Awaiting review (${r.count}), in order:`, ...r.pending.map((p) => `  step ${p.step}  ${p.id}  ${p.title}${p.changed ? "  (changed since approved)" : ""}${p.feedback.length ? `  open feedback ${p.feedback.join(", ")}` : ""}`), r.next].join("\n") : r.next);
+      return 0;
+    }
+    if (sub === "show") {
+      const r = reviewShow(app, { item: target });
+      print(r, values.json, [`${r.id}: ${r.title} (step ${r.step}, ${r.status}; ${r.file})`, "", r.content, ...(r.feedback.length ? ["", "Feedback:", ...r.feedback.map((f) => `  ${f.id} [${f.status}] ${f.text}${f.response ? ` → ${f.response}` : ""}`)] : [])].join("\n"));
+      return 0;
+    }
+    if (sub === "feedback") {
+      const r = reviewFeedback(app, { item: target, text: values.text });
+      print(r, values.json, `${r.id} recorded on ${r.item}. Address it, then: ux-builder-design review respond ${r.id} --text "<what changed>".`);
+      return 0;
+    }
+    if (sub === "respond") {
+      const r = reviewRespond(app, { id: target, text: values.text });
+      print(r, values.json, `${r.id} addressed. Show ${r.item} again and ask for approval.`);
+      return 0;
+    }
+    if (sub === "approve") {
+      const r = reviewApprove(app, { item: target, answer: values.answer });
+      print(r, values.json, `${r.item} approved. ${r.remaining ? `${r.remaining} item${r.remaining === 1 ? "" : "s"} left; next: ${r.next}.` : "Nothing else awaits review."}`);
+      return 0;
+    }
+    throw new DesignError(`unknown review command "${sub}": use list, show, feedback, respond or approve`);
+  }
   if (command === "status") {
     const r = status(app);
     print(r, values.json, r.text);

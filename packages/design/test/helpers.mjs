@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { after } from "node:test";
 import "./guard.mjs";
-import { emptyState, serialize } from "../index.mjs";
+import { emptyState, reviewApprove, reviewList, serialize } from "../index.mjs";
 
 export const CLI = fileURLToPath(new URL("../cli.mjs", import.meta.url));
 export const GUARD = fileURLToPath(new URL("./guard.mjs", import.meta.url));
@@ -34,4 +34,10 @@ export function cli(cwd, args) {
   const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith("NODE_TEST")));
   const r = spawnSync(process.execPath, ["--import", GUARD, CLI, ...args], { cwd, encoding: "utf8", env });
   return { status: r.status, stdout: r.stdout, stderr: r.stderr };
+}
+
+/* Record the person's approval of every item awaiting review (US-148), for
+   tests whose subject is a later step, not the review itself. */
+export function approveAll(app) {
+  for (const p of reviewList(app).pending) reviewApprove(app, { item: p.id, answer: "Approved in the test" });
 }

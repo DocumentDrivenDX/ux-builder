@@ -10,6 +10,8 @@ export { DesignError, findApp, writeInApp } from "./app.mjs";
 export { canonical, emptyState, hasState, parsePath, readState, SCHEMA, serialize, STATE_FILE, stateGet, stateSet, validateState, writeState } from "./state.mjs";
 export { status, summary } from "./status.mjs";
 export { checkpoint, CHECKPOINTS, FIRST_STEP, setMode } from "./checkpoints.mjs";
+export { CHANGE_STEPS, CLOSES, explain, explainText, GLOSSARY, overview, overviewText, progress, setStep, STEPS } from "./process.mjs";
+export { pendingReviews, reviewApprove, reviewFeedback, reviewItems, reviewList, reviewRespond, reviewShow } from "./review.mjs";
 export { baseline } from "./baseline.mjs";
 export { applyImpact, buildGraph, impact, summaryOf, trace } from "./graph.mjs";
 export { goalText, kits, kitTasks, OBSERVATION_COLUMNS, testKit } from "./testkit.mjs";
