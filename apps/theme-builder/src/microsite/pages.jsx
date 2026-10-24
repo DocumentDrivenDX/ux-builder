@@ -120,6 +120,7 @@ const NOW = [
   ["FEAT-015", "Findings by journey, each with its rule spelled out"],
   ["FEAT-016", "The episode trace, and learning from the builds owners choose to share"],
   ["FEAT-017", "Diagram and chart tokens in every theme"],
+  ["FEAT-018", "The guided design loop: from intent through alternatives, prototypes and tests with people to production insights, with your decision at every checkpoint"],
 ];
 const Item = ({ x }) => <li><span>{x.title}</span>{x.features.length > 0 && <span className="uxm-hint"> ({x.features.join(", ")})</span>}</li>;
 function Roadmap() {
@@ -138,7 +139,7 @@ function Roadmap() {
         <li><b>&lt;1 hr</b><span>from nothing to a themed screen</span></li>
         <li><b>90%</b><span>of agent-built components on SDK widgets and tokens</span></li>
       </ul>
-      <Cite ids={["Product vision", "FEAT-005", "FEAT-007", "FEAT-008", "FEAT-009", "FEAT-010", "FEAT-011", "FEAT-012", "FEAT-013", "FEAT-014", "FEAT-015", "FEAT-016", "FEAT-017"]} />
+      <Cite ids={["Product vision", "FEAT-005", "FEAT-007", "FEAT-008", "FEAT-009", "FEAT-010", "FEAT-011", "FEAT-012", "FEAT-013", "FEAT-014", "FEAT-015", "FEAT-016", "FEAT-017", "FEAT-018"]} />
     </>
   );
 }
@@ -174,6 +175,7 @@ function NewApp() {
         <li><code>npm run lint</code> (including the <code>ux-builder/ai-neutral-voice</code> warning) and <code>npm run audit</code>, and a CI workflow that runs the blueprint check, lint and the audit</li>
         <li><code>CLAUDE.md</code> and <code>AGENTS.md</code> pointing at the SDK's guidance, and the Claude Code skill <code>ux-builder-ui</code></li>
         <li><code>app.blueprint.json</code>, the plan of the app's screens, and <code>npm run check:blueprint</code></li>
+        <li><code>@ux-builder/design</code>, its skill and an empty design state, so <code>/ux-builder-design</code> can <a href={href("start", "design")}>guide the design</a> (<code>--mcp</code> also writes <code>.mcp.json</code>)</li>
         <li>HELIX, its documents, <code>ux-assessment.yml</code> and <code>e2e/starter.spec.js</code> (below)</li>
         <li>The episode trace (<code>@ux-builder/trace</code>): creating the app is its first episode, <code>npm run lint</code> records each run, and a Claude Code hook attaches each session's transcript (<a href={`${href("start", "agents")}#trace`}>below, for agents</a>)</li>
       </ul>
@@ -274,6 +276,7 @@ function Agents() {
         <li><code>node_modules/@ux-builder/ui/AGENTS.md</code>: the rules, set-up, and a reference of every component, prop, token, icon and theme.</li>
         <li>The Claude Code skill <code>ux-builder-ui</code>, which the starter installs.</li>
         <li>The skill <code>ux-builder-assess</code>, in <code>node_modules/@ux-builder/audit/skill/</code>, for <a href={href("start", "assess")}>assessing an app's UX</a>.</li>
+        <li>The skill <code>ux-builder-design</code>, which the starter and <code>ux-builder-design init</code> install, for <a href={href("start", "design")}>designing the UX with you</a>.</li>
       </ul>
       <H2 id="loop">Plan, check, build, lint, audit, assess</H2>
       <p>Agents get the interaction rules where they plan. Over MCP, <code>list_recipes</code> suggests patterns for a job, <code>get_rules</code> gives the rules for a context, size classes, inputs (never a device) and AI roles, and <code>check_blueprint</code> checks the plan. Each finding has a rule ID, a path and a fix. Then the agent builds each screen from its pattern, lint and the audit check the result against the same rule IDs, and the assessment walks the journeys.</p>
@@ -287,6 +290,76 @@ function Agents() {
       <H2 id="demo">See it work</H2>
       <AiSection />
       <Cite ids={["FEAT-004", "FEAT-011", "ADR-023", "FEAT-016", "ADR-035", "CONTRACT-007"]} />
+    </>
+  );
+}
+
+/* The guided design loop (FEAT-018; ADR-036 to ADR-039; CONTRACT-008). */
+const ACTIVITIES = [
+  ["Define", "Say what people should accomplish; answer one question at a time; bring any research. The agent drafts the brief, the jobs and the task model, every point marked confirmed, assumed or hypothesis."],
+  ["Explore", "Compare two or more alternative flows for the same tasks, side by side, with what each asks of its users predicted, and choose one."],
+  ["Experience", "Click through a disposable prototype of each alternative; then the chosen design is built in the app, on a branch, as the validated prototype."],
+  ["Validate", "Test with people from a generated kit; read what they did beside what was predicted; decide what to fix. Later, learn from how the app is used."],
+];
+const CHECKPOINTS = [
+  ["core-1", "After Define", "Is this the outcome, and is this how we'll know it worked?"],
+  ["core-2", "After Explore", "Which approach should we try?"],
+  ["core-3", "After Validate", "Is this validated enough to build?"],
+  ["significant-change", "Before changing something validated", "Should we make this change?"],
+  ["experiment", "Before real users see a variant", "Run this experiment?"],
+  ["release", "After an experiment", "Release it, or keep what we have?"],
+];
+const DOCS = [
+  ["brief.md", "The experience brief: product, users, outcome, jobs, principles, constraints, open questions"],
+  ["jobs.md", "Jobs to be done, each with its importance, evidence and confidence"],
+  ["evidence/EV-n.md", "A research source: where its owner keeps it, and only the masked quotes the synthesis cites"],
+  ["decisions/UXD-n.md", "An interaction decision: the alternatives, the choice and why, its assumptions and whether it was tested"],
+  ["tests/TK-n/", "A usability test kit: scenarios, script, consent, screener and observation sheet"],
+  ["evaluations/UER-n.md", "The UX evaluation report: the rubric predicted, agent-measured and observed, findings by journey"],
+  ["insights/INS-date.md", "What people did in production, per journey"],
+  ["experiments/EXP-n.md", "An experiment: hypothesis, variant, metrics, duration and result"],
+];
+
+function Design() {
+  return (
+    <>
+      <p className="uxm-lede">An AI agent leads you through designing the simplest experience that works, and stops for your decision at each checkpoint. You work with the experience itself (the brief, the comparison, the prototype, the evidence); the agent keeps the documents behind it up to date.</p>
+      <p>The agent does the reasoning: interviewing, proposing hypotheses, drafting alternatives, judging designs, diagnosing problems. <code>@ux-builder/design</code> does the deterministic work through the <code>ux-builder-design</code> command: the design state, scores, comparisons, prototypes, test kits and reports. Its standing objective is the minimum interaction that lets the intended user reach the intended outcome, and it challenges every addition before making it.</p>
+      <H2 id="start">Start</H2>
+      <p>A new app has it already: <a href={href("start", "new-app")}>create the app</a>, then in Claude Code type <code>/ux-builder-design</code>. In an existing app:</p>
+      <Command text="npm install -D @ux-builder/design" />
+      <Command text="npx ux-builder-design init" />
+      <p><code>init</code> installs the skill in <code>.claude/skills/ux-builder-design/</code> and an empty design state, <code>.ux-builder/design-state.json</code>, committed with the app. An existing app's first session starts at <b>Baseline</b>: the agent drafts <code>docs/ux/baseline.md</code> from its blueprint, its HELIX stories and its latest assessment, each point marked current state, assumed, then asks what to improve. Each session opens with <code>ux-builder-design status</code>: where the loop is, what is chosen, what is untested, and the next step.</p>
+      <Notice tone="info" title="CLI first; MCP optional; nothing hosted">Every capability is a command with <code>--json</code> output, run through the agent's shell. <code>init --mcp</code> also writes <code>.mcp.json</code> for the ux-builder MCP server, whose design tools return the same results. The package makes no network request and calls no model.</Notice>
+      <H2 id="activities">Four activities</H2>
+      <ul className="uxm-grid">{ACTIVITIES.map(([t, d]) => <li key={t} className="uxm-tile"><h3>{t}</h3><p>{d}</p></li>)}</ul>
+      <H2 id="checkpoints">Checkpoints: you decide</H2>
+      <p>At each checkpoint the agent asks one question and waits. Your answer is recorded in the design state and in the episode trace, with your words. A no or not yet is recorded too, and never counts as yes.</p>
+      <DataTable caption="Checkpoints" rowKey="id" rows={CHECKPOINTS.map(([id, when, q]) => ({ id, when, q }))}
+        columns={[{ key: "id", label: "Checkpoint", render: (r) => <code>{r.id}</code> }, { key: "when", label: "When" }, { key: "q", label: "The question" }]} />
+      <Command text={'npx ux-builder-design state checkpoint core-2 --answer "Map first: fewer steps"'} />
+      <H2 id="simplicity">Simplicity, checked</H2>
+      <p>Before adding a screen, step, modal or required input, the agent answers five questions: what user goal it serves, what happens without it, the simplest alternative, what it assumes about users, and how that will be validated. The trace refuses an addition without all five. <code>ux-builder-blueprint simplify</code> proposes inputs to infer, decisions to default, steps to combine and hops to remove; <code>check --diff</code> shows the complexity a change adds to each journey.</p>
+      <H2 id="explore">Alternatives, scored and compared</H2>
+      <Command text="npx ux-builder-blueprint alternative new list-first" />
+      <Command text="npx ux-builder-blueprint compare app.blueprint.json app.blueprint.list-first.json" />
+      <Command text={'npx ux-builder-blueprint prototype --explore --alternative list-first --question "Is a list faster than the map?"'} />
+      <p>The comparison shows, for each task, the steps, screens, modals, required inputs, decisions and navigation hops each alternative asks for, all labelled <i>predicted</i>. The UX quality rubric (<code>ux-builder-design rubric</code>) adds nine dimensions, each with its basis: computed from the blueprint and the audit, the agent's judgment with its reasoning, or <i>to validate</i>. It gives no overall score, and never recommends an alternative that fails a baseline (task effectiveness, accessibility). A prototype is a clickable set of pages under <code>prototype/</code>, never app code: a lint rule refuses any import of it.</p>
+      <H2 id="validate">Test with people</H2>
+      <Command text="npx ux-builder-design test-kit" />
+      <p>The kit's scenarios state each user's goal without naming a screen or a button, with the success criteria from the stories' acceptance criteria, a script, a consent note and a screener. After the sessions, <code>observe import</code> turns the observation sheet into findings marked as human observations; <code>transcript add</code> keeps only the masked lines you cite, and only once consent for that session is confirmed. Recordings never enter the repository. <code>report</code> writes the evaluation: the rubric with its predicted, agent-measured and observed columns side by side, a prediction that people contradicted highlighted, and the assumptions behind it marked refuted. At core-3 you choose what to fix, and <code>route</code> proposes it to HELIX's improvement backlog.</p>
+      <p>People appear only by pseudonym. Real names, kept for masking, stay in <code>.ux-builder/participants.local.json</code>, out of git. Every finding says whether a person was observed or the agent recommends it.</p>
+      <H2 id="production">Learn from production</H2>
+      <Command code text={'import { JourneyProvider, useJourneyStep } from "@ux-builder/ui";\n\n<JourneyProvider sink={(event) => myAnalytics.track(event)}>\n  <App />\n</JourneyProvider>\n\nfunction RiverList() {\n  useJourneyStep("J-find", 1);\n  // ...\n}'} />
+      <p>The app's own <code>sink</code> receives each journey's start, steps, completion and abandonment, and the error, empty and no-results states the SDK's panels show, with no user content. Without a sink nothing is emitted; the SDK sends nothing anywhere. From the events the app exports, <code>insights</code> reports completion, where people leave, failed searches and time per step; <code>diagnose</code> records the explanations; an <code>experiment</code> runs only after its checkpoint, and its result is judged against the hypothesis and its guardrails before <code>release</code>.</p>
+      <H2 id="change">Everyday changes</H2>
+      <p>For a change to something that exists ("remove the activity selection"), <code>ux-builder-design impact "&lt;the change&gt;"</code> lists every task, journey, screen, prototype page, test task, finding and HELIX document it reaches. Applied, it updates the blueprint, regenerates the prototypes and kits, and drafts HELIX changes as proposals, then prints one summary of what changed in each journey.</p>
+      <H2 id="docs">What it writes</H2>
+      <p>The design's documents live in <code>docs/ux/</code>, each with a template, a prompt and an example; <code>ux-builder-design validate</code> checks them. HELIX documents are only ever changed through proposals you apply.</p>
+      <DataTable caption="Design documents" rowKey="file" rows={DOCS.map(([file, what]) => ({ file, what }))}
+        columns={[{ key: "file", label: "docs/ux/", render: (r) => <code>{r.file}</code> }, { key: "what", label: "What it holds" }]} />
+      <p>Every command is listed in the <a href={`${href("reference", "cli")}#design`}>command reference</a>.</p>
+      <Cite ids={["FEAT-018", "ADR-036", "ADR-037", "ADR-038", "ADR-039", "CONTRACT-008", "SD-006"]} />
     </>
   );
 }
@@ -336,6 +409,7 @@ function Assess() {
       </ol>
       <H2 id="walkthroughs">3. Walkthroughs</H2>
       <p><code>assess browser</code> starts Chromium for the agent's browser driver and refuses every host outside the manifest's origins. The agent walks each journey from its entry, and at each significant step <code>assess inspect</code> inspects the page in place, with no reload, writing the audit's findings, a screenshot and the accessibility tree. A state the agent did not reach is recorded as not assessed, never as passed.</p>
+      <p><code>assess heuristics</code> adds a heuristic pass: every walked screen against Nielsen's ten heuristics, error prevention and recovery, information hierarchy and navigation complexity, each recorded as a finding or as checked with none, and screens no step reached listed as not inspected. <code>assess metrics</code> records each journey's completion, moves against the blueprint's shortest path, backtracks, failed actions, information not found, interface errors and time per step, every one labelled agent-measured: an agent navigates differently from people.</p>
       <H2 id="scenarios">4. AI journeys: three scenarios</H2>
       <p>A journey through an assistant or an agent is marked <code>ai: true</code> and walked three times, with the catalogue's AI rules as its heuristics:</p>
       <ul className="uxm-grid">
@@ -357,7 +431,7 @@ function Assess() {
       <p>This project's own guided builder has a manifest, <a href={`${REPO}/blob/main/apps/theme-builder/ux-assessment.yml`}><code>apps/theme-builder/ux-assessment.yml</code></a>: three journeys from its HELIX stories (logo to theme, US-015; refining with feedback, US-018; saving and adopting, US-019), run on the mock model and a throwaway repository, audited at 390 and 1280 pixels, report only. Its assessment of 21 October 2026 proposed three changes to the builder's stories, which wait for the operator's decision.</p>
       <details className="uxm-details"><summary>The whole manifest</summary><Command code text={THEME_BUILDER_MANIFEST.trim()} /></details>
       <p className="uxm-cite">A clean audit is not proof of usability or of full accessibility compliance, and passing functional tests do not show that usability criteria are met.</p>
-      <Cite ids={["FEAT-009", "FEAT-011", "FEAT-013", "FEAT-015", "ADR-026", "ADR-031", "ADR-033", "CONTRACT-006"]} />
+      <Cite ids={["FEAT-009", "FEAT-011", "FEAT-013", "FEAT-015", "FEAT-018", "ADR-026", "ADR-031", "ADR-033", "CONTRACT-006"]} />
     </>
   );
 }
@@ -680,7 +754,7 @@ export const PAGES = {
   // Pages added for FEAT-007 to FEAT-012 (SD-002, 2026-10-21).
   "start/assess": Assess, "start/microsoft-agents": MicrosoftAgents, "concepts/ai-agent-experience": AiAgentExperience, "concepts/flows-journeys": FlowsJourneys,
   "why/problem": Problem, "why/audience": Audience, "why/principles": Principles, "why/roadmap": Roadmap,
-  "start/new-app": NewApp, "start/existing-app": ExistingApp, "start/theme-from-logo": ThemeFromLogo, "start/agents": Agents, "start/ci": Ci,
+  "start/new-app": NewApp, "start/existing-app": ExistingApp, "start/theme-from-logo": ThemeFromLogo, "start/agents": Agents, "start/design": Design, "start/ci": Ci,
   "concepts/themes": Themes, "concepts/tokens": Tokens, "concepts/patterns": Patterns, "concepts/generative-ui": GenerativeUi,
   "reference/packages": Packages, "reference/components": Components, "reference/screen-patterns": ScreenPatterns, "reference/ai-components": AiComponents, "reference/cli": Cli, "reference/rules": Rules, "reference/adaptive-cards": AdaptiveCards,
   "proof/decisions": Decisions, "proof/features": Features, "proof/live": Live, "proof/releases": Releases, "proof/traceability": Traceability, "proof/sources": Sources,

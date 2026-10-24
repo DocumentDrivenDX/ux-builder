@@ -16,12 +16,13 @@ export const SECTIONS = [
   },
   {
     id: "start", title: "Start", mode: "Start", question: "How do I try it correctly?",
-    lede: "From nothing to a themed screen in minutes: a new app on HELIX, shaped by its modalities, an existing app, a theme from your logo, an agent doing the work, a UX assessment, or cards from Microsoft agents.",
+    lede: "From nothing to a themed screen in minutes: a new app on HELIX, shaped by its modalities, an existing app, a theme from your logo, an agent doing the work, a design your agent guides you through, a UX assessment, or cards from Microsoft agents.",
     pages: [
       { id: "new-app", title: "Start a new app", blurb: "One command scaffolds a React + Vite app for its modalities, on-theme and on HELIX from its first commit." },
       { id: "existing-app", title: "Add it to an existing app", blurb: "Install two packages, load the theme, wrap the app." },
       { id: "theme-from-logo", title: "Make a theme from your logo", blurb: "The guided builder: logo in, accessible palettes out, saved for review." },
       { id: "agents", title: "Work with AI coding agents", blurb: "AGENTS.md, a Claude Code skill and an MCP server that know your installed version, and the episode trace." },
+      { id: "design", title: "Design the UX with your agent", blurb: "A guided loop from intent through alternatives, prototypes and tests with people to production insights, stopping for your decision at each checkpoint." },
       { id: "ci", title: "Keep it on-theme in CI", blurb: "Lint rules and a running-app audit that catch drift before it ships." },
       { id: "assess", title: "Assess an app's UX", blurb: "Walk an app's journeys from its HELIX stories, in three scenarios for AI, and get a report by journey, proposals and walkthrough videos." },
       { id: "microsoft-agents", title: "Show cards from Microsoft agents", blurb: "Render Adaptive Cards from Copilot, Teams and Bot Framework agents in your theme, and check them before they are sent." },

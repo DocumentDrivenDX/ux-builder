@@ -43,6 +43,13 @@ describe("Reference: command line and MCP", () => {
     for (const c of commands) assert.ok(c.text, c.name);
     for (const h of handled) assert.ok(names.includes(h), h);
   });
+  test("ux-builder-design: every command from --help, each saying what it does, and every command the CLI handles", () => {
+    const { commands, handled } = d.cli.design;
+    const names = new Set(commands.map((c) => c.name));
+    for (const n of ["init", "status", "brief", "evidence", "rubric", "test-kit", "observe", "transcript", "report", "route", "insights", "diagnose", "experiment", "ready", "validate"]) assert.ok(names.has(n), n);
+    for (const c of commands) { assert.ok(c.text.length > 10, c.call); assert.ok(c.call.startsWith(`ux-builder-design ${c.name}`), c.call); }
+    for (const h of handled) assert.ok(names.has(h), `the CLI handles ${h}, which --help does not list`);
+  });
   test("MCP: every tool the server registers, with its description", () => {
     const registered = [...read("packages/mcp/server.mjs").matchAll(/registerTool\("([a-z_]+)"/g)].map((m) => m[1]).sort();
     assert.ok(registered.length >= 24);

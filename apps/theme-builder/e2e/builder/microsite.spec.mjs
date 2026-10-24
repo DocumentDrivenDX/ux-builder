@@ -64,7 +64,26 @@ test.describe("The public site", () => {
     await page.goto(page_("concepts/tokens"));
     await expect(page.locator("#diagrams ~ ul").first()).toContainText("--piq-color-series-1");
     await page.goto("/home.html");
-    await expect(page.locator("section[aria-labelledby=pkg-h] .uxh-cards > li")).toHaveCount(6);
+    await expect(page.locator("section[aria-labelledby=pkg-h] .uxh-cards > li")).toHaveCount(7);
+    expect(errors).toEqual([]);
+  });
+
+  test("Start / design explains the guided design loop: how to start, the activities, the checkpoints and the documents", async ({ page }) => {
+    const errors = watch(page);
+    await page.goto(page_("why/roadmap"));
+    await expect(page.locator('[data-roadmap="now"]')).toContainText("FEAT-018");
+    await page.goto(page_("start/design"));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Design the UX with your agent");
+    await expect(page.getByText("npx ux-builder-design init")).toBeVisible();
+    for (const a of ["Define", "Explore", "Experience", "Validate"]) await expect(page.locator("#activities ~ ul").first().getByRole("heading", { name: a })).toBeVisible();
+    for (const c of ["core-1", "core-2", "core-3", "significant-change", "experiment", "release"]) await expect(page.getByRole("table", { name: "Checkpoints" }).getByText(c, { exact: true })).toBeVisible();
+    await expect(page.getByRole("table", { name: "Design documents" }).locator("tbody tr")).toHaveCount(8);
+    await expect(page.locator("#production ~ div").first()).toContainText("JourneyProvider");
+    // The starter, the agents page and the command reference lead here.
+    for (const from of ["start/new-app", "start/agents", "reference/cli"]) {
+      await page.goto(page_(from));
+      await expect(page.locator('main a[href="?p=start/design"]').first()).toBeVisible();
+    }
     expect(errors).toEqual([]);
   });
 
