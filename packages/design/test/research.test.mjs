@@ -13,8 +13,8 @@ const SKILL = readFileSync(new URL("../skill/ux-builder-design/SKILL.md", import
 const jobs = (rows) => `---\nux:\n  id: jobs\n  type: jobs\n---\n\n# Jobs to be done\n\n## Jobs\n\n| ID | Job | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|---|\n${rows.join("\n")}\n`;
 function app(rows) {
   const a = tempApp();
-  mkdirSync(join(a, "docs/ux"), { recursive: true });
-  writeFileSync(join(a, "docs/ux/jobs.md"), jobs(rows));
+  mkdirSync(join(a, "docs/ux-builder"), { recursive: true });
+  writeFileSync(join(a, "docs/ux-builder/jobs.md"), jobs(rows));
   return a;
 }
 
@@ -31,18 +31,18 @@ describe("US-124: hypotheses", () => {
     const a = app(["| J-1 | Discover nearby rivers | high | none | low | hypothesis |", "| J-2 | Find access points | high | none | low | hypothesis |"]);
     const r = cli(a, ["validate"]);
     assert.equal(r.status, 0, r.stdout);
-    assert.match(r.stdout, /note {4}docs\/ux\/jobs\.md: J-1 is a hypothesis: Discover nearby rivers/);
-    assert.match(r.stdout, /note {4}docs\/ux\/jobs\.md: J-2 is a hypothesis: Find access points/);
+    assert.match(r.stdout, /note {4}docs\/ux-builder\/jobs\.md: J-1 is a hypothesis: Discover nearby rivers/);
+    assert.match(r.stdout, /note {4}docs\/ux-builder\/jobs\.md: J-2 is a hypothesis: Find access points/);
   });
 
   // @covers US-124-AC3
   test("AC3: a hypothesis that lists an evidence source fails, naming the job and the field", () => {
     const a = app(["| J-1 | Discover nearby rivers | high | EV-1 | low | hypothesis |"]);
-    mkdirSync(join(a, "docs/ux/evidence"), { recursive: true });
-    writeFileSync(join(a, "docs/ux/evidence/EV-1.md"), "---\nux:\n  id: EV-1\n  type: research-evidence\n  kind: interview\n  participants: {}\n---\n\n# EV-1\n\n## Source\n\n- x\n\n## Excerpts\n\n- None.\n\n## Synthesis notes\n\n- None.\n");
+    mkdirSync(join(a, "docs/ux-builder/evidence"), { recursive: true });
+    writeFileSync(join(a, "docs/ux-builder/evidence/EV-1.md"), "---\nux:\n  id: EV-1\n  type: research-evidence\n  kind: interview\n  participants: {}\n---\n\n# EV-1\n\n## Source\n\n- x\n\n## Excerpts\n\n- None.\n\n## Synthesis notes\n\n- None.\n");
     const r = cli(a, ["validate"]);
     assert.equal(r.status, 1);
-    assert.match(r.stdout, /docs\/ux\/jobs\.md: J-1: evidence lists a source, but status is hypothesis/);
+    assert.match(r.stdout, /docs\/ux-builder\/jobs\.md: J-1: evidence lists a source, but status is hypothesis/);
   });
 
   // @covers US-124-AC4

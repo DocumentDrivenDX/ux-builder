@@ -7,7 +7,7 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { DesignError, writeInApp } from "./app.mjs";
+import { DesignError, bpFile, ux, writeInApp } from "./app.mjs";
 import { advance } from "./checkpoints.mjs";
 import { businessRules, helixRoot, parseDocument, usersTable } from "./documents.mjs";
 import { readState, writeState } from "./state.mjs";
@@ -20,7 +20,7 @@ export const OBSERVATION_COLUMNS = ["participant", "task", "completed", "seconds
 const MISSING = "missing: the journey names no acceptance criteria";
 
 function kitNumbers(app) {
-  const dir = join(app, "docs/ux/tests");
+  const dir = join(app, ux(app, "tests"));
   if (!existsSync(dir)) return [];
   return readdirSync(dir).map((n) => n.match(/^TK-([1-9][0-9]*)$/)?.[1]).filter(Boolean).map(Number);
 }
@@ -77,7 +77,7 @@ export function goalText(goal, bp) {
 function targetUsers(app) {
   const table = usersTable(app);
   if (table) return Object.entries(table).map(([id, u]) => ({ id, user: u.user, context: u.context }));
-  const brief = join(app, "docs/ux/brief.md");
+  const brief = join(app, ux(app, "brief.md"));
   if (existsSync(brief)) {
     const body = parseDocument(readFileSync(brief, "utf8")).body;
     const m = body.match(/^## Target users\s*\n([\s\S]*?)(?=^## |$(?![\s\S]))/m);
@@ -94,7 +94,7 @@ const csv = (s) => (/[",\n]/.test(String(s)) ? `"${String(s).replace(/"/g, '""')
 export function kitTasks(app, bp, { journeys = [] } = {}) {
   const all = list(bp.journeys).filter((j) => j?.id);
   const unknown = journeys.filter((id) => !all.some((j) => j.id === id));
-  if (unknown.length) throw new DesignError(`no journey ${unknown.join(", ")} in app.blueprint.json; it has ${all.map((j) => j.id).join(", ") || "none"}`);
+  if (unknown.length) throw new DesignError(`no journey ${unknown.join(", ")} in ${bpFile(app)}; it has ${all.map((j) => j.id).join(", ") || "none"}`);
   const chosen = journeys.length ? all.filter((j) => journeys.includes(j.id)) : all;
   const us = stories(app);
   const tasks = new Map(list(bp.tasks).map((t) => [t.id, t]));
@@ -121,12 +121,12 @@ export function kitTasks(app, bp, { journeys = [] } = {}) {
 
 /* Write a kit: TK-<n> after the last, or rewrite `id`, keeping an observation sheet already filled in. */
 export function testKit(app, { journeys = [], id } = {}) {
-  const bp = readJson(join(app, "app.blueprint.json"));
-  if (!bp) throw new DesignError("no app.blueprint.json: the kit is written from its journeys");
+  const bp = readJson(join(app, bpFile(app)));
+  if (!bp) throw new DesignError(`no ${bpFile(app)}: the kit is written from its journeys`);
   const tasks = kitTasks(app, bp, { journeys });
   if (!tasks.length) throw new DesignError("the blueprint has no journeys to test");
   const kit = id ?? `TK-${Math.max(0, ...kitNumbers(app)) + 1}`;
-  const dir = `docs/ux/tests/${kit}`;
+  const dir = `${ux(app)}/tests/${kit}`;
   const users = targetUsers(app);
   // Who each task is for, when the tasks name their users (GDL-77).
   const forWhom = tasks.some((t) => t.users.length);
@@ -137,7 +137,7 @@ export function testKit(app, { journeys = [], id } = {}) {
   const lower = (x) => x.charAt(0).toLowerCase() + x.slice(1);
   const screener = ["# Screener", "",
     ...(!users.length ? ["The experience brief names no target users yet: write the screener questions from the PRD's personas."]
-      : users[0].id ? ["Recruit people who match one of these target users (docs/ux/users.md). Note the one each participant matches in the observation sheet's user column.", "",
+      : users[0].id ? [`Recruit people who match one of these target users (${ux(app, "users.md")}). Note the one each participant matches in the observation sheet's user column.`, "",
         ...users.flatMap((u) => [`## ${u.id}: ${u.user}`, "", `- Does this describe you: ${lower(u.user)}? (yes / no)`, ...(u.context ? [`- Is this how you would use it: ${lower(u.context)}? (yes / no)`] : []), ""])]
       : ["Recruit people who match one of these target users (from the experience brief):", "", ...users.map((u) => `- Does this describe you: ${lower(u.user)}? (yes / no)`)]),
     "", "Leave out anyone who works on this product.", ""].join("\n").replace(/\n{3,}/g, "\n\n");

@@ -18,7 +18,7 @@ const ids = (a) => json(a, ["review"]).pending.map((p) => p.id);
 /* The kit app (a brief, jobs, two stories, two tasks and journeys) with two target users and a decision. */
 function reviewApp() {
   const a = kitApp();
-  writeFileSync(join(a, "docs/ux/users.md"), "---\nux:\n  id: users\n  type: users\n---\n\n# Target users\n\n## Users\n\n| ID | User | Context | Needs | Jobs | Evidence | Confidence | Status |\n|---|---|---|---|---|---|---|---|\n| U-1 | Weekend anglers | On a phone at the river | None known | J-1 high | none | low | hypothesis |\n| U-2 | Guides | At a desk | None known | J-2 high | none | low | hypothesis |\n");
+  writeFileSync(join(a, "docs/ux-builder/users.md"), "---\nux:\n  id: users\n  type: users\n---\n\n# Target users\n\n## Users\n\n| ID | User | Context | Needs | Jobs | Evidence | Confidence | Status |\n|---|---|---|---|---|---|---|---|\n| U-1 | Weekend anglers | On a phone at the river | None known | J-1 high | none | low | hypothesis |\n| U-2 | Guides | At a desk | None known | J-2 high | none | low | hypothesis |\n");
   decisionAdd(a, { question: "Map first?", options: ["Map", "List"], choice: "Map", why: "Fewer steps" });
   return a;
 }
@@ -93,7 +93,7 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
     const refused = cli(a, ["review", "approve", "user:U-1", "--answer", "OK"]);
     assert.equal(refused.status, 2);
     assert.match(refused.stderr, /user:U-1 has feedback not yet addressed: FB-1 \("They fish from a kayak too, not only the bank"\)/);
-    writeFileSync(join(a, "docs/ux/users.md"), readFileSync(join(a, "docs/ux/users.md"), "utf8").replace("On a phone at the river", "On a phone at the river or in a kayak"));
+    writeFileSync(join(a, "docs/ux-builder/users.md"), readFileSync(join(a, "docs/ux-builder/users.md"), "utf8").replace("On a phone at the river", "On a phone at the river or in a kayak"));
     json(a, ["review", "respond", "FB-1", "--text", "Context now says: on a phone at the river or in a kayak"]);
     const ok = json(a, ["review", "approve", "user:U-1", "--answer", "Yes, that's them"]);
     assert.equal(ok.next, "brief", "the next is the first still awaiting review, in step order");
@@ -103,7 +103,7 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
     assert.deepEqual(s.feedback[0], { ...s.feedback[0], status: "addressed", response: "Context now says: on a phone at the river or in a kayak" });
     assert.ok(!ids(a).includes("user:U-1"));
     // Changed after approval: listed again, marked as changed.
-    writeFileSync(join(a, "docs/ux/users.md"), readFileSync(join(a, "docs/ux/users.md"), "utf8").replace("| None known | J-1 high", "| Large touch targets | J-1 high"));
+    writeFileSync(join(a, "docs/ux-builder/users.md"), readFileSync(join(a, "docs/ux-builder/users.md"), "utf8").replace("| None known | J-1 high", "| Large touch targets | J-1 high"));
     const again = json(a, ["review"]).pending.find((p) => p.id === "user:U-1");
     assert.equal(again.changed, true);
     assert.match(cli(a, ["review"]).stdout, /step 2 {2}user:U-1 {2}Weekend anglers {2}\(changed since approved\)/);

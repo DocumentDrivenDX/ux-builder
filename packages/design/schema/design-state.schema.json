@@ -353,6 +353,38 @@
         }
       }
     },
+    "modality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modalities",
+        "sizeClasses",
+        "answer",
+        "at"
+      ],
+      "description": "The person's answer to which modalities and screen sizes the app is for, before any wireframe or prototype (FEAT-018 GDL-80)",
+      "properties": {
+        "modalities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sizeClasses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "answer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "at": {
+          "type": "string"
+        }
+      }
+    },
     "issues": {
       "type": "array",
       "items": {

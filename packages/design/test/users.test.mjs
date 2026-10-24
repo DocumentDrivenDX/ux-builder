@@ -16,16 +16,16 @@ const ROWS = [
   "| U-1 | Weekend anglers new to an area | On a phone at the riverbank, one hand free | Large touch targets | J-1 high, J-2 medium | EV-1 | medium | confirmed |",
   "| U-2 | Fishing guides | Plan at a desk for clients | None known | J-1 low, J-2 high | none | low | hypothesis |",
 ];
-const users = (a, rows = ROWS) => writeFileSync(join(a, "docs/ux/users.md"), HEAD + rows.join("\n") + "\n");
+const users = (a, rows = ROWS) => writeFileSync(join(a, "docs/ux-builder/users.md"), HEAD + rows.join("\n") + "\n");
 /* The kit app, with an interview (EV-1), a users table and tasks naming their users. */
 function usersApp({ taskUsers = [["U-1"], ["U-1", "U-2"]] } = {}) {
   const a = kitApp();
-  mkdirSync(join(a, "docs/ux/evidence"), { recursive: true });
-  writeFileSync(join(a, "docs/ux/evidence/EV-1.md"), "---\nux:\n  id: EV-1\n  type: research-evidence\n  kind: interview\n  date: 2026-10-12\n  source: \"shared drive\"\n  file: \"i.txt\"\n  participants: {}\n---\n\n# EV-1: interview\n\n## Source\n\n- kept elsewhere\n\n## Excerpts\n\n- None cited yet.\n\n## Synthesis notes\n\n- None yet.\n");
+  mkdirSync(join(a, "docs/ux-builder/evidence"), { recursive: true });
+  writeFileSync(join(a, "docs/ux-builder/evidence/EV-1.md"), "---\nux:\n  id: EV-1\n  type: research-evidence\n  kind: interview\n  date: 2026-10-12\n  source: \"shared drive\"\n  file: \"i.txt\"\n  participants: {}\n---\n\n# EV-1: interview\n\n## Source\n\n- kept elsewhere\n\n## Excerpts\n\n- None cited yet.\n\n## Synthesis notes\n\n- None yet.\n");
   users(a);
   const bp = structuredClone(KIT_BP);
   bp.tasks = bp.tasks.map((t, i) => ({ ...t, users: taskUsers[i] }));
-  writeFileSync(join(a, "app.blueprint.json"), JSON.stringify(bp, null, 2));
+  writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(bp, null, 2));
   return a;
 }
 const problems = (a) => JSON.parse(cli(a, ["validate", "--json"]).stdout);
@@ -42,7 +42,7 @@ describe("US-146: describe target users with their context and evidence", () => 
       "| U-3 | Clubs | Meet weekly | None known | J-1 low | EV-1 | low | hypothesis |",
       "| X | Bad | x | x | J-1 low | none | low | maybe |",
     ]);
-    const msgs = problems(a).problems.filter((p) => p.path === "docs/ux/users.md").map((p) => p.message);
+    const msgs = problems(a).problems.filter((p) => p.path === "docs/ux-builder/users.md").map((p) => p.message);
     for (const m of [
       "U-1: say the user's context (where, on what, with what expertise)",
       'U-1: needs is empty; write "none known" when there are none',
@@ -60,8 +60,8 @@ describe("US-146: describe target users with their context and evidence", () => 
     users(a, ["| U-1 | Weekend anglers | On a phone | None known | J-9 high | EV-7 | medium | confirmed |"]);
     const r = cli(a, ["validate"]);
     assert.equal(r.status, 1);
-    assert.match(r.stdout, /docs\/ux\/users\.md: U-1: holds J-9, which docs\/ux\/jobs\.md does not have/);
-    assert.match(r.stdout, /docs\/ux\/users\.md: U-1: evidence EV-7 does not exist in docs\/ux\/evidence\//);
+    assert.match(r.stdout, /docs\/ux-builder\/users\.md: U-1: holds J-9, which docs\/ux-builder\/jobs\.md does not have/);
+    assert.match(r.stdout, /docs\/ux-builder\/users\.md: U-1: evidence EV-7 does not exist in docs\/ux-builder\/evidence\//);
   });
 
   // @covers US-146-AC3
@@ -69,7 +69,7 @@ describe("US-146: describe target users with their context and evidence", () => 
     const a = usersApp();
     json(a, ["state", "set", "assumptions[+]", JSON.stringify({ text: "Families on holiday", section: "users", status: "hypothesis" })]);
     json(a, ["brief"]);
-    const brief = readFileSync(join(a, "docs/ux/brief.md"), "utf8");
+    const brief = readFileSync(join(a, "docs/ux-builder/brief.md"), "utf8");
     const section = brief.slice(brief.indexOf("## Target users"), brief.indexOf("## Primary outcome"));
     assert.match(section, /^- Weekend anglers new to an area \(U-1\): On a phone at the riverbank, one hand free \[confirmed\]$/m);
     assert.match(section, /^- Fishing guides \(U-2\): Plan at a desk for clients \[hypothesis\]\n {2}Confirm by: research evidence about these users/m);
@@ -83,7 +83,7 @@ describe("US-146: describe target users with their context and evidence", () => 
   test("AC4: a task naming an unknown user exits 1; one serving a low-confidence user is warned about", () => {
     const a = usersApp({ taskUsers: [["U-1"], ["U-2", "U-9"]] });
     const v = problems(a);
-    assert.ok(v.problems.some((p) => p.path === "app.blueprint.json" && p.message === "T-2 names U-9, which docs/ux/users.md does not have"));
+    assert.ok(v.problems.some((p) => p.path === "docs/ux-builder/blueprint/app.blueprint.json" && p.message === "T-2 names U-9, which docs/ux-builder/users.md does not have"));
     assert.ok(v.warnings.some((p) => p.message === 'T-2 serves U-2 ("Fishing guides"), whose confidence is low'));
     assert.equal(cli(a, ["validate"]).status, 1);
   });

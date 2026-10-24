@@ -163,7 +163,7 @@ the report says so, and the favicon check is skipped.
 | `--json` | Print the report as JSON. |
 | `--write-baseline <file>` | Write every finding (not notes) to this file, in a stable order. Run it once when adopting the audit in an existing app, and commit the file. |
 | `--baseline <file>` | Leave out the findings in this file: they are not reported and do not affect the exit code. New findings are reported as usual; baselined ones no longer found are listed as resolved, so the file can shrink. A check the file names that this version lacks is ignored with a note. |
-| `--blueprint <file>` | The app's blueprint (`app.blueprint.json`). Its `supports.modalities` choose the widths and rule families; the report follows its journeys, step by step, matching each page to a screen by `data-piq-screen="<screen id>"`, else by the screen's `path`. AI markup on a screen whose blueprint declares no AI role is reported (`ai-declared`); the screen's `ai.roles` and `ai.takeover` apply to the agent checks. |
+| `--blueprint <file>` | The app's blueprint (default `docs/ux-builder/blueprint/app.blueprint.json`). Its `supports.modalities` choose the widths and rule families; the report follows its journeys, step by step, matching each page to a screen by `data-piq-screen="<screen id>"`, else by the screen's `path`. AI markup on a screen whose blueprint declares no AI role is reported (`ai-declared`); the screen's `ai.roles` and `ai.takeover` apply to the agent checks. |
 | `--modality <list>` | The app's modalities when the blueprint names none, comma-separated: `responsive-web`, `chat`, `hybrid-chat`. They choose the widths and rule families, and the report gives a modality-fit verdict for each. A future modality (`ios`, `android`, `macos`, `windows`) or an unknown one exits 2. Without it or a blueprint, `responsive-web` is assumed. |
 
 A URL that starts with `/` is relative to the first full URL. The SDK's CSS
@@ -236,8 +236,8 @@ tests: [{ id: e2e, command: npm run test:e2e }]
 restrictions: { writes: report-only }
 ```
 
-A journey can come from the app's blueprint (`app.blueprint.json`, or the
-manifest's `blueprint` path) instead: `{ blueprint: J-review, role: reviewer, priority: critical }`
+A journey can come from the app's blueprint (`docs/ux-builder/blueprint/app.blueprint.json`, or `app.blueprint.json` in an app on the
+old layout, or the manifest's `blueprint` path) instead: `{ blueprint: J-review, role: reviewer, priority: critical }`
 takes its story, criteria, entry screen, steps and alternates from there, and
 `assess plan` turns each alternate into a walkthrough of its journey-and-state
 pair. A journey through an assistant or agent is marked `ai: true` and

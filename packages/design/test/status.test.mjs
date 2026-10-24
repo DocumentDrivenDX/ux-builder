@@ -18,7 +18,7 @@ const EXPLORING = {
     { id: "A-2", text: "Anglers plan the night before", status: "hypothesis", evidence: [] },
     { id: "A-3", text: "Most use phones", status: "confirmed", evidence: ["EV-1"] },
   ],
-  alternatives: [{ name: "map-first", file: "app.blueprint.map-first.json", status: "chosen" }, { name: "search-first", file: "app.blueprint.search-first.json", status: "rejected", reason: "More steps" }],
+  alternatives: [{ name: "map-first", file: "docs/ux-builder/blueprint/app.blueprint.map-first.json", status: "chosen" }, { name: "search-first", file: "docs/ux-builder/blueprint/app.blueprint.search-first.json", status: "rejected", reason: "More steps" }],
   next: "Build an exploratory prototype of map first.",
 };
 
@@ -40,11 +40,11 @@ describe("status", () => {
   });
 
   // @covers US-117-AC3
-  test("--json returns the same facts, and the documents in docs/ux/", () => {
+  test("--json returns the same facts, and the documents in docs/ux-builder/", () => {
     const app = tempApp({ state: EXPLORING });
-    mkdirSync(join(app, "docs/ux/decisions"), { recursive: true });
-    writeFileSync(join(app, "docs/ux/brief.md"), "# Brief\n");
-    writeFileSync(join(app, "docs/ux/decisions/UXD-1.md"), "# UXD-1\n");
+    mkdirSync(join(app, "docs/ux-builder/decisions"), { recursive: true });
+    writeFileSync(join(app, "docs/ux-builder/brief.md"), "# Brief\n");
+    writeFileSync(join(app, "docs/ux-builder/decisions/UXD-1.md"), "# UXD-1\n");
     const r = cli(app, ["status", "--json"]);
     assert.equal(r.status, 0, r.stderr);
     const out = JSON.parse(r.stdout);
@@ -53,7 +53,7 @@ describe("status", () => {
     assert.equal(out.untestedAssumptions, 2);
     assert.deepEqual(out.openQuestions, ["Should people sign in to save rivers?"]);
     assert.equal(out.next, "Build an exploratory prototype of map first.");
-    assert.deepEqual(out.documents.map((d) => d.path), ["docs/ux/brief.md", "docs/ux/decisions/UXD-1.md"]);
+    assert.deepEqual(out.documents.map((d) => d.path), ["docs/ux-builder/brief.md", "docs/ux-builder/decisions/UXD-1.md"]);
     assert.deepEqual(out, status(app));
   });
 

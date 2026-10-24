@@ -207,17 +207,18 @@ const aiVoice = {
 };
 
 /* ux-builder/no-prototype-import (FEAT-018 GDL-42, ADR-037): exploratory
-   prototypes under prototype/ are disposable; app code never imports them. */
-const PROTOTYPE = /(^|\/)prototype\//;
+   prototypes under docs/ux-builder/prototypes/ (or an unmigrated app's
+   prototype/) are disposable; app code never imports them. */
+const PROTOTYPE = /(^|\/)prototype\/|(^|\/)docs\/ux-builder\/prototypes\//;
 const noPrototypeImport = {
   meta: {
     type: "problem",
-    docs: { description: "Report an import from prototype/: exploratory prototypes are disposable and never app code (ADR-037)" },
+    docs: { description: "Report an import from docs/ux-builder/prototypes/ (or prototype/): exploratory prototypes are disposable and never app code (ADR-037)" },
     schema: [],
   },
   create(context) {
     const check = (node, source) => {
-      if (typeof source === "string" && PROTOTYPE.test(source)) context.report({ node, message: `"${source}" imports from prototype/: exploratory prototypes are disposable and never app code (ADR-037). Build the screen from the SDK's patterns instead.` });
+      if (typeof source === "string" && PROTOTYPE.test(source)) context.report({ node, message: `"${source}" imports from a prototype: exploratory prototypes are disposable and never app code (ADR-037). Build the screen from the SDK's patterns instead.` });
     };
     return {
       ImportDeclaration(node) { check(node, node.source.value); },

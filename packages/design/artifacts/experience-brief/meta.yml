@@ -12,7 +12,7 @@ id:
   prefix: brief
   pattern: "^brief$"
   example: brief
-output: docs/ux/brief.md
+output: docs/ux-builder/brief.md
 sections:
     - Product
     - Target users

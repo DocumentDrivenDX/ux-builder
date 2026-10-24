@@ -11,7 +11,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { DesignError } from "./app.mjs";
+import { DesignError, bpFile } from "./app.mjs";
 import { readState } from "./state.mjs";
 
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
@@ -30,7 +30,7 @@ function citations(app) {
   const found = new Set();
   const walk = (dir) => {
     for (const name of readdirSync(dir)) {
-      if (["node_modules", ".git", "dist", "prototype", "ux-assessment", "audit-report", "test-results", "playwright-report"].includes(name) || name.startsWith(".")) continue;
+      if (["node_modules", ".git", "dist", "prototype", "docs", "ux-assessment", "audit-report", "test-results", "playwright-report"].includes(name) || name.startsWith(".")) continue;
       const p = join(dir, name);
       if (statSync(p).isDirectory()) walk(p);
       else if (/\.(m?[jt]sx?|cjs)$/.test(name)) for (const [, id] of readFileSync(p, "utf8").matchAll(/@covers\s+(US-\d+-AC\d+)/g)) found.add(id);
@@ -50,22 +50,22 @@ export function ready(app, { for: purpose = "production" } = {}) {
     : { name: "audit", ok: audit.summary.error === 0, detail: audit.summary.error === 0 ? "no errors" : `${audit.summary.error} error${audit.summary.error === 1 ? "" : "s"}` });
   if (audit?.summary) {
     // An audit older than the blueprint audited a design that has since changed.
-    const bpFile = join(app, "app.blueprint.json");
+    const blueprint = join(app, bpFile(app));
     const auditedAt = Date.parse(audit.generatedAt ?? "");
-    const changedAt = existsSync(bpFile) ? statSync(bpFile).mtimeMs : NaN;
+    const changedAt = existsSync(blueprint) ? statSync(blueprint).mtimeMs : NaN;
     const day = (t) => new Date(t).toISOString().replace("T", " ").slice(0, 16);
     checks.push(Number.isNaN(auditedAt) ? { name: "audit is current", ok: false, detail: "the audit report has no date: run npm run audit" }
-      : auditedAt < changedAt ? { name: "audit is current", ok: false, detail: `the audit (${day(auditedAt)}) is older than app.blueprint.json (${day(changedAt)}): run npm run audit` }
+      : auditedAt < changedAt ? { name: "audit is current", ok: false, detail: `the audit (${day(auditedAt)}) is older than ${bpFile(app)} (${day(changedAt)}): run npm run audit` }
       : { name: "audit is current", ok: true, detail: `audited ${day(auditedAt)}, after the blueprint's last change` });
     // Every screen the blueprint plans is a page the audit saw (data-piq-screen, or the screen's path).
     const seen = new Set(list(audit.pages).map((p) => p?.screen).filter(Boolean));
-    const planned = list((readJson(bpFile) ?? {}).screens).map((x) => x?.id).filter(Boolean);
+    const planned = list((readJson(blueprint) ?? {}).screens).map((x) => x?.id).filter(Boolean);
     const missing = planned.filter((id) => !seen.has(id));
     checks.push({ name: "screens built", ok: !missing.length, detail: missing.length ? `no audited page is ${missing.join(", ")}: build ${missing.length === 1 ? "it" : "them"}, mark each page with data-piq-screen="<id>" (or give the screen its path), and run npm run audit` : `every planned screen (${planned.length}) is an audited page` });
   }
   const result = { for: purpose, checks };
   if (purpose === "production") {
-    const bp = readJson(join(app, "app.blueprint.json")) ?? {};
+    const bp = readJson(join(app, bpFile(app))) ?? {};
     const covered = [...new Set(list(bp.journeys).flatMap((j) => list(j.criteria)))].sort();
     const cited = citations(app);
     result.uncited = covered.filter((id) => !cited.has(id));

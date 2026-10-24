@@ -64,7 +64,7 @@ describe("US-071: an agent in the new app finds HELIX", () => {
       assert.match(t, /the marker is `\.helix\.yml`/, f);
       assert.match(t, /documents are in `docs\/helix\/`/, f);
       const helix = t.slice(t.indexOf("## HELIX"));
-      const order = ["Frame or evolve the requirement in HELIX first", "app.blueprint.json", "AppShell", "npm run lint", "npm run audit", "Assess the UX"].map((s) => helix.indexOf(s));
+      const order = ["Frame or evolve the requirement in HELIX first", "docs/ux-builder/blueprint/app.blueprint.json", "AppShell", "npm run lint", "npm run audit", "Assess the UX"].map((s) => helix.indexOf(s));
       assert.ok(order.every((i) => i >= 0) && order.every((i, k) => k === 0 || i > order[k - 1]), `${f}: the order of work`);
       assert.match(t, /DocumentDrivenDX\/helix\/blob\/main\/docs\/install\/README\.md/, f);
     }

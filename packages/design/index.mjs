@@ -6,11 +6,13 @@ import { readFileSync } from "node:fs";
 
 export const VERSION = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")).version;
 
-export { DesignError, findApp, writeInApp } from "./app.mjs";
+export { bpFile, DesignError, findApp, layout, protoDir, proposalsDir, ux, writeInApp } from "./app.mjs";
 export { canonical, emptyState, hasState, parsePath, readState, SCHEMA, serialize, STATE_FILE, stateGet, stateSet, validateState, writeState } from "./state.mjs";
 export { status, summary } from "./status.mjs";
 export { checkpoint, CHECKPOINTS, FIRST_STEP, setMode } from "./checkpoints.mjs";
 export { CHANGE_STEPS, CLOSES, explain, explainText, GLOSSARY, overview, overviewText, progress, setStep, STEPS } from "./process.mjs";
+export { confirmModality, modalityStatus, SIZE_CLASSES } from "./modality.mjs";
+export { migrate, migrationPlan, rewritePaths } from "./migrate.mjs";
 export { pendingReviews, reviewApprove, reviewFeedback, reviewItems, reviewList, reviewRespond, reviewShow } from "./review.mjs";
 export { baseline } from "./baseline.mjs";
 export { applyImpact, buildGraph, impact, summaryOf, trace } from "./graph.mjs";

@@ -7,7 +7,7 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { DesignError, writeInApp } from "./app.mjs";
+import { DesignError, bpFile, ux, writeInApp } from "./app.mjs";
 import { helixRoot, parseDocument } from "./documents.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -47,8 +47,8 @@ function latestFindings(app) {
 const cell = (s) => String(s ?? "").replace(/\|/g, "\\|");
 
 export function baseline(app) {
-  const bp = readJson(join(app, "app.blueprint.json"));
-  if (!bp) throw new DesignError("no app.blueprint.json: run ux-builder-design init (it writes a starting one), then describe the app's screens");
+  const bp = readJson(join(app, bpFile(app)));
+  if (!bp) throw new DesignError(`no ${bpFile(app)}: run ux-builder-design init (it writes a starting one), then describe the app's screens`);
   const state = structuredClone(readState(app));
   const us = stories(app);
   const { run, findings } = latestFindings(app);
@@ -84,6 +84,6 @@ export function baseline(app) {
   lines.push("", "## Draft brief", "", ...brief.filter(Boolean).map((a) => current(a)));
   lines.push("", "## Draft jobs", "", ...(jobs.length ? jobs.map((j) => current(j.a)) : ["- None drafted: no stories found."]));
   lines.push("", "## Draft tasks", "", ...(tasks.length ? tasks.map((t) => current(t.a)) : ["- None drafted: the blueprint has no journeys."]), "");
-  const written = [writeInApp(app, "docs/ux/baseline.md", lines.join("\n"))];
+  const written = [writeInApp(app, ux(app, "baseline.md"), lines.join("\n"))];
   return { written, run, screens: screens.length, journeys: journeys.length, stories: us.length, findings: findings.length, drafted: [...brief, ...jobs.map((j) => j.a), ...tasks.map((t) => t.a)].filter(Boolean).map((a) => a.id) };
 }

@@ -86,7 +86,7 @@ test("US-022-AC10: the fresh app of every modality passes the theme audit in eve
     // The SDK's own widgets clear contrast in every theme the starter shows.
     assert.deepEqual(report.findings.filter((f) => f.check === "contrast").map((f) => `${f.runs.join(" ")}: ${f.selector}: ${f.message}`), [], `${name}: SDK widgets clear contrast`);
     // Audited as the modalities its blueprint declares, and its shell fits them (US-099).
-    const { supports } = JSON.parse(readFileSync(join(dir(name), "app.blueprint.json"), "utf8"));
+    const { supports } = JSON.parse(readFileSync(join(dir(name), "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
     assert.deepEqual(report.verdicts.modality.map((v) => v.modality), supports.modalities, `${name}: the blueprint's modalities`);
     // Every required component is there. An empty hybrid-chat shell shows its first card only after a
     // message, so the audit of the first screen may warn that it saw no Adaptive Card part, and nothing else.
@@ -302,7 +302,7 @@ test("FEAT-016: every created app's trace validates; its create episode is compl
     const call = async (n, a = {}) => { const r = await c.callTool({ name: n, arguments: a }); assert.ok(!r.isError, `${n}: ${r.content[0].text}`); return r.content[0].text; };
     ({ episode } = JSON.parse(await call("start_episode", { goal: "Review screen", stories: ["US-003"], screens: ["home"], agent: "e2e", model: "none" })));
     await call("get_guidance", { modalities: ["responsive-web"] });
-    await call("check_blueprint", { blueprint: JSON.parse(readFileSync(join(d, "app.blueprint.json"), "utf8")) });
+    await call("check_blueprint", { blueprint: JSON.parse(readFileSync(join(d, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8")) });
     await call("record_decision", { chose: "CollectionList", considered: ["DataTable"], why: "the home screen lists records to open", relied: ["US-003"], screen: "home" });
     writeFileSync(join(d, "src/Home.jsx"), readFileSync(join(d, "src/Home.jsx"), "utf8") + "\n");
     git("commit", "-q", "-am", `Home: the review list\n\nUX-Episode: ${episode}`);

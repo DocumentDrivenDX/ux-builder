@@ -22,7 +22,7 @@ function rulesApp({ designed = [DESIGNED], cite = ["BR-1"] } = {}) {
   bp.tasks[0].rules = cite;
   bp.journeys[0].steps[1].rules = ["BR-1"];
   bp.businessRules = designed;
-  writeFileSync(join(a, "app.blueprint.json"), JSON.stringify(bp, null, 2));
+  writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(bp, null, 2));
   return a;
 }
 const messages = (a) => { const v = JSON.parse(cli(a, ["validate", "--json"]).stdout); return v.problems.map((p) => p.message); };
@@ -34,9 +34,9 @@ describe("US-147: design how users meet each business rule", () => {
     assert.deepEqual(messages(a), []);
     const b = rulesApp({ cite: ["BR-1", "BR-9"] });
     assert.ok(messages(b).includes("T-1 cites BR-9, which no HELIX document defines (**BR-9** — <rule>)"), messages(b).join("\n"));
-    const bp = JSON.parse(readFileSync(join(b, "app.blueprint.json"), "utf8"));
+    const bp = JSON.parse(readFileSync(join(b, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
     bp.journeys[1].steps[0].rules = ["BR-8"];
-    writeFileSync(join(b, "app.blueprint.json"), JSON.stringify(bp));
+    writeFileSync(join(b, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(bp));
     assert.ok(messages(b).includes("J-saved step 1 cites BR-8, which no HELIX document defines (**BR-8** — <rule>)"));
     assert.equal(cli(b, ["validate"]).status, 1);
     // A rule defined twice is warned about.
@@ -72,7 +72,7 @@ describe("US-147: design how users meet each business rule", () => {
   test("AC4: the report lists each cited rule with its kit tasks' results, and an untested rule under Not tested", () => {
     const a = rulesApp({ designed: [DESIGNED, { ...DESIGNED, id: "BR-2", trigger: "Your saved list is full" }], cite: ["BR-1", "BR-2"] });
     json(a, ["test-kit", "--journey", "J-find"]);
-    const scen = readFileSync(join(a, "docs/ux/tests/TK-1/scenarios.md"), "utf8");
+    const scen = readFileSync(join(a, "docs/ux-builder/tests/TK-1/scenarios.md"), "utf8");
     const br1 = Number(scen.match(/^\| (\d+) \| J-find \| [^|]* \| BR-1 \|$/m)[1]);
     writeFileSync(join(a, "sheet.csv"), ["participant,task,completed,seconds,errors,assists,remark,problem", `P1,${br1},no,90,1,1,Thought saving was broken,save looked broken`, `P2,${br1},yes,40,0,0,,`].join("\n"));
     json(a, ["observe", "import", "sheet.csv", "--kit", "TK-1"]);

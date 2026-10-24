@@ -59,7 +59,7 @@ describe("US-105: creating the app is its first episode", () => {
     assert.equal(created.theme, "databricks");
     assert.equal(created.options.helix, "offline");
     assert.ok(created.files > 20, `${created.files} files`);
-    assert.equal(created.blueprint, sha(join(dir, "app.blueprint.json")));
+    assert.equal(created.blueprint, sha(join(dir, "docs/ux-builder/blueprint/app.blueprint.json")));
     // The rest of the episode: the guidance it gave, the blueprint's check, and its close.
     assert.deepEqual(ev.map((e) => e.kind), ["start", "created", "guidance", "check", "change", "outcome", "end"]);
     const g = ev[2];
@@ -109,7 +109,7 @@ describe("US-106: the trace is committed, and holds no source", () => {
       const id = listEpisodes(app)[0].id;
       const raw = readFileSync(join(app, `.ux-builder/trace/${id}.jsonl`), "utf8");
       for (const e of readEpisode(app, id)) assert.deepEqual(validateEvent(e), [], e.kind);
-      for (const f of ["src/App.jsx", "src/main.jsx", "app.blueprint.json", "AGENTS.md"]) {
+      for (const f of ["src/App.jsx", "src/main.jsx", "docs/ux-builder/blueprint/app.blueprint.json", "AGENTS.md"]) {
         const text = readFileSync(join(app, f), "utf8");
         for (const line of text.split("\n").filter((l) => l.trim().length > 24)) assert.ok(!raw.includes(line.trim()), `${f}: "${line.trim()}" is in the trace`);
       }

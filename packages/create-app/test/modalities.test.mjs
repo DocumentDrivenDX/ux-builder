@@ -25,7 +25,7 @@ process.env.UX_BUILDER_HELIX_BUNDLE = BUNDLE;
 after(() => { rmSync(tmp, { recursive: true, force: true }); rmSync(BUNDLE, { recursive: true, force: true }); });
 const ENV = { ...process.env, UX_BUILDER_HELIX_API: "http://127.0.0.1:9", UX_BUILDER_HELIX_BUNDLE: BUNDLE };
 const run = (...args) => spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8", cwd: tmp, env: ENV, stdio: ["ignore", "pipe", "pipe"] });
-const blueprint = (dir) => JSON.parse(readFileSync(join(tmp, dir, "app.blueprint.json"), "utf8"));
+const blueprint = (dir) => JSON.parse(readFileSync(join(tmp, dir, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
 const files = (dir) => readdirSync(dir, { recursive: true, withFileTypes: true }).filter((e) => e.isFile()).map((e) => relative(dir, join(e.parentPath ?? e.path, e.name)));
 const ALL = [["responsive-web"], ["chat"], ["hybrid-chat"], ["responsive-web", "hybrid-chat"], ["chat", "hybrid-chat"], ["responsive-web", "chat", "hybrid-chat"]];
 
@@ -137,7 +137,7 @@ describe("US-097: start from an empty shell for the modalities", () => {
         assert.doesNotMatch(text, /\bmatters?\b|invoice|Halvorsen|Okafor|Brightwater|partner/i, `${ms.join()}: ${f}`);
       }
       assert.doesNotMatch(readFileSync(join(r.dir, "src/main.jsx"), "utf8"), /DataTable|rows/);
-      assert.deepEqual(checkBlueprint(JSON.parse(readFileSync(join(r.dir, "app.blueprint.json"), "utf8"))), [], ms.join());
+      assert.deepEqual(checkBlueprint(JSON.parse(readFileSync(join(r.dir, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"))), [], ms.join());
     }
   });
 

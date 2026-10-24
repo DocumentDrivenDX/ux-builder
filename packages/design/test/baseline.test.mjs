@@ -20,7 +20,7 @@ const BP = {
 
 function existing() {
   const app = tempApp({ state: emptyState({ startedFrom: "existing" }) });
-  writeFileSync(join(app, "app.blueprint.json"), JSON.stringify(BP));
+  writeFileSync(join(app, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(BP));
   writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
   put(app, "docs/helix/01-frame/user-stories/US-001-find-a-river.md", "---\nddx:\n  id: US-001\n  type: user-stories\n---\n\n# US-001: Find a river near me\n");
   put(app, "docs/helix/01-frame/user-stories/US-002-save-a-river.md", "---\nddx:\n  id: US-002\n  type: user-stories\n---\n\n# US-002: Save a river for later\n");
@@ -38,7 +38,7 @@ describe("baseline", () => {
     const app = existing();
     const r = cli(app, ["baseline", "--json"]);
     assert.equal(r.status, 0, r.stderr);
-    const text = readFileSync(join(app, "docs/ux/baseline.md"), "utf8");
+    const text = readFileSync(join(app, "docs/ux-builder/baseline.md"), "utf8");
     for (const s of ["| map | CollectionList | / |", "| detail | RecordDetail | /river |", "| saved | CollectionList | /saved |"]) assert.ok(text.includes(s), s);
     assert.match(text, /\| J-find \| US-001 \| map → detail \|/);
     assert.match(text, /- US-001: Find a river near me\n- US-002: Save a river for later/);
@@ -63,10 +63,10 @@ describe("baseline", () => {
     const none = tempApp();
     const r = cli(none, ["baseline"]);
     assert.equal(r.status, 2);
-    assert.match(r.stderr, /no app\.blueprint\.json/);
+    assert.match(r.stderr, /no docs\/ux-builder\/blueprint\/app\.blueprint\.json/);
     const app = existing();
     rmSync(join(app, "ux-assessment"), { recursive: true });
     assert.equal(cli(app, ["baseline"]).status, 0);
-    assert.match(readFileSync(join(app, "docs/ux/baseline.md"), "utf8"), /No assessment run yet \(ux-builder-audit assess\)/);
+    assert.match(readFileSync(join(app, "docs/ux-builder/baseline.md"), "utf8"), /No assessment run yet \(ux-builder-audit assess\)/);
   });
 });

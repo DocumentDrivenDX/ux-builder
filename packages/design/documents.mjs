@@ -9,6 +9,7 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { findSecrets } from "@ux-builder/trace";
+import { bpFile, ux } from "./app.mjs";
 
 export const ARTIFACTS = fileURLToPath(new URL("./artifacts", import.meta.url));
 
@@ -36,10 +37,11 @@ export function parseDocument(text) {
 }
 
 /* The path a document of this type and ID belongs at. */
-export function pathFor(type, id) {
+export function pathFor(type, id, app) {
   const out = documentTypes()[type]?.output;
   if (!out) return null;
-  return out.replace(/<[^>]+>/, id.replace(/^[A-Z]+-/, ""));
+  // meta.yml names the place under docs/ux-builder/; an unmigrated app keeps docs/ux/ (GDL-80).
+  return out.replace(/^docs\/ux-builder(?=\/)/, ux(app)).replace(/<[^>]+>/, id.replace(/^[A-Z]+-/, ""));
 }
 
 const norm = (s) => s.toLowerCase().replace(/\s+/g, " ").trim();
@@ -103,7 +105,7 @@ const RULES = {
     return ["not-tested", "tested", "refuted"].includes(ux.status) ? [] : [`status is "${ux.status ?? ""}"; use not-tested, tested or refuted`];
   },
   // Target users (GDL-77): the jobs table's evidence rules, plus their context and the jobs they hold.
-  users(doc, ux, { known }) {
+  users(doc, front, { known, appDir }) {
     const out = [], notes = [];
     const seen = new Set();
     const rows = tableRows(doc.body, "Users");
@@ -119,20 +121,20 @@ const RULES = {
       for (const h of held) {
         const m = h.match(/^(J-[1-9][0-9]*)\s+(high|medium|low)$/);
         if (!m) { out.push(`${id}: "${h}" is not a job and its importance (J-<n> high, medium or low)`); continue; }
-        if (known && !known.has(m[1])) out.push(`${id}: holds ${m[1]}, which docs/ux/jobs.md does not have`);
+        if (known && !known.has(m[1])) out.push(`${id}: holds ${m[1]}, which ${ux(appDir, "jobs.md")} does not have`);
       }
       const sources = (evidence ?? "").match(/EV-[1-9][0-9]*/g) ?? [];
       if (status === "hypothesis" && sources.length) out.push(`${id}: evidence lists a source, but status is hypothesis; a hypothesis has no evidence (mark it confirmed, or clear evidence)`);
       if (status === "hypothesis") notes.push(`${id} is a hypothesis: ${user}`);
       if (!["high", "medium", "low"].includes(confidence)) out.push(`${id}: confidence is "${confidence ?? ""}"; use high, medium or low`);
       if (confidence && confidence !== "low" && !sources.length) out.push(`${id}: confidence ${confidence} needs at least one evidence source (EV-<n>)`);
-      for (const src of sources) if (known && !known.has(src)) out.push(`${id}: evidence ${src} does not exist in docs/ux/evidence/`);
+      for (const src of sources) if (known && !known.has(src)) out.push(`${id}: evidence ${src} does not exist in ${ux(appDir, "evidence")}/`);
       if (!["hypothesis", "confirmed", "current-state"].includes(status)) out.push(`${id}: status is "${status ?? ""}"; use hypothesis or confirmed`);
     }
     if (!rows.length) out.push("the Users table has no rows");
     return { problems: out, notes };
   },
-  jobs(doc, ux, { known }) {
+  jobs(doc, front, { known, appDir }) {
     const out = [], notes = [];
     const seen = new Set();
     for (const [id, job, importance, evidence, confidence, status] of tableRows(doc.body, "Jobs")) {
@@ -146,7 +148,7 @@ const RULES = {
       for (const [field, v] of [["importance", importance], ["confidence", confidence]]) if (!["high", "medium", "low"].includes(v)) out.push(`${id}: ${field} is "${v ?? ""}"; use high, medium or low`);
       const sources = (evidence ?? "").match(/EV-[1-9][0-9]*/g) ?? [];
       if (confidence && confidence !== "low" && !sources.length) out.push(`${id}: confidence ${confidence} needs at least one evidence source (EV-<n>)`);
-      for (const s of sources) if (known && !known.has(s)) out.push(`${id}: evidence ${s} does not exist in docs/ux/evidence/`);
+      for (const s of sources) if (known && !known.has(s)) out.push(`${id}: evidence ${s} does not exist in ${ux(appDir, "evidence")}/`);
       if (!["hypothesis", "confirmed", "current-state"].includes(status)) out.push(`${id}: status is "${status ?? ""}"; use hypothesis or confirmed`);
       if (!job) out.push(`${id}: the job is empty`);
     }
@@ -171,7 +173,7 @@ export function validateDocument(text, { path = null, known = null, appDir } = {
   if (!meta) { add(`"${ux.type}" is not a docs/ux type; use one of ${Object.keys(documentTypes()).join(", ")}`); return problems; }
   if (ux.id && !new RegExp(meta.id.pattern).test(String(ux.id))) add(`ID "${ux.id}" does not match ${meta.id.prefix}'s format (${meta.id.example})`);
   if (path && ux.id) {
-    const want = pathFor(ux.type, String(ux.id));
+    const want = pathFor(ux.type, String(ux.id), appDir);
     if (want && path !== want) add(`a ${ux.type} with ID ${ux.id} belongs at ${want}, not ${path}`);
     if (path.startsWith("docs/helix/")) add("a docs/ux type is never written under docs/helix/");
   }
@@ -225,7 +227,8 @@ export function helixIds(app) {
    frontmatter does not say). */
 export function uxDocuments(app) {
   // A test kit is its kit.md; scenarios, script, consent and screener are its parts, not documents of their own.
-  return markdown(app, "docs/ux").filter((path) => !/^docs\/ux\/tests\/TK-[^/]+\/(?!kit\.md$)[^/]+\.md$/.test(path)).map((path) => {
+  const kitParts = new RegExp(`^${ux(app).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/tests/TK-[^/]+/(?!kit\\.md$)[^/]+\\.md$`);
+  return markdown(app, ux(app)).filter((path) => !kitParts.test(path)).map((path) => {
     const ux = parseDocument(readFileSync(join(app, path), "utf8")).front?.ux;
     return { path, type: ux?.type ?? null, id: ux?.id != null ? String(ux.id) : null };
   });
@@ -233,7 +236,7 @@ export function uxDocuments(app) {
 
 /* The jobs table's rows: { id: { job, confidence, status } }. */
 export function jobsTable(app) {
-  const p = join(app, "docs/ux/jobs.md");
+  const p = join(app, ux(app, "jobs.md"));
   if (!existsSync(p)) return null;
   const out = {};
   for (const [id, job, importance, evidence, confidence, status] of tableRows(parseDocument(readFileSync(p, "utf8")).body, "Jobs")) if (id) out[id] = { job, importance, evidence, confidence, status };
@@ -266,7 +269,7 @@ export const RULE_ANSWERS = [["trigger", "the situation that triggers it"], ["be
 
 /* The target users table's rows: { U-n: { user, context, needs, jobs: [{ job, importance }], confidence, status } }. */
 export function usersTable(app) {
-  const p = join(app, "docs/ux/users.md");
+  const p = join(app, ux(app, "users.md"));
   if (!existsSync(p)) return null;
   const out = {};
   for (const [id, user, context, needs, jobs, evidence, confidence, status] of tableRows(parseDocument(readFileSync(p, "utf8")).body, "Users")) {
@@ -301,8 +304,8 @@ export function validate(app) {
   // What cites a job: blueprint tasks (T-<n>) and decision records (UXD-<n>).
   const cites = [];
   let bp = null;
-  try { bp = JSON.parse(readFileSync(join(app, "app.blueprint.json"), "utf8")); } catch { /* no blueprint */ }
-  for (const t of Array.isArray(bp?.tasks) ? bp.tasks : []) for (const j of t?.jobs ?? []) cites.push({ path: "app.blueprint.json", item: t.id, job: j });
+  try { bp = JSON.parse(readFileSync(join(app, bpFile(app)), "utf8")); } catch { /* no blueprint */ }
+  for (const t of Array.isArray(bp?.tasks) ? bp.tasks : []) for (const j of t?.jobs ?? []) cites.push({ path: bpFile(app), item: t.id, job: j });
   for (const d of documents.filter((x) => x.type === "ux-decision")) {
     const text = readFileSync(join(app, d.path), "utf8");
     for (const j of new Set(text.match(/\bJ-[1-9][0-9]*\b/g) ?? [])) cites.push({ path: d.path, item: d.id, job: j });
@@ -310,22 +313,22 @@ export function validate(app) {
   // Business rules (GDL-78): each cited rule is defined in HELIX, and how the user meets it is designed.
   const br = businessRules(app);
   const cited = ruleCitations(bp);
-  for (const c of cited) if (!br.rules[c.rule]) problems.push({ path: "app.blueprint.json", message: br.helix ? `${c.item} cites ${c.rule}, which no HELIX document defines (**${c.rule}** — <rule>)` : `${c.item} cites ${c.rule}, but the app has no HELIX to define it` });
+  for (const c of cited) if (!br.rules[c.rule]) problems.push({ path: bpFile(app), message: br.helix ? `${c.item} cites ${c.rule}, which no HELIX document defines (**${c.rule}** — <rule>)` : `${c.item} cites ${c.rule}, but the app has no HELIX to define it` });
   for (const id of [...new Set(cited.map((c) => c.rule))]) {
     const entry = (Array.isArray(bp?.businessRules) ? bp.businessRules : []).find((e) => e?.id === id);
     const missing = RULE_ANSWERS.filter(([k]) => !String(entry?.[k] ?? "").trim()).map(([k, what]) => `${k} (${what})`);
-    if (missing.length) problems.push({ path: "app.blueprint.json", message: `${id}: how the user meets it is not designed; businessRules needs ${missing.join(", ")}` });
+    if (missing.length) problems.push({ path: bpFile(app), message: `${id}: how the user meets it is not designed; businessRules needs ${missing.join(", ")}` });
   }
   for (const t of br.twice) warnings.push({ path: t.files.join(", "), message: `${t.id} is defined in more than one HELIX document` });
   // What cites a target user: blueprint tasks (GDL-77).
   for (const t of Array.isArray(bp?.tasks) ? bp.tasks : []) for (const u of t?.users ?? []) {
     const user = users?.[u];
-    if (!user) { problems.push({ path: "app.blueprint.json", message: `${t.id} names ${u}, which docs/ux/users.md does not have` }); continue; }
-    if (user.confidence === "low") warnings.push({ path: "app.blueprint.json", message: `${t.id} serves ${u} ("${user.user}"), whose confidence is low` });
+    if (!user) { problems.push({ path: bpFile(app), message: `${t.id} names ${u}, which ${ux(app, "users.md")} does not have` }); continue; }
+    if (user.confidence === "low") warnings.push({ path: bpFile(app), message: `${t.id} serves ${u} ("${user.user}"), whose confidence is low` });
   }
   for (const c of cites) {
     const job = jobs?.[c.job];
-    if (!job) { problems.push({ path: c.path, message: `${c.item} cites ${c.job}, which docs/ux/jobs.md does not have` }); continue; }
+    if (!job) { problems.push({ path: c.path, message: `${c.item} cites ${c.job}, which ${ux(app, "jobs.md")} does not have` }); continue; }
     if (job.confidence === "low") warnings.push({ path: c.path, message: `${c.item} relies on ${c.job} ("${job.job}"), whose confidence is low` });
   }
   return { documents, problems, warnings, notes, valid: problems.length === 0 };

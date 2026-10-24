@@ -43,9 +43,16 @@ audit need the SDK. `<path>` is a field, an index or `[+]` to append:
 `state set 'assumptions[+]' '{"text":"Location is available"}'` adds an
 assumption with the next `A-<n>` ID, status `assumed` and no evidence.
 
-The guide writes only under `docs/ux/`, `.ux-builder/`, `prototype/`,
-`helix-proposals/`, its own skill, `.mcp.json` and the blueprint files.
-HELIX changes are always proposals (`helix-proposals/`) the person applies.
+The guide writes only under `docs/ux-builder/` (its documents; the
+blueprint and alternatives in `blueprint/`; `prototypes/`,
+`helix-proposals/`, `compare/`, `drawings/`, `wireframes/`), `.ux-builder/`,
+its own skill and `.mcp.json`. An app made before that layout (`docs/ux/`,
+`app.blueprint.json` at the top) keeps working there; `ux-builder-design
+migrate [--dry-run]` moves it with `git mv` and rewrites the app's
+references. Before any wireframe or prototype the guide asks the person which
+modalities and screen sizes the app is for (`ux-builder-design modality`).
+HELIX changes are always proposals (`docs/ux-builder/helix-proposals/`) the
+person applies.
 People in tests appear only by pseudonym; a real name a sheet gives is kept
 in `.ux-builder/participants.local.json`, out of git, and transcripts are
 analysed only after consent is confirmed for the session (ADR-039).

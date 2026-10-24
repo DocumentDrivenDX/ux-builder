@@ -3,11 +3,17 @@
    interaction and IA rules, or start one (FEAT-008, CONTRACT-005); draft
    HELIX content and draw the plan from it (FEAT-012, CONTRACT-004).
 
-     ux-builder-blueprint check app.blueprint.json [--json]
-     ux-builder-blueprint init [--kind app|view] [--out app.blueprint.json]
-     ux-builder-blueprint propose [file] [--out helix-proposals]
-     ux-builder-blueprint draw [file] [--out blueprint-drawings]
-     ux-builder-blueprint wireframes [file] [--out blueprint-wireframes]
+     ux-builder-blueprint check [file] [--json]
+     ux-builder-blueprint init [--kind app|view] [--out file]
+     ux-builder-blueprint propose [file] [--out dir]
+     ux-builder-blueprint draw [file] [--out dir]
+     ux-builder-blueprint wireframes [file] [--out dir]
+
+   Files default to the app's layout (paths.mjs, FEAT-018 GDL-80): the
+   blueprint at docs/ux-builder/blueprint/app.blueprint.json, and proposals,
+   drawings, wireframes, comparisons and prototypes in their folders under
+   docs/ux-builder/. An app on the old layout (app.blueprint.json at its top)
+   keeps it until `ux-builder-design migrate`, and each command says so.
 
    check exits 0 with no error finding, 1 with one, 2 on bad usage or an
    unreadable file. init exits 0 when written, 1 when the file exists.
@@ -18,7 +24,7 @@
    Each check is also a check event in the app's episode trace (FEAT-016)
    when @ux-builder/trace is installed and .ux-builder/ is above the file.
 
-   check, propose, draw and wireframes read app.blueprint.json when no file is
+   check, propose, draw and wireframes read the app's blueprint when no file is
    given (FEAT-012 DRF-01, DRW-01, DRW-02; FEAT-015 RPT-09). propose writes
    HELIX proposals as patches, a report and proposals.json, and applies
    nothing; for HELIX UX types the installed HELIX does not define, it names
@@ -35,6 +41,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { needsStories, readStories, skippedNote } from "./helix.mjs";
 import { checkBlueprint, compareAlternatives, complexityDelta, deltaFindings, principleFindings, score, simplify, skeleton } from "./index.mjs";
+import { alternativeFile, layoutOf, LEGACY, MIGRATE_HINT } from "./paths.mjs";
 import { propose, writeProposals } from "./propose.mjs";
 import { drawings, writeDrawings } from "./draw.mjs";
 
@@ -49,7 +56,9 @@ const USAGE = `Usage:
   ux-builder-blueprint propose [<file>] [--out <dir>]
   ux-builder-blueprint draw [<file>] [--out <dir>]
   ux-builder-blueprint wireframes [<file>] [--out <dir>]`;
-const OUT = { propose: "helix-proposals", draw: "blueprint-drawings", wireframes: "blueprint-wireframes" };
+/* Where each drawing command writes by default: under docs/ux-builder/ (paths.mjs), or the old layout's folders. */
+const OUT = { propose: "proposals", draw: "drawings", wireframes: "wireframes" };
+const MODALITY_FIRST = "Ask the person first which modalities (responsive-web, chat, hybrid-chat) and screen sizes (compact to extra-large) the app is for, and record the answer: ux-builder-design modality --answer \"<their words>\" --modality <list> --size-classes <list>. Nothing was drawn.";
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 async function main(argv) {
@@ -59,11 +68,15 @@ async function main(argv) {
   } catch (e) { console.error(`${e.message}\n${USAGE}`); return 2; }
   let { values, positionals: [command, file, ...rest] } = parsed;
   if (values.help) { console.log(USAGE); return 0; }
+  // The app's layout (GDL-80): docs/ux-builder/, or the old one until it is migrated.
+  const L = layoutOf(process.cwd());
+  const legacyNote = () => { if (L === LEGACY) console.error(`note: ${MIGRATE_HINT}`); };
 
   if (command === "init") {
-    const out = values.out ?? "app.blueprint.json";
+    const out = values.out ?? L.blueprint;
     if (file || !["app", "view"].includes(values.kind)) { console.error(USAGE); return 2; }
     if (existsSync(out)) { console.error(`${out} exists; not overwriting it.`); return 1; }
+    mkdirSync(dirname(out), { recursive: true });
     writeFileSync(out, JSON.stringify(skeleton(values.kind), null, 2) + "\n");
     console.log(`Wrote ${out}. Describe your ${values.kind === "view" ? "view's screen" : "app's destinations and screens"}, then run: ux-builder-blueprint check ${out}`);
     return 0;
@@ -71,7 +84,7 @@ async function main(argv) {
 
   if (command === "score") {
     if (rest.length) { console.error(USAGE); return 2; }
-    const src = file ?? "app.blueprint.json";
+    const src = file ?? L.blueprint;
     let bp;
     try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
     const scores = score(bp);
@@ -94,7 +107,8 @@ async function main(argv) {
       console.error(`The alternatives do not cover the same tasks: ${r.differ.join(", ")}. ${r.missing.map((m) => `${m.name} lacks ${m.lacks.join(", ")}`).join("; ")}.`);
       return 1;
     }
-    const out = values.out ?? "blueprint-compare";
+    const out = values.out ?? L.compare;
+    legacyNote();
     mkdirSync(out, { recursive: true });
     writeFileSync(join(out, "compare.html"), r.html);
     if (values.json) console.log(JSON.stringify({ file: join(out, "compare.html"), scores: r.scores, best: r.best }, null, 2));
@@ -105,7 +119,8 @@ async function main(argv) {
   if (command === "alternative") {
     const [name] = rest;
     if (!["new", "choose"].includes(file) || !/^[a-z0-9][a-z0-9-]*$/.test(name ?? "")) { console.error(`alternative new <name> or alternative choose <name> --reason <text>; a name is lowercase letters, digits and hyphens\n${USAGE}`); return 2; }
-    const main = "app.blueprint.json", alt = `app.blueprint.${name}.json`;
+    const main = L.blueprint, alt = alternativeFile(L, name);
+    legacyNote();
     if (file === "new") {
       if (!existsSync(main)) { console.error(`No ${main} here to copy.`); return 2; }
       if (existsSync(alt)) { console.error(`${alt} exists; not overwriting it.`); return 1; }
@@ -121,10 +136,10 @@ async function main(argv) {
     const d = await designState(main);
     if (d) {
       const date = new Date().toISOString().slice(0, 10);
-      const others = readdirSync(".").map((f) => f.match(/^app\.blueprint\.([a-z0-9][a-z0-9-]*)\.json$/)?.[1]).filter(Boolean);
+      const others = readdirSync(L.blueprintDir).map((f) => f.match(/^app\.blueprint\.([a-z0-9][a-z0-9-]*)\.json$/)?.[1]).filter(Boolean);
       const known = new Map(d.state.alternatives.map((a) => [a.name, a]));
       const names = [...new Set([...known.keys(), ...others])].sort();
-      const alternatives = names.map((n) => ({ ...(known.get(n) ?? { name: n, file: `app.blueprint.${n}.json` }), status: n === name ? "chosen" : "rejected", reason: n === name ? values.reason.trim() : `${name} was chosen: ${values.reason.trim()}`, date }));
+      const alternatives = names.map((n) => ({ ...(known.get(n) ?? { name: n, file: alternativeFile(L, n) }), status: n === name ? "chosen" : "rejected", reason: n === name ? values.reason.trim() : `${name} was chosen: ${values.reason.trim()}`, date }));
       d.design.stateSet(d.app, { path: "alternatives", value: alternatives });
     }
     console.log(`${main} is now ${name}${d ? "; the design state records the choice" : ""}.`);
@@ -134,15 +149,16 @@ async function main(argv) {
   if (command === "prototype") {
     if (file || rest.length) { console.error(USAGE); return 2; }
     const { archivePrototype, themeFor, writePrototype } = await import("./prototype.mjs");
+    legacyNote();
     if (values.archive) {
-      const to = archivePrototype(values.archive);
-      if (!to) { console.error(`No prototype/${values.archive}/ to archive.`); return 1; }
-      console.log(`Moved prototype/${values.archive}/ to ${to}/.`);
+      const to = archivePrototype(values.archive, { root: L.prototypes });
+      if (!to) { console.error(`No ${L.prototypes}/${values.archive}/ to archive.`); return 1; }
+      console.log(`Moved ${L.prototypes}/${values.archive}/ to ${to}/.`);
       return 0;
     }
     if (!values.explore) { console.error(`prototype needs --explore (or --archive <name>)\n${USAGE}`); return 2; }
     const name = values.alternative ?? "current";
-    const src = values.alternative ? `app.blueprint.${values.alternative}.json` : "app.blueprint.json";
+    const src = alternativeFile(L, values.alternative);
     let bp;
     try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
     const errors = checkBlueprint(bp).filter((f) => f.severity === "error");
@@ -152,13 +168,15 @@ async function main(argv) {
       return 1;
     }
     const d = await designState(src);
+    // In a guided app, the person says which modalities and screen sizes come first (FEAT-018 GDL-80).
+    if (d && !d.design.modalityStatus(d.app).confirmed) { console.error(MODALITY_FIRST); return 1; }
     const question = values.question ?? d?.state?.questions?.find((q) => q.status === "open")?.text ?? `What is it like to use ${name}?`;
     const systems = values["design-system"] ?? [];
     const targets = systems.length ? systems.map((ds) => ({ dir: `${name}-${ds}`, theme: themeFor(ds), ds })) : [{ dir: name, theme: "plain" }];
     const missing = targets.filter((t) => !t.theme);
     if (missing.length) { console.error(`No theme shows the design system ${missing.map((t) => t.ds).join(", ")}.`); return 2; }
     const written = [];
-    for (const t of targets) written.push(await writePrototype(bp, { dir: t.dir, question, theme: t.theme }));
+    for (const t of targets) written.push(await writePrototype(bp, { root: L.prototypes, dir: t.dir, question, theme: t.theme }));
     if (values.json) console.log(JSON.stringify({ question, prototypes: written }, null, 2));
     else for (const w of written) console.log(`${w.dir}/: ${w.pages} pages (${w.theme}); open ${w.dir}/index.html. A prototype, never app code.`);
     return 0;
@@ -166,7 +184,7 @@ async function main(argv) {
 
   if (command === "simplify") {
     if (rest.length) { console.error(USAGE); return 2; }
-    const src = file ?? "app.blueprint.json";
+    const src = file ?? L.blueprint;
     let bp;
     try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
     const r = simplify(bp);
@@ -180,10 +198,11 @@ async function main(argv) {
 
   if (OUT[command]) {
     if (rest.length) { console.error(USAGE); return 2; }
-    const src = file ?? "app.blueprint.json";
+    const src = file ?? L.blueprint;
     let bp;
     try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
-    const out = values.out ?? OUT[command];
+    const out = values.out ?? L[OUT[command]];
+    legacyNote();
     if (command === "propose") {
       const r = propose(bp, { blueprintFile: src });
       if (!r.marker) { console.error(`No HELIX marker (.helix.yml) above ${src}: propose drafts into the HELIX flow that marker names. Run it in a HELIX-governed repository.`); return 2; }
@@ -195,6 +214,10 @@ async function main(argv) {
       for (const p of r.problems) console.log(`note     ${p}`);
       console.log(`${out}: ${plural(r.proposals.length, "patch", "patches")}, ${plural(r.drafts.length, "draft")}, ${plural(r.disagreements.length, "disagreement")}; nothing applied. Review report.md, then apply the patches you accept.`);
       return 0;
+    }
+    if (command === "wireframes") {
+      const d = await designState(src);
+      if (d && !d.design.modalityStatus(d.app).confirmed) { console.error(MODALITY_FIRST); return 1; }
     }
     if (command === "draw") {
       const list = drawings(bp);
@@ -213,8 +236,8 @@ async function main(argv) {
   }
 
   if (command !== "check" || rest.length) { console.error(USAGE); return 2; }
-  // Like the other commands, check reads app.blueprint.json when no file is given.
-  file ??= "app.blueprint.json";
+  // Like the other commands, check reads the app's blueprint when no file is given.
+  file ??= L.blueprint;
   let bp;
   try { bp = JSON.parse(readFileSync(file, "utf8")); } catch (e) { console.error(`${file}: ${e.message}`); return 2; }
   const storied = needsStories(bp);

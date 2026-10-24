@@ -37,8 +37,8 @@ describe("brief", () => {
     const app = helixApp();
     const r = cli(app, ["brief", "--name", "River Path", "--json"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.deepEqual(JSON.parse(r.stdout).written, ["docs/ux/brief.md", "docs/ux/brief.html", ".ux-builder/principles.json"]);
-    const text = readFileSync(join(app, "docs/ux/brief.md"), "utf8");
+    assert.deepEqual(JSON.parse(r.stdout).written, ["docs/ux-builder/brief.md", "docs/ux-builder/brief.html", ".ux-builder/principles.json"]);
+    const text = readFileSync(join(app, "docs/ux-builder/brief.md"), "utf8");
     const doc = parseDocument(text);
     assert.deepEqual(doc.headings, ["Product", "Target users", "Primary outcome", "Primary jobs", "Experience principles", "Constraints", "Open questions"]);
     assert.match(text, /- River Path: River Path helps people discover rivers and the places to reach them\. \[confirmed\]/);
@@ -50,12 +50,12 @@ describe("brief", () => {
     assert.doesNotMatch(text, /rate rivers/, "a refuted point is left out");
     assert.equal(validate(app).valid, true, JSON.stringify(validate(app).problems));
     // The page the person reads, and the checkable principles.
-    assert.match(readFileSync(join(app, "docs/ux/brief.html"), "utf8"), /<h1>Experience brief: River Path<\/h1>[\s\S]*<span class="status status-hypothesis">hypothesis<\/span>/);
+    assert.match(readFileSync(join(app, "docs/ux-builder/brief.html"), "utf8"), /<h1>Experience brief: River Path<\/h1>[\s\S]*<span class="status status-hypothesis">hypothesis<\/span>/);
     assert.deepEqual(JSON.parse(readFileSync(join(app, ".ux-builder/principles.json"), "utf8")), { principles: [{ id: "PR-1", text: "No mandatory account creation", rule: { kind: "no-step-before", screens: ["sign-in"] } }, { id: "PR-2", text: "Progressive disclosure" }] });
     // A PRD still the template (a fresh HELIX app's) gives no points: its [placeholders] are not confirmed facts.
     put(app, "docs/helix/01-frame/prd.md", "---\nddx:\n  id: prd\n  type: prd\n---\n\n# Product Requirements Document\n\n## Summary\n\n[This section should work as a standalone 1-pager.]\n\n## Users and Scope\n\n### Primary Persona: [Name]\n\n## Constraints, Assumptions, Dependencies\n\n### Constraints\n\n- Technical: [Platform or technology limits]\n- Works offline, see [the spec](https://example.com/spec)\n");
     cli(app, ["brief"]);
-    const fresh = readFileSync(join(app, "docs/ux/brief.md"), "utf8");
+    const fresh = readFileSync(join(app, "docs/ux-builder/brief.md"), "utf8");
     assert.doesNotMatch(fresh, /\[(Name|Platform|This section)|Product Requirements Document \[/);
     assert.match(fresh, /- Works offline, see \[the spec\]\(https:\/\/example\.com\/spec\) \[confirmed\]/, "a Markdown link is not a placeholder");
   });
@@ -64,11 +64,11 @@ describe("brief", () => {
   test("a hypothesis lists what would confirm it", () => {
     const app = helixApp();
     assert.equal(cli(app, ["brief"]).status, 0);
-    assert.match(readFileSync(join(app, "docs/ux/brief.md"), "utf8"), /- Most plan the night before \[hypothesis\]\n  Confirm by: Ask in each interview when they plan/);
+    assert.match(readFileSync(join(app, "docs/ux-builder/brief.md"), "utf8"), /- Most plan the night before \[hypothesis\]\n  Confirm by: Ask in each interview when they plan/);
     // Without one, the brief says it is still to decide rather than leaving it out.
     const app2 = tempApp({ state: { assumptions: [{ id: "A-1", text: "Anglers start from a map", status: "hypothesis", evidence: [], section: "users" }] } });
     assert.equal(cli(app2, ["brief"]).status, 0);
-    assert.match(readFileSync(join(app2, "docs/ux/brief.md"), "utf8"), /Anglers start from a map \[hypothesis\]\n  Confirm by: to be decided with the person/);
+    assert.match(readFileSync(join(app2, "docs/ux-builder/brief.md"), "utf8"), /Anglers start from a map \[hypothesis\]\n  Confirm by: to be decided with the person/);
   });
 
   // @covers US-122-AC3
@@ -77,10 +77,10 @@ describe("brief", () => {
     const r = cli(app, ["brief"]);
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /HELIX was not found \(no \.helix\.yml\): the brief is built from the design state alone\./);
-    const text = readFileSync(join(app, "docs/ux/brief.md"), "utf8");
+    const text = readFileSync(join(app, "docs/ux-builder/brief.md"), "utf8");
     assert.match(text, /## Product\n\n- Not yet known\./);
     assert.match(text, /People choose rivers by place \[confirmed\]/);
     assert.doesNotMatch(text, /links:/, "no PRD to link");
-    assert.ok(existsSync(join(app, "docs/ux/brief.html")));
+    assert.ok(existsSync(join(app, "docs/ux-builder/brief.html")));
   });
 });

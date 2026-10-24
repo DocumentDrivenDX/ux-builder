@@ -23,9 +23,9 @@ const BP = { version: 1, kind: "app", name: "rivers", supports: { sizeClasses: [
 /* A fixture app with a state, a blueprint and a document. */
 function fixture() {
   const app = tempApp({ state: { assumptions: [{ id: "A-1", text: "Location is available", status: "assumed", evidence: [], section: "constraints" }] } });
-  writeFileSync(join(app, "app.blueprint.json"), JSON.stringify(BP));
-  mkdirSync(join(app, "docs/ux/evidence"), { recursive: true });
-  cpSync(design.exampleFile("research-evidence"), join(app, "docs/ux/evidence/EV-1.md"));
+  writeFileSync(join(app, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(BP));
+  mkdirSync(join(app, "docs/ux-builder/evidence"), { recursive: true });
+  cpSync(design.exampleFile("research-evidence"), join(app, "docs/ux-builder/evidence/EV-1.md"));
   return app;
 }
 /* The fixture with its items approved, for commands a pending review would stop (US-148). */

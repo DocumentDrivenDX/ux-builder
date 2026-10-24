@@ -11,12 +11,12 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSy
 import { tmpdir } from "node:os";
 import { isAbsolute, join } from "node:path";
 import { parse as parseYaml, stringify as toYaml } from "yaml";
-import { DesignError, writeInApp } from "./app.mjs";
+import { DesignError, bpFile, proposalsDir, ux, writeInApp } from "./app.mjs";
 import { helixRoot, parseDocument } from "./documents.mjs";
 import { addDiagnosisText } from "./insights.mjs";
 import { readState, writeState } from "./state.mjs";
 
-const DIR = "docs/ux/experiments";
+const docsDir = (app) => ux(app, "experiments");
 const list = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]).map(String).map((s) => s.trim()).filter(Boolean);
 const today = () => new Date().toISOString().slice(0, 10);
 const nextId = (xs, prefix) => `${prefix}-${Math.max(0, ...xs.map((x) => Number(String(x.id ?? "").split("-")[1]) || 0)) + 1}`;
@@ -30,12 +30,12 @@ export function diagnose(app, { insight, observation, explanations, hypothesis, 
   if (!hypothesis?.trim()) throw new DesignError("diagnose needs --hypothesis: If …, then …, because …");
   if (!alternative?.trim()) throw new DesignError("diagnose needs --alternative: the blueprint alternative that tests the hypothesis");
   const state = readState(app);
-  if (!existsSync(join(app, `app.blueprint.${alternative}.json`)) && !state.alternatives.some((a) => a.name === alternative)) throw new DesignError(`no alternative ${alternative}: make it with ux-builder-blueprint alternative new ${alternative}`);
+  if (!existsSync(join(app, bpFile(app, alternative))) && !state.alternatives.some((a) => a.name === alternative)) throw new DesignError(`no alternative ${alternative}: make it with ux-builder-blueprint alternative new ${alternative}`);
   state.diagnoses ??= [];
   const d = { id: nextId(state.diagnoses, "D"), insight, observation: observation.trim(), explanations, hypothesis: hypothesis.trim(), alternative: alternative.trim() };
   state.diagnoses.push(d);
   writeState(app, state);
-  const path = addDiagnosisText(app, insight, [`### ${d.id}`, "", `- **Observation**: ${d.observation}`, ...d.explanations.map((e, i) => `- **Explanation ${i + 1}**: ${e}`), `- **Hypothesis**: ${d.hypothesis}`, `- **Alternative**: ${d.alternative} (\`app.blueprint.${d.alternative}.json\`)`, ""]);
+  const path = addDiagnosisText(app, insight, [`### ${d.id}`, "", `- **Observation**: ${d.observation}`, ...d.explanations.map((e, i) => `- **Explanation ${i + 1}**: ${e}`), `- **Hypothesis**: ${d.hypothesis}`, `- **Alternative**: ${d.alternative} (\`${bpFile(app, d.alternative)}\`)`, ""]);
   return { ...d, path };
 }
 
@@ -82,14 +82,14 @@ export function toleranceOf(t, control) {
 function proposeMetric(app, root, name, { experiment, role }) {
   const path = `${root.replace(/\/$/, "")}/06-iterate/metrics/${name}.yaml`;
   const yaml = toYaml({ name, description: `${role === "guardrail" ? "Guardrail" : "Success metric"} for ${experiment}: <fill in what it measures>`, unit: "<percent|seconds|count>", direction: role === "guardrail" ? "<lower|higher: the side that is worse>" : "higher", command: "<fill in: the repeatable query over the app's exported journey events that emits the value>", output_pattern: "<regex with a capture group>", baseline: null, target: null, tolerance: null, last_verified: null, interpretation: `Read with ${experiment}; never trusted before its command has been run (last_verified).`, labels: { experiment, source: "ux-builder-design" } });
-  return writeInApp(app, `helix-proposals/metrics/${name}.patch`, unifiedDiff(path, null, yaml));
+  return writeInApp(app, `${proposalsDir(app)}/metrics/${name}.patch`, unifiedDiff(path, null, yaml));
 }
 
 /* ux-builder-design experiment start --decision UXD-<n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>. */
 export function experimentStart(app, { decision, variant, metric, guardrails, duration } = {}) {
   guardrails = list(guardrails);
   if (!/^UXD-[1-9][0-9]*$/.test(decision ?? "")) throw new DesignError(`--decision names the decision the experiment tests, such as UXD-1, not "${decision ?? ""}"`);
-  if (!existsSync(join(app, `docs/ux/decisions/${decision}.md`))) throw new DesignError(`no decision ${decision} (docs/ux/decisions/${decision}.md)`);
+  if (!existsSync(join(app, `${ux(app)}/decisions/${decision}.md`))) throw new DesignError(`no decision ${decision} (${ux(app)}/decisions/${decision}.md)`);
   if (!variant?.trim()) throw new DesignError("experiment start needs --variant: the blueprint alternative shown to some people");
   if (!metric?.trim()) throw new DesignError("experiment start needs --metric: the success metric");
   const days = Number(duration);
@@ -100,17 +100,17 @@ export function experimentStart(app, { decision, variant, metric, guardrails, du
   if (answered <= state.experiments.length) throw new DesignError(`checkpoint experiment has not been answered for this experiment: ask the person "Run this experiment?" and record it with ux-builder-design state checkpoint experiment --answer "<their words>" first. Nothing was written.`);
   const id = nextId(state.experiments, "EXP");
   const diag = [...(state.diagnoses ?? [])].reverse().find((d) => d.alternative === variant);
-  const question = parseDocument(readFileSync(join(app, `docs/ux/decisions/${decision}.md`), "utf8")).body.match(/^# UXD-\d+: (.+)$/m)?.[1] ?? decision;
+  const question = parseDocument(readFileSync(join(app, `${ux(app)}/decisions/${decision}.md`), "utf8")).body.match(/^# UXD-\d+: (.+)$/m)?.[1] ?? decision;
   const hypothesis = diag?.hypothesis ?? `If people get ${variant}, then ${metric} improves, because it answers "${question}" better.`;
   const links = [["tests", decision], ...(diag ? [["informed_by", diag.insight]] : [])];
   const text = ["---", "ux:", `  id: ${id}`, "  type: experiment", "  status: running", `  started: ${today()}`, "  links:", ...links.flatMap(([kind, to]) => [`    - kind: ${kind}`, `      to: ${to}`]), "---", "", `# ${id}: ${variant} for ${decision}`, "",
     "## Hypothesis", "", `${hypothesis} (tests ${decision}${diag ? `; from ${diag.id} on ${diag.insight}` : ""})`, "",
-    "## Variant", "", `${variant} (\`app.blueprint.${variant}.json\`), behind the app's own feature flag; the rest see the current design.`, "",
+    "## Variant", "", `${variant} (\`${bpFile(app, variant)}\`), behind the app's own feature flag; the rest see the current design.`, "",
     "## Metrics", "", `- **Success**: ${metric}`, `- **Guardrails**: ${guardrails.join(", ") || "none named"}`, "",
     "## Duration", "", `${days} days`, "",
     "## Result", "", "Filled when it ends: `ux-builder-design experiment end " + id + " --result <file>`.", "",
     "## Decision", "", "Filled at the release checkpoint.", ""].join("\n");
-  const path = writeInApp(app, `${DIR}/${id}.md`, text);
+  const path = writeInApp(app, `${docsDir(app)}/${id}.md`, text);
   state.experiments.push({ id, status: "running", decision, variant });
   state.next = `${id} is running for ${days} days; then run experiment end ${id} --result <file>.`;
   writeState(app, state);
@@ -133,7 +133,7 @@ export function experimentEnd(app, { id, result } = {}) {
   let r;
   try { r = JSON.parse(readFileSync(file, "utf8")); } catch (e) { throw new DesignError(`${result} is not a readable JSON result: ${e.message}`); }
   if (typeof r.control !== "number" || typeof r.variant !== "number") throw new DesignError(`${result} needs control and variant: the success metric's value for each`);
-  const path = `${DIR}/${id}.md`;
+  const path = `${docsDir(app)}/${id}.md`;
   const text = readFileSync(join(app, path), "utf8");
   const metric = r.metric ?? text.match(/\*\*Success\*\*: (.+)/)?.[1] ?? "success";
   // A guardrail holds unless it got worse by more than its tolerance (the result's, else HELIX's metric definition's).

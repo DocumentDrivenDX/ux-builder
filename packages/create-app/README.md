@@ -24,7 +24,7 @@ There is no sample domain or data. Native `ios`, `android`, `macos` and
 
 | Option | |
 |---|---|
-| `--modality <list>` | The app's modalities, comma-separated (`responsive-web`, `chat`, `hybrid-chat`). Recorded in `app.blueprint.json` as `supports.modalities`, with the size classes and inputs they derive. An unknown or future one exits 1 |
+| `--modality <list>` | The app's modalities, comma-separated (`responsive-web`, `chat`, `hybrid-chat`). Recorded in `docs/ux-builder/blueprint/app.blueprint.json` as `supports.modalities`, with the size classes and inputs they derive. An unknown or future one exits 1 |
 | `--theme <name>` | The theme to start on: any theme in `@ux-builder/tokens` (`databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `ux-builder-databricks`, `plain`). Default `plain` |
 | `--name <name>` | The package name. Default: the directory's name |
 | `--blueprint <file>` | Start from this plan of the app's screens instead of the starter's. A plan with an error (`ux-builder-blueprint check`) is refused, with each error, and nothing is written. Its `supports.modalities` (or `responsive-web` when it names none) must agree with `--modality`, or the starter exits 1 naming both |
@@ -86,7 +86,7 @@ without HELIX, and the output says why.
 - `npm run audit`: builds, serves and audits the app in every theme and
   appearance with `@ux-builder/audit` (run `npx playwright install chromium`
   once); the report is in `audit-report/`.
-- `app.blueprint.json`: the plan of the app's destinations and screens, and
+- `docs/ux-builder/blueprint/app.blueprint.json`: the plan of the app's destinations and screens, and
   `npm run check:blueprint`, which checks it against the interaction rules.
 - `.github/workflows/ci.yml`: `npm ci`, the blueprint check, lint and the audit on every push,
   with the report as an artifact.

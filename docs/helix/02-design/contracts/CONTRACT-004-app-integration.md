@@ -301,7 +301,7 @@ and `@ux-builder/create-app` 0.5.0. The formats are CONTRACT-005; this section l
 | `ux-builder-audit` | Checks `one-modal`, `modal-contract`, `one-primary-action`, `nav-per-breakpoint` (with `--width`), `line-length`: warnings for their first minor release. Options `--write-baseline <file>` and `--baseline <file>` |
 | `report.json` | A finding from these checks adds `ruleId` (the rule catalogue ID) and `sources[]` (`{ title, url }`); with `--baseline`, `summary` adds `baselined` and `resolved` (counts) and the report lists `resolved[]` |
 | Baseline file | `{ tool: "ux-builder-audit", version, findings: [{ rule, url, selector, message?, runs }] }`, sorted by `rule`, `url`, `selector`, `message`. `selector` is `null` for a finding with no element; such a finding carries `message`, and a later finding matches it by `rule`, `url` and `message`. A finding with a selector carries no `message` and matches by `rule`, `url` and `selector` |
-| `@ux-builder/create-app` | Writes `app.blueprint.json`, a `check:blueprint` script and a CI step; option `--blueprint <file>` |
+| `@ux-builder/create-app` | Writes `app.blueprint.json` (*[Amended 2026-10-24 — FEAT-018 GDL-80, US-149]* at `docs/ux-builder/blueprint/app.blueprint.json`), a `check:blueprint` script and a CI step; option `--blueprint <file>` |
 
 ## UX assessment *[Amended 2026-10-20 — FEAT-009, ADR-026]*
 
@@ -605,6 +605,9 @@ had to settle:
   (default `app.blueprint.json`). `--out` defaults to `helix-proposals/`,
   `blueprint-drawings/` and `blueprint-wireframes/`. A rerun replaces the
   `.patch`, `.mmd`/`.svg` and `.html`/`.png` files an earlier run wrote there.
+  *[Amended 2026-10-24 — FEAT-018 GDL-80, US-149]* The defaults follow the app's layout (CONTRACT-008 Layout):
+  `docs/ux-builder/blueprint/app.blueprint.json`, and `docs/ux-builder/helix-proposals/`, `drawings/` and
+  `wireframes/`; an app on the old layout keeps the paths above.
 - **`propose` output**: one `<id>.patch` per section (a unified diff,
   paths relative to the marker's directory, so `git apply` works from the
   repository root), `report.md` (patches, disagreements with both texts,
@@ -643,7 +646,7 @@ had to settle:
   Chromium is missing; the HTML is still written.
 - **`propose_from_blueprint`**: `{ blueprint, path? }`, `path` being where
   the blueprint lives (default `app.blueprint.json` in the server's
-  directory). It returns `{ flow, helix, proposals: [{ id, kind, path,
+  directory; *[Amended 2026-10-24 — FEAT-018 GDL-80, US-149]* `docs/ux-builder/blueprint/app.blueprint.json` unless the app is on the old layout). It returns `{ flow, helix, proposals: [{ id, kind, path,
   section, target, file, patch }], disagreements, current, problems,
   drafts: [{ id, kind, type, path, sections, text }], uxTypes: { installed,
   missing }, written: false }`, or an error naming `.helix.yml` when there is

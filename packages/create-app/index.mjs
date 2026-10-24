@@ -62,6 +62,7 @@ import { parseArgs } from "node:util";
 import { createInterface } from "node:readline";
 import { checkBlueprint } from "@ux-builder/ui/blueprint";
 import { DEFAULT_MODALITIES, FUTURE_MODALITIES, MODALITIES, modalityProblems } from "@ux-builder/ui/blueprint/modalities";
+import { CURRENT } from "@ux-builder/ui/blueprint/paths";
 import * as trace from "@ux-builder/trace";
 import { init as initDesign } from "@ux-builder/design";
 import { getHelix, install as installHelix } from "./helix.mjs";
@@ -174,7 +175,9 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = 
   for (const [to, from] of Object.entries(shellFiles(modalities))) cpSync(join(HERE, "shells", from), join(target, to));
   mkdirSync(join(target, "e2e"), { recursive: true });
   writeFileSync(join(target, "e2e/starter.spec.js"), starterSpec(modalities));
-  writeFileSync(join(target, "app.blueprint.json"), JSON.stringify(blueprintFor("__APP_NAME__", modalities), null, 2) + "\n");
+  // The blueprint lives with the rest of the design work, under docs/ux-builder/ (FEAT-018 GDL-80).
+  mkdirSync(join(target, "docs/ux-builder/blueprint"), { recursive: true });
+  writeFileSync(join(target, CURRENT.blueprint), JSON.stringify(blueprintFor("__APP_NAME__", modalities), null, 2) + "\n");
   const guide = modalityGuide(modalities);
   // The audit visits every screen of the shell, so each modality's screen is checked (FEAT-014 MOD-08).
   const auditUrls = [...new Set(blueprintFor(name, modalities).screens.map((sc) => sc.path ?? "/"))].map((p) => `http://127.0.0.1:4173${p}`).join(" ");
@@ -191,7 +194,7 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = 
     }
   };
   walk(target);
-  if (plan) writeFileSync(join(target, "app.blueprint.json"), plan);
+  if (plan) writeFileSync(join(target, CURRENT.blueprint), plan);
   return { dir: target, theme, name, modalities, versions, files: written.sort() };
 }
 
@@ -244,7 +247,7 @@ export function traceCreate(r, { agent, options = {} } = {}) {
       sdk: { ...r.versions, [OWN.name]: OWN.version },
     });
   } catch (e) { process.stderr.write(`create-app: no episode trace was started (${e.message})\n`); return null; }
-  const blueprintText = readFileSync(join(r.dir, "app.blueprint.json"), "utf8");
+  const blueprintText = readFileSync(join(r.dir, CURRENT.blueprint), "utf8");
   const files = countFiles(r.dir);
   trace.appendEvent(r.dir, "created", { modalities: r.modalities, theme: r.theme, options, files, blueprint: sha256(blueprintText) }, { by });
   // What the app tells its agent: AGENTS.md (CLAUDE.md is the same), with the patterns its blueprint starts from.
@@ -310,7 +313,7 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   cd ${relative(process.cwd(), r.dir).startsWith("..") ? r.dir : relative(process.cwd(), r.dir) || "."}
   npm install
   npm run dev      # http://localhost:5173
-  npm run check:blueprint  # the plan of the screens, app.blueprint.json
+  npm run check:blueprint  # the plan of the screens, docs/ux-builder/blueprint/app.blueprint.json
   npm run lint     # no hard-coded colours, fonts or radii
 
 Design with your agent: in Claude Code, type /ux-builder-design (the guide's skill is in .claude/skills/ux-builder-design/).${r.design?.mcp ? " .mcp.json configures the ux-builder MCP server." : ""}`);

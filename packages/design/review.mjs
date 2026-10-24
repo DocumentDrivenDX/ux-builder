@@ -10,7 +10,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { DesignError } from "./app.mjs";
+import { DesignError, bpFile, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -46,39 +46,39 @@ function stories(app) {
 
 /* Every reviewable item, in step order: [{ id, step, title, file, content, hash }]. */
 export function reviewItems(app) {
-  const bp = readJson(join(app, "app.blueprint.json")) ?? {};
+  const bp = readJson(join(app, bpFile(app))) ?? {};
   let state = null;
   try { state = readState(app); } catch { /* no design state */ }
   const items = [];
   const add = (id, step, title, file, content) => { if (content != null) items.push({ id, step, title, file, content, hash: hashOf(content) }); };
   // 1 Define intent
-  add("brief", 1, "The experience brief", "docs/ux/brief.md", read(app, "docs/ux/brief.md"));
+  add("brief", 1, "The experience brief", ux(app, "brief.md"), read(app, ux(app, "brief.md")));
   // 2 Understand users
-  for (const [id, u] of Object.entries(usersTable(app) ?? {})) add(`user:${id}`, 2, u.user, "docs/ux/users.md", readable({ id, user: u.user, context: u.context, needs: u.needs, jobs: u.jobs.map((j) => `${j.job} ${j.importance}`), evidence: u.evidence, confidence: u.confidence, status: u.status }));
-  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) add(`job:${id}`, 2, j.job, "docs/ux/jobs.md", readable({ id, job: j.job, importance: j.importance, evidence: j.evidence, confidence: j.confidence, status: j.status }));
-  for (const f of files(app, "docs/ux/evidence", /^EV-\d+\.md$/)) add(`evidence:${f.replace(/\.md$/, "")}`, 2, `Research evidence ${f.replace(/\.md$/, "")}`, `docs/ux/evidence/${f}`, read(app, `docs/ux/evidence/${f}`));
+  for (const [id, u] of Object.entries(usersTable(app) ?? {})) add(`user:${id}`, 2, u.user, ux(app, "users.md"), readable({ id, user: u.user, context: u.context, needs: u.needs, jobs: u.jobs.map((j) => `${j.job} ${j.importance}`), evidence: u.evidence, confidence: u.confidence, status: u.status }));
+  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) add(`job:${id}`, 2, j.job, ux(app, "jobs.md"), readable({ id, job: j.job, importance: j.importance, evidence: j.evidence, confidence: j.confidence, status: j.status }));
+  for (const f of files(app, ux(app, "evidence"), /^EV-\d+\.md$/)) add(`evidence:${f.replace(/\.md$/, "")}`, 2, `Research evidence ${f.replace(/\.md$/, "")}`, `${ux(app)}/evidence/${f}`, read(app, `${ux(app)}/evidence/${f}`));
   // 3 Model tasks: the stories the journeys cite, the tasks, and the business rules they cite
   const us = stories(app);
   for (const id of [...new Set(list(bp.journeys).map((j) => j?.story).filter(Boolean))]) if (us[id]) add(`story:${id}`, 3, parseDocument(us[id].text).body.match(/^# (.+)$/m)?.[1] ?? id, us[id].file, us[id].text);
-  for (const t of list(bp.tasks).filter((x) => x?.id)) add(`task:${t.id}`, 3, t.goal ?? t.id, "app.blueprint.json", readable(t));
+  for (const t of list(bp.tasks).filter((x) => x?.id)) add(`task:${t.id}`, 3, t.goal ?? t.id, bpFile(app), readable(t));
   const rules = businessRules(app).rules;
-  for (const id of [...new Set(ruleCitations(bp).map((c) => c.rule))]) add(`rule:${id}`, 3, rules[id]?.text ?? id, rules[id]?.file ?? "app.blueprint.json", readable({ rule: rules[id]?.text ?? "not defined in HELIX", ...(list(bp.businessRules).find((r) => r?.id === id) ?? {}) }));
+  for (const id of [...new Set(ruleCitations(bp).map((c) => c.rule))]) add(`rule:${id}`, 3, rules[id]?.text ?? id, rules[id]?.file ?? bpFile(app), readable({ rule: rules[id]?.text ?? "not defined in HELIX", ...(list(bp.businessRules).find((r) => r?.id === id) ?? {}) }));
   // 4 Explore alternatives
-  for (const j of list(bp.journeys).filter((x) => x?.id)) add(`journey:${j.id}`, 4, j.id, "app.blueprint.json", readable(j));
-  for (const a of list(state?.alternatives)) { const text = read(app, a.file ?? `app.blueprint.${a.name}.json`); if (text) add(`alternative:${a.name}`, 4, `Alternative ${a.name}`, a.file ?? `app.blueprint.${a.name}.json`, text); }
-  for (const f of files(app, "docs/ux/decisions", /^UXD-\d+\.md$/)) add(`decision:${f.replace(/\.md$/, "")}`, 4, parseDocument(read(app, `docs/ux/decisions/${f}`)).body.match(/^# (.+)$/m)?.[1] ?? f, `docs/ux/decisions/${f}`, read(app, `docs/ux/decisions/${f}`));
+  for (const j of list(bp.journeys).filter((x) => x?.id)) add(`journey:${j.id}`, 4, j.id, bpFile(app), readable(j));
+  for (const a of list(state?.alternatives)) { const text = read(app, a.file ?? bpFile(app, a.name)); if (text) add(`alternative:${a.name}`, 4, `Alternative ${a.name}`, a.file ?? bpFile(app, a.name), text); }
+  for (const f of files(app, ux(app, "decisions"), /^UXD-\d+\.md$/)) add(`decision:${f.replace(/\.md$/, "")}`, 4, parseDocument(read(app, `${ux(app)}/decisions/${f}`)).body.match(/^# (.+)$/m)?.[1] ?? f, `${ux(app)}/decisions/${f}`, read(app, `${ux(app)}/decisions/${f}`));
   // 5 Design the structure
-  for (const s of list(bp.screens).filter((x) => x?.id)) add(`screen:${s.id}`, 5, s.title ?? s.id, "app.blueprint.json", readable(s));
+  for (const s of list(bp.screens).filter((x) => x?.id)) add(`screen:${s.id}`, 5, s.title ?? s.id, bpFile(app), readable(s));
   // 7 Test with people
-  for (const d of files(app, "docs/ux/tests", /^TK-\d+$/)) {
-    const dir = `docs/ux/tests/${d}`;
+  for (const d of files(app, ux(app, "tests"), /^TK-\d+$/)) {
+    const dir = `${ux(app)}/tests/${d}`;
     if (!statSync(join(app, dir)).isDirectory()) continue;
     add(`kit:${d}`, 7, `Test kit ${d}`, `${dir}/kit.md`, ["kit.md", "scenarios.md", "script.md", "screener.md", "consent.md"].map((f) => read(app, `${dir}/${f}`)).filter(Boolean).join("\n\n"));
   }
-  for (const f of files(app, "docs/ux/evaluations", /^UER-\d+\.md$/)) add(`report:${f.replace(/\.md$/, "")}`, 7, `UX evaluation report ${f.replace(/\.md$/, "")}`, `docs/ux/evaluations/${f}`, read(app, `docs/ux/evaluations/${f}`));
+  for (const f of files(app, ux(app, "evaluations"), /^UER-\d+\.md$/)) add(`report:${f.replace(/\.md$/, "")}`, 7, `UX evaluation report ${f.replace(/\.md$/, "")}`, `${ux(app)}/evaluations/${f}`, read(app, `${ux(app)}/evaluations/${f}`));
   // 8 Refine and improve
-  for (const f of files(app, "docs/ux/insights", /^INS-[\d-]+\.md$/)) add(`insight:${f.replace(/\.md$/, "")}`, 8, `Production insights ${f.replace(/\.md$/, "")}`, `docs/ux/insights/${f}`, read(app, `docs/ux/insights/${f}`));
-  for (const f of files(app, "docs/ux/experiments", /^EXP-\d+\.md$/)) add(`experiment:${f.replace(/\.md$/, "")}`, 8, `Experiment ${f.replace(/\.md$/, "")}`, `docs/ux/experiments/${f}`, read(app, `docs/ux/experiments/${f}`));
+  for (const f of files(app, ux(app, "insights"), /^INS-[\d-]+\.md$/)) add(`insight:${f.replace(/\.md$/, "")}`, 8, `Production insights ${f.replace(/\.md$/, "")}`, `${ux(app)}/insights/${f}`, read(app, `${ux(app)}/insights/${f}`));
+  for (const f of files(app, ux(app, "experiments"), /^EXP-\d+\.md$/)) add(`experiment:${f.replace(/\.md$/, "")}`, 8, `Experiment ${f.replace(/\.md$/, "")}`, `${ux(app)}/experiments/${f}`, read(app, `${ux(app)}/experiments/${f}`));
   return items;
 }
 

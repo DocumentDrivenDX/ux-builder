@@ -22,7 +22,7 @@ describe("the docs/ux types", () => {
       const meta = documentTypes()[type];
       assert.equal(meta.type, type);
       assert.ok(meta.id.prefix, `${type}: id.prefix`);
-      assert.match(meta.output, /^docs\/ux\//, `${type}: output under docs/ux/`);
+      assert.match(meta.output, /^docs\/ux-builder\//, `${type}: output under docs/ux-builder/`);
       assert.ok(meta.sections.length >= 1, `${type}: sections`);
       // The template has every section, so an agent filling it in passes validate's section check.
       const headings = parseDocument(readFileSync(join(ARTIFACTS, type, "template.md"), "utf8")).headings.map((h) => h.toLowerCase());

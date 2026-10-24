@@ -21,16 +21,17 @@ describe("US-052: adopting the rules in an existing app", () => {
     writeFileSync(join(dir, "package.json"), '{"name":"existing"}\n');
     const first = run(["init"], dir);
     assert.equal(first.status, 0, first.stderr);
-    assert.deepEqual(readdirSync(dir).sort(), ["app.blueprint.json", "package.json"]);
-    const bp = JSON.parse(readFileSync(join(dir, "app.blueprint.json"), "utf8"));
+    // A new app's blueprint goes with its design work, under docs/ux-builder/ (FEAT-018 GDL-80).
+    assert.deepEqual(readdirSync(dir).sort(), ["docs", "package.json"]);
+    const bp = JSON.parse(readFileSync(join(dir, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
     assert.equal(bp.kind, "app");
     assert.ok(bp.supports.sizeClasses.length && bp.supports.inputs.length);
     assert.equal(bp.screens.length, 1);
-    writeFileSync(join(dir, "app.blueprint.json"), "{ \"mine\": true }\n");
+    writeFileSync(join(dir, "docs/ux-builder/blueprint/app.blueprint.json"), "{ \"mine\": true }\n");
     const second = run(["init"], dir);
     assert.equal(second.status, 1);
     assert.match(second.stderr, /exists/);
-    assert.equal(readFileSync(join(dir, "app.blueprint.json"), "utf8"), "{ \"mine\": true }\n");
+    assert.equal(readFileSync(join(dir, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"), "{ \"mine\": true }\n");
     assert.equal(readFileSync(join(dir, "package.json"), "utf8"), '{"name":"existing"}\n');
     assert.equal(run(["init", "--kind", "view", "--out", "view.blueprint.json"], dir).status, 0);
     assert.equal(JSON.parse(readFileSync(join(dir, "view.blueprint.json"), "utf8")).kind, "view");

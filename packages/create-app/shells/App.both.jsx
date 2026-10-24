@@ -8,7 +8,7 @@ import { Assistant } from "./Assistant.jsx";
 
 registerIcons(iconMessageSquare);
 
-/* The app's frame (app.blueprint.json, its destinations): Home, a screen of
+/* The app's frame (docs/ux-builder/blueprint/app.blueprint.json, its destinations): Home, a screen of
    the responsive web app, and Assistant, its conversation. AppShell places
    the navigation for the space available, from a bottom bar at compact to
    side navigation at large. Each destination has its own path. */
