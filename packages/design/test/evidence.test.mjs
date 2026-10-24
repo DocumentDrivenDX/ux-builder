@@ -43,7 +43,7 @@ describe("US-125: evidence", () => {
     const app = withTranscript();
     const r = cli(app, ["evidence", "add", "research/interview-1.txt", "--kind", "gossip"]);
     assert.equal(r.status, 2);
-    assert.match(r.stderr, /--kind is one of interview, analytics, support, survey, observation, not "gossip"/);
+    assert.match(r.stderr, /--kind is one of interview, analytics, support, feedback, survey, observation, not "gossip"/);
     assert.equal(existsSync(join(app, "docs/ux/evidence")), false);
   });
 

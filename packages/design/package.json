@@ -29,6 +29,8 @@
     "testkit.mjs",
     "sessions.mjs",
     "evaluation.mjs",
+    "insights.mjs",
+    "experiments.mjs",
     "documents.mjs",
     "cli.mjs",
     "artifacts",

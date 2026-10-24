@@ -30,7 +30,9 @@ ChatGPT's proposal, in six phases; the operator accepted every proposed
 decision (D-1 to D-10) and asked for all six phases to be framed for
 development. Stage 1 of the operator's plan: new artifact templates and
 prompts live in ux-builder; mapping them into HELIX is stage 2, after the
-concept is tested.
+concept is tested. Stage 1 built (2026-10-23): all six phases, B-018 to
+B-036, every acceptance criterion cited by a test. Open: stage 2 (the
+HELIX mapping) and decision D-11.
 **Priority**: P1
 **Owner**: Operator
 **Covered PRD Subsystem(s)**: Guided design (new); Interaction and

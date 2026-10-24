@@ -127,6 +127,7 @@ Nothing in the trace is sent anywhere; the app's owner shares episodes by choice
 | `<Dialog>` | `open = false, onClose, title, description, actions, closeLabel = "Close", initialFocus, role, className, children` | A modal dialog in the middle of the screen: a short task or a decision. The page behind is inert, focus moves in (to initialFocus, a ref, if given) and returns to what opened it; Escape or the close button calls onClose. |
 | `<Favicon>` | `—` | Keeps the page's icon on the theme's favicon, for a page that sets data-theme and data-appearance on <html> without a ThemeProvider; renders nothing. |
 | `<Icon>` | `name, icon, set, size = "1em", label, className = ""` | An icon by shared name (ICON_NAMES) or registered name, or an icon from @ux-builder/ui/icons passed as icon, drawn in the theme's icon set, the text colour and 1em; decorative unless label names it. |
+| `<JourneyProvider>` | `sink, children` | Hands the app's own sink each journey event (journey-start, step, complete, abandon, error-shown, empty-result, no-results-search) for its own analytics: wrap the app, or the part a journey runs in. Without a sink it does nothing, and the SDK sends nothing anywhere. |
 | `<Logo>` | `variant = "logo", size = "md", label, className = ""` | The active theme's logo, or its mark (variant="mark"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour. |
 | `<MenuButton>` | `label, items = [], icon, variant = "secondary", size, align = "start", buttonLabel, className` | A button that opens a menu of actions: account, workspace, a page's or a row's "More". Keyboard as the WAI-ARIA Menu Button pattern: Enter, Space or Down opens on the first item, Up on the last; arrows, Home and End move; a letter jumps to the next item starting with it; Escape closes and returns focus to the button. |
 | `<Notice>` | `tone = "info", title, children` | A message in the flow of the page. The tone sets its colour and its mark; the title says the point, so the colour is never the only signal. |
@@ -250,6 +251,8 @@ Spacing props (`gap`) are the theme's space steps, 0 to 8. Each design system ch
 
 ### Hooks
 
+- `useJourneySignal()`: For the SDK's own panels: report `type` for the current step while `when` holds. Outside a provider with a sink it does nothing.
+- `useJourneyStep()`: Mark the screen a component renders as step `step` of `journeyId` (the blueprint's IDs). The screen is the given one, else the page's data-piq-screen.
 - `useTheme()`: The nearest provider's theme: { theme, appearance, preference, themes, setTheme, setAppearance }. appearance is always "light" or "dark".
 - `useToast()`: show({ message, actionLabel, onAction, duration }) a toast, or dismiss(id) one.
 

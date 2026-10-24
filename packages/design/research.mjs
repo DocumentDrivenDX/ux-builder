@@ -8,7 +8,7 @@ import { isAbsolute, join, relative } from "node:path";
 import { DesignError, writeInApp } from "./app.mjs";
 import { parseDocument } from "./documents.mjs";
 
-export const EVIDENCE_KINDS = ["interview", "analytics", "support", "survey", "observation"];
+export const EVIDENCE_KINDS = ["interview", "analytics", "support", "feedback", "survey", "observation"];
 const DIR = "docs/ux/evidence";
 
 /* The EV- numbers in use. */
@@ -21,7 +21,7 @@ function numbers(app) {
 const today = () => new Date().toISOString().slice(0, 10);
 const quote = (s) => JSON.stringify(String(s));
 
-/* A new evidence record; kind transcript is written by transcriptAdd. */
+/* A new evidence record; kind transcript is written by transcriptAdd, and insights writes analytics, support and feedback. */
 export function writeEvidence(app, { file, kind, date = today(), source, title, extra = [], excerpts = [], participants = {} }) {
   const n = Math.max(0, ...numbers(app)) + 1;
   const id = `EV-${n}`;

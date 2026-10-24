@@ -11,6 +11,7 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { checkBlueprint, score } from "@ux-builder/ui/blueprint";
 import { DesignError } from "./app.mjs";
+import { latestInsights } from "./insights.mjs";
 import { observedDimensions, observedMeasures } from "./sessions.mjs";
 import { readState } from "./state.mjs";
 
@@ -65,7 +66,20 @@ function computed(bp, app) {
 export function observedFor(app, alternative, predicted = {}) {
   let chosen = null;
   try { chosen = readState(app).alternatives.find((a) => a.status === "chosen")?.name ?? null; } catch { /* no design state */ }
-  return [undefined, "current", chosen].includes(alternative) ? observedDimensions(app, predicted) : {};
+  if (![undefined, "current", chosen].includes(alternative)) return {};
+  const dims = observedDimensions(app, predicted);
+  // Production use, from the latest insights, beside what people did in tests (FEAT-018 GDL-65).
+  const ins = latestInsights(app);
+  const started = sum(list(ins?.journeys).map((j) => j.started)), completed = sum(list(ins?.journeys).map((j) => j.completed));
+  if (started) {
+    const rate = completed / started;
+    const prod = `${Math.round(rate * 100)}% of ${started} journeys completed in production (${ins.id})`;
+    const cites = [ins.id, ...list(ins.sources).map((x) => x.id)];
+    const te = dims["task-effectiveness"];
+    dims["task-effectiveness"] = te ? { ...te, value: `${te.value}; ${prod}`, evidence: [...te.evidence, ...cites] }
+      : { value: prod, evidence: cites, verdict: predicted["task-effectiveness"]?.fails ? (rate >= 0.8 ? "contradicts" : "supports") : rate < 0.8 ? "contradicts" : "supports" };
+  }
+  return dims;
 }
 
 /* ux-builder-design rubric [--alternative <name>]. */

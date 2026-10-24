@@ -42,7 +42,7 @@ Phase 2, evidence mode. `ux-builder-design evidence add` records each source as 
 ## Acceptance Criteria
 
 - [ ] **US-125-AC1** — Given a transcript file, when `ux-builder-design evidence add <file> --kind interview --date <d> --source <s>` runs, then it writes `docs/ux/evidence/EV-<n>.md` with the next free number, the kind, date, source and a reference to the file, and does not copy the file's text.
-- [ ] **US-125-AC2** — Given a kind outside interview, analytics, support, survey and observation, when `evidence add` runs, then it exits 2 (bad input, CONTRACT-008), names the allowed kinds and writes nothing.
+- [ ] **US-125-AC2** — Given a kind outside interview, analytics, support, feedback, survey and observation, when `evidence add` runs, then it exits 2 (bad input, CONTRACT-008), names the allowed kinds and writes nothing.
 - [ ] **US-125-AC3** — Given an evidence file whose excerpts contain an email address, a phone number and a key matching the trace's patterns, when `ux-builder-design validate` runs, then it exits 1 and names each unmasked excerpt; after masking it exits 0.
 - [ ] **US-125-AC4** — Given an excerpt that names a participant by the real name the owner listed for that pseudonym in `.ux-builder/participants.local.json` (kept out of git, ADR-039), when `validate` runs, then it fails until the excerpt uses the participant's pseudonym.
 - [ ] **US-125-AC5** — Given three evidence files, when `ux-builder-design evidence list --json` runs, then it lists each with its ID, kind, date, source and the number of excerpts cited.
@@ -58,7 +58,7 @@ Phase 2, evidence mode. `ux-builder-design evidence add` records each source as 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
 | AC1 | US-125-AC1 | a transcript file | `ux-builder-design evidence add <file> --kind interview --date <d> --source <s>` runs | it writes `docs/ux/evidence/EV-<n>.md` with the next free number, the kind, date, source and a reference to the file, and does not copy the file's text |
-| AC2 | US-125-AC2 | a kind outside interview, analytics, support, survey and observation | `evidence add` runs | it exits 2 (bad input, CONTRACT-008), names the allowed kinds and writes nothing |
+| AC2 | US-125-AC2 | a kind outside interview, analytics, support, feedback, survey and observation | `evidence add` runs | it exits 2 (bad input, CONTRACT-008), names the allowed kinds and writes nothing |
 | AC3 | US-125-AC3 | an evidence file whose excerpts contain an email address, a phone number and a key matching the trace's patterns | `ux-builder-design validate` runs | it exits 1 and names each unmasked excerpt; after masking it exits 0 |
 | AC4 | US-125-AC4 | an excerpt that names a participant by the real name the owner listed for that pseudonym in `.ux-builder/participants.local.json` (kept out of git, ADR-039) | `validate` runs | it fails until the excerpt uses the participant's pseudonym |
 | AC5 | US-125-AC5 | three evidence files | `ux-builder-design evidence list --json` runs | it lists each with its ID, kind, date, source and the number of excerpts cited |

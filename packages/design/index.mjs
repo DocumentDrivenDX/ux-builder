@@ -17,6 +17,8 @@ export { ready, readyText } from "./ready.mjs";
 export { observedFor, RUBRIC, rubric, rubricText } from "./rubric.mjs";
 export { findingIdFor, humanFindings, maskPersonal, observedDimensions, observedMeasures, observeImport, parseCsv, transcriptAdd, transcriptLines } from "./sessions.mjs";
 export { evaluationFindings, report, route } from "./evaluation.mjs";
+export { insights, journeyStats, latestInsights } from "./insights.mjs";
+export { diagnose, experimentEnd, experimentStart } from "./experiments.mjs";
 export { DECISION_STATUSES, decisionAdd, decisionStatus } from "./decisions.mjs";
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml, principlesFile } from "./brief.mjs";
 export { EVIDENCE_KINDS, evidenceAdd, evidenceList, writeEvidence } from "./research.mjs";

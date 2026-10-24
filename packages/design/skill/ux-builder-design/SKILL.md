@@ -249,6 +249,22 @@ a proposed patch to HELIX's improvement backlog. Label every finding you
 report as a human observation or your recommendation; never pass yours off
 as what people did.
 
+## Learn from production
+
+The app reports journeys only if it chooses to: wrap it in
+`JourneyProvider` with its own `sink`, and mark each step with
+`useJourneyStep("<journey>", <step>)`. Nothing is sent anywhere by the SDK.
+When the owner exports the events (JSON Lines), and support or feedback:
+
+- `insights <events.jsonl> [--support <file>] [--feedback <file>]` writes
+  `docs/ux/insights/INS-<date>.md`; the jobs and the rubric cite it.
+- `diagnose --insight INS-<date> --observation … --explanation …
+  --explanation … --hypothesis "If …, then …, because …" --alternative <name>`:
+  never one explanation; make the alternative first.
+- Ask checkpoint `experiment`, then `experiment start --decision UXD-<n>
+  --variant <alt> --metric <m> --guardrail <m> --duration <days>`. When it
+  ends, `experiment end EXP-<n> --result <file>`, then ask `release`.
+
 ## Change what exists
 
 When the person asks for a change ("remove the activity selection before

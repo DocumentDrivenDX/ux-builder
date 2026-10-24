@@ -97,9 +97,10 @@ camelCase that returns the `--json` object.
 | `report` | Writes the UX evaluation report: method, tasks, measures, the rubric (predicted, agent-measured, observed), findings by journey labelled human observation or agent recommendation, recommendations and what was not tested; links the kits and the earlier report (`follows`). An observed `contradicts` verdict highlights the dimension and moves assumptions with that `dimension` to `refuted`; `supports` moves them to `confirmed`; with no human observation nothing changes | `docs/ux/evaluations/UER-<n>.md` |
 | `route <F-id>... [--decision <UXD-n> --status tested\|refuted]` | The findings chosen at `core-3` as a proposed patch adding rows to HELIX's improvement backlog (an existing `improvement-backlog` document, else a new one at `<root>/06-iterate/improvement-backlog.md`); with `--decision`, `decision status` with the latest report as evidence | `helix-proposals/backlog/improvement-backlog.patch` |
 | `ready [--for testing\|production]` | `--for testing`: the validated prototype passes lint, `check:blueprint` and the audit. `--for production` (default): also every covered criterion cited by a test, and the faked data and error handling listed, before checkpoint `core-3` (ADR-037 rule 4) | nothing |
-| `insights <events.jsonl> [--support <file>] [--feedback <file>]` | Per-journey production insights | `docs/ux/insights/INS-<yyyy-mm-dd>.md` |
-| `experiment start --decision <UXD-n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>` | Opens an experiment after the `experiment` checkpoint | `docs/ux/experiments/EXP-<n>.md` |
-| `experiment end <EXP-n> --result <file>` | Records the result against the hypothesis | that record |
+| `insights <events.jsonl> [--support <file>] [--feedback <file>] [--date YYYY-MM-DD]` | Per-journey production insights: started, completed, completion, the most abandoned step, failed searches, errors shown, feature use (step events per screen) and median seconds per step (by `session` when events carry one); events of journeys the blueprint lacks listed as unmatched. Writes evidence records (kind `analytics`, and `support` and `feedback` with their masked entries that mention a journey by ID or screen title), cites them in the jobs that the observed journeys' tasks serve (a hypothesis becomes confirmed, low confidence medium), and a JSON sidecar the rubric's observed column reads. Reads only the given files and the app's own | `docs/ux/insights/INS-<yyyy-mm-dd>.md` and `.json`, `docs/ux/evidence/EV-<n>.md` |
+| `diagnose --insight <INS-date> --observation <o> --explanation <e>... --hypothesis <h> --alternative <name>` | Records a diagnosis: at least two explanations, and an existing alternative | `diagnoses[]`; the insight's Diagnosis section |
+| `experiment start --decision <UXD-n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>` | Opens an experiment, only with one more passed `experiment` checkpoint than experiments started; its hypothesis from the latest diagnosis of that variant. Metrics with no `<root>/06-iterate/metrics/<name>.yaml` are proposed as metric-definition patches | `docs/ux/experiments/EXP-<n>.md`, `helix-proposals/metrics/<name>.patch` |
+| `experiment end <EXP-n> --result <file>` | Compares the success metric (`control`, `variant`) and each guardrail (`{ metric, control, variant, better: lower\|higher }`), records the hypothesis as supported only when the metric improved and every guardrail held, and sets `next` to ask `release` | that record |
 | `validate` | Checks every `docs/ux/` document's frontmatter, ID, template sections and links | nothing |
 
 Exit codes: 0 done; 1 a check failed or a finding at error severity; 2 bad
@@ -122,7 +123,8 @@ input or a refusal (named on stderr).
 | `alternatives[]` | `{ name, file, status: candidate\|chosen\|rejected, reason?, date?, judgments?: [{ criterion, value, reasoning }] }` | Judgments are preliminary, shown on the comparison page |
 | `principles[]` | `{ id: "PR-<n>", text, status: confirmed\|assumed\|hypothesis\|refuted, rule? }` | Experience principles; one with a `rule` becomes a project rule (Project principles) |
 | `issues[]` | `{ finding, status: open\|fixed\|wont-fix }` | Unresolved usability issues |
-| `experiments[]` | `{ id, status: running\|ended }` | |
+| `experiments[]` | `{ id, status: running\|ended, decision?, variant?, result?: supported\|not-supported }` | |
+| `diagnoses[]` | `{ id: "D-<n>", insight, observation, explanations[2+], hypothesis, alternative }` | From an insight to the alternative that tests it |
 | `faked[]` | `{ what, where }` | Data and error handling a prototype faked |
 | `prototype` | `{ branch, alternative? }` | The validated prototype's branch; `status` reports it `validated` until `core-3` passes, then `production` |
 | `observations[]` | `{ id: "O-<n>", text, source: design-team, alternative? }` | What the design team noticed trying a prototype; never user evidence |
@@ -154,7 +156,7 @@ Type-specific rules `validate` applies:
   phone number, a `.ux-builder/config.json` `redact` match, or a real name
   the owner listed in `.ux-builder/participants.local.json` (`{ "P1":
   "<name>" }`, kept out of git) fails. `evidence add` takes `--kind`
-  interview, analytics, support, survey or observation; `transcript add`
+  interview, analytics, support, feedback, survey or observation; `transcript add`
   records kind `transcript`.
 - `jobs`: each `J-<n>` row has importance, evidence (source IDs) and
   confidence (`low`, `medium`, `high`); confidence above `low` needs at
@@ -253,6 +255,14 @@ interaction decision record carries `ux: "UXD-<n>"`.
   step | complete | abandon | error-shown | empty-result |
   no-results-search, journey, screen, step, at }`. No sink, no events. The
   SDK makes no network call for them (ADR-038).
+  `useJourneyStep(journeyId, step, { screen }?)` registers the step (screen
+  from the option, else the page's `data-piq-screen`) and returns
+  `{ complete, abandon, errorShown, emptyResult, noResultsSearch }`. A
+  journey left for another before it completes, or still under way when
+  the provider unmounts, is abandoned. `StatePanel` reports `error-shown`,
+  `empty-result` and `no-results-search` for its `error`, `empty` and
+  `no-results` kinds; `useJourneySignal(type)` does the same for an app's
+  own panels.
 - `create-app` gains `--mcp`, adds `@ux-builder/design`, installs its skill
   and writes an empty design state.
 
@@ -271,6 +281,7 @@ interaction decision record carries `ux: "UXD-<n>"`.
 | `validate` on a document missing a template section | Exit 1, the document and section named |
 | `insights` with events naming an unknown journey | Exit 0; those events reported as unmatched |
 | `experiment start` without a passed `experiment` checkpoint | Exit 2, refusal |
+| `diagnose` with fewer than two explanations, or an unknown alternative | Exit 2; nothing written |
 
 ## Validation Checklist
 

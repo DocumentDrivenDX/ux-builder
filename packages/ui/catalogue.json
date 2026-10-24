@@ -895,6 +895,23 @@
       "import": "import { Icon } from \"@ux-builder/ui\";"
     },
     {
+      "name": "JourneyProvider",
+      "type": "component",
+      "purpose": "Hands the app's own sink each journey event (journey-start, step, complete, abandon, error-shown, empty-result, no-results-search) for its own analytics: wrap the app, or the part a journey runs in. Without a sink it does nothing, and the SDK sends nothing anywhere.",
+      "props": [
+        {
+          "name": "sink",
+          "default": null
+        },
+        {
+          "name": "children",
+          "default": null
+        }
+      ],
+      "source": "src/journey/Journey.jsx",
+      "import": "import { JourneyProvider } from \"@ux-builder/ui\";"
+    },
+    {
       "name": "Logo",
       "type": "component",
       "purpose": "The active theme's logo, or its mark (variant=\"mark\"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour.",
@@ -1636,6 +1653,44 @@
       ],
       "source": "src/widgets/Tooltip.jsx",
       "import": "import { Tooltip } from \"@ux-builder/ui\";"
+    },
+    {
+      "name": "useJourneySignal",
+      "type": "hook",
+      "purpose": "For the SDK's own panels: report `type` for the current step while `when` holds. Outside a provider with a sink it does nothing.",
+      "props": [
+        {
+          "name": "type",
+          "default": null
+        },
+        {
+          "name": "when",
+          "default": "true"
+        }
+      ],
+      "source": "src/journey/Journey.jsx",
+      "import": "import { useJourneySignal } from \"@ux-builder/ui\";"
+    },
+    {
+      "name": "useJourneyStep",
+      "type": "hook",
+      "purpose": "Mark the screen a component renders as step `step` of `journeyId` (the blueprint's IDs). The screen is the given one, else the page's data-piq-screen.",
+      "props": [
+        {
+          "name": "journeyId",
+          "default": null
+        },
+        {
+          "name": "step",
+          "default": null
+        },
+        {
+          "name": "{ screen }",
+          "default": "{}"
+        }
+      ],
+      "source": "src/journey/Journey.jsx",
+      "import": "import { useJourneyStep } from \"@ux-builder/ui\";"
     },
     {
       "name": "useTheme",

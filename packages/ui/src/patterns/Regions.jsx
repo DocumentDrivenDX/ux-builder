@@ -3,6 +3,7 @@ import { Button } from "../widgets/Button.jsx";
 import { MenuButton } from "../widgets/MenuButton.jsx";
 import { Sheet } from "../widgets/Sheet.jsx";
 import { Icon } from "../icons/Icon.jsx";
+import { useJourneySignal } from "../journey/Journey.jsx";
 
 /* The lower bound of each size class in CSS px (ADR-021): the same numbers as
    --piq-size-breakpoint-* and patterns.css's queries. */
@@ -159,6 +160,8 @@ const STATES = {
   error: { icon: "error", title: "This didn't load", text: "Something went wrong on our side. Try again." },
   partial: { icon: "warning", title: "Some of this didn't load", text: "What loaded is shown below. Try again for the rest." },
 };
+/* The journey event each panel reports (ADR-038). */
+const SIGNALS = { error: "error-shown", empty: "empty-result", "no-results": "no-results-search" };
 
 /* What a list or region shows when it has no content to show: first use
    (empty), nothing matching (no-results, with the active filters and a way
@@ -167,6 +170,8 @@ const STATES = {
    next action, and is announced to screen readers. */
 export function StatePanel({ kind = "empty", title, children, action, filters = [], onClearFilters, clearLabel = "Clear filters", onRetry, retryLabel = "Try again", activeLabel = "Active filters:", className }) {
   const s = STATES[kind] ?? STATES.empty;
+  // Inside a journey with a sink, the panel says what the user met (ADR-038).
+  useJourneySignal(SIGNALS[kind]);
   return (
     <div className={`piq-state-panel${className ? ` ${className}` : ""}`} data-kind={kind} role={kind === "error" ? "alert" : "status"}>
       <Icon name={s.icon} className="piq-state-panel__mark" />

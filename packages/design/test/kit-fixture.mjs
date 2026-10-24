@@ -27,7 +27,8 @@ export function kitApp() {
   writeFileSync(join(a, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
   put(a, "docs/helix/01-frame/user-stories/US-001-find.md", "---\nddx:\n  id: US-001\n  type: user-stories\n---\n\n# US-001: Find a river\n\n- [ ] **US-001-AC1** — Given rivers nearby, when the angler looks, then they find one with access.\n- [ ] **US-001-AC2** — Given a river, when the angler saves it, then it is in Saved.\n");
   put(a, "docs/helix/01-frame/user-stories/US-002-saved.md", "---\nddx:\n  id: US-002\n  type: user-stories\n---\n\n# US-002: Saved rivers\n");
-  put(a, "docs/ux/brief.md", "---\nux:\n  id: brief\n  type: experience-brief\n---\n\n# Experience brief\n\n## Target users\n\n- Weekend anglers new to the area [assumed]\n- Fly-fishing guides\n\n## Outcome\n\n- Find water fast.\n");
+  put(a, "docs/ux/jobs.md", "---\nux:\n  id: jobs\n  type: jobs\n---\n\n# Jobs\n\n## Jobs\n\n| ID | Job | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|---|\n| J-1 | Find a river | high | none | low | hypothesis |\n| J-2 | Go back to a river | medium | none | low | hypothesis |\n");
+  put(a, "docs/ux/brief.md", "---\nux:\n  id: brief\n  type: experience-brief\n---\n\n# Experience brief\n\n## Product\n\n- River finder.\n\n## Target users\n\n- Weekend anglers new to the area [assumed]\n- Fly-fishing guides\n\n## Primary outcome\n\n- Find water fast.\n\n## Primary jobs\n\n- None yet.\n\n## Experience principles\n\n- None yet.\n\n## Constraints\n\n- None yet.\n\n## Open questions\n\n- None yet.\n");
   return a;
 }
 
