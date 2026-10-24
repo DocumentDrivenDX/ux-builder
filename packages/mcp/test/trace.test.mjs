@@ -38,6 +38,8 @@ before(async () => {
 /* Arguments for the tools that need some; the others are called with none. */
 const ARGS = {
   update_design_state: { path: "next", value: "Compare flows" },
+  design_impact: { change: "Remove the filters" },
+  design_trace: { id: "J-find" },
   simplify_blueprint: { blueprint: skeleton("app") },
   score_blueprint: { blueprint: skeleton("app") },
   compare_blueprints: { alternatives: [{ name: "a", blueprint: skeleton("app") }, { name: "b", blueprint: skeleton("app") }] },

@@ -456,6 +456,18 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       description: "The activity, mode, chosen alternative, untested assumptions, open questions, checkpoints, next action and docs/ux documents; as `ux-builder-design status --json` returns it.",
       inputSchema: {},
     }, async () => run(() => design.status(at())));
+    if (design.impact) {
+      server.registerTool("design_impact", {
+        title: "What a change reaches",
+        description: "Everything a change described in plain words reaches: tasks, journeys, screens, patterns, prototype pages, test-kit tasks, findings and HELIX documents, and checkpointRequired when it touches something already tested. Changes nothing; as `ux-builder-design impact \"<change>\" --json` returns it.",
+        inputSchema: { change: z.string().describe("The change, in plain words") },
+      }, async ({ change }) => run(() => design.impact(at(), { change })));
+      server.registerTool("design_trace", {
+        title: "Trace an item",
+        description: "Everything linked to a job, task, journey, screen, decision, kit task or finding, upstream and downstream, each with its file; as `ux-builder-design trace <id> --json` returns it.",
+        inputSchema: { id: z.string().describe("A J-, T-, journey, screen, UXD-, TK-n#task or F- ID") },
+      }, async ({ id }) => run(() => design.trace(at(), { id })));
+    }
   }
 
   // The episode trace's own tools (CONTRACT-007 MCP tools; US-105-AC2, US-107).

@@ -25,6 +25,8 @@
     "decisions.mjs",
     "rubric.mjs",
     "ready.mjs",
+    "graph.mjs",
+    "testkit.mjs",
     "documents.mjs",
     "cli.mjs",
     "artifacts",

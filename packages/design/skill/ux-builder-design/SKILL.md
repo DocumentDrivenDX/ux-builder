@@ -219,6 +219,20 @@ Before test users see it, run `ux-builder-design ready --for testing`;
 before it becomes production code, `ux-builder-design ready` and then ask
 `core-3`. It stays a prototype until `core-3` is answered.
 
+## Change what exists
+
+When the person asks for a change ("remove the activity selection before
+exploring"), first run `ux-builder-design impact "<their words>"`: it lists
+every task, journey, screen, pattern, prototype page, kit task, finding and
+HELIX document the change reaches. Show the person that list, and the
+complexity it adds. If it says `checkpointRequired`, ask `significant-change`
+first. When they accept, write the changed blueprint to a file and run
+`impact "<their words>" --apply --set <that file>`: it checks it,
+regenerates the prototypes and the test kits, drafts HELIX changes as
+proposals and records the decision, then prints one summary. If the check
+fails, nothing is regenerated: fix the blueprint and apply again. Use
+`ux-builder-design trace <id>` to see what any item is linked to.
+
 ## Checkpoints
 
 Stop, ask the person one question, and wait for the answer at each

@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { baseline, brief, checkpoint, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -48,6 +48,15 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       write docs/ux/decisions/UXD-<n>.md, status not-tested, and a decision in the trace.
   decision status <UXD-n> tested|refuted [--evidence <id>]
       update a decision's validation status, keeping the earlier one in its history.
+  trace <id>
+      everything linked to a job, task, journey, screen, decision, kit task or
+      finding, upstream and down, each with its file.
+  impact "<change>" [--apply --set <changed blueprint>]
+      what a change in plain words reaches (and checkpointRequired when it
+      touches something already tested); --apply makes it: the blueprint,
+      prototypes and kits regenerated, HELIX only as proposals, a decision.
+  test-kit [--journey <id>]...
+      a usability test kit in docs/ux/tests/TK-<n>/ from the journeys.
   ready [--for testing|production]
       is the validated prototype ready? testing: lint, check:blueprint and the
       audit pass. production (default): also every criterion its journeys
@@ -82,7 +91,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -129,6 +138,28 @@ async function main(argv) {
   if (command === "brief") {
     const r = brief(app, { name: values.name });
     print(r, values.json, [`Wrote ${r.written.join(", ")}.`, ...r.notes].join("\n"));
+    return 0;
+  }
+  if (command === "trace") {
+    const r = trace(app, { id: rest[0] });
+    const line = (n) => `  ${n.kind.padEnd(15)} ${n.id}${n.label && n.label !== n.id ? `  ${n.label}` : ""}${n.file ? `  (${n.file})` : ""}`;
+    print(r, values.json, [`${r.item.kind} ${r.item.id}`, "Upstream:", ...(r.upstream.length ? r.upstream.map(line) : ["  none"]), "Downstream:", ...(r.downstream.length ? r.downstream.map(line) : ["  none"])].join("\n"));
+    return 0;
+  }
+  if (command === "impact") {
+    if (values.apply) {
+      const r = await applyImpact(app, { change: rest[0], set: values.set });
+      print(r, values.json, r.summary);
+      return r.applied ? 0 : 1;
+    }
+    const r = impact(app, { change: rest[0] });
+    const line = (n) => `  ${n.kind.padEnd(15)} ${n.id}${n.file ? `  (${n.file})` : ""}`;
+    print(r, values.json, [`Change: ${r.change}`, `Reaches ${r.affected.length} item${r.affected.length === 1 ? "" : "s"}:`, ...r.affected.map(line), ...(r.checkpointRequired ? [`Checkpoint ${r.checkpointRequired} needed: ${r.because}.`] : [])].join("\n"));
+    return 0;
+  }
+  if (command === "test-kit") {
+    const r = testKit(app, { journeys: values.journey ?? [] });
+    print(r, values.json, `Wrote ${r.dir}/: ${r.tasks.length} task${r.tasks.length === 1 ? "" : "s"} (${r.tasks.map((t) => t.journey).join(", ")}).`);
     return 0;
   }
   if (command === "ready") {

@@ -439,6 +439,50 @@
         "ready",
         "next"
       ]
+    },
+    "trace": {
+      "type": "object",
+      "required": [
+        "item",
+        "upstream",
+        "downstream"
+      ]
+    },
+    "impact": {
+      "type": "object",
+      "required": [
+        "change",
+        "mode",
+        "matched",
+        "affected",
+        "decisions"
+      ],
+      "properties": {
+        "checkpointRequired": {
+          "const": "significant-change"
+        }
+      }
+    },
+    "applyImpact": {
+      "type": "object",
+      "required": [
+        "applied",
+        "change",
+        "errors",
+        "delta",
+        "regenerated",
+        "summary"
+      ]
+    },
+    "testKit": {
+      "type": "object",
+      "required": [
+        "id",
+        "dir",
+        "tasks",
+        "written",
+        "users"
+      ]
     }
   }
 }
