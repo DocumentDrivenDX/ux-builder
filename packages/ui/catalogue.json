@@ -135,6 +135,19 @@
       "fonts": "@ux-builder/tokens/fonts/synaptiq.css"
     },
     {
+      "name": "test-theme-01",
+      "title": "Test Theme 01 Material",
+      "brand": "test-theme-01",
+      "designSystem": "material",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/test-theme-01.css",
+      "fonts": "@ux-builder/tokens/fonts/test-theme-01.css"
+    },
+    {
       "name": "ux-builder-databricks",
       "title": "UX Builder Databricks",
       "brand": "ux-builder",
