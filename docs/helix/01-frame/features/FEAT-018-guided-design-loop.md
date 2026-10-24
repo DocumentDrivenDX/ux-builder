@@ -501,6 +501,19 @@ the users they serve; the test kit's screener and scenarios, the
 observation sheet and the evaluation report are organized by them; and
 `trace` follows a user to its jobs, tasks and journeys.
 
+GDL-78. **Business rules in the task model** *(added 2026-10-24)*. A
+business rule is defined once, in HELIX (the PRD, a feature specification
+or the solution design's *Business Rules*), as `**BR-<n>** — <rule>`, the
+way acceptance criteria are. The blueprint says where it applies (the
+tasks and the journey steps that cite it) and how the user meets it:
+the situation that triggers it, how the user learns of it before acting,
+what they see when it blocks them, and how they recover. The guide asks
+those four questions for every rule a task cites. The test kit gives each
+cited rule a task set in its trigger situation, the evaluation report
+says how people fared with each rule and which were not tested, and
+`trace` and `impact` follow a rule to the tasks, journeys and screens it
+applies to.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each
@@ -902,6 +915,7 @@ The proposal's seven connected artifacts, and its rubric:
 **Amendment, 2026-10-24**
 
 - [US-146 — Describe target users with their context and evidence](../user-stories/US-146-describe-target-users-with-their-context-and-evidence.md)
+- [US-147 — Design how users meet each business rule](../user-stories/US-147-design-how-users-meet-each-business-rule.md)
 
 ## Edge Cases and Error Handling
 

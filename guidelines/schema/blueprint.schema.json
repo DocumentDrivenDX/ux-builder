@@ -251,6 +251,43 @@
       },
       "description": "The task model (FEAT-018 GDL-22)"
     },
+    "businessRules": {
+      "type": "array",
+      "description": "How the user meets each business rule the tasks cite; the rules themselves are defined in HELIX as **BR-<n>** (FEAT-018 GDL-78)",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^BR-[1-9][0-9]*$"
+          },
+          "trigger": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The situation in which the rule applies, in the user's terms"
+          },
+          "before": {
+            "type": "string",
+            "minLength": 1,
+            "description": "How the user learns of the rule before acting"
+          },
+          "blocked": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the user sees when the rule stops them"
+          },
+          "recover": {
+            "type": "string",
+            "minLength": 1,
+            "description": "How the user recovers or goes on"
+          }
+        }
+      }
+    },
     "journeys": {
       "type": "array",
       "items": {
@@ -519,6 +556,14 @@
           "type": "string",
           "minLength": 1,
           "description": "Work the app does for the user at this step (FEAT-018 GDL-09)"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^BR-[1-9][0-9]*$"
+          },
+          "description": "The business rules that apply at this step (BR-<n>) (FEAT-018 GDL-78)"
         }
       }
     },
@@ -637,6 +682,14 @@
             "type": "string",
             "pattern": "^U-[1-9][0-9]*$"
           }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^BR-[1-9][0-9]*$"
+          },
+          "description": "The business rules this task depends on, by ID (BR-<n>, defined in HELIX) (FEAT-018 GDL-78)"
         },
         "trigger": {
           "type": "string",
