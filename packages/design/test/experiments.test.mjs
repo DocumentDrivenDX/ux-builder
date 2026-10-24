@@ -106,6 +106,20 @@ describe("US-145: run an experiment through its checkpoints", () => {
     const w = json(b, ["experiment", "end", "EXP-1", "--result", "result.json"]);
     assert.equal(w.hypothesis, "not supported: a guardrail got worse");
     assert.match(w.next, /Keep the current design, or try another alternative\?/);
+    // A change within the guardrail's tolerance holds: the result's own, else HELIX's metric definition's.
+    const c = expApp();
+    json(c, DIAG); cli(c, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(c);
+    writeFileSync(join(c, "result.json"), JSON.stringify({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 40, variant: 43, better: "lower", tolerance: "10%" }] }));
+    const tol = json(c, ["experiment", "end", "EXP-1", "--result", "result.json"]);
+    assert.equal(tol.supported, true);
+    assert.match(readFileSync(join(c, "docs/ux/experiments/EXP-1.md"), "utf8"), /- \*\*Guardrail time-to-river\*\*: control 40, variant 43 \(held, within the tolerance 10%\)/);
+    const e = expApp();
+    mkdirSync(join(e, "docs/helix/06-iterate/metrics"), { recursive: true });
+    writeFileSync(join(e, "docs/helix/06-iterate/metrics/time-to-river.yaml"), "name: time-to-river\nunit: seconds\ndirection: lower\ntolerance: 2s\n");
+    json(e, DIAG); cli(e, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(e);
+    writeFileSync(join(e, "result.json"), JSON.stringify({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 40, variant: 43, better: "lower" }] }));
+    assert.equal(json(e, ["experiment", "end", "EXP-1", "--result", "result.json"]).supported, false);
+    assert.match(readFileSync(join(e, "docs/ux/experiments/EXP-1.md"), "utf8"), /\(got worse by more than the tolerance 2s; lower is better\)/);
   });
 
   // @covers US-145-AC5

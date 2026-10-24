@@ -18,7 +18,7 @@ import { DesignError, writeInApp } from "./app.mjs";
 import { decisionStatus } from "./decisions.mjs";
 import { helixRoot, parseDocument } from "./documents.mjs";
 import { rubric } from "./rubric.mjs";
-import { humanFindings, observedMeasures } from "./sessions.mjs";
+import { humanFindings, kitTranscripts, observedMeasures } from "./sessions.mjs";
 import { readState, writeState } from "./state.mjs";
 import { kits } from "./testkit.mjs";
 
@@ -48,9 +48,12 @@ function latestRun(app) {
 /* Every finding the evaluation reports: human observations from the kits,
    agent recommendations from the latest run. Each with its origin label. */
 export function evaluationFindings(app, run = latestRun(app)) {
+  // A person's transcript from the same kit is evidence beside their row of the sheet.
+  const transcripts = kitTranscripts(app);
+  const quotes = (f) => transcripts.filter((t) => t.kit === f.kit && t.participants.includes(f.participant)).map((t) => t.id);
   const human = humanFindings(app).filter((f) => f.severity > 0 || f.problem).map((f) => ({
     id: f.id, source: "human", label: "human observation", journey: f.journey, severity: f.severity, title: f.title,
-    evidence: `${f.kit} task ${f.task}, ${f.participant} (docs/ux/tests/${f.kit}/findings.json)`, fix: null,
+    evidence: `${f.kit} task ${f.task}, ${f.participant} (docs/ux/tests/${f.kit}/findings.json)${quotes(f).length ? `; transcript ${quotes(f).join(", ")}` : ""}`, transcripts: quotes(f), fix: null,
     detail: `${f.completed ? "completed" : "did not complete"}${f.seconds != null ? ` in ${f.seconds} s` : ""}, ${f.errors} error${f.errors === 1 ? "" : "s"}, ${f.assists} assist${f.assists === 1 ? "" : "s"}${f.remark ? `; "${f.remark}"` : ""}`,
   }));
   const agent = list(run?.backlog?.findings).filter((f) => f.status !== "rejected").map((f) => {

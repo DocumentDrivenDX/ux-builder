@@ -155,5 +155,6 @@ export function stateSet(app, { path, value, now = new Date().toISOString() } = 
     written = value;
   }
   writeState(app, state);
-  return { path, value: written };
+  // An appended item's ID, so it can be referred to: A-3, Q-1, PR-2.
+  return { path, value: written, ...(last === "+" && written?.id ? { id: written.id } : {}) };
 }

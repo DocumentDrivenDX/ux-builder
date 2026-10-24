@@ -61,6 +61,9 @@ describe("state get and set", () => {
     assert.equal(r.status, 0, r.stderr);
     r = cli(app, ["state", "set", "assumptions[+]", JSON.stringify({ text: "People fish near home" })]);
     assert.equal(r.status, 0, r.stderr);
+    // It says the ID it gave, to refer to later.
+    assert.equal(r.stdout, "assumptions[+] set: A-2.\n");
+    assert.equal(JSON.parse(cli(app, ["state", "set", "questions[+]", JSON.stringify({ text: "Map or list?" }), "--json"]).stdout).id, "Q-1");
 
     r = cli(app, ["state", "get", "assumptions", "--json"]);
     assert.equal(r.status, 0, r.stderr);

@@ -48,18 +48,34 @@ function unifiedDiff(path, before, after) {
   } finally { rmSync(d, { recursive: true, force: true }); }
 }
 
-/* The metrics HELIX defines: the names of <root>/06-iterate/metrics/*.yaml. */
+/* The metrics HELIX defines: the names of <root>/06-iterate/metrics/*.yaml,
+   and each one's tolerance when it gives one. */
 function definedMetrics(app) {
   const root = helixRoot(app);
   if (!root) return null;
   const dir = join(app, root, "06-iterate/metrics");
-  if (!existsSync(dir)) return { root, names: new Set() };
-  const names = new Set();
+  const names = new Set(), tolerances = {};
+  if (!existsSync(dir)) return { root, names, tolerances };
   for (const f of readdirSync(dir).filter((n) => /\.ya?ml$/.test(n))) {
-    names.add(f.replace(/\.ya?ml$/, ""));
-    try { const y = parseYaml(readFileSync(join(dir, f), "utf8")); if (y?.name) names.add(String(y.name)); } catch { /* not YAML: its file name stands */ }
+    const file = f.replace(/\.ya?ml$/, "");
+    names.add(file);
+    try {
+      const y = parseYaml(readFileSync(join(dir, f), "utf8"));
+      if (y?.name) names.add(String(y.name));
+      if (y?.tolerance != null) for (const n of [file, y.name].filter(Boolean)) tolerances[n] = y.tolerance;
+    } catch { /* not YAML: its file name stands */ }
   }
-  return { root, names };
+  return { root, names, tolerances };
+}
+
+/* A tolerance as an amount in the metric's units: a number, a percent of
+   the control ("5%"), or a number with a unit ("100ms", "3 s"). */
+export function toleranceOf(t, control) {
+  if (t == null || t === "") return 0;
+  if (typeof t === "number") return Math.abs(t);
+  const m = String(t).trim().match(/^(-?[0-9.]+)\s*(%|[a-z]*)$/i);
+  if (!m) return 0;
+  return m[2] === "%" ? Math.abs(control * Number(m[1]) / 100) : Math.abs(Number(m[1]));
 }
 
 /* A proposed metric-definition for a metric HELIX lacks: helix-proposals/metrics/<name>.patch. */
@@ -105,7 +121,7 @@ export function experimentStart(app, { decision, variant, metric, guardrails, du
 }
 
 /* ux-builder-design experiment end <EXP-n> --result <file>. The result file:
-   { metric, control, variant, guardrails: [{ metric, control, variant, better: lower|higher }] }. */
+   { metric, control, variant, guardrails: [{ metric, control, variant, better: lower|higher, tolerance? }] }. */
 export function experimentEnd(app, { id, result } = {}) {
   if (!/^EXP-[1-9][0-9]*$/.test(id ?? "")) throw new DesignError(`experiment end needs an experiment ID such as EXP-1, not "${id ?? ""}"`);
   const state = readState(app);
@@ -120,14 +136,19 @@ export function experimentEnd(app, { id, result } = {}) {
   const path = `${DIR}/${id}.md`;
   const text = readFileSync(join(app, path), "utf8");
   const metric = r.metric ?? text.match(/\*\*Success\*\*: (.+)/)?.[1] ?? "success";
+  // A guardrail holds unless it got worse by more than its tolerance (the result's, else HELIX's metric definition's).
+  const defined = definedMetrics(app);
   const guardrails = (Array.isArray(r.guardrails) ? r.guardrails : []).map((g) => {
-    const worse = g.better === "higher" ? g.variant < g.control : g.variant > g.control;
-    return { metric: g.metric, control: g.control, variant: g.variant, better: g.better === "higher" ? "higher" : "lower", held: !worse };
+    const better = g.better === "higher" ? "higher" : "lower";
+    const worseBy = better === "higher" ? g.control - g.variant : g.variant - g.control;
+    const tolerance = g.tolerance ?? defined?.tolerances?.[g.metric] ?? null;
+    const allowed = toleranceOf(tolerance, g.control);
+    return { metric: g.metric, control: g.control, variant: g.variant, better, ...(tolerance != null ? { tolerance } : {}), held: worseBy <= allowed };
   });
   const improved = r.variant > r.control;
   const supported = improved && guardrails.every((g) => g.held);
   const verdict = supported ? "supported" : improved ? "not supported: a guardrail got worse" : "not supported: the success metric did not improve";
-  const lines = [`- **${metric}**: control ${r.control}, variant ${r.variant} (${improved ? "improved" : "did not improve"})`, ...guardrails.map((g) => `- **Guardrail ${g.metric}**: control ${g.control}, variant ${g.variant} (${g.held ? "held" : `got worse; ${g.better} is better`})`), `- **Hypothesis**: ${verdict}`, `- **Result file**: \`${result}\``];
+  const lines = [`- **${metric}**: control ${r.control}, variant ${r.variant} (${improved ? "improved" : "did not improve"})`, ...guardrails.map((g) => `- **Guardrail ${g.metric}**: control ${g.control}, variant ${g.variant} (${g.held ? `held${g.tolerance != null ? `, within the tolerance ${g.tolerance}` : ""}` : `got worse${g.tolerance != null ? ` by more than the tolerance ${g.tolerance}` : ""}; ${g.better} is better`})`), `- **Hypothesis**: ${verdict}`, `- **Result file**: \`${result}\``];
   const next = text.replace(/status: running/, "status: ended").replace(/## Result\n\n[\s\S]*?(?=\n## Decision)/, `## Result\n\n${lines.join("\n")}\n`);
   writeInApp(app, path, next);
   exp.status = "ended";

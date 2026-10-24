@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -44,6 +44,9 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       never its text; add the masked excerpts the synthesis cites.
   evidence list
       each source's ID, kind, date, source and excerpts cited.
+  evidence excerpt add <EV-n> --participant <name or Pn> --text <quote> [--at <time>] [--role <role>]
+      add one quote the synthesis cites to the record's Excerpts: masked, by
+      pseudonym (a name gets one, kept in .ux-builder/participants.local.json).
   decision add --question <q> --option <o> --option <o>... --choice <o> --why <text>
                [--assumption <a>]... [--validation <how it will be tested>] [--link <HELIX ID>]...
       write docs/ux/decisions/UXD-<n>.md, status not-tested, and a decision in the trace.
@@ -62,10 +65,12 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       import a filled observation sheet (CSV or JSON) as findings with
       source: human, one per participant and task, by pseudonym, remarks
       masked; into docs/ux/tests/<TK-n>/findings.json.
-  transcript add <file> --session <id> --consent-confirmed [--by <name>] [--cite <time>]...
+  transcript add <file> --session <id> --consent-confirmed [--by <name>] [--kit TK-<n>] [--cite <time>]...
       record a session transcript's masked, cited excerpts (the lines at the
       cited timestamps) as docs/ux/evidence/EV-<n>.md, and the consent in the
       design state. Refuses without --consent-confirmed, and refuses recordings.
+      --kit names the test kit the session ran, so the report shows these
+      quotes beside that person's findings.
   report
       write the UX evaluation report, docs/ux/evaluations/UER-<n>.md: method,
       tasks, measures, the rubric (predicted, agent-measured, observed),
@@ -140,7 +145,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, at: { type: "string" }, role: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -169,7 +174,7 @@ async function main(argv) {
     if (sub === "set") {
       if (!path || value === undefined) throw new DesignError("usage: state set <path> <json>");
       const r = stateSet(app, { path, value: parseJson(value, "the value") });
-      print(r, values.json, `${path} set.`);
+      print(r, values.json, r.id ? `${path} set: ${r.id}.` : `${path} set.`);
       return 0;
     }
     if (sub === "checkpoint") {
@@ -219,7 +224,7 @@ async function main(argv) {
   if (command === "transcript") {
     const [sub, file] = rest;
     if (sub !== "add") throw new DesignError(`unknown transcript command "${sub ?? ""}": use add`);
-    const r = transcriptAdd(app, { file, session: values.session, consentConfirmed: values["consent-confirmed"], by: values.by, cite: values.cite ?? [], date: values.date });
+    const r = transcriptAdd(app, { file, session: values.session, consentConfirmed: values["consent-confirmed"], by: values.by, cite: values.cite ?? [], date: values.date, kit: values.kit });
     print(r, values.json, `Wrote ${r.path}: ${r.excerpts} cited excerpt${r.excerpts === 1 ? "" : "s"} from session ${r.session}, masked; consent recorded.${r.excerpts ? "" : " Cite the lines the synthesis relies on with --cite <time>."}`);
     return 0;
   }
@@ -294,7 +299,14 @@ async function main(argv) {
       print(r, values.json, r.evidence.length ? r.evidence.map((e) => `${e.id}  ${e.kind}  ${e.date}  ${e.excerpts} excerpt${e.excerpts === 1 ? "" : "s"}  ${e.source}`).join("\n") : "No evidence yet.");
       return 0;
     }
-    throw new DesignError(`unknown evidence command "${sub ?? ""}": use add or list`);
+    if (sub === "excerpt") {
+      const [, op, id] = rest;
+      if (op !== "add") throw new DesignError(`unknown evidence excerpt command "${op ?? ""}": use add`);
+      const r = excerptAdd(app, { id, participant: values.participant, text: values.text, at: values.at, role: values.role });
+      print(r, values.json, `Added to ${r.path}: ${r.excerpt}`);
+      return 0;
+    }
+    throw new DesignError(`unknown evidence command "${sub ?? ""}": use add, list or excerpt add`);
   }
   if (command === "validate") {
     const r = validate(app);

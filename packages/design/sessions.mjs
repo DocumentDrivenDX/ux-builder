@@ -8,6 +8,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { extname, isAbsolute, join, relative, sep } from "node:path";
+import { parse as parseYaml, stringify as toYaml } from "yaml";
 import { mask } from "@ux-builder/trace";
 import { DesignError, writeInApp } from "./app.mjs";
 import { PERSONAL_PATTERNS } from "./documents.mjs";
@@ -156,8 +157,9 @@ export function transcriptLines(text) {
   return String(text).split("\n").map((l) => /^\s*\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s+([^:]{1,40}):\s*(.*)$/.exec(l)).filter(Boolean).map((m) => ({ at: m[1], speaker: m[2].trim(), text: m[3].trim() }));
 }
 
-/* ux-builder-design transcript add <file> --session <id> --consent-confirmed [--by <name>] [--cite <time>]... */
-export function transcriptAdd(app, { file, session, consentConfirmed = false, by, cite = [], date = today(), source } = {}) {
+/* ux-builder-design transcript add <file> --session <id> --consent-confirmed [--by <name>] [--kit TK-<n>] [--cite <time>]... */
+export function transcriptAdd(app, { file, session, consentConfirmed = false, by, cite = [], date = today(), source, kit } = {}) {
+  if (kit && !/^TK-[1-9][0-9]*$/.test(kit)) throw new DesignError(`--kit names the test kit the session ran, such as TK-1, not "${kit}"`);
   if (!session?.trim()) throw new DesignError("transcript add needs --session: the session the transcript is of");
   if (!consentConfirmed) throw new DesignError(`consent must be confirmed for session ${session} before its transcript is analysed: ask the owner, then add --consent-confirmed (ADR-039). Nothing was written.`);
   if (!file) throw new DesignError("transcript add needs the transcript file");
@@ -176,11 +178,24 @@ export function transcriptAdd(app, { file, session, consentConfirmed = false, by
   people.save();
   const participants = Object.fromEntries(Object.values(speakers).map((p) => [p, "participant"]));
   const ev = writeEvidence(app, { file, kind: "transcript", date, source: source ?? file, title: `transcript of session ${session}`, excerpts, participants,
-    extra: [`  session: ${JSON.stringify(session)}`, "  consent:", "    confirmed: true", ...(by ? [`    by: ${JSON.stringify(by)}`] : []), `    date: ${date}`] });
+    extra: [`  session: ${JSON.stringify(session)}`, ...(kit ? [`  kit: ${kit}`] : []), "  consent:", "    confirmed: true", ...(by ? [`    by: ${JSON.stringify(by)}`] : []), `    date: ${date}`] });
   const state = readState(app);
   state.consents = [...(state.consents ?? []).filter((c) => c.session !== session), { session, confirmed: true, ...(by ? { by } : {}), date, evidence: ev.id }];
   writeState(app, state);
   return { ...ev, session, excerpts: excerpts.length, consent: { confirmed: true, ...(by ? { by } : {}), date } };
+}
+
+/* The transcript records of a kit's sessions: [{ id, kit, session, participants }].
+   A record belongs to a kit when it names it (--kit) or its session does. */
+export function kitTranscripts(app) {
+  const dir = join(app, "docs/ux/evidence");
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).filter((f) => /^EV-\d+\.md$/.test(f)).map((f) => {
+    const m = readFileSync(join(dir, f), "utf8").match(/^---\n([\s\S]*?)\n---/);
+    let ux = {};
+    try { ux = parseYaml(m?.[1] ?? "")?.ux ?? {}; } catch { /* not YAML */ }
+    return { id: String(ux.id ?? f.replace(/\.md$/, "")), kind: ux.kind, kit: ux.kit ?? String(ux.session ?? "").match(/TK-[1-9][0-9]*/)?.[0] ?? null, session: ux.session ?? null, participants: Object.keys(ux.participants ?? {}) };
+  }).filter((x) => x.kind === "transcript" && x.kit);
 }
 
 /* Every human finding across the kits: [{ ...finding }]. */
@@ -238,6 +253,42 @@ export function observedDimensions(app, predicted = {}) {
     out["error-recovery"] = { value: `${recovered} of ${erred.length} attempts with an error still completed`, evidence, verdict: recovered / erred.length < 0.5 ? "contradicts" : "supports" };
   }
   return out;
+}
+
+/* ux-builder-design evidence excerpt add <EV-n> --participant <name or Pn> --text <quote> [--at <time>] [--role <role>]:
+   one quote the synthesis cites, masked and by pseudonym, in the record's Excerpts. */
+export function excerptAdd(app, { id, participant, text, at, role = "participant" } = {}) {
+  if (!/^EV-[1-9][0-9]*$/.test(id ?? "")) throw new DesignError(`evidence excerpt add needs an evidence ID such as EV-1, not "${id ?? ""}"`);
+  if (!participant?.trim()) throw new DesignError("evidence excerpt add needs --participant: who said it (a name is replaced by a pseudonym)");
+  if (!text?.trim()) throw new DesignError("evidence excerpt add needs --text: the words the synthesis relies on");
+  if (at && !/^\d{1,2}:\d{2}(:\d{2})?$/.test(at)) throw new DesignError(`--at is a time in the source, such as 00:12:30, not "${at}"`);
+  const path = `docs/ux/evidence/${id}.md`;
+  if (!existsSync(join(app, path))) throw new DesignError(`no evidence ${id} (${path}): record the source first with evidence add`);
+  const people = pseudonyms(app);
+  const p = people.of(participant);
+  people.save();
+  const quote = maskPersonal(text.trim(), { app, names: people.names() }).replace(/"/g, "'");
+  const line = `- ${p}: ${at ? `[${at}] ` : ""}"${quote}"`;
+  const source = readFileSync(join(app, path), "utf8");
+  const m = source.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!m) throw new DesignError(`${path} has no frontmatter`);
+  // The participant is listed in the frontmatter; the quote goes at the end of Excerpts, replacing the placeholder.
+  const front = parseYaml(m[1]) ?? {};
+  front.ux ??= {};
+  if (!front.ux.participants || typeof front.ux.participants !== "object") front.ux.participants = {};
+  front.ux.participants[p] ??= role;
+  let body = m[2].replace(/^- None cited yet\.[^\n]*\n/m, "");
+  const lines = body.split("\n");
+  const start = lines.findIndex((l) => /^## Excerpts\s*$/.test(l));
+  if (start < 0) throw new DesignError(`${path} has no "## Excerpts" section`);
+  let end = lines.findIndex((l, i) => i > start && /^## /.test(l));
+  if (end < 0) end = lines.length;
+  let last = end - 1;
+  while (last > start && !lines[last].trim()) last--;
+  lines.splice(last + 1, 0, ...(last === start ? ["", line] : [line]));
+  body = lines.join("\n").replace(/\n{3,}/g, "\n\n");
+  writeInApp(app, path, `---\n${toYaml(front).trimEnd()}\n---\n${body}`);
+  return { id, path, participant: p, excerpt: line };
 }
 
 /* Kits whose findings.json exists. */

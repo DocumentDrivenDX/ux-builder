@@ -131,7 +131,9 @@ status hypothesis, confidence low and evidence none.
 transcripts, analytics exports, support tickets, surveys, observations),
 record each source with `ux-builder-design evidence add <file> --kind
 <kind> --source "<where it is kept>"`. Add to its record only the short
-excerpts your synthesis relies on, by pseudonym (P1, P2), masked; the
+excerpts your synthesis relies on, with `ux-builder-design evidence excerpt
+add EV-<n> --participant "<who>" --text "<their words>"`: it masks them and
+gives the speaker a pseudonym (P1, P2); the
 owner may list each pseudonym's real name in
 `.ux-builder/participants.local.json` (kept out of git) so `validate` can
 catch one that slips in. Then
@@ -234,7 +236,7 @@ control name), success criteria, a script, a consent note, a screener and
   `source: human`, by pseudonym, remarks masked. Name a problem in the same
   words in every row it was seen (the `problem` column), so recurring
   problems are counted.
-- `transcript add <file> --session <id> --consent-confirmed --cite <time>...`:
+- `transcript add <file> --session <id> --kit TK-<n> --consent-confirmed --cite <time>...`:
   only after the person confirms that session's consent; you keep only the
   cited lines, masked. Never take a recording.
 - `rubric`: the observed column beside the predicted one, per task

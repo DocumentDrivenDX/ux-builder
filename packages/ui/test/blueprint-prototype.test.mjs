@@ -54,6 +54,10 @@ describe("US-135: exploratory prototypes", () => {
     assert.equal(go["Open river"], "detail.compact.html");
     assert.equal(go["Try again"], "map.error.compact.html");
     assert.equal(JSON.parse(detail.match(/const go = (\{.*?\});/)[1]).Back, "back");
+    // Each page knows its size class's widths, to say when the window shows another layout and offer to open it at its own.
+    assert.match(map, /<p class="proto-width" role="status" data-size-class="compact" data-min="0" data-max="600" data-width="390" hidden><\/p>/);
+    assert.match(readFileSync(join(dir, "prototype/map-first/map.expanded.html"), "utf8"), /data-size-class="expanded" data-min="840" data-max="1200" data-width="1024"/);
+    assert.match(map, /shows another size class's layout/);
   });
 
   // @covers US-135-AC2

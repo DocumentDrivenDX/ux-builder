@@ -96,6 +96,18 @@ describe("US-125: evidence", () => {
       { id: "EV-2", kind: "support", date: "2026-10-21", source: "support export", excerpts: 0 },
       { id: "EV-3", kind: "analytics", date: "2026-10-22", source: "analytics export", excerpts: 0 },
     ]);
+    // evidence excerpt add: the quote masked, its speaker by pseudonym and listed, and the record still valid.
+    let r = cli(app, ["evidence", "excerpt", "add", "EV-2", "--participant", "Dana Wu", "--text", "Dana here: email me at dana@example.com", "--at", "00:03:10"]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /^Added to docs\/ux\/evidence\/EV-2\.md: - P1: \[00:03:10\] "P1 here: email me at \[masked:email\]"$/m);
+    r = cli(app, ["evidence", "excerpt", "add", "EV-2", "--participant", "P1", "--text", "The ramp floods in spring"]);
+    const ev2 = readFileSync(join(app, "docs/ux/evidence/EV-2.md"), "utf8");
+    assert.ok(!/Dana|dana@|None cited yet/.test(ev2), ev2);
+    assert.match(ev2, /participants:\n {4}P1: participant\n/);
+    assert.match(ev2, /## Excerpts\n\n- P1: \[00:03:10\] "P1 here: email me at \[masked:email\]"\n- P1: "The ramp floods in spring"\n\n## Synthesis notes/);
+    assert.equal(JSON.parse(cli(app, ["evidence", "list", "--json"]).stdout).evidence[1].excerpts, 2);
+    assert.equal(cli(app, ["validate"]).status, 0, cli(app, ["validate"]).stdout);
+    assert.equal(cli(app, ["evidence", "excerpt", "add", "EV-9", "--participant", "P1", "--text", "x"]).status, 2);
   });
 
   // @covers US-125-AC6

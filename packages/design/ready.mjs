@@ -1,13 +1,15 @@
 /* ux-builder-design ready (CONTRACT-008 Commands, FEAT-018 GDL-45, GDL-46;
    ADR-037 rule 4): is the validated prototype ready? --for testing: its
-   lint, blueprint check and audit pass, so test users can see it. --for
+   lint, blueprint check and audit pass, the audit is newer than the
+   blueprint, and every planned screen is an audited page, so test users
+   can see it. --for
    production (the default): also every acceptance criterion its journeys
    cover is cited by a test, and nothing it faked is left; then the guide
    asks checkpoint core-3. It runs the app's own scripts and reads its audit
    report; it changes nothing. */
 
 import { spawnSync } from "node:child_process";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { DesignError } from "./app.mjs";
 import { readState } from "./state.mjs";
@@ -46,6 +48,21 @@ export function ready(app, { for: purpose = "production" } = {}) {
   const audit = readJson(join(app, "audit-report/report.json"));
   checks.push(!audit?.summary ? { name: "audit", ok: false, detail: "no audit report: run npm run audit" }
     : { name: "audit", ok: audit.summary.error === 0, detail: audit.summary.error === 0 ? "no errors" : `${audit.summary.error} error${audit.summary.error === 1 ? "" : "s"}` });
+  if (audit?.summary) {
+    // An audit older than the blueprint audited a design that has since changed.
+    const bpFile = join(app, "app.blueprint.json");
+    const auditedAt = Date.parse(audit.generatedAt ?? "");
+    const changedAt = existsSync(bpFile) ? statSync(bpFile).mtimeMs : NaN;
+    const day = (t) => new Date(t).toISOString().replace("T", " ").slice(0, 16);
+    checks.push(Number.isNaN(auditedAt) ? { name: "audit is current", ok: false, detail: "the audit report has no date: run npm run audit" }
+      : auditedAt < changedAt ? { name: "audit is current", ok: false, detail: `the audit (${day(auditedAt)}) is older than app.blueprint.json (${day(changedAt)}): run npm run audit` }
+      : { name: "audit is current", ok: true, detail: `audited ${day(auditedAt)}, after the blueprint's last change` });
+    // Every screen the blueprint plans is a page the audit saw (data-piq-screen, or the screen's path).
+    const seen = new Set(list(audit.pages).map((p) => p?.screen).filter(Boolean));
+    const planned = list((readJson(bpFile) ?? {}).screens).map((x) => x?.id).filter(Boolean);
+    const missing = planned.filter((id) => !seen.has(id));
+    checks.push({ name: "screens built", ok: !missing.length, detail: missing.length ? `no audited page is ${missing.join(", ")}: build ${missing.length === 1 ? "it" : "them"}, mark each page with data-piq-screen="<id>" (or give the screen its path), and run npm run audit` : `every planned screen (${planned.length}) is an audited page` });
+  }
   const result = { for: purpose, checks };
   if (purpose === "production") {
     const bp = readJson(join(app, "app.blueprint.json")) ?? {};

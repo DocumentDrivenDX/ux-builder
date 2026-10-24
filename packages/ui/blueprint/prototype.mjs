@@ -4,13 +4,15 @@
    one size class, with a banner naming the design question it answers, a
    switcher for its states and size classes, and a link for every action to
    where it leads; the page's own buttons and navigation lead there too.
+   When the window is not that size class's width, the bar says so and
+   offers to open the page at it.
    It lives under prototype/, outside the app's source, and
    never becomes app code (the ux-builder/no-prototype-import lint rule). */
 
 import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
-import { assets, wireframes } from "./wireframes.mjs";
+import { assets, WIDTHS, wireframes } from "./wireframes.mjs";
 
 const require = createRequire(import.meta.url);
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -22,6 +24,8 @@ export function themeFor(designSystem) {
   return themes.filter((t) => t.designSystem === designSystem).map((t) => t.name).sort()[0] ?? null;
 }
 
+/* Each size class's window widths, [from, below] (the SDK's SIZE_CLASSES). */
+const RANGES = { compact: [0, 600], medium: [600, 840], expanded: [840, 1200], large: [1200, 1600], "extra-large": [1600, null] };
 const fileOf = (screen, state, size) => `${state === "ideal" ? screen : `${screen}.${state}`}.${size}.html`;
 
 /* The bar a person uses: the banner, then this screen's states and the size classes, then its actions. */
@@ -43,7 +47,9 @@ function bar(bp, page, { question, statesOf, sizes }) {
 <nav aria-label="States"><span>State:</span> ${statesOf(page.screen).map(state).join(" · ")}</nav>
 <nav aria-label="Size classes"><span>Size:</span> ${sizes.map(size).join(" · ")}</nav>
 <nav aria-label="Actions"><span>Actions:</span> ${list(s.actions).map(action).join(" · ") || "<span>none</span>"}</nav>
-</header>`;
+<p class="proto-width" role="status" data-size-class="${esc(page.sizeClass)}" data-min="${RANGES[page.sizeClass]?.[0] ?? 0}" data-max="${RANGES[page.sizeClass]?.[1] ?? ""}" data-width="${WIDTHS[page.sizeClass] ?? 1024}" hidden></p>
+</header>
+<script>(() => { const p = document.querySelector(".proto-width"); const min = +p.dataset.min, max = p.dataset.max ? +p.dataset.max : Infinity, w = +p.dataset.width; const check = () => { const fits = innerWidth >= min && innerWidth < max; p.hidden = fits; if (!fits) p.innerHTML = "This window is " + innerWidth + " px wide, so it shows another size class's layout, not " + p.dataset.sizeClass + ". <a href=\\"#\\" data-open>Open it " + w + " px wide</a>, or resize the window."; }; check(); addEventListener("resize", check); p.addEventListener("click", (e) => { if (e.target.closest("[data-open]")) { e.preventDefault(); open(location.href, "_blank", "popup,width=" + w + ",height=" + Math.min(screen.availHeight || 900, 900)); } }); })();</script>`;
 }
 
 /* What the page's own controls do: a click on a button or link whose name

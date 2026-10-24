@@ -30,7 +30,7 @@ lists each one's options.
 | Stage | Commands |
 |---|---|
 | Set up | `init [--mcp]`, `status`, `state get [<path>]`, `state set <path> <json>`, `state checkpoint <id> --answer …`, `mode full\|change` |
-| Define | `baseline` (an existing app's first session), `brief`, `evidence add\|list`, `validate` |
+| Define | `baseline` (an existing app's first session), `brief`, `evidence add\|list`, `evidence excerpt add`, `validate` |
 | Explore and decide | `decision add\|status`, `rubric [--alternative <name>]`; alternatives, scores, comparisons and prototypes come from `ux-builder-blueprint` |
 | Build and change | `ready [--for testing\|production]`, `trace <id>`, `impact "<change>" [--apply --set <file>]` |
 | Validate with people | `test-kit`, `observe import <sheet> --kit TK-<n>`, `transcript add <file> --session <id> --consent-confirmed`, `report`, `route <F-id>...` |

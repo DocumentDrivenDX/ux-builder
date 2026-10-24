@@ -38,6 +38,9 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
   // @covers US-142-AC1
   test("AC1: report writes UER-<n>.md with method, tasks, findings by journey, corrections, the rubric's predicted and observed columns, and what was not tested", () => {
     const a = evalApp();
+    // P2's session transcript, from the kit: its quotes are evidence beside P2's findings.
+    writeFileSync(join(a, "p2.txt"), "[00:01:00] P2: Which of these is public?\n");
+    json(a, ["transcript", "add", "p2.txt", "--session", "S-2", "--kit", "TK-1", "--consent-confirmed", "--cite", "00:01:00"]);
     const r = json(a, ["report"]);
     assert.equal(r.path, "docs/ux/evaluations/UER-1.md");
     assert.equal(r.approach, "mixed");
@@ -50,7 +53,7 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     assert.match(section(t, "Measures"), /- access points unclear \(3 sessions;/);
     assert.match(section(t, "Rubric"), /^\| Dimension \| Predicted \| Agent-measured \| Observed \|$/m);
     assert.match(section(t, "Rubric"), /\| Task efficiency \| .* \(computed\) \| 2 moves over the shortest paths; 1 backtracks \| median 95 s a task \|/);
-    assert.match(section(t, "Findings by journey"), new RegExp(`### J-find\\n\\n- \\*\\*${findingIdFor("TK-1", "P2", 1)}\\*\\* \\(human observation\\) Severity 3: access points unclear \\(did not complete in 240 s, 2 errors, 1 assist; "Could not tell which access point was public"\\)\\. Evidence: TK-1 task 1, P2`));
+    assert.match(section(t, "Findings by journey"), new RegExp(`### J-find\\n\\n- \\*\\*${findingIdFor("TK-1", "P2", 1)}\\*\\* \\(human observation\\) Severity 3: access points unclear \\(did not complete in 240 s, 2 errors, 1 assist; "Could not tell which access point was public"\\)\\. Evidence: TK-1 task 1, P2 \\(docs/ux/tests/TK-1/findings\\.json\\); transcript EV-1\\.`));
     assert.match(section(t, "Recommendations"), /^1\. Correct: access points unclear \(F-[0-9a-f]{8}, human observation\)\. Route it at checkpoint core-3: `ux-builder-design route F-[0-9a-f]{8}`\./m);
     assert.match(section(t, "Not tested"), /- Consistency: no human observation/);
     assert.match(section(t, "State coverage"), /\| J-find \| assessed \| not tested \| not tested \|/);
