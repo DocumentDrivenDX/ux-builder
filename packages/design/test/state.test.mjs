@@ -20,7 +20,7 @@ const FULL = {
   checkpoints: [{ id: "core-1", status: "passed", answer: "Yes, that is the outcome", at: "2026-10-23T10:00:00.000Z" }],
   questions: [{ id: "Q-1", text: "Search first or map first?", status: "open" }],
   assumptions: [{ id: "A-1", text: "Location is available", status: "assumed", evidence: [] }],
-  alternatives: [{ name: "map-first", file: "app.blueprint.map-first.json", status: "chosen" }, { name: "search-first", file: "app.blueprint.search-first.json", status: "rejected", reason: "More steps" }],
+  alternatives: [{ name: "map-first", file: "docs/ux-builder/blueprint/app.blueprint.map-first.json", status: "chosen" }, { name: "search-first", file: "docs/ux-builder/blueprint/app.blueprint.search-first.json", status: "rejected", reason: "More steps" }],
   issues: [{ finding: "F-3", status: "open" }],
   experiments: [{ id: "EXP-1", status: "running" }],
   faked: [{ what: "River conditions", where: "screens/detail" }],
@@ -115,12 +115,12 @@ describe("state get and set", () => {
 });
 
 describe("where the guide writes", () => {
-  test("writes outside docs/ux/, .ux-builder/, prototype/ and the blueprint files are refused", () => {
+  test("writes outside docs/ux-builder/, .ux-builder/, prototype/ and the blueprint files are refused", () => {
     const app = tempApp();
     assert.throws(() => writeInApp(app, "docs/helix/01-frame/prd.md", "x"), /refusing to write docs\/helix/);
     assert.throws(() => writeInApp(app, "../outside.md", "x"), DesignError);
-    assert.equal(writeInApp(app, "docs/ux/brief.md", "x"), "docs/ux/brief.md");
-    assert.equal(writeInApp(app, "app.blueprint.map-first.json", "{}"), "app.blueprint.map-first.json");
+    assert.equal(writeInApp(app, "docs/ux-builder/brief.md", "x"), "docs/ux-builder/brief.md");
+    assert.equal(writeInApp(app, "docs/ux-builder/blueprint/app.blueprint.map-first.json", "{}"), "docs/ux-builder/blueprint/app.blueprint.map-first.json");
   });
 
   test("the network guard is active: any network use throws", async () => {

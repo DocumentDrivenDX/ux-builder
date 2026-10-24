@@ -77,7 +77,7 @@ describe("US-088: the assessment walks the blueprint's journeys", () => {
     // No blueprint at all: refused; journeys of the manifest's own still work.
     const none = check(manifest([{ blueprint: "J-review", role: "reviewer", priority: "critical" }, { id: "J-undo", story: "US-002", priority: "important", role: "reviewer", entry: "/queue" }]), {});
     assert.deepEqual(none.problems.map((p) => p.path), ["/journeys/0/blueprint"]);
-    assert.match(none.problems[0].message, /"J-review" cannot be resolved: the app has no blueprint \(app\.blueprint\.json does not exist/);
+    assert.match(none.problems[0].message, /"J-review" cannot be resolved: the app has no blueprint \(docs\/ux-builder\/blueprint\/app\.blueprint\.json does not exist/);
     // A blueprint journey whose story HELIX lacks is refused like a manifest's own.
     const lost = check(manifest([{ blueprint: "J-review", role: "reviewer", priority: "critical" }]), { "app.blueprint.json": JSON.stringify({ ...BLUEPRINT, journeys: [{ ...BLUEPRINT.journeys[0], story: "US-404", criteria: undefined }] }) });
     assert.match(lost.problems[0].message, /no story US-404 in the flow "helix" .*from blueprint journey J-review/);

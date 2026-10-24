@@ -26,7 +26,7 @@ describe("US-131: decision records", () => {
     const r = cli(app, [...ADD, "--json"]);
     assert.equal(r.status, 0, r.stderr);
     assert.equal(JSON.parse(r.stdout).id, "UXD-1");
-    const doc = parseDocument(readFileSync(join(app, "docs/ux/decisions/UXD-1.md"), "utf8"));
+    const doc = parseDocument(readFileSync(join(app, "docs/ux-builder/decisions/UXD-1.md"), "utf8"));
     assert.deepEqual(doc.front.ux, { id: "UXD-1", type: "ux-decision", status: "not-tested", links: [{ kind: "informed_by", to: "prd" }] });
     assert.deepEqual(doc.headings, ["Question", "Alternatives", "Recommendation", "Rationale", "Assumptions", "Validation"]);
     for (const s of ["What should users see first?", "- Search first\n- Map first\n- Activity first", "## Recommendation\n\nMap first", "- Supports immediate exploration", "- Location is available", "**Required**: Comparative usability test"]) assert.ok(doc.body.includes(s), s);
@@ -42,7 +42,7 @@ describe("US-131: decision records", () => {
     r = cli(app, ["decision", "add", "--question", "Q?", "--option", "A", "--option", "B", "--choice", "C", "--why", "w"]);
     assert.equal(r.status, 2);
     assert.match(r.stderr, /--choice must be one of the options \(A, B\), not "C"/);
-    assert.equal(existsSync(join(app, "docs/ux/decisions")), false);
+    assert.equal(existsSync(join(app, "docs/ux-builder/decisions")), false);
   });
 
   // @covers US-131-AC3
@@ -54,12 +54,12 @@ describe("US-131: decision records", () => {
     r = cli(app, ["decision", "status", "UXD-1", "refuted", "--evidence", "UER-1", "--json"]);
     assert.equal(r.status, 0, r.stderr);
     const today = new Date().toISOString().slice(0, 10);
-    const ux = parseDocument(readFileSync(join(app, "docs/ux/decisions/UXD-1.md"), "utf8")).front.ux;
+    const ux = parseDocument(readFileSync(join(app, "docs/ux-builder/decisions/UXD-1.md"), "utf8")).front.ux;
     assert.equal(ux.status, "refuted");
     assert.deepEqual(ux.validated, { status: "refuted", date: today, evidence: "UER-1" });
     assert.deepEqual(ux.history, [{ status: "not-tested", until: today }, { status: "tested", until: today, evidence: "EV-1" }]);
     // The rest of the record is kept.
-    assert.match(readFileSync(join(app, "docs/ux/decisions/UXD-1.md"), "utf8"), /## Recommendation\n\nMap first[\s\S]*\*\*Status\*\*: refuted \(evidence UER-1, \d{4}-\d{2}-\d{2}\)/);
+    assert.match(readFileSync(join(app, "docs/ux-builder/decisions/UXD-1.md"), "utf8"), /## Recommendation\n\nMap first[\s\S]*\*\*Status\*\*: refuted \(evidence UER-1, \d{4}-\d{2}-\d{2}\)/);
   });
 
   // @covers US-131-AC4
@@ -67,7 +67,7 @@ describe("US-131: decision records", () => {
     const app = helixApp();
     cli(app, ADD);
     assert.equal(validate(app).valid, true, JSON.stringify(validate(app).problems));
-    const p = join(app, "docs/ux/decisions/UXD-1.md");
+    const p = join(app, "docs/ux-builder/decisions/UXD-1.md");
     writeFileSync(p, readFileSync(p, "utf8").replace("to: prd", "to: FEAT-404").replace("status: not-tested", "status: probably"));
     const msgs = validate(app).problems.map((x) => x.message);
     assert.ok(msgs.includes("link to FEAT-404 (informed_by) does not resolve to a docs/ux document or a HELIX document"), msgs.join("\n"));

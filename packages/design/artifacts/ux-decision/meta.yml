@@ -12,7 +12,7 @@ id:
   prefix: UXD
   pattern: "^UXD-[1-9][0-9]*$"
   example: UXD-1
-output: docs/ux/decisions/UXD-<n>.md
+output: docs/ux-builder/decisions/UXD-<n>.md
 sections:
     - Question
     - Alternatives

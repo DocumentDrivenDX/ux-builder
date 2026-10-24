@@ -8,7 +8,7 @@ import { cpSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { skeleton } from "@ux-builder/ui/blueprint";
-import { DesignError, writeInApp } from "./app.mjs";
+import { DesignError, bpFile, writeInApp } from "./app.mjs";
 import { emptyState, STATE_FILE, writeState } from "./state.mjs";
 
 export const SKILL_SOURCE = fileURLToPath(new URL("./skill/ux-builder-design", import.meta.url));
@@ -56,8 +56,8 @@ export function init(app, { mcp = false, startedFrom = "existing" } = {}) {
   const written = [];
 
   let blueprint = "exists";
-  if (!existsSync(join(app, "app.blueprint.json"))) {
-    written.push(writeInApp(app, "app.blueprint.json", JSON.stringify(skeleton("app"), null, 2) + "\n"));
+  if (!existsSync(join(app, bpFile(app)))) {
+    written.push(writeInApp(app, bpFile(app), JSON.stringify(skeleton("app"), null, 2) + "\n"));
     blueprint = "written";
     notes.push("There was no app.blueprint.json, so a starting blueprint was written. The guide will help you describe the app's current screens in it.");
   }

@@ -12,7 +12,7 @@ id:
   prefix: EV
   pattern: "^EV-[1-9][0-9]*$"
   example: EV-1
-output: docs/ux/evidence/EV-<n>.md
+output: docs/ux-builder/evidence/EV-<n>.md
 sections:
     - Source
     - Excerpts

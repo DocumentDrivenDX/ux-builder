@@ -12,7 +12,7 @@ id:
   prefix: EXP
   pattern: "^EXP-[1-9][0-9]*$"
   example: EXP-1
-output: docs/ux/experiments/EXP-<n>.md
+output: docs/ux-builder/experiments/EXP-<n>.md
 sections:
     - Hypothesis
     - Variant

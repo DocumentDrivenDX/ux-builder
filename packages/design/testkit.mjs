@@ -7,9 +7,9 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { DesignError, writeInApp } from "./app.mjs";
+import { DesignError, bpFile, ux, writeInApp } from "./app.mjs";
 import { advance } from "./checkpoints.mjs";
-import { helixRoot, parseDocument, usersTable } from "./documents.mjs";
+import { businessRules, helixRoot, parseDocument, usersTable } from "./documents.mjs";
 import { readState, writeState } from "./state.mjs";
 
 const list = (x) => (Array.isArray(x) ? x : []);
@@ -20,7 +20,7 @@ export const OBSERVATION_COLUMNS = ["participant", "task", "completed", "seconds
 const MISSING = "missing: the journey names no acceptance criteria";
 
 function kitNumbers(app) {
-  const dir = join(app, "docs/ux/tests");
+  const dir = join(app, ux(app, "tests"));
   if (!existsSync(dir)) return [];
   return readdirSync(dir).map((n) => n.match(/^TK-([1-9][0-9]*)$/)?.[1]).filter(Boolean).map(Number);
 }
@@ -77,7 +77,7 @@ export function goalText(goal, bp) {
 function targetUsers(app) {
   const table = usersTable(app);
   if (table) return Object.entries(table).map(([id, u]) => ({ id, user: u.user, context: u.context }));
-  const brief = join(app, "docs/ux/brief.md");
+  const brief = join(app, ux(app, "brief.md"));
   if (existsSync(brief)) {
     const body = parseDocument(readFileSync(brief, "utf8")).body;
     const m = body.match(/^## Target users\s*\n([\s\S]*?)(?=^## |$(?![\s\S]))/m);
@@ -94,25 +94,39 @@ const csv = (s) => (/[",\n]/.test(String(s)) ? `"${String(s).replace(/"/g, '""')
 export function kitTasks(app, bp, { journeys = [] } = {}) {
   const all = list(bp.journeys).filter((j) => j?.id);
   const unknown = journeys.filter((id) => !all.some((j) => j.id === id));
-  if (unknown.length) throw new DesignError(`no journey ${unknown.join(", ")} in app.blueprint.json; it has ${all.map((j) => j.id).join(", ") || "none"}`);
+  if (unknown.length) throw new DesignError(`no journey ${unknown.join(", ")} in ${bpFile(app)}; it has ${all.map((j) => j.id).join(", ") || "none"}`);
   const chosen = journeys.length ? all.filter((j) => journeys.includes(j.id)) : all;
   const us = stories(app);
   const tasks = new Map(list(bp.tasks).map((t) => [t.id, t]));
-  return chosen.map((j, i) => {
-    const goal = tasks.get(j.task)?.goal ?? us[j.story]?.title ?? j.id.replace(/^J-/, "").replace(/-/g, " ");
+  const goalOf = (j) => tasks.get(j.task)?.goal ?? us[j.story]?.title ?? j.id.replace(/^J-/, "").replace(/-/g, " ");
+  const out = chosen.map((j, i) => {
     const criteria = list(j.criteria).length ? list(j.criteria) : Object.keys(us[j.story]?.criteria ?? {});
-    return { n: i + 1, journey: j.id, goal: goalText(goal, bp), criteria: criteria.map((id) => ({ id, text: us[j.story]?.criteria?.[id] ?? null })), users: list(tasks.get(j.task)?.users) };
+    return { n: i + 1, journey: j.id, goal: goalText(goalOf(j), bp), criteria: criteria.map((id) => ({ id, text: us[j.story]?.criteria?.[id] ?? null })), users: list(tasks.get(j.task)?.users) };
   });
+  // A task per business rule the chosen journeys depend on (GDL-78), set in the rule's trigger situation.
+  const defined = businessRules(app).rules;
+  const designed = new Map(list(bp.businessRules).filter((r) => r?.id).map((r) => [r.id, r]));
+  const done = new Set();
+  for (const j of chosen) {
+    const ids = [...list(tasks.get(j.task)?.rules), ...list(j.steps).flatMap((st) => list(st?.rules))];
+    for (const id of ids) {
+      if (done.has(id) || !designed.get(id)?.trigger) continue;
+      done.add(id);
+      const trigger = goalText(designed.get(id).trigger, bp).replace(/[.]$/, "");
+      out.push({ n: out.length + 1, journey: j.id, rule: id, goal: `${goalText(goalOf(j), bp).replace(/[.]$/, "")}, and ${trigger}`, criteria: [{ id, text: defined[id]?.text ?? null }], users: list(tasks.get(j.task)?.users) });
+    }
+  }
+  return out;
 }
 
 /* Write a kit: TK-<n> after the last, or rewrite `id`, keeping an observation sheet already filled in. */
 export function testKit(app, { journeys = [], id } = {}) {
-  const bp = readJson(join(app, "app.blueprint.json"));
-  if (!bp) throw new DesignError("no app.blueprint.json: the kit is written from its journeys");
+  const bp = readJson(join(app, bpFile(app)));
+  if (!bp) throw new DesignError(`no ${bpFile(app)}: the kit is written from its journeys`);
   const tasks = kitTasks(app, bp, { journeys });
   if (!tasks.length) throw new DesignError("the blueprint has no journeys to test");
   const kit = id ?? `TK-${Math.max(0, ...kitNumbers(app)) + 1}`;
-  const dir = `docs/ux/tests/${kit}`;
+  const dir = `${ux(app)}/tests/${kit}`;
   const users = targetUsers(app);
   // Who each task is for, when the tasks name their users (GDL-77).
   const forWhom = tasks.some((t) => t.users.length);
@@ -123,7 +137,7 @@ export function testKit(app, { journeys = [], id } = {}) {
   const lower = (x) => x.charAt(0).toLowerCase() + x.slice(1);
   const screener = ["# Screener", "",
     ...(!users.length ? ["The experience brief names no target users yet: write the screener questions from the PRD's personas."]
-      : users[0].id ? ["Recruit people who match one of these target users (docs/ux/users.md). Note the one each participant matches in the observation sheet's user column.", "",
+      : users[0].id ? [`Recruit people who match one of these target users (${ux(app, "users.md")}). Note the one each participant matches in the observation sheet's user column.`, "",
         ...users.flatMap((u) => [`## ${u.id}: ${u.user}`, "", `- Does this describe you: ${lower(u.user)}? (yes / no)`, ...(u.context ? [`- Is this how you would use it: ${lower(u.context)}? (yes / no)`] : []), ""])]
       : ["Recruit people who match one of these target users (from the experience brief):", "", ...users.map((u) => `- Does this describe you: ${lower(u.user)}? (yes / no)`)]),
     "", "Leave out anyone who works on this product.", ""].join("\n").replace(/\n{3,}/g, "\n\n");

@@ -95,7 +95,8 @@ The skill grows sub-skills only if a section becomes too long to follow.
   tool's result with the command's `--json` (GDL-71).
 - Every write goes through one helper that resolves the app root, refuses
   paths outside `docs/ux/`, `.ux-builder/`, `prototype/` and the
-  blueprint files, and records a trace event when an episode is open.
+  blueprint files (*[Amended 2026-10-24 — FEAT-018 GDL-80, US-149]* `docs/ux-builder/` and `.ux-builder/`, or the old
+  paths for an app not yet migrated; CONTRACT-008 Layout), and records a trace event when an episode is open.
 - A network guard in tests stubs `fetch`, `http`, `https`, `net` and
   `dns` to throw; every command's test runs under it.
 

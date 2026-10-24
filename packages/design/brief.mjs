@@ -6,7 +6,7 @@
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { writeInApp } from "./app.mjs";
+import { ux, writeInApp } from "./app.mjs";
 import { helixRoot, parseDocument, usersTable } from "./documents.mjs";
 import { readState } from "./state.mjs";
 
@@ -90,7 +90,7 @@ export function briefContent(app) {
   const users = usersTable(app);
   if (users) {
     points.users = Object.entries(users).map(([id, u]) => ({ text: `${u.user} (${id}): ${u.context}`, status: u.status, id, confirm: "research evidence about these users (ux-builder-design evidence add), cited in docs/ux/users.md" }));
-    notes.push("Target users are from docs/ux/users.md.");
+    notes.push(`Target users are from ${ux(app, "users.md")}.`);
   }
   if (!helix) notes.push("HELIX was not found (no .helix.yml): the brief is built from the design state alone.");
   else if (!prd) notes.push("HELIX has no PRD yet: the brief is built from the stories and the design state.");
@@ -141,8 +141,8 @@ export function brief(app, { name } = {}) {
   let product = name;
   if (!product) { try { product = JSON.parse(readFileSync(join(app, "package.json"), "utf8")).name; } catch { product = ""; } }
   const written = [
-    writeInApp(app, "docs/ux/brief.md", markdown(content, product)),
-    writeInApp(app, "docs/ux/brief.html", briefHtml(content, product)),
+    writeInApp(app, ux(app, "brief.md"), markdown(content, product)),
+    writeInApp(app, ux(app, "brief.html"), briefHtml(content, product)),
     writeInApp(app, ".ux-builder/principles.json", JSON.stringify(principlesFile(readState(app)), null, 2) + "\n"),
   ];
   return { written, sections: content.sections, notes: content.notes, helix: content.helix };

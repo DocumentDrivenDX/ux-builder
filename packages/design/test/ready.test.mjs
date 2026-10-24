@@ -9,14 +9,14 @@ import { join } from "node:path";
 import { describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { writeInApp } from "../index.mjs";
-import { cli, tempApp } from "./helpers.mjs";
+import { approveAll, cli, tempApp } from "./helpers.mjs";
 
 /* An app with a validated prototype: scripts that pass or fail, a blueprint
    whose journey covers two criteria, an audit report and its tests. */
 function app({ lint = 0, bp = 0, auditErrors = 0, cite = ["US-001-AC1", "US-001-AC2"], faked = [], screens = ["map"], pages = screens, auditedAt = new Date(Date.now() + 60_000).toISOString() } = {}) {
-  const a = tempApp({ state: { prototype: { branch: "prototype/map-first", alternative: "map-first" }, faked } });
+  const a = tempApp({ state: { prototype: { branch: "docs/ux-builder/prototypes/map-first", alternative: "map-first" }, faked } });
   writeFileSync(join(a, "package.json"), JSON.stringify({ name: "rivers", private: true, scripts: { lint: `node -e "process.exit(${lint})"`, "check:blueprint": `node -e "process.exit(${bp})"` } }));
-  writeFileSync(join(a, "app.blueprint.json"), JSON.stringify({ screens: screens.map((id) => ({ id })), journeys: [{ id: "J-find", story: "US-001", criteria: ["US-001-AC1", "US-001-AC2"], entry: "map", steps: [{ screen: "map" }] }] }));
+  writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ screens: screens.map((id) => ({ id })), journeys: [{ id: "J-find", story: "US-001", criteria: ["US-001-AC1", "US-001-AC2"], entry: "map", steps: [{ screen: "map" }] }] }));
   mkdirSync(join(a, "audit-report"), { recursive: true });
   writeFileSync(join(a, "audit-report/report.json"), JSON.stringify({ generatedAt: auditedAt, pages: pages.map((screen) => ({ screen })), summary: { error: auditErrors, warning: 0, info: 0 } }));
   mkdirSync(join(a, "e2e"), { recursive: true });
@@ -29,10 +29,11 @@ describe("US-136: the validated prototype", () => {
   // @covers US-136-AC1
   test("AC1: status reports the branch as prototype: validated until core-3 is answered", () => {
     const a = app();
-    assert.deepEqual(JSON.parse(cli(a, ["status", "--json"]).stdout).prototype, { branch: "prototype/map-first", status: "validated" });
-    assert.match(cli(a, ["status"]).stdout, /Prototype: the validated prototype on prototype\/map-first is still a prototype \(core-3 not answered\)\./);
+    assert.deepEqual(JSON.parse(cli(a, ["status", "--json"]).stdout).prototype, { branch: "docs/ux-builder/prototypes/map-first", status: "validated" });
+    assert.match(cli(a, ["status"]).stdout, /Prototype: the validated prototype on docs\/ux-builder\/prototypes\/map-first is still a prototype \(core-3 not answered\)\./);
+    approveAll(a);
     assert.equal(cli(a, ["state", "checkpoint", "core-3", "--answer", "Yes, build it"]).status, 0);
-    assert.deepEqual(JSON.parse(cli(a, ["status", "--json"]).stdout).prototype, { branch: "prototype/map-first", status: "production" });
+    assert.deepEqual(JSON.parse(cli(a, ["status", "--json"]).stdout).prototype, { branch: "docs/ux-builder/prototypes/map-first", status: "production" });
   });
 
   // @covers US-136-AC2
@@ -46,7 +47,7 @@ describe("US-136: the validated prototype", () => {
     // An audit older than the blueprint, and a planned screen no audited page is, both refuse.
     const stale = ready(app({ auditedAt: "2020-01-01T00:00:00Z", screens: ["map", "detail"], pages: [] }), "--for", "testing");
     assert.equal(stale.status, 1);
-    assert.match(stale.out.checks.find((c) => c.name === "audit is current").detail, /^the audit \(2020-01-01 00:00\) is older than app\.blueprint\.json \(.+\): run npm run audit$/);
+    assert.match(stale.out.checks.find((c) => c.name === "audit is current").detail, /^the audit \(2020-01-01 00:00\) is older than docs\/ux-builder\/blueprint\/app\.blueprint\.json \(.+\): run npm run audit$/);
     assert.match(stale.out.checks.find((c) => c.name === "screens built").detail, /^no audited page is map, detail: build them, mark each page with data-piq-screen="<id>"/);
   });
 

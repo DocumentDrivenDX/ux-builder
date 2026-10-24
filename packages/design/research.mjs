@@ -5,15 +5,15 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { isAbsolute, join, relative } from "node:path";
-import { DesignError, writeInApp } from "./app.mjs";
+import { DesignError, ux, writeInApp } from "./app.mjs";
 import { parseDocument } from "./documents.mjs";
 
 export const EVIDENCE_KINDS = ["interview", "analytics", "support", "feedback", "survey", "observation"];
-const DIR = "docs/ux/evidence";
+const docsDir = (app) => ux(app, "evidence");
 
 /* The EV- numbers in use. */
 function numbers(app) {
-  const dir = join(app, DIR);
+  const dir = join(app, docsDir(app));
   if (!existsSync(dir)) return [];
   return readdirSync(dir).map((n) => n.match(/^EV-([1-9][0-9]*)\.md$/)?.[1]).filter(Boolean).map(Number);
 }
@@ -32,7 +32,7 @@ export function writeEvidence(app, { file, kind, date = today(), source, title, 
   lines.push("---", "", `# ${id}: ${title ?? `${kind} from ${date}`}`, "", "## Source", "", `- **Kind**: ${kind}`, `- **Where it is kept**: ${source ?? ref}; not copied here`, `- **File**: \`${ref}\``, "", "## Excerpts", "");
   lines.push(...(excerpts.length ? excerpts.map((e) => `- ${e}`) : ["- None cited yet. Quote only what the synthesis relies on, by pseudonym (P1: \"…\"), masked."]));
   lines.push("", "## Synthesis notes", "", "- None yet.", "");
-  const path = writeInApp(app, `${DIR}/${id}.md`, lines.join("\n"));
+  const path = writeInApp(app, `${docsDir(app)}/${id}.md`, lines.join("\n"));
   return { id, path, kind, date, source: source ?? ref, file: ref };
 }
 
@@ -47,14 +47,14 @@ export function evidenceAdd(app, { file, kind, date, source, title } = {}) {
 
 /* ux-builder-design evidence list: each record's ID, kind, date, source and excerpt count. */
 export function evidenceList(app) {
-  const dir = join(app, DIR);
+  const dir = join(app, docsDir(app));
   const ids = numbers(app).sort((a, b) => a - b);
   const evidence = ids.map((n) => {
     const doc = parseDocument(readFileSync(join(dir, `EV-${n}.md`), "utf8"));
     const ux = doc.front?.ux ?? {};
     const section = doc.body.split(/^## /m).find((s) => s.startsWith("Excerpts")) ?? "";
     const excerpts = section.split("\n").filter((l) => /^\s*-\s*P[0-9]+:/.test(l)).length;
-    return { id: `EV-${n}`, kind: ux.kind ?? null, date: ux.date != null ? String(ux.date) : null, source: ux.source ?? null, excerpts, path: `${DIR}/EV-${n}.md` };
+    return { id: `EV-${n}`, kind: ux.kind ?? null, date: ux.date != null ? String(ux.date) : null, source: ux.source ?? null, excerpts, path: `${docsDir(app)}/EV-${n}.md` };
   });
   return { evidence };
 }

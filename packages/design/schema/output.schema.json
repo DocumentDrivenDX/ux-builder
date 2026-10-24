@@ -67,7 +67,9 @@
         "documents",
         "text",
         "jobs",
-        "prototype"
+        "prototype",
+        "progress",
+        "awaitingReview"
       ],
       "properties": {
         "activity": {
@@ -114,6 +116,37 @@
         },
         "text": {
           "type": "string"
+        },
+        "progress": {
+          "type": "object",
+          "required": [
+            "mode",
+            "step",
+            "of",
+            "name",
+            "text"
+          ],
+          "properties": {
+            "step": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "of": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            }
+          }
+        },
+        "awaitingReview": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -482,6 +515,136 @@
         "tasks",
         "written",
         "users"
+      ]
+    },
+    "overview": {
+      "type": "object",
+      "required": [
+        "steps",
+        "change",
+        "review"
+      ],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": [
+              "n",
+              "name",
+              "activity",
+              "you",
+              "produces",
+              "terms"
+            ]
+          }
+        },
+        "change": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "review": {
+          "type": "string"
+        }
+      }
+    },
+    "explain": {
+      "type": "object",
+      "required": [
+        "terms"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "term",
+              "step",
+              "means",
+              "why"
+            ]
+          }
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "mode",
+        "step",
+        "of",
+        "name",
+        "text"
+      ]
+    },
+    "reviewList": {
+      "type": "object",
+      "required": [
+        "pending",
+        "count",
+        "next"
+      ],
+      "properties": {
+        "pending": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "step",
+              "title",
+              "file",
+              "hash",
+              "changed",
+              "feedback"
+            ]
+          }
+        },
+        "count": {
+          "type": "integer"
+        },
+        "next": {
+          "type": "string"
+        }
+      }
+    },
+    "reviewShow": {
+      "type": "object",
+      "required": [
+        "id",
+        "step",
+        "title",
+        "file",
+        "content",
+        "hash",
+        "status",
+        "feedback"
+      ]
+    },
+    "reviewFeedback": {
+      "type": "object",
+      "required": [
+        "id",
+        "item",
+        "text",
+        "status",
+        "at"
+      ]
+    },
+    "reviewApprove": {
+      "type": "object",
+      "required": [
+        "item",
+        "approved",
+        "remaining",
+        "next"
       ]
     }
   }

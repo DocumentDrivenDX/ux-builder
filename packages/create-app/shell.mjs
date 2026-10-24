@@ -63,7 +63,7 @@ export function criteria(modalities) {
   await page.goto("/");
   const empty = page.locator("[data-piq-screen=home] .piq-state-panel");
   await expect(empty).toContainText("Frame the first feature in HELIX");
-  await expect(empty).toContainText("app.blueprint.json");
+  await expect(empty).toContainText("docs/ux-builder/blueprint/app.blueprint.json");
   await expect(page.locator(".piq-shell__bar")).toBeVisible();
   await expect(page.locator(".piq-shell__side")).toBeHidden();
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -143,7 +143,7 @@ export function modalityGuide(modalities) {
   const ms = normalize(modalities);
   const x = expandModalities(ms);
   const list = JSON.stringify(ms);
-  return `This app's modalities are ${ms.map((m) => `\`${m}\``).join(" and ")} (\`supports.modalities\` in \`app.blueprint.json\`). For each:
+  return `This app's modalities are ${ms.map((m) => `\`${m}\``).join(" and ")} (\`supports.modalities\` in \`docs/ux-builder/blueprint/app.blueprint.json\`). For each:
 
 ${ms.map((m) => `- \`${m}\`: ${MODALITIES[m].shell}; build with ${MODALITIES[m].components.map((c) => `\`${c}\``).join(", ")}; its rules are the ${MODALITIES[m].ruleFamilies.map((f) => `\`${f}.*\``).join(", ")} families.`).join("\n")}
 

@@ -21,9 +21,9 @@ const BP = {
   journeys: [{ id: "J-find", story: "US-001", task: "T-1", entry: "map", steps: [{ screen: "map", action: "open", decision: "Which river" }, { screen: "detail" }] }],
 };
 function app({ bp = BP, audit = { error: 0, warning: 1 }, judgments } = {}) {
-  const a = tempApp({ state: judgments ? { alternatives: [{ name: "map-first", file: "app.blueprint.map-first.json", status: "candidate", judgments }] } : {} });
-  writeFileSync(join(a, "app.blueprint.json"), JSON.stringify(bp));
-  writeFileSync(join(a, "app.blueprint.map-first.json"), JSON.stringify(bp));
+  const a = tempApp({ state: judgments ? { alternatives: [{ name: "map-first", file: "docs/ux-builder/blueprint/app.blueprint.map-first.json", status: "candidate", judgments }] } : {} });
+  writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(bp));
+  writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.map-first.json"), JSON.stringify(bp));
   if (audit) { mkdirSync(join(a, "audit-report"), { recursive: true }); writeFileSync(join(a, "audit-report/report.json"), JSON.stringify({ summary: { ...audit, info: 0 } })); }
   return a;
 }

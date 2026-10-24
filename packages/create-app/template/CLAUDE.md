@@ -20,7 +20,7 @@ To design or redesign the app's experience with your agent, start the
 guided design loop: in Claude Code, type `/ux-builder-design` (the skill is
 in `.claude/skills/ux-builder-design/`), or ask the agent to design
 something. The guide keeps its state in `.ux-builder/design-state.json` and
-its documents in `docs/ux/`; `npx ux-builder-design status` shows where it
+its documents in `docs/ux-builder/`; `npx ux-builder-design status` shows where it
 stands. It works without the MCP server.
 
 The standing objective: design the minimum viable interaction that lets the
@@ -37,7 +37,7 @@ addition`).
 ## Screens
 
 Plan screens before building them. The app's destinations and screens are
-described in `app.blueprint.json`: add a screen there first, choosing its
+described in `docs/ux-builder/blueprint/app.blueprint.json`: add a screen there first, choosing its
 pattern from the recipes in the guidance (or the MCP tool `list_recipes`),
 and run `npm run check:blueprint` until it reports no errors. Then build each
 screen from its pattern (`@ux-builder/ui/patterns`) inside a `Page`, within

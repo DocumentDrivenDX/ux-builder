@@ -56,7 +56,7 @@ describe("US-069: start with the HELIX documents drafted", () => {
     for (const ac of ["US-001-AC1", "US-001-AC2"]) assert.match(story, new RegExp(`\\*\\*${ac}\\*\\* — Given`), ac);
     assert.match(story, /^\*\*Feature\*\*: FEAT-001/m);
     assert.match(read("02-design/DESIGN.md"), /^# DESIGN\.md — acme$/m);
-    assert.match(read("02-design/DESIGN.md"), /`app\.blueprint\.json`[\s\S]*AppShell/);
+    assert.match(read("02-design/DESIGN.md"), /`docs\/ux-builder\/blueprint\/app\.blueprint\.json`[\s\S]*AppShell/);
     assert.match(read("03-test/test-plan.md"), /npm run check:blueprint[\s\S]*npm run test:e2e/);
     assert.match(read("03-test/test-plans/STP-001-open-the-app-and-see-where-to-start.md"), /`@covers US-001-AC2`/);
   });

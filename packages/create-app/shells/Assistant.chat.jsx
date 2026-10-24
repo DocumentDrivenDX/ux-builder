@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Conversation } from "@ux-builder/ui/assistant";
 
-/* The app's assistant (app.blueprint.json, screen "assistant"): the SDK's
+/* The app's assistant (docs/ux-builder/blueprint/app.blueprint.json, screen "assistant"): the SDK's
    Conversation, empty, with its composer and AI disclosure. No runtime is
    connected yet: connect one with useAiSdkConversation(chat) from
    "@ux-builder/ui/assistant/ai-sdk", or useAssistantUiConversation(thread)

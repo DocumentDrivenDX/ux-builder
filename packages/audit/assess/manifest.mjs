@@ -11,6 +11,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
+import { layoutOf } from "@ux-builder/ui/blueprint/paths";
 import { rolesOf, riskyStep, SCENARIOS } from "./ai.mjs";
 import { bind, criteriaOf, globOutsideRoot, HelixError, instances } from "./helix.mjs";
 
@@ -85,9 +86,10 @@ const origin = (u, base) => { try { return new URL(u, base).origin; } catch { re
 const SCENARIO_TEXT = { normal: "normal (the task as intended)", errorProne: "error-prone (an ambiguous or failing request)", risky: "risky (a step with a high-impact action)" };
 
 /* The app's blueprint (CONTRACT-005): the manifest's `blueprint` path, else
-   app.blueprint.json beside the manifest. { data, file, rel } or { why }. */
+   the app's own beside the manifest: docs/ux-builder/blueprint/app.blueprint.json,
+   or an unmigrated app's app.blueprint.json (FEAT-018 GDL-80). { data, file, rel } or { why }. */
 function blueprintOf(m, d, add) {
-  const file = resolve(m.dir, typeof d.blueprint === "string" ? d.blueprint : "app.blueprint.json");
+  const file = resolve(m.dir, typeof d.blueprint === "string" ? d.blueprint : layoutOf(m.dir).blueprint);
   const rel = relative(m.dir, file) || file;
   if (!existsSync(file)) {
     if (d.blueprint !== undefined) add("/blueprint", `${d.blueprint} does not exist`);

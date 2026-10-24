@@ -59,7 +59,7 @@ describe("the skill for a new app (US-114)", () => {
     for (const a of ["Define", "Explore", "Experience", "Validate"]) assert.match(acts, new RegExp(`^\\| ${a} \\|`, "m"));
     const open = section("Opening every session");
     assert.match(open, /ux-builder-design status/);
-    assert.match(open, /Tell the person where things stand/);
+    assert.match(open, /tell the person where things stand/i);
   });
 });
 
@@ -145,5 +145,31 @@ describe("the skill needs no MCP (US-116)", () => {
     const MCP = /\b(get_rules|get_design_state|update_design_state|design_status|record_decision|start_episode|end_episode|check_blueprint|list_recipes)\b/;
     for (const line of SKILL.split("\n").filter((l) => MCP.test(l))) assert.match(line, / or /, `an MCP tool with no alternative: ${line}`);
     assert.match(SKILL, /never need it/);
+  });
+});
+
+describe("business rules in the skill (US-147)", () => {
+  // @covers US-147-AC6
+  test("AC6: modelling tasks, the agent cites each business rule by ID and asks the person the four questions", () => {
+    const text = section("Model tasks");
+    assert.match(text, /\*\*Business rules\.\*\*/);
+    assert.match(text, /defined once in\nHELIX, as `\*\*BR-<n>\*\* — <rule>`/);
+    assert.match(text, /`"rules": \["BR-1"\]` on the task, and on the journey step where\nit bites/);
+    for (const k of ["trigger", "before", "blocked", "recover"]) assert.match(text, new RegExp(`"${k}": "…"`), k);
+    assert.match(text, /ask the person four questions/);
+  });
+});
+
+describe("the guided conversation in the skill (US-148)", () => {
+  // @covers US-148-AC7
+  test("AC7: each item shown inline, one at a time, feedback collected and addressed, approval before the next; the step said at each step", () => {
+    const review = section("Review and approval");
+    assert.match(review, /Take \*\*one item at a time\*\*\. Show it \*\*inline in the conversation\*\*/);
+    assert.match(review, /review feedback <item> --text/);
+    assert.match(review, /review respond <FB-n>/);
+    assert.match(review, /review approve <item> --answer "…"`\. Only then show the next item\./);
+    assert.match(review, /Never\nsend the person to a file instead/);
+    assert.match(section("Where the person is"), /"Step 2 of 8: Understand users\."/);
+    assert.match(section("Explaining terms"), /say what it means and why it is valuable/);
   });
 });

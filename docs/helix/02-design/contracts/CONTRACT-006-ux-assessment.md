@@ -46,7 +46,7 @@ YAML at the app's root. Unknown keys are errors. JSON Schema:
 | `version` | `1` | yes | Manifest schema version |
 | `app.name` | string | yes | |
 | `app.repository` | string | no | URL; recorded, not fetched |
-| `blueprint` | path | no | *[Amended 2026-10-21 — FEAT-012 step 3]* The app's blueprint (CONTRACT-005), where `journeys[].blueprint` is resolved. Default: `app.blueprint.json` beside the manifest. A path that does not exist fails validation |
+| `blueprint` | path | no | *[Amended 2026-10-21 — FEAT-012 step 3]* The app's blueprint (CONTRACT-005), where `journeys[].blueprint` is resolved. Default: `app.blueprint.json` beside the manifest (*[Amended 2026-10-24 — FEAT-018 GDL-80, US-149]* `docs/ux-builder/blueprint/app.blueprint.json` beside it, unless the app is on the old layout). A path that does not exist fails validation |
 | `helix.marker` | path | no | Default: the first `.helix.yml` walking up from the manifest to the git root, as HELIX discovers it |
 | `helix.flow` | string | when the marker lists two or more flows and has no `defaults.flow` | A flow `id` in the marker |
 | `helix.catalog` | `auto` or path | no | Default `auto`: HELIX's order (marker `graph:`/`catalog:`, vendored `workflows/`, a HELIX skill installed in the project at `.claude/skills/helix/references/` — next to the marker, then at the repository root — then an installed plugin); a path names a catalogue root holding `graph.yml`. `run.json` records which bound: `manifest`, `marker`, `repository`, `project-skill`, `plugin` or `none` |

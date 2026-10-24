@@ -24,11 +24,73 @@ that add complexity without measurable user value.
 
 1. Run `ux-builder-design status`. If it says there is no design state, the
    app has not started the loop.
-2. Tell the person where things stand in two or three sentences, from the
-   status: the activity, what is chosen, how many assumptions are untested,
-   the open questions and the next action. For example: "Map first is
-   chosen. Two assumptions are untested. Next: test with users."
-3. Ask whether to continue with the next action or do something else.
+2. **In the first session** (no checkpoint answered, nothing approved yet),
+   start with an overview, before any question: run
+   `ux-builder-design overview` and tell the person, in your own words, the
+   eight steps, what they will do in each, what comes out, and that you
+   will stop for their decision at each checkpoint and for their approval of
+   everything you produce. Keep it short; ask if they have questions.
+3. Otherwise tell the person where things stand in two or three sentences,
+   starting with the step: "Step 4 of 8: Explore alternatives. Map first is
+   chosen. Two assumptions are untested. Three items await your review."
+4. If items await review, review them first (*Review and approval*).
+   Then ask whether to continue with the next action or do something else.
+
+## Where the work lives
+
+Everything you produce that is not HELIX's lives under `docs/ux-builder/`:
+the design documents (brief, users, jobs, evidence, decisions, test kits,
+reports, insights, experiments) at its top, the blueprint and its
+alternatives in `blueprint/`, prototypes in `prototypes/`, HELIX proposals
+in `helix-proposals/`, comparisons, drawings and wireframes in their own
+folders. The design state stays in `.ux-builder/`. If `status` says the app
+is on the old layout (`docs/ux/`, `app.blueprint.json` at the top), offer
+`ux-builder-design migrate --dry-run`, show the person what would move, and
+run `migrate` when they agree.
+
+## Where the person is
+
+Say which step the person is on whenever you start a step or come back to
+one: "Step 2 of 8: Understand users." (`status` gives it; change mode has
+its own four steps, "Change mode, step 2 of 4: Impact"). When a step's
+work is done and approved, run `ux-builder-design step next` and say what
+the next step is and what it will ask of them.
+
+## Explaining terms
+
+The person may not know the vocabulary. The first time a term comes up in
+a session (blueprint, user story, acceptance criterion, job to be done,
+target user, task, journey, business rule, alternative, rubric, prototype,
+checkpoint and the rest), say what it means and why it is valuable, in a
+sentence or two, before using it: `ux-builder-design explain <term>` has
+the wording, and `explain --step <n>` lists the terms a step introduces.
+Explain in plain words, with an example from their product. Don't explain
+the same term twice in a session unless they ask.
+
+## Review and approval
+
+Everything you produce is reviewed by the person before you move on: each
+target user, job, user story, task, business rule, journey, alternative,
+decision, screen, test kit, report, insight and experiment. Files are
+where the work is kept; the conversation is where it is reviewed. Never
+send the person to a file instead.
+
+1. `ux-builder-design review` lists what awaits review, in order.
+2. Take **one item at a time**. Show it **inline in the conversation**:
+   `review show <item>` gives its content; present it readably (a story as
+   its story and criteria, a task as its goal, users, steps and rules),
+   with any term explained.
+3. Ask for feedback: "Does this match what you mean? Anything to change?"
+4. Record any feedback in their words: `review feedback <item> --text "…"`.
+   Make the change, record what you changed (`review respond <FB-n> --text
+   "…"`), and show the item again.
+5. When they approve, record it in their words:
+   `review approve <item> --answer "…"`. Only then show the next item.
+
+Don't batch items into one message, and don't take silence or "looks
+fine" about several items as approval of each. An item changed after its
+approval goes back on the list. Checkpoints and `step next` refuse while
+items of their steps await review.
 
 Record what you learn as you go, with `ux-builder-design state set`:
 - an assumption: `state set 'assumptions[+]' '{"text":"…"}'` (it gets an
@@ -39,7 +101,7 @@ Record what you learn as you go, with `ux-builder-design state set`:
 ## Starting in an existing app
 
 `ux-builder-design init` starts an existing app at Baseline. In its first
-session, run `ux-builder-design baseline`: it writes `docs/ux/baseline.md`
+session, run `ux-builder-design baseline`: it writes `docs/ux-builder/baseline.md`
 from the blueprint, the HELIX stories and the latest assessment run (run
 `ux-builder-audit assess` first if there is none), with every drafted brief
 point, job and task marked current state, assumed. Go through it with the
@@ -63,7 +125,9 @@ stages inside them without being asked.
 
 The person works with the evolving experience, not with the documents: the
 brief, the comparison, the prototype and the evidence. You keep the
-documents up to date behind it, and never ask the person to edit one.
+documents up to date behind it, and never ask the person to edit one; you
+show them each item's content in the conversation for their review and
+approval (*Review and approval*).
 
 ## What you draw on
 
@@ -72,7 +136,7 @@ documents up to date behind it, and never ask the person to edit one.
   and the UX quality rubric;
 - research evidence the person supplies;
 - the task model in the blueprint;
-- decision history: the design state, `docs/ux/decisions/` and the trace.
+- decision history: the design state, `docs/ux-builder/decisions/` and the trace.
 
 **Tools:**
 - the assessment (`ux-builder-audit assess`), which walks journeys in a
@@ -115,7 +179,7 @@ experience principle goes in `principles[+]`; give it a `rule` when a check
 can hold the design to it, for example
 `{"text":"No mandatory account creation","rule":{"kind":"no-step-before","patterns":["SignIn"]}}`.
 
-Then run `ux-builder-design brief` and open `docs/ux/brief.html` for the
+Then run `ux-builder-design brief` and open `docs/ux-builder/brief.html` for the
 person. Regenerate the brief whenever its sources change: the PRD, the
 stories or the design state. Ask `core-1` on the brief.
 
@@ -124,9 +188,9 @@ stories or the design state. Ask `core-1` on the brief.
 **Hypotheses first.** From the brief and what you know of the domain,
 propose the user segments, jobs to be done, motivations, frustrations,
 usage contexts and accessibility needs. Mark every item *hypothesis*, with
-no evidence: write the jobs into `docs/ux/jobs.md` from its template with
+no evidence: write the jobs into `docs/ux-builder/jobs.md` from its template with
 status hypothesis, confidence low and evidence none, and the target users
-into `docs/ux/users.md`: one row per user segment (`U-<n>`) with its
+into `docs/ux-builder/users.md`: one row per user segment (`U-<n>`) with its
 context (where, on what, with what expertise), its needs (accessibility
 needs and constraints), the jobs it holds with an importance for each
 (`J-1 high, J-2 low`), evidence none, confidence low, status hypothesis.
@@ -161,6 +225,21 @@ blueprint, one per thing a user must accomplish, each with its goal, the
 jobs it serves, its trigger, required and optional inputs, system and user
 actions, success (acceptance criteria IDs), exceptions and subtasks with
 their alternative ways, and the target users it serves (`"users": ["U-1"]`).
+
+**Business rules.** A task often depends on the business's rules ("only
+stretches with public access can be saved"). Each is defined once in
+HELIX, as `**BR-<n>** — <rule>` (the PRD, a feature spec or the solution
+design's Business Rules; propose one there if it is missing). Cite it where
+it applies: `"rules": ["BR-1"]` on the task, and on the journey step where
+it bites. Then ask the person four questions and record the answers in the
+blueprint's `businessRules`:
+`{ "id": "BR-1", "trigger": "…", "before": "…", "blocked": "…", "recover": "…" }`:
+the situation that triggers it (in the user's words), how the user learns of
+it before acting, what they see when it stops them, and how they recover.
+A rule the user only meets as an error is a design problem; `validate`
+fails a cited rule without the four answers, and the test kit gives each
+rule a task set in its trigger.
+
 Name each journey's task (`"task": "T-<n>"`) and run
 `ux-builder-blueprint check`.
 
@@ -177,15 +256,15 @@ Before Explore, ask the person to confirm the essential goals, as part of
 For every open question about the interaction model (search first or map
 first, say), draft at least two alternatives and recommend one:
 1. `ux-builder-blueprint alternative new <name>` copies the blueprint to
-   `app.blueprint.<name>.json`; change it to the alternative and run
-   `ux-builder-blueprint check app.blueprint.<name>.json`.
+   `docs/ux-builder/blueprint/app.blueprint.<name>.json`; change it to the
+   alternative and run `ux-builder-blueprint check docs/ux-builder/blueprint/app.blueprint.<name>.json`.
 2. Record your design judgments of each, against criteria that fit the
    product (initial effort, support for exploration, required knowledge,
    mobile fit…), each with its reasoning, in the design state:
    `state set 'alternatives[<i>].judgments' '[{"criterion":"…","value":"…","reasoning":"…"}]'`.
    They are preliminary judgments, not measured results; say so.
-3. `ux-builder-blueprint compare app.blueprint.<a>.json app.blueprint.<b>.json …`
-   writes `blueprint-compare/compare.html`: open it for the person.
+3. `ux-builder-blueprint compare docs/ux-builder/blueprint/app.blueprint.<a>.json docs/ux-builder/blueprint/app.blueprint.<b>.json …`
+   writes `docs/ux-builder/compare/compare.html`: open it for the person.
 4. Run `ux-builder-design rubric --alternative <name>` for each: every
    dimension's predicted value and its basis. Never average them, and never
    recommend an alternative that fails a baseline (task effectiveness,
@@ -196,6 +275,16 @@ first, say), draft at least two alternatives and recommend one:
    record the decision (`ux-builder-design decision add`).
 
 ## Design the structure
+
+**Modality first.** Before any wireframe or prototype is drawn, explain
+the terms *modality* and *size class* (`ux-builder-design explain modality`),
+then ask the person what kind of experience the app gives (responsive web,
+chat, hybrid chat; more than one is possible) and the screen sizes it must
+work at, and record their answer:
+`ux-builder-design modality --answer "<their words>" --modality <list> --size-classes <list>`.
+It sets the blueprint's `supports`; `ux-builder-blueprint wireframes` and
+`prototype --explore` refuse until it is recorded, and ask again if the
+blueprint's supports change.
 
 From the chosen flow, generate the information architecture, the
 interaction design and the interface design together, not one after
@@ -212,13 +301,13 @@ and `propose` carries purposes and content into the wireframe drafts.
 
 **Exploratory prototypes** answer one design question each:
 `ux-builder-blueprint prototype --explore --alternative <name> --question "<the question>"`
-writes `prototype/<name>/`; open its `index.html` for the person. Add
+writes `docs/ux-builder/prototypes/<name>/`; open its `index.html` for the person. Add
 `--design-system <ds>` (twice for two) to compare presentation as well as
 flow. Ask what they noticed and record each note as a design-team
 observation, never as user evidence:
 `state set 'observations[+]' '{"text":"…","alternative":"<name>"}'`.
 When the question is answered, `prototype --archive <name>`. App code never
-imports from `prototype/` (the `ux-builder/no-prototype-import` lint rule).
+imports from a prototype (the `ux-builder/no-prototype-import` lint rule).
 
 **The validated prototype** is the chosen design built in the app's source,
 on a branch, from the SDK's patterns, in the app's theme, with realistic
@@ -235,7 +324,7 @@ prototype (`ux-builder-audit assess heuristics`), and fix what it finds.
 Its task metrics are agent-measured; never present them as how people do.
 
 Then test with people. `ux-builder-design test-kit` writes
-`docs/ux/tests/TK-<n>/`: scenarios as the user's goals (never a screen or
+`docs/ux-builder/tests/TK-<n>/`: scenarios as the user's goals (never a screen or
 control name), success criteria, a script, a consent note, a screener and
 `observations.csv`. The person runs the sessions. Afterwards:
 
@@ -250,7 +339,7 @@ control name), success criteria, a script, a consent note, a screener and
   cited lines, masked. Never take a recording.
 - `rubric`: the observed column beside the predicted one, per task
   completion, median time, errors, assists, and the problems seen twice.
-- `report`: `docs/ux/evaluations/UER-<n>.md`. A prediction the people
+- `report`: `docs/ux-builder/evaluations/UER-<n>.md`. A prediction the people
   contradicted is highlighted, and the assumptions behind it (those with a
   `dimension`) become refuted. Say plainly what was not tested.
 
@@ -268,7 +357,7 @@ The app reports journeys only if it chooses to: wrap it in
 When the owner exports the events (JSON Lines), and support or feedback:
 
 - `insights <events.jsonl> [--support <file>] [--feedback <file>]` writes
-  `docs/ux/insights/INS-<date>.md`; the jobs and the rubric cite it.
+  `docs/ux-builder/insights/INS-<date>.md`; the jobs and the rubric cite it.
 - `diagnose --insight INS-<date> --observation … --explanation …
   --explanation … --hypothesis "If …, then …, because …" --alternative <name>`:
   never one explanation; make the alternative first.
@@ -322,23 +411,23 @@ reversible assumptions yourself and list each one with
 
 ## Documents
 
-The loop's own documents live in `docs/ux/`, one type each, written from a
+The loop's own documents live in `docs/ux-builder/`, one type each, written from a
 template in `node_modules/@ux-builder/design/artifacts/<type>/`
 (`template.md`, with `prompt.md` saying what to fill in and `example.md`
 showing a finished one):
 
 | Type | Path |
 |---|---|
-| experience-brief | `docs/ux/brief.md` |
-| baseline | `docs/ux/baseline.md` |
-| research-evidence | `docs/ux/evidence/EV-<n>.md` |
-| jobs | `docs/ux/jobs.md` |
-| users | `docs/ux/users.md` |
-| ux-decision | `docs/ux/decisions/UXD-<n>.md` |
-| test-kit | `docs/ux/tests/TK-<n>/kit.md` |
-| usability-evaluation-report | `docs/ux/evaluations/UER-<n>.md` |
-| insights | `docs/ux/insights/INS-<yyyy-mm-dd>.md` |
-| experiment | `docs/ux/experiments/EXP-<n>.md` |
+| experience-brief | `docs/ux-builder/brief.md` |
+| baseline | `docs/ux-builder/baseline.md` |
+| research-evidence | `docs/ux-builder/evidence/EV-<n>.md` |
+| jobs | `docs/ux-builder/jobs.md` |
+| users | `docs/ux-builder/users.md` |
+| ux-decision | `docs/ux-builder/decisions/UXD-<n>.md` |
+| test-kit | `docs/ux-builder/tests/TK-<n>/kit.md` |
+| usability-evaluation-report | `docs/ux-builder/evaluations/UER-<n>.md` |
+| insights | `docs/ux-builder/insights/INS-<yyyy-mm-dd>.md` |
+| experiment | `docs/ux-builder/experiments/EXP-<n>.md` |
 
 After writing or changing one, run `ux-builder-design validate` and fix what
 it reports.
@@ -349,7 +438,7 @@ HELIX documents (`docs/helix/`) change only through proposals: run
 `ux-builder-blueprint propose` and offer its patches to the person as a
 batch at a checkpoint; they apply the ones they accept. Never edit
 `docs/helix/` yourself, and never put a new document type there: new types
-go in `docs/ux/`.
+go in `docs/ux-builder/`.
 
 ## Challenge before you add
 
@@ -398,5 +487,5 @@ in and why, and that they can switch (`mode full`).
   evidence supports it.
 - Never present your own walk of the app as user testing: it is diagnostic.
 - Never write a new document type into `docs/helix/`. New types go in
-  `docs/ux/`; HELIX documents change only through `propose` patches the
+  `docs/ux-builder/`; HELIX documents change only through `propose` patches the
   person accepts.

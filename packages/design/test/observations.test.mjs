@@ -26,13 +26,13 @@ describe("US-141: import observations and consented transcripts", () => {
     const r = json(a, ["observe", "import", "sheet.csv", "--kit", "TK-1"]);
     assert.equal(r.imported, 9);
     assert.deepEqual(r.sessions, ["P1", "P2", "P3", "P4", "P5"]);
-    const store = JSON.parse(readFileSync(join(a, "docs/ux/tests/TK-1/findings.json"), "utf8"));
+    const store = JSON.parse(readFileSync(join(a, "docs/ux-builder/tests/TK-1/findings.json"), "utf8"));
     const f = store.findings.find((x) => x.participant === "P2" && x.task === 1);
     assert.deepEqual({ ...f }, { id: findingIdFor("TK-1", "P2", 1), source: "human", kit: "TK-1", participant: "P2", task: 1, journey: "J-find", completed: false, seconds: 240, errors: 2, assists: 1, remark: "Could not tell which access point was public", problem: "access points unclear", severity: 3, title: "access points unclear" });
     assert.match(f.id, /^F-[0-9a-f]{8}$/);
     // Importing again replaces, never duplicates: the IDs are stable.
     json(a, ["observe", "import", "sheet.csv", "--kit", "TK-1"]);
-    const again = JSON.parse(readFileSync(join(a, "docs/ux/tests/TK-1/findings.json"), "utf8"));
+    const again = JSON.parse(readFileSync(join(a, "docs/ux-builder/tests/TK-1/findings.json"), "utf8"));
     assert.deepEqual(again.findings.map((x) => x.id), store.findings.map((x) => x.id));
     // A row for a task the kit does not have is reported and skipped.
     writeFileSync(join(a, "extra.csv"), "participant,task,completed\nP6,9,yes\n");
@@ -50,7 +50,7 @@ describe("US-141: import observations and consented transcripts", () => {
       "P2,2,yes,50,0,0,Lopez family uses it too",
     ].join("\n"));
     const r = json(a, ["observe", "import", "named.csv", "--kit", "TK-1"]);
-    const written = readFileSync(join(a, "docs/ux/tests/TK-1/findings.json"), "utf8");
+    const written = readFileSync(join(a, "docs/ux-builder/tests/TK-1/findings.json"), "utf8");
     for (const leak of ["Maria", "Lopez", "maria.lopez@example.com", "415-555-0134"]) assert.ok(!written.includes(leak), `${leak} written`);
     const m = r.findings.find((f) => f.task === 1);
     assert.equal(m.participant, "P1");
@@ -59,11 +59,11 @@ describe("US-141: import observations and consented transcripts", () => {
     // The real name is kept out of git, beside the pseudonym.
     assert.deepEqual(JSON.parse(readFileSync(join(a, ".ux-builder/participants.local.json"), "utf8")), { P1: "Maria Lopez" });
     // A name next to pseudonyms the sheet already uses never takes one of theirs; the kit's own sheet keeps only pseudonyms.
-    writeFileSync(join(a, "docs/ux/tests/TK-1/observations.csv"), "participant,task,completed,remark\nP2,1,yes,fine\nTom Reyes,1,no,Tom got lost\nP3,1,yes,\n");
-    const mixed = json(a, ["observe", "import", "docs/ux/tests/TK-1/observations.csv", "--kit", "TK-1"]);
+    writeFileSync(join(a, "docs/ux-builder/tests/TK-1/observations.csv"), "participant,task,completed,remark\nP2,1,yes,fine\nTom Reyes,1,no,Tom got lost\nP3,1,yes,\n");
+    const mixed = json(a, ["observe", "import", "docs/ux-builder/tests/TK-1/observations.csv", "--kit", "TK-1"]);
     assert.deepEqual(mixed.findings.map((f) => f.participant).sort(), ["P2", "P3", "P4"], "three people, three pseudonyms: P1 is Maria, P2 and P3 the sheet's own");
-    assert.equal(mixed.rewritten, "docs/ux/tests/TK-1/observations.csv");
-    const sheet = readFileSync(join(a, "docs/ux/tests/TK-1/observations.csv"), "utf8");
+    assert.equal(mixed.rewritten, "docs/ux-builder/tests/TK-1/observations.csv");
+    const sheet = readFileSync(join(a, "docs/ux-builder/tests/TK-1/observations.csv"), "utf8");
     assert.ok(!/Tom|Reyes/.test(sheet), sheet);
     assert.match(sheet, /^P4,1,no,P4 got lost$/m);
   });
@@ -76,7 +76,7 @@ describe("US-141: import observations and consented transcripts", () => {
     const r = cli(a, ["transcript", "add", "s1.txt", "--session", "S1", "--cite", "00:00:20"]);
     assert.equal(r.status, 2);
     assert.match(r.stderr, /consent must be confirmed for session S1 before its transcript is analysed/);
-    assert.equal(existsSync(join(a, "docs/ux/evidence")), false);
+    assert.equal(existsSync(join(a, "docs/ux-builder/evidence")), false);
     assert.equal(readFileSync(join(a, ".ux-builder/design-state.json"), "utf8"), before);
   });
 
@@ -92,7 +92,7 @@ describe("US-141: import observations and consented transcripts", () => {
     const r = json(a, ["transcript", "add", "s1.txt", "--session", "S1", "--consent-confirmed", "--by", "facilitator on the call", "--cite", "00:00:20", "--cite", "00:01:10", "--date", "2026-10-20"]);
     assert.equal(r.id, "EV-1");
     assert.equal(r.excerpts, 2);
-    const ev = readFileSync(join(a, "docs/ux/evidence/EV-1.md"), "utf8");
+    const ev = readFileSync(join(a, "docs/ux-builder/evidence/EV-1.md"), "utf8");
     assert.match(ev, /kind: transcript/);
     assert.match(ev, /file: "s1\.txt"/);
     assert.match(ev, /^- P1: \[00:00:20\] "Hmm, where is the access\? My number is \[masked:phone\]\."$/m);
@@ -107,7 +107,7 @@ describe("US-141: import observations and consented transcripts", () => {
       assert.equal(x.status, 2);
       assert.match(x.stderr, /is a recording; recordings stay with their owner/);
     }
-    assert.deepEqual(readdirSync(join(a, "docs/ux/evidence")), ["EV-1.md"]);
+    assert.deepEqual(readdirSync(join(a, "docs/ux-builder/evidence")), ["EV-1.md"]);
   });
 
   // @covers US-141-AC5

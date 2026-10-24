@@ -109,12 +109,12 @@ them, in Node or a browser, with no network (FEAT-008, CONTRACT-005):
 ```js
 import { rulesFor, checkBlueprint, findRecipes, skeleton } from "@ux-builder/ui/blueprint";
 rulesFor({ context: "view", sizeClasses: ["compact", "medium"], inputs: ["coarse"] }); // the rules for an embedded view
-checkBlueprint(JSON.parse(readFileSync("app.blueprint.json", "utf8")));              // [{ rule, severity, path, message, fix }]
+checkBlueprint(JSON.parse(readFileSync("docs/ux-builder/blueprint/app.blueprint.json", "utf8")));              // [{ rule, severity, path, message, fix }]
 ```
 
 The command `ux-builder-blueprint` does the same from a shell:
 `ux-builder-blueprint init [--kind app|view]` writes a starting
-`app.blueprint.json`, and `ux-builder-blueprint check app.blueprint.json`
+`docs/ux-builder/blueprint/app.blueprint.json`, and `ux-builder-blueprint check`
 prints each finding and exits 1 on an error. `check <file> --diff <base>`
 also reports the complexity the change adds over a base blueprint: per
 journey, the screens, steps, required inputs and decisions added and
@@ -141,7 +141,13 @@ declare; `wireframes` writes `<screen>.<state>.<size>.html` and `.png` for
 each state beside the ideal `<screen>.<size>.html`; and `propose` drafts
 HELIX's interaction-state-diagram, wireframe, screen-flow and
 user-journey-map documents, as patches when the installed HELIX defines
-those types and otherwise as drafts under `helix-proposals/drafts/`. See
+those types and otherwise as drafts under `docs/ux-builder/helix-proposals/drafts/`. Every command
+writes under `docs/ux-builder/` (the blueprint and its alternatives in
+`blueprint/`, then `prototypes/`, `helix-proposals/`, `compare/`,
+`drawings/`, `wireframes/`); an app made before that layout keeps its old
+paths, each command says so, and `npx ux-builder-design migrate` moves it
+(FEAT-018 GDL-80). In a guided app, `wireframes` and `prototype --explore`
+first need the person's modality answer (`ux-builder-design modality`). See
 the repository README. The rules, recipes and the
 blueprint schema are also in `catalogue.json` (`interaction`) and in
 `AGENTS.md`.

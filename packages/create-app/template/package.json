@@ -7,10 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check:blueprint": "ux-builder-blueprint check app.blueprint.json",
+    "check:blueprint": "ux-builder-blueprint check docs/ux-builder/blueprint/app.blueprint.json",
     "test:e2e": "playwright test",
     "lint": "ux-builder-trace lint --stylelint \"src/**/*.css\" --eslint src",
-    "audit": "vite build && ux-builder-audit --blueprint app.blueprint.json --serve \"vite preview --port 4173 --strictPort --host 127.0.0.1\" __AUDIT_URLS__",
+    "audit": "vite build && ux-builder-audit --blueprint docs/ux-builder/blueprint/app.blueprint.json --serve \"vite preview --port 4173 --strictPort --host 127.0.0.1\" __AUDIT_URLS__",
     "postinstall": "node scripts/install-skill.mjs"
   },
   "dependencies": {

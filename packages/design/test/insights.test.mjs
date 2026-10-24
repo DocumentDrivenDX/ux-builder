@@ -34,7 +34,7 @@ function insightsApp() {
   ].map((x) => JSON.stringify(x)).join("\n"));
   writeFileSync(join(a, "feedback.txt"), "Saved rivers are hard to find, says Dana\nLove it\n");
   writeFileSync(join(a, ".ux-builder/participants.local.json"), JSON.stringify({ P1: "Dana" }));
-  writeFileSync(join(a, "docs/ux/jobs.md"), JOBS);
+  writeFileSync(join(a, "docs/ux-builder/jobs.md"), JOBS);
   return a;
 }
 
@@ -43,7 +43,7 @@ describe("US-144: read production insights per journey", () => {
   test("AC1: insights writes INS-<date>.md with completion, abandonment points, failed searches, feature use and time per step per journey", () => {
     const a = insightsApp();
     const r = json(a, ["insights", "events.jsonl", "--date", "2026-10-23"]);
-    assert.equal(r.path, "docs/ux/insights/INS-2026-10-23.md");
+    assert.equal(r.path, "docs/ux-builder/insights/INS-2026-10-23.md");
     const find = r.journeys.find((j) => j.journey === "J-find");
     assert.deepEqual({ started: find.started, completed: find.completed, abandoned: find.abandoned, failedSearches: find.failedSearches, errors: find.errors, features: find.features, secondsPerStep: find.secondsPerStep },
       { started: 4, completed: 2, abandoned: { 1: 1, 2: 1 }, failedSearches: 1, errors: 1, features: { map: 4, detail: 3 }, secondsPerStep: { "1→2": 20 } });
@@ -59,7 +59,7 @@ describe("US-144: read production insights per journey", () => {
     const r = cli(a, ["insights", "events.jsonl", "--date", "2026-10-23"]);
     assert.equal(r.status, 0);
     assert.match(r.stdout, /unmatched: J-activity \(2 events; not in the blueprint\)/);
-    assert.match(readFileSync(join(a, "docs/ux/insights/INS-2026-10-23.md"), "utf8"), /## Unmatched events\n\n- J-activity: 2 events name a journey the blueprint does not have/);
+    assert.match(readFileSync(join(a, "docs/ux-builder/insights/INS-2026-10-23.md"), "utf8"), /## Unmatched events\n\n- J-activity: 2 events name a journey the blueprint does not have/);
   });
 
   // @covers US-144-AC3
@@ -68,13 +68,13 @@ describe("US-144: read production insights per journey", () => {
     const r = json(a, ["insights", "events.jsonl", "--support", "support.jsonl", "--feedback", "feedback.txt", "--date", "2026-10-23"]);
     assert.deepEqual(r.sources.map((s) => [s.id, s.kind]), [["EV-1", "analytics"], ["EV-2", "support"], ["EV-3", "feedback"]]);
     assert.deepEqual(r.linked.map((l) => [l.evidence, l.journeys]), [["EV-2", ["J-find", "J-saved"]], ["EV-3", ["J-saved"]]]);
-    const support = readFileSync(join(a, "docs/ux/evidence/EV-2.md"), "utf8");
+    const support = readFileSync(join(a, "docs/ux-builder/evidence/EV-2.md"), "utf8");
     assert.match(support, /^- \[J-find, J-saved\] "The River details page never shows where to park\. Call me at \[masked:phone\]\."$/m);
     assert.ok(!support.includes("sam@example.com") && !support.includes("Billing"), "an entry naming no journey is not cited");
-    const feedback = readFileSync(join(a, "docs/ux/evidence/EV-3.md"), "utf8");
+    const feedback = readFileSync(join(a, "docs/ux-builder/evidence/EV-3.md"), "utf8");
     assert.match(feedback, /^- \[J-saved\] "Saved rivers are hard to find, says P1"$/m);
     assert.ok(!feedback.includes("Dana"));
-    assert.equal(JSON.parse(cli(a, ["validate", "--json"]).stdout).problems.filter((p) => p.path.startsWith("docs/ux/evidence/")).length, 0);
+    assert.equal(JSON.parse(cli(a, ["validate", "--json"]).stdout).problems.filter((p) => p.path.startsWith("docs/ux-builder/evidence/")).length, 0);
   });
 
   // @covers US-144-AC4
@@ -82,7 +82,7 @@ describe("US-144: read production insights per journey", () => {
     const a = insightsApp();
     json(a, ["insights", "events.jsonl", "--support", "support.jsonl", "--date", "2026-10-23"]);
     assert.deepEqual(json(a, ["evidence", "list"]).evidence.map((e) => [e.id, e.kind]), [["EV-1", "analytics"], ["EV-2", "support"]]);
-    const jobs = readFileSync(join(a, "docs/ux/jobs.md"), "utf8");
+    const jobs = readFileSync(join(a, "docs/ux-builder/jobs.md"), "utf8");
     assert.match(jobs, /^\| J-1 \| Find a river \| high \| EV-1, EV-2 \| medium \| confirmed \|$/m);
     assert.match(jobs, /^\| J-2 \| Go back to a river \| medium \| EV-1, EV-2 \| medium \| confirmed \|$/m);
     assert.equal(cli(a, ["validate"]).status, 0, cli(a, ["validate"]).stdout);

@@ -12,7 +12,7 @@ id:
   prefix: jobs
   pattern: "^jobs$"
   example: jobs
-output: docs/ux/jobs.md
+output: docs/ux-builder/jobs.md
 sections:
     - Jobs
 rules:

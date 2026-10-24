@@ -35,6 +35,7 @@
     "./blueprint/modalities": "./blueprint/modalities.mjs",
     "./blueprint/prototype": "./blueprint/prototype.mjs",
     "./blueprint/propose": "./blueprint/propose.mjs",
+    "./blueprint/paths": "./blueprint/paths.mjs",
     "./catalogue.json": "./catalogue.json",
     "./AGENTS.md": "./AGENTS.md",
     "./skill/*": "./skill/*",

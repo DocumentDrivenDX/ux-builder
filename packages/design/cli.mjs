@@ -5,12 +5,40 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
 Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
 
+  modality --answer <their words> --modality <list> [--size-classes <list>]
+      record which modalities (responsive-web, chat, hybrid-chat) and screen
+      sizes the person says the app is for, in the blueprint's supports;
+      wireframes and prototypes wait for it.
+  migrate [--dry-run]
+      move an app made before docs/ux-builder/ onto it: the design documents,
+      the blueprint and alternatives, prototypes, proposals, comparisons and
+      drawings, with git mv; and rewrite the app's references to them.
+  overview
+      the process in eight steps: what you do in each, what comes out, the
+      terms it introduces and the checkpoint that closes it.
+  step next|<n>
+      move to the next (or the given) step; next refuses while items of the
+      current step await review.
+  explain [<term>] [--step <n>]
+      what a term means and why it is valuable; --step: the terms a step
+      introduces; with neither, every term.
+  review [list]
+      every item not yet approved in its current form, in step order.
+  review show <item>
+      the item's content, to present inline in the conversation.
+  review feedback <item> --text <their words>
+      record the person's feedback on an item (FB-<n>).
+  review respond <FB-n> --text <what changed>
+      record how the feedback was addressed.
+  review approve <item> --answer <their words>
+      record the person's approval of the item as it is now; refused while
+      its feedback is open.
   init [--mcp]
       put the guide in this app: the skill in .claude/skills/ux-builder-design/,
       an empty design state, a starting blueprint if there is none, and with
@@ -32,15 +60,15 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   mode full|change [--why <text>]
       the full loop, or change mode for an everyday change.
   baseline
-      an existing app's first session: docs/ux/baseline.md from the blueprint,
+      an existing app's first session: docs/ux-builder/baseline.md from the blueprint,
       the HELIX stories and the latest assessment run, every drafted point
       marked current state, assumed.
   brief [--name <product>]
-      write the experience brief (docs/ux/brief.md and brief.html) from the
+      write the experience brief (docs/ux-builder/brief.md and brief.html) from the
       HELIX PRD and stories and the design state, and .ux-builder/principles.json.
   evidence add <file> --kind interview|analytics|support|feedback|survey|observation
                [--date YYYY-MM-DD] [--source <where it is kept>] [--title <t>]
-      record a research source as docs/ux/evidence/EV-<n>.md: where it is kept,
+      record a research source as docs/ux-builder/evidence/EV-<n>.md: where it is kept,
       never its text; add the masked excerpts the synthesis cites.
   evidence list
       each source's ID, kind, date, source and excerpts cited.
@@ -49,7 +77,7 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       pseudonym (a name gets one, kept in .ux-builder/participants.local.json).
   decision add --question <q> --option <o> --option <o>... --choice <o> --why <text>
                [--assumption <a>]... [--validation <how it will be tested>] [--link <HELIX ID>]...
-      write docs/ux/decisions/UXD-<n>.md, status not-tested, and a decision in the trace.
+      write docs/ux-builder/decisions/UXD-<n>.md, status not-tested, and a decision in the trace.
   decision status <UXD-n> tested|refuted [--evidence <id>]
       update a decision's validation status, keeping the earlier one in its history.
   trace <id>
@@ -60,30 +88,30 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       touches something already tested); --apply makes it: the blueprint,
       prototypes and kits regenerated, HELIX only as proposals, a decision.
   test-kit [--journey <id>]...
-      a usability test kit in docs/ux/tests/TK-<n>/ from the journeys.
+      a usability test kit in docs/ux-builder/tests/TK-<n>/ from the journeys.
   observe import <file> --kit <TK-n>
       import a filled observation sheet (CSV or JSON) as findings with
       source: human, one per participant and task, by pseudonym, remarks
-      masked; into docs/ux/tests/<TK-n>/findings.json.
+      masked; into docs/ux-builder/tests/<TK-n>/findings.json.
   transcript add <file> --session <id> --consent-confirmed [--by <name>] [--kit TK-<n>] [--cite <time>]...
       record a session transcript's masked, cited excerpts (the lines at the
-      cited timestamps) as docs/ux/evidence/EV-<n>.md, and the consent in the
+      cited timestamps) as docs/ux-builder/evidence/EV-<n>.md, and the consent in the
       design state. Refuses without --consent-confirmed, and refuses recordings.
       --kit names the test kit the session ran, so the report shows these
       quotes beside that person's findings.
   report
-      write the UX evaluation report, docs/ux/evaluations/UER-<n>.md: method,
+      write the UX evaluation report, docs/ux-builder/evaluations/UER-<n>.md: method,
       tasks, measures, the rubric (predicted, agent-measured, observed),
       findings by journey labelled human or agent, recommendations and what
       was not tested. A contradicted prediction refutes its assumptions.
   route <F-id>... [--decision <UXD-n> --status tested|refuted]
       the findings the person chose at checkpoint core-3 as a proposed patch
-      to HELIX's improvement backlog (helix-proposals/backlog/); with
+      to HELIX's improvement backlog (docs/ux-builder/helix-proposals/backlog/); with
       --decision, the decision record's new status.
   insights <events.jsonl> [--support <file>] [--feedback <file>] [--date YYYY-MM-DD]
       production insights from the journey events the app exported: per
       journey, completion, where people abandon, failed searches, errors,
-      feature use and time per step, in docs/ux/insights/INS-<date>.md; the
+      feature use and time per step, in docs/ux-builder/insights/INS-<date>.md; the
       support and feedback entries masked and linked to the journeys they
       mention. Its sources become evidence the jobs and the rubric cite.
       Reads only the files it is given; fetches nothing.
@@ -92,8 +120,8 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       record what an insight shows, at least two explanations, the
       hypothesis and the alternative that tests it.
   experiment start --decision UXD-<n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>
-      after the person answers checkpoint experiment: docs/ux/experiments/EXP-<n>.md,
-      running; metrics HELIX does not define are proposed in helix-proposals/metrics/.
+      after the person answers checkpoint experiment: docs/ux-builder/experiments/EXP-<n>.md,
+      running; metrics HELIX does not define are proposed in docs/ux-builder/helix-proposals/metrics/.
   experiment end <EXP-n> --result <file>
       compare the success metric and each guardrail, record the result against
       the hypothesis, then ask checkpoint release.
@@ -107,12 +135,12 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       each dimension's predicted value and its basis (computed, judgment, or
       to validate), observed where tested; never an overall score.
   validate
-      check every document in docs/ux/: frontmatter, ID, place, sections,
+      check every document in docs/ux-builder/: frontmatter, ID, place, sections,
       links and its type's rules. Exits 1 on a problem.
 
 Options:
   --app <dir>   the app (default: the nearest folder above with .ux-builder/
-                or app.blueprint.json, else the git root, else here)
+                or a blueprint, else the git root, else here)
   --json        print the result as JSON
   -h, --help    this help
 `;
@@ -126,13 +154,13 @@ function print(result, json, text) {
 function itemLines(items, { labels = false } = {}) {
   const out = [], pages = new Map();
   for (const n of items) {
-    const m = n.kind === "prototype page" && /^prototype\/(.+)\/([a-z0-9-]+)(?:\.[a-z-]+)?\.[a-z-]+\.html$/i.exec(n.file ?? "");
+    const m = n.kind === "prototype page" && /^((?:docs\/ux-builder\/prototypes|prototype)\/.+)\/([a-z0-9-]+)(?:\.[a-z-]+)?\.[a-z-]+\.html$/i.exec(n.file ?? "");
     if (!m) { out.push(`  ${n.kind.padEnd(15)} ${n.id}${labels && n.label && n.label !== n.id ? `  ${n.label}` : ""}${n.file ? `  (${n.file})` : ""}`); continue; }
     const key = `${m[1]}\u0000${m[2]}`;
     if (!pages.has(key)) { pages.set(key, 0); out.push(key); }
     pages.set(key, pages.get(key) + 1);
   }
-  return out.map((l) => (pages.has(l) ? (([dir, screen]) => `  ${"prototype pages".padEnd(15)} ${screen}: ${pages.get(l)} page${pages.get(l) === 1 ? "" : "s"}  (prototype/${dir}/)`)(l.split("\u0000")) : l));
+  return out.map((l) => (pages.has(l) ? (([dir, screen]) => `  ${"prototype pages".padEnd(15)} ${screen}: ${pages.get(l)} page${pages.get(l) === 1 ? "" : "s"}  (${dir}/)`)(l.split("\u0000")) : l));
 }
 
 function parseJson(text, what) {
@@ -145,7 +173,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, at: { type: "string" }, role: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -159,6 +187,60 @@ async function main(argv) {
 
   const app = values.app ? findApp(values.app) : findApp();
 
+  if (command === "modality") {
+    const r = confirmModality(app, { answer: values.answer, modalities: values.modality, sizeClasses: values["size-classes"] });
+    print(r, values.json, `Recorded: ${r.modalities.join(", ")}${r.sizeClasses.length ? ` at ${r.sizeClasses.join(", ")}` : ""}, in ${r.file}. Wireframes and prototypes can be drawn now.`);
+    return 0;
+  }
+  if (command === "migrate") {
+    const r = migrate(app, { dryRun: values["dry-run"] });
+    print(r, values.json, r.dryRun ? [`Would move (${r.git ? "git mv" : "move"}):`, ...r.moves.map((m) => `  ${m.from} → ${m.to}`), ...(r.updated.length ? [`Would update: ${r.updated.join(", ")}`] : [])].join("\n") : [r.message, ...r.moves.map((m) => `  ${m.from} → ${m.to}`)].join("\n"));
+    return 0;
+  }
+  if (command === "overview") {
+    const r = overview();
+    print(r, values.json, overviewText(r));
+    return 0;
+  }
+  if (command === "explain") {
+    const r = explain({ term: rest.join(" ") || undefined, step: values.step });
+    print(r, values.json, explainText(r));
+    return 0;
+  }
+  if (command === "step") {
+    const r = setStep(app, { to: rest[0], pending: (n) => pendingReviews(app, { steps: [n] }).map((p) => p.id) });
+    print(r, values.json, `${r.text}.`);
+    return 0;
+  }
+  if (command === "review") {
+    const [sub = "list", target] = rest;
+    if (sub === "list") {
+      const r = reviewList(app);
+      print(r, values.json, r.count ? [`Awaiting review (${r.count}), in order:`, ...r.pending.map((p) => `  step ${p.step}  ${p.id}  ${p.title}${p.changed ? "  (changed since approved)" : ""}${p.feedback.length ? `  open feedback ${p.feedback.join(", ")}` : ""}`), r.next].join("\n") : r.next);
+      return 0;
+    }
+    if (sub === "show") {
+      const r = reviewShow(app, { item: target });
+      print(r, values.json, [`${r.id}: ${r.title} (step ${r.step}, ${r.status}; ${r.file})`, "", r.content, ...(r.feedback.length ? ["", "Feedback:", ...r.feedback.map((f) => `  ${f.id} [${f.status}] ${f.text}${f.response ? ` → ${f.response}` : ""}`)] : [])].join("\n"));
+      return 0;
+    }
+    if (sub === "feedback") {
+      const r = reviewFeedback(app, { item: target, text: values.text });
+      print(r, values.json, `${r.id} recorded on ${r.item}. Address it, then: ux-builder-design review respond ${r.id} --text "<what changed>".`);
+      return 0;
+    }
+    if (sub === "respond") {
+      const r = reviewRespond(app, { id: target, text: values.text });
+      print(r, values.json, `${r.id} addressed. Show ${r.item} again and ask for approval.`);
+      return 0;
+    }
+    if (sub === "approve") {
+      const r = reviewApprove(app, { item: target, answer: values.answer });
+      print(r, values.json, `${r.item} approved. ${r.remaining ? `${r.remaining} item${r.remaining === 1 ? "" : "s"} left; next: ${r.next}.` : "Nothing else awaits review."}`);
+      return 0;
+    }
+    throw new DesignError(`unknown review command "${sub}": use list, show, feedback, respond or approve`);
+  }
   if (command === "status") {
     const r = status(app);
     print(r, values.json, r.text);
@@ -311,7 +393,7 @@ async function main(argv) {
   if (command === "validate") {
     const r = validate(app);
     const lines = [...r.problems.map((p) => `${p.path}: ${p.message}`), ...r.warnings.map((p) => `warning ${p.path}: ${p.message}`), ...r.notes.map((p) => `note    ${p.path}: ${p.message}`)];
-    if (r.valid) lines.push(`docs/ux/: ${r.documents.length} document${r.documents.length === 1 ? "" : "s"}, no problems.`);
+    if (r.valid) lines.push(`${ux(app)}/: ${r.documents.length} document${r.documents.length === 1 ? "" : "s"}, no problems.`);
     print(r, values.json, lines.join("\n"));
     return r.valid ? 0 : 1;
   }

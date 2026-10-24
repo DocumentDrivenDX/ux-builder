@@ -29,6 +29,7 @@
    sha256 and size, never its contents) and a summary of the answer: the
    rule IDs, components and recipes it named, its sha256 and its size. */
 
+import { layoutOf } from "@ux-builder/ui/blueprint/paths";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -315,7 +316,7 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
 
     server.registerTool("get_blueprint_schema", {
       title: "Get the blueprint schema",
-      description: "The JSON Schema of app.blueprint.json: an app's or view's kind, supported size classes and inputs, destinations and screens (each a catalogue pattern, with its primary action, destructive actions and safeguards, states and modals). Plan here before building.",
+      description: "The JSON Schema of an app's blueprint (docs/ux-builder/blueprint/app.blueprint.json): an app's or view's kind, supported size classes and inputs, destinations and screens (each a catalogue pattern, with its primary action, destructive actions and safeguards, states and modals). Plan here before building.",
       inputSchema: {},
     }, async () => ok({ schema: bp.blueprintSchema, skeleton: { app: bp.skeleton("app"), view: bp.skeleton("view") } }));
 
@@ -326,7 +327,7 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
     }, async ({ blueprint: b }) => {
       // Journeys are checked against the HELIX stories above the app's directory, read and never written.
       const storied = hx?.needsStories(b) ?? false;
-      const helix = storied ? hx.readStories(join(process.cwd(), "app.blueprint.json")) : null;
+      const helix = storied ? hx.readStories(join(process.cwd(), layoutOf(process.cwd()).blueprint)) : null;
       const findings = bp.checkBlueprint(b, { helix });
       checked("blueprint", findings);
       const notes = storied && !helix ? [hx.skippedNote(process.cwd())] : [];
@@ -366,10 +367,10 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       description: "Draft HELIX content from the blueprint's flow and journeys, as unified-diff patches a person reviews and applies: story walkthroughs, the solution design's Mermaid screen flow, architecture's Data Flow sequence diagram, DESIGN.md's navigation table and story test plan scenarios. Reads the HELIX documents and templates under the .helix.yml marker above the blueprint's path; writes nothing and applies nothing. Where a HELIX section already says something else, it returns a disagreement with both texts instead of a patch: HELIX governs.",
       inputSchema: {
         blueprint: z.record(z.string(), z.unknown()).describe("The blueprint object (app.blueprint.json)"),
-        path: z.string().optional().describe("Where the blueprint lives; the HELIX marker is found walking up from it (default: app.blueprint.json in the server's directory)"),
+        path: z.string().optional().describe("Where the blueprint lives; the HELIX marker is found walking up from it (default: the app's blueprint, docs/ux-builder/blueprint/app.blueprint.json, in the server's directory)"),
       },
     }, async ({ blueprint: b, path }) => {
-      const r = px.propose(b, { blueprintFile: path ?? join(process.cwd(), "app.blueprint.json") });
+      const r = px.propose(b, { blueprintFile: path ?? join(process.cwd(), layoutOf(process.cwd()).blueprint) });
       if (!r.marker) return fail(`No HELIX marker (.helix.yml) above ${path ?? process.cwd()}: propose_from_blueprint drafts into the HELIX flow that marker names.`);
       const { marker, ...rest } = r;
       return ok({ ...rest, written: false });

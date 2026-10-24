@@ -7,12 +7,12 @@
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
-import { DesignError, writeInApp } from "./app.mjs";
+import { DesignError, bpFile, ux, writeInApp } from "./app.mjs";
 import { jobsTable, parseDocument } from "./documents.mjs";
 import { writeEvidence } from "./research.mjs";
 import { maskPersonal } from "./sessions.mjs";
 
-const DIR = "docs/ux/insights";
+const docsDir = (app) => ux(app, "insights");
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
 const list = (x) => (Array.isArray(x) ? x : []);
 const today = () => new Date().toISOString().slice(0, 10);
@@ -80,7 +80,7 @@ const jobsOf = (bp, journey) => list(list(bp.tasks).find((t) => t.id === list(bp
 /* Add an evidence source to job rows of docs/ux/jobs.md: { J-n: EV-m }.
    A hypothesis with evidence becomes confirmed, and low confidence medium. */
 function citeInJobs(app, cites) {
-  const path = "docs/ux/jobs.md";
+  const path = ux(app, "jobs.md");
   if (!existsSync(join(app, path)) || !Object.keys(cites).length) return [];
   const changed = [];
   const text = readFileSync(join(app, path), "utf8").split("\n").map((line) => {
@@ -102,8 +102,8 @@ export function insights(app, { events: file, support, feedback, date = today() 
   if (!file) throw new DesignError("insights needs the exported journey events: insights <events.jsonl>");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new DesignError(`--date is YYYY-MM-DD, not "${date}"`);
   for (const f of [file, support, feedback].filter(Boolean)) if (!existsSync(abs(app, f))) throw new DesignError(`no such file: ${f}`);
-  const bp = readJson(join(app, "app.blueprint.json"));
-  if (!bp) throw new DesignError("no app.blueprint.json: insights are read per blueprint journey");
+  const bp = readJson(join(app, bpFile(app)));
+  if (!bp) throw new DesignError(`no ${bpFile(app)}: insights are read per blueprint journey`);
   const id = `INS-${date}`;
   const events = jsonLines(abs(app, file));
   const { journeys, unmatched } = journeyStats(events, list(bp.journeys).map((j) => j.id).filter(Boolean));
@@ -137,15 +137,15 @@ export function insights(app, { events: file, support, feedback, date = today() 
   L.push("", "## Unmatched events", "", ...(unmatched.length ? unmatched.map((u) => `- ${u.journey}: ${u.events} event${u.events === 1 ? "" : "s"} name${u.events === 1 ? "s" : ""} a journey the blueprint does not have`) : ["- None."]), "");
   if (linked.length) L.push("## Support and feedback", "", ...linked.map((l) => `- ${l.evidence} (${l.kind}) [${l.journeys.join(", ")}]: "${l.text}"`), "");
   L.push("## Diagnosis", "", "- None yet. Record one with `ux-builder-design diagnose --insight " + id + "`: the observation, at least two explanations, the hypothesis and the alternative that tests it.", "");
-  const path = writeInApp(app, `${DIR}/${id}.md`, L.join("\n"));
+  const path = writeInApp(app, `${docsDir(app)}/${id}.md`, L.join("\n"));
   const data = { id, date, events: events.length, journeys, unmatched, sources, linked, jobs };
-  writeInApp(app, `${DIR}/${id}.json`, JSON.stringify(data, null, 2) + "\n");
+  writeInApp(app, `${docsDir(app)}/${id}.json`, JSON.stringify(data, null, 2) + "\n");
   return { ...data, path };
 }
 
 /* The latest insights' data, or null. */
 export function latestInsights(app) {
-  const dir = join(app, DIR);
+  const dir = join(app, docsDir(app));
   if (!existsSync(dir)) return null;
   const f = readdirSync(dir).filter((n) => /^INS-\d{4}-\d{2}-\d{2}\.json$/.test(n)).sort().at(-1);
   return f ? readJson(join(dir, f)) : null;
@@ -153,7 +153,7 @@ export function latestInsights(app) {
 
 /* Append a diagnosis to an insights document's Diagnosis section. */
 export function addDiagnosisText(app, insight, lines) {
-  const path = `${DIR}/${insight}.md`;
+  const path = `${docsDir(app)}/${insight}.md`;
   if (!existsSync(join(app, path))) throw new DesignError(`no insights ${insight} (${path})`);
   const text = readFileSync(join(app, path), "utf8");
   const doc = parseDocument(text);

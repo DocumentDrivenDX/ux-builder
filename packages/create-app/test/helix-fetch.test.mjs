@@ -208,8 +208,8 @@ describe("US-068: create an app offline or on a pinned HELIX", () => {
   test("AC4: --no-helix writes no marker, documents, skill or manifest; the e2e test stays, citing nothing", async () => {
     const r = await create("http://127.0.0.1:9", ["--no-helix"]);
     assert.equal(r.code, 0, r.out);
-    for (const f of [".helix.yml", "docs", ".claude/skills/helix", "ux-assessment.yml"]) assert.equal(existsSync(join(r.dir, f)), false, f);
-    for (const f of ["package.json", "src/App.jsx", "app.blueprint.json", "AGENTS.md"]) assert.ok(existsSync(join(r.dir, f)), f);
+    for (const f of [".helix.yml", "docs/helix", ".claude/skills/helix", "ux-assessment.yml"]) assert.equal(existsSync(join(r.dir, f)), false, f);
+    for (const f of ["package.json", "src/App.jsx", "docs/ux-builder/blueprint/app.blueprint.json", "AGENTS.md"]) assert.ok(existsSync(join(r.dir, f)), f);
     const spec = readFileSync(join(r.dir, "e2e/starter.spec.js"), "utf8");
     assert.doesNotMatch(spec, /@covers|US-001|docs\/helix/, "there is no US-001 to cite");
     assert.equal((spec.match(/^test\(/gm) ?? []).length, 2, "the shell's two tests (Home, the theme) are kept");
@@ -234,7 +234,7 @@ describe("US-068: create an app offline or on a pinned HELIX", () => {
         assert.equal(r.code, 0, r.out);
         assert.match(r.out, reason);
         assert.match(r.out, /The app was created without HELIX .*no HELIX-VERSION\.json was written/);
-        for (const f of [".helix.yml", "docs", ".claude/skills/helix", "ux-assessment.yml"]) assert.equal(existsSync(join(r.dir, f)), false, f);
+        for (const f of [".helix.yml", "docs/helix", ".claude/skills/helix", "ux-assessment.yml"]) assert.equal(existsSync(join(r.dir, f)), false, f);
         assert.doesNotMatch(readFileSync(join(r.dir, "e2e/starter.spec.js"), "utf8"), /@covers/);
       }
     } finally { rmSync(empty, { recursive: true, force: true }); rmSync(corrupt, { recursive: true, force: true }); }

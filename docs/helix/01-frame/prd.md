@@ -649,6 +649,10 @@ rules, so it invents colours and components.
   significant changes, experiments and releases), recording each answer.
   HELIX documents change only through proposals a person accepts.
   *(Added 2026-10-23.)*
+  The guide opens with an overview, says which step of eight the person is
+  on, explains its terms, and has the person review and approve each item
+  it produces, inline and one at a time, before moving on. *(Added
+  2026-10-24.)*
 - **FR-78** — The agent challenges requests that add complexity, records
   five answers (goal, whether it is needed, the simplest alternative,
   assumptions, how it will be validated) for every added destination,
@@ -670,6 +674,9 @@ rules, so it invents colours and components.
 - **FR-82** — The blueprint models tasks (goal, trigger, inputs, system and
   user actions, success, exceptions, subtasks), and the guide proposes
   simplifications a person accepts. *(Added 2026-10-23.)*
+  Tasks and steps cite the business rules (`BR-<n>`, defined in HELIX)
+  they apply, with how the user meets each. *(Business rules added
+  2026-10-24.)*
 - **FR-83** — Alternative blueprints for the same tasks are checked,
   scored, compared side by side with the agent's labelled judgments, and
   the choice is recorded with its validation status. *(Added 2026-10-23.)*

@@ -19,8 +19,8 @@ function withTranscript() {
 }
 /* An evidence record with these excerpt lines. */
 function record(app, excerpts, participants = "  participants:\n    P1: \"Angler\"\n") {
-  mkdirSync(join(app, "docs/ux/evidence"), { recursive: true });
-  writeFileSync(join(app, "docs/ux/evidence/EV-1.md"), `---\nux:\n  id: EV-1\n  type: research-evidence\n  kind: interview\n${participants}---\n\n# EV-1\n\n## Source\n\n- interview\n\n## Excerpts\n\n${excerpts.map((e) => `- ${e}`).join("\n")}\n\n## Synthesis notes\n\n- None.\n`);
+  mkdirSync(join(app, "docs/ux-builder/evidence"), { recursive: true });
+  writeFileSync(join(app, "docs/ux-builder/evidence/EV-1.md"), `---\nux:\n  id: EV-1\n  type: research-evidence\n  kind: interview\n${participants}---\n\n# EV-1\n\n## Source\n\n- interview\n\n## Excerpts\n\n${excerpts.map((e) => `- ${e}`).join("\n")}\n\n## Synthesis notes\n\n- None.\n`);
 }
 
 describe("US-125: evidence", () => {
@@ -29,8 +29,8 @@ describe("US-125: evidence", () => {
     const app = withTranscript();
     let r = cli(app, ["evidence", "add", "research/interview-1.txt", "--kind", "interview", "--date", "2026-10-20", "--source", "Research drive, interviews", "--json"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.deepEqual(JSON.parse(r.stdout), { id: "EV-1", path: "docs/ux/evidence/EV-1.md", kind: "interview", date: "2026-10-20", source: "Research drive, interviews", file: "research/interview-1.txt" });
-    const text = readFileSync(join(app, "docs/ux/evidence/EV-1.md"), "utf8");
+    assert.deepEqual(JSON.parse(r.stdout), { id: "EV-1", path: "docs/ux-builder/evidence/EV-1.md", kind: "interview", date: "2026-10-20", source: "Research drive, interviews", file: "research/interview-1.txt" });
+    const text = readFileSync(join(app, "docs/ux-builder/evidence/EV-1.md"), "utf8");
     assert.match(text, /kind: interview\n {2}date: 2026-10-20\n {2}source: "Research drive, interviews"\n {2}file: "research\/interview-1\.txt"/);
     assert.doesNotMatch(text, /Clackamas|Sam Rivera|Where do you fish/);
     r = cli(app, ["evidence", "add", "research/interview-1.txt", "--kind", "support", "--json"]);
@@ -44,7 +44,7 @@ describe("US-125: evidence", () => {
     const r = cli(app, ["evidence", "add", "research/interview-1.txt", "--kind", "gossip"]);
     assert.equal(r.status, 2);
     assert.match(r.stderr, /--kind is one of interview, analytics, support, feedback, survey, observation, not "gossip"/);
-    assert.equal(existsSync(join(app, "docs/ux/evidence")), false);
+    assert.equal(existsSync(join(app, "docs/ux-builder/evidence")), false);
   });
 
   // @covers US-125-AC3
@@ -74,7 +74,7 @@ describe("US-125: evidence", () => {
     record(app, ['P1: "Sam here, I fish the Clackamas"']);
     r = cli(app, ["validate"]);
     assert.equal(r.status, 1);
-    const line = readFileSync(join(app, "docs/ux/evidence/EV-1.md"), "utf8").split("\n").findIndex((l) => l.includes("Sam here")) + 1;
+    const line = readFileSync(join(app, "docs/ux-builder/evidence/EV-1.md"), "utf8").split("\n").findIndex((l) => l.includes("Sam here")) + 1;
     assert.match(r.stdout, new RegExp(`the excerpt on line ${line} names a participant`));
     record(app, ['P1: "P1 here, I fish the Clackamas"']);
     r = cli(app, ["validate"]);
@@ -88,7 +88,7 @@ describe("US-125: evidence", () => {
   test("AC5: evidence list --json lists each with its ID, kind, date, source and the excerpts cited", () => {
     const app = withTranscript();
     for (const [kind, date] of [["interview", "2026-10-20"], ["support", "2026-10-21"], ["analytics", "2026-10-22"]]) assert.equal(cli(app, ["evidence", "add", "research/interview-1.txt", "--kind", kind, "--date", date, "--source", `${kind} export`]).status, 0);
-    const p = join(app, "docs/ux/evidence/EV-1.md");
+    const p = join(app, "docs/ux-builder/evidence/EV-1.md");
     writeFileSync(p, readFileSync(p, "utf8").replace("participants: {}", "participants:\n    P1: \"Angler\"").replace(/- None cited yet\.[^\n]*/, '- P1: "I check the map the night before"\n- P1: "Access is the hard part"'));
     const { evidence } = JSON.parse(cli(app, ["evidence", "list", "--json"]).stdout);
     assert.deepEqual(evidence.map(({ id, kind, date, source, excerpts }) => ({ id, kind, date, source, excerpts })), [
@@ -99,9 +99,9 @@ describe("US-125: evidence", () => {
     // evidence excerpt add: the quote masked, its speaker by pseudonym and listed, and the record still valid.
     let r = cli(app, ["evidence", "excerpt", "add", "EV-2", "--participant", "Dana Wu", "--text", "Dana here: email me at dana@example.com", "--at", "00:03:10"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /^Added to docs\/ux\/evidence\/EV-2\.md: - P1: \[00:03:10\] "P1 here: email me at \[masked:email\]"$/m);
+    assert.match(r.stdout, /^Added to docs\/ux-builder\/evidence\/EV-2\.md: - P1: \[00:03:10\] "P1 here: email me at \[masked:email\]"$/m);
     r = cli(app, ["evidence", "excerpt", "add", "EV-2", "--participant", "P1", "--text", "The ramp floods in spring"]);
-    const ev2 = readFileSync(join(app, "docs/ux/evidence/EV-2.md"), "utf8");
+    const ev2 = readFileSync(join(app, "docs/ux-builder/evidence/EV-2.md"), "utf8");
     assert.ok(!/Dana|dana@|None cited yet/.test(ev2), ev2);
     assert.match(ev2, /participants:\n {4}P1: participant\n/);
     assert.match(ev2, /## Excerpts\n\n- P1: \[00:03:10\] "P1 here: email me at \[masked:email\]"\n- P1: "The ramp floods in spring"\n\n## Synthesis notes/);

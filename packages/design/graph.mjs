@@ -10,8 +10,8 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "
 import { join } from "node:path";
 import { checkBlueprint, complexityDelta } from "@ux-builder/ui/blueprint";
 import { recordDecision } from "@ux-builder/trace";
-import { DesignError } from "./app.mjs";
-import { helixRoot, jobsTable, parseDocument, usersTable, uxDocuments } from "./documents.mjs";
+import { DesignError, bpFile, proposalsDir, protoDir, ux } from "./app.mjs";
+import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable, uxDocuments } from "./documents.mjs";
 import { readState } from "./state.mjs";
 import { kits, testKit } from "./testkit.mjs";
 
@@ -34,18 +34,25 @@ export function buildGraph(app) {
   const nodes = new Map(), edges = [];
   const node = (id, kind, label, file) => { if (!nodes.has(id)) nodes.set(id, { id, kind, label: label ?? id, file }); return id; };
   const edge = (from, to) => { if (from && to && from !== to) edges.push([from, to]); };
-  const bp = readJson(join(app, "app.blueprint.json")) ?? {};
-  const BP = "app.blueprint.json";
+  const bp = readJson(join(app, bpFile(app))) ?? {};
+  const BP = bpFile(app);
 
-  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) node(id, "job", j.job, "docs/ux/jobs.md");
+  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) node(id, "job", j.job, ux(app, "jobs.md"));
   // Target users (GDL-77): a user holds jobs, and tasks serve users.
-  for (const [id, u] of Object.entries(usersTable(app) ?? {})) { node(id, "user", u.user, "docs/ux/users.md"); for (const h of u.jobs) edge(id, h.job); }
+  for (const [id, u] of Object.entries(usersTable(app) ?? {})) { node(id, "user", u.user, ux(app, "users.md")); for (const h of u.jobs) edge(id, h.job); }
   for (const t of list(bp.tasks).filter((x) => x?.id)) { node(t.id, "task", t.goal, BP); for (const j of list(t.jobs)) edge(j, t.id); for (const u of list(t.users)) edge(u, t.id); }
+  // Business rules (GDL-78), defined in HELIX: a rule applies to the tasks and journey steps that cite it.
+  const rules = businessRules(app).rules;
+  for (const c of ruleCitations(bp)) {
+    node(c.rule, "rule", rules[c.rule]?.text ?? c.rule, rules[c.rule]?.file ?? null);
+    if (c.kind === "task") edge(c.rule, c.item);
+    else { edge(c.rule, c.journey); if (c.screen) edge(c.rule, `screen:${c.screen}`); }
+  }
   for (const s of list(bp.screens).filter((x) => x?.id)) {
     node(`screen:${s.id}`, "screen", s.title ?? s.id, BP);
     if (s.pattern) { node(`pattern:${s.pattern}`, "pattern", s.pattern, BP); edge(`screen:${s.id}`, `pattern:${s.pattern}`); }
   }
-  for (const page of files(app, "prototype", (f) => f.endsWith(".html") && !f.endsWith("/index.html"))) {
+  for (const page of files(app, protoDir(app), (f) => f.endsWith(".html") && !f.endsWith("/index.html"))) {
     const screen = page.split("/").pop().split(".")[0];
     if (nodes.has(`screen:${screen}`)) { node(`page:${page}`, "prototype page", page, page); edge(`screen:${screen}`, `page:${page}`); }
   }
@@ -68,10 +75,10 @@ export function buildGraph(app) {
   }
   // Test-kit tasks, by journey; findings, by journey.
   for (const kit of kits(app)) {
-    const text = existsSync(join(app, `docs/ux/tests/${kit}/scenarios.md`)) ? readFileSync(join(app, `docs/ux/tests/${kit}/scenarios.md`), "utf8") : "";
-    for (const [, n, journey] of text.matchAll(/^\| (\d+) \| (J-[^ |]+) \|/gm)) { const id = `${kit}#${n}`; node(id, "test-kit task", `${kit} task ${n}`, `docs/ux/tests/${kit}/scenarios.md`); edge(journey, id); }
-    const findings = readJson(join(app, `docs/ux/tests/${kit}/findings.json`))?.findings ?? [];
-    for (const f of findings) { node(f.id, "finding", f.title ?? f.remark ?? f.id, `docs/ux/tests/${kit}/findings.json`); edge(`${kit}#${f.task}`, f.id); }
+    const text = existsSync(join(app, `${ux(app)}/tests/${kit}/scenarios.md`)) ? readFileSync(join(app, `${ux(app)}/tests/${kit}/scenarios.md`), "utf8") : "";
+    for (const [, n, journey] of text.matchAll(/^\| (\d+) \| (J-[^ |]+) \|/gm)) { const id = `${kit}#${n}`; node(id, "test-kit task", `${kit} task ${n}`, `${ux(app)}/tests/${kit}/scenarios.md`); edge(journey, id); }
+    const findings = readJson(join(app, `${ux(app)}/tests/${kit}/findings.json`))?.findings ?? [];
+    for (const f of findings) { node(f.id, "finding", f.title ?? f.remark ?? f.id, `${ux(app)}/tests/${kit}/findings.json`); edge(`${kit}#${f.task}`, f.id); }
   }
   const runs = existsSync(join(app, "ux-assessment")) ? readdirSync(join(app, "ux-assessment")).filter((n) => /^R-/.test(n)).sort() : [];
   if (runs.length) for (const f of readJson(join(app, "ux-assessment", runs.at(-1), "backlog.json"))?.findings ?? []) {
@@ -163,10 +170,10 @@ export async function applyImpact(app, { change, set } = {}) {
   if (!set) throw new DesignError("impact --apply needs --set <file>: the blueprint with the change made");
   const next = readJson(join(app, set)) ?? readJson(set);
   if (!next) throw new DesignError(`${set} is not a readable blueprint`);
-  const before = readJson(join(app, "app.blueprint.json")) ?? {};
+  const before = readJson(join(app, bpFile(app))) ?? {};
   const reached = impact(app, { change });
   // The blueprint takes the edit either way; a failing check leaves it for the person to fix.
-  writeFileSync(join(app, "app.blueprint.json"), JSON.stringify(next, null, 2) + "\n");
+  writeFileSync(join(app, bpFile(app)), JSON.stringify(next, null, 2) + "\n");
   const errors = checkBlueprint(next).filter((f) => f.severity === "error");
   const delta = complexityDelta(before, next);
   if (errors.length) return { applied: false, change: reached.change, errors, delta, regenerated: [], proposals: null, summary: summaryOf(reached, delta, [], errors) };
@@ -175,20 +182,21 @@ export async function applyImpact(app, { change, set } = {}) {
   let chosen = null;
   try { chosen = readState(app).alternatives.find((a) => a.status === "chosen")?.name ?? null; } catch { /* no design state */ }
   const { writePrototype } = await import("@ux-builder/ui/blueprint/prototype");
-  for (const dir of existsSync(join(app, "prototype")) ? readdirSync(join(app, "prototype")).filter((n) => /^current(-[a-z0-9-]+)?$/.test(n) || (chosen && (n === chosen || n.startsWith(`${chosen}-`)))) : []) {
+  const protos = protoDir(app);
+  for (const dir of existsSync(join(app, protos)) ? readdirSync(join(app, protos)).filter((n) => /^current(-[a-z0-9-]+)?$/.test(n) || (chosen && (n === chosen || n.startsWith(`${chosen}-`)))) : []) {
     // The theme it was drawn in: its assets hold that theme's CSS beside ui.css and patterns.css.
-    const assetsDir = join(app, "prototype", dir, "assets");
+    const assetsDir = join(app, protos, dir, "assets");
     const theme = (existsSync(assetsDir) ? readdirSync(assetsDir) : []).find((f) => f.endsWith(".css") && !["ui.css", "patterns.css"].includes(f))?.replace(/\.css$/, "") ?? "plain";
-    await writePrototype(next, { root: join(app, "prototype"), dir, question: reached.change, theme });
-    regenerated.push(`prototype/${dir}/`);
+    await writePrototype(next, { root: join(app, protos), dir, question: reached.change, theme });
+    regenerated.push(`${protos}/${dir}/`);
   }
-  for (const kit of kits(app)) { testKit(app, { id: kit }); regenerated.push(`docs/ux/tests/${kit}/`); }
+  for (const kit of kits(app)) { testKit(app, { id: kit }); regenerated.push(`${ux(app)}/tests/${kit}/`); }
   // HELIX changes only as proposals the person applies.
   let proposals = null;
   if (helixRoot(app)) {
     const { propose, writeProposals } = await import("@ux-builder/ui/blueprint/propose");
-    const r = propose(next, { blueprintFile: join(app, "app.blueprint.json") });
-    if (r.marker) { writeProposals(r, join(app, "helix-proposals")); proposals = { patches: r.proposals.length, drafts: r.drafts.length, dir: "helix-proposals/" }; }
+    const r = propose(next, { blueprintFile: join(app, bpFile(app)) });
+    if (r.marker) { writeProposals(r, join(app, proposalsDir(app))); proposals = { patches: r.proposals.length, drafts: r.drafts.length, dir: `${proposalsDir(app)}/` }; }
   }
   try { recordDecision(app, { chose: `Applied: ${reached.change}`, why: `The person accepted the change after reviewing its impact (${reached.affected.length} items).`, relied: reached.matched.map((m) => m.id) }, { by: "agent" }); } catch (e) { process.emitWarning(`the change was not written to the trace: ${e.message}`); }
   return { applied: true, change: reached.change, errors: [], delta, regenerated, proposals, summary: summaryOf(reached, delta, regenerated, [], proposals) };
@@ -198,7 +206,7 @@ export async function applyImpact(app, { change, set } = {}) {
 export function summaryOf(reached, delta, regenerated, errors, proposals = null) {
   const lines = [`Change: ${reached.change}`];
   if (errors.length) {
-    lines.push(`The blueprint check fails (${errors.length} error${errors.length === 1 ? "" : "s"}); nothing was regenerated. Fix app.blueprint.json:`);
+    lines.push(`The blueprint check fails (${errors.length} error${errors.length === 1 ? "" : "s"}); nothing was regenerated. Fix the blueprint:`);
     for (const e of errors) lines.push(`  ${e.rule} ${e.path}: ${e.message}`);
   }
   for (const j of delta.journeys) {

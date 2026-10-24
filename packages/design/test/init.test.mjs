@@ -20,7 +20,7 @@ const BLUEPRINT = { $schema: "https://documentdrivendx.github.io/ux-builder/sche
 function existingApp({ sdk = true, blueprint = true, helix = true } = {}) {
   const app = tempApp({ state: false });
   writeFileSync(join(app, "package.json"), JSON.stringify({ name: "rivers", private: true, dependencies: sdk ? { "@ux-builder/tokens": "^1.6.0", "@ux-builder/ui": "^0.9.0" } : { react: "^19.3.0" } }, null, 2) + "\n");
-  if (blueprint) writeFileSync(join(app, "app.blueprint.json"), JSON.stringify(BLUEPRINT, null, 2) + "\n");
+  if (blueprint) writeFileSync(join(app, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(BLUEPRINT, null, 2) + "\n");
   if (helix) writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
   return app;
 }
@@ -29,7 +29,7 @@ describe("init in an existing app", () => {
   // @covers US-115-AC1
   test("with ux-builder, a blueprint and HELIX: installs the skill, writes a valid empty state, exits 0, and leaves the blueprint alone", () => {
     const app = existingApp();
-    const before = readFileSync(join(app, "app.blueprint.json"), "utf8");
+    const before = readFileSync(join(app, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8");
     const r = cli(app, ["init"]);
     assert.equal(r.status, 0, r.stderr);
     assert.equal(readFileSync(join(app, ".claude/skills/ux-builder-design/SKILL.md"), "utf8"), SKILL);
@@ -38,7 +38,7 @@ describe("init in an existing app", () => {
     assert.equal(state.startedFrom, "existing");
     assert.equal(state.activity, "baseline");
     for (const k of ["checkpoints", "questions", "assumptions", "alternatives", "issues", "experiments", "faked"]) assert.deepEqual(state[k], [], k);
-    assert.equal(readFileSync(join(app, "app.blueprint.json"), "utf8"), before);
+    assert.equal(readFileSync(join(app, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"), before);
     assert.equal(existsSync(join(app, ".mcp.json")), false);
     assert.match(r.stdout, /\/ux-builder-design/);
   });
@@ -50,7 +50,7 @@ describe("init in an existing app", () => {
     assert.equal(r.status, 0, r.stderr);
     const out = JSON.parse(r.stdout);
     assert.equal(out.blueprint, "written");
-    const bp = JSON.parse(readFileSync(join(app, "app.blueprint.json"), "utf8"));
+    const bp = JSON.parse(readFileSync(join(app, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
     assert.equal(bp.kind, "app");
     assert.deepEqual(checkBlueprint(bp).filter((f) => f.severity === "error"), []);
     assert.ok(out.notes.some((n) => /help you describe the app's current screens/.test(n)), out.notes.join("\n"));

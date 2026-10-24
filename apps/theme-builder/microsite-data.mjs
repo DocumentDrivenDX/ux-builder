@@ -202,6 +202,7 @@ export const NOTES = {
   "@ux-builder/ui ./eslint": "The ESLint plugin: no hard-coded values in JSX, and the AI voice rules",
   "@ux-builder/ui ./blueprint": "checkBlueprint, the interaction rules and the blueprint schema",
   "@ux-builder/ui ./blueprint/modalities": "The app modalities: each one's size classes, inputs, AI roles, components, rule families and audit widths",
+  "@ux-builder/ui ./blueprint/paths": "Where an app's design work lives: the docs/ux-builder/ layout and the old one, layoutOf, alternativeFile and the write fence (FEAT-018)",
   "@ux-builder/ui ./blueprint/prototype": "Exploratory prototypes of a blueprint: writePrototype, prototypePages, archivePrototype and themeFor (FEAT-018)",
   "@ux-builder/ui ./blueprint/propose": "HELIX proposals drafted from a blueprint as patches: propose and writeProposals",
   "@ux-builder/ui ./catalogue.json": "The machine-readable catalogue: widgets, patterns, tokens, icons, rules and recipes",

@@ -101,7 +101,7 @@ function content(r, helix) {
       sections: {
         "Technical Context": [
           `- **App**: ${app}, a React 19 + Vite app created with \`@ux-builder/create-app\`.`,
-          `- **UI**: \`@ux-builder/ui\` ${ui} and \`@ux-builder/tokens\` ${r.versions["@ux-builder/tokens"]}, theme \`${theme}\`; screens are planned in \`app.blueprint.json\` and built from the SDK's patterns.`,
+          `- **UI**: \`@ux-builder/ui\` ${ui} and \`@ux-builder/tokens\` ${r.versions["@ux-builder/tokens"]}, theme \`${theme}\`; screens are planned in \`docs/ux-builder/blueprint/app.blueprint.json\` and built from the SDK's patterns.`,
           "- **Checks**: `npm run lint` (no hard-coded colours, fonts or radii), `npm run check:blueprint`, `npm run audit` (every theme and appearance), `npm run test:e2e` (Playwright).",
           `- **Method**: HELIX ${helixVersion}, installed in \`.claude/skills/helix/\`; documents under \`docs/helix/\`.`,
         ].join("\n"),
@@ -117,7 +117,7 @@ function content(r, helix) {
           "| e2e-playwright | library | `area:testing` | Core flows run in Playwright (`npm run test:e2e`) | One e2e tool; flows cite their criteria |",
           `| packaged-design-system | library | \`area:ui\` | The UI comes from \`@ux-builder/ui\` ${ui}, theme \`${theme}\` | Use the SDK's widgets and patterns; role tokens; no literals (lint, audit) |`,
           "| a11y-wcag-aa | library | `area:ui` | The audit checks contrast, targets, reflow and focus | WCAG 2.2 AA |",
-          "| ux-interaction-patterns | library | `area:ui` | Screens follow the SDK's interaction rules (`app.blueprint.json`) | Plan screens in the blueprint; one primary action; safeguards; states |",
+          "| ux-interaction-patterns | library | `area:ui` | Screens follow the SDK's interaction rules (`docs/ux-builder/blueprint/app.blueprint.json`) | Plan screens in the blueprint; one primary action; safeguards; states |",
         ].join("\n"),
         "Project Overrides": [
           "| Concern | Practice | Override | Authority |",
@@ -131,11 +131,11 @@ function content(r, helix) {
       title: "Feature Specification: FEAT-001 — The app's shell for its modalities",
       intro: note("It describes the empty shell the starter created for the app's modalities, so the app is traced from its first commit. Frame your first real feature next."),
       sections: {
-        Overview: `${app} is a ${kinds} app (\`supports.modalities\` in \`app.blueprint.json\`). It starts as the empty shell for ${ms.length > 1 ? "those modalities" : "that modality"}, with no sample data, under a header with the theme's logo and a theme and appearance switcher:\n\n${shell}${both ? "\n\nWith several modalities the shell is an `AppShell` whose destinations are Home and Assistant, each built for its modality." : ""}\n\nIt is built only from \`@ux-builder/ui\` components and role tokens.`,
+        Overview: `${app} is a ${kinds} app (\`supports.modalities\` in \`docs/ux-builder/blueprint/app.blueprint.json\`). It starts as the empty shell for ${ms.length > 1 ? "those modalities" : "that modality"}, with no sample data, under a header with the theme's logo and a theme and appearance switcher:\n\n${shell}${both ? "\n\nWith several modalities the shell is an `AppShell` whose destinations are Home and Assistant, each built for its modality." : ""}\n\nIt is built only from \`@ux-builder/ui\` components and role tokens.`,
         "Functional Requirements by Area": `#### Shell\n\n${ms.map((m, i) => `SHL-0${i + 1}. The \`${m}\` shell: ${MODALITIES[m].shell}${m === "responsive-web" ? ", whose empty state says to frame the first feature in HELIX and plan its screens in the blueprint" : ", empty until a runtime is connected"}.`).join("\n\n")}\n\n#### Theme\n\nTHM-01. The theme and appearance can be switched, and every widget follows.`,
         "Functional Areas": `| Area | User question or job | Feature responsibility |\n|------|----------------------|------------------------|\n| Shell | "Where do I start?" | ${chat ? "Open on the shell for each modality" : "Open on the Home screen"} |\n| Theme | "Can I see it in another theme?" | Switch theme and appearance |`,
         "User Stories": "- [US-001 — Open the app and see where to start](../user-stories/US-001-open-the-app-and-see-where-to-start.md)",
-        Dependencies: `- \`@ux-builder/ui\` ${ui}; the plan of the shell in \`app.blueprint.json\`; DESIGN.md.`,
+        Dependencies: `- \`@ux-builder/ui\` ${ui}; the plan of the shell in \`docs/ux-builder/blueprint/app.blueprint.json\`; DESIGN.md.`,
       },
     },
     story: {
@@ -156,11 +156,11 @@ function content(r, helix) {
     },
     design: {
       title: `DESIGN.md — ${app}`,
-      intro: note(`The interface decisions the starter made with ux-builder; the plan of every screen is \`app.blueprint.json\`.`),
+      intro: note(`The interface decisions the starter made with ux-builder; the plan of every screen is \`docs/ux-builder/blueprint/app.blueprint.json\`.`),
       sections: {
         "Navigation and Active State": ms.includes("responsive-web")
-          ? `${both ? "Two destinations today, Home and Assistant" : "One destination today, Home"} (in \`app.blueprint.json\`), framed by the SDK's \`AppShell\`, which places navigation for the space available (a bottom bar or drawer when compact, a rail or side navigation when wide) and marks the current destination. Add destinations to the blueprint before building them.`
-          : "One screen today, the conversation (in `app.blueprint.json`), filling the window under the header. Add screens to the blueprint before building them.",
+          ? `${both ? "Two destinations today, Home and Assistant" : "One destination today, Home"} (in \`docs/ux-builder/blueprint/app.blueprint.json\`), framed by the SDK's \`AppShell\`, which places navigation for the space available (a bottom bar or drawer when compact, a rail or side navigation when wide) and marks the current destination. Add destinations to the blueprint before building them.`
+          : "One screen today, the conversation (in `docs/ux-builder/blueprint/app.blueprint.json`), filling the window under the header. Add screens to the blueprint before building them.",
         "Visual Hierarchy": `${ms.includes("responsive-web") ? "Home's page title, then its empty state (`StatePanel`) saying where to start" : "The header, then the `Conversation`: its AI disclosure, its log and its composer"}. One primary action per region (the SDK's \`emphasis.one-primary\` rule).`,
         "Interaction States": `${ms.includes("responsive-web") ? "Home's empty state comes from the SDK's `StatePanel`; every screen in the blueprint declares its empty, loading and error states." : ""}${chat ? `${ms.includes("responsive-web") ? " " : ""}The conversation's streaming, stopped and failed replies, Stop and Retry come from the SDK's \`Conversation\`.` : ""}`,
         Tokens: `From the theme \`${theme}\` (\`@ux-builder/tokens\`); the app styles its own markup only with \`--piq-*\` role tokens, which the lint rule enforces.`,
@@ -239,7 +239,7 @@ shell, DESIGN.md, the test plans). Work in this order:
 
 1. Frame or evolve the requirement in HELIX first (\`/helix frame\`, \`/helix evolve\`): a story with
    acceptance criteria, before any code.
-2. Plan its screens in \`app.blueprint.json\` and run \`npm run check:blueprint\`.
+2. Plan its screens in \`docs/ux-builder/blueprint/app.blueprint.json\` and run \`npm run check:blueprint\`.
 3. Build each screen from its pattern inside a \`Page\`, within the app's \`AppShell\`.
 4. Cite the story's criteria in its tests (\`// @covers US-<n>-AC<m>\`), then \`npm run lint\`,
    \`npm run test:e2e\` and \`npm run audit\`.
