@@ -383,7 +383,8 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       description: "Check an Adaptive Card payload (open-source schema 1.6) before an agent sends it: the vendored 1.6 schema, then the card.* rules (few actions, wrapping text, labelled inputs with error messages, a heading, few columns, alt text, clear action titles, no hidden validated inputs, a supported version, high-impact actions marked). Returns findings, each with its rule ID, severity, JSON Pointer path into the card, message and fix; the same as checkCard from @ux-builder/ui/adaptive-cards.",
       inputSchema: { card: z.record(z.string(), z.unknown()).describe("The card payload (type AdaptiveCard)") },
     }, async ({ card }) => {
-      const findings = cc.checkCard(card);
+      // The server writes the event, for the app it serves (UX_BUILDER_APP), not checkCard's own.
+      const findings = cc.checkCard(card, { trace: false });
       checked("card", findings);
       return ok({ errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings });
     });

@@ -122,6 +122,7 @@ AI screens unchanged.
 | ID | Statement | Roles | Checks | Sources |
 |---|---|---|---|---|
 | `genui.renderable` | An assistant renders inline only components the catalogue marks renderable | A | B | FEAT-007 GEN-01, ADR-023 (own) |
+| `genui.inline-compact` | At compact, a `Wizard` or `FormPage` in a reply shows one short step at a time with its progress, and leaves the composer and Stop reachable; a longer task opens on its own screen (applies to the pattern at compact; added 2026-10-23, AR-2026-10-22 D-2) | (any) | B, R | TMS (best practices), FEAT-011 AIB-03 (own) |
 | `genui.review-prefill` | Values the AI pre-fills in an inline form or wizard are editable and are submitted only by the user's own action | A, Ag | Au | APL (keep people in control), CUA (permission to proceed) |
 | `genui.keep-input` | Regenerating an answer never silently discards what the user typed into its inline UI | A | R | APL (refine without losing work); own |
 | `genui.history` | A submitted inline component stays readable in the conversation, showing what was submitted, and can no longer be changed | A | R | own (FEAT-007 AGT-T-04 records choices) |
@@ -160,7 +161,7 @@ rendered card with the rest of the page.
 | `card.sparingly` | An agent sends a card only when it helps; cards that scroll out of view lose their use | A, Ag | R | TMS (frequency) |
 | `card.high-impact-marked` | An action that pays, sends, deletes or publishes is marked high-impact so the host asks for approval | A, Ag | C | own (ADR-029), APL (confirm significant actions) |
 
-Total: 47 rules: 30 with an automated check (blueprint, audit, lint or
+Total: 48 rules: 31 with an automated check (blueprint, audit, lint or
 card) and 17 review only.
 
 *[Build note 2026-10-21 — FEAT-011 step 1]* In `guidelines/rules.json`:
@@ -217,7 +218,7 @@ card) and 17 review only.
 
 1. CONTRACT-005 and CONTRACT-004 amendments; the rule schema's `aiRole` and
    licence values.
-2. Rule data for the 47 rules; generated guidance; `get_rules` roles
+2. Rule data for the 48 rules; generated guidance; `get_rules` roles
    (US-076).
 3. Blueprint `ai` and its checks (US-077, US-080 blueprint part).
 4. Markers in FEAT-007's components as they are built, and the audit checks

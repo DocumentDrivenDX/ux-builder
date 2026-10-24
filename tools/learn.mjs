@@ -95,7 +95,11 @@
        assessment: { open: [{ id, rule? }] } | null,
        lint: { findings: [{ ruleId, count }] },   for grade
        components: n, patterns: [name], layoutCss: n }   for grade
-   replay-result writes the two side by side, a row per check, audit rule
+   docs/learning/replay-an-evaluation-task.md is how a maintainer replays a
+   task by hand and where each field comes from (AR-2026-10-22 D-5).
+   replay-result first checks the result against that format and refuses
+   it (exit 1, naming each problem) when a required field is missing or
+   malformed, or when it is for another task. Then it writes the two side by side, a row per check, audit rule
    and the open assessment count, each marked better, same or worse (fewer
    attempts and fewer findings are better; never green is worst).
 
@@ -544,6 +548,27 @@ export function evals(episodes, cat) {
 
 const worse = (a, b) => (a === b ? "same" : a === null ? "better" : b === null ? "worse" : b < a ? "better" : "worse");
 
+/* What is wrong with a replay result, by the procedure's format
+   (docs/learning/replay-an-evaluation-task.md): [] when it can be compared. */
+export function replayProblems(task, result) {
+  const p = [];
+  const isObj = (x) => x !== null && typeof x === "object" && !Array.isArray(x);
+  const count = (x) => Number.isInteger(x) && x >= 0;
+  if (!isObj(result)) return ["the result is not a JSON object"];
+  if (result.v !== 1) p.push("v must be 1");
+  if (result.task !== task?.task) p.push(`task is ${JSON.stringify(result.task ?? null)}, not this task's ${JSON.stringify(task?.task ?? null)}`);
+  if (!isObj(result.sdk) || !Object.keys(result.sdk).length || !Object.values(result.sdk).every((v) => typeof v === "string")) p.push("sdk must name each package and its version, from the replay's start event");
+  if (!isObj(result.agent) || typeof result.agent.name !== "string" || typeof result.agent.model !== "string") p.push("agent must be { name, model }, from the replay's start event");
+  if (!isObj(result.checksToGreen) || !Object.values(result.checksToGreen).every((v) => v === null || (count(v) && v > 0))) p.push("checksToGreen must map each check to the attempt it first passed on, or null");
+  if (!isObj(result.audit) || !isObj(result.audit.findings) || !Object.values(result.audit.findings).every(count) || !["pass", "warn", "fail"].includes(result.audit.status)) p.push("audit must be { status: pass | warn | fail, findings: { <rule>: count } }");
+  if (task?.outcome?.assessment && !(isObj(result.assessment) && Array.isArray(result.assessment.open))) p.push("assessment must be { open: [{ id, rule }] }: the task's outcome has an assessment");
+  if (result.assessment !== undefined && result.assessment !== null && !(isObj(result.assessment) && (Array.isArray(result.assessment.open) || Array.isArray(result.assessment.compare)))) p.push("assessment must be { open: [...] } or null");
+  if (result.lint !== undefined && !(isObj(result.lint) && Array.isArray(result.lint.findings) && result.lint.findings.every((f) => isObj(f) && typeof f.ruleId === "string" && count(f.count)))) p.push("lint must be { findings: [{ ruleId, count }] }");
+  for (const k of ["components", "layoutCss"]) if (result[k] !== undefined && !count(result[k])) p.push(`${k} must be a count`);
+  if (result.patterns !== undefined && !(Array.isArray(result.patterns) && result.patterns.every((x) => typeof x === "string"))) p.push("patterns must be a list of pattern names");
+  return p;
+}
+
 /* The side-by-side comparison of a task's outcome and a replay's result (US-111-AC2). */
 export function compareReplay(task, result) {
   const o = task.outcome, rows = [];
@@ -660,7 +685,10 @@ export function main(argv = process.argv.slice(2)) {
     const out = o.out ?? o.result.replace(/\.json$/, "") + ".compare.json";
     const refused = refuseInside(out, "The output");
     if (refused) return fail(refused);
-    const c = compareReplay(readJson(o.task), readJson(o.result));
+    const task = readJson(o.task), result = readJson(o.result);
+    const problems = replayProblems(task, result);
+    if (problems.length) return fail(`${o.result} does not follow docs/learning/replay-an-evaluation-task.md:\n${problems.map((x) => `  - ${x}`).join("\n")}`);
+    const c = compareReplay(task, result);
     write(out, JSON.stringify(c, null, 2) + "\n");
     write(out.replace(/\.json$/, "") + ".md", compareMarkdown(c));
     console.log(compareMarkdown(c));

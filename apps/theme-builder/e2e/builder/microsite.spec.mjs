@@ -48,6 +48,26 @@ test.describe("The public site", () => {
     await expect(page.getByText("ux-assessment.yml").first()).toBeVisible();
   });
 
+  test("the pages say what FEAT-013 to FEAT-017 shipped: modalities, the trace, videos, verdicts and diagram tokens", async ({ page }) => {
+    const errors = watch(page);
+    await page.goto(page_("why/roadmap"));
+    for (const f of ["FEAT-013", "FEAT-014", "FEAT-015", "FEAT-016", "FEAT-017"]) await expect(page.locator('[data-roadmap="now"]')).toContainText(f);
+    await page.goto(page_("start/new-app"));
+    await expect(page.getByText("--modality responsive-web").first()).toBeVisible();
+    for (const m of ["responsive-web", "chat", "hybrid-chat"]) await expect(page.getByRole("table", { name: "Modalities" }).getByText(m, { exact: true })).toBeVisible();
+    await page.goto(page_("start/agents"));
+    await expect(page.locator("#trace ~ p").first()).toContainText("UX-Episode:");
+    await page.goto(page_("start/ci"));
+    await expect(page.locator("#audit ~ p").nth(1)).toContainText("fit of each modality");
+    await page.goto(page_("start/assess"));
+    await expect(page.getByText("npx ux-builder-audit assess video --run <run> --pace slow")).toBeVisible();
+    await page.goto(page_("concepts/tokens"));
+    await expect(page.locator("#diagrams ~ ul").first()).toContainText("--piq-color-series-1");
+    await page.goto("/home.html");
+    await expect(page.locator("section[aria-labelledby=pkg-h] .uxh-cards > li")).toHaveCount(6);
+    expect(errors).toEqual([]);
+  });
+
   test("Start / assess explains the manifest, the scenarios and never-approve, with the theme builder's own manifest", async ({ page }) => {
     await page.goto(page_("start/assess"));
     await expect(page.getByRole("heading", { level: 1, name: "Assess an app's UX" })).toBeVisible();

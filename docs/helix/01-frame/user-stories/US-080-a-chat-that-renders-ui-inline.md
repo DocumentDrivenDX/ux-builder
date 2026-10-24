@@ -52,6 +52,7 @@ cite them.
 - [ ] **US-080-AC4** — Given an inline component the user has edited, when its message is regenerated, then the edits are kept or the user is asked before they are discarded (`genui.keep-input`; FEAT-007 component test).
 - [ ] **US-080-AC5** — Given a submitted inline component, when the user scrolls back, then it shows the submitted values and is not editable (`genui.history`).
 - [ ] **US-080-AC6** — Given an inline pattern, when the audit runs, then the pattern's own audit checks run on it as on any page.
+- [ ] **US-080-AC7** — Given `ai.renders` naming a `Wizard` or `FormPage` and a conversation region that includes `compact`, when the blueprint is checked, then a warning (`genui.inline-compact`) points to the screen and says how to fit the task to the column or move it to a screen of its own. *[Added 2026-10-23, AR-2026-10-22 D-2]*
 
 ## Edge Cases
 
@@ -68,6 +69,7 @@ cite them.
 | AC4 | US-080-AC4 | an inline component the user has edited | its message is regenerated | the edits are kept or the user is asked before they are discarded (`genui.keep-input`; FEAT-007 component test) |
 | AC5 | US-080-AC5 | a submitted inline component | the user scrolls back | it shows the submitted values and is not editable (`genui.history`) |
 | AC6 | US-080-AC6 | an inline pattern | the audit runs | the pattern's own audit checks run on it as on any page |
+| AC7 | US-080-AC7 | `ai.renders` naming a `Wizard` or `FormPage`, a region including `compact` | the blueprint is checked | a warning (`genui.inline-compact`) points to the screen with the fix |
 
 ## Dependencies
 

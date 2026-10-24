@@ -7,4 +7,4 @@
    @ux-builder/ui/adaptive-cards/check, with no React, for Node tools. */
 
 export { AdaptiveCard } from "./AdaptiveCard.jsx";
-export { CHECKS, SUPPORTED_VERSION, cardSchema, checkCard } from "../../adaptive-cards/check.mjs";
+export { CHECKS, SUPPORTED_VERSION, cardSchema, checkCard, traceWritten } from "../../adaptive-cards/check.mjs";

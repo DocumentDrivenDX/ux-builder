@@ -23,7 +23,7 @@ test("US-003-AC4: the contrast gate fails on a pairing below 4.5:1, naming brand
   mkdirSync(resolved);
   // A preview pair as the build writes it: grey text on a grey ground (about 1.3:1).
   writeFileSync(join(resolved, "lowbrand.carbon.light.json"), JSON.stringify({
-    theme: "lowbrand.carbon", preview: true, brand: "lowbrand", designSystem: "carbon", appearance: "light",
+    theme: "lowbrand.carbon", preview: true, fixture: true, brand: "lowbrand", designSystem: "carbon", appearance: "light",
     tokens: { "piq-color-text": "#888888", "piq-color-ground": "#777777", "piq-color-surface": "#FFFFFF", "piq-color-text-strong": "#000000" },
   }));
   const baseline = join(tmp, "baseline.json");
@@ -36,7 +36,7 @@ test("US-003-AC4: the contrast gate fails on a pairing below 4.5:1, naming brand
 test("the contrast gate passes the same check on a readable brand", () => {
   const resolved = join(tmp, "ok");
   mkdirSync(resolved);
-  writeFileSync(join(resolved, "fine.carbon.light.json"), JSON.stringify({ theme: "fine.carbon", appearance: "light", tokens: { "piq-color-text": "#111111", "piq-color-ground": "#FFFFFF" } }));
+  writeFileSync(join(resolved, "fine.carbon.light.json"), JSON.stringify({ theme: "fine.carbon", appearance: "light", fixture: true, tokens: { "piq-color-text": "#111111", "piq-color-ground": "#FFFFFF" } }));
   const baseline = join(tmp, "baseline-ok.json");
   writeFileSync(baseline, JSON.stringify({ floor: 4.5, known: [] }));
   assert.equal(run("check-contrast.mjs", "--resolved", resolved, "--baseline", baseline).status, 0);
@@ -49,9 +49,9 @@ test("US-003-AC4: a pill is measured on what shows through its background: the p
   // #777268 clears 4.5:1 on the sunken panel (#FFFFFF) but not on the ground (#F0EEE6, 4.12:1),
   // nor on a 13% tint of itself over white.
   const base = { "piq-state-evaluation": "#777268", "piq-color-ground": "#F0EEE6", "piq-color-surface": "#FFFFFF", "piq-color-surface-sunken": "#FFFFFF" };
-  writeFileSync(join(resolved, "clear.light.json"), JSON.stringify({ theme: "clear", appearance: "light", tokens: { ...base, "piq-pill-bg": "transparent" } }));
-  writeFileSync(join(resolved, "tinted.light.json"), JSON.stringify({ theme: "tinted", appearance: "light", tokens: { ...base, "piq-color-ground": "#FFFFFF", "piq-pill-bg": "color-mix(in srgb, currentColor 13%, transparent)" } }));
-  writeFileSync(join(resolved, "filled.light.json"), JSON.stringify({ theme: "filled", appearance: "light", tokens: { ...base, "piq-pill-bg": "#FFFFFF" } }));
+  writeFileSync(join(resolved, "clear.light.json"), JSON.stringify({ theme: "clear", appearance: "light", fixture: true, tokens: { ...base, "piq-pill-bg": "transparent" } }));
+  writeFileSync(join(resolved, "tinted.light.json"), JSON.stringify({ theme: "tinted", appearance: "light", fixture: true, tokens: { ...base, "piq-color-ground": "#FFFFFF", "piq-pill-bg": "color-mix(in srgb, currentColor 13%, transparent)" } }));
+  writeFileSync(join(resolved, "filled.light.json"), JSON.stringify({ theme: "filled", appearance: "light", fixture: true, tokens: { ...base, "piq-pill-bg": "#FFFFFF" } }));
   const baseline = join(tmp, "baseline-pills.json");
   writeFileSync(baseline, JSON.stringify({ floor: 4.5, known: [] }));
   const r = run("check-contrast.mjs", "--resolved", resolved, "--baseline", baseline);

@@ -13,8 +13,17 @@
    then rule, in plain string order, as checkBlueprint orders them. Schema
    errors are errors, reported under card.version (the card is not a valid
    1.6 card); every rule finding is a warning (ADR-028 decision 5). No rule
-   runs on an element the schema rejected, or on anything inside it. */
+   runs on an element the schema rejected, or on anything inside it.
 
+   In Node, each check is also a `card` check event in the app's episode
+   trace (FEAT-016 TRC-03, US-106-AC2; AR-2026-10-22 D-6), when
+   @ux-builder/trace is installed and a .ux-builder/ folder is at or above
+   the app directory: checkCard(card, { trace: <dir> }), else the working
+   directory. { trace: false } writes nothing; neither does a browser. The
+   write happens after checkCard returns (await traceWritten() for it), and
+   a trace that cannot be written never changes the findings. */
+
+import pkg from "../package.json" with { type: "json" };
 import schema from "./schema-1.6/adaptive-card.json" with { type: "json" };
 
 /* The vendored Adaptive Cards 1.6 JSON Schema (draft-06), as data. */
@@ -160,9 +169,29 @@ export const COMPACT_WIDTH = 320;
 export const MAX_ACTIONS = 6;
 export const markerOf = (action) => (isObj(action?.data) && isObj(action.data["ux-builder"]) ? action.data["ux-builder"] : null);
 
+const NODE = typeof process !== "undefined" && !!process.versions?.node;
+const TRACE = "@ux-builder/trace";   // a variable, so a browser bundle does not try to resolve it
+let traceModule = null;
+let written = Promise.resolve();
+/* Resolves when every trace write so far is done. */
+export const traceWritten = () => written;
+function traceCard(findings, dir) {
+  written = written.then(async () => {
+    const t = await (traceModule ??= import(/* @vite-ignore */ TRACE).catch(() => null));
+    const app = t?.findApp(dir ?? process.cwd());
+    if (app) t.recordCheck(app, "card", { findings: t.countFindings(findings) }, { by: `${pkg.name}@${pkg.version}` });
+  }).catch(() => {});
+}
+
 /* Findings for a card payload: the vendored 1.6 schema, then every card
    rule with an automatic check. Ordered by path, then rule. */
-export function checkCard(card) {
+export function checkCard(card, { trace } = {}) {
+  const findings = cardFindings(card);
+  if (NODE && trace !== false) traceCard(findings, typeof trace === "string" ? trace : undefined);
+  return findings;
+}
+
+function cardFindings(card) {
   const findings = [];
   const add = (rule, path, message, fix, severity = "warning") => findings.push({ rule, severity, path: ptr(path), message, fix });
   if (!isObj(card) || card.type !== "AdaptiveCard") {

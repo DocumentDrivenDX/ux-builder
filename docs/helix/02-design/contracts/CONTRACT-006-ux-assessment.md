@@ -76,7 +76,7 @@ YAML at the app's root. Unknown keys are errors. JSON Schema:
 | `evidence.out` | path | no | Default `ux-assessment/` |
 | `evidence.capture` | `screenshot`, `tree`, `both` | no | Default `both`. What `inspect` writes for a checkpoint: `screenshot.png`, `tree.yml` or both; the one not captured is `null` in `inspection.json` |
 | `evidence.redact` | `{ selectors?: string[], text?: regex[] }` | no | Masked before writing |
-| `video` | `{ viewports?: { width, height }[], holdSeconds?: { min, perWord }, autoPause?: boolean }` | no | *[Amended 2026-10-21 — planned, FEAT-013, ADR-031]* Walkthrough videos. Defaults: one viewport 1440 × 900; a hold of at least 4 s plus 0.3 s a word of caption; the player pauses at pop-ups |
+| `video` | `{ viewports?: { width, height }[], holdSeconds?: { min, perWord }, autoPause?: boolean }` | no | *[Amended 2026-10-21 — FEAT-013, ADR-031; from audit 0.3.0]* Walkthrough videos. Defaults: one viewport 1440 × 900; a hold of at least 4 s plus 0.3 s a word of caption; the player pauses at pop-ups |
 | `limits` | `{ runMinutes?, steps?, journeyMinutes? }` | no | Defaults 60, 200, 15, applied when a command is given the manifest. `runMinutes`: minutes from the run's `startedAt` (`run.json`) after which `inspect` takes no step and `browser --run` stops. `steps`: the most browser steps in one run, where a step is a checkpoint `inspect` records or an action a replay takes. `journeyMinutes`: minutes from a journey's first checkpoint after which `inspect` takes no step for that journey; also the default timeout of a `tests[]` command without `timeoutMinutes`. A step refused for a limit is recorded `blocked: limit` and the `walkthrough` stage `partial` |
 | `restrictions.allow` | action[] | no | Permitted test actions (`create-test-data`, `edit-test-data`, `delete-test-data`) |
 | `restrictions.deny` | action[] | no | Always includes `payment`, `send-message`, `production-approval`, `delete-real-data`. A denied action can never be allowed: naming one in `allow` fails validation |
@@ -307,7 +307,9 @@ Decisions the build had to make, the smallest that make the criteria testable:
   the request kept in its field. These are deterministic proxies; the agent's
   own observation in `walkthrough.json` stays the judgment.
 
-### Walkthrough videos *[Amended 2026-10-21 — planned, FEAT-013, ADR-031]*
+### Walkthrough videos *[Amended 2026-10-21 — FEAT-013, ADR-031]*
+
+Normative from `@ux-builder/audit` 0.3.0, which shipped FEAT-013.
 
 Field and record changes:
 
@@ -333,7 +335,7 @@ Further subcommand:
 
 | Subcommand | Behaviour | Exit |
 |---|---|---|
-| `video --run id [--journey J-id]... [--viewport WxH]... [--manifest f] [--out dir]` | For each journey with `done` steps (or the ones named): in one recording, the title card, then for the main path and each walked alternate (after the first: the fixture's reset and the signed-in state put back, behind a card), signed in by the role's `auth` before recording, installs `evidence.redact` masking from the first paint, replays `do` at a human pace, re-checks each checkpoint's state, and holds at checkpoints with findings, writing their annotations. Then writes the files above. Applies `run.origins`, `restrictions` and `limits` as `inspect --replay` does | 0 every journey recorded; 1 a journey not recorded, a chapter stopped, or no `ffmpeg` (MP4 skipped), with the `video` stage `partial`; 2 usage |
+| `video --run id [--journey J-id]... [--viewport WxH]... [--pace slow\|normal\|fast] [--manifest f] [--out dir]` | For each journey with `done` steps (or the ones named): in one recording, the title card, then for the main path and each walked alternate (after the first: the fixture's reset and the signed-in state put back, behind a card), signed in by the role's `auth` before recording, installs `evidence.redact` masking from the first paint, replays `do` at a human pace, re-checks each checkpoint's state, and holds at checkpoints with findings, writing their annotations. Then writes the files above. Applies `run.origins`, `restrictions` and `limits` as `inspect --replay` does | 0 every journey recorded; 1 a journey not recorded, a chapter stopped, or no `ffmpeg` (MP4 skipped), with the `video` stage `partial`; 2 usage |
 
 Decisions the build had to make *(FEAT-013 step 3, 2026-10-21)*:
 - **One recording per journey and viewport.** Playwright records a browser
@@ -394,7 +396,9 @@ has `plain`; `annotations.json` and `video.json` validate against their
 schemas; `report` links each shown finding to `video/index.html#<video name>@<start>`
 and lists the videos in `evidence.json`.
 
-### Journey-first report, HELIX artifact and pace *[Amended 2026-10-21 — planned, FEAT-015, ADR-033]*
+### Journey-first report, HELIX artifact and pace *[Amended 2026-10-21 — FEAT-015, ADR-033]*
+
+Normative from `@ux-builder/audit` 0.3.0, which shipped FEAT-015.
 
 - `assess report` orders `report.md` and `report.html` journey → state → step
   → finding. Each finding has its rule ID and full statement (or heuristic and

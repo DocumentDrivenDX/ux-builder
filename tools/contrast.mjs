@@ -113,6 +113,13 @@ const STATUS = ["positive", "caution", "negative", "info"];
 export const SERIES = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => c(`series-${i}`));
 export const REGIONS = [1, 2, 3].map((i) => c(`diagram-region-${i}`));
 const ON = [[c("ground"), "the ground"], [c("surface"), "a card"], [c("diagram-region-3"), "the deepest region"]];
+/* Every FEAT-017 role, as CONTRACT-001 names them: the 28 every built theme sets. */
+export const DIAGRAM_ROLES = [
+  ...STATUS.flatMap((s) => [c(`status-${s}`), c(`status-${s}-subtle`)]), ...SERIES, ...REGIONS,
+  c("diagram-edge"), c("diagram-edge-strong"), c("diagram-edge-muted"),
+  ...["placeholder", "decided", "unknown"].map((s) => c(`lifecycle-${s}`)),
+  "piq-size-diagram-stroke", "piq-size-diagram-stroke-strong", "piq-radius-diagram-node",
+];
 export const DIAGRAM_PAIRS = [
   ...STATUS.flatMap((s) => [
     [c(`status-${s}`), c("ground"), `${s} as text`, FLOOR],

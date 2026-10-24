@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/create-app",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "license": "MIT OR Apache-2.0",
   "description": "Scaffold a React + Vite app that is on the AI-UI SDK from its first commit, as the empty shell for its modalities: npm create @ux-builder/app my-app -- --modality responsive-web --theme databricks (FEAT-004 SDK-08, SDK-09; FEAT-014).",
   "type": "module",
@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "@ux-builder/tokens": "^1.6.0",
-    "@ux-builder/ui": "^0.9.0",
-    "@ux-builder/audit": "^0.4.0",
+    "@ux-builder/ui": "^0.10.0",
+    "@ux-builder/audit": "^0.4.1",
     "@ux-builder/trace": "^0.1.0",
     "@ux-builder/design": "^0.1.0",
     "undici": "^7.30.1"

@@ -1,5 +1,13 @@
 # @ux-builder/create-app
 
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [d9967eb]
+  - @ux-builder/ui@0.10.0
+  - @ux-builder/audit@0.4.1
+
 ## 0.7.0
 
 ### Minor Changes

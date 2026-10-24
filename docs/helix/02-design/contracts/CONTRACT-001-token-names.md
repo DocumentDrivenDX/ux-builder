@@ -454,7 +454,7 @@ gets the point's default, which is also the `ui.css` fallback.
 
 #### Tokens added for diagrams and charts *[Amended 2026-10-22 — FEAT-017]*
 
-Additive; no accepted name changes. Every theme and preview pair sets every
+Normative from `@ux-builder/tokens` 1.7.0. Additive; no accepted name changes. Every theme and preview pair sets every
 one of them in every appearance (CONTRACT-002 Composition step 4). Status
 and series values are SDK defaults in `tokens/dataviz.json`, one set per
 appearance, which a brand MAY replace per appearance; the others are derived
