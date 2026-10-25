@@ -86,10 +86,10 @@ export function briefContent(app) {
   for (const p of state.principles ?? []) if (p.status !== "refuted") points.principles.push({ text: p.text, status: p.status, id: p.id, rule: p.rule?.kind });
   for (const q of state.questions) if (q.status === "open") points.questions.push({ text: `${q.id}: ${q.text}`, status: null });
   const notes = [];
-  // Target users described in docs/ux/users.md are the only source of the section (GDL-77).
+  // Target users described in users.md are the only source of the section (GDL-77).
   const users = usersTable(app);
   if (users) {
-    points.users = Object.entries(users).map(([id, u]) => ({ text: `${u.user} (${id}): ${u.context}`, status: u.status, id, confirm: "research evidence about these users (ux-builder-design evidence add), cited in docs/ux/users.md" }));
+    points.users = Object.entries(users).map(([id, u]) => ({ text: `${u.user} (${id}): ${u.context}`, status: u.status, id, confirm: `research evidence about these users (ux-builder-design evidence add), cited in ${ux(app, "users.md")}` }));
     notes.push(`Target users are from ${ux(app, "users.md")}.`);
   }
   if (!helix) notes.push("HELIX was not found (no .helix.yml): the brief is built from the design state alone.");

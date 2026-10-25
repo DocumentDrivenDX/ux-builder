@@ -63,6 +63,12 @@ describe("US-150: design first, and build the app in place at the end", () => {
     assert.doesNotMatch(readFileSync(join(dir, "AGENTS.md"), "utf8"), /theme `/, "no theme yet");
   });
 
+  // @covers US-114-AC3
+  test("US-114-AC3 (amended): a design folder's CLAUDE.md, AGENTS.md and README.md each name /ux-builder-design as the way to start", () => {
+    const dir = join(tmp, "trip-planner");
+    for (const f of ["CLAUDE.md", "AGENTS.md", "README.md"]) assert.match(readFileSync(join(dir, f), "utf8"), /type `\/ux-builder-design`/, f);
+  });
+
   // @covers US-150-AC2
   test("AC2: status in a design folder says the app is not built, and what the build needs, in order", () => {
     const dir = folder("status-check", { modality: false });

@@ -134,7 +134,9 @@ const SUB = {
     } catch (e) { console.error(e.message); return e.code === "usage" ? 2 : 1; }
   },
   async hierarchy(args) {
-    const { values: o } = parseArgs({ args, options: { page: { type: "string" }, screen: { type: "string" }, blueprint: { type: "string", default: "app.blueprint.json" }, json: { type: "boolean" } } });
+    const { values: o } = parseArgs({ args, options: { page: { type: "string" }, screen: { type: "string" }, blueprint: { type: "string" }, json: { type: "boolean" } } });
+    // The app's blueprint where its layout keeps it, unless --blueprint names one (FEAT-018 GDL-80).
+    o.blueprint ??= (await import("@ux-builder/ui/blueprint/paths")).layoutOf(process.cwd()).blueprint;
     const { existsSync, readFileSync } = await import("node:fs");
     if (!o.page) { console.error(USAGE); return 2; }
     for (const f of [o.page, o.blueprint]) if (!existsSync(f)) { console.error(`${f} does not exist`); return 2; }

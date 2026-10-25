@@ -4,6 +4,271 @@
   "title": "ux-builder-design --json output (CONTRACT-008 Commands)",
   "description": "What each command prints with --json; its exported function returns the same object.",
   "$defs": {
+    "applyImpact": {
+      "type": "object",
+      "required": [
+        "applied",
+        "change",
+        "errors",
+        "delta",
+        "regenerated",
+        "summary"
+      ]
+    },
+    "baseline": {
+      "type": "object",
+      "required": [
+        "written",
+        "run",
+        "screens",
+        "journeys",
+        "stories",
+        "findings",
+        "drafted"
+      ],
+      "properties": {
+        "written": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "drafted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "brief": {
+      "type": "object",
+      "required": [
+        "written",
+        "sections",
+        "notes",
+        "helix"
+      ],
+      "properties": {
+        "written": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "key",
+              "heading",
+              "points"
+            ]
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "helix": {
+          "type": "boolean"
+        }
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "checkpoint",
+        "about",
+        "trace"
+      ],
+      "properties": {
+        "checkpoint": {
+          "type": "object",
+          "required": [
+            "id",
+            "status",
+            "at"
+          ]
+        },
+        "about": {
+          "type": "string"
+        },
+        "trace": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "decisionAdd": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "status",
+        "trace"
+      ]
+    },
+    "decisionStatus": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "status",
+        "evidence",
+        "date",
+        "history"
+      ]
+    },
+    "diagnose": {
+      "type": "object",
+      "required": [
+        "id",
+        "insight",
+        "observation",
+        "explanations",
+        "hypothesis",
+        "alternative",
+        "path"
+      ],
+      "properties": {
+        "explanations": {
+          "type": "array",
+          "minItems": 2
+        }
+      }
+    },
+    "evidenceAdd": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "kind",
+        "date",
+        "source",
+        "file"
+      ]
+    },
+    "evidenceList": {
+      "type": "object",
+      "required": [
+        "evidence"
+      ],
+      "properties": {
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "date",
+              "source",
+              "excerpts",
+              "path"
+            ]
+          }
+        }
+      }
+    },
+    "excerptAdd": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "participant",
+        "excerpt"
+      ]
+    },
+    "experimentEnd": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "status",
+        "metric",
+        "control",
+        "variant",
+        "improved",
+        "guardrails",
+        "hypothesis",
+        "supported",
+        "next"
+      ],
+      "properties": {
+        "status": {
+          "const": "ended"
+        }
+      }
+    },
+    "experimentStart": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "status",
+        "decision",
+        "variant",
+        "metric",
+        "guardrails",
+        "duration",
+        "hypothesis"
+      ],
+      "properties": {
+        "status": {
+          "const": "running"
+        }
+      }
+    },
+    "explain": {
+      "type": "object",
+      "required": [
+        "terms"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "term",
+              "step",
+              "means",
+              "why"
+            ]
+          }
+        }
+      }
+    },
+    "impact": {
+      "type": "object",
+      "required": [
+        "change",
+        "mode",
+        "matched",
+        "affected",
+        "decisions"
+      ],
+      "properties": {
+        "checkpointRequired": {
+          "const": "significant-change"
+        }
+      }
+    },
     "init": {
       "type": "object",
       "required": [
@@ -48,6 +313,327 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "insights": {
+      "type": "object",
+      "required": [
+        "id",
+        "date",
+        "events",
+        "journeys",
+        "unmatched",
+        "path"
+      ]
+    },
+    "migrate": {
+      "type": "object",
+      "required": [
+        "migrated",
+        "moves",
+        "updated",
+        "git"
+      ],
+      "properties": {
+        "moves": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "from",
+              "to"
+            ]
+          }
+        }
+      }
+    },
+    "modality": {
+      "type": "object",
+      "required": [
+        "file",
+        "modalities",
+        "sizeClasses",
+        "answer",
+        "at"
+      ]
+    },
+    "mode": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "full",
+            "change"
+          ]
+        },
+        "why": {
+          "type": "string"
+        }
+      }
+    },
+    "observeImport": {
+      "type": "object",
+      "required": [
+        "kit",
+        "path",
+        "imported",
+        "findings",
+        "skipped",
+        "sessions"
+      ]
+    },
+    "overview": {
+      "type": "object",
+      "required": [
+        "steps",
+        "change",
+        "review"
+      ],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": [
+              "n",
+              "name",
+              "activity",
+              "you",
+              "produces",
+              "terms"
+            ]
+          }
+        },
+        "change": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "review": {
+          "type": "string"
+        }
+      }
+    },
+    "ready": {
+      "type": "object",
+      "required": [
+        "for",
+        "checks",
+        "ready",
+        "next"
+      ]
+    },
+    "report": {
+      "type": "object",
+      "required": [
+        "id",
+        "path",
+        "follows",
+        "approach",
+        "contradicted",
+        "assumptions",
+        "observed",
+        "findings"
+      ]
+    },
+    "reviewApprove": {
+      "type": "object",
+      "required": [
+        "item",
+        "approved",
+        "remaining",
+        "next"
+      ]
+    },
+    "reviewFeedback": {
+      "type": "object",
+      "required": [
+        "id",
+        "item",
+        "text",
+        "status",
+        "at"
+      ]
+    },
+    "reviewList": {
+      "type": "object",
+      "required": [
+        "pending",
+        "count",
+        "next"
+      ],
+      "properties": {
+        "pending": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "step",
+              "title",
+              "file",
+              "hash",
+              "changed",
+              "feedback"
+            ]
+          }
+        },
+        "count": {
+          "type": "integer"
+        },
+        "next": {
+          "type": "string"
+        }
+      }
+    },
+    "reviewRespond": {
+      "type": "object",
+      "required": [
+        "id",
+        "item",
+        "text",
+        "status",
+        "response"
+      ],
+      "properties": {
+        "status": {
+          "const": "addressed"
+        }
+      }
+    },
+    "reviewShow": {
+      "type": "object",
+      "required": [
+        "id",
+        "step",
+        "title",
+        "file",
+        "content",
+        "hash",
+        "status",
+        "feedback"
+      ]
+    },
+    "route": {
+      "type": "object",
+      "required": [
+        "findings",
+        "target",
+        "patch"
+      ],
+      "properties": {
+        "target": {
+          "type": "object",
+          "required": [
+            "path",
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "existing",
+                "new"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "rubric": {
+      "type": "object",
+      "required": [
+        "alternative",
+        "file",
+        "dimensions",
+        "recommendable"
+      ],
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "overall"
+            ]
+          },
+          {
+            "required": [
+              "average"
+            ]
+          },
+          {
+            "required": [
+              "total"
+            ]
+          },
+          {
+            "required": [
+              "score"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "baseline",
+              "predicted",
+              "observed"
+            ],
+            "properties": {
+              "predicted": {
+                "type": "object",
+                "required": [
+                  "value",
+                  "basis"
+                ],
+                "properties": {
+                  "basis": {
+                    "enum": [
+                      "computed",
+                      "judgment",
+                      "to validate"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "stateGet": {
+      "type": "object",
+      "required": [
+        "path",
+        "value"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "stateSet": {
+      "type": "object",
+      "required": [
+        "path",
+        "value"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
         }
       }
     },
@@ -150,140 +736,48 @@
         }
       }
     },
-    "stateGet": {
+    "step": {
       "type": "object",
       "required": [
-        "path",
-        "value"
-      ],
-      "properties": {
-        "path": {
-          "type": "string"
-        }
-      }
+        "mode",
+        "step",
+        "of",
+        "name",
+        "text"
+      ]
     },
-    "stateSet": {
+    "testKit": {
       "type": "object",
       "required": [
-        "path",
-        "value"
-      ],
-      "properties": {
-        "path": {
-          "type": "string"
-        }
-      }
+        "id",
+        "dir",
+        "tasks",
+        "written",
+        "users"
+      ]
     },
-    "checkpoint": {
+    "trace": {
       "type": "object",
       "required": [
-        "checkpoint",
-        "about",
-        "trace"
+        "item",
+        "upstream",
+        "downstream"
+      ]
+    },
+    "transcriptAdd": {
+      "type": "object",
+      "required": [
+        "session",
+        "excerpts",
+        "consent"
       ],
       "properties": {
-        "checkpoint": {
+        "consent": {
           "type": "object",
           "required": [
-            "id",
-            "status",
-            "at"
+            "confirmed",
+            "date"
           ]
-        },
-        "about": {
-          "type": "string"
-        },
-        "trace": {
-          "type": [
-            "object",
-            "null"
-          ]
-        }
-      }
-    },
-    "mode": {
-      "type": "object",
-      "required": [
-        "mode"
-      ],
-      "properties": {
-        "mode": {
-          "enum": [
-            "full",
-            "change"
-          ]
-        },
-        "why": {
-          "type": "string"
-        }
-      }
-    },
-    "baseline": {
-      "type": "object",
-      "required": [
-        "written",
-        "run",
-        "screens",
-        "journeys",
-        "stories",
-        "findings",
-        "drafted"
-      ],
-      "properties": {
-        "written": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "run": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "drafted": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "brief": {
-      "type": "object",
-      "required": [
-        "written",
-        "sections",
-        "notes",
-        "helix"
-      ],
-      "properties": {
-        "written": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "sections": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "key",
-              "heading",
-              "points"
-            ]
-          }
-        },
-        "notes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "helix": {
-          "type": "boolean"
         }
       }
     },
@@ -342,310 +836,6 @@
           }
         }
       }
-    },
-    "evidenceAdd": {
-      "type": "object",
-      "required": [
-        "id",
-        "path",
-        "kind",
-        "date",
-        "source",
-        "file"
-      ]
-    },
-    "evidenceList": {
-      "type": "object",
-      "required": [
-        "evidence"
-      ],
-      "properties": {
-        "evidence": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "id",
-              "kind",
-              "date",
-              "source",
-              "excerpts",
-              "path"
-            ]
-          }
-        }
-      }
-    },
-    "decisionAdd": {
-      "type": "object",
-      "required": [
-        "id",
-        "path",
-        "status",
-        "trace"
-      ]
-    },
-    "decisionStatus": {
-      "type": "object",
-      "required": [
-        "id",
-        "path",
-        "status",
-        "evidence",
-        "date",
-        "history"
-      ]
-    },
-    "rubric": {
-      "type": "object",
-      "required": [
-        "alternative",
-        "file",
-        "dimensions",
-        "recommendable"
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "overall"
-            ]
-          },
-          {
-            "required": [
-              "average"
-            ]
-          },
-          {
-            "required": [
-              "total"
-            ]
-          },
-          {
-            "required": [
-              "score"
-            ]
-          }
-        ]
-      },
-      "properties": {
-        "dimensions": {
-          "type": "array",
-          "minItems": 9,
-          "maxItems": 9,
-          "items": {
-            "type": "object",
-            "required": [
-              "id",
-              "name",
-              "baseline",
-              "predicted",
-              "observed"
-            ],
-            "properties": {
-              "predicted": {
-                "type": "object",
-                "required": [
-                  "value",
-                  "basis"
-                ],
-                "properties": {
-                  "basis": {
-                    "enum": [
-                      "computed",
-                      "judgment",
-                      "to validate"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "ready": {
-      "type": "object",
-      "required": [
-        "for",
-        "checks",
-        "ready",
-        "next"
-      ]
-    },
-    "trace": {
-      "type": "object",
-      "required": [
-        "item",
-        "upstream",
-        "downstream"
-      ]
-    },
-    "impact": {
-      "type": "object",
-      "required": [
-        "change",
-        "mode",
-        "matched",
-        "affected",
-        "decisions"
-      ],
-      "properties": {
-        "checkpointRequired": {
-          "const": "significant-change"
-        }
-      }
-    },
-    "applyImpact": {
-      "type": "object",
-      "required": [
-        "applied",
-        "change",
-        "errors",
-        "delta",
-        "regenerated",
-        "summary"
-      ]
-    },
-    "testKit": {
-      "type": "object",
-      "required": [
-        "id",
-        "dir",
-        "tasks",
-        "written",
-        "users"
-      ]
-    },
-    "overview": {
-      "type": "object",
-      "required": [
-        "steps",
-        "change",
-        "review"
-      ],
-      "properties": {
-        "steps": {
-          "type": "array",
-          "minItems": 8,
-          "maxItems": 8,
-          "items": {
-            "type": "object",
-            "required": [
-              "n",
-              "name",
-              "activity",
-              "you",
-              "produces",
-              "terms"
-            ]
-          }
-        },
-        "change": {
-          "type": "array",
-          "minItems": 4,
-          "maxItems": 4
-        },
-        "review": {
-          "type": "string"
-        }
-      }
-    },
-    "explain": {
-      "type": "object",
-      "required": [
-        "terms"
-      ],
-      "properties": {
-        "step": {
-          "type": "integer"
-        },
-        "terms": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "term",
-              "step",
-              "means",
-              "why"
-            ]
-          }
-        }
-      }
-    },
-    "step": {
-      "type": "object",
-      "required": [
-        "mode",
-        "step",
-        "of",
-        "name",
-        "text"
-      ]
-    },
-    "reviewList": {
-      "type": "object",
-      "required": [
-        "pending",
-        "count",
-        "next"
-      ],
-      "properties": {
-        "pending": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "id",
-              "step",
-              "title",
-              "file",
-              "hash",
-              "changed",
-              "feedback"
-            ]
-          }
-        },
-        "count": {
-          "type": "integer"
-        },
-        "next": {
-          "type": "string"
-        }
-      }
-    },
-    "reviewShow": {
-      "type": "object",
-      "required": [
-        "id",
-        "step",
-        "title",
-        "file",
-        "content",
-        "hash",
-        "status",
-        "feedback"
-      ]
-    },
-    "reviewFeedback": {
-      "type": "object",
-      "required": [
-        "id",
-        "item",
-        "text",
-        "status",
-        "at"
-      ]
-    },
-    "reviewApprove": {
-      "type": "object",
-      "required": [
-        "item",
-        "approved",
-        "remaining",
-        "next"
-      ]
     }
   }
 }

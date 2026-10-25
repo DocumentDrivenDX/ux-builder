@@ -24,7 +24,7 @@ export const CHECKPOINTS = {
 const ORDER = ["baseline", "define", "explore", "experience", "validate"];
 const AFTER = { "core-1": "explore", "core-2": "experience" };
 export const FIRST_STEP = {
-  baseline: "Go through docs/ux/baseline.md with the person and ask what to improve",
+  baseline: "Go through the baseline (baseline.md, beside the brief) with the person and ask what to improve",
   define: "Interview the person about what users must accomplish, then draft the brief and ask core-1",
   explore: "Draft at least two alternatives for the open questions, compare them and ask core-2",
   experience: "Prototype the chosen design for the person to try; then build the validated prototype",

@@ -519,7 +519,8 @@ rules, so it invents colours and components.
 - **FR-60** — A new app is created for one or more modalities. Today these
   are `responsive-web` (a mobile and desktop web app), `chat` (a chat app)
   and `hybrid-chat` (a chat app that renders Adaptive Cards). The starter
-  asks for them when it runs in a terminal and takes `--modality` otherwise.
+  takes `--modality`; without it, it makes a design folder and the
+  modality is asked during the design (FR-76; *amended 2026-10-25*).
   The choice is recorded in the blueprint. Native iOS, Android, macOS and
   Windows apps are future modalities (ADR-032). *(Added 2026-10-21.)*
 - **FR-61** — A new app starts as an empty shell for its modalities, with no
@@ -666,8 +667,11 @@ rules, so it invents colours and components.
   confirmed, assumed or hypothesis; principles a check can express become
   project rules. *(Added 2026-10-23.)*
 - **FR-80** — New artifact types live in ux-builder for now: templates in
-  the package, documents in the app's `docs/ux/`, validated and linked to
-  the HELIX documents they relate to. *(Added 2026-10-23.)*
+  the package, documents in the app's `docs/ux-builder/` (*amended
+  2026-10-24*: with the blueprint in `blueprint/`, prototypes in
+  `prototypes/` and HELIX proposals in `helix-proposals/`; the modality is
+  chosen before anything is drawn), validated and linked to the HELIX
+  documents they relate to. *(Added 2026-10-23.)*
 - **FR-81** — User needs start as labelled hypotheses; research evidence
   is stored as masked, pseudonymous excerpts and synthesized into a jobs
   table that rates importance, evidence and confidence separately. Target
@@ -718,7 +722,7 @@ rules, so it invents colours and components.
 | P1-8 (FR-43–FR-45) | Create an app on HELIX | `npm create @ux-builder/app acme` online, then with `--helix-offline` | HELIX installed in `.claude/skills/helix/` with its version recorded; 8 HELIX documents typed and linked, plus `concerns.local.yml`; `assess validate` passes and `assess collect` reports 0 warnings with US-001's criteria explicit |
 | P1-9 (FR-46–FR-50) | Plan, check and assess an agent screen | A blueprint with an `agent` screen whose "Submit payment" action has no approval and which renders a `Wizard` inline at a 400 px column; the built screen streaming an unmarked answer with no Stop control; UI copy "I think this is right" | Blueprint findings for the missing approval and for the inline wizard's compact rules; audit findings for the missing disclosure and Stop control; one lint warning; the assessment's risky scenario stops at the approval |
 | P1-12 (FR-73, FR-74) | Diagram tokens in every theme | Every theme and preview pair, light and dark; a page drawing a status chip, a series legend, a region with a node, an edge in each weight and the three lifecycle tints with those tokens only | `npm run contrast` reports 0 failures; the audit reports no errors or warnings for that page in every theme and appearance; each theme's page lists every diagram token |
-| P1-13 (FR-75–FR-88) | Guide a new app to checkpoint 2 with no MCP | A fixture app created by the starter; no `.mcp.json`; a scripted agent answering the guide's questions; three alternative blueprints | The design state records `core-1` and `core-2`; `docs/ux/brief.md` and a `UXD-` record pass `validate`; `compare` marks the alternative with the fewest steps and required inputs; no network call is made |
+| P1-13 (FR-75–FR-88) | Guide a new app to checkpoint 2 with no MCP | A fixture app created by the starter; no `.mcp.json`; a scripted agent answering the guide's questions; three alternative blueprints | The design state records `core-1` and `core-2`; `docs/ux-builder/brief.md` and a `UXD-` record pass `validate`; `compare` marks the alternative with the fewest steps and required inputs; no network call is made |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context

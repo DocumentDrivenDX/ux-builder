@@ -455,7 +455,7 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
     }, async ({ path, value }) => run(() => design.stateSet(at(), { path, value })));
     server.registerTool("design_status", {
       title: "Where the design loop stands",
-      description: "The activity, mode, chosen alternative, untested assumptions, open questions, checkpoints, next action and docs/ux documents; as `ux-builder-design status --json` returns it.",
+      description: "Where the person is (step n of 8), the activity, mode, items awaiting review, chosen alternative, untested assumptions, open questions, checkpoints, next action, the layout (and whether it needs migrating), in a design folder what building the app needs, and the docs/ux-builder documents; as `ux-builder-design status --json` returns it.",
       inputSchema: {},
     }, async () => run(() => design.status(at())));
     if (design.impact) {

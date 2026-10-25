@@ -32,6 +32,11 @@ Any MCP client can run it over stdio: the command is `npx @ux-builder/mcp` (bin
 | `start_episode` | Opens an episode in the app's trace (`goal`, `stories`, `screens`, `journeys`, `agent`, `model`, `transcripts`); returns its ID and the commit trailer. Refused while one is open |
 | `record_decision` | Records a decision: `chose` and `why` (both required; `why` is masked), `considered`, `relied` (rule and story IDs), `departs`, `workaround`, `screen`. Without `chose` or `why`, an error naming it, and nothing written |
 | `end_episode` | Closes the episode (`status`: `done` or `abandoned`; `assessment`: a run directory after `assess compare`): its commits, change, outcome and warnings |
+| `simplify_blueprint`, `score_blueprint`, `compare_blueprints` | A blueprint's simplifications (inputs to infer, decisions to default, steps to combine, hops to remove); each journey's predicted cost; two or more alternatives scored side by side, the best per task and dimension marked (FEAT-018) |
+| `validate_assessment_manifest`, `validate_assessment_report` | `ux-assessment.yml` against its schema and the app's HELIX; a run package's records, coverage, walkthroughs, findings and proposals |
+| `get_design_state`, `update_design_state` | The guided design loop's state, or one field; write one field, checked against its schema (`ux-builder-design state get` and `state set`) |
+| `design_status` | Where the design stands: step n of 8, items awaiting review, checkpoints, the next action, the layout and, in a design folder, what building the app needs (`ux-builder-design status`) |
+| `design_impact`, `design_trace` | Everything a change reaches, and everything linked to a job, task, journey, screen, decision or finding (`ux-builder-design impact` and `trace`) |
 
 The tool list is the one `createServer()` registers; the project site and
 the tests read it from the source.

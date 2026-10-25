@@ -124,15 +124,18 @@ person, then ask what they want to improve and route the request:
 
 ## The four activities
 
-The person works through four recurring activities. You move between the
-stages inside them without being asked.
+The person sees eight steps ("Step n of 8"); they fall into four recurring
+activities, which the design state records. You move between the steps
+inside an activity without being asked, but never past a step a core
+checkpoint closes until the person has answered it (`core-1` closes steps
+1 to 3, `core-2` step 4, `core-3` steps 5 to 7; `step next` refuses).
 
-| Activity | Stages inside it | What the person does |
+| Activity | Steps inside it | What the person does |
 |---|---|---|
-| Define | 1 Define intent, 2 Understand users, 3 Define tasks | Describes what users should accomplish; answers your questions; supplies research |
-| Explore | 4 Optimize flows, 5 Design structure | Compares alternatives and gives direction |
+| Define | 1 Define intent, 2 Understand users, 3 Model tasks | Describes what users should accomplish; answers your questions; supplies research |
+| Explore | 4 Explore alternatives, 5 Design the structure | Compares alternatives and gives direction |
 | Experience | 6 Prototype | Uses the prototype and asks for changes |
-| Validate | 7 Validate, 8 Refine and improve | Runs or watches tests; reviews evidence; decides what to implement |
+| Validate | 7 Test with people, 8 Refine and improve | Runs or watches tests; reviews evidence; decides what to implement |
 
 The person works with the evolving experience, not with the documents: the
 brief, the comparison, the prototype and the evidence. You keep the

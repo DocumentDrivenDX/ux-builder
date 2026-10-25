@@ -100,12 +100,15 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
     const s = readState(a);
     assert.equal(s.reviews[0].item, "user:U-1");
     assert.equal(s.reviews[0].answer, "Yes, that's them");
+    // The approval records the content approved, as its hash, so a change shows.
+    assert.match(s.reviews[0].hash, /^[0-9a-f]{16,}$/);
     assert.deepEqual(s.feedback[0], { ...s.feedback[0], status: "addressed", response: "Context now says: on a phone at the river or in a kayak" });
     assert.ok(!ids(a).includes("user:U-1"));
     // Changed after approval: listed again, marked as changed.
     writeFileSync(join(a, "docs/ux-builder/users.md"), readFileSync(join(a, "docs/ux-builder/users.md"), "utf8").replace("| None known | J-1 high", "| Large touch targets | J-1 high"));
     const again = json(a, ["review"]).pending.find((p) => p.id === "user:U-1");
     assert.equal(again.changed, true);
+    assert.equal(readState(a).reviews[0].hash, s.reviews[0].hash, "the recorded approval keeps the content it approved");
     assert.match(cli(a, ["review"]).stdout, /step 2 {2}user:U-1 {2}Weekend anglers {2}\(changed since approved\)/);
   });
 
@@ -126,5 +129,27 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
     assert.equal(cli(a, ["state", "checkpoint", "core-2", "--skip", "--reason", "The person wants to see a prototype first"]).status, 0);
     approveAll(a, [4]);
     assert.equal(cli(a, ["state", "checkpoint", "core-2", "--answer", "Map"]).status, 0);
+    // core-3 waits for steps 5 to 7: here, the screens of step 5.
+    const c3 = cli(a, ["state", "checkpoint", "core-3", "--answer", "Yes"]);
+    assert.equal(c3.status, 2);
+    assert.match(c3.stderr, /checkpoint core-3 cannot be passed yet: \d+ items? await the person's review: screen:/);
+    approveAll(a, [5, 6, 7]);
+    assert.equal(cli(a, ["state", "checkpoint", "core-3", "--answer", "Yes"]).status, 0);
+  });
+
+  // @covers US-148-AC6
+  test("AC6: step does not move past a step a core checkpoint closes until it has passed or been skipped", () => {
+    const a = reviewApp();
+    for (const [to, id] of [["4", "core-1"], ["8", "core-1"]]) {
+      const r = cli(a, ["step", to]);
+      assert.equal(r.status, 2, to);
+      assert.match(r.stderr, new RegExp(`step ${to} is past checkpoint ${id}, which has not been asked`));
+    }
+    assert.equal(json(a, ["step", "3"]).step, 3, "within the checkpoint's steps, moving is free");
+    cli(a, ["state", "checkpoint", "core-1", "--answer", "Not yet", "--declined"]);
+    assert.match(cli(a, ["step", "4"]).stderr, /past checkpoint core-1, which the person answered no or not yet/);
+    assert.equal(cli(a, ["state", "checkpoint", "core-1", "--skip", "--reason", "Framed elsewhere"]).status, 0);
+    assert.equal(json(a, ["step", "4"]).step, 4);
+    assert.match(cli(a, ["step", "5"]).stderr, /past checkpoint core-2/);
   });
 });

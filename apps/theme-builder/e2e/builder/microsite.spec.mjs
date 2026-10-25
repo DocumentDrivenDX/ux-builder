@@ -150,7 +150,7 @@ test.describe("The public site", () => {
     }
     expect(await page.locator('[data-demo="wireframes"] img').count()).toBe(2);
     await expect(page.locator('[data-demo="check-blueprint"]').getByText("journey.covers-errors", { exact: true })).toBeVisible();
-    await expect(page.getByText("npx ux-builder-blueprint propose app.blueprint.json --out helix-proposals")).toBeVisible();
+    await expect(page.locator(".uxh-cmd code", { hasText: /^\$ npx ux-builder-blueprint propose$/ })).toBeVisible();
     expect(errors).toEqual([]);
   });
 

@@ -32,7 +32,7 @@ ddx:
 
 ## Context
 
-ADR-037 allows generated exploratory prototypes outside the app's source; ADR-025 decision 3 still holds for app code. `ux-builder-blueprint prototype --explore` writes `prototype/<alternative>/` from a blueprint alternative (CONTRACT-008).
+ADR-037 allows generated exploratory prototypes outside the app's source; ADR-025 decision 3 still holds for app code. `ux-builder-blueprint prototype --explore` writes `docs/ux-builder/prototypes/<alternative>/` from a blueprint alternative (CONTRACT-008).
 
 ## Walkthrough
 
@@ -43,26 +43,26 @@ ADR-037 allows generated exploratory prototypes outside the app's source; ADR-02
 
 ## Acceptance Criteria
 
-- [ ] **US-135-AC1** — Given a blueprint alternative that passes `blueprint check`, when `ux-builder-blueprint prototype --explore --alternative <name>` runs, then it writes `prototype/<name>/` with one page per screen rendering that screen's pattern with placeholder content, and every action links to its `to`.
+- [ ] **US-135-AC1** — Given a blueprint alternative that passes `blueprint check`, when `ux-builder-blueprint prototype --explore --alternative <name>` runs, then it writes `docs/ux-builder/prototypes/<name>/` with one page per screen rendering that screen's pattern with placeholder content, and every action links to its `to`.
 - [ ] **US-135-AC2** — Given a generated prototype page, when it is read, then it shows a switcher for each declared state and supported size class, a prototype banner, and the design question the alternative answers.
 - [ ] **US-135-AC3** — Given `--design-system` given twice for the same alternative, when `prototype --explore` runs, then it writes one prototype per design system for the same flow, each named by its design system.
-- [ ] **US-135-AC4** — Given an app source file that imports from `prototype/`, when lint runs with `ux-builder/no-prototype-import`, then it reports an error naming the import.
+- [ ] **US-135-AC4** — Given an app source file that imports from `docs/ux-builder/prototypes/`, when lint runs with `ux-builder/no-prototype-import`, then it reports an error naming the import.
 - [ ] **US-135-AC5** — Given notes the person gives after trying a prototype, when the guide records them with `ux-builder-design state set`, then the design state stores them as observations with `source: design-team`, never as user evidence.
 - [ ] **US-135-AC6** — Given an alternative whose blueprint has a check error, when `prototype --explore` runs, then it exits 1 naming the findings and writes nothing.
 
 ## Edge Cases
 
 - **A pattern the catalogue lacks**: the page shows a labelled box, as `blueprint wireframes` does.
-- **An answered question**: `prototype --explore --archive <name>` moves the folder under `prototype/.archive/`.
+- **An answered question**: `prototype --explore --archive <name>` moves the folder under `docs/ux-builder/prototypes/.archive/`.
 
 ## Test Scenarios
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-135-AC1 | a blueprint alternative that passes `blueprint check` | `ux-builder-blueprint prototype --explore --alternative <name>` runs | it writes `prototype/<name>/` with one page per screen rendering that screen's pattern with placeholder content, and every action links to its `to` |
+| AC1 | US-135-AC1 | a blueprint alternative that passes `blueprint check` | `ux-builder-blueprint prototype --explore --alternative <name>` runs | it writes `docs/ux-builder/prototypes/<name>/` with one page per screen rendering that screen's pattern with placeholder content, and every action links to its `to` |
 | AC2 | US-135-AC2 | a generated prototype page | it is read | it shows a switcher for each declared state and supported size class, a prototype banner, and the design question the alternative answers |
 | AC3 | US-135-AC3 | `--design-system` given twice for the same alternative | `prototype --explore` runs | it writes one prototype per design system for the same flow, each named by its design system |
-| AC4 | US-135-AC4 | an app source file that imports from `prototype/` | lint runs with `ux-builder/no-prototype-import` | it reports an error naming the import |
+| AC4 | US-135-AC4 | an app source file that imports from `docs/ux-builder/prototypes/` | lint runs with `ux-builder/no-prototype-import` | it reports an error naming the import |
 | AC5 | US-135-AC5 | notes the person gives after trying a prototype | the guide records them with `ux-builder-design state set` | the design state stores them as observations with `source: design-team`, never as user evidence |
 | AC6 | US-135-AC6 | an alternative whose blueprint has a check error | `prototype --explore` runs | it exits 1 naming the findings and writes nothing |
 

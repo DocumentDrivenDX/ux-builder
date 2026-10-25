@@ -181,7 +181,7 @@ function NewApp() {
         <li>The empty shell of its modalities, built only from SDK components</li>
         <li><code>npm run lint</code> (including the <code>ux-builder/ai-neutral-voice</code> warning) and <code>npm run audit</code>, and a CI workflow that runs the blueprint check, lint and the audit</li>
         <li><code>CLAUDE.md</code> and <code>AGENTS.md</code> pointing at the SDK's guidance, and the Claude Code skill <code>ux-builder-ui</code></li>
-        <li><code>app.blueprint.json</code>, the plan of the app's screens, and <code>npm run check:blueprint</code></li>
+        <li><code>docs/ux-builder/blueprint/app.blueprint.json</code>, the plan of the app's screens, and <code>npm run check:blueprint</code></li>
         <li><code>@ux-builder/design</code>, its skill and an empty design state, so <code>/ux-builder-design</code> can <a href={href("start", "design")}>guide the design</a> (<code>--mcp</code> also writes <code>.mcp.json</code>)</li>
         <li>HELIX, its documents, <code>ux-assessment.yml</code> and <code>e2e/starter.spec.js</code> (below)</li>
         <li>The episode trace (<code>@ux-builder/trace</code>): creating the app is its first episode, <code>npm run lint</code> records each run, and a Claude Code hook attaches each session's transcript (<a href={`${href("start", "agents")}#trace`}>below, for agents</a>)</li>
@@ -198,7 +198,7 @@ function NewApp() {
       <p>The app's <code>CLAUDE.md</code> and <code>AGENTS.md</code> give people and agents the same order of work:</p>
       <ol className="uxm-points">
         <li><b>Frame the requirement in HELIX first</b> (<code>/helix frame</code>, <code>/helix evolve</code>): a story with acceptance criteria, before any code.</li>
-        <li><b>Plan its screens</b> in <code>app.blueprint.json</code> and run <code>npm run check:blueprint</code>.</li>
+        <li><b>Plan its screens</b> in <code>docs/ux-builder/blueprint/app.blueprint.json</code> and run <code>npm run check:blueprint</code>.</li>
         <li><b>Build each screen</b> from its pattern inside a <code>Page</code>, within the app's <code>AppShell</code>.</li>
         <li><b>Cite the story's criteria in its tests</b> (<code>// @covers US-&lt;n&gt;-AC&lt;m&gt;</code>), then run <code>npm run lint</code>, <code>npm run test:e2e</code> and <code>npm run audit</code>.</li>
         <li><b>Assess the UX</b>: <code>npm run assess:validate</code>, then the <code>ux-builder-assess</code> skill (<a href={href("start", "assess")}>Assess an app's UX</a>).</li>
@@ -213,7 +213,7 @@ function NewApp() {
       <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme ux-builder-databricks --helix-offline" />
       <p>The HELIX request reads <code>GITHUB_TOKEN</code> if it is set (never written) and honours <code>HTTPS_PROXY</code>, <code>HTTP_PROXY</code> and <code>NO_PROXY</code>.</p>
       <H2 id="plan">Plan the screens first</H2>
-      <p>Before building a screen, add it to <code>app.blueprint.json</code>: its pattern, its actions and where each leads, what it deletes and how that is safeguarded, its states, its modals, and what AI does on it, if anything. The check holds the plan to the interaction rules (navigation for the space available, one modal at a time, safeguards, states, flows and journeys) before any code exists. To start from your own plan:</p>
+      <p>Before building a screen, add it to the blueprint, <code>docs/ux-builder/blueprint/app.blueprint.json</code>: its pattern, its actions and where each leads, what it deletes and how that is safeguarded, its states, its modals, and what AI does on it, if anything. The check holds the plan to the interaction rules (navigation for the space available, one modal at a time, safeguards, states, flows and journeys) before any code exists. To start from your own plan:</p>
       <Command text="npm create @ux-builder/app my-app -- --blueprint plan.json" />
       <p>A plan with an error is refused, with each error, and nothing is written. <a href={href("concepts", "flows-journeys")}>Flows and journeys</a> explains the plan's model.</p>
       <Affiliation />
@@ -239,7 +239,7 @@ function ExistingApp() {
       <H2 id="rules">Adopt the interaction rules</H2>
       <p>Describe the screens you already have, check the plan, and let the audit fail only on what is new:</p>
       <Command text="npx ux-builder-blueprint init" />
-      <Command text="npx ux-builder-blueprint check app.blueprint.json" />
+      <Command text="npx ux-builder-blueprint check" />
       <Command text="npx ux-builder-audit --write-baseline audit-baseline.json http://localhost:4173/" />
       <Command text="npx ux-builder-audit --baseline audit-baseline.json http://localhost:4173/" />
       <p>Commit the blueprint and the baseline. Findings you fix show as resolved, so the baseline only shrinks. If the app is governed by HELIX, <a href={href("start", "assess")}>assess its UX</a> next.</p>
@@ -446,9 +446,9 @@ function Ci() {
       <p>The report opens with two verdicts: the <b>theme</b> (applied, SDK components only, contrast in light and dark) and the <b>fit of each modality</b> (the components it needs, and whether its rule families were checked). The modalities come from the blueprint, else <code>--modality</code>, and choose the widths and checks that run. With <code>--blueprint</code> and its journeys, the report then follows each journey step by step, with each screen's screenshot and its findings drawn on it.</p>
       <H2 id="ai-checks">The AI checks</H2>
       <p>{AI_AUDIT_CHECKS.length} checks look only at AI markup (<code>data-piq-ai</code> and its companions), which the SDK's assistant components and Adaptive Cards emit and an app's own AI UI adds, so a page without it gets no AI finding: {AI_AUDIT_CHECKS.map((c, i) => <Fragment key={c}>{i ? ", " : ""}<code>{c}</code></Fragment>)}. With <code>--blueprint app.blueprint.json</code>, a screen showing AI markup must declare an AI role, and its roles select the agent checks.</p>
-      <Command text="npx ux-builder-audit --blueprint app.blueprint.json --width 390 --width 1280 http://localhost:4173/" />
+      <Command text="npx ux-builder-audit --blueprint docs/ux-builder/blueprint/app.blueprint.json --width 390 --width 1280 http://localhost:4173/" />
       <H2 id="blueprint">The blueprint check</H2>
-      <Command text="npx ux-builder-blueprint check app.blueprint.json" />
+      <Command text="npx ux-builder-blueprint check" />
       <p>It exits 1 on an error. In an existing app, <code>--baseline</code> lets the audit fail only on new findings.</p>
       <Cite ids={["FEAT-004", "FEAT-008", "FEAT-011", "FEAT-014", "FEAT-015", "CONTRACT-005"]} />
     </>
@@ -681,8 +681,8 @@ function FlowsJourneys() {
       <BlueprintCheckDemo />
       <H2 id="draw">Drawn from the blueprint</H2>
       <p><code>draw</code> writes an IA map, the flow and one diagram per journey, as Mermaid and as SVG, byte for byte the same for the same blueprint. <code>wireframes</code> renders each screen's pattern with placeholder content, in the neutral <code>plain</code> theme, at each supported size class, as HTML and PNG; the SDK's real components draw it, so a wireframe is the layout the app will get. These were made from the sample by those commands:</p>
-      <Command text="npx ux-builder-blueprint draw app.blueprint.json" />
-      <Command text="npx ux-builder-blueprint wireframes app.blueprint.json" />
+      <Command text="npx ux-builder-blueprint draw" />
+      <Command text="npx ux-builder-blueprint wireframes" />
       <FlowDiagram />
       <details className="uxm-details"><summary>The flow as Mermaid</summary><Command code text={FLOW_MERMAID.trim()} /></details>
       <Wireframes />
@@ -695,7 +695,7 @@ function FlowsJourneys() {
         <li>the design system's navigation table, destinations by size class;</li>
         <li>test plan scenarios, from steps and alternates.</li>
       </ul>
-      <Command text="npx ux-builder-blueprint propose app.blueprint.json --out helix-proposals" />
+      <Command text="npx ux-builder-blueprint propose" />
       <p>Drafts follow the installed HELIX's templates and leave a person's text alone. Where a HELIX document already says something different, the proposal is a reported disagreement, not a rewrite. Over MCP, <code>propose_from_blueprint</code> does the same without writing anything.</p>
       <H2 id="assessment">One journey, not three copies</H2>
       <p>The UX assessment's manifest can name a blueprint journey instead of restating it, so the story, the plan and the walk share one definition: <code>{"{ blueprint: J-review, role: reviewer, priority: critical }"}</code>. <a href={href("start", "assess")}>Assess an app's UX</a> shows the rest.</p>

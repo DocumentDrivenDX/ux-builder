@@ -73,6 +73,8 @@ test the concept in ux-builder before asking HELIX for anything.
    Choosing one copies it to `app.blueprint.json`; the design state records
    which was chosen and why the others were rejected.
 
+*[Amended 2026-10-24 — FEAT-018 GDL-80, CONTRACT-008 Layout]* The decision stands; the paths moved. The design documents (here `docs/ux/`) are now in `docs/ux-builder/`, and the blueprint and its alternatives (here `app.blueprint.json` and `app.blueprint.<name>.json` at the app's top) in `docs/ux-builder/blueprint/`. An app not yet migrated keeps the old paths until `ux-builder-design migrate`.
+
 ## Alternatives Considered
 
 | Option | Evaluation |

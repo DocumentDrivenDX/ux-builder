@@ -34,7 +34,7 @@ ADR-036 puts the guide in a new dev dependency, `@ux-builder/design`, with the `
 
 ## Walkthrough
 
-1. The developer runs `npm create @ux-builder/app river-path`.
+1. The developer runs `npm create @ux-builder/app river-path -- --modality responsive-web` (without `--modality`, a design folder: US-150).
 2. The starter adds `@ux-builder/design`, installs the skill into `.claude/skills/ux-builder-design/` and writes an empty design state.
 3. `CLAUDE.md`, `AGENTS.md` and the empty Home panel say to start with `/ux-builder-design`.
 4. The developer opens Claude Code and types `/ux-builder-design`; the guide starts at Define.
@@ -43,9 +43,9 @@ ADR-036 puts the guide in a new dev dependency, `@ux-builder/design`, with the `
 
 - [ ] **US-114-AC1** — Given a new app created with `npm create @ux-builder/app`, when its `package.json` and `.claude/skills/` are read, then `@ux-builder/design` is a dev dependency and `.claude/skills/ux-builder-design/SKILL.md` exists.
 - [ ] **US-114-AC2** — Given a new app, when `.ux-builder/design-state.json` is read, then it validates against `design-state.schema.json`, its activity is `define`, and it has no checkpoints, assumptions or alternatives.
-- [ ] **US-114-AC3** — Given a new app, when its `CLAUDE.md`, `AGENTS.md` and the starter's Home screen are read, then each names `/ux-builder-design` as the way to start designing.
+- [ ] **US-114-AC3** — Given a new app, when its `CLAUDE.md`, `AGENTS.md` and the starter's Home screen are read, then each names `/ux-builder-design` as the way to start designing. *[Amended 2026-10-25 — alignment, GDL-79/GDL-81]* This is the app made with `--modality`; a design folder (no `--modality`) names it in its `CLAUDE.md`, `AGENTS.md` and `README.md`.
 - [ ] **US-114-AC4** — Given a new app created without `--mcp`, when its files are listed, then no `.mcp.json` is written; with `--mcp`, `.mcp.json` names the ux-builder MCP server started with `npx @ux-builder/mcp`.
-- [ ] **US-114-AC5** — Given the installed skill, when its text is read, then it names the eight capabilities and the four activities (Define, Explore, Experience, Validate) and tells the agent to open each session with the design state's summary.
+- [ ] **US-114-AC5** — Given the installed skill, when its text is read, then it names the eight capabilities and the four activities (Define, Explore, Experience, Validate) and tells the agent to open each session with the design state's summary. *[Amended 2026-10-25 — alignment, GDL-79/GDL-81]* It also lays out the eight steps the person sees ("Step n of 8"), which the four activities group.
 - [ ] **US-114-AC6** — Given `@ux-builder/design`'s `package.json`, when its dependencies are read, then they are `@ux-builder/ui`, `@ux-builder/audit`, `@ux-builder/trace` and libraries that make no network call, and `npm run licences` passes.
 
 ## Edge Cases

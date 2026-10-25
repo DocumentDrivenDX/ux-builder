@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
@@ -35,9 +35,11 @@ const BP = {
   journeys: [{ id: "J-review", story: "US-001", entry: "queue", steps: [{ screen: "queue", action: "open" }, { screen: "entry" }] }],
 };
 /* A walked run: J-review went through queue and entry. */
-function walked() {
+function walked({ layout = "legacy" } = {}) {
   const p = pkg();
-  writeFileSync(join(p.r.dir, "app.blueprint.json"), JSON.stringify(BP));
+  // The blueprint where the app's layout keeps it: at the top (an app not yet migrated) or under docs/ux-builder/ (FEAT-018 GDL-80).
+  if (layout === "current") mkdirSync(join(p.r.dir, "docs/ux-builder/blueprint"), { recursive: true });
+  writeFileSync(join(p.r.dir, layout === "current" ? "docs/ux-builder/blueprint/app.blueprint.json" : "app.blueprint.json"), JSON.stringify(BP));
   p.write("walkthrough.json", { schema: "walkthrough", version: 1, journeys: [{ id: "J-review", status: "completed", steps: [
     { n: 1, action: "open the queue", screen: "queue", status: "done" },
     { n: 2, action: "open the first entry", screen: "entry", status: "done" },
@@ -96,6 +98,19 @@ describe("US-138: the assessment runs a heuristic inspection pass", () => {
     rec.entries = rec.entries.filter((e) => !(e.screen === "queue" && e.heuristic === "help"));
     p.write("heuristics.json", rec);
     assert.ok(validateReport(p.dir).some((x) => x.message.startsWith("queue × help has no entry")));
+  });
+
+  // @covers US-138-AC1
+  // @covers US-138-AC3
+  test("in an app on the docs/ux-builder/ layout, the heuristic pass and the hierarchy check find the blueprint there", () => {
+    const p = walked({ layout: "current" });
+    const start = audits(p, "heuristics", p.dir);
+    assert.equal(start.status, 0, start.stderr);
+    assert.match(start.stdout, /2 walked screens × 13 heuristics; 26 to record; not inspected: settings/);
+    writeFileSync(join(p.r.dir, "entry.html"), `<main data-piq-screen="entry"><h2>Requester</h2><h2>Amount</h2><h2>History</h2></main>`);
+    const out = audits(p, "hierarchy", "--page", "entry.html");
+    assert.equal(out.status, 1, out.stderr);
+    assert.match(out.stdout, /^entry: "Requester" is shown before "Amount"/);
   });
 
   // @covers US-138-AC3

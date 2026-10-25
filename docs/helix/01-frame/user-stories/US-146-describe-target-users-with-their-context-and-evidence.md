@@ -28,7 +28,7 @@ ddx:
 
 ## Context
 
-Until now target users were one-line points in the brief, and the PRD's personas were read in beside them; nothing linked a user to the jobs, tasks, tests or findings about them. The same job can matter more to one user than another, and a user's context (one hand on a phone at the riverbank) changes the design. This story makes target users records in `docs/ux/users.md`, rated like jobs, and connects them to the rest of the loop. They are evidence-backed segments, not personas with invented biographies.
+Until now target users were one-line points in the brief, and the PRD's personas were read in beside them; nothing linked a user to the jobs, tasks, tests or findings about them. The same job can matter more to one user than another, and a user's context (one hand on a phone at the riverbank) changes the design. This story makes target users records in `docs/ux-builder/users.md`, rated like jobs, and connects them to the rest of the loop. They are evidence-backed segments, not personas with invented biographies.
 
 ## Walkthrough
 
@@ -41,7 +41,7 @@ Until now target users were one-line points in the brief, and the PRD's personas
 
 ## Acceptance Criteria
 
-- [ ] **US-146-AC1** — Given a `docs/ux/users.md` written from the template, when `ux-builder-design validate` runs, then it checks every row has a unique `U-<n>` ID, a user, a context, jobs with an importance each, evidence, a confidence and a status; confidence above low needs at least one evidence source, and a hypothesis cites none.
+- [ ] **US-146-AC1** — Given a `docs/ux-builder/users.md` written from the template, when `ux-builder-design validate` runs, then it checks every row has a unique `U-<n>` ID, a user, a context, jobs with an importance each, evidence, a confidence and a status; confidence above low needs at least one evidence source, and a hypothesis cites none.
 - [ ] **US-146-AC2** — Given a user row citing a job `jobs.md` lacks, or an evidence source that does not exist, when `validate` runs, then it exits 1 naming the user and the missing ID.
 - [ ] **US-146-AC3** — Given `users.md`, when `ux-builder-design brief` runs, then the brief's Target users lists each user with its context and status, from `users.md` alone (not the PRD's personas or separate user points).
 - [ ] **US-146-AC4** — Given a task whose `users` cites a user `users.md` lacks, when `validate` runs, then it exits 1 naming the task and the ID; a task citing a low-confidence user gets a warning.
@@ -57,7 +57,7 @@ Until now target users were one-line points in the brief, and the PRD's personas
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-146-AC1 | a `docs/ux/users.md` written from the template | `ux-builder-design validate` runs | every row's fields are checked, with the jobs table's evidence rules |
+| AC1 | US-146-AC1 | a `docs/ux-builder/users.md` written from the template | `ux-builder-design validate` runs | every row's fields are checked, with the jobs table's evidence rules |
 | AC2 | US-146-AC2 | a user citing a missing job or evidence source | `validate` runs | it exits 1 naming the user and the missing ID |
 | AC3 | US-146-AC3 | `users.md` | `brief` runs | Target users lists each user with context and status, from `users.md` alone |
 | AC4 | US-146-AC4 | a task citing an unknown or low-confidence user | `validate` runs | exit 1 naming task and ID; a warning for a low-confidence user |

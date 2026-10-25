@@ -54,6 +54,8 @@ anything is written, using the trace's masking.
    observation or an agent recommendation; agent claims about users stay
    *hypothesis* until evidence supports them.
 
+*[Amended 2026-10-24 — FEAT-018 GDL-80, CONTRACT-008 Layout]* The decision stands; evidence (here `docs/ux/evidence/`) is now in `docs/ux-builder/evidence/`.
+
 ## Alternatives Considered
 
 | Option | Evaluation |

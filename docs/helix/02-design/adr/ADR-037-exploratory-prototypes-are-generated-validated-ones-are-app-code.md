@@ -64,6 +64,8 @@ framework": apps own their screens' content, data, routing and logic.
    patterns, not screens; the only screens it generates are disposable
    exploratory ones.
 
+*[Amended 2026-10-24 — FEAT-018 GDL-80, CONTRACT-008 Layout]* The decision stands; exploratory prototypes (here `prototype/<alternative>/`) are now written to `docs/ux-builder/prototypes/<alternative>/`, and the lint rule refuses imports from either folder.
+
 ## Alternatives Considered
 
 | Option | Evaluation |

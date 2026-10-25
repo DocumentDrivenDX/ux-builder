@@ -46,7 +46,7 @@ The guide runs observe → diagnose → hypothesize → design → test → meas
 
 - [ ] **US-145-AC1** — Given an insight and a new blueprint alternative, when the guide records the diagnosis, then the design state holds the observation, at least two explanations, the hypothesis and the alternative, linked to the insight.
 - [ ] **US-145-AC2** — Given no answered `experiment` checkpoint for the decision, when `experiment start` runs, then it refuses and names the checkpoint.
-- [ ] **US-145-AC3** — Given an answered checkpoint, when `experiment start --decision UXD-<n> --variant <alt> --metric <m> --guardrail <m> --duration <days>` runs, then it writes `docs/ux/experiments/EXP-<n>.md` with the variant, metric, guardrails and duration, and lists the experiment as running in the design state.
+- [ ] **US-145-AC3** — Given an answered checkpoint, when `experiment start --decision UXD-<n> --variant <alt> --metric <m> --guardrail <m> --duration <days>` runs, then it writes `docs/ux-builder/experiments/EXP-<n>.md` with the variant, metric, guardrails and duration, and lists the experiment as running in the design state.
 - [ ] **US-145-AC4** — Given a fixture result file, when `experiment end --result <file>` runs, then it compares task success and each guardrail, records the result against the hypothesis, and asks the `release` checkpoint.
 - [ ] **US-145-AC5** — Given an experiment whose metrics are new, when it starts, then metric definitions are written only as `propose` patches to HELIX's metric-definition documents.
 
@@ -60,7 +60,7 @@ The guide runs observe → diagnose → hypothesize → design → test → meas
 |----------|-------|---------------|--------|-----------------|
 | AC1 | US-145-AC1 | an insight and a new blueprint alternative | the guide records the diagnosis | the design state holds the observation, at least two explanations, the hypothesis and the alternative, linked to the insight |
 | AC2 | US-145-AC2 | no answered `experiment` checkpoint for the decision | `experiment start` runs | it refuses and names the checkpoint |
-| AC3 | US-145-AC3 | an answered checkpoint | `experiment start --decision UXD-<n> --variant <alt> --metric <m> --guardrail <m> --duration <days>` runs | it writes `docs/ux/experiments/EXP-<n>.md` with the variant, metric, guardrails and duration, and lists the experiment as running in the design state |
+| AC3 | US-145-AC3 | an answered checkpoint | `experiment start --decision UXD-<n> --variant <alt> --metric <m> --guardrail <m> --duration <days>` runs | it writes `docs/ux-builder/experiments/EXP-<n>.md` with the variant, metric, guardrails and duration, and lists the experiment as running in the design state |
 | AC4 | US-145-AC4 | a fixture result file | `experiment end --result <file>` runs | it compares task success and each guardrail, records the result against the hypothesis, and asks the `release` checkpoint |
 | AC5 | US-145-AC5 | an experiment whose metrics are new | it starts | metric definitions are written only as `propose` patches to HELIX's metric-definition documents |
 

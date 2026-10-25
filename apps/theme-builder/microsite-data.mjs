@@ -220,6 +220,7 @@ export const NOTES = {
   "@ux-builder/trace ./schema/*": "The JSON Schemas of a trace event, the export bundle and .ux-builder/config.json",
   "@ux-builder/trace ./package.json": "The package's own metadata",
   "@ux-builder/design .": "The guided design loop's commands as functions, from init and the design state to brief, rubric, test-kit, report, insights and experiments (ux-builder-design)",
+  "@ux-builder/design ./artifacts/*": "The design document types: each one's meta.yml, template, prompt and example, as validate reads them (docs/ux-builder/)",
   "@ux-builder/design ./schema/*": "The JSON Schema of the design state, .ux-builder/design-state.json",
   "@ux-builder/design ./package.json": "The package's own metadata",
 };

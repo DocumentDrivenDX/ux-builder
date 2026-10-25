@@ -30,7 +30,7 @@ ddx:
 
 ## Context
 
-In stage 1 a decision is `docs/ux/decisions/UXD-<n>.md`, written by `ux-builder-design decision add` from the interaction decision record template. Its validation status is `not-tested`, `tested` or `refuted`, with the validation it requires. In stage 2 it maps to a HELIX ADR or *Solution Approaches* (H-3).
+In stage 1 a decision is `docs/ux-builder/decisions/UXD-<n>.md`, written by `ux-builder-design decision add` from the interaction decision record template. Its validation status is `not-tested`, `tested` or `refuted`, with the validation it requires. In stage 2 it maps to a HELIX ADR or *Solution Approaches* (H-3).
 
 ## Walkthrough
 
@@ -41,7 +41,7 @@ In stage 1 a decision is `docs/ux/decisions/UXD-<n>.md`, written by `ux-builder-
 
 ## Acceptance Criteria
 
-- [ ] **US-131-AC1** — Given the question, at least two alternatives, the choice, the rationale, the assumptions and the required validation, when `ux-builder-design decision add` runs, then it writes `docs/ux/decisions/UXD-<n>.md` with the next free number, every field, and status `not-tested`.
+- [ ] **US-131-AC1** — Given the question, at least two alternatives, the choice, the rationale, the assumptions and the required validation, when `ux-builder-design decision add` runs, then it writes `docs/ux-builder/decisions/UXD-<n>.md` with the next free number, every field, and status `not-tested`.
 - [ ] **US-131-AC2** — Given `decision add` with fewer than two alternatives or a choice not among them, when it runs, then it exits 2 (bad input, CONTRACT-008) naming the problem and writes nothing.
 - [ ] **US-131-AC3** — Given UXD-1, when `ux-builder-design decision status UXD-1 refuted --evidence UER-1` runs, then the record's status becomes `refuted` with the evidence ID and date, and its history keeps the earlier status.
 - [ ] **US-131-AC4** — Given a decision record, when `ux-builder-design validate` runs, then it checks the frontmatter links to the HELIX documents it relates to and that the status is one of the three values.
@@ -49,13 +49,13 @@ In stage 1 a decision is `docs/ux/decisions/UXD-<n>.md`, written by `ux-builder-
 
 ## Edge Cases
 
-- **No HELIX marker**: the record links only `docs/ux/` documents.
+- **No HELIX marker**: the record links only `docs/ux-builder/` documents.
 
 ## Test Scenarios
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-131-AC1 | the question, at least two alternatives, the choice, the rationale, the assumptions and the required validation | `ux-builder-design decision add` runs | it writes `docs/ux/decisions/UXD-<n>.md` with the next free number, every field, and status `not-tested` |
+| AC1 | US-131-AC1 | the question, at least two alternatives, the choice, the rationale, the assumptions and the required validation | `ux-builder-design decision add` runs | it writes `docs/ux-builder/decisions/UXD-<n>.md` with the next free number, every field, and status `not-tested` |
 | AC2 | US-131-AC2 | `decision add` with fewer than two alternatives or a choice not among them | it runs | it exits 2 (bad input, CONTRACT-008) naming the problem and writes nothing |
 | AC3 | US-131-AC3 | UXD-1 | `ux-builder-design decision status UXD-1 refuted --evidence UER-1` runs | the record's status becomes `refuted` with the evidence ID and date, and its history keeps the earlier status |
 | AC4 | US-131-AC4 | a decision record | `ux-builder-design validate` runs | it checks the frontmatter links to the HELIX documents it relates to and that the status is one of the three values |

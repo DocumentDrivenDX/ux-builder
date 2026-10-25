@@ -45,7 +45,7 @@ CONTRACT-008 amends CONTRACT-006: `assess heuristics` records a pass over Nielse
 - [ ] **US-138-AC1** — Given a run on a fixture app, when `assess heuristics` runs and the agent records its results, then the run's records hold an entry for every heuristic in the pass for every walked screen, each a finding or `checked: no finding`.
 - [ ] **US-138-AC2** — Given a record missing a heuristic for a walked screen, when `assess validate-report` runs, then it fails naming the screen and the heuristic.
 - [ ] **US-138-AC3** — Given a screen whose content order differs from its declared `screens[].content`, when the information-hierarchy check runs, then it reports a finding naming the first content out of order.
-- [ ] **US-138-AC4** — Given an exploratory prototype served from `prototype/<name>/`, when the assessment runs against it, then it inspects the prototype's pages like the app's, matched by `data-piq-screen`.
+- [ ] **US-138-AC4** — Given an exploratory prototype served from `docs/ux-builder/prototypes/<name>/`, when the assessment runs against it, then it inspects the prototype's pages like the app's, matched by `data-piq-screen`.
 
 ## Edge Cases
 
@@ -58,7 +58,7 @@ CONTRACT-008 amends CONTRACT-006: `assess heuristics` records a pass over Nielse
 | AC1 | US-138-AC1 | a run on a fixture app | `assess heuristics` runs and the agent records its results | the run's records hold an entry for every heuristic in the pass for every walked screen, each a finding or `checked: no finding` |
 | AC2 | US-138-AC2 | a record missing a heuristic for a walked screen | `assess validate-report` runs | it fails naming the screen and the heuristic |
 | AC3 | US-138-AC3 | a screen whose content order differs from its declared `screens[].content` | the information-hierarchy check runs | it reports a finding naming the first content out of order |
-| AC4 | US-138-AC4 | an exploratory prototype served from `prototype/<name>/` | the assessment runs against it | it inspects the prototype's pages like the app's, matched by `data-piq-screen` |
+| AC4 | US-138-AC4 | an exploratory prototype served from `docs/ux-builder/prototypes/<name>/` | the assessment runs against it | it inspects the prototype's pages like the app's, matched by `data-piq-screen` |
 
 ## Dependencies
 

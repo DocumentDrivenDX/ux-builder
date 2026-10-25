@@ -32,7 +32,7 @@ ddx:
 
 ## Context
 
-`ux-builder-design insights` reads files the owner exports and writes `docs/ux/insights/INS-<date>.md` (CONTRACT-008). It fetches nothing (ADR-038).
+`ux-builder-design insights` reads files the owner exports and writes `docs/ux-builder/insights/INS-<date>.md` (CONTRACT-008). It fetches nothing (ADR-038).
 
 ## Walkthrough
 
@@ -43,7 +43,7 @@ ddx:
 
 ## Acceptance Criteria
 
-- [ ] **US-144-AC1** — Given a fixture event export, when `ux-builder-design insights <events.jsonl>` runs, then it writes `docs/ux/insights/INS-<date>.md` with completion, abandonment points, failed searches, feature use and time per step for each journey.
+- [ ] **US-144-AC1** — Given a fixture event export, when `ux-builder-design insights <events.jsonl>` runs, then it writes `docs/ux-builder/insights/INS-<date>.md` with completion, abandonment points, failed searches, feature use and time per step for each journey.
 - [ ] **US-144-AC2** — Given events naming a journey the blueprint no longer has, when insights run, then they are reported as unmatched, not dropped.
 - [ ] **US-144-AC3** — Given `--support` and `--feedback` files, when insights run, then their entries are masked and linked to the journeys they mention, as evidence sources.
 - [ ] **US-144-AC4** — Given an insights run, when it completes, then its findings are added to the evidence store, and the jobs table's confidence and the rubric's observed column cite them.
@@ -57,7 +57,7 @@ ddx:
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-144-AC1 | a fixture event export | `ux-builder-design insights <events.jsonl>` runs | it writes `docs/ux/insights/INS-<date>.md` with completion, abandonment points, failed searches, feature use and time per step for each journey |
+| AC1 | US-144-AC1 | a fixture event export | `ux-builder-design insights <events.jsonl>` runs | it writes `docs/ux-builder/insights/INS-<date>.md` with completion, abandonment points, failed searches, feature use and time per step for each journey |
 | AC2 | US-144-AC2 | events naming a journey the blueprint no longer has | insights run | they are reported as unmatched, not dropped |
 | AC3 | US-144-AC3 | `--support` and `--feedback` files | insights run | their entries are masked and linked to the journeys they mention, as evidence sources |
 | AC4 | US-144-AC4 | an insights run | it completes | its findings are added to the evidence store, and the jobs table's confidence and the rubric's observed column cite them |
