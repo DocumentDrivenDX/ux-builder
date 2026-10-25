@@ -16,7 +16,7 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: { baseURL: "http://127.0.0.1:5190", viewport: { width: 1360, height: 900 } },
-  webServer: { command: "node e2e/serve.mjs", url: "http://127.0.0.1:5190/api/context", reuseExistingServer: false, timeout: 60_000, cwd: new URL("..", import.meta.url).pathname },
+  webServer: { stdout: "pipe", command: "node e2e/serve.mjs", url: "http://127.0.0.1:5190/api/context", reuseExistingServer: false, timeout: 60_000, cwd: new URL("..", import.meta.url).pathname },
   projects: [
     { name: "builder", testMatch: /e2e\/builder\/.*\.spec\.mjs$/ },
     { name: "client", testMatch: /e2e\/client\/.*\.spec\.mjs$/, dependencies: ["builder"] },
