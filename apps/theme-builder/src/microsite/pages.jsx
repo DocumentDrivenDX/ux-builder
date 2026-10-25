@@ -159,14 +159,20 @@ const HELIX_OPTIONS = [
 function NewApp() {
   return (
     <>
-      <p className="uxm-lede">One command gives you a React + Vite app that wears a theme from its first commit, is governed by HELIX, and has lint, the audit, a browser test and CI already wired up.</p>
-      <H2 id="create">Create the app</H2>
+      <p className="uxm-lede">One command gives you a React + Vite app that wears a theme from its first commit, is governed by HELIX, and has lint, the audit, a browser test and CI already wired up. Or start with the design, and build the app when the design is ready.</p>
+      <H2 id="design-first">Design first, the app last</H2>
+      <p>Without <code>--modality</code>, the starter makes a design folder and asks nothing: the guided design, a starting blueprint and HELIX's skill, with no app code. The modality is asked during the design, the theme when the app is built.</p>
+      <Command text="npm create @ux-builder/app@latest trip-planner" />
+      <Command text="cd trip-planner && npm install" />
+      <p>In Claude Code, type <code>/ux-builder-design</code> to <a href={href("start", "design")}>start the design</a>. When it is ready, the guide asks for the theme (a released one, or one you make from your brand in the <a href={href("start", "theme-from-logo")}>theme builder</a>) and builds the app in the same folder, from the recorded modality and the designed blueprint, keeping every design document:</p>
+      <Command text="npm create @ux-builder/app@latest . -- --theme ux-builder-databricks" />
+      <H2 id="create">Create the app at once</H2>
       <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme ux-builder-databricks" />
       <Command text="cd my-app && npm install && npm run dev" />
       <H2 id="modalities">Choose its modalities</H2>
-      <p><code>--modality</code> says what the app is, and the starter builds that shell from SDK components, with no sample data. Name several, comma-separated, for an <code>AppShell</code> with one destination per modality. In a terminal, without it, the starter asks; without one (an agent, CI) it is required, and nothing is written without it.</p>
+      <p><code>--modality</code> says what the app is, and the starter builds that shell from SDK components, with no sample data. Name several, comma-separated, for an <code>AppShell</code> with one destination per modality. Without it, the starter makes a design folder instead (above).</p>
       <DataTable caption="Modalities" rowKey="modality" columns={[{ key: "modality", label: "Modality", render: (r) => <code>{r.modality}</code> }, { key: "starts", label: "The app starts as", render: (r) => <Md>{r.starts}</Md> }]} rows={MODALITIES} />
-      <p>The modalities are recorded in <code>app.blueprint.json</code> as <code>supports.modalities</code>. They choose the rules the blueprint check applies and the widths and checks the audit runs, and the app's <code>AGENTS.md</code> names the components and rule families for each. Native iOS, Android, macOS and Windows apps are future modalities and are refused.</p>
+      <p>The modalities are recorded in the blueprint, <code>docs/ux-builder/blueprint/app.blueprint.json</code>, as <code>supports.modalities</code>. They choose the rules the blueprint check applies and the widths and checks the audit runs, and the app's <code>AGENTS.md</code> names the components and rule families for each. Native iOS, Android, macOS and Windows apps are future modalities and are refused.</p>
       <H2 id="inside">What's inside</H2>
       <ul>
         <li>The theme's CSS and fonts, and <code>ThemeProvider</code> with a light, auto and dark switch</li>
@@ -203,7 +209,7 @@ function NewApp() {
       </ul>
       <H2 id="helix-options">HELIX options</H2>
       <DataTable caption="HELIX options" rowKey="option" columns={[{ key: "option", label: "Option", render: (r) => <code>{r.option}</code> }, { key: "effect", label: "Effect", render: (r) => <Md>{r.effect}</Md> }]} rows={HELIX_OPTIONS} />
-      <Command text="npm create @ux-builder/app my-app -- --theme ux-builder-databricks --helix-offline" />
+      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme ux-builder-databricks --helix-offline" />
       <p>The HELIX request reads <code>GITHUB_TOKEN</code> if it is set (never written) and honours <code>HTTPS_PROXY</code>, <code>HTTP_PROXY</code> and <code>NO_PROXY</code>.</p>
       <H2 id="plan">Plan the screens first</H2>
       <p>Before building a screen, add it to <code>app.blueprint.json</code>: its pattern, its actions and where each leads, what it deletes and how that is safeguarded, its states, its modals, and what AI does on it, if anything. The check holds the plan to the interaction rules (navigation for the space available, one modal at a time, safeguards, states, flows and journeys) before any code exists. To start from your own plan:</p>
@@ -326,7 +332,9 @@ function Design() {
       <p className="uxm-lede">An AI agent leads you through designing the simplest experience that works, and stops for your decision at each checkpoint. You work with the experience itself (the brief, the comparison, the prototype, the evidence); the agent keeps the documents behind it up to date.</p>
       <p>The agent does the reasoning: interviewing, proposing hypotheses, drafting alternatives, judging designs, diagnosing problems. <code>@ux-builder/design</code> does the deterministic work through the <code>ux-builder-design</code> command: the design state, scores, comparisons, prototypes, test kits and reports. Its standing objective is the minimum interaction that lets the intended user reach the intended outcome, and it challenges every addition before making it.</p>
       <H2 id="start">Start</H2>
-      <p>A new app has it already: <a href={href("start", "new-app")}>create the app</a>, then in Claude Code type <code>/ux-builder-design</code>. In an existing app:</p>
+      <p>Start before there is an app: the starter makes a design folder with the guide and no app code, and asks nothing. The modality is asked during the design; when the design is ready, the guide asks for the theme and <a href={`${href("start", "new-app")}#design-first`}>builds the app in the same folder</a>.</p>
+      <Command text="npm create @ux-builder/app@latest trip-planner" />
+      <p>Then <code>npm install</code>, and in Claude Code type <code>/ux-builder-design</code>. An app made with <code>--modality</code> has the guide too. In an existing app:</p>
       <Command text="npm install -D @ux-builder/design" />
       <Command text="npx ux-builder-design init" />
       <p><code>init</code> installs the skill in <code>.claude/skills/ux-builder-design/</code> and an empty design state, <code>.ux-builder/design-state.json</code>, committed with the app. An existing app's first session starts at <b>Baseline</b>: the agent drafts <code>docs/ux/baseline.md</code> from its blueprint, its HELIX stories and its latest assessment, each point marked current state, assumed, then asks what to improve. Each session opens with <code>ux-builder-design status</code>: where the loop is, what is chosen, what is untested, and the next step.</p>

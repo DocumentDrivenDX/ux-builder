@@ -1,0 +1,15 @@
+{
+  "name": "__APP_NAME__",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "design": "ux-builder-design status",
+    "check:blueprint": "ux-builder-blueprint check docs/ux-builder/blueprint/app.blueprint.json",
+    "postinstall": "node scripts/install-skill.mjs"
+  },
+  "devDependencies": {
+    "@ux-builder/design": "__DESIGN__",
+    "@ux-builder/ui": "__UI__"
+  }
+}

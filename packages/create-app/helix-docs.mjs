@@ -9,7 +9,7 @@
    wrote it. A heading the starter fills that a template no longer has is
    added at the end, so a later HELIX's templates never break creation. */
 
-import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { MODALITIES } from "@ux-builder/ui/blueprint/modalities";
 import { ref } from "./helix.mjs";
@@ -192,7 +192,7 @@ function content(r, helix) {
 /* Write the starter set into the app (HLA-01). Returns the paths written.
    A type the installed HELIX has no template or location for is still
    written, from the starter's own sections, and the problem is printed. */
-export function writeStarterSet(helix, r, { log = () => {} } = {}) {
+export function writeStarterSet(helix, r, { log = () => {}, keep = false } = {}) {
   const c = content(r, helix);
   const docs = [
     ["product-vision", { id: "product-vision", ...c.vision }],
@@ -211,11 +211,14 @@ export function writeStarterSet(helix, r, { log = () => {} } = {}) {
     const missing = [t.template == null && `template (${t.base}/template.md)`, !t.location && `output location (${t.base}/meta.yml)`].filter(Boolean);
     if (missing.length) log(`HELIX ${helix.manifest.version} has no ${missing.join(" and no ")} for the ${type} type; docs/helix/${path} was drafted from the starter's own sections`);
     const file = join(r.dir, "docs/helix", path);
+    // In a design folder's build (GDL-81), a document the person already wrote is kept.
+    if (keep && existsSync(file)) continue;
     mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, draft(t.template, { ...d, type }));
     written.push(`docs/helix/${path}`);
   }
   // Slot choices HELIX reads before concerns.md (its concern-selection order).
+  if (keep && existsSync(join(r.dir, "docs/helix/01-frame/concerns.local.yml"))) return written;
   writeFileSync(join(r.dir, "docs/helix/01-frame/concerns.local.yml"), "# Operator overrides for HELIX's concern slots (set by @ux-builder/create-app).\nslots:\n  frontend-framework: react-vite\n  e2e-framework: e2e-playwright\n");
   written.push("docs/helix/01-frame/concerns.local.yml");
   return written;

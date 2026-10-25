@@ -91,7 +91,7 @@ catalogue without reading the SDK's source.
 | | `eslint`, `stylelint` | Lint plugins |
 | | `catalogue.json`, `AGENTS.md`, `skill/ux-builder-ui/` | Generated agent guidance (SDK-12, SDK-13) |
 | `@ux-builder/audit` | bin `ux-builder-audit`; `.` (`audit`, `RULES`, `VERSION`); `report` (`writeReports`, `html`, `summaryText`) | SDK-18 |
-| `@ux-builder/create-app` | `npm create @ux-builder/app <dir> -- [--theme <name>] [--name <pkg>]` | SDK-08 |
+| `@ux-builder/create-app` | `npm create @ux-builder/app <dir> -- [--theme <name>] [--name <pkg>]` (*[Amended 2026-10-24 — FEAT-018 GDL-81, US-150]* without `--modality`, a design folder; in a design folder, the app built in place: CONTRACT-008 Design first) | SDK-08 |
 | `@ux-builder/mcp` | bin over stdio (`npx @ux-builder/mcp`) | SDK-14 |
 
 An app MUST NOT import any other path: files outside `exports` are not part

@@ -558,6 +558,19 @@ any wireframe or prototype is drawn, the guide asks the person which
 modalities and screen sizes the app is for, and records the answer;
 wireframes and prototypes wait for it.
 
+GDL-81. **Design first, the app last** *(added 2026-10-24, from the
+operator)*. A person starts the guide before there is an app:
+`npm create @ux-builder/app <dir>` without a modality makes a design
+folder, with the guide, its skill, an empty design state, a starting
+blueprint and HELIX's skill and marker, and no app code. It asks nothing:
+the name is the folder's, the modality is asked during design (GDL-80),
+and the theme when the app is built. When the design is ready, the guide
+asks the person for the theme, pointing them to the theme builder to make
+one from their brand when no released theme fits, and builds the app in
+the same folder (`npm create @ux-builder/app . -- --theme <name>`) from
+the recorded modality and the designed blueprint, keeping every design
+document. Giving `--modality` still makes the app at once, as before.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each
@@ -962,6 +975,7 @@ The proposal's seven connected artifacts, and its rubric:
 - [US-147 — Design how users meet each business rule](../user-stories/US-147-design-how-users-meet-each-business-rule.md)
 - [US-148 — Follow the guide step by step, and approve each item](../user-stories/US-148-follow-the-guide-step-by-step-and-approve-each-item.md)
 - [US-149 — Keep the design work in docs/ux-builder, and choose the modality first](../user-stories/US-149-keep-the-design-work-in-docs-ux-builder-and-choose-the-modality-first.md)
+- [US-150 — Design first, and build the app in place at the end](../user-stories/US-150-design-first-and-build-the-app-in-place-at-the-end.md)
 
 ## Edge Cases and Error Handling
 

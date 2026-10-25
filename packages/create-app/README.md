@@ -1,16 +1,48 @@
 # @ux-builder/create-app
 
-Starts a new React + Vite app that is on ux-builder from its first commit.
+Starts a new React + Vite app that is on ux-builder from its first commit,
+or, design first, a folder for the guided design that becomes the app when
+the design is ready.
+
+## Design first, the app last
+
+```sh
+npm create @ux-builder/app@latest trip-planner
+cd trip-planner && npm install
+```
+
+Without `--modality` (or `--blueprint`) the starter asks nothing and writes a
+design folder: `@ux-builder/design` and its skill, an empty design state, a
+starting blueprint in `docs/ux-builder/blueprint/`, HELIX's skill and marker,
+and no app code. In Claude Code, type `/ux-builder-design`. The guide asks for
+the modality during the design (`ux-builder-design modality`) and, when the
+design is ready, for the theme: one of the released themes below, or one made
+from the brand in the theme builder (`npm run builder` in a clone of this
+repository; saving a theme opens a pull request, and it can be used once it is
+released in `@ux-builder/tokens`). Then it builds the app in the same folder:
+
+```sh
+npm create @ux-builder/app@latest . -- --theme databricks
+```
+
+The build uses the recorded modalities and the designed blueprint, keeps
+`docs/`, `.ux-builder/` and the skills, keeps `package.json`'s name and adds
+the app's scripts and dependencies, writes HELIX's starter documents where none
+exists, and records the build in the design state. It writes nothing, and says
+why, when the modality is not recorded, a `--modality` given differs from it,
+`--blueprint` is given, the blueprint has an error, or a file it did not write
+is in the way. Without `--theme` it asks in a terminal and exits 1 listing the
+themes without one. `--theme` without `--modality` in an empty folder exits 1:
+the theme is chosen at the build.
+
+## The app at once
 
 ```sh
 npm create @ux-builder/app my-app -- --modality responsive-web --theme databricks
 cd my-app && npm install && npm run dev
 ```
 
-In a terminal, without `--modality`, the starter asks which modalities the app
-has (a multi-select: answer with numbers or names, e.g. `1,3`). Without a
-terminal (an agent, CI) `--modality` is required: the starter exits 1 listing
-the modalities, writes nothing and assumes none.
+With `--modality` the app is made at once, for those modalities.
 
 | Modality | The app starts as |
 |---|---|
@@ -24,8 +56,8 @@ There is no sample domain or data. Native `ios`, `android`, `macos` and
 
 | Option | |
 |---|---|
-| `--modality <list>` | The app's modalities, comma-separated (`responsive-web`, `chat`, `hybrid-chat`). Recorded in `docs/ux-builder/blueprint/app.blueprint.json` as `supports.modalities`, with the size classes and inputs they derive. An unknown or future one exits 1 |
-| `--theme <name>` | The theme to start on: any theme in `@ux-builder/tokens` (`databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `ux-builder-databricks`, `plain`). Default `plain` |
+| `--modality <list>` | The app's modalities, comma-separated (`responsive-web`, `chat`, `hybrid-chat`). Recorded in `docs/ux-builder/blueprint/app.blueprint.json` as `supports.modalities`, with the size classes and inputs they derive. An unknown or future one exits 1. Without it (and without `--blueprint`), a design folder |
+| `--theme <name>` | The theme to start on: any theme in `@ux-builder/tokens` (`databricks`, `praxis`, `praxis-material`, `praxis-fluentui`, `praxis-carbon`, `praxis-v2-databricks`, `synaptiq`, `ux-builder-databricks`, `plain`). Default `plain`. In a design folder, the theme the app is built on |
 | `--name <name>` | The package name. Default: the directory's name |
 | `--blueprint <file>` | Start from this plan of the app's screens instead of the starter's. A plan with an error (`ux-builder-blueprint check`) is refused, with each error, and nothing is written. Its `supports.modalities` (or `responsive-web` when it names none) must agree with `--modality`, or the starter exits 1 naming both |
 | `--helix-version <tag>` | Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written |

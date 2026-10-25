@@ -8,13 +8,12 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
-import { PassThrough } from "node:stream";
 import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { checkBlueprint, skeleton } from "@ux-builder/ui/blueprint";
 import { checkCard } from "@ux-builder/ui/adaptive-cards/check";
 import { MODALITIES, expandModalities } from "@ux-builder/ui/blueprint/modalities";
-import { askModalities, create, parseModalities, resolveModalities, scaffold, uncite } from "../index.mjs";
+import { create, parseModalities, resolveModalities, scaffold, uncite } from "../index.mjs";
 import { criteria, shellFiles, starterSpec } from "../shell.mjs";
 import { bundle } from "./fixtures/helix-release.mjs";
 
@@ -44,28 +43,13 @@ const hasPty = spawnSync("python3", ["-c", "import pty"]).status === 0;
 
 describe("US-096: choose the app's modalities when creating it", () => {
   // @covers US-096-AC1
-  test("AC1: in a terminal with no --modality, it asks as a multi-select and creates the app for the ones chosen", { skip: !hasPty && "no python3 pty for a pseudo-terminal" }, async () => {
+  test("AC1 (amended, GDL-81): in a terminal with no --modality, it asks nothing and makes a design folder; the modality is asked during the design", { skip: !hasPty && "no python3 pty for a pseudo-terminal" }, async () => {
     const r = await inTerminal(["asked", "--no-helix"], "1,3");
     assert.equal(r.status, 0, r.out);
-    assert.match(r.out, /Which modalities does the app have\?[\s\S]*1\. responsive-web[\s\S]*2\. chat[\s\S]*3\. hybrid-chat/);
-    assert.deepEqual(blueprint("asked").supports.modalities, ["responsive-web", "hybrid-chat"]);
-    assert.ok(existsSync(join(tmp, "asked/src/Home.jsx")) && existsSync(join(tmp, "asked/src/Assistant.jsx")));
-  });
-
-  // @covers US-096-AC1
-  test("AC1: the multi-select takes numbers or names, asks again on an answer it cannot use, and refuses when the input ends", async () => {
-    const input = new PassThrough(), output = new PassThrough();
-    let said = "";
-    output.on("data", (d) => { said += d; });
-    const answer = askModalities({ input, output });
-    input.write("7\n");
-    input.write("chat, 3\n");
-    assert.deepEqual(await answer, ["chat", "hybrid-chat"]);
-    assert.match(said, /"7" is not a modality[\s\S]*Modalities: /);
-    const none = new PassThrough();
-    const ended = askModalities({ input: none, output: new PassThrough() });
-    none.end();
-    await assert.rejects(ended, /no modalities were chosen; no app was created/);
+    assert.doesNotMatch(r.out, /Which modalities/);
+    assert.match(r.out, /a design folder: the guided design, and no app yet/);
+    assert.equal(blueprint("asked").supports.modalities, undefined, "no modality decided at creation");
+    assert.ok(!existsSync(join(tmp, "asked/src")));
   });
 
   // @covers US-096-AC2
@@ -82,12 +66,13 @@ describe("US-096: choose the app's modalities when creating it", () => {
   });
 
   // @covers US-096-AC3
-  test("AC3: no terminal and no --modality: exit 1 listing the modalities, nothing written, none assumed", () => {
+  test("AC3 (amended, GDL-81): no terminal and no --modality: a design folder, no app code, no modality assumed", () => {
     const r = run("unasked", "--no-helix");
-    assert.equal(r.status, 1);
-    for (const m of Object.keys(MODALITIES)) assert.match(r.stderr, new RegExp(`^  ${m} `, "m"));
-    assert.match(r.stderr, /--modality <list>[\s\S]*No app was created/);
-    assert.equal(existsSync(join(tmp, "unasked")), false);
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(existsSync(join(tmp, "unasked/.ux-builder/design-state.json")));
+    assert.ok(!existsSync(join(tmp, "unasked/src")) && !existsSync(join(tmp, "unasked/index.html")));
+    assert.equal(blueprint("unasked").supports.modalities, undefined);
+    assert.equal(JSON.parse(readFileSync(join(tmp, "unasked/.ux-builder/design-state.json"), "utf8")).modality, undefined);
     assert.throws(() => scaffold(join(tmp, "lib"), {}), /modalities are required/);
     assert.equal(existsSync(join(tmp, "lib")), false);
   });

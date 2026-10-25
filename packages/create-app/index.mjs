@@ -11,9 +11,10 @@
    versions this package was released with.
 
      --modality <list>  the app's modalities, comma-separated: responsive-web, chat,
-                        hybrid-chat (FEAT-014). In a terminal without it, the starter
-                        asks; without a terminal it is required, and none is assumed
-     --theme <name>     the theme to start on (default: the first listed)
+                        hybrid-chat (FEAT-014), to make the app at once. Without it
+                        (and without --blueprint) the starter makes a design folder
+     --theme <name>     the theme to start on (default: plain); in a design folder,
+                        the theme the app is built on
      --name <name>      the package name (default: the directory's name)
      --blueprint <file> start from this plan of the app's screens instead of the
                         starter's (FEAT-008 ADP-01); refused, with each error, if
@@ -29,6 +30,12 @@
      --model <id>       the agent's model, for its episode trace (default: UX_BUILDER_MODEL)
      --mcp              also write .mcp.json for the ux-builder MCP server (optional:
                         the guide and the skills work without it; ADR-036)
+
+   Design first (FEAT-018 GDL-81, US-150): without --modality or --blueprint
+   it writes a design folder instead, the guide with no app code, and asks
+   nothing; run in that folder with --theme <name> (asked for in a
+   terminal), it builds the app there from the modality and blueprint the
+   design recorded (design-first.mjs).
 
    Every app gets the guided design loop (FEAT-018, ADR-036): @ux-builder/design,
    its skill in .claude/skills/ux-builder-design/ and an empty design state
@@ -67,6 +74,7 @@ import * as trace from "@ux-builder/trace";
 import { init as initDesign } from "@ux-builder/design";
 import { getHelix, install as installHelix } from "./helix.mjs";
 import { blueprintFor, modalityGuide, normalize, shellFiles, starterSpec } from "./shell.mjs";
+import { buildInPlace, builtFrom, isDesignFolder, startDesign, THEME_BUILDER, themeList } from "./design-first.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
@@ -111,23 +119,21 @@ export function resolveModalities({ modality, blueprint } = {}) {
   return flag ?? own;
 }
 
-/* The multi-select, in a terminal (MOD-01): the modalities numbered; answer
-   with numbers or names, comma-separated. Asks again on an answer it cannot
-   use; rejects when the input ends. */
-export function askModalities({ input = process.stdin, output = process.stdout } = {}) {
+/* The theme, in a terminal, for the app built in a design folder (GDL-81):
+   the released themes numbered, and where to make one from a brand. */
+export function askTheme({ input = process.stdin, output = process.stdout } = {}) {
+  const known = themes();
   const rl = createInterface({ input, output, terminal: false });
-  output.write(`Which modalities does the app have? Choose one or more, e.g. 1,3:\n${NAMES.map((m, i) => `  ${i + 1}. ${m.padEnd(15)} ${MODALITIES[m].label}`).join("\n")}\n`);
+  output.write(`Which theme should the app be built on?\n${known.map((t, i) => `  ${i + 1}. ${t}`).join("\n")}\n${THEME_BUILDER}\n`);
   return new Promise((resolveAnswer, reject) => {
     let done = false;
-    const ask = () => output.write("Modalities: ");
+    const ask = () => output.write("Theme: ");
     rl.on("line", (line) => {
-      const picked = line.split(/[\s,]+/).filter(Boolean).map((x) => (/^\d+$/.test(x) ? NAMES[Number(x) - 1] ?? x : x));
-      try {
-        const ms = parseModalities(picked.join(","));
-        done = true; rl.close(); resolveAnswer(ms);
-      } catch (e) { output.write(`${e.message.replace(/^--modality [^:]*: /, "")}\n`); ask(); }
+      const x = line.trim();
+      const t = /^\d+$/.test(x) ? known[Number(x) - 1] : x;
+      if (known.includes(t)) { done = true; rl.close(); resolveAnswer(t); } else { output.write(`"${x}" is not a released theme.\n`); ask(); }
     });
-    rl.on("close", () => { if (!done) reject(new Error(`no modalities were chosen; no app was created. Choose with --modality <list>:\n${modalityList()}`)); });
+    rl.on("close", () => { if (!done) reject(new Error(`no theme was chosen; the app was not built. Choose with --theme <name>:\n${themeList()}\n${THEME_BUILDER}`)); });
     ask();
   });
 }
@@ -144,7 +150,7 @@ export function readBlueprint(file) {
   return text.endsWith("\n") ? text : text + "\n";
 }
 
-export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = {}) {
+export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities, base } = {}) {
   // Never assumed (MOD-01): the CLI asks, or takes --modality.
   if (!Array.isArray(modalities) || !modalities.length) throw new Error(`the app's modalities are required (--modality <list>):\n${modalityList()}`);
   const problems = modalityProblems(modalities);
@@ -164,7 +170,8 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities } = 
     if (!sdkFrom) return versions[p];
     const tgz = readdirSync(resolve(sdkFrom)).find((f) => f.startsWith(p.slice(1).replace("/", "-") + "-") && f.endsWith(".tgz"));
     if (!tgz) die(`no ${p} tarball in ${sdkFrom}`);
-    return `file:${relative(target, join(resolve(sdkFrom), tgz))}`;
+    // Relative to where the app will live: base, when it is made apart and moved in (GDL-81).
+    return `file:${relative(base ? resolve(base) : target, join(resolve(sdkFrom), tgz))}`;
   };
 
   mkdirSync(target, { recursive: true });
@@ -294,21 +301,56 @@ export async function create(dir, { helix: h = {}, log = () => {}, agent, ...opt
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: { mcp: { type: "boolean" }, modality: { type: "string" }, theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, agent: { type: "string" }, model: { type: "string" }, help: { type: "boolean", short: "h" } } });
   if (values.help || !positionals[0]) {
-    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix] [--agent <name>] [--model <id>] [--mcp]\n\nModalities (--modality, comma-separated; asked for in a terminal, required without one):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
+    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix] [--agent <name>] [--model <id>] [--mcp]\n\nWithout --modality or --blueprint: a design folder (the guide, no app code); in a design folder: the app built there, on --theme.\n\nModalities (--modality, comma-separated, to make the app at once):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
     process.exit(values.help ? 0 : 1);
   }
-  // The modalities, before anything is written (MOD-01, MOD-03; US-096).
-  let modalities;
-  try { modalities = resolveModalities({ modality: values.modality, blueprint: values.blueprint }); } catch (e) { die(e.message); }
-  if (!modalities) {
-    if (!(process.stdin.isTTY && process.stdout.isTTY)) die(`which modalities does the app have? Without a terminal the starter cannot ask, and it assumes none: pass --modality <list>, one or more of:\n${modalityList()}\nNo app was created.`);
-    try { modalities = await askModalities(); } catch (e) { die(e.message); }
-  }
-  let r;
-  try {
-    r = await create(positionals[0], { modalities, theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] }, agent: { agent: values.agent, model: values.model }, mcp: values.mcp, log: (m) => console.error(m) });
-  } catch (e) { die(e.message); }
-  console.log(`Created ${r.name}, a ${r.modalities.join(" and ")} app, on the ${r.theme} theme (@ux-builder/tokens ${r.versions["@ux-builder/tokens"]}, @ux-builder/ui ${r.versions["@ux-builder/ui"]}).
+  const helixOpts = { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] };
+  const log = (m) => console.error(m);
+  const where = (dir) => relative(process.cwd(), dir).startsWith("..") ? dir : relative(process.cwd(), dir) || ".";
+  // Design first (GDL-81): a design folder is built in place; without --modality or --blueprint, the starter makes one.
+  if (isDesignFolder(positionals[0])) {
+    let given = null;
+    try { if (values.modality != null) given = parseModalities(values.modality); } catch (e) { die(e.message); }
+    let theme = values.theme;
+    if (!theme && !values.blueprint) {
+      if (!(process.stdin.isTTY && process.stdout.isTTY)) die(`which theme should the app be built on? Without a terminal the starter cannot ask: pass --theme <name>, one of:\n${themeList()}\n${THEME_BUILDER}\nNothing was written.`);
+      try { theme = await askTheme(); } catch (e) { die(e.message); }
+    }
+    let r;
+    try { r = await buildInPlace(positionals[0], { theme, modalities: given, blueprint: values.blueprint, name: values.name, sdkFrom: values["sdk-from"], helix: helixOpts, agent: { agent: values.agent, model: values.model }, mcp: values.mcp, log }); } catch (e) { die(e.message); }
+    console.log(`Built ${r.name}, a ${r.modalities.join(" and ")} app, in ${where(r.dir)} on the ${r.theme} theme, from the designed blueprint (docs/ux-builder/blueprint/app.blueprint.json). The design documents and the design state are where they were.
+
+  npm install
+  npm run dev      # http://localhost:5173
+  npm run lint
+  npm run audit
+
+The guide goes on in Claude Code with /ux-builder-design: the validated prototype is next.`);
+    if (r.helix) console.log(`\nHELIX ${r.helix.tag}: ${r.helix.documents.length} starter documents written in docs/helix/ where none existed; ux-assessment.yml and AGENTS.md wired to it.`);
+  } else if (builtFrom(positionals[0])) {
+    die(`${positionals[0]} was already built from its design, on the ${builtFrom(positionals[0]).theme} theme; the app is there. Nothing was written.`);
+  } else if (values.modality == null && !values.blueprint) {
+    if (values.theme) die(`--theme without --modality: the starter makes a design folder, and the theme is chosen when the app is built there, once the design is ready (npm create @ux-builder/app@latest . -- --theme <name>). To make the app at once, pass --modality <list> as well. Nothing was written.`);
+    let r;
+    try { r = await startDesign(positionals[0], { name: values.name, sdkFrom: values["sdk-from"], helix: helixOpts, mcp: values.mcp, log }); } catch (e) { die(e.message); }
+    console.log(`Created ${r.name}, a design folder: the guided design, and no app yet. Nothing was asked: the modality is chosen during the design, the theme when the app is built.
+
+  cd ${where(r.dir)}
+  npm install
+  npx ux-builder-design status
+
+Design with your agent: in Claude Code, type /ux-builder-design. When the design is ready, the guide builds the app here (npm create @ux-builder/app@latest . -- --theme <name>).`);
+    if (r.helix) console.log(`\nHELIX ${r.helix.tag}: the helix skill in .claude/skills/helix/ and the marker; its documents are written when the app is built.`);
+    if (r.helixUnavailable) console.log(`\nHELIX: not installed: ${r.helixUnavailable}.`);
+  } else {
+    // The modalities, before anything is written (MOD-01, MOD-03; US-096).
+    let modalities;
+    try { modalities = resolveModalities({ modality: values.modality, blueprint: values.blueprint }); } catch (e) { die(e.message); }
+    let r;
+    try {
+      r = await create(positionals[0], { modalities, theme: values.theme, name: values.name, sdkFrom: values["sdk-from"], blueprint: values.blueprint, helix: helixOpts, agent: { agent: values.agent, model: values.model }, mcp: values.mcp, log });
+    } catch (e) { die(e.message); }
+    console.log(`Created ${r.name}, a ${r.modalities.join(" and ")} app, on the ${r.theme} theme (@ux-builder/tokens ${r.versions["@ux-builder/tokens"]}, @ux-builder/ui ${r.versions["@ux-builder/ui"]}).
 
   cd ${relative(process.cwd(), r.dir).startsWith("..") ? r.dir : relative(process.cwd(), r.dir) || "."}
   npm install
@@ -317,10 +359,11 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   npm run lint     # no hard-coded colours, fonts or radii
 
 Design with your agent: in Claude Code, type /ux-builder-design (the guide's skill is in .claude/skills/ux-builder-design/).${r.design?.mcp ? " .mcp.json configures the ux-builder MCP server." : ""}`);
-  if (r.episode) console.log(`
+    if (r.episode) console.log(`
 Episode trace: ${r.episode} in .ux-builder/trace/ records the creation. Open an episode for each change (npx ux-builder-trace start, or the MCP tool start_episode); AGENTS.md says how.`);
-  if (r.helix) console.log(`
+    if (r.helix) console.log(`
 HELIX ${r.helix.tag}${r.helix.bundled ? ` (bundled with this starter: ${r.helix.reason})` : " (latest release, verified)"}: the helix skill in .claude/skills/helix/, the marker and ${r.helix.documents.length} documents in docs/helix/.`);
-  if (r.helixUnavailable) console.log(`
+    if (r.helixUnavailable) console.log(`
 HELIX: not installed: ${r.helixUnavailable}. The app was created without HELIX (as with --no-helix): no marker, documents or skill, and no HELIX-VERSION.json was written.`);
+  }
 }

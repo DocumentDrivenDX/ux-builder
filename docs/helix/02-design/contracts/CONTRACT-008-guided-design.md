@@ -146,6 +146,33 @@ In an app with a design state, `ux-builder-blueprint wireframes` and
 `modality` matches the blueprint's `supports.modalities` and
 `supports.sizeClasses`.
 
+### Design first *(2026-10-24, GDL-81)*
+
+`npm create @ux-builder/app <dir>` without `--modality` or `--blueprint`
+writes a design folder and asks nothing: `package.json` (`@ux-builder/design`
+and `@ux-builder/ui` as dev dependencies; `postinstall` installs the
+skill), the skill, a design state with `startedFrom: design`, a starting
+blueprint, HELIX's skill and marker (no documents), `README.md`,
+`AGENTS.md`, `CLAUDE.md`, `.gitignore`. `--theme` without `--modality`
+there exits 1: the theme is chosen at the build.
+
+`npm create @ux-builder/app <design folder> -- --theme <name>` builds the
+app in place:
+
+| Needs | Else (exit 1, nothing written) |
+|---|---|
+| A design folder not yet built (`startedFrom: design`, no `app`) | the folder is not empty (as before) |
+| The recorded `modality`, matching the blueprint; `--modality` absent or the same | names `ux-builder-design modality`, or both lists |
+| `--theme`, or the person's answer in a terminal | lists the released themes and the theme builder (`npm run builder` in the ux-builder repository; a saved theme is released in `@ux-builder/tokens`) |
+| The blueprint with no errors; no `--blueprint` | lists each error; `--blueprint` is refused |
+| No file in the way the design folder did not write | names each |
+
+It writes the app's files, keeps the blueprint, `docs/`, `.ux-builder/`
+and the skills, merges `package.json` (its name and own fields kept),
+writes HELIX's starter documents where none exists and wires HELIX, sets
+the state's `app`, and traces the create episode. `status` in a design
+folder says the app is not built and what the build needs.
+
 ### Design state
 
 `.ux-builder/design-state.json`, committed (ADR-036 rule 6), schema
@@ -156,7 +183,7 @@ In an app with a design state, `ux-builder-blueprint wireframes` and
 | `version` | `1` | |
 | `activity` | `baseline`, `define`, `explore`, `experience`, `validate` | Where the loop is; `baseline` only in an existing app's first session |
 | `mode` | `full`, `change` | |
-| `startedFrom` | `new`, `existing` | |
+| `startedFrom` | `new`, `existing`, `design` | `design`: a design folder, before the app is built (GDL-81) |
 | `checkpoints[]` | `{ id, status: passed\|declined\|skipped, answer?, reason?, at }` | `id`: `core-1`, `core-2`, `core-3`, `significant-change`, `experiment`, `release` |
 | `questions[]` | `{ id, text, status: open\|answered, answer? }` | Open questions |
 | `assumptions[]` | `{ id: "A-<n>", text, status: assumed\|hypothesis\|confirmed\|refuted\|current-state, evidence[], section?, confirm?, dimension? }` | `current-state` marks a baseline item, shown as *current state, assumed* |
@@ -170,6 +197,7 @@ In an app with a design state, `ux-builder-blueprint wireframes` and
 | `observations[]` | `{ id: "O-<n>", text, source: design-team, alternative? }` | What the design team noticed trying a prototype; never user evidence |
 | `consents[]` | `{ session, confirmed: true, by?, date, evidence? }` | Consent confirmed per test session before its transcript was analysed (ADR-039) |
 | `modality` | `{ modalities[], sizeClasses[], answer, at }` | The person's answer to which modalities and screen sizes the app is for (GDL-80) |
+| `app` | `{ builtAt, theme, modalities[], by }` | In a design folder, the app's build in place (GDL-81); absent until then |
 | `step` | integer | The step of the current mode the person is on (0: an existing app's baseline) |
 | `reviews[]` | `{ item, hash, answer, at }` | Approvals: the person's words and the content approved; an item whose content changes needs approving again |
 | `feedback[]` | `{ id: "FB-<n>", item, text, status: open\|addressed, response?, at }` | The person's feedback on an item, and how it was addressed |

@@ -50,7 +50,8 @@
     "startedFrom": {
       "enum": [
         "new",
-        "existing"
+        "existing",
+        "design"
       ]
     },
     "checkpoints": {
@@ -595,6 +596,33 @@
     },
     "next": {
       "type": "string"
+    },
+    "app": {
+      "description": "In a design folder (startedFrom design), the app's build in place (FEAT-018 GDL-81); absent until then.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "builtAt",
+        "theme",
+        "modalities"
+      ],
+      "properties": {
+        "builtAt": {
+          "type": "string"
+        },
+        "theme": {
+          "type": "string"
+        },
+        "modalities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "by": {
+          "type": "string"
+        }
+      }
     }
   },
   "$defs": {
