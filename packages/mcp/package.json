@@ -33,6 +33,6 @@
     "directory": "packages/mcp"
   },
   "devDependencies": {
-    "@ux-builder/design": "^0.3.0"
+    "@ux-builder/design": "^0.4.0"
   }
 }
