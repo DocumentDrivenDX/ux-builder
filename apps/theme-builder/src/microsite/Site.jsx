@@ -1,7 +1,7 @@
 import { AppearanceSwitch, Icon, Logo, ThemeProvider, useTheme } from "@ux-builder/ui";
 import { iconArrowRight, iconBot, iconPalette, iconShieldCheck, iconSparkles, iconTerminal } from "@ux-builder/ui/icons";
 import { useEffect, useState } from "react";
-import { AiSection, GetStarted, Guardrails, Hero, LiveDemo, Loop, Packages } from "../home/Home.jsx";
+import { AiSection, DesignedWithYou, GetStarted, Guardrails, Hero, Journey, LiveDemo, Packages } from "../home/Home.jsx";
 import { ROOT } from "../site-root.js";
 import { SECTIONS, href, locate, neighbours } from "./nav.js";
 import { PAGES } from "./pages.jsx";
@@ -26,7 +26,7 @@ export function Site() {
   const choose = (v) => { setAppearance(v); try { localStorage.setItem(PREF, v); } catch { /* not remembered */ } };
   const { section, page } = locate(new URLSearchParams(location.search).get("p"));
   useEffect(() => {
-    document.title = section ? `${page?.title ?? section.title} · UX Builder` : "UX Builder: turn a logo into a theme";
+    document.title = section ? `${page?.title ?? section.title} · UX Builder` : "UX Builder: from an idea to an app people can use";
     window.uxbPageReady?.();
     if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
   }, [section, page]);
@@ -65,10 +65,11 @@ function HomePage() {
   return (
     <main>
       <Hero />
+      <Journey />
+      <DesignedWithYou />
       <Paths />
       <LiveDemo />
       <AiSection />
-      <Loop />
       <Guardrails />
       <Packages />
       <GetStarted />

@@ -78,11 +78,10 @@ test.describe("The public site", () => {
     await expect(page.getByText("npm create @ux-builder/app@latest . -- --theme ux-builder-databricks")).toBeVisible();
     await expect(page.getByText("npx ux-builder-design init")).toBeVisible();
     for (const t of ["An overview first", "Step n of 8", "Terms explained", "Everything reviewed in the chat"]) await expect(page.locator("#expect ~ ul").first().getByRole("heading", { name: t })).toBeVisible();
-    // The steps and the terms come from @ux-builder/design itself.
-    const steps = page.getByRole("table", { name: "The guided design's steps" });
-    await expect(steps.locator("tbody tr")).toHaveCount(8);
-    for (const n of ["Define intent", "Design the structure", "Refine and improve"]) await expect(steps.getByText(n, { exact: true })).toBeVisible();
-    await expect(page.getByRole("table", { name: "Terms" }).getByText("checkpoint", { exact: true })).toBeVisible();
+    // The steps come from @ux-builder/design itself; the full table and the glossary have their own pages.
+    await expect(page.locator("#steps ~ ol").first().locator("li")).toHaveCount(8);
+    await expect(page.locator("#steps ~ ol").first()).toContainText("Design the structure.");
+    await expect(page.locator('main a[href="?p=reference/glossary"]').first()).toBeVisible();
     await expect(page.locator("#modality ~ p").first()).toContainText("screen sizes");
     for (const c of ["core-1", "core-2", "core-3", "significant-change", "experiment", "release"]) await expect(page.getByRole("table", { name: "Checkpoints" }).getByText(c, { exact: true })).toBeVisible();
     await expect(page.getByRole("table", { name: "Design documents" }).locator("tbody tr")).toHaveCount(12);
@@ -93,6 +92,24 @@ test.describe("The public site", () => {
       await page.goto(page_(from));
       await expect(page.locator('main a[href="?p=start/design"]').first()).toBeVisible();
     }
+    expect(errors).toEqual([]);
+  });
+
+  test("the guided design: the process, the glossary and a worked example, generated from @ux-builder/design", async ({ page }) => {
+    const errors = watch(page);
+    await page.goto(page_("concepts/guided-design"));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("The guided design process");
+    const steps = page.getByRole("table", { name: "The guided design's steps" });
+    await expect(steps.locator("tbody tr")).toHaveCount(8);
+    for (const n of ["Define intent", "Design the structure", "Refine and improve"]) await expect(steps.getByText(n, { exact: true })).toBeVisible();
+    for (const c of ["core-1", "core-2", "core-3"]) await expect(steps.getByText(c, { exact: true })).toBeVisible();
+    for (const h of ["Checkpoints: the person decides", "Reviewed in the conversation", "Hypotheses until evidence", "Design first, the app last"]) await expect(page.getByRole("heading", { name: h })).toBeVisible();
+    await page.goto(page_("reference/glossary"));
+    const terms = page.getByRole("table", { name: "Design glossary" });
+    for (const t of ["blueprint", "target user", "modality", "theme"]) await expect(terms.getByText(t, { exact: true })).toBeVisible();
+    await page.goto(page_("proof/worked-example"));
+    for (const h of ["The experience brief", "Target users", "Jobs to be done", "An interaction decision", "A usability test kit", "The UX evaluation report"]) await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
+    await expect(page.locator("#ex-users ~ div table").first()).toContainText("Weekend anglers new to an area");
     expect(errors).toEqual([]);
   });
 
@@ -160,7 +177,7 @@ test.describe("The public site", () => {
     await expect(page.locator("#assistant ~ p").first()).toContainText("ApprovalCard");
   });
 
-  test("home: the AI section runs the SDK's assistant with an Adaptive Card, four guards, and the plan-check-build-assess strip", async ({ page }) => {
+  test("home: the guided design leads; the AI section runs the SDK's assistant with an Adaptive Card, four guards, and the design-build-check-learn strip", async ({ page }) => {
     const errors = watch(page);
     await page.goto("/home.html");
     const ai = page.locator(".uxh-section--ai");
@@ -170,9 +187,19 @@ test.describe("The public site", () => {
     await expect(ai.getByText("Add a settings page to the app, in our brand.")).toBeVisible();
     await expect(page.locator("section[aria-labelledby=guard-h] .uxh-cards > li")).toHaveCount(4);
     await expect(page.getByRole("heading", { level: 3, name: "AI checks on AI screens" })).toBeVisible();
+    // The value proposition first: the guided design, with a moment of it in the hero.
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("From an idea to an app people can actually use.");
+    await expect(page.locator(".uxh-hero").getByText("npm create @ux-builder/app@latest my-idea")).toBeVisible();
+    const review = page.locator(".uxh-heroapp");
+    await expect(review.getByText("Step 2 of 8: Understand users")).toBeVisible();
+    await review.getByRole("button", { name: "Approve" }).click();
+    await expect(review.getByText("Approved", { exact: true }).first()).toBeVisible();
+    await expect(page.locator(".uxh-steplist > li")).toHaveCount(8);
+    await expect(page.getByRole("heading", { level: 2, name: /^\d+ packages\. Take what you need\.$/ })).toBeVisible();
+    await expect(page.locator(".uxh-cards--six > li")).toHaveCount(Number((await page.locator("#pkg-h").textContent()).match(/^\d+/)[0]));
     const loop = page.locator(".uxh-loop");
-    await expect(loop.getByRole("heading", { level: 3 })).toHaveText(["Plan", "Check", "Build", "Assess"]);
-    await loop.getByRole("link", { name: /Assess/ }).click();
+    await expect(loop.getByRole("heading", { level: 3 })).toHaveText(["Design", "Build", "Check", "Learn"]);
+    await loop.getByRole("link", { name: /Assess and test/ }).click();
     await expect(page).toHaveURL(/\?p=start\/assess$/);
     expect(errors).toEqual([]);
   });

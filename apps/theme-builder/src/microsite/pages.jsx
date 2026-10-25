@@ -1,10 +1,10 @@
 import { DataTable, Icon, Notice, StatusPill } from "@ux-builder/ui";
-import { iconBot, iconPalette, iconScanEye, iconShieldCheck, iconSparkles, iconWand2 } from "@ux-builder/ui/icons";
+import { iconBot, iconPalette, iconPencilRuler, iconScanEye, iconShieldCheck, iconSparkles, iconWand2 } from "@ux-builder/ui/icons";
 import { Fragment } from "react";
 import { AiSection, Command, GUARDS, LiveDemo, PACKAGES } from "../home/Home.jsx";
 import { ROOT } from "../site-root.js";
 import { href } from "./nav.js";
-import { AdaptiveCards, Cli, EntryPoints, Rules, Sources, Traceability } from "./reference.jsx";
+import { AdaptiveCards, Cli, EntryPoints, Generated, Rules, Sources, Traceability } from "./reference.jsx";
 import { AI, CONTRACT_LIST, DECISIONS, FEATURES, PATTERNS, RELEASES, REPO, WIDGETS } from "./sources.js";
 
 /* The microsite's pages. The Why pages follow the product vision
@@ -38,12 +38,16 @@ const Affiliation = () => (
 function Problem() {
   return (
     <>
-      <p className="uxm-lede">Every app UX Builder touches should look and behave like its brand from its first commit, and keep doing so as brands, design systems and people change, without anyone hard-coding a colour, a font or a widget.</p>
+      <p className="uxm-lede">Anyone with an idea for an app, working with their AI coding agent, should get to an app people can actually use: designed with them, step by step, built on their brand from its first commit, and checked at every step.</p>
       <H2 id="problem">The problem</H2>
-      <p>Each new app starts by re-deciding its look. Colours are copied from a logo by eye and fail contrast; widgets are rebuilt, then drift; fonts load differently in every app; moving an app to another design system means rewriting it.</p>
+      <p>Each new app starts by re-deciding two things, and AI coding agents make both worse.</p>
+      <p><b>What to build.</b> Agents build what they are asked, fast. Features pile up without anyone checking who the users are, what they must accomplish, or whether a simpler flow would do. Design, if it happens, is a document nobody reviews, and nothing is tested with people before it ships.</p>
+      <p><b>How it looks.</b> Each new app re-decides its look. Colours are copied from a logo by eye and fail contrast; widgets are rebuilt, then drift; fonts load differently in every app; moving an app to another design system means rewriting it.</p>
       <p>AI coding agents make it worse. Asked for "a filter bar", they invent one, with literal colours. Asked for a chat screen, they build it from memory, with no way to stop a reply and approvals that are automatic or missing. The result is apps that look approximately like the brand, cost developer time to keep that way, and cannot be re-themed.</p>
       <H2 id="different">What makes it different</H2>
       <ol className="uxm-points">
+        <li><b>Designed with you, not for you.</b> An agent leads you through <a href={href("concepts", "guided-design")}>eight steps</a>, from intent and users to alternatives, a prototype and tests with people. Every item is shown to you in the conversation for feedback and approval, each term is explained, user needs stay labelled hypotheses until evidence confirms them, and nothing moves past a checkpoint without your answer.</li>
+        <li><b>Design first, the app last.</b> A design folder holds the work until it is ready; the kind of app is chosen during the design and the theme when the app is built, in place, from the blueprint you approved.</li>
         <li><b>A theme is a brand on a design system.</b> Identity (colours, logo, fonts) is separate from anatomy (shapes, type, density, icons), so any brand can be shown in Material, Fluent, Carbon, Databricks or its own look, and a new brand is a file, not a fork.</li>
         <li><b>AI steers; a deterministic engine decides.</b> A model turns "more conservative, it's a law firm" into bounded settings; the engine chooses every colour, so every option is reproducible and passes contrast before anyone sees it.</li>
         <li><b>Accessible by construction.</b> Every theme, in every appearance, on every design system, passes the same 4.5:1 contrast gate in CI. Nothing ships that fails.</li>
@@ -59,12 +63,13 @@ function Problem() {
         <li>Not a way to publish without review: themes go through ordinary code review, and the assessment proposes changes as patches a person accepts.</li>
         <li>Not proof of usability: a clean audit or assessment says what it checked and what is left for representative users to confirm.</li>
       </ul>
-      <Cite ids={["Product vision", "ADR-013", "ADR-014", "ADR-023", "ADR-029"]} />
+      <Cite ids={["Product vision", "FEAT-018", "ADR-013", "ADR-014", "ADR-023", "ADR-029", "ADR-036"]} />
     </>
   );
 }
 
 const AUDIENCE = [
+  { who: "People with an idea", icon: iconPencilRuler, get: "Product owners, designers and founders get a guided design conversation with their agent: an overview, \"Step n of 8\", every term explained, every item shown for feedback and approval, then an app built from the design they approved." },
   { who: "App developers", icon: iconWand2, get: "Widgets, screen patterns, an assistant, fonts, icons and themes from packages; a starter that is on the design system and on HELIX from the first commit; lint rules and an audit that keep it there." },
   { who: "Brand owners", icon: iconPalette, get: "A guided builder: logo in, palette options shown on real widgets in light and dark, plain-language feedback, a theme saved for review." },
   { who: "AI coding agents", icon: iconBot, get: "Guidance, a catalogue and an MCP server that name the real widgets, patterns, tokens and rules, and check a blueprint or an Adaptive Card before anything is built or sent." },
@@ -108,6 +113,7 @@ function Principles() {
 }
 
 const NOW = [
+  ["FEAT-018", "The guided design: eight steps with review and approval, target users and business rules, alternatives, prototypes, tests with people and production insights; design first, with the app built in place"],
   ["FEAT-001 to FEAT-003", "Role-based tokens and themes on four shared design systems, the palette engine and the guided theme builder"],
   ["FEAT-004, FEAT-006", "Widgets, screen patterns, fonts and icons on the public npm registry; lint rules, the audit, agent guidance and the MCP server"],
   ["FEAT-007", "The SDK's own assistant, with adapters for the AI SDK and assistant-ui, and bridges that dress AI Elements and assistant-ui"],
@@ -121,7 +127,6 @@ const NOW = [
   ["FEAT-015", "Findings by journey, each with its rule spelled out"],
   ["FEAT-016", "The episode trace, and learning from the builds owners choose to share"],
   ["FEAT-017", "Diagram and chart tokens in every theme"],
-  ["FEAT-018", "The guided design loop: from intent through alternatives, prototypes and tests with people to production insights, with your decision at every checkpoint"],
 ];
 const Item = ({ x }) => <li><span>{x.title}</span>{x.features.length > 0 && <span className="uxm-hint"> ({x.features.join(", ")})</span>}</li>;
 function Roadmap() {
@@ -135,6 +140,8 @@ function Roadmap() {
       </div>
       <H2 id="measures">Measures of success</H2>
       <ul className="uxm-stats">
+        <li><b>1 session</b><span>from an idea to an approved design</span></li>
+        <li><b>100%</b><span>of design items reviewed and approved by a person</span></li>
         <li><b>0</b><span>hard-coded presentation values in adopting apps</span></li>
         <li><b>&lt;30 min</b><span>from a logo to a reviewed theme</span></li>
         <li><b>&lt;1 hr</b><span>from nothing to a themed screen</span></li>
@@ -160,7 +167,7 @@ const HELIX_OPTIONS = [
 function NewApp() {
   return (
     <>
-      <p className="uxm-lede">One command gives you a React + Vite app that wears a theme from its first commit, is governed by HELIX, and has lint, the audit, a browser test and CI already wired up. Or start with the design, and build the app when the design is ready.</p>
+      <p className="uxm-lede">Start with an idea: one command makes a design folder, your agent guides you through the design, and the app is built there when the design is ready. Or, if you already know what it is, make the app at once: a React + Vite app that wears a theme from its first commit, is governed by HELIX, and has lint, the audit, a browser test and CI wired up.</p>
       <H2 id="design-first">Design first, the app last</H2>
       <p>Without <code>--modality</code>, the starter makes a design folder and asks nothing: the guided design, a starting blueprint and HELIX's skill, with no app code. The modality is asked during the design, the theme when the app is built.</p>
       <Command text="npm create @ux-builder/app@latest trip-planner" />
@@ -233,6 +240,10 @@ function ExistingApp() {
       <Command code text={'import "@ux-builder/tokens/themes/ux-builder-databricks.css";\nimport "@ux-builder/tokens/fonts/ux-builder-databricks.css";\nimport "@ux-builder/ui/ui.css";'} />
       <H2 id="wrap">3. Wrap the app</H2>
       <Command code text={'import { ThemeProvider } from "@ux-builder/ui";\n\n<ThemeProvider theme="ux-builder-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} />
+      <H2 id="design">Design what comes next with your agent</H2>
+      <p>To design or redesign the app's experience, add the guide and start it. Its first session is a baseline of what exists; then it asks what to improve (<a href={href("start", "design")}>Design the UX with your agent</a>).</p>
+      <Command text="npm install -D @ux-builder/design@latest" />
+      <Command text="npx ux-builder-design init" />
       <H2 id="no-react">Without React</H2>
       <p>Set <code>data-theme</code> (and optionally <code>data-appearance</code>) on <code>&lt;html&gt;</code>, and use the <code>.piq-*</code> class names each component renders.</p>
       <Command code text={'<html data-theme="ux-builder-databricks" data-appearance="light">'} />
@@ -334,7 +345,7 @@ const EXPECT = [
 ];
 
 function Design() {
-  const { steps, changeSteps, glossary } = cliData.guide;
+  const { steps, glossary } = cliData.guide;
   return (
     <>
       <p className="uxm-lede">An AI agent leads you through designing the simplest experience that works: it explains each step and term, shows you everything it produces for your feedback and approval, and stops for your decision at each checkpoint. Start with nothing but an idea; the app is built when the design is ready.</p>
@@ -363,9 +374,8 @@ function Design() {
       <ul className="uxm-grid">{EXPECT.map(([t, d]) => <li key={t} className="uxm-tile"><h3>{t}</h3><p>{d}</p></li>)}</ul>
 
       <H2 id="steps">The eight steps</H2>
-      <DataTable caption="The guided design's steps" rowKey="n" rows={steps}
-        columns={[{ key: "n", label: "Step" }, { key: "name", label: "Name", render: (r) => <b>{r.name}</b> }, { key: "you", label: "What you do" }, { key: "produces", label: "What comes out" }]} />
-      <p>For an everyday change to something that exists, the guide works in <b>change mode</b>, {changeSteps.length} steps: {changeSteps.map((s) => s.name).join(", ")}.</p>
+      <ol className="uxm-points">{steps.map((st) => <li key={st.n}><b>{st.name}.</b> {st.you}</li>)}</ol>
+      <p>What each step produces, which checkpoint closes it and how the steps fit together are in <a href={href("concepts", "guided-design")}>the guided design process</a>.</p>
 
       <H2 id="review">Review and approval</H2>
       <p>Files are where the work is kept; the conversation is where it is reviewed. The agent shows each item in the chat, one at a time, asks for your feedback, makes the changes and asks for your approval before showing the next. Approval is refused while your feedback on the item is unaddressed; an item that changes after you approved it needs approving again; and a checkpoint does not pass while items of the steps it closes await review.</p>
@@ -373,9 +383,7 @@ function Design() {
       <Command text={'npx ux-builder-design review approve user:U-1 --answer "Yes, that is our angler"'} />
 
       <H2 id="terms">Terms it explains</H2>
-      <p>The agent explains each term the first time it comes up. <code>ux-builder-design explain &lt;term&gt;</code> prints one; <code>explain --step &lt;n&gt;</code> those of a step.</p>
-      <DataTable caption="Terms" rowKey="term" rows={glossary} pageSize={12}
-        columns={[{ key: "term", label: "Term", sortable: true, render: (r) => <b>{r.term}</b> }, { key: "step", label: "Step", sortable: true, render: (r) => (r.step ? r.step : "all") }, { key: "means", label: "What it means" }, { key: "why", label: "Why it matters" }]} />
+      <p>The agent explains each of its {glossary.length} terms the first time it comes up: what it means, and why it is worth your time. <code>ux-builder-design explain &lt;term&gt;</code> prints one; the <a href={href("reference", "glossary")}>design glossary</a> lists them all. To see the documents the guide writes, read <a href={href("proof", "worked-example")}>a worked example</a>.</p>
 
       <H2 id="users-rules">Target users and business rules</H2>
       <p><b>Target users</b> are evidence-backed records in <code>docs/ux-builder/users.md</code>, one per segment (<code>U-1</code>…): their context, goals, constraints and the evidence for each, starting as hypotheses until research confirms them. Jobs, tasks and test scenarios name the users they serve.</p>
@@ -818,8 +826,83 @@ function Releases() {
   );
 }
 
+/* ---- The guided design, as concepts (FEAT-018; from @ux-builder/design via virtual:microsite-data) ---- */
+
+const CHECKPOINT_OF = { 3: "core-1", 4: "core-2", 7: "core-3", 8: "experiment, release" };
+function GuidedDesign() {
+  const { steps, changeSteps } = cliData.guide;
+  return (
+    <>
+      <p className="uxm-lede">The guided design takes a person from an idea to a tested design, with their AI coding agent leading and the person deciding. Eight steps, each ending in work they have seen and approved; three core checkpoints where nothing moves on without their answer; and, at the end, an app built from the design they approved.</p>
+      <H2 id="steps">Eight steps, four activities</H2>
+      <p>The person sees the steps ("Step 4 of 8: Explore alternatives"). The design state groups them into four activities (Define, Explore, Experience, Validate) and records where the person is.</p>
+      <DataTable caption="The guided design's steps" rowKey="n" rows={steps.map((st) => ({ ...st, closes: CHECKPOINT_OF[st.n] ?? "" }))} pageSize={8}
+        columns={[{ key: "n", label: "Step" }, { key: "name", label: "Name", render: (r) => <b>{r.name}</b> }, { key: "activity", label: "Activity", render: (r) => r.activity[0].toUpperCase() + r.activity.slice(1) }, { key: "you", label: "What you do" }, { key: "produces", label: "What comes out" }, { key: "closes", label: "Then", render: (r) => (r.closes ? <code>{r.closes}</code> : "") }]} />
+      <p>For an everyday change to something that exists, the guide works in <b>change mode</b>, {changeSteps.length} steps: {changeSteps.map((st) => st.name).join(", ")}. A change to something already tested asks <code>significant-change</code> first.</p>
+      <H2 id="checkpoints">Checkpoints: the person decides</H2>
+      <p><code>core-1</code> closes steps 1 to 3 (is this the outcome, and how will we know it worked?), <code>core-2</code> closes step 4 (which approach to try), and <code>core-3</code> closes steps 5 to 7 (is this validated enough to build?). The agent asks one question and waits; the answer is recorded in the person's words. A no or not yet is recorded too and never counts as yes, and the guide cannot move past a checkpoint that has not passed.</p>
+      <H2 id="review">Reviewed in the conversation</H2>
+      <p>Files are where the work is kept; the conversation is where it is reviewed. Each item the agent produces (the brief, each target user, job, story, task, journey, screen and decision) is shown in the chat, one at a time. The person gives feedback, the agent addresses it and says how, and the person approves. An approval records their words and the content they approved, so an item that changes needs approving again; a checkpoint does not pass while items of its steps await review.</p>
+      <H2 id="evidence">Hypotheses until evidence</H2>
+      <p>What users need starts as labelled hypotheses, drafted from the person's account and the domain. Research (interview notes, support tickets, analytics) is stored as masked, pseudonymous excerpts with the person's consent, and moves a hypothesis to confirmed or refuted. The brief, target users and jobs show each point as confirmed, assumed or hypothesis, so nobody mistakes a guess for a finding. A finding always says whether a person was observed or the agent recommends it.</p>
+      <H2 id="simplicity">The simplest experience that works</H2>
+      <p>The standing objective is the minimum interaction that lets the intended user reach the intended outcome. Before adding a screen, step, modal or required input, the agent answers five questions: the goal it serves, what happens without it, the simplest alternative, what it assumes, and how that will be validated. Alternatives are compared on what each asks of its users, all labelled predicted until people confirm them.</p>
+      <H2 id="design-first">Design first, the app last</H2>
+      <p>A person can start with nothing but an idea: <code>npm create @ux-builder/app@latest my-idea</code> makes a design folder with the guide and no app code. The modality (responsive web, chat, hybrid chat) is chosen at step 5, before anything is drawn; the theme when the design is ready, from the released themes or one made in the <a href={href("start", "theme-from-logo")}>theme builder</a>. Then the app is built in the same folder from the recorded modality and the approved blueprint, keeping every design document, before step 6's validated prototype.</p>
+      <H2 id="where">Where the work lives</H2>
+      <p>Everything the guide writes that is not HELIX's is in <code>docs/ux-builder/</code>: the documents, the blueprint and its alternatives, prototypes, comparisons and proposed HELIX changes. The design state, <code>.ux-builder/design-state.json</code>, is committed with the app. HELIX documents change only through proposals the person applies. Everything runs locally with the person's agent; nothing is sent anywhere.</p>
+      <p>How to run it: <a href={href("start", "design")}>Design the UX with your agent</a>. The documents it writes: <a href={href("proof", "worked-example")}>a worked example</a>.</p>
+      <Cite ids={["FEAT-018", "ADR-036", "ADR-037", "ADR-039", "CONTRACT-008", "SD-006"]} />
+    </>
+  );
+}
+
+function Glossary() {
+  const { glossary, steps } = cliData.guide;
+  const stepName = (n) => (n ? `${n} ${steps.find((st) => st.n === n)?.name ?? ""}` : "Throughout");
+  return (
+    <>
+      <p className="uxm-lede">Every term the guided design explains, read from <code>@ux-builder/design</code>'s glossary: what it means, and why it is worth the person's time. The agent explains each the first time it comes up; <code>ux-builder-design explain &lt;term&gt;</code> prints one.</p>
+      <DataTable caption="Design glossary" rowKey="term" rows={glossary} pageSize={glossary.length}
+        columns={[{ key: "term", label: "Term", sortable: true, render: (r) => <b>{r.term}</b> }, { key: "step", label: "Step", sortable: true, render: (r) => stepName(r.step) }, { key: "means", label: "What it means" }, { key: "why", label: "Why it matters" }]} />
+      <Generated><code>packages/design/glossary.json</code></Generated>
+    </>
+  );
+}
+
+/* A Markdown document as blocks (microsite-data.mjs mdBlocks). */
+function Doc({ blocks }) {
+  return blocks.map((b, i) => {
+    if (b.kind === "h") { if (b.level === 1) return null; const T = b.level === 2 ? "h4" : "h5"; return <T key={i}>{b.text}</T>; }
+    if (b.kind === "p") return <p key={i}><Md>{b.text}</Md></p>;
+    if (b.kind === "list") return <ul key={i}>{b.items.map((x, j) => <li key={j}><Md>{x}</Md></li>)}</ul>;
+    return (
+      <div key={i} className="uxm-scroll"><table className="uxm-table"><thead><tr>{b.head.map((h) => <th key={h} scope="col">{h}</th>)}</tr></thead>
+        <tbody>{b.rows.map((row, j) => <tr key={j}>{row.map((c, k) => <td key={k}><Md>{c}</Md></td>)}</tr>)}</tbody></table></div>
+    );
+  });
+}
+
+function WorkedExample() {
+  return (
+    <>
+      <p className="uxm-lede">The documents the guided design writes, for one small fictional app, River Path: a map of rivers to fish this weekend. Each is the example <code>@ux-builder/design</code> ships with its template, the same one its tests validate, shown as the person reviews it in the conversation.</p>
+      {cliData.examples.map((d) => (
+        <section key={d.type} aria-labelledby={`ex-${d.type}`}>
+          <H2 id={`ex-${d.type}`}>{d.title}</H2>
+          <p className="uxm-hint">Step {d.step} · <code>docs/ux-builder/</code> · <a href={d.url}>the source</a></p>
+          <Doc blocks={d.blocks} />
+        </section>
+      ))}
+      <p>The steps that produce each are in <a href={href("concepts", "guided-design")}>the guided design process</a>.</p>
+      <Cite ids={["FEAT-018", "CONTRACT-008"]} />
+    </>
+  );
+}
+
 export const PAGES = {
   // Pages added for FEAT-007 to FEAT-012 (SD-002, 2026-10-21).
+  "concepts/guided-design": GuidedDesign, "reference/glossary": Glossary, "proof/worked-example": WorkedExample,
   "start/assess": Assess, "start/microsoft-agents": MicrosoftAgents, "concepts/ai-agent-experience": AiAgentExperience, "concepts/flows-journeys": FlowsJourneys,
   "why/problem": Problem, "why/audience": Audience, "why/principles": Principles, "why/roadmap": Roadmap,
   "start/new-app": NewApp, "start/existing-app": ExistingApp, "start/theme-from-logo": ThemeFromLogo, "start/agents": Agents, "start/design": Design, "start/ci": Ci,
