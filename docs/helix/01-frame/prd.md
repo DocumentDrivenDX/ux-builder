@@ -643,6 +643,9 @@ rules, so it invents colours and components.
   gets it from the starter and begins at Define; an existing app runs
   `init` and begins with a baseline of what exists. The guide works in a
   full loop or, for everyday changes, in change mode. *(Added 2026-10-23.)*
+  *(Amended 2026-10-24.)* A person may also start the guide before
+  there is an app, in a design folder; the app is built in that folder
+  when the design is ready, on the theme chosen then.
 - **FR-77** — The guide keeps a committed design state, opens each session
   with where things stand, and stops at checkpoints (the intended
   experience, the interaction model, the validated experience; and before

@@ -85,6 +85,10 @@ multi-select, when it runs in a terminal. With `--modality <list>`
 (comma-separated), it does not ask. When it cannot ask (no terminal, as for an
 agent or CI) and no `--modality` is given, it exits 1 listing the
 modalities. It never assumes one.
+*[Amended 2026-10-24 — FEAT-018 GDL-81]* Without `--modality` (or
+`--blueprint`) the starter now makes a design folder instead of asking:
+the modality is asked during the design (FEAT-018 GDL-80) and the app is
+built for the answer. It still never assumes one.
 
 MOD-02. The chosen modalities are recorded in the blueprint as
 `supports.modalities`. The blueprint's `sizeClasses` and `inputs` are derived

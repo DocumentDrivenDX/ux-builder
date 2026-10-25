@@ -152,6 +152,12 @@
       "why": "You can try a design in minutes and throw it away, before anything is built."
     },
     {
+      "term": "theme",
+      "step": 6,
+      "means": "The app's look: its colours, type, shapes and logo, applied through role tokens so every screen follows it. Each released theme pairs a brand with a design system (Material 3, Fluent 2, Carbon, Databricks or its own).",
+      "why": "Chosen once the design is settled, so the look serves the experience; a theme made from your brand in the theme builder makes the app yours without hand-styling any screen."
+    },
+    {
       "term": "validated prototype",
       "step": 6,
       "means": "The chosen design built in the app itself, on a branch, with sample data, ready to show test users.",

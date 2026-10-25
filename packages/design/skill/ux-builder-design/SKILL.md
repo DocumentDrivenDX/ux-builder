@@ -98,6 +98,17 @@ Record what you learn as you go, with `ux-builder-design state set`:
 - an open question: `state set 'questions[+]' '{"text":"…"}'`;
 - the next action: `state set next '"Test map first with five users"'`.
 
+## Starting before there is an app
+
+`npm create @ux-builder/app <dir>` without `--modality` makes a design
+folder: the guide and its state, a starting blueprint, HELIX's skill, and
+no app code (`status` says *in a design folder*). Nothing about the app
+was asked: its modality is asked at *Design the structure*, its theme when
+it is built. Design as in a new app. When the design is ready (an
+alternative chosen, the modality recorded, the blueprint with no errors),
+build the app here, before the validated prototype (*Experience
+prototypes*).
+
 ## Starting in an existing app
 
 `ux-builder-design init` starts an existing app at Baseline. In its first
@@ -308,6 +319,23 @@ observation, never as user evidence:
 `state set 'observations[+]' '{"text":"…","alternative":"<name>"}'`.
 When the question is answered, `prototype --archive <name>`. App code never
 imports from a prototype (the `ux-builder/no-prototype-import` lint rule).
+
+**Build the app first, in a design folder.** When `status` says *No app
+yet*, the validated prototype needs the app. Explain the term *theme*
+(`ux-builder-design explain theme`) and ask which one the app should wear:
+show the released themes (`npm create @ux-builder/app@latest -- --help`
+lists them). If none carries their brand, point them to the theme builder:
+in a clone of https://github.com/DocumentDrivenDX/ux-builder, `npm install
+&& npm run builder` makes a theme from their logo, checked for contrast,
+and saving it opens a pull request; once it is merged and released in
+`@ux-builder/tokens`, the app can be built on it by name. They may wait
+for it, or build on `plain` now. Record their answer as a decision, then
+run `npm create @ux-builder/app@latest . -- --theme <name>` and
+`npm install`. The app is built from the recorded modality and the
+designed blueprint; the design documents and the state stay where they
+are. If it refuses, it says why (the modality not recorded, an error in
+the blueprint, a file in the way): fix that with the person and run it
+again.
 
 **The validated prototype** is the chosen design built in the app's source,
 on a branch, from the SDK's patterns, in the app's theme, with realistic

@@ -39,9 +39,9 @@ The operator created an app and was never asked what it was; the starter assumed
 
 ## Acceptance Criteria
 
-- [ ] **US-096-AC1** — Given a terminal, when `npm create @ux-builder/app acme` runs with no `--modality`, then it asks which modalities the app has as a multi-select of `responsive-web`, `chat` and `hybrid-chat`, and creates the app for the ones chosen.
+- [ ] **US-096-AC1** — Given a terminal, when `npm create @ux-builder/app acme` runs with no `--modality`, then it asks which modalities the app has as a multi-select of `responsive-web`, `chat` and `hybrid-chat`, and creates the app for the ones chosen. *[Amended 2026-10-24 — FEAT-018 GDL-81, US-150]* Without `--modality` the starter no longer asks: it makes a design folder, the modality is asked during the design (US-149) and the app is built for the person's answer (US-150).
 - [ ] **US-096-AC2** — Given `--modality responsive-web,hybrid-chat`, when the starter runs, then it does not ask, and the blueprint's `supports.modalities` is exactly those two, with size classes and inputs derived by FEAT-014's matrix.
-- [ ] **US-096-AC3** — Given no terminal and no `--modality` (as for an agent or CI), when the starter runs, then it exits 1 listing the modalities, writes nothing and assumes none.
+- [ ] **US-096-AC3** — Given no terminal and no `--modality` (as for an agent or CI), when the starter runs, then it exits 1 listing the modalities, writes nothing and assumes none. *[Amended 2026-10-24 — FEAT-018 GDL-81, US-150]* It now makes a design folder: no app code, and still no modality assumed.
 - [ ] **US-096-AC4** — Given `--modality ios` or an unknown name, when the starter runs, then it exits 1 saying which modalities are available now and that native apps are future.
 - [ ] **US-096-AC5** — Given `--blueprint plan.json` whose `supports.modalities` differs from `--modality`, when the starter runs, then it exits 1 naming both.
 

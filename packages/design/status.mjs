@@ -5,6 +5,7 @@
 import { jobsTable, usersTable, uxDocuments } from "./documents.mjs";
 import { layout, ux } from "./app.mjs";
 import { FIRST_STEP } from "./checkpoints.mjs";
+import { modalityStatus } from "./modality.mjs";
 import { progress } from "./process.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState } from "./state.mjs";
@@ -37,6 +38,8 @@ export function status(app) {
     activity: s.activity,
     mode: s.mode,
     startedFrom: s.startedFrom,
+    // A design folder (GDL-81): the app is built in place when the design is ready; null elsewhere.
+    app: s.startedFrom === "design" ? (s.app ? { built: true, theme: s.app.theme, modalities: s.app.modalities } : { built: false, modalityRecorded: modalityStatus(app).confirmed }) : null,
     chosen: chosen?.name ?? null,
     untestedAssumptions: untested.length,
     openQuestions: open.map((q) => q.text),
@@ -55,13 +58,18 @@ export function status(app) {
   return result;
 }
 
+/* What building the app in a design folder needs, in order (GDL-81). */
+export const BUILD_NEEDS = (modalityRecorded) => `To build the app here when the design is ready: ${modalityRecorded ? "" : "record the person's answer on modality (ux-builder-design modality), then "}ask them for the theme (a released one, or one they make from their brand in the theme builder), then run npm create @ux-builder/app@latest . -- --theme <name>.`;
+
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 export function summary(r) {
   const lines = [];
   // Only the latest answer at a checkpoint stands: a decline after a pass, or a pass after a decline.
   const latest = new Map(r.checkpoints.map((c) => [c.id, c.status]));
-  lines.push(`${r.progress.text} (${ACTIVITY[r.activity]}, in ${r.mode === "change" ? "change mode" : "the full loop"}${r.startedFrom === "existing" ? ", in an existing app" : ""}).`);
+  lines.push(`${r.progress.text} (${ACTIVITY[r.activity]}, in ${r.mode === "change" ? "change mode" : "the full loop"}${r.startedFrom === "existing" ? ", in an existing app" : r.startedFrom === "design" && !r.app?.built ? ", in a design folder" : ""}).`);
+  if (r.app && !r.app.built) lines.push(`No app yet: this folder holds the design. ${BUILD_NEEDS(r.app.modalityRecorded)}`);
+  else if (r.app?.built) lines.push(`The app was built here on the ${r.app.theme} theme (${r.app.modalities.join(", ")}).`);
   if (r.layout === "legacy") lines.push("This app is on the old layout (docs/ux/, app.blueprint.json at the top): run ux-builder-design migrate to move it under docs/ux-builder/.");
   if (r.awaitingReview.length) lines.push(`Awaiting your review: ${r.awaitingReview.length} item${r.awaitingReview.length === 1 ? "" : "s"} (${r.awaitingReview.slice(0, 5).join(", ")}${r.awaitingReview.length > 5 ? ", …" : ""}).`);
   lines.push(r.chosen ? `${r.chosen} is chosen.` : "No alternative is chosen yet.");

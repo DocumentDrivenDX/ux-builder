@@ -5,7 +5,10 @@ designer or developer through designing an app's UX, and stops for the
 person's decision at each checkpoint. The agent does the reasoning; this
 package does the deterministic work.
 
-New apps from `npm create @ux-builder/app` get it already.
+New apps from `npm create @ux-builder/app` get it already. Without
+`--modality` the starter makes a design folder, the guide with no app code,
+and builds the app there when the design is ready, on the theme chosen then
+(FEAT-018 GDL-81; see the create-app README).
 
 ```sh
 npm install -D @ux-builder/design

@@ -13,7 +13,7 @@
      install(helix, appDir);                            // .claude/skills/helix/ */
 
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, normalize, posix } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
@@ -154,6 +154,20 @@ export function install(helix, appDir) {
   }
   writeFileSync(join(root, "HELIX-VERSION.json"), JSON.stringify(helix.provenance, null, 2) + "\n");
   return { root, files: n };
+}
+
+/* The HELIX an app already has installed (.claude/skills/helix/), read
+   back as getHelix returns it: a design folder's build (FEAT-018 GDL-81)
+   writes HELIX's documents from the release the folder started on, with no
+   network. Null when none is installed. */
+export function installed(appDir) {
+  const root = join(appDir, ".claude", "skills", "helix");
+  let provenance;
+  try { provenance = JSON.parse(readFileSync(join(root, "HELIX-VERSION.json"), "utf8")); } catch { return null; }
+  const files = new Map();
+  const walk = (d, rel) => { for (const e of readdirSync(d, { withFileTypes: true })) { const p = join(d, e.name); if (e.isDirectory()) walk(p, `${rel}${e.name}/`); else if (e.name !== "HELIX-VERSION.json" || rel) files.set(`helix/skills/helix/${rel}${e.name}`, readFileSync(p)); } };
+  walk(root, "");
+  return { files, manifest: { version: provenance.version }, provenance };
 }
 
 /* The installed catalogue's file, by its path under references/. */

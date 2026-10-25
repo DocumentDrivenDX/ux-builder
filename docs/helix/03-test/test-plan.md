@@ -109,6 +109,7 @@ criteria; earlier features keep their tests where they are, traced by
 | FEAT-018 amendment: business rules in the task model (US-147) | [[STP-147]] | Integration | `validate`, `test-kit`, `report`, `trace` and `impact` over fixture apps whose HELIX defines `BR-<n>` rules |
 | FEAT-018 amendment: the guided conversation (US-148) | [[STP-148]] | Integration | `overview`, `status`, `step`, `explain` and `review` over fixture apps; checkpoints gated by pending reviews |
 | FEAT-018 amendment: docs/ux-builder layout and modality first (US-149) | [[STP-149]] | Integration | Commands on new and old-layout fixture apps; `migrate` in a temp git repository; the blueprint CLI's modality gate; create-app's paths |
+| FEAT-018 amendment: design first, the app built in place (US-150) | [[STP-150]] | Integration | create-app without `--modality` makes a design folder; the build in place from the recorded modality and the designed blueprint; its refusals; the guide's status |
 
 Every P0 criterion of an in-scope story maps to one layer here and to
 tests in its STP.

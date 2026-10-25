@@ -58,6 +58,23 @@ test("AC1: the fresh app of every modality builds", () => {
   for (const name of Object.keys(APPS)) sh("npm", ["run", "build"], dir(name));
 });
 
+// @covers US-150-AC3
+test("US-150: a design folder installs, runs the guide, then is built in place into an app that builds and lints", () => {
+  const d = dir("designed");
+  const create = (cwd, ...args) => sh(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), ...args, "--sdk-from", join(tmp, "sdk"), "--helix-offline"], cwd);
+  create(tmp, d);
+  sh("npm", ["install", "--no-audit", "--no-fund"], d);
+  sh("test", ["-f", join(d, ".claude/skills/ux-builder-design/SKILL.md")], d);
+  assert.match(sh("npx", ["ux-builder-design", "status"], d), /No app yet: this folder holds the design/);
+  sh("npx", ["ux-builder-design", "modality", "--answer", "A web app for phones to desktops", "--modality", "responsive-web", "--size-classes", "compact,medium,expanded,large"], d);
+  assert.match(create(d, ".", "--theme", "databricks"), /Built designed, a responsive-web app, in \. on the databricks theme/);
+  sh("npm", ["install", "--no-audit", "--no-fund"], d);
+  sh("npm", ["run", "build"], d);
+  assert.match(sh("npm", ["run", "check:blueprint"], d), /app\.blueprint\.json: no findings/);
+  sh("npm", ["run", "lint"], d);
+  assert.match(sh("npx", ["ux-builder-design", "status"], d), /The app was built here on the databricks theme/);
+});
+
 test("npm install puts the SDK's Claude Code skill in place", () => {
   sh("test", ["-f", join(app, ".claude/skills/ux-builder-ui/SKILL.md")], app);
 });
