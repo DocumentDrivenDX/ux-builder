@@ -81,7 +81,7 @@ export function Hero() {
           <span className="uxh-eyebrow"><Icon icon={iconSparkles} />Open-source UI SDK for AI-era apps</span>
           <h1 id="hero-h">Turn a logo into a theme. Ship apps that <em>can't drift</em> from it.</h1>
           <p className="uxh-lede">UX Builder reads a brand, proposes palettes that already pass contrast, and pairs them with a design system. Your app, and the coding agents that write it, build with widgets and AI components that follow the theme everywhere: light, dark and every screen.</p>
-          <Command text="npm create @ux-builder/app my-app" />
+          <Command text="npm create @ux-builder/app@latest my-app" />
           <div className="uxh-row">
             <a className="uxh-btn uxh-btn--primary" href={`${ROOT}themes/?theme=ux-builder-databricks`}>See this theme's page<Icon name="arrow-right" /></a>
             <a className="uxh-btn" href={REPO}>Star on GitHub</a>

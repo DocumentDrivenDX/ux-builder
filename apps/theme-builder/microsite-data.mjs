@@ -120,7 +120,7 @@ export const BLUEPRINT_NOTES = {
   score: "Score each journey of a blueprint, labelled predicted: steps, screens, modals, required inputs, decisions, navigation hops, findings and patterns.",
   compare: "Compare two or more alternative blueprints for the same tasks on one page, the best per task and dimension marked.",
   alternative: "Make an alternative blueprint (new) or choose one, with its reason (choose), recorded in the design state.",
-  prototype: "Write a disposable, clickable prototype of a blueprint under prototype/ (one page per screen, state and size class, actions linked), optionally in other design systems; or archive one.",
+  prototype: "Write a disposable, clickable prototype of a blueprint under docs/ux-builder/prototypes/ (one page per screen, state and size class, actions linked), optionally in other design systems; or archive one.",
   simplify: "Propose ways to make the task model take less of its users: inputs to infer, decisions to default, steps to combine, hops to remove. Changes nothing.",
 };
 export function blueprintCommands() {
@@ -346,11 +346,20 @@ export function notices() {
 
 /* ---- Everything, for the site ---- */
 
+/* The guided design's steps and the terms it explains, from
+   @ux-builder/design itself (FEAT-018 GDL-79), so the Design page shows
+   what the guide says. */
+export async function guide() {
+  const p = await import(pathToFileURL(join(REPO, "packages/design/process.mjs")).href);
+  const pick = (s) => ({ n: s.n, name: s.name, activity: s.activity, you: s.you, produces: s.produces, terms: s.terms ?? [] });
+  return { steps: p.STEPS.map(pick), changeSteps: p.CHANGE_STEPS.map(pick), glossary: p.GLOSSARY.map(({ term, step, means, why }) => ({ term, step, means, why })) };
+}
+
 export async function micrositeData() {
   const rs = rules();
   return {
     cli: { createApp: createAppOptions(), audit: await auditOptions(), assess: assessCommands(), blueprint: blueprintCommands(), design: designCommands(), mcp: await mcpTools() },
-    packages: packages(), rules: rs, sources: sources(rs), licences: LICENCES, cards: await cards(), coverage: await coverage(), notices: notices(),
+    guide: await guide(), packages: packages(), rules: rs, sources: sources(rs), licences: LICENCES, cards: await cards(), coverage: await coverage(), notices: notices(),
   };
 }
 

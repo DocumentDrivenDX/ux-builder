@@ -187,18 +187,35 @@ UX assessment in CONTRACT-006 and the episode trace in CONTRACT-007.
 
 Node 20 or later, React 19.
 
-**A new app:**
+**Design first** (a new idea, no app yet):
 
 ```sh
-npm create @ux-builder/app my-app -- --modality responsive-web --theme databricks
+npm create @ux-builder/app@latest my-idea
+cd my-idea && npm install
+```
+
+This makes a design folder (the guided design, no app code) and asks nothing.
+In Claude Code, type `/ux-builder-design`: the agent opens with an overview of
+its eight steps, explains each term, shows you everything it produces for
+your feedback and approval, and asks for the modality during the design.
+When the design is ready it asks for the theme (a released one, or one made
+from your logo in the theme builder) and builds the app in the same folder:
+`npm create @ux-builder/app@latest . -- --theme <name>`. Use `@latest`, or
+`npm create` may reuse an older starter it cached. The
+[Design page](https://documentdrivendx.github.io/ux-builder/?p=start/design)
+walks through it, and how to keep the guide current.
+
+**A new app at once:**
+
+```sh
+npm create @ux-builder/app@latest my-app -- --modality responsive-web --theme databricks
 cd my-app && npm install && npm run dev
 ```
 
 `--modality` takes one or more of `responsive-web`, `chat` and `hybrid-chat`,
-comma-separated. In a terminal, without it, the starter asks; without a
-terminal (an agent, CI) it is required, and the starter writes nothing
-without it. Native modalities (`ios`, `android`, `macos`, `windows`) are
-future ones and are refused.
+comma-separated. Without it, the starter makes a design folder instead (above).
+Native modalities (`ios`, `android`, `macos`, `windows`) are future ones and
+are refused.
 
 The starter comes with:
 
@@ -208,7 +225,8 @@ The starter comes with:
 - the empty shell of its modalities, built only from SDK components: an
   `AppShell` with a Home screen, a full-screen `Conversation`, or a
   conversation whose replies draw Adaptive Cards. There is no sample data;
-- `app.blueprint.json` and `npm run check:blueprint`;
+- the blueprint, `docs/ux-builder/blueprint/app.blueprint.json`, and
+  `npm run check:blueprint`;
 - the latest HELIX release (its skill, the `.helix.yml` marker and the
   starter HELIX documents), `ux-assessment.yml`, and a Playwright test that
   cites the first story's criteria;
