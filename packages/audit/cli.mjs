@@ -23,7 +23,7 @@
      --write-baseline <f>  write every finding to this file, to adopt the audit in an existing app
      --baseline <f>        leave out the findings in this file: they neither show as new nor fail the
                            build; those no longer found are listed as resolved
-     --blueprint <f>       the app's blueprint (app.blueprint.json): its supports.modalities choose the
+     --blueprint <f>       the app's blueprint (docs/ux-builder/blueprint/app.blueprint.json): its supports.modalities choose the
                            widths and rule families; pages map to its screens (data-piq-screen="<screen id>",
                            else the screen's path) and the report follows its journeys, step by step;
                            AI-marked content on a screen whose blueprint declares no AI role is reported

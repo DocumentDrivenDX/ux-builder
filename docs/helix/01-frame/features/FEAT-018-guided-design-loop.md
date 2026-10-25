@@ -222,7 +222,7 @@ assumptions are untested. Next: test with users."
 | Area | User question or job | Feature responsibility | Phase |
 |------|----------------------|------------------------|-------|
 | Setup | "How do I install and start it?" | The package, the CLI, new and existing apps, full loop and change mode, stage 1 homes | 1 |
-| Guide | "What do we do next?" | One orchestrating skill, its state, checkpoints, the four-activity workflow | 1 |
+| Guide | "What do we do next?" | One orchestrating skill, its state, checkpoints, the eight steps (GDL-79) | 1 |
 | Simplicity | "Does this earn its complexity?" | Challenge questions, the standing objective, the complexity delta | 1 |
 | Define | "What are we building, and for whom?" | The experience brief | 1 |
 | Understand | "What do users need, and how sure are we?" | Hypotheses, evidence synthesis, evidence-linked jobs | 2 |
@@ -280,7 +280,10 @@ GDL-72. **A new app.** `npm create @ux-builder/app` adds
 `.claude/skills/`, writes an empty design state, and points to
 `/ux-builder-design` from `CLAUDE.md`, `AGENTS.md` and the starter's empty
 Home panel. `--mcp` also writes `.mcp.json` for the ux-builder MCP server;
-without it, none is written.
+without it, none is written. *[Amended 2026-10-25 — alignment]* This is the app made at once,
+with `--modality`. Without it the starter makes a design folder (GDL-81),
+which points to `/ux-builder-design` from its `CLAUDE.md`, `AGENTS.md` and
+`README.md`; the app built there later gets everything above.
 
 GDL-73. **An existing app.** `npx ux-builder-design init` installs the
 skill and writes an empty design state. It handles three starting points:
@@ -345,7 +348,7 @@ and shows their results as pages.
 
 GDL-02. The guide keeps a **design state** in a committed file,
 `.ux-builder/design-state.json`, with a JSON Schema. It holds:
-- the current activity and the checkpoints passed or skipped;
+- the current step (GDL-79) and its activity, and the checkpoints passed or skipped;
 - open questions;
 - assumptions and hypotheses, each with a status (*assumed*, *hypothesis*,
   *confirmed*, *refuted*) and its evidence;
@@ -366,8 +369,11 @@ describes:
   generation, accessibility testing (the audit) and analytics (journey
   events, Phase 6).
 
-GDL-04. The human works through four recurring activities, and the guide
-moves between the stages inside them without being asked:
+GDL-04. *[Amended 2026-10-25 — alignment]* The human works through the **eight steps** of
+GDL-79 ("Step n of 8"), which are the structure they see. The steps fall
+into four recurring activities, which the design state records and the
+guide uses internally; it moves between the stages inside them without
+being asked:
 
 | Activity | Stages | What the human does |
 |---|---|---|
@@ -384,6 +390,12 @@ GDL-05. The guide stops at three **core checkpoints**:
 2. after Explore: the interaction model to pursue;
 3. after Validate: whether the validated experience goes to production
    implementation.
+
+*[Amended 2026-10-25 — alignment]* In the eight steps: `core-1` closes steps 1 to 3, `core-2`
+closes step 4 (the approach is chosen from the alternatives; step 5 then
+designs its structure), and `core-3` closes steps 5 to 7. The person
+cannot move past a step a checkpoint closes until that checkpoint has
+passed or been skipped with a reason.
 
 GDL-06. The guide also stops at three **conditional checkpoints**:
 - before a significant design change to something already validated;
@@ -550,7 +562,10 @@ at its top (until now `docs/ux/`), the blueprint and its alternatives in
 `blueprint/` (until now `app.blueprint*.json` at the app's top),
 exploratory prototypes in `prototypes/`, HELIX proposals in
 `helix-proposals/`, and comparisons, drawings and wireframes in their own
-folders. The design state and the trace stay in `.ux-builder/`. Every
+folders. The design state and the trace stay in `.ux-builder/`. *[Amended 2026-10-25 — alignment]*
+Stories written before this requirement name the old paths (`docs/ux/`,
+`app.blueprint*.json` at the app's top, `prototype/`); in an app on the
+new layout each reads as the same place under `docs/ux-builder/`. Every
 ux-builder tool finds these paths the same way; an app made before stays
 readable where it is until `ux-builder-design migrate` moves it (with
 `git mv`, rewriting its own references), and the tools say so. Before
@@ -570,6 +585,10 @@ one from their brand when no released theme fits, and builds the app in
 the same folder (`npm create @ux-builder/app . -- --theme <name>`) from
 the recorded modality and the designed blueprint, keeping every design
 document. Giving `--modality` still makes the app at once, as before.
+*[Amended 2026-10-25 — alignment]* "Ready" means: `core-2` has passed (the approach is chosen) and
+the modality is recorded; the guide builds the app then, before step 6's
+validated prototype (GDL-44), which needs it. The starter itself checks
+only what it can: a recorded modality and a blueprint with no errors.
 
 ##### Tasks (stage 3)
 
@@ -627,7 +646,8 @@ mobile suitability, personalization potential). Each judgment is labelled
 a preliminary judgment, not a measured result, with its reasoning.
 
 GDL-30. `blueprint compare` writes one HTML page for two or more
-alternatives: their flows and wireframes side by side, the scores with
+alternatives: their flows side by side (*Amended 2026-10-25 — alignment* wireframes come
+from `blueprint wireframes`, which waits for the modality, GDL-80), the scores with
 the best value per dimension marked, the agent's judgments, the rubric's
 predicted column (GDL-38) and each alternative's check findings. It is
 deterministic. *(Built 2026-10-23: the rubric's predicted column is
@@ -694,7 +714,7 @@ after that.
 ##### Exploratory prototypes (stage 6, level 1)
 
 GDL-40. `blueprint prototype --explore` writes a **disposable, clickable
-prototype** for each alternative, to `prototype/<alternative>/`, outside
+prototype** for each alternative, to `docs/ux-builder/prototypes/<alternative>/` (GDL-80; `prototype/` in an app not yet migrated), outside
 the app's source:
 - each screen renders its pattern with placeholder content;
 - each action navigates to its `to`;
@@ -706,7 +726,7 @@ GDL-41. The prototype can be generated in more than one interface design
 for the same flow (for example two design systems' variants), so the human
 can compare presentation as well as flow.
 
-GDL-42. Lint refuses any import of `prototype/` from the app's source.
+GDL-42. Lint refuses any import of an exploratory prototype (`docs/ux-builder/prototypes/`, or `prototype/` on the old layout) from the app's source.
 Exploratory prototypes are deleted or archived when their question is
 answered.
 
@@ -930,7 +950,7 @@ The proposal's seven connected artifacts, and its rubric:
 - [US-120 — See the complexity a blueprint change adds](../user-stories/US-120-see-the-complexity-a-blueprint-change-adds.md)
 - [US-121 — Make an everyday change in change mode](../user-stories/US-121-make-an-everyday-change-in-change-mode.md)
 - [US-122 — See the experience brief with confirmed, assumed and hypothesis points](../user-stories/US-122-see-the-experience-brief-with-confirmed-assumed-and-hypothesis-points.md)
-- [US-123 — New artifact types live in docs/ux and are validated](../user-stories/US-123-new-artifact-types-live-in-docs-ux-and-are-validated.md)
+- [US-123 — New artifact types live in docs/ux-builder and are validated](../user-stories/US-123-new-artifact-types-live-in-docs-ux-and-are-validated.md)
 
 **Phase 2**
 
@@ -996,7 +1016,7 @@ The proposal's seven connected artifacts, and its rubric:
   analyse it and says why.
 - **Journey events name a journey the blueprint no longer has**: insights
   reports them as unmatched rather than dropping them.
-- **Someone imports from `prototype/` in app code**: lint fails.
+- **Someone imports from an exploratory prototype in app code**: lint fails.
 
 ## Success Metrics
 

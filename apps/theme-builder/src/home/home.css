@@ -82,6 +82,17 @@
 /* Plan, check, build, assess: four linked steps in a row */
 .uxh-loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--piq-space-4); margin: 0; padding: 0; list-style: none; }
 .uxh-loop > li { display: flex; }
+/* The guided design: an item shown for review, the eight steps, and the two ways to start. */
+.uxh-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--piq-space-1) var(--piq-space-3); margin: 0; }
+.uxh-item dt { font-weight: var(--piq-font-weight-strong); color: var(--piq-color-text-muted); }
+.uxh-item dd { margin: 0; }
+.uxh-steplist { display: grid; gap: var(--piq-space-3); margin: 0; padding: 0; list-style: none; }
+.uxh-steplist > li { display: flex; gap: var(--piq-space-3); align-items: flex-start; }
+.uxh-steplist h3 { margin: 0; font-size: var(--piq-font-size-body); }
+.uxh-steplist p { margin: 0; color: var(--piq-color-text-muted); }
+.uxh-steplist .uxh-loop__n { flex: none; }
+.uxh-paths2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--piq-space-8); }
+.uxh-paths2 h3 { margin: 0; }
 .uxh-loop__n { display: inline-grid; place-items: center; inline-size: 1.75rem; block-size: 1.75rem; border-radius: var(--piq-pill-radius); background: var(--piq-color-accent); color: var(--piq-color-on-accent); font-size: var(--piq-font-size-small); font-weight: var(--piq-font-weight-strong); }
 .uxh-loop__go { display: inline-flex; align-items: center; gap: var(--piq-space-1); margin-block-start: auto; font-weight: var(--piq-font-weight-strong); color: var(--piq-color-accent); }
 

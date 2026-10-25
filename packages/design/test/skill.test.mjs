@@ -6,6 +6,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
+import * as design from "../index.mjs";
 
 const SKILL = readFileSync(new URL("../skill/ux-builder-design/SKILL.md", import.meta.url), "utf8");
 
@@ -27,10 +28,10 @@ describe("the skill", () => {
     const s = section("The four activities");
     const rows = Object.fromEntries([...s.matchAll(/^\| (Define|Explore|Experience|Validate) \| ([^|]+) \| ([^|]+) \|$/gm)].map(([, a, stages, human]) => [a, { stages, human }]));
     assert.deepEqual(Object.keys(rows), ["Define", "Explore", "Experience", "Validate"]);
-    assert.match(rows.Define.stages, /Define intent.*Understand users.*Define tasks/);
-    assert.match(rows.Explore.stages, /Optimize flows.*Design structure/);
-    assert.match(rows.Experience.stages, /Prototype/);
-    assert.match(rows.Validate.stages, /Validate.*Refine/);
+    // The steps inside each activity are the eight steps the person sees, by their names (GDL-79).
+    const names = design.STEPS.map((x) => x.name);
+    for (const [a, steps] of Object.entries({ Define: [1, 2, 3], Explore: [4, 5], Experience: [6], Validate: [7, 8] })) for (const n of steps) assert.match(rows[a].stages, new RegExp(`${n} ${names[n - 1]}`), `${a}: ${n} ${names[n - 1]}`);
+    assert.match(s, /The person sees eight steps \("Step n of 8"\)/);
     for (const { human } of Object.values(rows)) assert.ok(human.trim().length > 20);
     assert.match(s, /works with the evolving experience, not with the documents/);
     assert.match(s, /You keep the\s+documents up to date/);
@@ -57,6 +58,8 @@ describe("the skill for a new app (US-114)", () => {
     for (const c of ["Requirements analysis", "UX research", "Task modelling", "Interaction optimization", "UX design", "Prototyping", "UX evaluation", "Artifact management"]) assert.match(caps, new RegExp(`\\| ${c} \\|`));
     const acts = section("The four activities");
     for (const a of ["Define", "Explore", "Experience", "Validate"]) assert.match(acts, new RegExp(`^\\| ${a} \\|`, "m"));
+    assert.match(acts, /eight steps \("Step n of 8"\)/);
+    assert.match(section("Where the person is"), /"Step 2 of 8: Understand users\."/);
     const open = section("Opening every session");
     assert.match(open, /ux-builder-design status/);
     assert.match(open, /tell the person where things stand/i);

@@ -54,9 +54,9 @@ The operator created an app and was never asked what it was; the starter assumed
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-096-AC1 | a terminal | `npm create @ux-builder/app acme` runs with no `--modality` | it asks which modalities the app has as a multi-select of `responsive-web`, `chat` and `hybrid-chat`, and creates the app for the ones chosen |
+| AC1 | US-096-AC1 | a terminal | `npm create @ux-builder/app acme` runs with no `--modality` | *(amended, GDL-81)* it asks nothing and makes a design folder; the modality is asked during the design |
 | AC2 | US-096-AC2 | `--modality responsive-web,hybrid-chat` | the starter runs | it does not ask, and the blueprint's `supports.modalities` is exactly those two, with size classes and inputs derived by FEAT-014's matrix |
-| AC3 | US-096-AC3 | no terminal and no `--modality` (as for an agent or CI) | the starter runs | it exits 1 listing the modalities, writes nothing and assumes none |
+| AC3 | US-096-AC3 | no terminal and no `--modality` (as for an agent or CI) | the starter runs | *(amended, GDL-81)* a design folder: no app code, no modality assumed |
 | AC4 | US-096-AC4 | `--modality ios` or an unknown name | the starter runs | it exits 1 saying which modalities are available now and that native apps are future |
 | AC5 | US-096-AC5 | `--blueprint plan.json` whose `supports.modalities` differs from `--modality` | the starter runs | it exits 1 naming both |
 

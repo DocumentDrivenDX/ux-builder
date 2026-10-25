@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, test } from "node:test";
@@ -41,7 +41,10 @@ describe("US-149-AC4: modality before any wireframe or prototype", () => {
     r = explore();
     assert.equal(r.status, 0, r.stderr);
     assert.ok(existsSync(join(dir, "docs/ux-builder/prototypes/list-first/index.html")));
-    assert.notEqual(run(CLI, dir, "wireframes").status, 1, "wireframes no longer wait for the modality");
+    const drawn = run(CLI, dir, "wireframes");
+    assert.notEqual(drawn.status, 1, "wireframes no longer wait for the modality");
+    // The HTML is drawn even where Chromium is missing for the PNGs (exit 2 then).
+    assert.ok(existsSync(join(dir, "docs/ux-builder/wireframes")) && readdirSync(join(dir, "docs/ux-builder/wireframes")).some((f) => f.endsWith(".html")), drawn.stderr);
 
     // A blueprint whose supports changed since the answer asks again.
     const bp = JSON.parse(readFileSync(join(dir, BP), "utf8"));

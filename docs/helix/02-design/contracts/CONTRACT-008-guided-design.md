@@ -70,9 +70,14 @@ The package makes no network request and calls no model (ADR-036 rule 3).
 
 Every command accepts `--json` (machine output on stdout), `--app <dir>`
 (default: the nearest folder at or above the working directory with
-`.ux-builder/`, `docs/ux-builder/blueprint/app.blueprint.json` or, on the old layout, `app.blueprint.json`) and prints a one-line summary
-otherwise. Every command has an exported function of the same name in
-camelCase that returns the `--json` object.
+`.ux-builder/`, `docs/ux-builder/blueprint/app.blueprint.json` or, on the old layout, `app.blueprint.json`; else the git root; else the working directory) and prints a one-line summary
+otherwise. Every command has an exported function that returns the `--json`
+object, named for the command in camelCase where that is unambiguous; the
+others are `setMode` (`mode`), `setStep` (`step`), `confirmModality`
+(`modality`), `checkpoint` (`state checkpoint`), `excerptAdd` (`evidence
+excerpt add`) and `observeImport` (`observe import`). `schema/output.schema.json`
+describes each command's `--json` under the function's name, except
+`mode`, `step` and `modality`, which keep the command's.
 
 | Command | Does | Writes |
 |---|---|---|
@@ -83,28 +88,28 @@ camelCase that returns the `--json` object.
 | `state checkpoint <id> (--answer <text> [--declined] \| --skip --reason <text>)` | Records a checkpoint answer (`--declined`: the person said no or not yet; never counts as passed) or skip; also writes a trace `decision`. A passed `core-1` moves the activity to `explore`, `core-2` to `experience` (forward only), replacing a `next` that waited on a passed checkpoint with the activity's first step | the state, the trace |
 | `mode full\|change [--why <text>]` | Sets the working mode | the state |
 | `baseline` | Drafts the current-state baseline from the blueprint, HELIX documents and the latest audit and assessment runs | `docs/ux-builder/baseline.md` |
-| `brief` | Writes the experience brief from the PRD, stories and state, in seven sections: Product, Target users, Primary outcome, Primary jobs, Experience principles, Constraints, Open questions; each point marked with its status, and each hypothesis with what would confirm it. Principles a check can express go to `.ux-builder/principles.json`, which `ux-builder-blueprint check` applies as project rules | `docs/ux-builder/brief.md`, `docs/ux-builder/brief.html`, `.ux-builder/principles.json` |
-| `evidence add <file> --kind <kind> [--date] [--source]` | Records a research source and its masked excerpts | `docs/ux-builder/evidence/EV-<n>.md` |
+| `brief [--name <product>]` | Writes the experience brief from the PRD, stories and state, in seven sections: Product, Target users, Primary outcome, Primary jobs, Experience principles, Constraints, Open questions; each point marked with its status, and each hypothesis with what would confirm it. Principles a check can express go to `.ux-builder/principles.json`, which `ux-builder-blueprint check` applies as project rules | `docs/ux-builder/brief.md`, `docs/ux-builder/brief.html`, `.ux-builder/principles.json` |
+| `evidence add <file> --kind <kind> [--date] [--source] [--title]` | Records a research source and its masked excerpts | `docs/ux-builder/evidence/EV-<n>.md` |
 | `evidence list` | Lists sources | nothing |
 | `evidence excerpt add <EV-n> --participant <name or Pn> --text <quote> [--at <time>] [--role <r>]` | Adds one quote the synthesis cites to the record's Excerpts, masked, by pseudonym (a name gets the lowest free one, kept in `.ux-builder/participants.local.json`), and lists the participant | that record |
-| `decision add --question <q> --option <o>... --choice <o> --why <text> [--assumption <a>]... [--validation <v>]` | Writes an interaction decision record, status `not-tested`, and a trace `decision` event carrying its `UXD-` ID | `docs/ux-builder/decisions/UXD-<n>.md`, the trace |
+| `decision add --question <q> --option <o>... --choice <o> --why <text> [--assumption <a>]... [--validation <v>] [--link <HELIX ID>]...` | Writes an interaction decision record, status `not-tested`, and a trace `decision` event carrying its `UXD-` ID | `docs/ux-builder/decisions/UXD-<n>.md`, the trace |
 | `decision status <UXD-n> tested\|refuted [--evidence <id>]` | Updates a decision's validation status | that record |
-| `impact "<change>" [--apply]` | Lists every artifact the change reaches, and `checkpointRequired: "significant-change"` when the change touches an item whose decision is `tested`; with `--apply`, makes the blueprint change, regenerates prototypes and the test kit, writes `propose` patches and a decision | listed files, with `--apply` |
+| `impact "<change>" [--apply --set <changed blueprint>]` | Lists every artifact the change reaches, and `checkpointRequired: "significant-change"` when the change touches an item whose decision is `tested`; with `--apply`, makes the blueprint change, regenerates prototypes and the test kit, writes `propose` patches and a decision | listed files, with `--apply` |
 | `trace <id>` | Everything linked to a `J-`, `T-`, journey, screen, `UXD-`, `TK-` or `F-` ID, upstream and down | nothing |
 | `test-kit [--journey <id>]...` | Writes a usability test kit from the journeys; `observations.csv` has the columns participant, task, completed, seconds, errors, assists, remark, problem (a problem's name in the same words across sessions); a journey with no criteria is warned about. Scenario goals drop pattern names and screen titles and action labels of two words or more (a one-word title such as "River" is the user's word too) and are said in the second person; writing a kit moves the activity to `validate` | `docs/ux-builder/tests/TK-<n>/` |
 | `observe import <file> --kit <TK-n>` | Imports observations (CSV or JSON) as findings with `source: human`, one per participant and task, ID `F-` + 8 hex of kit, pseudonym and task (stable on re-import); real names, email addresses and phone numbers masked before writing, names kept in `.ux-builder/participants.local.json`; rows for a task not in the kit reported and skipped. A new pseudonym is the lowest not already used, in the local names or by the sheet itself; a sheet kept under `docs/ux-builder/` is rewritten with pseudonyms and masked remarks | `docs/ux-builder/tests/TK-<n>/findings.json` |
 | `transcript add <file> --session <id> --consent-confirmed [--by <name>] [--kit <TK-n>] [--cite <time>]...` | Records the masked lines cited by timestamp, by pseudonym, as kind `transcript` with the session and consent, and the consent in the design state's `consents[]`; refuses audio and video files | `docs/ux-builder/evidence/EV-<n>.md` |
 | `rubric [--alternative <name>]` | The rubric with predicted and observed columns; with observations, `observedTasks[]` (per kit task: completion rate, median seconds, error rate, assists) and `recurring[]` (problems seen in two or more sessions) | nothing |
 | `report` | Writes the UX evaluation report: method, tasks, measures, the rubric (predicted, agent-measured, observed), findings by journey labelled human observation or agent recommendation (a human finding also cites the transcript records of that person's session in the same kit: `kit`, or a session naming it), recommendations and what was not tested; links the kits and the earlier report (`follows`). An observed `contradicts` verdict highlights the dimension and moves assumptions with that `dimension` to `refuted`; `supports` moves them to `confirmed`; with no human observation nothing changes | `docs/ux-builder/evaluations/UER-<n>.md` |
-| `route <F-id>... [--decision <UXD-n> --status tested\|refuted]` | The findings chosen at `core-3` as a proposed patch adding rows to HELIX's improvement backlog (an existing `improvement-backlog` document, else a new one at `<root>/06-iterate/improvement-backlog.md`); with `--decision`, `decision status` with the latest report as evidence | `helix-proposals/backlog/improvement-backlog.patch` |
+| `route <F-id>... [--decision <UXD-n> --status tested\|refuted]` | The findings chosen at `core-3` as a proposed patch adding rows to HELIX's improvement backlog (an existing `improvement-backlog` document, else a new one at `<root>/06-iterate/improvement-backlog.md`); with `--decision`, `decision status` with the latest report as evidence | `docs/ux-builder/helix-proposals/backlog/improvement-backlog.patch` |
 | `ready [--for testing\|production]` | `--for testing`: the validated prototype passes lint, `check:blueprint` and the audit. Both also need the audit report newer than the blueprint, and every blueprint screen an audited page (`data-piq-screen` or path). `--for production` (default): also every covered criterion cited by a test, and the faked data and error handling listed, before checkpoint `core-3` (ADR-037 rule 4) | nothing |
 | `insights <events.jsonl> [--support <file>] [--feedback <file>] [--date YYYY-MM-DD]` | Per-journey production insights: started, completed, completion, the most abandoned step, failed searches, errors shown, feature use (step events per screen) and median seconds per step (by `session` when events carry one); events of journeys the blueprint lacks listed as unmatched. Writes evidence records (kind `analytics`, and `support` and `feedback` with their masked entries that mention a journey by ID or screen title), cites them in the jobs that the observed journeys' tasks serve (a hypothesis becomes confirmed, low confidence medium), and a JSON sidecar the rubric's observed column reads. Reads only the given files and the app's own | `docs/ux-builder/insights/INS-<yyyy-mm-dd>.md` and `.json`, `docs/ux-builder/evidence/EV-<n>.md` |
 | `diagnose --insight <INS-date> --observation <o> --explanation <e>... --hypothesis <h> --alternative <name>` | Records a diagnosis: at least two explanations, and an existing alternative | `diagnoses[]`; the insight's Diagnosis section |
-| `experiment start --decision <UXD-n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>` | Opens an experiment, only with one more passed `experiment` checkpoint than experiments started; its hypothesis from the latest diagnosis of that variant. Metrics with no `<root>/06-iterate/metrics/<name>.yaml` are proposed as metric-definition patches | `docs/ux-builder/experiments/EXP-<n>.md`, `helix-proposals/metrics/<name>.patch` |
+| `experiment start --decision <UXD-n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>` | Opens an experiment, only with one more passed `experiment` checkpoint than experiments started; its hypothesis from the latest diagnosis of that variant. Metrics with no `<root>/06-iterate/metrics/<name>.yaml` are proposed as metric-definition patches | `docs/ux-builder/experiments/EXP-<n>.md`, `docs/ux-builder/helix-proposals/metrics/<name>.patch` |
 | `experiment end <EXP-n> --result <file>` | Compares the success metric (`control`, `variant`) and each guardrail (`{ metric, control, variant, better: lower\|higher }`), records the hypothesis as supported only when the metric improved and every guardrail held (a guardrail holds unless it got worse by more than its `tolerance`: the result's, else the HELIX metric definition's; a number, a percent of the control, or a number with a unit), and sets `next` to ask `release` | that record |
 | `validate` | Checks every `docs/ux-builder/` document's frontmatter, ID, template sections and links | nothing |
 | `overview` | The eight steps (1 Define intent, 2 Understand users, 3 Model tasks, 4 Explore alternatives, 5 Design the structure, 6 Prototype, 7 Test with people, 8 Refine and improve), each with what the person does, what comes out, its terms and the checkpoint closing it; and change mode's four steps | nothing |
-| `step next\|<n>` | Moves the loop to the next (or the given) step of its mode, setting the activity; `next` refuses while items of the current step await review | the state's `step` |
+| `step next\|<n>` | Moves the loop to the next (or the given) step of its mode, setting the activity; `next` refuses while items of the current step await review, and in the full loop neither form moves past a step that `core-1`, `core-2` or `core-3` closes until it has passed or been skipped (exit 2) | the state's `step` |
 | `explain [<term>] [--step <n>]` | What a term means and why it is valuable, from `glossary.json`; with `--step`, the terms that step introduces; with neither, every term. An unknown term exits 2 listing the known ones | nothing |
 | `review [list]` | Every item not approved in its current form, in step order: `user:U-n`, `job:J-n`, `evidence:EV-n`, `brief`, `story:US-n` (stories the blueprint's journeys cite), `task:T-n`, `rule:BR-n`, `journey:J-x`, `alternative:<name>`, `decision:UXD-n`, `screen:<id>`, `kit:TK-n`, `report:UER-n`, `insight:INS-date`, `experiment:EXP-n` | nothing |
 | `review show <item>` | The item's content, to present inline in the conversation | nothing |
@@ -198,6 +203,7 @@ folder says the app is not built and what the build needs.
 | `consents[]` | `{ session, confirmed: true, by?, date, evidence? }` | Consent confirmed per test session before its transcript was analysed (ADR-039) |
 | `modality` | `{ modalities[], sizeClasses[], answer, at }` | The person's answer to which modalities and screen sizes the app is for (GDL-80) |
 | `app` | `{ builtAt, theme, modalities[], by }` | In a design folder, the app's build in place (GDL-81); absent until then |
+| `modeReason` | string | Why the mode was set (`mode --why`) |
 | `step` | integer | The step of the current mode the person is on (0: an existing app's baseline) |
 | `reviews[]` | `{ item, hash, answer, at }` | Approvals: the person's words and the content approved; an item whose content changes needs approving again |
 | `feedback[]` | `{ id: "FB-<n>", item, text, status: open\|addressed, response?, at }` | The person's feedback on an item, and how it was addressed |
@@ -310,7 +316,7 @@ only when it is there. Every command's `--json` output is described by
 - Commands added to `ux-builder-blueprint`: `score [file]`,
   `compare <a> <b> [...] [--out dir]`, `simplify [file]`,
   `alternative new <name>`, `alternative choose <name> --reason <text>`,
-  `prototype --explore [--alternative <name>] [--design-system <ds>]...`
+  `prototype --explore [--alternative <name>] [--design-system <ds>]... [--question <q>]`
   and `prototype --archive <name>` (moves it to `.archive/` in the prototypes folder),
   `check --diff <base>`.
 - Rules added: `simplicity.delta-decided` (a journey grows without a
@@ -375,7 +381,7 @@ interaction decision record carries `ux: "UXD-<n>"`.
 | `validate` on a document missing a template section | Exit 1, the document and section named |
 | `insights` with events naming an unknown journey | Exit 0; those events reported as unmatched |
 | `experiment start` without a passed `experiment` checkpoint | Exit 2, refusal |
-| A checkpoint answered while items of the steps it closes await review (`core-1`: steps 1 to 3; `core-2`: step 4; `core-3`: steps 5 to 7; `experiment`, `release`: step 8), or `step next` while the current step's do | Exit 2 naming the items; nothing recorded (a skip with a reason still records) |
+| A checkpoint answered while items of the steps it closes await review (`core-1`: steps 1 to 3; `core-2`: step 4; `core-3`: steps 5 to 7; `experiment`, `release`: step 8), or `step next` while the current step's items await review, or `step` past a step an unpassed core checkpoint closes | Exit 2 naming the items; nothing recorded (a skip with a reason still records) |
 | `review approve` with open feedback on the item | Exit 2 naming the feedback |
 | `diagnose` with fewer than two explanations, or an unknown alternative | Exit 2; nothing written |
 

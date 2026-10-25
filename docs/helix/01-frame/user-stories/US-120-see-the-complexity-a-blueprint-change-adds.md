@@ -35,7 +35,7 @@ ddx:
 ## Walkthrough
 
 1. A pull request adds an activity picker before the map.
-2. `check --diff main:app.blueprint.json` reports J-find: +1 screen, +1 step, +1 required input, +1 decision.
+2. `check --diff main:docs/ux-builder/blueprint/app.blueprint.json` reports J-find: +1 screen, +1 step, +1 required input, +1 decision.
 3. No decision names the picker, so the check warns.
 
 ## Acceptance Criteria

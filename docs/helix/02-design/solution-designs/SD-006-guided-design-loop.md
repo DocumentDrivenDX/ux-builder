@@ -34,6 +34,12 @@ of work.
 
 ## Components
 
+*[Amended 2026-10-25 — FEAT-018 GDL-77 to GDL-81, alignment]* **Paths.** CONTRACT-008's Layout section governs every path
+(`@ux-builder/ui/blueprint/paths`). The design documents are in
+`docs/ux-builder/` (until GDL-80, `docs/ux/`), the blueprint and its
+alternatives in `docs/ux-builder/blueprint/`, exploratory prototypes in
+`docs/ux-builder/prototypes/`; an app not yet migrated keeps the old paths.
+
 | Component | Package | New or changed |
 |---|---|---|
 | `ux-builder-design` command and its functions | `@ux-builder/design` | New |
@@ -54,7 +60,7 @@ of work.
 person ──talks──▶ agent ──reads──▶ skill (ux-builder-design)
                     │
                     ├─runs─▶ ux-builder-design ─┬─ design state (.ux-builder/)
-                    │                            ├─ docs/ux/*  (templates from the package)
+                    │                            ├─ docs/ux-builder/*  (templates from the package)
                     │                            ├─ trace (decisions, checkpoints)
                     │                            └─ propose ─▶ HELIX patches (ADR-030)
                     ├─runs─▶ ux-builder-blueprint (score, compare, simplify, prototype, check --diff)
@@ -113,20 +119,20 @@ Each `artifacts/<type>/` has `meta.yml` (id pattern, output path, required
 sections, links it expects), `template.md`, `prompt.md` (what the agent
 fills in, and what it must not invent) and `example.md` (the river-finding
 app). `validate` reads `meta.yml`: frontmatter shape, ID pattern, required
-headings, links that resolve (to `docs/ux/` or HELIX IDs found through the
+headings, links that resolve (to `docs/ux-builder/` or HELIX IDs found through the
 marker), and the type rules in CONTRACT-008. Each example passes
 `validate` in the package's tests.
 
 The `usability-evaluation-report` template is the one already proposed to
 HELIX in `docs/proposals/helix-ux-artifact-types`, copied with its
-frontmatter adapted to `docs/ux/`.
+frontmatter adapted to `docs/ux-builder/`.
 
 ## Algorithms
 
 ### Baseline (GDL-74)
 
 Reads the blueprint, the HELIX PRD and stories (through the marker), the
-latest audit report and assessment run. Writes `docs/ux/baseline.md` with
+latest audit report and assessment run. Writes `docs/ux-builder/baseline.md` with
 the current destinations, screens, journeys, findings by journey and a
 draft brief, jobs and task list, every item an `A-<n>` assumption with
 status `current-state`. The agent then edits it with the person.
@@ -211,7 +217,7 @@ placeholder content in `plain`, or a named design system with
 their target's page, `back` uses history, `state:` actions switch the
 state, and a toolbar switches states and size classes. Each page carries a
 "Prototype: <question>" banner and `data-piq-screen`. Output:
-`prototype/<alternative>/index.html` and one page per screen and state.
+`docs/ux-builder/prototypes/<alternative>/index.html` and one page per screen and state.
 
 ### Readiness (GDL-45, GDL-46)
 
@@ -265,6 +271,57 @@ no work. `insights` groups exported events by journey and step:
 completion rate, abandonment by step, failed searches, median time per
 step, and matches support and feedback rows to journeys by the IDs or
 screen paths they carry.
+
+### Target users and business rules (GDL-77, GDL-78)
+
+`docs/ux-builder/users.md` is a document type (`users`) whose table rows
+(`U-<n>`) `documents.usersTable` parses; the brief's Target users section
+reads only it, and jobs, tasks and test-kit scenarios cite `U-` IDs.
+Business rules stay in HELIX as `**BR-<n>** — <rule>`
+(`documents.businessRules` reads them through the marker); blueprint tasks
+and journey steps cite them in `rules`, and the blueprint's
+`businessRules[]` designs each (trigger, before, blocked, recover).
+`validate` fails a citation HELIX does not define or a cited rule with no
+designed experience; `testKit`, `report`, `trace` and `impact` follow
+rules like any other node in the graph.
+
+### The guided conversation (GDL-79)
+
+`process.mjs` holds the eight steps and change mode's four (name,
+activity, what the person does, what comes out, the terms introduced) and
+`CLOSES`, the steps each checkpoint closes. `overview`, `explain` (from
+`glossary.json`) and `step` print from it; `status` leads with "Step n of
+8". `review.mjs` derives the reviewable items from the documents and the
+blueprint (`user:U-1`, `story:US-3`, `screen:map`…), each with its step
+and a hash of its content; `review approve` records the person's words and
+that hash, so a changed item needs approving again; feedback (`FB-<n>`)
+must be addressed before approval. A checkpoint, and `step next`, refuse
+while items of the steps they close await review; `step` also refuses to
+move past a step an unpassed core checkpoint closes.
+
+### Layout, migration and modality (GDL-80)
+
+`paths.mjs` (in `@ux-builder/ui`) defines the current and old layouts and
+`layoutOf(app)`: the old one only when old files exist and none of the
+new. Every writer resolves paths through it; `writable()` is the write
+fence. `migrate.mjs` plans the moves, refuses a destination that exists,
+uses `git mv` for tracked files and rewrites the app's references.
+`modality.mjs` validates the answer against the modality matrix, writes
+the blueprint's `supports` and records `state.modality`; the blueprint
+CLI's `wireframes` and `prototype --explore` call `modalityStatus` and
+exit 1 until the record matches the blueprint.
+
+### Design first (GDL-81)
+
+`@ux-builder/create-app`'s `design-first.mjs`: `startDesign` writes the
+design folder (its own templates in `design-folder/`, the skill and state
+through `init` with `startedFrom: design`, HELIX's skill and marker);
+`buildInPlace` checks the recorded modality, `--theme` and the blueprint,
+scaffolds the app in a temporary folder, refuses any file in the way, then
+moves it in, merges `package.json`, writes HELIX's starter documents from
+the folder's installed copy where none exists, records `state.app` and
+traces the create episode. `status` reports what a design folder's build
+needs (`BUILD_NEEDS`).
 
 ## Rubric and rule sources (FEAT-018 D-10)
 

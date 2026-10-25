@@ -41,8 +41,8 @@ The design state, `.ux-builder/design-state.json`, is committed with the app (D-
 
 - [ ] **US-117-AC1** — Given a design state with each field CONTRACT-008 defines, when it is validated, then it passes `design-state.schema.json`; a state with an unknown field or a bad assumption status fails, naming the path.
 - [ ] **US-117-AC2** — Given an app with a design state, when `state set assumptions[+]` adds an assumption and `state get --json` runs, then the assumption is returned with status `assumed`, an ID `A-<n>` and an empty evidence list, and the file is rewritten in a stable key order.
-- [ ] **US-117-AC3** — Given a state at Explore with two untested assumptions and a chosen alternative, when `ux-builder-design status` runs, then it prints the activity, the chosen alternative, the count of untested assumptions, open questions and the next action, in plain words.
-- [ ] **US-117-AC4** — Given the installed skill, when its text is read, then it describes the four activities with the stages inside each and what the human does in each, and says the human works with the experience while the guide keeps the documents.
+- [ ] **US-117-AC3** — Given a state at Explore with two untested assumptions and a chosen alternative, when `ux-builder-design status` runs, then it prints *[Amended 2026-10-25 — alignment, GDL-79/GDL-81]* the step ("Step n of 8"), the activity, the chosen alternative, the count of untested assumptions, open questions and the next action, in plain words.
+- [ ] **US-117-AC4** — Given the installed skill, when its text is read, then it describes *[Amended 2026-10-25 — alignment, GDL-79/GDL-81]* the eight steps the person sees and the four activities they fall into, with the stages inside each and what the human does in each, and says the human works with the experience while the guide keeps the documents.
 - [ ] **US-117-AC5** — Given the installed skill, when its text is read, then it names the guide's knowledge sources (rules, rubric, evidence, task model, decisions) and tools (assessment, prototype, audit, journey events).
 
 ## Edge Cases

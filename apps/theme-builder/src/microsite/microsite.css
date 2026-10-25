@@ -133,3 +133,5 @@
   .uxm-drawer .uxm-tree { margin-block-start: var(--piq-space-3); }
   .uxm-pager { grid-template-columns: 1fr; }
 }
+.uxm-scroll { overflow-x: auto; margin-block: var(--piq-space-3); }
+.uxm-scroll .uxm-table { min-inline-size: 40rem; }

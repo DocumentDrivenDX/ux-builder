@@ -28,7 +28,7 @@ ddx:
 
 ## Context
 
-Define runs through HELIX's grill and frame activities. `ux-builder-design brief` writes `docs/ux/brief.md` and a page from the PRD, stories and the design state. Principles the blueprint check can express become project rules.
+Define runs through HELIX's grill and frame activities. `ux-builder-design brief` writes `docs/ux-builder/brief.md` and a page from the PRD, stories and the design state. Principles the blueprint check can express become project rules.
 
 ## Walkthrough
 
@@ -38,7 +38,7 @@ Define runs through HELIX's grill and frame activities. `ux-builder-design brief
 
 ## Acceptance Criteria
 
-- [ ] **US-122-AC1** — Given a HELIX PRD, stories and a design state with one confirmed point, one assumption and one hypothesis, when `brief` runs, then `docs/ux/brief.md` has the seven sections CONTRACT-008 names, and each point carries its status.
+- [ ] **US-122-AC1** — Given a HELIX PRD, stories and a design state with one confirmed point, one assumption and one hypothesis, when `brief` runs, then `docs/ux-builder/brief.md` has the seven sections CONTRACT-008 names, and each point carries its status.
 - [ ] **US-122-AC2** — Given a brief with a hypothesis, when it is read, then the hypothesis lists what would confirm it.
 - [ ] **US-122-AC3** — Given an app with no HELIX marker, when `brief` runs, then it builds the brief from the design state alone and says HELIX was not found.
 - [ ] **US-122-AC4** — Given a brief principle "no mandatory account creation" and a blueprint whose J-find starts at a sign-in screen, when `ux-builder-blueprint check` runs, then it reports a finding from the project rule naming the principle.
@@ -52,7 +52,7 @@ Define runs through HELIX's grill and frame activities. `ux-builder-design brief
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-122-AC1 | a HELIX PRD, stories and a design state with one confirmed point, one assumption and one hypothesis | `brief` runs | `docs/ux/brief.md` has the seven sections CONTRACT-008 names, and each point carries its status |
+| AC1 | US-122-AC1 | a HELIX PRD, stories and a design state with one confirmed point, one assumption and one hypothesis | `brief` runs | `docs/ux-builder/brief.md` has the seven sections CONTRACT-008 names, and each point carries its status |
 | AC2 | US-122-AC2 | a brief with a hypothesis | it is read | the hypothesis lists what would confirm it |
 | AC3 | US-122-AC3 | an app with no HELIX marker | `brief` runs | it builds the brief from the design state alone and says HELIX was not found |
 | AC4 | US-122-AC4 | a brief principle "no mandatory account creation" and a blueprint whose J-find starts at a sign-in screen | `ux-builder-blueprint check` runs | it reports a finding from the project rule naming the principle |

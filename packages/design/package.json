@@ -9,6 +9,7 @@
   },
   "exports": {
     ".": "./index.mjs",
+    "./artifacts/*": "./artifacts/*",
     "./schema/*": "./schema/*",
     "./package.json": "./package.json"
   },

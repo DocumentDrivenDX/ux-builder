@@ -23,6 +23,8 @@ import auditPkg from "../../../../packages/audit/package.json";
 import mcpPkg from "../../../../packages/mcp/package.json";
 import tracePkg from "../../../../packages/trace/package.json";
 import designPkg from "../../../../packages/design/package.json";
+import glossary from "../../../../packages/design/glossary.json";
+import siteData from "virtual:microsite-data";
 
 /* The GitHub Pages home page's sections (tools/build-pages.mjs), shown by the
    site's shell (microsite/Site.jsx). They wear the SDK's own
@@ -53,13 +55,13 @@ function previewTokens(system, appearance) {
 }
 
 export const PACKAGES = [
+  { pkg: designPkg, icon: iconPencilRuler, what: "The guided design loop: an agent leads you from intent to a tested design, stopping for your decision at each checkpoint, with the brief, alternatives, prototypes, tests with people and production insights." },
   { pkg: tokensPkg, icon: iconPalette, what: "Every theme as CSS, every token's value as JSON, the fonts and brand artwork." },
   { pkg: uiPkg, icon: iconWand2, what: `React 19 widgets, screen patterns, the assistant and Adaptive Cards, ThemeProvider, ${ICONS} icons, the blueprint, lint rules and agent guidance.` },
   { pkg: createPkg, icon: iconSparkles, what: "A new React + Vite app on the SDK and on HELIX from its first commit, with lint, the audit, a browser test and CI." },
   { pkg: auditPkg, icon: iconScanEye, what: "Drives the running app through every theme in light and dark and reports anything off-theme; assesses a HELIX app's journeys." },
   { pkg: mcpPkg, icon: iconPlug, what: "The SDK over MCP: themes, widgets, tokens, icons and rules, and checks of blueprints and cards, for any coding agent." },
   { pkg: tracePkg, icon: iconHistory, what: "The episode trace each build of an app leaves in its repository, and the export its owner shares only by choice." },
-  { pkg: designPkg, icon: iconPencilRuler, what: "The guided design loop: an agent leads you from intent to a tested design, stopping for your decision at each checkpoint, with the brief, alternatives, prototypes, tests with people and production insights." },
 ];
 
 export function Copy({ text, label = "Copy" }) {
@@ -78,24 +80,44 @@ export function Hero() {
     <section className="uxh-hero" aria-labelledby="hero-h">
       <div className="uxh-wrap uxh-hero__grid">
         <div className="uxh-col">
-          <span className="uxh-eyebrow"><Icon icon={iconSparkles} />Open-source UI SDK for AI-era apps</span>
-          <h1 id="hero-h">Turn a logo into a theme. Ship apps that <em>can't drift</em> from it.</h1>
-          <p className="uxh-lede">UX Builder reads a brand, proposes palettes that already pass contrast, and pairs them with a design system. Your app, and the coding agents that write it, build with widgets and AI components that follow the theme everywhere: light, dark and every screen.</p>
-          <Command text="npm create @ux-builder/app@latest my-app" />
+          <span className="uxh-eyebrow"><Icon icon={iconSparkles} />Guided UX design and a UI SDK for AI-era apps</span>
+          <h1 id="hero-h">From an idea to an app people <em>can actually use</em>.</h1>
+          <p className="uxh-lede">Your AI coding agent guides you through the design, step by step, and shows you every piece for your approval. Then it builds the app on your brand, and checks it at every step: the plan before any code, the running app after, and real people last.</p>
+          <Command text="npm create @ux-builder/app@latest my-idea" />
           <div className="uxh-row">
-            <a className="uxh-btn uxh-btn--primary" href={`${ROOT}themes/?theme=ux-builder-databricks`}>See this theme's page<Icon name="arrow-right" /></a>
-            <a className="uxh-btn" href={REPO}>Star on GitHub</a>
+            <a className="uxh-btn uxh-btn--primary" href={href("start", "design")}>See how the design works<Icon name="arrow-right" /></a>
+            <a className="uxh-btn" href={href("start", "theme-from-logo")}>Make a theme from your logo</a>
           </div>
           <ul className="uxh-stats" aria-label="In the box">
+            <li><b>{siteData.guide.steps.length}</b><span>guided design steps</span></li>
+            <li><b>{glossary.terms.length}</b><span>terms explained</span></li>
             <li><b>{count("widgets")}</b><span>widgets</span></li>
             <li><b>{count("patterns")}</b><span>screen patterns</span></li>
-            <li><b>{count("assistant")}</b><span>assistant components</span></li>
-            <li><b>{ICONS}</b><span>icons</span></li>
           </ul>
         </div>
-        <HeroApp />
+        <HeroDesign />
       </div>
     </section>
+  );
+}
+
+/* One moment of the guided design, made of the SDK's widgets: the agent
+   shows a target user for the person's review, explains the term, and
+   waits for their approval (FEAT-018 GDL-79). */
+export function HeroDesign() {
+  const [approved, setApproved] = useState(false);
+  return (
+    <div className="uxh-heroapp"><Card title="Step 2 of 8: Understand users" actions={<StatusPill state={approved ? "live" : "evaluation"}>{approved ? "Approved" : "Awaiting your review"}</StatusPill>}>
+      <div className="uxh-col">
+        <p>Here is the first target user I drafted from what you told me. Is this who the app is for?</p>
+        <dl className="uxh-item">
+          <dt>U-1</dt><dd><b>Weekend anglers</b>: on a phone at the river, often with one free hand; want a spot within an hour's drive.</dd>
+          <dt>Status</dt><dd>Hypothesis, until research confirms it</dd>
+        </dl>
+        <Notice tone="info" title="Target user">A group of people the app is for, described by their context and goals, not their demographics. Naming them keeps every screen answerable to someone real.</Notice>
+        <div className="uxh-row"><Button onClick={() => setApproved(true)} disabled={approved}>{approved ? "Approved" : "Approve"}</Button><Button variant="secondary" disabled={approved}>Give feedback</Button></div>
+      </div>
+    </Card></div>
   );
 }
 
@@ -138,8 +160,8 @@ export function LiveDemo() {
     <section className="uxh-section" aria-labelledby="demo-h">
       <div className="uxh-wrap uxh-col uxh-gap">
         <div className="uxh-head">
-          <span className="uxh-eyebrow"><Icon icon={iconPalette} />Live, not a screenshot</span>
-          <h2 id="demo-h">One brand. Four design systems. Zero restyling.</h2>
+          <span className="uxh-eyebrow"><Icon icon={iconPalette} />The theme, live, not a screenshot</span>
+          <h2 id="demo-h">Your brand, in any design system.</h2>
           <p className="uxh-lede">A theme is a brand on a design system. Switch the system and the same widgets take its type, shape, density and icons, while the brand's colours and logo stay. App code doesn't change at all.</p>
         </div>
         <div className="uxh-row uxh-controls">
@@ -289,22 +311,22 @@ export function Guardrails() {
 }
 
 /* How an app is made on the SDK, each step linked to where it is explained. */
-const LOOP = [
-  { step: "Plan", what: "Describe the screens, how they connect, the journeys and any AI roles in the blueprint.", to: href("concepts", "flows-journeys"), link: "Flows and journeys" },
-  { step: "Check", what: "Hold the plan to cited interaction and AI rules, before any code exists.", to: `${href("start", "ci")}#blueprint`, link: "The blueprint check" },
-  { step: "Build", what: "Build each screen from its pattern; lint and the audit check what was built.", to: href("start", "ci"), link: "Lint and the audit" },
-  { step: "Assess", what: "Walk the journeys against the HELIX stories, and get a report with proposals.", to: href("start", "assess"), link: "The UX assessment" },
+const JOURNEY = [
+  { step: "Design", what: "Eight guided steps from intent and users to alternatives, structure and a prototype, every item shown to you for approval.", to: href("start", "design"), link: "The guided design" },
+  { step: "Build", what: "The app is built in the same folder from the design you approved, on your brand, from the SDK's screen patterns.", to: `${href("start", "new-app")}#design-first`, link: "Design first, the app last" },
+  { step: "Check", what: "The plan is held to cited interaction and AI rules before any code; lint and the audit check what was built, in every theme.", to: href("start", "ci"), link: "Lint, the blueprint check and the audit" },
+  { step: "Learn", what: "Test with real people from a generated kit, walk the journeys against the stories, and learn from how the app is used.", to: href("start", "assess"), link: "Assess and test" },
 ];
-export function Loop() {
+export function Journey() {
   return (
-    <section className="uxh-section" aria-labelledby="loop-h">
+    <section className="uxh-section" aria-labelledby="journey-h">
       <div className="uxh-wrap uxh-col uxh-gap">
         <div className="uxh-head">
-          <span className="uxh-eyebrow"><Icon icon={iconSparkles} />How it fits together</span>
-          <h2 id="loop-h">Plan, check, build, assess.</h2>
+          <span className="uxh-eyebrow"><Icon icon={iconSparkles} />How it works</span>
+          <h2 id="journey-h">Design, build, check, learn.</h2>
         </div>
-        <ol className="uxh-loop" aria-label="Plan, check, build, assess">
-          {LOOP.map((l, i) => (
+        <ol className="uxh-loop" aria-label="Design, build, check, learn">
+          {JOURNEY.map((l, i) => (
             <li key={l.step}>
               <a className="uxh-card uxh-card--link" href={l.to}>
                 <span className="uxh-loop__n" aria-hidden="true">{i + 1}</span>
@@ -320,13 +342,39 @@ export function Loop() {
   );
 }
 
+/* What sets the guided design apart, beside its eight steps (from @ux-builder/design). */
+export function DesignedWithYou() {
+  return (
+    <section className="uxh-section" aria-labelledby="design-h">
+      <div className="uxh-wrap uxh-ai">
+        <div className="uxh-col uxh-gap">
+          <span className="uxh-eyebrow"><Icon icon={iconPencilRuler} />The guided design</span>
+          <h2 id="design-h">Designed with you, not for you.</h2>
+          <p className="uxh-lede">The agent leads; you decide. It opens with an overview, tells you where you are, explains each term, and never moves on without your answer.</p>
+          <ul className="uxh-checks">
+            <li><Icon icon={iconCheck} />Every brief, user, job, story and screen is shown to you in the conversation, one at a time, for feedback and approval</li>
+            <li><Icon icon={iconCheck} />What people need stays a labelled hypothesis until research or a test confirms it</li>
+            <li><Icon icon={iconCheck} />Every added screen, step or input must earn its complexity; the simplest flow wins</li>
+            <li><Icon icon={iconCheck} />Alternatives compared side by side, a clickable prototype, and a test kit for real people</li>
+            <li><Icon icon={iconCheck} />Runs locally with your agent; nothing is hosted and nothing is sent anywhere</li>
+          </ul>
+          <div className="uxh-row"><a className="uxh-btn uxh-btn--primary" href={href("concepts", "guided-design")}>The guided design process<Icon name="arrow-right" /></a></div>
+        </div>
+        <ol className="uxh-steplist" aria-label="The eight steps">
+          {siteData.guide.steps.map((st) => <li key={st.n}><span className="uxh-loop__n" aria-hidden="true">{st.n}</span><div><h3>{st.name}</h3><p>{st.you}</p></div></li>)}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
 export function Packages() {
   return (
     <section className="uxh-section" aria-labelledby="pkg-h">
       <div className="uxh-wrap uxh-col uxh-gap">
         <div className="uxh-head">
           <span className="uxh-eyebrow"><Icon icon={iconPackage} />On npm, no token needed</span>
-          <h2 id="pkg-h">Six packages. Take what you need.</h2>
+          <h2 id="pkg-h">{PACKAGES.length} packages. Take what you need.</h2>
         </div>
         <ul className="uxh-cards uxh-cards--six">
           {PACKAGES.map(({ pkg, icon, what }) => (
@@ -351,16 +399,27 @@ export function GetStarted() {
       <div className="uxh-wrap uxh-col uxh-gap">
         <div className="uxh-head">
           <span className="uxh-eyebrow"><Icon icon={iconTerminal} />Get started</span>
-          <h2 id="start-h">On-theme in three steps.</h2>
+          <h2 id="start-h">Start with an idea, or with the app you have.</h2>
         </div>
-        <ol className="uxh-steps">
-          <li><b>Install</b><Command text="npm install @ux-builder/tokens @ux-builder/ui" /></li>
-          <li><b>Load the theme</b><Command code text={'import "@ux-builder/tokens/themes/ux-builder-databricks.css";\nimport "@ux-builder/ui/ui.css";'} /></li>
-          <li><b>Wrap the app</b><Command code text={'<ThemeProvider theme="ux-builder-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} /></li>
-        </ol>
-        <div className="uxh-row">
-          <a className="uxh-btn uxh-btn--primary" href={`${REPO}#quick-start`}>Read the quick start<Icon name="arrow-right" /></a>
-          <a className="uxh-btn" href={`${ROOT}storybook/`}>Browse every widget</a>
+        <div className="uxh-paths2">
+          <div className="uxh-col uxh-gap">
+            <h3>Design first</h3>
+            <ol className="uxh-steps">
+              <li><b>Make a design folder</b><Command text="npm create @ux-builder/app@latest my-idea" /></li>
+              <li><b>Install it</b><Command text="cd my-idea && npm install" /></li>
+              <li><b>In Claude Code, start the guide</b><Command code text="/ux-builder-design" /></li>
+            </ol>
+            <a className="uxh-btn uxh-btn--primary" href={href("start", "design")}>Design the UX with your agent<Icon name="arrow-right" /></a>
+          </div>
+          <div className="uxh-col uxh-gap">
+            <h3>An app you already have</h3>
+            <ol className="uxh-steps">
+              <li><b>Install</b><Command text="npm install @ux-builder/tokens @ux-builder/ui" /></li>
+              <li><b>Load the theme</b><Command code text={'import "@ux-builder/tokens/themes/ux-builder-databricks.css";\nimport "@ux-builder/ui/ui.css";'} /></li>
+              <li><b>Wrap the app</b><Command code text={'<ThemeProvider theme="ux-builder-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} /></li>
+            </ol>
+            <a className="uxh-btn" href={href("start", "existing-app")}>Add it to an existing app<Icon name="arrow-right" /></a>
+          </div>
         </div>
       </div>
     </section>

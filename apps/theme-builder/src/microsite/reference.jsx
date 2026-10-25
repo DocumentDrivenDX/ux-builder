@@ -24,7 +24,7 @@ function Code({ children }) {
 }
 const H2 = ({ id, children }) => <h2 id={id}>{children}</h2>;
 const sentence = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
-const Generated = ({ children }) => <p className="uxm-cite">Generated from {children}.</p>;
+export const Generated = ({ children }) => <p className="uxm-cite">Generated from {children}.</p>;
 
 /* ---- Reference: packages' entry points ---- */
 

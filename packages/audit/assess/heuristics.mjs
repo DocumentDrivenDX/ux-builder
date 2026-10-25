@@ -10,6 +10,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { layoutOf } from "@ux-builder/ui/blueprint/paths";
 
 const NN = "Nielsen Norman Group: 10 Usability Heuristics for User Interface Design";
 export const HEURISTICS = [
@@ -52,10 +53,11 @@ export function walkedScreens(dir) {
   return out;
 }
 
-/* The app's blueprint for a run: --blueprint, else app.blueprint.json in the app the run is of. */
+/* The app's blueprint for a run: --blueprint, else the blueprint of the app the run is of, where its layout keeps it (docs/ux-builder/blueprint/, or app.blueprint.json at the top of an app not yet migrated; FEAT-018 GDL-80). */
 export function runBlueprint(dir, file) {
   const run = read(dir, "run.json");
-  const p = file ? resolve(file) : resolve(dir, run?.config?.appDir ?? "../..", "app.blueprint.json");
+  const app = resolve(dir, run?.config?.appDir ?? "../..");
+  const p = file ? resolve(file) : resolve(app, layoutOf(app).blueprint);
   if (!existsSync(p)) return null;
   try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; }
 }

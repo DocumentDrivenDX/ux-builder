@@ -74,7 +74,7 @@ describe("US-014", () => {
   // @covers US-014-AC3
   test("AC3: the guidance states the rules", () => {
     assert.equal(RULES.length, 7);
-    const topics = [/SDK's widgets/, /role tokens/, /Never hard-code colours, font families or radii/, /lint rule ux-builder\/no-hard-coded-values/, /ThemeProvider/, /Compose screens from @ux-builder\/ui\/patterns/, /Plan before you build: describe the app or view in app.blueprint.json/];
+    const topics = [/SDK's widgets/, /role tokens/, /Never hard-code colours, font families or radii/, /lint rule ux-builder\/no-hard-coded-values/, /ThemeProvider/, /Compose screens from @ux-builder\/ui\/patterns/, /Plan before you build: describe the app or view in its blueprint, docs\/ux-builder\/blueprint\/app\.blueprint\.json/];
     RULES.forEach((r, i) => assert.match(r, topics[i]));
     for (const g of GUIDES) for (const [i, r] of RULES.entries()) assert.ok(read(g).includes(`${i + 1}. ${r}`), `${g}: rule ${i + 1}`);
     assert.deepEqual(cat.rules, RULES);

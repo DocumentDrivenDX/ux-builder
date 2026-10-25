@@ -1,12 +1,19 @@
 # ux-builder
 
-**Turn a logo into a theme, and build apps that can't drift from it.**
+**From an idea to an app people can actually use: designed with you, built
+on your brand, checked at every step.**
 
-ux-builder is an open-source UI SDK for AI-era apps. It holds a product's
-whole look (its theme tokens, widgets, fonts, icons and brand artwork) in one
-place. It also gives people and AI coding agents the tools to build apps that
-never hard-code presentation:
+ux-builder guides a person and their AI coding agent from an idea to a
+tested app. The agent leads the design in eight steps, from intent and users
+to alternatives, a prototype and tests with people, and shows every item for
+the person's feedback and approval; then the app is built from the approved
+design on an open-source UI SDK that holds the product's whole look (its
+theme tokens, widgets, fonts, icons and brand artwork) in one place:
 
+- **A guided design, approved by you.** `npm create @ux-builder/app@latest
+  my-idea`, then `/ux-builder-design` in Claude Code. Each step is explained,
+  each term defined, each item reviewed in the conversation, and nothing
+  moves past a checkpoint without your answer (`@ux-builder/design`).
 - **Themes made from a brand.** A palette engine reads a logo and proposes
   palettes that already pass contrast. A local theme builder pairs a palette
   with a design system (Material 3, Fluent 2, Carbon, Databricks, or one of
@@ -32,7 +39,7 @@ never hard-code presentation:
   and reports anything that isn't the theme's. It also checks the interaction
   and AI rules, and gives a verdict on the theme and on each modality.
 - **Planned before it's built.** An app's screens, flows and journeys live in
-  `app.blueprint.json`. It is checked against cited interaction and AI rules
+  its blueprint, `docs/ux-builder/blueprint/app.blueprint.json`. It is checked against cited interaction and AI rules
   before any code exists, and it draws IA maps, flows and wireframes and
   drafts HELIX documents.
 - **AI screens done right.** The SDK's own assistant and an Adaptive Cards
@@ -448,7 +455,8 @@ in ux-builder's own words, each with an ID and a link to its sources
 pointer) and context (a whole app, or a view embedded in a host), never by
 device.
 
-An app describes its destinations and screens in `app.blueprint.json`, and
+An app describes its destinations and screens in its blueprint,
+`docs/ux-builder/blueprint/app.blueprint.json`, and
 `ux-builder-blueprint check` (from `@ux-builder/ui`) checks the plan against
 the rules before any screen is built. The audit checks the running app
 against the same rules by ID. The loop, for a person or an agent: **plan**
@@ -463,8 +471,8 @@ error is refused before anything is written.
 **An existing app** adopts the rules in three steps:
 
 ```sh
-npx ux-builder-blueprint init                     # writes app.blueprint.json: describe your screens
-npx ux-builder-blueprint check app.blueprint.json # exits 1 on an error; add it to CI
+npx ux-builder-blueprint init     # writes docs/ux-builder/blueprint/app.blueprint.json: describe your screens
+npx ux-builder-blueprint check    # exits 1 on an error; add it to CI
 npx ux-builder-audit --write-baseline audit-baseline.json http://localhost:4173/   # once
 npx ux-builder-audit --baseline audit-baseline.json http://localhost:4173/         # in CI: only new findings count
 ```
@@ -477,12 +485,13 @@ Agents get the rules where they plan, over MCP: `get_rules`,
 A blueprint's screens can declare `actions` (where each leads), and its
 `journeys` tie a HELIX story and its criteria to a path through them
 (CONTRACT-005 *Flows and journeys*). From those, three commands draft and
-draw; each reads `app.blueprint.json` unless given a file:
+draw; each reads the app's blueprint unless given a file, and writes under
+`docs/ux-builder/`:
 
 ```sh
 npx ux-builder-blueprint propose      # HELIX proposals as patches, in helix-proposals/; applies nothing
-npx ux-builder-blueprint draw         # IA map, flow, journey and per-screen state diagrams: .mmd, .svg (and states-*.md), in blueprint-drawings/
-npx ux-builder-blueprint wireframes   # each screen in each declared state at each size class: .html and .png, in blueprint-wireframes/
+npx ux-builder-blueprint draw         # IA map, flow, journey and per-screen state diagrams: .mmd, .svg (and states-*.md), in drawings/
+npx ux-builder-blueprint wireframes   # each screen in each declared state at each size class: .html and .png, in wireframes/
 ```
 
 - **`propose`** needs the `.helix.yml` marker above the blueprint (exit 2
@@ -500,7 +509,7 @@ npx ux-builder-blueprint wireframes   # each screen in each declared state at ea
   *user-journey-map* per journey. When the installed HELIX defines a type,
   each document is a patch like the rest; when it does not, `propose` says
   which types are missing and writes the documents under
-  `helix-proposals/drafts/`, at the path HELIX would give them, from the
+  `docs/ux-builder/helix-proposals/drafts/`, at the path HELIX would give them, from the
   templates proposed in `docs/proposals/helix-ux-artifact-types`.
 - **`draw`** writes each diagram as Mermaid and as SVG. The SVG comes from
   the SDK's own small layered layout, so no Mermaid renderer or browser is

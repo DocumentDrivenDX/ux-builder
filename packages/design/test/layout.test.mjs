@@ -42,6 +42,7 @@ function oldApp() {
   writeFileSync(join(d, "ux-assessment.yml"), "version: 1\nblueprint: app.blueprint.json\n");
   mkdirSync(join(d, ".github/workflows"), { recursive: true });
   writeFileSync(join(d, ".github/workflows/ci.yml"), "jobs:\n  check:\n    steps:\n      - run: npx ux-builder-blueprint check app.blueprint.json\n");
+  for (const f of ["CLAUDE.md", "AGENTS.md"]) writeFileSync(join(d, f), "# Rivers\n\nPlan screens in `app.blueprint.json`; the design documents are in `docs/ux/`.\n");
   return d;
 }
 const listAll = (d, rel = "") => readdirSync(join(d, rel), { withFileTypes: true }).flatMap((e) => (e.name === ".git" ? [] : e.isDirectory() ? listAll(d, `${rel}${e.name}/`) : [`${rel}${e.name}`])).sort();
@@ -51,6 +52,8 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
   test("AC1: in a new app, every file the guide and the blueprint commands write lands under docs/ux-builder/", () => {
     const a = bare();
     json(a, ["init"]);
+    writeFileSync(join(a, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
+    writeFileSync(join(a, "docs/ux-builder/users.md"), "---\nux:\n  id: users\n  type: users\n---\n\n# Target users\n");
     json(a, ["state", "set", "assumptions[+]", JSON.stringify({ text: "Anglers new to an area", section: "users", status: "hypothesis" })]);
     json(a, ["brief"]);
     json(a, ["decision", "add", "--question", "Map first?", "--option", "Map", "--option", "List", "--choice", "Map", "--why", "Fewer steps"]);
@@ -58,8 +61,10 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     assert.equal(blueprint(a, ["compare", "docs/ux-builder/blueprint/app.blueprint.json", "docs/ux-builder/blueprint/app.blueprint.list-first.json"]).status, 0);
     json(a, ["modality", "--answer", "A web app for phones", "--modality", "responsive-web", "--size-classes", "compact"]);
     assert.equal(blueprint(a, ["prototype", "--explore", "--alternative", "list-first", "--question", "List first?"]).status, 0);
-    const files = listAll(a).filter((f) => f !== "package.json");
-    for (const f of ["docs/ux-builder/blueprint/app.blueprint.json", "docs/ux-builder/blueprint/app.blueprint.list-first.json", "docs/ux-builder/brief.md", "docs/ux-builder/decisions/UXD-1.md", "docs/ux-builder/compare/compare.html", "docs/ux-builder/prototypes/list-first/index.html"]) assert.ok(files.includes(f), f);
+    const proposed = blueprint(a, ["propose"]);
+    assert.equal(proposed.status, 0, proposed.stderr);
+    const files = listAll(a).filter((f) => f !== "package.json" && f !== ".helix.yml");
+    for (const f of ["docs/ux-builder/blueprint/app.blueprint.json", "docs/ux-builder/blueprint/app.blueprint.list-first.json", "docs/ux-builder/brief.md", "docs/ux-builder/decisions/UXD-1.md", "docs/ux-builder/compare/compare.html", "docs/ux-builder/prototypes/list-first/index.html", "docs/ux-builder/users.md", "docs/ux-builder/helix-proposals/report.md"]) assert.ok(files.includes(f), f);
     const outside = files.filter((f) => !f.startsWith("docs/ux-builder/") && !f.startsWith(".ux-builder/") && !f.startsWith(".claude/skills/ux-builder-design/"));
     assert.deepEqual(outside, [], "nothing at the app's top but .ux-builder/ and the skill");
     assert.equal(json(a, ["status"]).layout, "current");
@@ -91,7 +96,7 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
       { from: "app.blueprint.json", to: "docs/ux-builder/blueprint/app.blueprint.json" },
       { from: "app.blueprint.list-first.json", to: "docs/ux-builder/blueprint/app.blueprint.list-first.json" },
     ]);
-    assert.deepEqual(dry.updated.sort(), [".github/workflows/ci.yml", ".ux-builder/design-state.json", "package.json", "ux-assessment.yml"]);
+    assert.deepEqual(dry.updated.sort(), [".github/workflows/ci.yml", ".ux-builder/design-state.json", "AGENTS.md", "CLAUDE.md", "package.json", "ux-assessment.yml"]);
     assert.equal(dry.git, true);
     assert.deepEqual(listAll(a), before, "a dry run changes nothing");
     const r = json(a, ["migrate"]);
@@ -103,6 +108,7 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     assert.equal(JSON.parse(readFileSync(join(a, "package.json"), "utf8")).scripts["check:blueprint"], "ux-builder-blueprint check docs/ux-builder/blueprint/app.blueprint.json");
     assert.match(readFileSync(join(a, "ux-assessment.yml"), "utf8"), /^blueprint: docs\/ux-builder\/blueprint\/app\.blueprint\.json$/m);
     assert.match(readFileSync(join(a, ".github/workflows/ci.yml"), "utf8"), /check docs\/ux-builder\/blueprint\/app\.blueprint\.json/);
+    for (const f of ["CLAUDE.md", "AGENTS.md"]) assert.equal(readFileSync(join(a, f), "utf8"), "# Rivers\n\nPlan screens in `docs/ux-builder/blueprint/app.blueprint.json`; the design documents are in `docs/ux-builder/`.\n", f);
     assert.equal(readState(a).alternatives[0].file, "docs/ux-builder/blueprint/app.blueprint.list-first.json");
     // The commands now use the new layout.
     assert.equal(json(a, ["status"]).layout, "current");

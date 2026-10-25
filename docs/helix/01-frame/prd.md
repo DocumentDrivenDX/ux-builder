@@ -84,17 +84,24 @@ kind: product
 ## Summary
 
 The AI-UI SDK is the single source of the presentation layer for apps built on it — by Synaptiq and its clients first, and by anyone who
-installs it from the npm registry. It does three things:
+installs it from the npm registry. Under the name UX Builder it leads with
+a guided path from an idea to a tested app (*updated 2026-10-25, with the
+vision*). It does four things:
 
-1. **Owns the design system.** Tokens, widgets, screen patterns, fonts and
+1. **Guides the design.** An AI coding agent leads a person through eight
+   steps, from intent and users to alternatives, structure, prototypes and
+   tests with people, showing every item for their feedback and approval
+   and stopping at each checkpoint for their decision; when the design is
+   ready, the app is built in place from it (FEAT-018).
+2. **Owns the design system.** Tokens, widgets, screen patterns, fonts and
    icons ship as versioned packages, so no app hard-codes a colour, a widget,
    a screen layout or a typeface.
-2. **Turns a logo into a theme.** A guided theme builder extracts colours
+3. **Turns a logo into a theme.** A guided theme builder extracts colours
    from a client's logo, offers several accessible palette options, takes
    plain-language feedback, regenerates, shows each palette on the shared
    design systems, and saves the chosen combination as a brand file and a
    theme file for code review.
-3. **Starts new apps.** A React-first SDK — theme provider, starter template,
+4. **Starts new apps.** A React-first SDK — theme provider, starter template,
    lint rule and guidance for AI coding agents — so a new app is on the design
    system from its first commit.
 
@@ -105,7 +112,8 @@ Material 3, Fluent 2, Carbon, Databricks AppKit — or the theme's own, as in
 `praxis`, `plain` and `synaptiq`. Any brand works with any shared
 design system, and every combination passes the same contrast gate.
 
-Top success metrics: zero hard-coded presentation values in adopting apps;
+Top success metrics: an idea to an approved design in one working session;
+zero hard-coded presentation values in adopting apps;
 logo to a theme under review in under 30 minutes; a new app on a themed screen
 in under one hour.
 
@@ -113,6 +121,10 @@ in under one hour.
 
 ### Problem
 
+- **Apps are built before they are designed.** AI coding agents build what
+  they are asked, fast; nobody checks who the users are, what they must
+  accomplish or whether a simpler flow would do, and nothing is tested with
+  people before it ships. Design documents, when they exist, go unreviewed.
 - **Apps copy and hard-code the presentation layer.** A billing-review app copied four
   theme files byte-for-byte (its ADR-005) and wrote its own table layer. A
   client app that switched themes on 2026-10-05 saw no change in its widgets,
@@ -131,6 +143,9 @@ in under one hour.
 
 ### Goals
 
+0. A person with an idea, working with their agent, reaches an approved,
+   tested design, having reviewed and approved every item of it, and gets
+   an app built from it.
 1. Apps built on the SDK take every presentation value — colour, type, shape,
    widget, font, icon — from the SDK, and change look when the theme changes.
 2. A person with a client's logo produces a reviewed, accessible brand in one
@@ -143,6 +158,7 @@ in under one hour.
 
 | Metric | Target | Measurement Method |
 |--------|--------|--------------------|
+| Idea to an approved design | One working session to `core-2` passed, every item approved | The design state's checkpoints and reviews, over the first 10 guided designs |
 | Hard-coded presentation values in an adopting app | 0 literal colours, font families or radii in app CSS/JSX | The SDK lint rule (FEAT-004) run in the app's CI |
 | Logo to a theme under review | Median ≤ 30 minutes | Brand builder session timing, first upload to PR opened, over the first 10 brands |
 | Palette options accepted without manual hex editing | ≥ 80% of sessions | Brand builder session log: accepted option vs. options with manual overrides |
@@ -173,6 +189,16 @@ in under one hour.
 Deferred items are tracked as DDx beads labelled `parking-lot`.
 
 ## Users and Scope
+
+### Primary Persona: Person with an idea (product owner, designer, founder)
+
+**Role**: Owns what an app should do for its users; may not write code.
+**Goals**: Turn an idea into an app people can use, deciding what matters
+and approving what is built, without learning a design method first.
+**Pain Points**: Agents build features before anyone has asked who the
+users are; design documents are written but never reviewed; terms like
+"jobs to be done" or "blueprint" go unexplained; nothing is tested with
+people until it is too late to change.
 
 ### Primary Persona: App developer (Synaptiq, its clients, open-source users)
 
@@ -519,7 +545,8 @@ rules, so it invents colours and components.
 - **FR-60** — A new app is created for one or more modalities. Today these
   are `responsive-web` (a mobile and desktop web app), `chat` (a chat app)
   and `hybrid-chat` (a chat app that renders Adaptive Cards). The starter
-  asks for them when it runs in a terminal and takes `--modality` otherwise.
+  takes `--modality`; without it, it makes a design folder and the
+  modality is asked during the design (FR-76; *amended 2026-10-25*).
   The choice is recorded in the blueprint. Native iOS, Android, macOS and
   Windows apps are future modalities (ADR-032). *(Added 2026-10-21.)*
 - **FR-61** — A new app starts as an empty shell for its modalities, with no
@@ -666,8 +693,11 @@ rules, so it invents colours and components.
   confirmed, assumed or hypothesis; principles a check can express become
   project rules. *(Added 2026-10-23.)*
 - **FR-80** — New artifact types live in ux-builder for now: templates in
-  the package, documents in the app's `docs/ux/`, validated and linked to
-  the HELIX documents they relate to. *(Added 2026-10-23.)*
+  the package, documents in the app's `docs/ux-builder/` (*amended
+  2026-10-24*: with the blueprint in `blueprint/`, prototypes in
+  `prototypes/` and HELIX proposals in `helix-proposals/`; the modality is
+  chosen before anything is drawn), validated and linked to the HELIX
+  documents they relate to. *(Added 2026-10-23.)*
 - **FR-81** — User needs start as labelled hypotheses; research evidence
   is stored as masked, pseudonymous excerpts and synthesized into a jobs
   table that rates importance, evidence and confidence separately. Target
@@ -718,7 +748,7 @@ rules, so it invents colours and components.
 | P1-8 (FR-43–FR-45) | Create an app on HELIX | `npm create @ux-builder/app acme` online, then with `--helix-offline` | HELIX installed in `.claude/skills/helix/` with its version recorded; 8 HELIX documents typed and linked, plus `concerns.local.yml`; `assess validate` passes and `assess collect` reports 0 warnings with US-001's criteria explicit |
 | P1-9 (FR-46–FR-50) | Plan, check and assess an agent screen | A blueprint with an `agent` screen whose "Submit payment" action has no approval and which renders a `Wizard` inline at a 400 px column; the built screen streaming an unmarked answer with no Stop control; UI copy "I think this is right" | Blueprint findings for the missing approval and for the inline wizard's compact rules; audit findings for the missing disclosure and Stop control; one lint warning; the assessment's risky scenario stops at the approval |
 | P1-12 (FR-73, FR-74) | Diagram tokens in every theme | Every theme and preview pair, light and dark; a page drawing a status chip, a series legend, a region with a node, an edge in each weight and the three lifecycle tints with those tokens only | `npm run contrast` reports 0 failures; the audit reports no errors or warnings for that page in every theme and appearance; each theme's page lists every diagram token |
-| P1-13 (FR-75–FR-88) | Guide a new app to checkpoint 2 with no MCP | A fixture app created by the starter; no `.mcp.json`; a scripted agent answering the guide's questions; three alternative blueprints | The design state records `core-1` and `core-2`; `docs/ux/brief.md` and a `UXD-` record pass `validate`; `compare` marks the alternative with the fewest steps and required inputs; no network call is made |
+| P1-13 (FR-75–FR-88) | Guide a new app to checkpoint 2 with no MCP | A fixture app created by the starter; no `.mcp.json`; a scripted agent answering the guide's questions; three alternative blueprints | The design state records `core-1` and `core-2`; `docs/ux-builder/brief.md` and a `UXD-` record pass `validate`; `compare` marks the alternative with the fewest steps and required inputs; no network call is made |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context

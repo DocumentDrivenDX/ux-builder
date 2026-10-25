@@ -71,6 +71,12 @@ export function setStep(app, { to, pending = () => [] } = {}) {
     n = now + 1;
   } else n = Number(to);
   if (!Number.isInteger(n) || n < 1 || n > steps.length) throw new DesignError(`step is next or 1 to ${steps.length}, not "${to ?? ""}"`);
+  // Only a passed (or skipped) checkpoint moves the person past the steps it closes (CONTRACT-008: the person decides).
+  if (state.mode !== "change") {
+    const latest = new Map(state.checkpoints.map((c) => [c.id, c.status]));
+    const blocking = ["core-1", "core-2", "core-3"].find((id) => n > Math.max(...CLOSES[id]) && !["passed", "skipped"].includes(latest.get(id)));
+    if (blocking) throw new DesignError(`step ${n} is past checkpoint ${blocking}, which ${latest.get(blocking) === "declined" ? "the person answered no or not yet" : "has not been asked"}: ask it (ux-builder-design state checkpoint ${blocking} --answer "<their words>") before going on.`);
+  }
   state.step = n;
   if (state.mode !== "change") state.activity = STEPS[n - 1].activity;
   writeState(app, state);
