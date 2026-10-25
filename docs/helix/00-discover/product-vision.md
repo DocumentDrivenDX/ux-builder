@@ -8,7 +8,7 @@ ddx:
       to: prd
 ---
 
-# Product Vision — AI-UI SDK
+# Product Vision — UX Builder (the AI-UI SDK)
 
 > Drafted 2026-10-06 at the operator's request, from the operator's goals
 > (2026-10-05: own the design system, turn logos into themes, start new apps;
@@ -16,60 +16,82 @@ ddx:
 > override fonts; palettes offered as options and regenerated from feedback)
 > and from what has been built since. For the operator to review. Updated
 > 2026-10-19 to the codebase: screen patterns (FEAT-006), generative UI
-> bridges and the licence check (FEAT-007).
+> bridges and the licence check (FEAT-007). Updated 2026-10-25 at the
+> operator's direction: UX Builder leads with the guided design path, from
+> an idea to a tested app, with the theme as one of its pillars (FEAT-018).
 
 ## Vision
 
-**Every app Synaptiq or a client builds looks and behaves like that client
-from its first commit, and keeps doing so as brands, design systems and
-people change, without anyone hard-coding a colour, a font or a widget.**
+**Anyone with an idea for an app, working with their AI coding agent, gets
+to an app people can actually use: designed with them, step by step, built
+on their brand from its first commit, and checked at every step, without
+anyone hard-coding a colour, a font or a screen nobody needed.**
 
-The AI-UI SDK is where a client's look lives. A brand owner turns a logo into
-an accessible, reviewed theme in one sitting; a developer, or an AI agent
-working for one, starts a new app already wearing it; and when the brand or
-the design system changes, every app follows by upgrading a package.
+UX Builder is where an app's experience is designed and where its look
+lives. A product owner or designer describes what people should
+accomplish; the agent guides them through eight steps, from intent to
+users, tasks, alternatives, structure, prototype and tests with people,
+showing every piece for their approval. When the design is ready, the app
+is built in the same folder on a theme a brand owner made from a logo in
+one sitting. Rules, lint and audits keep it usable and on-brand, and when
+the brand or design system changes, every app follows by upgrading a
+package.
 
 ## The problem
 
-Each new client app starts by re-deciding its look. Colours are copied from a
-logo by eye and fail contrast; widgets are rebuilt, then drift; fonts are
-loaded differently in every app; switching an app to another design system
-means rewriting it. AI coding agents make it worse: asked for "a filter bar",
-they invent one, with literal colours. The result is apps that look
-approximately like the client, cost developer time to keep that way, and
-cannot be re-themed.
+Each new app starts by re-deciding two things, and AI coding agents make
+both worse.
+
+- **What to build.** Agents build what they are asked, fast: features
+  pile up without anyone checking who the users are, what they must
+  accomplish or whether a simpler flow would do. Design, if it happens, is
+  a document nobody reviews, and nothing is tested with people.
+- **How it looks.** Colours are copied from a logo by eye and fail
+  contrast; widgets are rebuilt, then drift; switching an app to another
+  design system means rewriting it. Asked for "a filter bar", an agent
+  invents one, with literal colours.
+
+The result is apps that are harder to use than they need to be, look
+approximately like their brand, cost time to keep that way, and cannot be
+re-themed.
 
 ## Who it is for
 
 | Who | What they get |
 |-----|---------------|
+| **Product owners, designers and founders** with an idea | A guided design conversation with their agent: an overview, "Step n of 8", every term explained, every item shown for their feedback and approval; then an app built from the design they approved |
 | **App developers** at Synaptiq and its clients' teams, and anyone who installs the packages from npm | Widgets, screen patterns, fonts, icons and themes from packages; a starter that is on the design system from the first commit; lint rules and an audit that keep it there; a bridge that dresses the chat library they choose in the app's theme |
 | **Brand owners** (delivery leads, designers, client stakeholders) | A guided builder: logo in, palette options shown on real widgets in light and dark, plain-language feedback, a theme saved for review |
-| **AI coding agents** working in those apps | Guidance and a catalogue (and an MCP server) that name the real widgets, patterns and tokens, so generated UI uses them |
-| **Synaptiq** | One design system to maintain instead of one per app; client looks delivered as data, not code |
+| **AI coding agents** working in those apps | A design skill that leads the conversation, and guidance, a catalogue and an MCP server that name the real widgets, patterns, tokens and rules, so generated UI uses them |
+| **App owners and UX reviewers** | An assessment that walks the app's journeys against its stories, usability test kits, and reports of what people actually did |
+| **Synaptiq** | One design system and one design process to maintain instead of one per app; client looks delivered as data, not code |
 
 ## What makes it different
 
-1. **A theme is a brand on a design system.** Identity (colours, logo,
+1. **Designed with you, not for you.** The agent leads; the person
+   decides. Every brief, user, job, story, screen and decision is shown in
+   the conversation for feedback and approval, and nothing moves past a
+   checkpoint without the person's answer. User needs stay labelled as
+   hypotheses until evidence confirms them, and every addition must earn
+   its complexity.
+2. **Design first, the app last.** A design folder holds the work until
+   the design is ready; the modality is chosen during the design and the
+   theme when the app is built, which then happens in place from the
+   approved blueprint.
+3. **A theme is a brand on a design system.** Identity (colours, logo,
    fonts) is separate from anatomy (shapes, type, density, icons), so any
-   client can be shown in Material, Fluent, Carbon, Databricks or their own
-   look, and a new client is a file, not a fork.
-2. **AI steers; a deterministic engine decides.** The model turns "more
-   conservative, it's a law firm" into bounded settings; the engine chooses
-   every colour, so every option is reproducible and passes contrast before
-   anyone sees it.
-3. **Accessible by construction.** Every theme, in every appearance, on every
-   design system, passes the same 4.5:1 gate in CI; nothing ships that fails.
-4. **Built for agents as much as people.** The same source generates the
-   documentation, the catalogue and the agent guidance, so they cannot drift
-   from what ships.
-   The same holds for how screens fit together and behave: cited rules, a
-   blueprint checked before code, and an audit that checks the running app
-   by the same rule IDs.
-5. **Whole screens, at any width.** Patterns carry the structure and states
-   (empty, error, loading) that basic widgets do not, and adapt to the space
-   they are given, from a desktop window to a phone or a narrow embedded
-   panel.
+   brand can be shown in Material, Fluent, Carbon, Databricks or its own
+   look, and a new brand is a file, not a fork. AI steers; a deterministic
+   engine chooses every colour, so every option is reproducible and passes
+   contrast before anyone sees it.
+4. **Checked at every step.** A blueprint checked against cited
+   interaction and AI rules before code; lint and an audit of the running
+   app by the same rule IDs; a UX assessment and tests with people after.
+   Every theme, in every appearance, passes the same contrast gate in CI.
+5. **Built for agents as much as people.** The same source generates the
+   documentation, the catalogue and the agent guidance, so they cannot
+   drift from what ships; everything runs locally, and nothing is sent
+   anywhere.
 
 ## Principles
 
@@ -92,15 +114,19 @@ cannot be re-themed.
 
 | Horizon | Outcome |
 |---------|---------|
-| **Now** (built, 2026-10) | Role-based tokens and eight themes on four shared design systems (Material, Fluent, Carbon, Databricks); widgets, fonts and icons in `@ux-builder/*` on the public npm registry; the palette engine; the theme builder (local, OpenAI-steered) with a screens preview and a chat-library step; starter, lint rules, audit, agent guidance, MCP server. Built in the repository, awaiting release: screen patterns that adapt by size class, with design-system variants; bridges that dress AI Elements and assistant-ui in every theme; the third-party licence check |
-| **Next** | Interaction and IA rules drawn from Apple's HIG and Material 3, applied to an app's or view's blueprint before code and by the audit after, served to agents over MCP (FEAT-008); a repeatable UX assessment that reads an app's HELIX documents and tests, walks its journeys, inspects each screen state in place and proposes HELIX changes (FEAT-009); new apps that start on the latest HELIX, with their documents drafted (FEAT-010); release the patterns and bridges; the SDK's own assistant patterns, with adapters per runtime and generative UI limited to catalogue components (FEAT-007); the first client apps (the platform and a billing-review app) adopt the SDK; the AI harness and its embedded products share one presentation contract (ADR-011); measure agent-built UI against the guidance |
-| **Later** | Client brands released apart from the public core (FEAT-005) as more clients adopt; a hosted builder for brand owners who are not developers; frameworks beyond React if a client needs one |
+| **Now** (built, 2026-10) | The guided design loop (`@ux-builder/design`): eight steps with review and approval, target users, business rules, alternatives compared, exploratory prototypes, test kits and evaluation reports, production insights and experiments; design first, with the app built in place; nine themes on four shared design systems, widgets, screen patterns, the assistant and Adaptive Cards on npm; the theme builder (local); the starter on HELIX; interaction and AI rules checked in the blueprint and the running app; the UX assessment; the MCP server; the episode trace |
+| **Next** | Real apps designed end to end with the guide, and what they teach folded back in; the guide's stage 2 (its document types proposed to HELIX); the first client apps adopt the SDK; measure agent-built UI against the guidance; the AI harness and its embedded products share one presentation contract (ADR-011) |
+| **Later** | A hosted builder and guide for people who are not developers; client brands released apart from the public core (FEAT-005); frameworks beyond React if a client needs one |
 
 ## Measures of success
 
+- An idea becomes an **approved design** (core-2 passed, the person having
+  approved every item) in **one working session**, and an app built from
+  it the same day.
+- Every design item the guide produces is **reviewed and approved** by a
+  person before the step it belongs to closes.
 - Adopting apps contain **zero** hard-coded presentation values (lint).
 - A logo becomes a reviewed theme in **under 30 minutes**.
-- A new app shows a themed screen in **under an hour**.
 - **90%** of agent-built components use SDK widgets and role tokens, and
   agent-built screens use the matching patterns with no app-written layout
   CSS.

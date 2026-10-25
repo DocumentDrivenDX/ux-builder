@@ -356,11 +356,59 @@ export async function guide() {
   return { steps: p.STEPS.map(pick), changeSteps: p.CHANGE_STEPS.map(pick), glossary: p.GLOSSARY.map(({ term, step, means, why }) => ({ term, step, means, why })) };
 }
 
+/* A Markdown document as blocks the site renders (headings, paragraphs,
+   lists, tables), its frontmatter and comments left out: enough for the
+   guide's own example documents, nothing more. */
+export function mdBlocks(text) {
+  const body = text.replace(/^---\n[\s\S]*?\n---\n/, "").replace(/<!--[\s\S]*?-->/g, "");
+  const blocks = [];
+  const cells = (l) => l.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+  const lines = body.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (!l.trim()) continue;
+    const h = /^(#{1,4})\s+(.*)$/.exec(l);
+    if (h) { blocks.push({ kind: "h", level: h[1].length, text: h[2] }); continue; }
+    if (l.trim().startsWith("|")) {
+      const rows = [];
+      for (; i < lines.length && lines[i].trim().startsWith("|"); i++) if (!/^\|[\s|:-]+\|$/.test(lines[i].trim())) rows.push(cells(lines[i]));
+      i--;
+      blocks.push({ kind: "table", head: rows[0], rows: rows.slice(1) });
+      continue;
+    }
+    if (/^\s*([-*]|\d+\.)\s+/.test(l)) {
+      const items = [];
+      for (; i < lines.length && /^\s*([-*]|\d+\.)\s+/.test(lines[i]); i++) items.push(lines[i].replace(/^\s*([-*]|\d+\.)\s+/, ""));
+      i--;
+      blocks.push({ kind: "list", items });
+      continue;
+    }
+    const para = [l.trim()];
+    while (i + 1 < lines.length && lines[i + 1].trim() && !/^(#|\||\s*([-*]|\d+\.)\s)/.test(lines[i + 1])) para.push(lines[++i].trim());
+    blocks.push({ kind: "p", text: para.join(" ") });
+  }
+  return blocks;
+}
+
+/* The guide's example documents (one fictional app, River Path), for the
+   worked example: each type's example.md as the guide writes it. */
+export const EXAMPLE_TYPES = [
+  ["experience-brief", "The experience brief", 1],
+  ["users", "Target users", 2],
+  ["jobs", "Jobs to be done", 2],
+  ["ux-decision", "An interaction decision", 4],
+  ["test-kit", "A usability test kit", 7],
+  ["usability-evaluation-report", "The UX evaluation report", 7],
+];
+export function examples() {
+  return EXAMPLE_TYPES.map(([type, title, step]) => ({ type, title, step, url: blob(`packages/design/artifacts/${type}/example.md`), blocks: mdBlocks(read(`packages/design/artifacts/${type}/example.md`)) }));
+}
+
 export async function micrositeData() {
   const rs = rules();
   return {
     cli: { createApp: createAppOptions(), audit: await auditOptions(), assess: assessCommands(), blueprint: blueprintCommands(), design: designCommands(), mcp: await mcpTools() },
-    guide: await guide(), packages: packages(), rules: rs, sources: sources(rs), licences: LICENCES, cards: await cards(), coverage: await coverage(), notices: notices(),
+    guide: await guide(), examples: examples(), packages: packages(), rules: rs, sources: sources(rs), licences: LICENCES, cards: await cards(), coverage: await coverage(), notices: notices(),
   };
 }
 

@@ -1,12 +1,19 @@
 # ux-builder
 
-**Turn a logo into a theme, and build apps that can't drift from it.**
+**From an idea to an app people can actually use: designed with you, built
+on your brand, checked at every step.**
 
-ux-builder is an open-source UI SDK for AI-era apps. It holds a product's
-whole look (its theme tokens, widgets, fonts, icons and brand artwork) in one
-place. It also gives people and AI coding agents the tools to build apps that
-never hard-code presentation:
+ux-builder guides a person and their AI coding agent from an idea to a
+tested app. The agent leads the design in eight steps, from intent and users
+to alternatives, a prototype and tests with people, and shows every item for
+the person's feedback and approval; then the app is built from the approved
+design on an open-source UI SDK that holds the product's whole look (its
+theme tokens, widgets, fonts, icons and brand artwork) in one place:
 
+- **A guided design, approved by you.** `npm create @ux-builder/app@latest
+  my-idea`, then `/ux-builder-design` in Claude Code. Each step is explained,
+  each term defined, each item reviewed in the conversation, and nothing
+  moves past a checkpoint without your answer (`@ux-builder/design`).
 - **Themes made from a brand.** A palette engine reads a logo and proposes
   palettes that already pass contrast. A local theme builder pairs a palette
   with a design system (Material 3, Fluent 2, Carbon, Databricks, or one of

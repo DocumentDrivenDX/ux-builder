@@ -84,17 +84,24 @@ kind: product
 ## Summary
 
 The AI-UI SDK is the single source of the presentation layer for apps built on it — by Synaptiq and its clients first, and by anyone who
-installs it from the npm registry. It does three things:
+installs it from the npm registry. Under the name UX Builder it leads with
+a guided path from an idea to a tested app (*updated 2026-10-25, with the
+vision*). It does four things:
 
-1. **Owns the design system.** Tokens, widgets, screen patterns, fonts and
+1. **Guides the design.** An AI coding agent leads a person through eight
+   steps, from intent and users to alternatives, structure, prototypes and
+   tests with people, showing every item for their feedback and approval
+   and stopping at each checkpoint for their decision; when the design is
+   ready, the app is built in place from it (FEAT-018).
+2. **Owns the design system.** Tokens, widgets, screen patterns, fonts and
    icons ship as versioned packages, so no app hard-codes a colour, a widget,
    a screen layout or a typeface.
-2. **Turns a logo into a theme.** A guided theme builder extracts colours
+3. **Turns a logo into a theme.** A guided theme builder extracts colours
    from a client's logo, offers several accessible palette options, takes
    plain-language feedback, regenerates, shows each palette on the shared
    design systems, and saves the chosen combination as a brand file and a
    theme file for code review.
-3. **Starts new apps.** A React-first SDK — theme provider, starter template,
+4. **Starts new apps.** A React-first SDK — theme provider, starter template,
    lint rule and guidance for AI coding agents — so a new app is on the design
    system from its first commit.
 
@@ -105,7 +112,8 @@ Material 3, Fluent 2, Carbon, Databricks AppKit — or the theme's own, as in
 `praxis`, `plain` and `synaptiq`. Any brand works with any shared
 design system, and every combination passes the same contrast gate.
 
-Top success metrics: zero hard-coded presentation values in adopting apps;
+Top success metrics: an idea to an approved design in one working session;
+zero hard-coded presentation values in adopting apps;
 logo to a theme under review in under 30 minutes; a new app on a themed screen
 in under one hour.
 
@@ -113,6 +121,10 @@ in under one hour.
 
 ### Problem
 
+- **Apps are built before they are designed.** AI coding agents build what
+  they are asked, fast; nobody checks who the users are, what they must
+  accomplish or whether a simpler flow would do, and nothing is tested with
+  people before it ships. Design documents, when they exist, go unreviewed.
 - **Apps copy and hard-code the presentation layer.** A billing-review app copied four
   theme files byte-for-byte (its ADR-005) and wrote its own table layer. A
   client app that switched themes on 2026-10-05 saw no change in its widgets,
@@ -131,6 +143,9 @@ in under one hour.
 
 ### Goals
 
+0. A person with an idea, working with their agent, reaches an approved,
+   tested design, having reviewed and approved every item of it, and gets
+   an app built from it.
 1. Apps built on the SDK take every presentation value — colour, type, shape,
    widget, font, icon — from the SDK, and change look when the theme changes.
 2. A person with a client's logo produces a reviewed, accessible brand in one
@@ -143,6 +158,7 @@ in under one hour.
 
 | Metric | Target | Measurement Method |
 |--------|--------|--------------------|
+| Idea to an approved design | One working session to `core-2` passed, every item approved | The design state's checkpoints and reviews, over the first 10 guided designs |
 | Hard-coded presentation values in an adopting app | 0 literal colours, font families or radii in app CSS/JSX | The SDK lint rule (FEAT-004) run in the app's CI |
 | Logo to a theme under review | Median ≤ 30 minutes | Brand builder session timing, first upload to PR opened, over the first 10 brands |
 | Palette options accepted without manual hex editing | ≥ 80% of sessions | Brand builder session log: accepted option vs. options with manual overrides |
@@ -173,6 +189,16 @@ in under one hour.
 Deferred items are tracked as DDx beads labelled `parking-lot`.
 
 ## Users and Scope
+
+### Primary Persona: Person with an idea (product owner, designer, founder)
+
+**Role**: Owns what an app should do for its users; may not write code.
+**Goals**: Turn an idea into an app people can use, deciding what matters
+and approving what is built, without learning a design method first.
+**Pain Points**: Agents build features before anyone has asked who the
+users are; design documents are written but never reviewed; terms like
+"jobs to be done" or "blueprint" go unexplained; nothing is tested with
+people until it is too late to change.
 
 ### Primary Persona: App developer (Synaptiq, its clients, open-source users)
 
