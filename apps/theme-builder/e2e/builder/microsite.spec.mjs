@@ -68,16 +68,25 @@ test.describe("The public site", () => {
     expect(errors).toEqual([]);
   });
 
-  test("Start / design explains the guided design loop: how to start, the activities, the checkpoints and the documents", async ({ page }) => {
+  test("Start / design explains the guided design loop: design first, what to expect, the eight steps, the terms, the checkpoints, the documents and keeping it current", async ({ page }) => {
     const errors = watch(page);
     await page.goto(page_("why/roadmap"));
     await expect(page.locator('[data-roadmap="now"]')).toContainText("FEAT-018");
     await page.goto(page_("start/design"));
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Design the UX with your agent");
+    await expect(page.getByText("npm create @ux-builder/app@latest my-idea")).toBeVisible();
+    await expect(page.getByText("npm create @ux-builder/app@latest . -- --theme ux-builder-databricks")).toBeVisible();
     await expect(page.getByText("npx ux-builder-design init")).toBeVisible();
-    for (const a of ["Define", "Explore", "Experience", "Validate"]) await expect(page.locator("#activities ~ ul").first().getByRole("heading", { name: a })).toBeVisible();
+    for (const t of ["An overview first", "Step n of 8", "Terms explained", "Everything reviewed in the chat"]) await expect(page.locator("#expect ~ ul").first().getByRole("heading", { name: t })).toBeVisible();
+    // The steps and the terms come from @ux-builder/design itself.
+    const steps = page.getByRole("table", { name: "The guided design's steps" });
+    await expect(steps.locator("tbody tr")).toHaveCount(8);
+    for (const n of ["Define intent", "Design the structure", "Refine and improve"]) await expect(steps.getByText(n, { exact: true })).toBeVisible();
+    await expect(page.getByRole("table", { name: "Terms" }).getByText("checkpoint", { exact: true })).toBeVisible();
+    await expect(page.locator("#modality ~ p").first()).toContainText("screen sizes");
     for (const c of ["core-1", "core-2", "core-3", "significant-change", "experiment", "release"]) await expect(page.getByRole("table", { name: "Checkpoints" }).getByText(c, { exact: true })).toBeVisible();
-    await expect(page.getByRole("table", { name: "Design documents" }).locator("tbody tr")).toHaveCount(8);
+    await expect(page.getByRole("table", { name: "Design documents" }).locator("tbody tr")).toHaveCount(12);
+    await expect(page.locator("#current ~ ol").first()).toContainText("npm install -D @ux-builder/design@latest @ux-builder/ui@latest");
     await expect(page.locator("#production ~ div").first()).toContainText("JourneyProvider");
     // The starter, the agents page and the command reference lead here.
     for (const from of ["start/new-app", "start/agents", "reference/cli"]) {
