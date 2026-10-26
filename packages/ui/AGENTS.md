@@ -485,5 +485,6 @@ The rules restate guidance from Apple's Human Interface Guidelines, Material Des
 | `praxis-material` | material | dark, light (default dark) |
 | `praxis-v2-databricks` | databricks | dark, light (default light) |
 | `synaptiq` | own anatomy | dark, light (default light) |
+| `to-do-vk` | databricks | dark, light (default light) |
 | `ux-builder-databricks` | databricks | dark, light (default light) |
 <!-- catalogue:end -->
