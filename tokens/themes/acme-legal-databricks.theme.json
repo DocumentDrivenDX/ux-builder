@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Acme Legal on the databricks design system: the acme-legal brand. Made in the theme builder.",
+  "name": "acme-legal-databricks",
+  "title": "Acme Legal Databricks",
+  "brand": "acme-legal",
+  "default": "light",
+  "designSystem": "databricks"
+}

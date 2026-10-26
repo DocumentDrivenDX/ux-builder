@@ -1,0 +1,211 @@
+{
+  "$schema": "../schema/brand.schema.json",
+  "$description": "Generated in the theme builder by @ux-builder/engine 0.1.0, strategy vibrant. Regenerate with: npm run brand -- --regenerate tokens/brands/acme-legal.brand.json",
+  "name": "acme-legal",
+  "title": "Acme Legal",
+  "appearances": {
+    "light": {
+      "color": {
+        "ground": {
+          "$value": "#F7FAFF",
+          "$description": "Page ground. Generated (vibrant)."
+        },
+        "ground-recessed": {
+          "$value": "#EAF3FF",
+          "$description": "Recessed ground (sidebar). Generated (vibrant)."
+        },
+        "surface": {
+          "$value": "#FFFFFF",
+          "$description": "Cards, fields and menus. Generated (vibrant)."
+        },
+        "surface-sunken": {
+          "$value": "#E7F1FF",
+          "$description": "Sunken panels and pills. Generated (vibrant)."
+        },
+        "border": {
+          "$value": "#CBE0FC",
+          "$description": "Borders. Generated (vibrant)."
+        },
+        "text-strong": {
+          "$value": "#031530",
+          "$description": "Headings. Generated (vibrant)."
+        },
+        "text": {
+          "$value": "#0F2440",
+          "$description": "Body text. Generated (vibrant)."
+        },
+        "text-muted": {
+          "$value": "#374E6E",
+          "$description": "Muted text. Generated (vibrant)."
+        },
+        "text-subtle": {
+          "$value": "#4D6585",
+          "$description": "Subtle text. Generated (vibrant)."
+        },
+        "structure": {
+          "$value": "#3C5F8E",
+          "$description": "Primary buttons: brand colour. Generated (vibrant)."
+        },
+        "accent": {
+          "$value": "#3C5F8E",
+          "$description": "Links, focus, kickers: brand colour. Generated (vibrant)."
+        },
+        "on-accent": {
+          "$value": "#FFFFFF",
+          "$description": "Text and icons on the accent. Generated (vibrant)."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#007C59",
+          "$description": "Status: live. Generated (vibrant)."
+        },
+        "limited": {
+          "$value": "#A25900",
+          "$description": "Status: limited. Generated (vibrant). #A75C00 moved −0.010 L (OKLCH, hue kept) to clear 4.5:1."
+        },
+        "purchasing": {
+          "$value": "#00668B",
+          "$description": "Status: purchasing. Generated (vibrant)."
+        },
+        "closed": {
+          "$value": "#B8284D",
+          "$description": "Status: closed. Generated (vibrant)."
+        },
+        "evaluation": {
+          "$value": "#374E6E",
+          "$description": "Status: evaluation (muted). Generated (vibrant)."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#1F3A5F",
+          "$description": "The logo's top brand colour, as supplied."
+        },
+        "logo-image": {
+          "$value": "../../brand/acme-legal/logo-framed.svg",
+          "$description": "The logo, as uploaded to the theme builder, framed to its drawing."
+        },
+        "logo-aspect": {
+          "$value": "1",
+          "$description": "The framed logo's width over its height."
+        }
+      }
+    },
+    "dark": {
+      "color": {
+        "ground": {
+          "$value": "#09121F",
+          "$description": "Page ground. Generated (vibrant)."
+        },
+        "ground-recessed": {
+          "$value": "#040B18",
+          "$description": "Recessed ground (sidebar). Generated (vibrant)."
+        },
+        "surface": {
+          "$value": "#141D2B",
+          "$description": "Cards, fields and menus. Generated (vibrant)."
+        },
+        "surface-sunken": {
+          "$value": "#1D2735",
+          "$description": "Sunken panels and pills. Generated (vibrant)."
+        },
+        "border": {
+          "$value": "#26364C",
+          "$description": "Borders. Generated (vibrant)."
+        },
+        "text-strong": {
+          "$value": "#F4F9FF",
+          "$description": "Headings. Generated (vibrant)."
+        },
+        "text": {
+          "$value": "#DFECFF",
+          "$description": "Body text. Generated (vibrant)."
+        },
+        "text-muted": {
+          "$value": "#A5C0E5",
+          "$description": "Muted text. Generated (vibrant)."
+        },
+        "text-subtle": {
+          "$value": "#87A0C4",
+          "$description": "Subtle text. Generated (vibrant)."
+        },
+        "structure": {
+          "$value": "#81A7DB",
+          "$description": "Primary buttons: brand colour. Generated (vibrant)."
+        },
+        "accent": {
+          "$value": "#81A7DB",
+          "$description": "Links, focus, kickers: brand colour. Generated (vibrant)."
+        },
+        "on-accent": {
+          "$value": "#000A21",
+          "$description": "Text and icons on the accent. Generated (vibrant)."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#4BC899",
+          "$description": "Status: live. Generated (vibrant)."
+        },
+        "limited": {
+          "$value": "#FFB06E",
+          "$description": "Status: limited. Generated (vibrant)."
+        },
+        "purchasing": {
+          "$value": "#36B2E7",
+          "$description": "Status: purchasing. Generated (vibrant)."
+        },
+        "closed": {
+          "$value": "#F86680",
+          "$description": "Status: closed. Generated (vibrant)."
+        },
+        "evaluation": {
+          "$value": "#A5C0E5",
+          "$description": "Status: evaluation (muted). Generated (vibrant)."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#1F3A5F",
+          "$description": "The logo's top brand colour, as supplied."
+        },
+        "logo-image": {
+          "$value": "../../brand/acme-legal/logo-framed.svg",
+          "$description": "The logo, as uploaded to the theme builder, framed to its drawing."
+        },
+        "logo-aspect": {
+          "$value": "1",
+          "$description": "The framed logo's width over its height."
+        }
+      }
+    }
+  },
+  "generation": {
+    "engine": "0.1.0",
+    "extracted": [
+      "#1F3A5F",
+      "#E8A33D",
+      "#B4442C"
+    ],
+    "strategy": "vibrant",
+    "settings": {
+      "strategies": "faithful,muted,vibrant,neutral-accent,two-colour",
+      "primaryCandidate": 0,
+      "secondaryCandidate": -1,
+      "hueShift": 0,
+      "chromaScale": 1,
+      "neutralTint": 1,
+      "groundLight": 0.985,
+      "groundDark": 0.18,
+      "stateHarmony": 0.5,
+      "minContrast": 4.5,
+      "suggestedHue": 250,
+      "appearances": "light,dark"
+    },
+    "logo": {
+      "path": "../../brand/acme-legal/logo.svg",
+      "sha256": "43cd7f5ebfdf0caaff783c7fa68b5c3f4537d9148a3becb69bf81fbe52efe00b"
+    }
+  }
+}
