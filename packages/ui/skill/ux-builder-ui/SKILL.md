@@ -483,6 +483,7 @@ The rules restate guidance from Apple's Human Interface Guidelines, Material Des
 | Theme | Design system | Appearances |
 |-------|---------------|-------------|
 | `databricks` | databricks | dark, light (default light) |
+| `img-8593-databricks` | databricks | dark, light (default light) |
 | `plain` | own anatomy | light (default light) |
 | `praxis` | own anatomy | dark, light (default dark) |
 | `praxis-carbon` | carbon | dark, light (default dark) |
