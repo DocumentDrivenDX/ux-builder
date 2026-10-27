@@ -353,7 +353,7 @@ export function notices() {
 export async function guide() {
   const p = await import(pathToFileURL(join(REPO, "packages/design/process.mjs")).href);
   const pick = (s) => ({ n: s.n, name: s.name, activity: s.activity, you: s.you, produces: s.produces, terms: s.terms ?? [] });
-  return { steps: p.STEPS.map(pick), changeSteps: p.CHANGE_STEPS.map(pick), glossary: p.GLOSSARY.map(({ term, step, means, why }) => ({ term, step, means, why })) };
+  return { steps: p.STEPS.map(pick), changeSteps: p.CHANGE_STEPS.map(pick), glossary: p.GLOSSARY.map(({ term, step, means, why }) => ({ term, step, means, why })), ids: p.IDS.map(({ id, kind, where }) => ({ id, kind, where })) };
 }
 
 /* A Markdown document as blocks the site renders (headings, paragraphs,

@@ -235,7 +235,7 @@ The starter comes with:
 - the blueprint, `docs/ux-builder/blueprint/app.blueprint.json`, and
   `npm run check:blueprint`;
 - the latest HELIX release (its skill, the `.helix.yml` marker and the
-  starter HELIX documents), `ux-assessment.yml`, and a Playwright test that
+  starter HELIX documents), `docs/ux-builder/ux-assessment.yml`, and a Playwright test that
   cites the first story's criteria;
 - the episode trace: creating the app is its first episode, and a Claude Code
   hook attaches each session's transcript;
@@ -441,7 +441,7 @@ modality** (the components it needs and the rule families checked). The
 modalities come from the blueprint's `supports.modalities`, else
 `--modality`. With `--blueprint`, the report then follows the app's
 journeys: each step's screenshot with its findings drawn on it. It writes
-`audit-report/index.html` and `audit-report/report.json`, and exits 1 on an
+`docs/ux-builder/audit-report/index.html` and `docs/ux-builder/audit-report/report.json`, and exits 1 on an
 error. See [`packages/audit`](packages/audit/README.md) for the options.
 
 ### Interaction and screen rules
@@ -540,7 +540,7 @@ ux-builder is not affiliated with or endorsed by Apple or Google. Human Interfac
 ### UX assessment
 
 `ux-builder-audit assess` lets a coding agent assess a HELIX-governed app's UX
-(FEAT-009). A `ux-assessment.yml` manifest binds the app's HELIX marker, flow
+(FEAT-009). A `docs/ux-builder/ux-assessment.yml` manifest binds the app's HELIX marker, flow
 and catalogue. The commands trace each journey to its HELIX stories,
 acceptance criteria and tests, record the app's tests and the audit as a
 baseline, and inspect the exact page state the agent's browser reached, over
@@ -551,9 +551,9 @@ Journeys through an assistant or agent are walked in three scenarios
 action.
 
 ```sh
-npx ux-builder-audit assess init                       # proposes ux-assessment.yml
+npx ux-builder-audit assess init                       # proposes docs/ux-builder/ux-assessment.yml
 npx ux-builder-audit assess validate
-npx ux-builder-audit assess report ux-assessment/<run> # report.html, report.md, evidence.json
+npx ux-builder-audit assess report docs/ux-builder/assessments/<run> # report.html, report.md, evidence.json
 npx ux-builder-audit assess video --run <run>          # an annotated walkthrough video per journey
 ```
 

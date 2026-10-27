@@ -24,8 +24,8 @@ function existing() {
   writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
   put(app, "docs/helix/01-frame/user-stories/US-001-find-a-river.md", "---\nddx:\n  id: US-001\n  type: user-stories\n---\n\n# US-001: Find a river near me\n");
   put(app, "docs/helix/01-frame/user-stories/US-002-save-a-river.md", "---\nddx:\n  id: US-002\n  type: user-stories\n---\n\n# US-002: Save a river for later\n");
-  put(app, "ux-assessment/R-20261020T100000Z/backlog.json", JSON.stringify({ findings: [{ id: "F-old", title: "Superseded", status: "open" }] }));
-  put(app, "ux-assessment/R-20261022T100000Z/backlog.json", JSON.stringify({ findings: [
+  put(app, "docs/ux-builder/assessments/R-20261020T100000Z/backlog.json", JSON.stringify({ findings: [{ id: "F-old", title: "Superseded", status: "open" }] }));
+  put(app, "docs/ux-builder/assessments/R-20261022T100000Z/backlog.json", JSON.stringify({ findings: [
     { id: "F-03", title: "The detail screen is a dead end", priority: "P1", journey_id: "J-find", status: "open" },
     { id: "F-04", title: "Rejected one", status: "rejected" },
   ] }));
@@ -65,7 +65,7 @@ describe("baseline", () => {
     assert.equal(r.status, 2);
     assert.match(r.stderr, /no docs\/ux-builder\/blueprint\/app\.blueprint\.json/);
     const app = existing();
-    rmSync(join(app, "ux-assessment"), { recursive: true });
+    rmSync(join(app, "docs/ux-builder/assessments"), { recursive: true });
     assert.equal(cli(app, ["baseline"]).status, 0);
     assert.match(readFileSync(join(app, "docs/ux-builder/baseline.md"), "utf8"), /No assessment run yet \(ux-builder-audit assess\)/);
   });

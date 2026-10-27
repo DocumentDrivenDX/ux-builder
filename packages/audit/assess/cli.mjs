@@ -26,6 +26,10 @@
    Exit codes: 0 done; 1 the stage could not complete (reported); 2 usage. */
 
 import { parseArgs } from "node:util";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
+
+/* The manifest where the app keeps it: docs/ux-builder/ux-assessment.yml, or at its top until it migrates (FEAT-018 GDL-82). */
+const MANIFEST = reportsOf(process.cwd()).manifest;
 
 const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
 
@@ -166,7 +170,7 @@ const SUB = {
     } catch (e) { console.error(e.message); return e.code === "usage" ? 2 : 1; }
   },
   async video(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, journey: { type: "string", multiple: true }, viewport: { type: "string", multiple: true }, pace: { type: "string", default: "normal" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, run: { type: "string" }, out: { type: "string" }, journey: { type: "string", multiple: true }, viewport: { type: "string", multiple: true }, pace: { type: "string", default: "normal" } } });
     const viewports = (o.viewport ?? []).map((v) => { const m = /^(\d+)x(\d+)$/.exec(v); return m && { width: Number(m[1]), height: Number(m[2]) }; });
     if (!["slow", "normal", "fast"].includes(o.pace)) { console.error(`--pace is slow, normal or fast\n${USAGE}`); return 2; }
     if (!o.run || viewports.some((v) => !v)) { console.error(USAGE); return 2; }
@@ -182,7 +186,7 @@ const SUB = {
     return r.code;
   },
   async propose(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, finding: { type: "string" }, target: { type: "string" }, new: { type: "string" }, kind: { type: "string", default: "new-requirement" }, criterion: { type: "string" }, test: { type: "string" }, "test-file": { type: "string" }, keeps: { type: "string" }, title: { type: "string" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, run: { type: "string" }, out: { type: "string" }, finding: { type: "string" }, target: { type: "string" }, new: { type: "string" }, kind: { type: "string", default: "new-requirement" }, criterion: { type: "string" }, test: { type: "string" }, "test-file": { type: "string" }, keeps: { type: "string" }, title: { type: "string" } } });
     if (!o.run || !o.finding || !(o.target || o.new) || !o.criterion || !o.test || !["new-requirement", "unmet-criterion", "scope"].includes(o.kind)) { console.error(USAGE); return 2; }
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
@@ -194,7 +198,7 @@ const SUB = {
     } catch (e) { console.error(e.message); return e.code === "missing" ? 1 : 2; }
   },
   async "check-writes"(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, run: { type: "string" }, out: { type: "string" } } });
     if (!o.run) { console.error(USAGE); return 2; }
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
@@ -205,7 +209,7 @@ const SUB = {
     return changed.length ? 1 : 0;
   },
   async "apply-check"(args) {
-    const { values: o, positionals: [proposal] } = parseArgs({ args, allowPositionals: true, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    const { values: o, positionals: [proposal] } = parseArgs({ args, allowPositionals: true, options: { manifest: { type: "string", default: MANIFEST }, run: { type: "string" }, out: { type: "string" } } });
     if (!o.run || !proposal) { console.error(USAGE); return 2; }
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
@@ -255,7 +259,7 @@ const SUB = {
     return problems.length ? 1 : 0;
   },
   async baseline(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, run: { type: "string" }, out: { type: "string" } } });
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
     const { runId } = await import("./collect.mjs");
@@ -268,7 +272,7 @@ const SUB = {
     return stage.status === "completed" ? 0 : 1;
   },
   async collect(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, run: { type: "string" }, out: { type: "string" } } });
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
     const { collect, runId } = await import("./collect.mjs");
@@ -280,17 +284,20 @@ const SUB = {
     return 0;
   },
   async init(args) {
-    const { values: o } = parseArgs({ args, options: { out: { type: "string", default: "ux-assessment.yml" } } });
+    const { values: o } = parseArgs({ args, options: { out: { type: "string", default: MANIFEST } } });
+    const { mkdirSync } = await import("node:fs");
+    const { dirname } = await import("node:path");
     const { existsSync, writeFileSync } = await import("node:fs");
     if (existsSync(o.out)) { console.error(`${o.out} exists; not overwriting it.`); return 1; }
     const { propose } = await import("./init.mjs");
     const { text, manifest } = propose(process.cwd());
+    mkdirSync(dirname(o.out), { recursive: true });
     writeFileSync(o.out, text);
     console.log(`Wrote ${o.out}: ${manifest.journeys.length} candidate journey${manifest.journeys.length === 1 ? "" : "s"}. Fill in every <fill-in: …>, then run: ux-builder-audit assess validate`);
     return 0;
   },
   async validate(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, json: { type: "boolean" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, json: { type: "boolean" } } });
     const m = await loaded(o.manifest);
     if (typeof m === "number") return m;
     const { validate } = await import("./manifest.mjs");
@@ -304,7 +311,7 @@ const SUB = {
     return problems.length ? 1 : 0;
   },
   async plan(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" }, agent: { type: "string" }, model: { type: "string" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, run: { type: "string" }, out: { type: "string" }, agent: { type: "string" }, model: { type: "string" } } });
     if (!o.run) { console.error("plan needs --run: the run collect wrote"); return 2; }
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
@@ -317,7 +324,7 @@ const SUB = {
     } catch (e) { console.error(e.message); return e.code === "blocked" ? 1 : 2; }
   },
   async merge(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, run: { type: "string" }, out: { type: "string" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, run: { type: "string" }, out: { type: "string" } } });
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
     if (!o.run) { console.error("merge needs --run"); return 2; }
@@ -333,7 +340,7 @@ const SUB = {
     return 0;
   },
   async reset(args) {
-    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: "ux-assessment.yml" }, fixture: { type: "string" } } });
+    const { values: o } = parseArgs({ args, options: { manifest: { type: "string", default: MANIFEST }, fixture: { type: "string" } } });
     const ready = await validated(o.manifest);
     if (typeof ready === "number") return ready;
     const f = (ready.resolved.fixtures ?? []).find((x) => x.id === o.fixture);
@@ -390,7 +397,7 @@ const SUB = {
     if (o.scenario && !["normal", "errorProne", "risky"].includes(o.scenario)) { console.error(`--scenario must be normal, errorProne or risky\n${USAGE}`); return 2; }
     if (o["high-impact-step"] && !/^[1-9]\d*$/.test(o["high-impact-step"])) { console.error("--high-impact-step must be a step number (1-based)"); return 2; }
     // With the manifest: its output path, origins and redaction apply (ENV-02, ENV-03).
-    let extra = { out: o.out ?? "ux-assessment" };
+    let extra = { out: o.out ?? reportsOf(process.cwd()).assessments };
     if (o.manifest) {
       const ready = await validated(o.manifest);
       if (typeof ready === "number") return ready;

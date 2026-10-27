@@ -24,7 +24,7 @@ function app({ bp = BP, audit = { error: 0, warning: 1 }, judgments } = {}) {
   const a = tempApp({ state: judgments ? { alternatives: [{ name: "map-first", file: "docs/ux-builder/blueprint/app.blueprint.map-first.json", status: "candidate", judgments }] } : {} });
   writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(bp));
   writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.map-first.json"), JSON.stringify(bp));
-  if (audit) { mkdirSync(join(a, "audit-report"), { recursive: true }); writeFileSync(join(a, "audit-report/report.json"), JSON.stringify({ summary: { ...audit, info: 0 } })); }
+  if (audit) { mkdirSync(join(a, "docs/ux-builder/audit-report"), { recursive: true }); writeFileSync(join(a, "docs/ux-builder/audit-report/report.json"), JSON.stringify({ summary: { ...audit, info: 0 } })); }
   return a;
 }
 const rubric = (a, ...args) => { const r = cli(a, ["rubric", ...args, "--json"]); assert.equal(r.status, 0, r.stderr); return JSON.parse(r.stdout); };

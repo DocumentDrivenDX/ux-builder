@@ -14,6 +14,7 @@ import { DesignError, bpFile, proposalsDir, protoDir, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable, uxDocuments } from "./documents.mjs";
 import { readState } from "./state.mjs";
 import { kits, testKit } from "./testkit.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const list = (x) => (Array.isArray(x) ? x : []);
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
@@ -80,9 +81,10 @@ export function buildGraph(app) {
     const findings = readJson(join(app, `${ux(app)}/tests/${kit}/findings.json`))?.findings ?? [];
     for (const f of findings) { node(f.id, "finding", f.title ?? f.remark ?? f.id, `${ux(app)}/tests/${kit}/findings.json`); edge(`${kit}#${f.task}`, f.id); }
   }
-  const runs = existsSync(join(app, "ux-assessment")) ? readdirSync(join(app, "ux-assessment")).filter((n) => /^R-/.test(n)).sort() : [];
-  if (runs.length) for (const f of readJson(join(app, "ux-assessment", runs.at(-1), "backlog.json"))?.findings ?? []) {
-    if (f.id && f.journey_id && nodes.has(f.journey_id)) { node(f.id, "finding", f.title ?? f.id, `ux-assessment/${runs.at(-1)}/backlog.json`); edge(f.journey_id, f.id); }
+  const assessments = reportsOf(app).assessments;
+  const runs = existsSync(join(app, assessments)) ? readdirSync(join(app, assessments)).filter((n) => /^R-/.test(n)).sort() : [];
+  if (runs.length) for (const f of readJson(join(app, assessments, runs.at(-1), "backlog.json"))?.findings ?? []) {
+    if (f.id && f.journey_id && nodes.has(f.journey_id)) { node(f.id, "finding", f.title ?? f.id, `${assessments}/${runs.at(-1)}/backlog.json`); edge(f.journey_id, f.id); }
   }
   // Decision records, linked to what they name.
   for (const d of uxDocuments(app).filter((x) => x.type === "ux-decision")) {

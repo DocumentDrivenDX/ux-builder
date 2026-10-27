@@ -62,7 +62,7 @@ There is no sample domain or data. Native `ios`, `android`, `macos` and
 | `--blueprint <file>` | Start from this plan of the app's screens instead of the starter's. A plan with an error (`ux-builder-blueprint check`) is refused, with each error, and nothing is written. Its `supports.modalities` (or `responsive-web` when it names none) must agree with `--modality`, or the starter exits 1 naming both |
 | `--helix-version <tag>` | Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written |
 | `--helix-offline` | Use the HELIX bundled with this starter; no network request. Not with `--helix-version` (refused, nothing written) |
-| `--no-helix` | Leave HELIX out: no marker, documents, skill or `ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines |
+| `--no-helix` | Leave HELIX out: no marker, documents, skill or `docs/ux-builder/ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines |
 | `--mcp` | Also write `.mcp.json` for the ux-builder MCP server (`npx @ux-builder/mcp`). Optional: the skills and the guided design loop work without it (ADR-036) |
 
 The HELIX request reads `GITHUB_TOKEN` (sent to GitHub's API as a bearer
@@ -87,7 +87,7 @@ without HELIX, and the output says why.
   the product's purpose, users, goals and metrics are yours to write. The
   package is verified against GitHub's SHA-256 digest; offline, the HELIX
   bundled with the starter is used, and the app records why.
-- `ux-assessment.yml` for the UX assessment (`npm run assess:validate`), and
+- `docs/ux-builder/ux-assessment.yml` for the UX assessment (`npm run assess:validate`), and
   `e2e/starter.spec.js`, a Playwright test of the shell that cites
   US-001's criteria (`npm run test:e2e`).
 
@@ -117,7 +117,7 @@ without HELIX, and the output says why.
   decisions, add the `UX-Episode:` trailer to its commits and end it.
 - `npm run audit`: builds, serves and audits the app in every theme and
   appearance with `@ux-builder/audit` (run `npx playwright install chromium`
-  once); the report is in `audit-report/`.
+  once); the report is in `docs/ux-builder/audit-report/`.
 - `docs/ux-builder/blueprint/app.blueprint.json`: the plan of the app's destinations and screens, and
   `npm run check:blueprint`, which checks it against the interaction rules.
 - `.github/workflows/ci.yml`: `npm ci`, the blueprint check, lint and the audit on every push,

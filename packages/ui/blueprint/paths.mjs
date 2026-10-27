@@ -12,7 +12,7 @@
    them there, and says how to move. */
 
 import { existsSync, readdirSync } from "node:fs";
-import { join, relative, resolve, sep } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 
 export const CURRENT = {
   name: "current",
@@ -24,6 +24,9 @@ export const CURRENT = {
   compare: "docs/ux-builder/compare",
   drawings: "docs/ux-builder/drawings",
   wireframes: "docs/ux-builder/wireframes",
+  assessmentManifest: "docs/ux-builder/ux-assessment.yml",
+  assessments: "docs/ux-builder/assessments",
+  auditReport: "docs/ux-builder/audit-report",
 };
 export const LEGACY = {
   name: "legacy",
@@ -35,6 +38,9 @@ export const LEGACY = {
   compare: "blueprint-compare",
   drawings: "blueprint-drawings",
   wireframes: "blueprint-wireframes",
+  assessmentManifest: "ux-assessment.yml",
+  assessments: "ux-assessment",
+  auditReport: "audit-report",
 };
 export const MIGRATE_HINT = "this app is on the old layout (app.blueprint.json, docs/ux/ at the top); `npx ux-builder-design migrate` moves it under docs/ux-builder/";
 
@@ -46,6 +52,25 @@ export function layoutOf(app = process.cwd()) {
   const oldBlueprints = () => { try { return readdirSync(app).some((n) => /^app\.blueprint(\.[a-z0-9-]+)?\.json$/.test(n)); } catch { return false; } };
   if (has(LEGACY.docs) || oldBlueprints()) return LEGACY;
   return CURRENT;
+}
+
+/* Where the UX assessment's manifest and runs and the UI audit's report go
+   (FEAT-018 GDL-82): under docs/ux-builder/ in an app that has it, unless the
+   app still keeps its manifest at its top (an app made before, until
+   `ux-builder-design migrate` moves it); elsewhere at the app's top, as
+   before. { manifest, assessments, auditReport, layout }, app-relative. */
+export function reportsOf(app = process.cwd()) {
+  const has = (p) => existsSync(join(app, p));
+  const old = !has(CURRENT.docs) || (has(LEGACY.assessmentManifest) && !has(CURRENT.assessmentManifest));
+  const l = old ? LEGACY : CURRENT;
+  return { manifest: l.assessmentManifest, assessments: l.assessments, auditReport: l.auditReport, layout: l.name };
+}
+
+/* The app a manifest belongs to: its folder, or the app above docs/ux-builder/ for one kept there. */
+export function manifestApp(file) {
+  const abs = resolve(file);
+  const tail = `${sep}${CURRENT.assessmentManifest.split("/").join(sep)}`;
+  return abs.endsWith(tail) ? abs.slice(0, -tail.length) || sep : dirname(abs);
 }
 
 /* An alternative's blueprint file: app.blueprint.<name>.json beside the app's blueprint. */

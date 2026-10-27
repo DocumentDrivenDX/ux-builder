@@ -99,7 +99,7 @@ describe("US-150: design first, and build the app in place at the end", () => {
     assert.equal(readFileSync(join(dir, "docs/helix/00-discover/product-vision.md"), "utf8"), "# Rivers, in the owner's words\n");
     assert.ok(existsSync(join(dir, "docs/helix/01-frame/user-stories/US-001-open-the-app-and-see-where-to-start.md")), "HELIX's starter documents where none existed");
     assert.ok(existsSync(join(dir, ".claude/skills/ux-builder-design/SKILL.md")) && existsSync(join(dir, ".claude/skills/helix/HELIX-VERSION.json")));
-    for (const f of ["src/main.jsx", "src/Home.jsx", "src/Assistant.jsx", "index.html", "e2e/starter.spec.js", "ux-assessment.yml", ".stylelintrc.json"]) assert.ok(existsSync(join(dir, f)), f);
+    for (const f of ["src/main.jsx", "src/Home.jsx", "src/Assistant.jsx", "index.html", "e2e/starter.spec.js", "docs/ux-builder/ux-assessment.yml", ".stylelintrc.json"]) assert.ok(existsSync(join(dir, f)), f);
     assert.match(readFileSync(join(dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="databricks"/);
     const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
     assert.equal(pkg.name, "rivers");

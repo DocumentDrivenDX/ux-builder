@@ -8,6 +8,14 @@ description: Assess a HELIX-governed app's UX with @ux-builder/audit — trace i
 You do the reasoning; `ux-builder-audit assess` does the deterministic work.
 Keep the two apart in everything you write (FEAT-009, ADR-026, CONTRACT-006).
 
+When the person asks for an "audit" or a "UX check" without saying which,
+ask first whether they want the **UI audit** (`npm run audit`: the running
+app in every theme and appearance against the interaction and AI rules,
+contrast and anything off-theme; quick), the **usability assessment** (this
+skill: journeys walked against the HELIX stories, each screen state
+inspected, heuristics, task measures and proposals; longer), or **both**,
+explaining each in a sentence. Run only what they choose.
+
 ## Rules
 
 1. **Report only.** Never change the app's code or anything under its HELIX
@@ -17,6 +25,11 @@ Keep the two apart in everything you write (FEAT-009, ADR-026, CONTRACT-006).
    Read documents through `collect`'s output, which found them the way HELIX
    does (marker, flow, catalogue, `ddx:` frontmatter). Never invent a story,
    criterion or HELIX ID; your own IDs start `R-`, `J-`, `S-`, `C-`, `F-`, `P-`.
+   A document read by its location (`untyped`) or with a type corrected
+   (`type-corrected`, such as `user-story` read as `user-stories`) was read:
+   nothing is missing, and no HELIX edit is needed to go on. Never give the
+   person a command to edit their HELIX documents or guess a HELIX field;
+   propose a change as a patch, or point them to the `helix` skill.
 3. **No false passes.** A stage you could not run is `blocked` or `partial`
    with its reason. A state you did not reach is `not assessed`. A clean audit
    is not proof of usability or of full accessibility compliance, and passing
@@ -130,7 +143,7 @@ A run can be replayed as a video for the app's product or technical leader
 ## Stages
 
 Run them in this order. Each command writes under `<out>/<run>/` (default
-`ux-assessment/R-<time>/`); pass the same `--run` to every command of one
+`docs/ux-builder/assessments/R-<time>/`); pass the same `--run` to every command of one
 assessment.
 
 1. **Context.** `npx ux-builder-audit assess validate`. If there is no
@@ -149,7 +162,7 @@ assessment.
    writes `plan.json` (each journey's goal, criteria, expected outcomes and the
    E2E tests to reuse) and a `coverage.json` with every journey × state pair:
    not-assessed or not-applicable until you record it.
-5. **Walk and inspect.** `npx ux-builder-audit assess browser --manifest ux-assessment.yml --run <R-id>`
+5. **Walk and inspect.** `npx ux-builder-audit assess browser --manifest docs/ux-builder/ux-assessment.yml --run <R-id>`
    prints a CDP endpoint, refuses every host outside `run.origins` and every
    excluded integration, and stops when `limits.runMinutes` are spent; connect your browser driver to it (Playwright MCP:
    `--cdp-endpoint <url>`). Walk the journey from its entry route. At each
@@ -157,7 +170,7 @@ assessment.
 
        npx ux-builder-audit assess inspect --cdp <url> --page <url-part> \
          --checkpoint C-<journey>-<n> --journey J-<id> --step <n> --role <id> \
-         --state <class> --run <R-id> --manifest ux-assessment.yml
+         --state <class> --run <R-id> --manifest docs/ux-builder/ux-assessment.yml
 
    Run `assess reset --fixture <id>` before each scenario. Record every step in
    `walkthrough.json` (action, URL, checkpoint, observation with its basis;
@@ -216,7 +229,7 @@ assessment.
    an earlier run: `assess compare <earlier> <later>`; `comparison.json`
    keeps the earlier baseline's failures, so name them in what you hand over. In CI:
    `assess gate <run> --fail-on P1` (see `examples/ux-assessment.workflow.yml`).
-9. **Video.** `assess video --run <R-id> --manifest ux-assessment.yml`
+9. **Video.** `assess video --run <R-id> --manifest docs/ux-builder/ux-assessment.yml`
    replays each walked journey and writes `video/`: an MP4 per journey (with
    `ffmpeg` on the PATH) and `video/index.html`, a player whose findings pop
    up. A step holds 2 s and a finding's caption (its problem, rule and fix) as

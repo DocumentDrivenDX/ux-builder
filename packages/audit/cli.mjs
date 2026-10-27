@@ -17,7 +17,8 @@
      --ignore <selector>   leave these elements out (repeat; elements with data-audit-ignore always are)
      --off <check>         turn a check off (repeat), e.g. --off token-radii
      --no-contrast         skip axe's colour-contrast check
-     --out <dir>           where the report goes (default: audit-report)
+     --out <dir>           where the report goes (default: docs/ux-builder/audit-report in an app with
+                           docs/ux-builder/, else audit-report)
      --fail-on <level>     error (default), warning or never: what makes the exit code 1
      --json                print the report as JSON instead of the summary
      --write-baseline <f>  write every finding to this file, to adopt the audit in an existing app
@@ -49,6 +50,7 @@ import { dirname, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { RULES, VERSION, audit, toBaseline } from "./audit.mjs";
 import { summaryText, writeReports } from "./report.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const { values: o, positionals } = parseArgs({
   allowPositionals: true,
@@ -56,7 +58,7 @@ const { values: o, positionals } = parseArgs({
     theme: { type: "string", multiple: true }, appearance: { type: "string", multiple: true }, width: { type: "string", multiple: true },
     serve: { type: "string" }, wait: { type: "string" }, ignore: { type: "string", multiple: true },
     off: { type: "string", multiple: true }, "no-contrast": { type: "boolean" },
-    out: { type: "string", default: "audit-report" }, "fail-on": { type: "string", default: "error" },
+    out: { type: "string", default: reportsOf(process.cwd()).auditReport }, "fail-on": { type: "string", default: "error" },
     json: { type: "boolean" }, "write-baseline": { type: "string" }, baseline: { type: "string" }, blueprint: { type: "string" }, modality: { type: "string", multiple: true }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
   },
 });

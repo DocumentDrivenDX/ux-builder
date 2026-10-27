@@ -162,7 +162,7 @@ const MODALITIES = [
 const HELIX_OPTIONS = [
   { option: "--helix-version <tag>", effect: "Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written." },
   { option: "--helix-offline", effect: "Use the HELIX bundled with the starter, with no network request. Not with `--helix-version`." },
-  { option: "--no-helix", effect: "Leave HELIX out: no marker, documents, skill or `ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines." },
+  { option: "--no-helix", effect: "Leave HELIX out: no marker, documents, skill or `docs/ux-builder/ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines." },
 ];
 function NewApp() {
   return (
@@ -190,7 +190,7 @@ function NewApp() {
         <li><code>CLAUDE.md</code> and <code>AGENTS.md</code> pointing at the SDK's guidance, and the Claude Code skill <code>ux-builder-ui</code></li>
         <li><code>docs/ux-builder/blueprint/app.blueprint.json</code>, the plan of the app's screens, and <code>npm run check:blueprint</code></li>
         <li><code>@ux-builder/design</code>, its skill and an empty design state, so <code>/ux-builder-design</code> can <a href={href("start", "design")}>guide the design</a> (<code>--mcp</code> also writes <code>.mcp.json</code>)</li>
-        <li>HELIX, its documents, <code>ux-assessment.yml</code> and <code>e2e/starter.spec.js</code> (below)</li>
+        <li>HELIX, its documents, <code>docs/ux-builder/ux-assessment.yml</code> and <code>e2e/starter.spec.js</code> (below)</li>
         <li>The episode trace (<code>@ux-builder/trace</code>): creating the app is its first episode, <code>npm run lint</code> records each run, and a Claude Code hook attaches each session's transcript (<a href={`${href("start", "agents")}#trace`}>below, for agents</a>)</li>
       </ul>
       <H2 id="helix">On HELIX from the first commit</H2>
@@ -212,7 +212,7 @@ function NewApp() {
       </ol>
       <H2 id="tests">The manifest and the starter's test</H2>
       <ul>
-        <li><code>ux-assessment.yml</code> binds the UX assessment to the app's HELIX documents through <code>.helix.yml</code>, with one journey for <code>US-001</code>. <code>npm run assess:validate</code> checks it.</li>
+        <li><code>docs/ux-builder/ux-assessment.yml</code> binds the UX assessment to the app's HELIX documents through <code>.helix.yml</code>, with one journey for <code>US-001</code>. <code>npm run assess:validate</code> checks it.</li>
         <li><code>e2e/starter.spec.js</code> is a Playwright test of the starter screen that cites <code>US-001</code>'s criteria. <code>npm run test:e2e</code> runs it.</li>
       </ul>
       <H2 id="helix-options">HELIX options</H2>
@@ -450,7 +450,7 @@ function Ci() {
       <p><code>ux-builder/ai-neutral-voice</code> warns on UI text that presents an AI as thinking or feeling ("I think", "I understand"), and on labels that make the AI the actor ("Copilot, summarize") where the user's verb should lead.</p>
       <H2 id="audit">The audit</H2>
       <Command text={'npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/'} />
-      <p>It writes <code>audit-report/index.html</code> with screenshots and exits 1 on an error. Every finding names its rule: its ID, its statement in full, its sources and the fix.</p>
+      <p>It writes <code>docs/ux-builder/audit-report/index.html</code> with screenshots and exits 1 on an error. Every finding names its rule: its ID, its statement in full, its sources and the fix.</p>
       <p>The report opens with two verdicts: the <b>theme</b> (applied, SDK components only, contrast in light and dark) and the <b>fit of each modality</b> (the components it needs, and whether its rule families were checked). The modalities come from the blueprint, else <code>--modality</code>, and choose the widths and checks that run. With <code>--blueprint</code> and its journeys, the report then follows each journey step by step, with each screen's screenshot and its findings drawn on it.</p>
       <H2 id="ai-checks">The AI checks</H2>
       <p>{AI_AUDIT_CHECKS.length} checks look only at AI markup (<code>data-piq-ai</code> and its companions), which the SDK's assistant components and Adaptive Cards emit and an app's own AI UI adds, so a page without it gets no AI finding: {AI_AUDIT_CHECKS.map((c, i) => <Fragment key={c}>{i ? ", " : ""}<code>{c}</code></Fragment>)}. With <code>--blueprint app.blueprint.json</code>, a screen showing AI markup must declare an AI role, and its roles select the agent checks.</p>
@@ -468,7 +468,7 @@ function Assess() {
     <>
       <p className="uxm-lede">The UX assessment walks a HELIX-governed app's journeys the way a careful reviewer would, and reports what it checked, what it saw and what is left for representative users to confirm. A coding agent does the reasoning, guided by a skill; <code>ux-builder-audit assess</code> does the deterministic work. It changes nothing in the app or its HELIX documents.</p>
       <H2 id="manifest">1. The manifest</H2>
-      <p><code>ux-assessment.yml</code> binds HELIX rather than restating it: it names the flow, how to start the app (local or staging only), the roles, and the journeys by story ID, or by a journey of the app's <a href={href("concepts", "flows-journeys")}>blueprint</a>. The starter writes one; for any other app, <code>init</code> proposes one, with placeholders for what it cannot work out.</p>
+      <p><code>docs/ux-builder/ux-assessment.yml</code> binds HELIX rather than restating it: it names the flow, how to start the app (local or staging only), the roles, and the journeys by story ID, or by a journey of the app's <a href={href("concepts", "flows-journeys")}>blueprint</a>. The starter writes one; for any other app, <code>init</code> proposes one, with placeholders for what it cannot work out.</p>
       <Command code text={'version: 1\napp: { name: Review app }\nhelix: { flow: helix }\nrun: { start: npm run preview, baseUrl: http://127.0.0.1:4173/, environment: local }\nroles: [{ id: reviewer, auth: { storageState: .auth/reviewer.json } }]\njourneys:\n  - { id: J-review, story: US-012, priority: critical, role: reviewer, entry: /queue }\ntests: [{ id: e2e, command: npm run test:e2e }]\nrestrictions: { writes: report-only }'} />
       <Command text="npx ux-builder-audit assess init" />
       <Command text="npx ux-builder-audit assess validate" />
@@ -497,7 +497,7 @@ function Assess() {
       <Command code text={'scenarios:\n  normal:     { description: "the task as intended" }\n  errorProne: { description: "an ambiguous or failing request" }\n  risky:      { description: "a step with a high-impact action", step: 4 }'} />
       <H2 id="report">5. The report</H2>
       <p><code>assess merge</code> makes one finding per user problem, each with a stable ID and every piece of evidence. <code>assess propose</code> writes a change to a HELIX artifact as a patch, applied only by a person. Then:</p>
-      <Command text="npx ux-builder-audit assess report ux-assessment/<run>" />
+      <Command text="npx ux-builder-audit assess report docs/ux-builder/assessments/<run>" />
       <p>It writes <code>report.html</code>, <code>report.md</code> and <code>evidence.json</code>: what was checked, seen and left uncertain. Findings are grouped by journey, then the state it was walked in, then step, each with its rule's ID and full statement (or its heuristic and source), the evidence, a severity on Nielsen's 0 to 4 scale and the fix. <code>report.md</code> is a HELIX <i>usability-evaluation-report</i>. Every conclusion is labelled deterministic, observed, heuristic, SDK adoption or real user; confusion, trust and time saved are left for representative users. <code>assess compare</code> says which findings are new, persistent, resolved or regressed between two runs, and <code>assess gate --fail-on P1</code> fails CI on an open finding at that priority.</p>
       <H2 id="video">6. Walkthrough videos</H2>
       <p><code>assess video</code> replays each walked journey in a browser of its own, signed in as its role, with sensitive data masked from the first frame, and pauses at each finding. For every journey it writes an MP4 with the findings drawn in, captions and a chapter per step, and a player whose findings pop up, pause the video and link to the report. Each caption gives the problem in plain English, the rule and the fix. It needs <code>ffmpeg</code> on the path.</p>
@@ -865,6 +865,10 @@ function Glossary() {
       <p className="uxm-lede">Every term the guided design explains, read from <code>@ux-builder/design</code>'s glossary: what it means, and why it is worth the person's time. The agent explains each the first time it comes up; <code>ux-builder-design explain &lt;term&gt;</code> prints one.</p>
       <DataTable caption="Design glossary" rowKey="term" rows={glossary} pageSize={glossary.length}
         columns={[{ key: "term", label: "Term", sortable: true, render: (r) => <b>{r.term}</b> }, { key: "step", label: "Step", sortable: true, render: (r) => stepName(r.step) }, { key: "means", label: "What it means" }, { key: "why", label: "Why it matters" }]} />
+      <H2 id="ids">The IDs you will see</H2>
+      <p>The work uses short IDs so each item can be found and traced. The agent names the thing beside its ID and explains each kind the first time it comes up; <code>ux-builder-design explain &lt;ID&gt;</code> says what one is.</p>
+      <DataTable caption="Design IDs" rowKey="id" rows={cliData.guide.ids} pageSize={cliData.guide.ids.length}
+        columns={[{ key: "id", label: "ID", render: (r) => <code>{r.id}</code> }, { key: "kind", label: "What it names" }, { key: "where", label: "Where it lives" }]} />
       <Generated><code>packages/design/glossary.json</code></Generated>
     </>
   );

@@ -14,7 +14,7 @@ export const STEPS = [
   { n: 4, name: "Explore alternatives", activity: "explore", you: "Compare two or more ways to do the same tasks, side by side, and choose one.", produces: "Alternative blueprints, a comparison, the rubric, a decision record", terms: ["journey", "alternative", "rubric", "decision record"], checkpoint: "core-2" },
   { n: 5, name: "Design the structure", activity: "explore", you: "Say which kinds of experience and screen sizes the app is for; then check each screen's purpose and the order of what it shows.", produces: "The modalities and screen sizes you choose; screens with their purpose and content; wireframes", terms: ["modality", "size class", "screen", "pattern", "wireframe"] },
   { n: 6, name: "Prototype", activity: "experience", you: "Click through the prototype and say what to change; choose the app's theme if it has none yet; then the chosen design is built in the app.", produces: "Exploratory prototypes; the validated prototype", terms: ["exploratory prototype", "theme", "validated prototype"] },
-  { n: 7, name: "Test with people", activity: "validate", you: "Run or watch sessions with real users; decide which findings to fix.", produces: "A test kit, findings, the UX evaluation report", terms: ["test kit", "finding", "evaluation report"], checkpoint: "core-3" },
+  { n: 7, name: "Test with people", activity: "validate", you: "Run or watch sessions with real users; decide which findings to fix.", produces: "A test kit, findings, the UX evaluation report", terms: ["UI audit", "usability assessment", "test kit", "finding", "evaluation report"], checkpoint: "core-3" },
   { n: 8, name: "Refine and improve", activity: "validate", you: "Look at how people use the app; decide what to try next and whether to release it.", produces: "Production insights, diagnoses, experiments", terms: ["journey event", "insight", "experiment"], checkpoint: "experiment, release" },
 ];
 export const CHANGE_STEPS = [
@@ -45,6 +45,7 @@ export function overview() {
     steps: STEPS.map(({ n, name, activity, you, produces, terms, checkpoint }) => ({ n, name, activity, you, produces, terms, ...(checkpoint ? { checkpoint } : {}) })),
     change: CHANGE_STEPS,
     review: "After each step, the agent shows you each thing it produced, inline and one at a time, asks for your feedback, makes the changes, and moves on only when you approve it.",
+    ids: "Along the way you will see short IDs: U-1 is a target user, J-1 a job to be done, J-find a journey, T-1 a task, BR-1 a business rule, US-1 a user story and UXD-1 a decision. The agent says what each is the first time; `ux-builder-design explain ids` lists them all.",
   };
 }
 
@@ -55,7 +56,7 @@ export function overviewText(o) {
     if (s.checkpoint) L.push(`  Then checkpoint ${s.checkpoint}: you decide whether to go on.`);
     L.push("");
   }
-  L.push(o.review, "", `Change mode, for an everyday change to what exists: ${o.change.map((s) => `${s.n} ${s.name}`).join(", ")}.`);
+  L.push(o.review, "", o.ids, "", `Change mode, for an everyday change to what exists: ${o.change.map((s) => `${s.n} ${s.name}`).join(", ")}.`);
   return L.join("\n");
 }
 
@@ -83,11 +84,23 @@ export function setStep(app, { to, pending = () => [] } = {}) {
   return progress(state);
 }
 
-export const GLOSSARY = JSON.parse(readFileSync(new URL("./glossary.json", import.meta.url), "utf8")).terms;
+const GLOSSARY_FILE = JSON.parse(readFileSync(new URL("./glossary.json", import.meta.url), "utf8"));
+export const GLOSSARY = GLOSSARY_FILE.terms;
+/* The short IDs the guide shows (U-1, J-1, T-1, BR-1…): what each names and where it lives. */
+export const IDS = GLOSSARY_FILE.ids.map((x) => ({ ...x, re: new RegExp(x.pattern) }));
+/* What an ID names: { id, kind, where, term? }, or null. */
+export function idKind(id) {
+  const x = IDS.find((i) => i.re.test(String(id).trim()));
+  return x ? { id: String(id).trim(), format: x.id, kind: x.kind, where: x.where, ...(x.term ? { term: x.term } : {}) } : null;
+}
 const key = (t) => String(t).toLowerCase().trim().replace(/[-_]+/g, " ").replace(/(ies)$/, "y").replace(/(?<!s)s$/, "");
 
 /* ux-builder-design explain [<term>] [--step <n>]: what a term means and why it is valuable. */
 export function explain({ term, step } = {}) {
+  // An ID (U-1, J-find, BR-2) or "ids": what it names, with its term when the glossary has one.
+  if (term && /^ids?$/i.test(term.trim())) return { ids: IDS.map(({ re, pattern, ...x }) => x), terms: [] };
+  const named = term ? idKind(term) : null;
+  if (named) return { ids: [named], terms: named.term ? GLOSSARY.filter((x) => key(x.term) === key(named.term)) : [] };
   if (term) {
     const t = GLOSSARY.find((x) => key(x.term) === key(term));
     if (!t) throw new DesignError(`"${term}" is not in the glossary; it has ${GLOSSARY.map((x) => x.term).join(", ")}`);
@@ -100,4 +113,7 @@ export function explain({ term, step } = {}) {
   }
   return { terms: GLOSSARY };
 }
-export const explainText = (r) => r.terms.map((t) => `${t.term}: ${t.means}\n  Why it matters: ${t.why}`).join("\n\n");
+export const explainText = (r) => [
+  ...(r.ids ?? []).map((x) => `${x.id}: ${x.kind[0].toUpperCase()}${x.kind.slice(1)}. Where: ${x.where}.`),
+  ...r.terms.map((t) => `${t.term}: ${t.means}\n  Why it matters: ${t.why}`),
+].join("\n\n");

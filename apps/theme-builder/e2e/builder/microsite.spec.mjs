@@ -107,6 +107,7 @@ test.describe("The public site", () => {
     await page.goto(page_("reference/glossary"));
     const terms = page.getByRole("table", { name: "Design glossary" });
     for (const t of ["blueprint", "target user", "modality", "theme"]) await expect(terms.getByText(t, { exact: true })).toBeVisible();
+    for (const id of ["U-<n>", "J-<name>", "BR-<n>"]) await expect(page.getByRole("table", { name: "Design IDs" }).getByText(id, { exact: true })).toBeVisible();
     await page.goto(page_("proof/worked-example"));
     for (const h of ["The experience brief", "Target users", "Jobs to be done", "An interaction decision", "A usability test kit", "The UX evaluation report"]) await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
     await expect(page.locator("#ex-users ~ div table").first()).toContainText("Weekend anglers new to an area");

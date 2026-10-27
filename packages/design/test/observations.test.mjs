@@ -132,7 +132,7 @@ describe("US-141: import observations and consented transcripts", () => {
   test("AC6: agent and human findings in one evaluation are each labelled; no agent recommendation carries source: human", () => {
     const a = sessionsApp();
     json(a, ["observe", "import", "sheet.csv", "--kit", "TK-1"]);
-    const run = join(a, "ux-assessment/R-20261021T090000Z");
+    const run = join(a, "docs/ux-builder/assessments/R-20261021T090000Z");
     const agent = { id: "F-agent01", title: "Access point not on the map", journey_id: "J-find", priority: "P1", finding_type: "heuristic", recommendation: "Show access points on the map.", evidence_refs: ["checkpoints/C-1/screenshot.png"], status: "open" };
     mkdirSync(run, { recursive: true });
     writeFileSync(join(run, "backlog.json"), JSON.stringify({ schema: "backlog", version: 1, findings: [agent] }));

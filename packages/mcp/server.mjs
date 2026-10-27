@@ -401,8 +401,8 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
 
     server.registerTool("validate_assessment_manifest", {
       title: "Validate an assessment manifest",
-      description: "Check ux-assessment.yml against its schema, the repository and the app's HELIX marker, flow and catalogue. Returns each problem with its path, and the HELIX binding.",
-      inputSchema: { path: z.string().describe("Path to ux-assessment.yml") },
+      description: "Check the assessment manifest (docs/ux-builder/ux-assessment.yml, or ux-assessment.yml at the app's top before migrating) against its schema, the repository and the app's HELIX marker, flow and catalogue. Returns each problem with its path, and the HELIX binding.",
+      inputSchema: { path: z.string().describe("Path to the manifest, docs/ux-builder/ux-assessment.yml") },
     }, async ({ path }) => {
       let m;
       try { m = ux.manifest.load(path); } catch (e) { return fail(`${path}: ${e.message.split("\n")[0]}`); }
@@ -412,7 +412,7 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
 
     server.registerTool("validate_assessment_report", {
       title: "Validate an assessment run",
-      description: "Check a run package (ux-assessment/<run>/): every record against its schema, the coverage matrix, walkthroughs, findings and proposals. Run it before handing an assessment over.",
+      description: "Check a run package (docs/ux-builder/assessments/<run>/, or ux-assessment/<run>/ before migrating): every record against its schema, the coverage matrix, walkthroughs, findings and proposals. Run it before handing an assessment over.",
       inputSchema: { dir: z.string().describe("The run's directory") },
     }, async ({ dir }) => {
       const problems = ux.report.validateReport(dir);

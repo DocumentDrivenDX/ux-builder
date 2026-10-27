@@ -13,8 +13,8 @@ npx ux-builder-audit http://localhost:5173/
 npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/ /settings /matters
 ```
 
-It prints a summary, writes `audit-report/index.html` (with the screenshots)
-and `audit-report/report.json`, and exits 1 if it found an error.
+It prints a summary, writes `docs/ux-builder/audit-report/index.html` (with the screenshots)
+and `docs/ux-builder/audit-report/report.json`, and exits 1 if it found an error.
 
 ## What it checks
 
@@ -158,7 +158,7 @@ the report says so, and the favicon check is skipped.
 | `--ignore <selector>` | Leave these elements out (repeat). Elements with `data-audit-ignore` always are, e.g. a chart. |
 | `--off <check>` | Turn a check off (repeat). |
 | `--no-contrast` | Skip the contrast check. |
-| `--out <dir>` | Where the report goes. Default `audit-report`. |
+| `--out <dir>` | Where the report goes. Default `docs/ux-builder/audit-report` in an app with `docs/ux-builder/`, else `audit-report`. |
 | `--fail-on <error\|warning\|never>` | What makes the exit code 1. Default `error`. |
 | `--json` | Print the report as JSON. |
 | `--write-baseline <file>` | Write every finding (not notes) to this file, in a stable order. Run it once when adopting the audit in an existing app, and commit the file. |
@@ -185,7 +185,7 @@ if (report.summary.error) process.exitCode = 1;
 
 The report is built to be handed to a coding agent: `report.json` names each
 finding's element, value, the rule it breaks in full, the fix, and the themes
-and widths it was seen in. "Fix every error in `audit-report/report.json`, then run
+and widths it was seen in. "Fix every error in `docs/ux-builder/audit-report/report.json`, then run
 `npm run audit` again" is a complete instruction.
 
 ## UX assessment
@@ -194,12 +194,12 @@ and widths it was seen in. "Fix every error in `audit-report/report.json`, then 
 UX (FEAT-009, CONTRACT-006). The agent does the reasoning, guided by the
 skill `skill/ux-builder-assess/SKILL.md` shipped in this package; the
 commands do the deterministic work. An assessment writes only under its
-output path (`ux-assessment/<run>/` by default) and never changes the app's
+output path (`docs/ux-builder/assessments/<run>/` by default: beside the manifest at `docs/ux-builder/ux-assessment.yml`; an app without `docs/ux-builder/`, or one that still keeps `ux-assessment.yml` at its top until `ux-builder-design migrate`, keeps both there and its runs in `ux-assessment/<run>/`. Paths inside the manifest are relative to the app, wherever the manifest is) and never changes the app's
 code or its HELIX documents.
 
 | Command | Does |
 |---|---|
-| `assess init` | Proposes `ux-assessment.yml` from the repository: the HELIX marker, flow and catalogue, the test scripts, and the flow's stories as candidate journeys, by ID only. Values it cannot work out are `<fill-in: …>` |
+| `assess init` | Proposes `docs/ux-builder/ux-assessment.yml` from the repository: the HELIX marker, flow and catalogue, the test scripts, and the flow's stories as candidate journeys, by ID only. Values it cannot work out are `<fill-in: …>` |
 | `assess validate` | Checks the manifest against its schema, the repository and HELIX: the marker as HELIX reads it, one flow, existing stories, criteria and commands, credentials only by reference, local or staging only |
 | `assess collect --run <R-id>` | Writes `requirements.json` (every HELIX document with its type, ID, path, hash and revision; goals, roles, stories and criteria) and `traceability.json` (each journey's criteria, linked to the tests that cite them with `@covers`, or marked uncovered) |
 | `assess baseline --run <R-id>` | Runs the declared tests and the audit before any change, and writes `baseline.json`; a page not on the SDK is also inspected as it is, with its SDK-adoption gaps counted apart |
@@ -260,4 +260,4 @@ for representative users to confirm.
 ## In CI
 
 The starter (`npm create @ux-builder/app`) runs `npm run lint` and `npm run audit`
-in `.github/workflows/ci.yml` and uploads `audit-report` as an artifact.
+in `.github/workflows/ci.yml` and uploads `docs/ux-builder/audit-report` as an artifact.

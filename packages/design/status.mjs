@@ -7,6 +7,7 @@ import { layout, ux } from "./app.mjs";
 import { FIRST_STEP } from "./checkpoints.mjs";
 import { modalityStatus } from "./modality.mjs";
 import { progress } from "./process.mjs";
+import { migrationPlan } from "./migrate.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState } from "./state.mjs";
 
@@ -34,6 +35,8 @@ export function status(app) {
     // Where the person is, and what awaits their review (GDL-79).
     progress: progress(s),
     layout: layout(app).name,
+    // What migrate would still move (GDL-80, GDL-82): an app on the new layout may keep its assessment and audit report at its top.
+    toMigrate: migrationPlan(app).map((m) => m.from),
     awaitingReview: pending.map((p) => p.id),
     activity: s.activity,
     mode: s.mode,
@@ -71,6 +74,7 @@ export function summary(r) {
   if (r.app && !r.app.built) lines.push(`No app yet: this folder holds the design. ${BUILD_NEEDS(r.app.modalityRecorded)}`);
   else if (r.app?.built) lines.push(`The app was built here on the ${r.app.theme} theme (${r.app.modalities.join(", ")}).`);
   if (r.layout === "legacy") lines.push("This app is on the old layout (docs/ux/, app.blueprint.json at the top): run ux-builder-design migrate to move it under docs/ux-builder/.");
+  else if (r.toMigrate?.length) lines.push(`Still at the app's top: ${r.toMigrate.join(", ")}; run ux-builder-design migrate to move ${r.toMigrate.length === 1 ? "it" : "them"} under docs/ux-builder/.`);
   if (r.awaitingReview.length) lines.push(`Awaiting your review: ${r.awaitingReview.length} item${r.awaitingReview.length === 1 ? "" : "s"} (${r.awaitingReview.slice(0, 5).join(", ")}${r.awaitingReview.length > 5 ? ", …" : ""}).`);
   lines.push(r.chosen ? `${r.chosen} is chosen.` : "No alternative is chosen yet.");
   lines.push(r.untestedAssumptions ? `${plural(r.untestedAssumptions, "assumption is", "assumptions are")} untested.` : "No untested assumptions.");

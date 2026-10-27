@@ -14,9 +14,11 @@ import { dirname, join } from "node:path";
 import { CURRENT, LEGACY } from "@ux-builder/ui/blueprint/paths";
 import { DesignError } from "./app.mjs";
 
-const FOLDERS = [["docs", "docs"], ["prototypes", "prototypes"], ["proposals", "proposals"], ["compare", "compare"], ["drawings", "drawings"], ["wireframes", "wireframes"]];
+const FOLDERS = [["docs", "docs"], ["prototypes", "prototypes"], ["proposals", "proposals"], ["compare", "compare"], ["drawings", "drawings"], ["wireframes", "wireframes"],
+  // The assessment's manifest and runs and the UI audit's report (GDL-82); an app on the new layout may still keep these at its top.
+  ["assessmentManifest", "assessmentManifest"], ["assessments", "assessments"], ["auditReport", "auditReport"]];
 /* The app's own files that name the old places. */
-const REFERRERS = ["package.json", "ux-assessment.yml", "CLAUDE.md", "AGENTS.md", "README.md", ".ux-builder/design-state.json", ".github/workflows"];
+const REFERRERS = ["package.json", "ux-assessment.yml", "CLAUDE.md", "AGENTS.md", "README.md", ".gitignore", ".ux-builder/design-state.json", ".github/workflows"];
 
 const git = (app, args) => execFileSync("git", args, { cwd: app, stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" });
 const inGit = (app) => { try { return git(app, ["rev-parse", "--is-inside-work-tree"]).trim() === "true"; } catch { return false; } };
@@ -37,7 +39,11 @@ export function rewritePaths(text) {
     .replace(/(?<![\w/-])docs\/ux\//g, `${CURRENT.docs}/`)
     .replace(/(?<![\w/-])prototype\//g, `${CURRENT.prototypes}/`)
     .replace(/(?<![\w/-])helix-proposals\//g, `${CURRENT.proposals}/`)
-    .replace(/(?<![\w/-])blueprint-(compare|drawings|wireframes)\//g, (m, k) => `${CURRENT[k]}/`);
+    .replace(/(?<![\w/-])blueprint-(compare|drawings|wireframes)\//g, (m, k) => `${CURRENT[k]}/`)
+    .replace(/(?<![\w./-])ux-assessment\.yml/g, CURRENT.assessmentManifest)
+    .replace(/(?<![\w./-])ux-assessment\//g, `${CURRENT.assessments}/`)
+    // Not an artifact's name in a workflow (name: audit-report), which may not contain a slash.
+    .replace(/(?<![\w./-]|name:\s*)audit-report(?![\w-])/g, CURRENT.auditReport);
 }
 
 function referrers(app) {
@@ -67,7 +73,9 @@ export function migrate(app, { dryRun = false } = {}) {
     }
     move(app, m.from, m.to, useGit);
   }
-  for (const f of updated) writeFileSync(join(app, f), rewritePaths(readFileSync(join(app, f), "utf8")));
+  // A referrer that moved (the manifest) is rewritten where it now is.
+  const now = (f) => moves.find((m) => m.from === f)?.to ?? f;
+  for (const f of updated) writeFileSync(join(app, now(f)), rewritePaths(readFileSync(join(app, now(f)), "utf8")));
   return { migrated: true, moves, updated, git: useGit, message: `Moved ${moves.length} item${moves.length === 1 ? "" : "s"} under ${CURRENT.docs}/${updated.length ? ` and updated ${updated.join(", ")}` : ""}.` };
 }
 

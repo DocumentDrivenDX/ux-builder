@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { DesignError, bpFile, ux, writeInApp } from "./app.mjs";
 import { helixRoot, parseDocument } from "./documents.mjs";
 import { readState, writeState } from "./state.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
 
@@ -33,9 +34,9 @@ function stories(app) {
   return out.sort((a, b) => Number(a.id.slice(3)) - Number(b.id.slice(3)));
 }
 
-/* The latest assessment run (ux-assessment/R-…/), its open findings. */
+/* The latest assessment run (docs/ux-builder/assessments/R-…/, or ux-assessment/R-…/ before migrating), its open findings. */
 function latestFindings(app) {
-  const root = join(app, "ux-assessment");
+  const root = join(app, reportsOf(app).assessments);
   if (!existsSync(root)) return { run: null, findings: [] };
   const run = readdirSync(root).filter((n) => /^R-/.test(n)).sort().at(-1) ?? null;
   if (!run) return { run: null, findings: [] };
