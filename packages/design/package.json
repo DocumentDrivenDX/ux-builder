@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/design",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "license": "MIT OR Apache-2.0",
   "description": "The guided design loop (FEAT-018, CONTRACT-008): the ux-builder-design skill, the new artifact types' templates and prompts, the design state and the ux-builder-design command. CLI first, MCP optional; it makes no network request and calls no model.",
   "type": "module",
@@ -56,9 +56,9 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@ux-builder/audit": "^0.6.0",
+    "@ux-builder/audit": "^0.7.0",
     "@ux-builder/trace": "^0.2.0",
-    "@ux-builder/ui": "^0.13.0",
+    "@ux-builder/ui": "^0.14.0",
     "ajv": "^8.20.0",
     "yaml": "^2.9.1"
   },

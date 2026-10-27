@@ -1,5 +1,13 @@
 # @ux-builder/mcp
 
+## 0.7.4
+
+### Patch Changes
+
+- Updated dependencies [4350756]
+- Updated dependencies [88942e5]
+  - @ux-builder/ui@0.14.0
+
 ## 0.7.3
 
 ### Patch Changes

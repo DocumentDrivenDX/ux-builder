@@ -1,5 +1,15 @@
 # @ux-builder/ui
 
+## 0.14.0
+
+### Minor Changes
+
+- 4350756: The app frame is the person's choice (US-162, ADR-041). AppShell takes `frame`: `screen` (the content alone), `top-bar` (no navigation), `top-nav` (destinations across the top, a bottom bar on phones) or `side-nav` (the default). The blueprint records it in `supports.frame` and `check` warns when it no longer fits the destinations; wireframes, prototypes and the built app are drawn in it; `ux-builder-design modality` asks for it with the modality and recommends one from the destinations; the audit judges it by outcome.
+
+### Patch Changes
+
+- 88942e5: The guided design holds up in a real session (US-161): a re-wrapped paragraph or moved bold marker keeps an approval; core-2 leads to step 5; a changed item or the coverage map is approved again only after it is shown; metrics count the person's approvals per answer, start testing only at a step 7 the loop stays at, and count format-only reopenings; `evidence claim contradict` records a contradiction and asks; `validate` warns about unasked contradictions and a brief calling a dropped story confirmed. The prototype toolbar is folded and names journeys by goal, and a screen with no sample of its own is drawn from its content.
+
 ## 0.13.0
 
 ### Minor Changes
