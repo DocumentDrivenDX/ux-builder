@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/mcp",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "license": "MIT OR Apache-2.0",
   "description": "An MCP server that gives AI agents the AI-UI SDK's catalogue: themes, brands, design systems, widgets with props, tokens with purposes, icons and guidance (FEAT-004 SDK-14).",
   "type": "module",
@@ -21,7 +21,7 @@
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@ux-builder/tokens": "^1.4.0",
     "@ux-builder/trace": "^0.2.0",
-    "@ux-builder/ui": "^0.12.1",
+    "@ux-builder/ui": "^0.13.0",
     "zod": "^4.6.5"
   },
   "publishConfig": {
@@ -33,6 +33,6 @@
     "directory": "packages/mcp"
   },
   "devDependencies": {
-    "@ux-builder/design": "^0.4.1"
+    "@ux-builder/design": "^0.5.0"
   }
 }

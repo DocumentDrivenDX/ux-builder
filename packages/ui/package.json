@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/ui",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "license": "MIT OR Apache-2.0",
   "description": "Widgets for the harness and embedded products: prefixed CSS and React 19 components on @ux-builder/tokens, shaped by whichever theme is on.",
   "type": "module",

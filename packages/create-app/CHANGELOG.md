@@ -1,5 +1,20 @@
 # @ux-builder/create-app
 
+## 0.11.0
+
+### Minor Changes
+
+- f11e073: Lessons from the first guided session (FEAT-018 GDL-82). `ux-builder-design explain <ID>` says what an ID such as U-1, J-1, J-find, T-2 or BR-1 names and where it lives, and `explain ids` lists every kind; the overview mentions them and the guide never shows a bare ID. HELIX stories are read without a type tag, and a near-miss tag such as `user-story` is read as `user-stories` and reported; the guides never hand the person a command to edit HELIX or guess a HELIX field. Asked for an audit, the guides ask whether the person wants the UI audit, the usability assessment, or both. The assessment's manifest and runs and the UI audit's report now live under `docs/ux-builder/` (`ux-assessment.yml`, `assessments/`, `audit-report/`), the manifest's paths still relative to the app; an app that keeps them at its top keeps working, `status` lists them and `ux-builder-design migrate` moves them.
+- 309ec20: The person's time goes to decisions (FEAT-018 GDL-83, ADR-040). Review comes in three tiers: the foundations (brief, target users, jobs, stories, business rules, decisions) a table per kind (`ux-builder-design review table <kind>`, `review approve --kind <kind>`); what is built from them as one coverage map with its exceptions (`review map`, `review approve map [--accept <exception>]`); records need no approval. An approval holds through changes of frontmatter and formatting, and a change of meaning comes back as a diff. `intake` asks the open questions together after reading what exists, and `status` shows the decisions left before the first prototype. `evidence claim add|verify` grounds each claim in its source, and `validate` warns about an unchecked one that changes the design's direction. `proposals preview` and `proposals apply --accepted <ids>` apply HELIX proposals all or nothing, renumbering a clashing ID. `advance --until-decision` does the safe work and names the next decision. `metrics` measures the session against its targets. The build in place generates a working journey skeleton from the chosen blueprint (`create-app --prototype` regenerates it) and no longer adds starter HELIX documents that clash with the design's. The responsive-web verdict is judged by outcome at the chosen size classes (`ux-builder-audit --size-classes`); every report is listed on `docs/ux-builder/reports.html` (`ux-builder-audit reports`); and `ux-builder-audit doctor` checks the installed packages agree.
+
+### Patch Changes
+
+- Updated dependencies [f11e073]
+- Updated dependencies [309ec20]
+  - @ux-builder/design@0.5.0
+  - @ux-builder/audit@0.6.0
+  - @ux-builder/ui@0.13.0
+
 ## 0.10.0
 
 ### Minor Changes
