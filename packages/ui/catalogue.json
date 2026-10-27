@@ -45,6 +45,19 @@
       "fonts": "@ux-builder/tokens/fonts/databricks.css"
     },
     {
+      "name": "img-8593-databricks",
+      "title": "Img 8593 Databricks",
+      "brand": "img-8593",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/img-8593-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/img-8593-databricks.css"
+    },
+    {
       "name": "plain",
       "title": "Plain",
       "brand": "plain",
