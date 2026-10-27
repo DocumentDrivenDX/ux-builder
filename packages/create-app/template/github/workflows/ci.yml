@@ -26,4 +26,4 @@ jobs:
         if: always()
         with:
           name: audit-report
-          path: audit-report
+          path: docs/ux-builder/audit-report

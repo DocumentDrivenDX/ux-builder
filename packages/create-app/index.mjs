@@ -23,7 +23,8 @@
      --helix-version <tag>  start on this HELIX release instead of the latest (FEAT-010)
      --helix-offline    use the HELIX bundled with this starter; no network
                         (not with --helix-version)
-     --no-helix         no HELIX marker, documents, skill or ux-assessment.yml;
+     --no-helix         no HELIX marker, documents, skill or assessment manifest
+                        (docs/ux-builder/ux-assessment.yml);
                         e2e/starter.spec.js has no @covers lines
      --agent <name>     the agent creating the app, for its episode trace (default:
                         UX_BUILDER_AGENT, else claude-code inside Claude Code, else none)
@@ -326,7 +327,7 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   npm run audit
 
 The guide goes on in Claude Code with /ux-builder-design: the validated prototype is next.`);
-    if (r.helix) console.log(`\nHELIX ${r.helix.tag}: ${r.helix.documents.length} starter documents written in docs/helix/ where none existed; ux-assessment.yml and AGENTS.md wired to it.`);
+    if (r.helix) console.log(`\nHELIX ${r.helix.tag}: ${r.helix.documents.length} starter documents written in docs/helix/ where none existed; docs/ux-builder/ux-assessment.yml and AGENTS.md wired to it.`);
   } else if (builtFrom(positionals[0])) {
     die(`${positionals[0]} was already built from its design, on the ${builtFrom(positionals[0]).theme} theme; the app is there. Nothing was written.`);
   } else if (values.modality == null && !values.blueprint) {

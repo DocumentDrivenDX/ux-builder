@@ -95,7 +95,7 @@ test("US-022-AC10: the fresh app of every modality passes the theme audit in eve
   for (const name of Object.keys(APPS)) {
     const out = sh("npm", ["run", "audit"], dir(name));
     assert.match(out, /Theme audit: 0 errors/, name);
-    const report = JSON.parse(readFileSync(join(dir(name), "audit-report/report.json"), "utf8"));
+    const report = JSON.parse(readFileSync(join(dir(name), "docs/ux-builder/audit-report/report.json"), "utf8"));
     assert.ok(report.runs.length >= 10, `${name}: ${report.runs.length} runs`);
     assert.ok(report.runs.every((r) => r.mode === "event"), "switched by the starter's ThemeProvider");
     assert.equal(report.summary.error, 0, JSON.stringify(report.findings.filter((f) => f.severity === "error"), null, 1));

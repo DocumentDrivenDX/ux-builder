@@ -110,6 +110,7 @@ criteria; earlier features keep their tests where they are, traced by
 | FEAT-018 amendment: the guided conversation (US-148) | [[STP-148]] | Integration | `overview`, `status`, `step`, `explain` and `review` over fixture apps; checkpoints gated by pending reviews |
 | FEAT-018 amendment: docs/ux-builder layout and modality first (US-149) | [[STP-149]] | Integration | Commands on new and old-layout fixture apps; `migrate` in a temp git repository; the blueprint CLI's modality gate; create-app's paths |
 | FEAT-018 amendment: design first, the app built in place (US-150) | [[STP-150]] | Integration | create-app without `--modality` makes a design folder; the build in place from the recorded modality and the designed blueprint; its refusals; the guide's status |
+| FEAT-018 amendment: IDs explained, HELIX read as it is, a choice of audit, reports beside the design (US-151) | [[STP-151]] | Integration | `explain` on the guide's IDs; stories without or with a near-miss type through the blueprint check and `collect`; the skills' text; manifest, runs and audit report locations in new and older apps, and `migrate` |
 
 Every P0 criterion of an in-scope story maps to one layer here and to
 tests in its STP.

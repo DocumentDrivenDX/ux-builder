@@ -21,6 +21,7 @@ import { rubric } from "./rubric.mjs";
 import { humanFindings, kitTranscripts, observedMeasures } from "./sessions.mjs";
 import { readState, writeState } from "./state.mjs";
 import { kits } from "./testkit.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const docsDir = (app) => ux(app, "evaluations");
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
@@ -37,12 +38,12 @@ function numbers(app) {
 
 /* The latest assessment run: { id, dir, metrics, backlog, coverage } or null. */
 function latestRun(app) {
-  const root = join(app, "ux-assessment");
+  const root = join(app, reportsOf(app).assessments);
   if (!existsSync(root)) return null;
   const id = readdirSync(root).filter((n) => /^R-/.test(n)).sort().at(-1);
   if (!id) return null;
   const dir = join(root, id);
-  return { id, dir: `ux-assessment/${id}`, metrics: readJson(join(dir, "metrics.json")), backlog: readJson(join(dir, "backlog.json")), coverage: readJson(join(dir, "coverage.json")) };
+  return { id, dir: `${reportsOf(app).assessments}/${id}`, metrics: readJson(join(dir, "metrics.json")), backlog: readJson(join(dir, "backlog.json")), coverage: readJson(join(dir, "coverage.json")) };
 }
 
 /* Every finding the evaluation reports: human observations from the kits,

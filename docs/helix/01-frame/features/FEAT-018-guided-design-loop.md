@@ -590,6 +590,27 @@ the modality is recorded; the guide builds the app then, before step 6's
 validated prototype (GDL-44), which needs it. The starter itself checks
 only what it can: a recorded modality and a blueprint with no errors.
 
+GDL-82. **Lessons from the first guided session** *(added 2026-10-26, from
+the operator)*.
+- **IDs explained.** The short IDs the work uses (U-1 a target user, J-1 a
+  job, J-find a journey, T-1 a task, BR-1 a business rule, US-1 a story,
+  UXD-1 a decision…) are never shown bare: the guide names the thing beside
+  its ID and explains each kind of ID the first time it appears;
+  `ux-builder-design explain <ID>` and `explain ids` say what an ID is and
+  where it lives, and the overview mentions them.
+- **HELIX read as it is.** A story is read by its `US-<n>` ID with or
+  without a type tag, and a type written slightly differently from HELIX's
+  (`user-story` for `user-stories`) is read as HELIX's and reported; the
+  guide never hands the person a command to edit their HELIX documents or
+  guesses a HELIX field, and proposes any change instead.
+- **Which audit.** Asked for an audit, the guide asks whether the person
+  wants the UI audit, the usability assessment, or both, explaining each.
+- **Reports beside the design.** The assessment's manifest and runs and the
+  UI audit's report live under `docs/ux-builder/` (`ux-assessment.yml`,
+  `assessments/`, `audit-report/`), the manifest's paths still relative to
+  the app; an app that keeps them at its top keeps working until
+  `ux-builder-design migrate` moves them.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each
@@ -996,6 +1017,7 @@ The proposal's seven connected artifacts, and its rubric:
 - [US-148 — Follow the guide step by step, and approve each item](../user-stories/US-148-follow-the-guide-step-by-step-and-approve-each-item.md)
 - [US-149 — Keep the design work in docs/ux-builder, and choose the modality first](../user-stories/US-149-keep-the-design-work-in-docs-ux-builder-and-choose-the-modality-first.md)
 - [US-150 — Design first, and build the app in place at the end](../user-stories/US-150-design-first-and-build-the-app-in-place-at-the-end.md)
+- [US-151 — IDs explained, HELIX read as it is, a choice of audit, and the reports beside the design](../user-stories/US-151-ids-explained-helix-read-as-it-is-a-choice-of-audit-and-the-reports-beside-the-design.md)
 
 ## Edge Cases and Error Handling
 

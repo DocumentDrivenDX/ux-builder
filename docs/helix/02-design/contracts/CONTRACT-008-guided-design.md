@@ -110,7 +110,7 @@ describes each command's `--json` under the function's name, except
 | `validate` | Checks every `docs/ux-builder/` document's frontmatter, ID, template sections and links | nothing |
 | `overview` | The eight steps (1 Define intent, 2 Understand users, 3 Model tasks, 4 Explore alternatives, 5 Design the structure, 6 Prototype, 7 Test with people, 8 Refine and improve), each with what the person does, what comes out, its terms and the checkpoint closing it; and change mode's four steps | nothing |
 | `step next\|<n>` | Moves the loop to the next (or the given) step of its mode, setting the activity; `next` refuses while items of the current step await review, and in the full loop neither form moves past a step that `core-1`, `core-2` or `core-3` closes until it has passed or been skipped (exit 2) | the state's `step` |
-| `explain [<term>] [--step <n>]` | What a term means and why it is valuable, from `glossary.json`; with `--step`, the terms that step introduces; with neither, every term. An unknown term exits 2 listing the known ones | nothing |
+| `explain [<term> \| <ID> \| ids] [--step <n>]` | What a term means and why it is valuable, from `glossary.json`; an ID (`U-1`, `J-find`, `BR-2`…) says what kind of thing it names and where it lives, with its term; `ids` lists every kind of ID; with `--step`, the terms that step introduces; with neither, every term. An unknown term exits 2 listing the known ones | nothing |
 | `review [list]` | Every item not approved in its current form, in step order: `user:U-n`, `job:J-n`, `evidence:EV-n`, `brief`, `story:US-n` (stories the blueprint's journeys cite), `task:T-n`, `rule:BR-n`, `journey:J-x`, `alternative:<name>`, `decision:UXD-n`, `screen:<id>`, `kit:TK-n`, `report:UER-n`, `insight:INS-date`, `experiment:EXP-n` | nothing |
 | `review show <item>` | The item's content, to present inline in the conversation | nothing |
 | `review feedback <item> --text <their words>` | Records the person's feedback, `FB-<n>`, open | the state's `feedback[]` |
@@ -134,9 +134,15 @@ and `layoutOf(app)`):
 | Exploratory prototypes | `docs/ux-builder/prototypes/<name>/` | `prototype/<name>/` |
 | HELIX proposals | `docs/ux-builder/helix-proposals/` | `helix-proposals/` |
 | Comparisons, drawings, wireframes | `docs/ux-builder/compare/`, `drawings/`, `wireframes/` | `blueprint-compare/`, `blueprint-drawings/`, `blueprint-wireframes/` |
+| The assessment's manifest *(GDL-82)* | `docs/ux-builder/ux-assessment.yml` (its paths relative to the app) | `ux-assessment.yml` |
+| Assessment runs *(GDL-82)* | `docs/ux-builder/assessments/<run>/` | `ux-assessment/<run>/` |
+| The UI audit's report *(GDL-82)* | `docs/ux-builder/audit-report/` | `audit-report/` |
 | Design state, trace | `.ux-builder/` (unchanged) | `.ux-builder/` |
 
-An app is on the old layout only when it has old files and none of the
+The last three follow `reportsOf(app)`: under `docs/ux-builder/` in an app
+that has it, unless the app still keeps `ux-assessment.yml` at its top (an
+app made before GDL-82, until `migrate` moves them; `status` lists what is
+left). An app is on the old layout only when it has old files and none of the
 new; every tool then reads and writes the old paths and `status` (and the
 blueprint CLI's writing commands, on stderr) says to migrate. New apps
 (create-app, `init` in an app with no blueprint) start on the new layout.

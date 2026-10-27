@@ -12,6 +12,7 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { MODALITIES } from "@ux-builder/ui/blueprint/modalities";
+import { CURRENT } from "@ux-builder/ui/blueprint/paths";
 import { ref } from "./helix.mjs";
 import { assistantPath, criteria as shellCriteria } from "./shell.mjs";
 
@@ -227,7 +228,9 @@ export function writeStarterSet(helix, r, { log = () => {}, keep = false } = {})
 /* The rest of the toolchain sees HELIX (HLW-01, HLW-03): the assessment's
    manifest bound to the marker, the script to check it, and the guidance. */
 export function wire(helix, r) {
-  writeFileSync(join(r.dir, "ux-assessment.yml"), manifest(r));
+  // The assessment's manifest beside the rest of the design work (FEAT-018 GDL-82).
+  mkdirSync(dirname(join(r.dir, CURRENT.assessmentManifest)), { recursive: true });
+  writeFileSync(join(r.dir, CURRENT.assessmentManifest), manifest(r));
   const pkgFile = join(r.dir, "package.json");
   const pkg = JSON.parse(readFileSync(pkgFile, "utf8"));
   pkg.scripts = { ...pkg.scripts, "assess:validate": "ux-builder-audit assess validate" };

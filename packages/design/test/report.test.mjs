@@ -23,7 +23,7 @@ function evalApp({ observed = true } = {}) {
   set(a, "assumptions[+]", { text: "People need no help to find Saved", status: "assumed", evidence: [], dimension: "discoverability" });
   set(a, "assumptions[+]", { text: "Location is available", status: "assumed", evidence: [] });
   testKit(a);
-  const run = join(a, "ux-assessment/R-20261021T090000Z");
+  const run = join(a, "docs/ux-builder/assessments/R-20261021T090000Z");
   mkdirSync(run, { recursive: true });
   writeFileSync(join(run, "metrics.json"), JSON.stringify({ schema: "metrics", version: 1, label: "agent-measured", note: "…", journeys: [
     { journey: "J-find", label: "agent-measured", completed: true, interactions: 4, moves: 3, shortestPath: 1, extraInteractions: 2, pathTaken: ["map", "detail", "map", "detail"], backtracks: 1, failedActions: 0, informationNotFound: [{ n: 2, what: "access" }], interfaceErrors: [], timePerStep: [] },

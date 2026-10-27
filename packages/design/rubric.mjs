@@ -14,6 +14,7 @@ import { DesignError, bpFile } from "./app.mjs";
 import { latestInsights } from "./insights.mjs";
 import { observedDimensions, observedMeasures } from "./sessions.mjs";
 import { readState } from "./state.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const require = createRequire(import.meta.url);
 export const RUBRIC = JSON.parse(readFileSync(require.resolve("@ux-builder/ui/catalogue.json"), "utf8")).interaction.rubric;
@@ -39,7 +40,7 @@ function computed(bp, app) {
   const inputs = sum(scores.map((s) => s.requiredInputs)), decisions = sum(scores.map((s) => s.decisions)), hops = sum(scores.map((s) => s.hops));
   const screens = list(bp.screens).filter((s) => s?.id);
   const content = screens.filter((s) => Array.isArray(s.content));
-  const audit = readJson(join(app, "audit-report/report.json"));
+  const audit = readJson(join(app, reportsOf(app).auditReport, "report.json"));
   const out = {};
   if (scores.length) {
     const notWalkable = count("journey.walkable"), unrealized = count("task.realized");

@@ -153,7 +153,7 @@ relative to the first full URL.
 | `--ignore <selector>` | repeatable | none; `[data-audit-ignore]` is always ignored |
 | `--off <check>` | repeatable, a check name below | none |
 | `--no-contrast` | flag | contrast on |
-| `--out <dir>` | path | `audit-report` |
+| `--out <dir>` | path | `audit-report` (*Amended 2026-10-26 — FEAT-018 GDL-82* `docs/ux-builder/audit-report` in an app with `docs/ux-builder/` that does not keep its assessment manifest at its top) |
 | `--fail-on <error\|warning\|never>` | enum | `error` |
 | `--json` | flag | summary text |
 

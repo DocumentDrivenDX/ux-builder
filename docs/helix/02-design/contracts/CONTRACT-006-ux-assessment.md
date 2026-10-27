@@ -38,6 +38,8 @@ the page-level inspection and commands the coding agent calls.
 
 ### Manifest: `ux-assessment.yml`
 
+*[Amended 2026-10-26 — FEAT-018 GDL-82]* In an app with `docs/ux-builder/` the manifest is `docs/ux-builder/ux-assessment.yml`; elsewhere, and in an app that still keeps it at its top, `ux-assessment.yml` at the app's top. Its relative paths (`blueprint`, `run.cwd`, `roles[].auth.storageState`, `evidence.out`) are relative to the app in both places.
+
 YAML at the app's root. Unknown keys are errors. JSON Schema:
 `@ux-builder/audit/schema/assessment-manifest.schema.json`.
 
@@ -73,7 +75,7 @@ YAML at the app's root. Unknown keys are errors. JSON Schema:
 | `journeys[].scenarios` | object | if `ai` | *[Amended 2026-10-21 — built in FEAT-011 step 6]* `{ normal, errorProne, risky }`, each `{ description, inputs?, step? }`; each one missing is reported. `risky.step` names the high-impact step (a 1-based walkthrough step number, or the action's label), and is required unless a blueprint step has `scenario: "risky"`; the walkthrough stops there, chooses Deny, and never approves (ADR-028 decision 8) |
 | `tests[]` | `{ id, command, report?: { format: junit \| playwright-json \| node-tap, path } }` | no | Functional test commands |
 | `audit` | `{ urls?, widths?, themes?, appearances?, off? }` | no | As CONTRACT-004's options |
-| `evidence.out` | path | no | Default `ux-assessment/` |
+| `evidence.out` | path | no | Default `ux-assessment/` (*Amended 2026-10-26 — FEAT-018 GDL-82* `docs/ux-builder/assessments/` beside a manifest in `docs/ux-builder/`) |
 | `evidence.capture` | `screenshot`, `tree`, `both` | no | Default `both`. What `inspect` writes for a checkpoint: `screenshot.png`, `tree.yml` or both; the one not captured is `null` in `inspection.json` |
 | `evidence.redact` | `{ selectors?: string[], text?: regex[] }` | no | Masked before writing |
 | `video` | `{ viewports?: { width, height }[], holdSeconds?: { min, perWord }, autoPause?: boolean }` | no | *[Amended 2026-10-21 — FEAT-013, ADR-031; from audit 0.3.0]* Walkthrough videos. Defaults: one viewport 1440 × 900; a hold of at least 4 s plus 0.3 s a word of caption; the player pauses at pop-ups |
@@ -182,7 +184,7 @@ No assessment identifier matches a HELIX ID pattern.
 | `inspect (--cdp url --page match \| --replay steps.json) --checkpoint id [--journey id --step n --role id --state s] [--state-affecting] [--redact selector]... [--manifest f] [--out dir] [--run id]` | Attaches and inspects in place, or replays recorded steps in a browser of its own and inspects only a verified state. `--redact` masks a selector in the screenshot (with the manifest's `evidence.redact`). With the manifest: its output path, origins, excluded integrations, `restrictions`, `evidence.capture` and `limits` apply | 0 inspected; 1 lost, ambiguous, unverified, no browser, restricted or a limit; 2 usage |
 | `validate-report <run-dir>` | Validates every record and the coverage and finding rules | 0; 1 problems; 2 no such directory |
 
-The default manifest path is `ux-assessment.yml` in the current directory.
+The default manifest path is `ux-assessment.yml` in the current directory (*Amended 2026-10-26 — FEAT-018 GDL-82* `docs/ux-builder/ux-assessment.yml` in an app with `docs/ux-builder/` that does not keep one at its top).
 Every command that takes `--out` reads the run package from `<out>/<run>/`
 (default the manifest's `evidence.out`).
 

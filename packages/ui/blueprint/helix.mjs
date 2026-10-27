@@ -43,11 +43,15 @@ export function readMarker(file) {
   return flow?.root ? { id: flow.id ?? null, root: resolve(dirname(file), flow.root) } : null;
 }
 
-/* A story document's ID and criteria, or null if it is not a user story. */
+/* A story document's ID and criteria, or null if it is not a user story: a
+   document whose ID is US-<n>, unless its frontmatter gives it another type.
+   A story needs no type tag to be read; one written as user-story or
+   user-stories is read the same. */
 export function readStory(text) {
   const front = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1] ?? "";
   const id = /^\s+id:\s*["']?(US-\d+)["']?\s*$/m.exec(front)?.[1];
-  if (!id || !/^\s+type:\s*["']?user-stor/m.test(front)) return null;
+  const type = /^\s+type:\s*["']?([\w-]+)/m.exec(front)?.[1];
+  if (!id || (type && !/^user-stor/.test(type))) return null;
   const criteria = [...text.matchAll(/^\s*[-*]\s*(?:\[[ xX]\]\s*)?\*{0,2}(US-\d+-AC\d+)\*{0,2}\s*[—:-]/gm)].map((m) => m[1]);
   return { id, criteria: [...new Set(criteria)] };
 }

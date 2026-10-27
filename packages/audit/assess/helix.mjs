@@ -165,6 +165,10 @@ const frontmatter = (text) => {
   try { return parseYaml(m[1]) ?? null; } catch { return null; }
 };
 
+/* Two type names that differ only in case, separators or a plural ending. */
+const typeKey = (t) => String(t).toLowerCase().replace(/[\s_]+/g, "-").replace(/ies$/, "y").replace(/s$/, "");
+export const sameType = (a, b) => typeKey(a) === typeKey(b);
+
 /* Every Markdown instance under the flow's root, typed and identified. */
 export function instances(flow, types, { include = [], exclude = [], repo, templates = [] } = {}) {
   const inc = include.map(globRe), exc = exclude.map(globRe);
@@ -178,7 +182,12 @@ export function instances(flow, types, { include = [], exclude = [], repo, templ
     if (exc.some((r) => r.test(rel))) continue;
     const text = readFileSync(abs, "utf8");
     const fm = frontmatter(text)?.ddx ?? null;
-    let type = fm?.type ?? null, typedBy = type ? "frontmatter" : "none";
+    let type = fm?.type ?? null, typedBy = type ? "frontmatter" : "none", written = null;
+    // A type written a little differently from HELIX's (user-story for user-stories) is read as HELIX's, and reported.
+    if (type && !types.some((x) => x.id === type)) {
+      const near = types.find((x) => sameType(x.id, type));
+      if (near) { written = type; type = near.id; typedBy = "corrected"; }
+    }
     if (!type) {
       const dir = rel.includes("/") ? rel.slice(0, rel.lastIndexOf("/") + 1) : "";
       const name = rel.split("/").pop();
@@ -194,7 +203,7 @@ export function instances(flow, types, { include = [], exclude = [], repo, templ
     const id = fm?.id != null ? String(fm.id) : null;
     const t = types.find((x) => x.id === type);
     const links = [...(Array.isArray(fm?.links) ? fm.links.map((l) => ({ kind: l.kind ?? "link", to: String(l.to) })) : []), ...(Array.isArray(fm?.depends_on) ? fm.depends_on.map((to) => ({ kind: "depends_on", to: String(to) })) : [])];
-    out.push({ id, type, typedBy, path: relative(repo ?? flow.root, abs).split(sep).join("/"), abs, hash: createHash("sha256").update(text).digest("hex"), idValid: !id || !t?.pattern || t.pattern.test(id), links, text });
+    out.push({ id, type, typedBy, ...(written ? { written } : {}), path: relative(repo ?? flow.root, abs).split(sep).join("/"), abs, hash: createHash("sha256").update(text).digest("hex"), idValid: !id || !t?.pattern || t.pattern.test(id), links, text });
   }
   return out;
 }

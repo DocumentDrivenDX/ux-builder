@@ -93,6 +93,7 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     assert.deepEqual(dry.moves, [
       { from: "docs/ux", to: "docs/ux-builder" },
       { from: "prototype", to: "docs/ux-builder/prototypes" },
+      { from: "ux-assessment.yml", to: "docs/ux-builder/ux-assessment.yml" },
       { from: "app.blueprint.json", to: "docs/ux-builder/blueprint/app.blueprint.json" },
       { from: "app.blueprint.list-first.json", to: "docs/ux-builder/blueprint/app.blueprint.list-first.json" },
     ]);
@@ -106,7 +107,9 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     // git sees renames, so the history follows the files.
     assert.match(execFileSync("git", ["status", "--porcelain"], { cwd: a, encoding: "utf8" }), /^R {2}app\.blueprint\.json -> docs\/ux-builder\/blueprint\/app\.blueprint\.json$/m);
     assert.equal(JSON.parse(readFileSync(join(a, "package.json"), "utf8")).scripts["check:blueprint"], "ux-builder-blueprint check docs/ux-builder/blueprint/app.blueprint.json");
-    assert.match(readFileSync(join(a, "ux-assessment.yml"), "utf8"), /^blueprint: docs\/ux-builder\/blueprint\/app\.blueprint\.json$/m);
+    // The manifest moved too (GDL-82), rewritten where it now is.
+    assert.ok(!existsSync(join(a, "ux-assessment.yml")));
+    assert.match(readFileSync(join(a, "docs/ux-builder/ux-assessment.yml"), "utf8"), /^blueprint: docs\/ux-builder\/blueprint\/app\.blueprint\.json$/m);
     assert.match(readFileSync(join(a, ".github/workflows/ci.yml"), "utf8"), /check docs\/ux-builder\/blueprint\/app\.blueprint\.json/);
     for (const f of ["CLAUDE.md", "AGENTS.md"]) assert.equal(readFileSync(join(a, f), "utf8"), "# Rivers\n\nPlan screens in `docs/ux-builder/blueprint/app.blueprint.json`; the design documents are in `docs/ux-builder/`.\n", f);
     assert.equal(readState(a).alternatives[0].file, "docs/ux-builder/blueprint/app.blueprint.list-first.json");

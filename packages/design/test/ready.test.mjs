@@ -17,8 +17,8 @@ function app({ lint = 0, bp = 0, auditErrors = 0, cite = ["US-001-AC1", "US-001-
   const a = tempApp({ state: { prototype: { branch: "docs/ux-builder/prototypes/map-first", alternative: "map-first" }, faked } });
   writeFileSync(join(a, "package.json"), JSON.stringify({ name: "rivers", private: true, scripts: { lint: `node -e "process.exit(${lint})"`, "check:blueprint": `node -e "process.exit(${bp})"` } }));
   writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ screens: screens.map((id) => ({ id })), journeys: [{ id: "J-find", story: "US-001", criteria: ["US-001-AC1", "US-001-AC2"], entry: "map", steps: [{ screen: "map" }] }] }));
-  mkdirSync(join(a, "audit-report"), { recursive: true });
-  writeFileSync(join(a, "audit-report/report.json"), JSON.stringify({ generatedAt: auditedAt, pages: pages.map((screen) => ({ screen })), summary: { error: auditErrors, warning: 0, info: 0 } }));
+  mkdirSync(join(a, "docs/ux-builder/audit-report"), { recursive: true });
+  writeFileSync(join(a, "docs/ux-builder/audit-report/report.json"), JSON.stringify({ generatedAt: auditedAt, pages: pages.map((screen) => ({ screen })), summary: { error: auditErrors, warning: 0, info: 0 } }));
   mkdirSync(join(a, "e2e"), { recursive: true });
   writeFileSync(join(a, "e2e/find.spec.js"), cite.map((id) => `// @covers ${id}\n`).join(""));
   return a;

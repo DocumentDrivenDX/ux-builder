@@ -1,10 +1,10 @@
 node_modules
 dist
 .claude/skills/ux-builder-ui
-audit-report
+docs/ux-builder/audit-report/
 test-results
 playwright-report
-ux-assessment/
+docs/ux-builder/assessments/
 
 # The episode trace (.ux-builder/) is committed, but for the open episode's marker.
 __TRACE_IGNORE__

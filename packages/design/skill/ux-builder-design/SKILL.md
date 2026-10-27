@@ -67,6 +67,18 @@ the wording, and `explain --step <n>` lists the terms a step introduces.
 Explain in plain words, with an example from their product. Don't explain
 the same term twice in a session unless they ask.
 
+**Never show a bare ID.** The work is full of short IDs (U-1, J-1, J-find,
+T-2, BR-1, US-3, UXD-1, EV-2, TK-1, F-…); to the person they are cryptic.
+Always say what an ID is and name the thing in words beside it: "the target
+user U-1, weekend anglers", "the job J-1 (find a river near me)", "the
+business rule BR-1, only public stretches can be saved". The first time a
+kind of ID comes up, explain the prefix in one sentence (U- is a target
+user, J- with a number a job to be done, J- with a name a journey, T- a
+task, BR- a business rule from HELIX…): `ux-builder-design explain <ID>`
+has the wording and where it lives, and `explain ids` lists every kind.
+Prefer the name over the ID in your own sentences; give the ID so the
+person can find the item, not instead of saying what it is.
+
 ## Review and approval
 
 Everything you produce is reviewed by the person before you move on: each
@@ -158,6 +170,21 @@ approval (*Review and approval*).
 - prototypes generated from the blueprint;
 - the audit (`ux-builder-audit`), for accessibility and the rules;
 - journey events, exported from the app's own analytics.
+
+**When the person asks for an audit, ask which.** "Audit" can mean two
+different checks, and the person should choose. Explain both in a sentence
+each (`ux-builder-design explain "UI audit"`, `explain "usability
+assessment"`), then ask whether they want the UI audit, the usability
+assessment, or both, and record the answer as a decision:
+- the **UI audit** (`npm run audit`, `ux-builder-audit`): the running app in
+  every theme and appearance, checked against the interaction and AI rules,
+  contrast and anything off-theme; quick, and needs only the app to build;
+- the **usability assessment** (`ux-builder-audit assess`, with the
+  `ux-builder-assess` skill): each journey from the HELIX stories walked in
+  the running app, each screen state inspected, the heuristic pass and task
+  measures, and proposed changes; it takes longer.
+Recommend both before testing with people. Don't run either until they have
+answered.
 
 ## Eight capabilities
 
@@ -470,6 +497,20 @@ HELIX documents (`docs/helix/`) change only through proposals: run
 batch at a checkpoint; they apply the ones they accept. Never edit
 `docs/helix/` yourself, and never put a new document type there: new types
 go in `docs/ux-builder/`.
+
+Never hand the person a command (a `sed`, a script, an edit to paste) to
+change their HELIX documents, and never guess a HELIX field's name or
+value: HELIX's own catalogue defines them (the installed `helix` skill's
+types, as `ux-builder-blueprint propose` reads them). The tools read HELIX
+documents as they are: a story is a story by its `US-<n>` ID, with or
+without a type tag, and a type written slightly differently (`user-story`
+for `user-stories`) is read as HELIX's. So a warning that a document was
+"read by its location" or "read as user-stories" needs no change before
+you go on; mention it, and if the person wants the frontmatter tidied,
+offer it as a proposal, or suggest they ask the `helix` skill, which knows
+the exact fields. If a tool really cannot read a HELIX document, say what
+it could not read and why, then fix the tool's input on your side or
+propose the change; never work around it by editing HELIX.
 
 ## Challenge before you add
 
