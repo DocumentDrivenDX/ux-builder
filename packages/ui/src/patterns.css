@@ -301,6 +301,28 @@
   .piq-shell-frame > .piq-shell .piq-shell__side .piq-primary-nav__link { flex-direction: var(--piq-nav-item-direction); gap: var(--piq-nav-item-gap); padding-inline: var(--piq-space-3); font-size: var(--piq-nav-item-label-font-size); text-align: start; }
 }
 
+/* The frame the person chose (US-162; AppShell's frame). "screen": the
+   content alone. "top-bar": the top bar over the content, no navigation.
+   "top-nav": the destinations across the top bar from medium up, the bottom
+   bar below it. Neither has the side column. */
+.piq-shell[data-frame="screen"] { grid-template-rows: minmax(0, 1fr); grid-template-areas: "main"; }
+.piq-shell[data-frame="top-bar"] { grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "top" "main"; }
+.piq-shell__topnav { display: none; }
+.piq-shell__topnav .piq-primary-nav__list { grid-auto-flow: column; justify-content: start; }
+@media (min-width: 600px) {
+  .piq-shell[data-frame]:not([data-adapt="container"]) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "top" "main"; }
+  .piq-shell[data-frame="screen"]:not([data-adapt="container"]) { grid-template-rows: minmax(0, 1fr); grid-template-areas: "main"; }
+  .piq-shell[data-frame="top-nav"]:not([data-adapt="container"]) .piq-shell__bar { display: none; }
+  .piq-shell[data-frame="top-nav"]:not([data-adapt="container"]) .piq-shell__topnav { display: block; }
+}
+@container (min-width: 600px) {
+  .piq-shell-frame > .piq-shell[data-frame] { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "top" "main"; }
+  .piq-shell-frame > .piq-shell[data-frame="screen"] { grid-template-rows: minmax(0, 1fr); grid-template-areas: "main"; }
+  .piq-shell-frame > .piq-shell[data-frame="top-nav"] .piq-shell__bar { display: none; }
+  .piq-shell-frame > .piq-shell[data-frame="top-nav"] .piq-shell__topnav { display: block; }
+}
+
+
 /* ----------------------------------------------------------- error screen */
 
 .piq-error-screen {

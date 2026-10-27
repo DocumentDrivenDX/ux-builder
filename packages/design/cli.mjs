@@ -5,13 +5,13 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { advance, carried, claimAdd, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
 Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
 
-  modality --answer <their words> --modality <list> [--size-classes <list>]
+  modality --answer <their words> --modality <list> [--size-classes <list>] [--frame <frame>]
       record which modalities (responsive-web, chat, hybrid-chat) and screen
       sizes the person says the app is for, in the blueprint's supports;
       wireframes and prototypes wait for it.
@@ -109,6 +109,9 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       direction and whether the agent checked it against the source itself.
   evidence claim verify <EV-n> <Cn> [--confidence <c>]
       the agent checked the claim against its source.
+  evidence claim contradict <EV-n> <Cn> --text <what the person said>
+      what the person said goes against the claim: written in its
+      Contradicting column and opened as a question for the person.
   evidence excerpt add <EV-n> --participant <name or Pn> --text <quote> [--at <time>] [--role <role>]
       add one quote the synthesis cites to the record's Excerpts: masked, by
       pseudonym (a name gets one, kept in .ux-builder/participants.local.json).
@@ -210,7 +213,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -225,8 +228,8 @@ async function main(argv) {
   const app = values.app ? findApp(values.app) : findApp();
 
   if (command === "modality") {
-    const r = confirmModality(app, { answer: values.answer, modalities: values.modality, sizeClasses: values["size-classes"] });
-    print(r, values.json, `Recorded: ${r.modalities.join(", ")}${r.sizeClasses.length ? ` at ${r.sizeClasses.join(", ")}` : ""}, in ${r.file}. Wireframes and prototypes can be drawn now.`);
+    const r = confirmModality(app, { answer: values.answer, modalities: values.modality, sizeClasses: values["size-classes"], frame: values.frame });
+    print(r, values.json, `Recorded: ${r.modalities.join(", ")}${r.sizeClasses.length ? ` at ${r.sizeClasses.join(", ")}` : ""}${r.frame ? `, in the ${r.frame} frame` : ""}, in ${r.file}. Wireframes and prototypes can be drawn now.`);
     return 0;
   }
   if (command === "migrate") {
@@ -343,7 +346,7 @@ async function main(argv) {
     }
     if (sub === "checkpoint") {
       const r = checkpoint(app, { id: path, answer: values.answer, skip: values.skip, declined: values.declined, reason: values.reason });
-      print(r, values.json, `Checkpoint ${r.checkpoint.id} ${r.checkpoint.status}${r.trace ? ` (trace ${r.trace.episode})` : ""}.${r.moved ? `\nNow ${r.activity}. Next: ${r.next}` : ""}`);
+      print(r, values.json, `Checkpoint ${r.checkpoint.id} ${r.checkpoint.status}${r.trace ? ` (trace ${r.trace.episode})` : ""}.${r.moved ? `\nNow ${r.activity}${r.step ? `, step ${r.step}` : ""}. Next: ${r.next}` : ""}`);
       return 0;
     }
     throw new DesignError(`unknown state command "${sub ?? ""}": use get, set or checkpoint`);
@@ -475,7 +478,12 @@ async function main(argv) {
         print(r, values.json, `${r.evidence} ${r.id} checked against its source (${r.confidence} confidence).`);
         return 0;
       }
-      throw new DesignError(`unknown evidence claim command "${op ?? ""}": use add or verify`);
+      if (op === "contradict") {
+        const r = claimContradict(app, { id, claim, text: values.text });
+        print(r, values.json, `${r.evidence} ${r.id} is contradicted by what the person said; asked as ${r.question.id}: ${r.question.text}`);
+        return 0;
+      }
+      throw new DesignError(`unknown evidence claim command "${op ?? ""}": use add, verify or contradict`);
     }
     if (sub === "excerpt") {
       const [, op, id] = rest;
@@ -484,7 +492,7 @@ async function main(argv) {
       print(r, values.json, `Added to ${r.path}: ${r.excerpt}`);
       return 0;
     }
-    throw new DesignError(`unknown evidence command "${sub ?? ""}": use add, list, claim add|verify or excerpt add`);
+    throw new DesignError(`unknown evidence command "${sub ?? ""}": use add, list, claim add|verify|contradict or excerpt add`);
   }
   if (command === "validate") {
     const r = validate(app);

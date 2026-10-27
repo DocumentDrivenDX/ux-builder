@@ -62,10 +62,17 @@ export function metrics(app, { carried = [] } = {}) {
   const turns = ev.filter((e) => e.type === "turn");
   const byKind = Object.fromEntries(TURN_KINDS.map((k) => [k, turns.filter((t) => t.kind === k).length]));
   const meaningful = turns.filter((t) => MEANINGFUL.has(t.kind)).length;
-  const testingAt = ev.find((e) => (e.type === "milestone" && e.name === "testing") || (e.type === "step" && e.step >= 7))?.at;
+  // Testing starts at the testing milestone, or when the loop reaches step 7 and stays there (US-161-AC4):
+  // a step-7 event the loop leaves for an earlier step is a correction, not testing.
+  let stayed = null;
+  for (const e of ev.filter((x) => x.type === "step")) stayed = e.step >= 7 ? stayed ?? e.at : null;
+  const testingAt = ev.find((e) => e.type === "milestone" && e.name === "testing")?.at ?? stayed;
   const approvals = ev.filter((e) => e.type === "approval");
-  const before = approvals.filter((a) => !testingAt || a.at < testingAt).length;
+  // The person's approvals: the distinct answers approvals were recorded with; one answer approving several items is one approval.
+  const answers = (xs) => new Set(xs.map((a, k) => a.answer ?? `#${k}`)).size;
+  const before = answers(approvals.filter((a) => !testingAt || a.at < testingAt));
   const reopened = approvals.flatMap((a) => a.reopened ?? []);
+  const formatOnly = approvals.flatMap((a) => a.formatOnly ?? []);
   const proto = ev.find((e) => e.type === "milestone" && e.name === "prototype");
   const decisions = ev.filter((e) => e.type === "approval" || e.type === "checkpoint" || (e.type === "turn" && e.kind === "decision")).map((e) => Date.parse(e.at));
   const gaps = decisions.slice(1).map((t, k) => active(ev, decisions[k], t)).sort((a, b) => a - b);
@@ -75,7 +82,8 @@ export function metrics(app, { carried = [] } = {}) {
     events: ev.length,
     activeMinutes: start == null ? 0 : active(ev, start, Date.parse(ev.at(-1).at)),
     turns: turns.length, byKind, meaningfulShare: turns.length ? Math.round((meaningful / turns.length) * 100) / 100 : null,
-    approvals: approvals.length, approvalsBeforeTesting: before,
+    approvals: approvals.length, personApprovals: answers(approvals), approvalsBeforeTesting: before,
+    reopenedByFormat: { count: formatOnly.length, items: [...new Set(formatOnly)] },
     reopened: { count: reopened.length, items: [...new Set(reopened)] },
     carried: { count: carried.length, items: carried },
     feedback: ev.filter((e) => e.type === "feedback").length,
@@ -87,7 +95,7 @@ export function metrics(app, { carried = [] } = {}) {
   r.targets = [
     { target: `at most ${TARGETS.approvalsBeforeTesting} approvals before testing`, value: before, met: before <= TARGETS.approvalsBeforeTesting },
     { target: `at least ${TARGETS.meaningfulShare * 100}% of turns new information or decisions`, value: r.meaningfulShare, met: r.meaningfulShare == null ? null : r.meaningfulShare >= TARGETS.meaningfulShare },
-    { target: "no approval reopened by formatting or metadata", value: 0, met: true, note: `${carried.length} held through such a change` },
+    { target: "no approval reopened by formatting or metadata", value: formatOnly.length, met: formatOnly.length === 0, note: `${carried.length} held through such a change` },
     { target: `a first prototype within ${TARGETS.minutesToPrototype} active minutes`, value: r.minutesToPrototype, met: r.minutesToPrototype == null ? null : r.minutesToPrototype <= TARGETS.minutesToPrototype },
   ];
   return r;
@@ -98,8 +106,8 @@ export function metricsText(r) {
   return [
     `${r.activeMinutes} active minutes, ${r.events} events.`,
     `Turns: ${r.turns} (${Object.entries(r.byKind).filter(([, n]) => n).map(([k, n]) => `${n} ${k}`).join(", ") || "none logged"}); ${r.meaningfulShare == null ? "no turns logged" : `${Math.round(r.meaningfulShare * 100)}% new information or decisions`}.`,
-    `Approvals: ${r.approvals} (${r.approvalsBeforeTesting} before testing); reopened ${r.reopened.count}${r.reopened.items.length ? ` (${r.reopened.items.join(", ")})` : ""}; ${r.carried.count} held through a formatting or metadata change.`,
-    `First prototype: ${r.minutesToPrototype == null ? "not yet" : `${r.minutesToPrototype} active minutes`}; between decisions: ${r.minutesBetweenDecisions == null ? "–" : `${r.minutesBetweenDecisions} minutes (median)`}.`,
+    `Approvals: ${r.personApprovals} given by the person (${r.approvalsBeforeTesting} before testing), recorded as ${r.approvals} approval${r.approvals === 1 ? "" : "s"}; reopened ${r.reopened.count}${r.reopened.items.length ? ` (${r.reopened.items.join(", ")})` : ""}, ${r.reopenedByFormat.count} by formatting alone; ${r.carried.count} held through a formatting or metadata change.`,
+    `First prototype: ${r.minutesToPrototype == null ? "not yet" : `${r.minutesToPrototype} active minutes, to when it was marked as first tried`}; between decisions: ${r.minutesBetweenDecisions == null ? "–" : `${r.minutesBetweenDecisions} minutes (median)`}.`,
     "Targets:", ...r.targets.map((t) => `  ${yes(t.met)}: ${t.target}${t.value != null ? ` (${typeof t.value === "number" && t.value < 1 && t.value > 0 ? `${Math.round(t.value * 100)}%` : t.value})` : ""}`),
   ].join("\n");
 }

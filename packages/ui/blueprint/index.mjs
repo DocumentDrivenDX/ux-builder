@@ -242,6 +242,14 @@ export function checkBlueprint(bp, { helix } = {}) {
     }
   }
 
+  // The frame fits the destinations (US-162-AC2): a frame with no navigation cannot reach a second
+  // destination, and navigation for one destination, or more than fit across the top, is chrome to drop.
+  const frame = bp.supports?.frame;
+  const destinationCount = Array.isArray(bp.destinations) ? bp.destinations.filter((d) => d && typeof d === "object").length : 0;
+  if ((frame === "screen" || frame === "top-bar") && destinationCount > 1) add("blueprint.valid", ["supports", "frame"], `supports.frame is ${frame}, which has no navigation, but the blueprint has ${destinationCount} destinations.`, "Choose top-nav or side-nav, or keep one destination.", "warning");
+  if ((frame === "top-nav" || frame === "side-nav") && destinationCount <= 1) add("blueprint.valid", ["supports", "frame"], `supports.frame is ${frame}, but the blueprint has ${destinationCount === 1 ? "one destination" : "no destinations"}: there is nothing to navigate between.`, "Choose screen or top-bar.", "warning");
+  if (frame === "top-nav" && destinationCount > 5) add("blueprint.valid", ["supports", "frame"], `supports.frame is top-nav, but ${destinationCount} destinations do not fit across the top bar (up to 5).`, "Choose side-nav, or group the destinations.", "warning");
+
   const screens = Array.isArray(bp.screens) ? bp.screens.filter((s) => s && typeof s === "object") : [];
   const ids = new Map();
   screens.forEach((s, i) => {

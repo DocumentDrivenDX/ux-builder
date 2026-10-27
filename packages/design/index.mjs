@@ -29,6 +29,6 @@ export { insights, journeyStats, latestInsights } from "./insights.mjs";
 export { diagnose, experimentEnd, experimentStart } from "./experiments.mjs";
 export { DECISION_STATUSES, decisionAdd, decisionStatus } from "./decisions.mjs";
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml, principlesFile } from "./brief.mjs";
-export { claimAdd, claimVerify, EVIDENCE_KINDS, evidenceAdd, evidenceList, unverifiedClaims, writeEvidence } from "./research.mjs";
+export { claimAdd, claimContradict, claimVerify, EVIDENCE_KINDS, evidenceAdd, evidenceList, unverifiedClaims, writeEvidence } from "./research.mjs";
 export { ARTIFACTS, businessRules, CLAIM_COLUMNS, claimChecks, evidenceClaims, documentTypes, jobsTable, RULE_ANSWERS, ruleCitations, usersTable, PERSONAL_PATTERNS, exampleFile, helixIds, helixRoot, parseDocument, pathFor, templateFile, uxDocuments, validate, validateDocument } from "./documents.mjs";
 export { ADOPT_SDK, init, installSkill, MCP_SERVER, SKILL_DIR, writeMcpConfig } from "./init.mjs";

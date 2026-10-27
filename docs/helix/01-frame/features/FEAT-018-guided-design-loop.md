@@ -571,7 +571,12 @@ readable where it is until `ux-builder-design migrate` moves it (with
 `git mv`, rewriting its own references), and the tools say so. Before
 any wireframe or prototype is drawn, the guide asks the person which
 modalities and screen sizes the app is for, and records the answer;
-wireframes and prototypes wait for it.
+wireframes and prototypes wait for it. *[Amended 2026-10-27 — US-162, ADR-041]* With the modality and screen
+sizes, the person chooses the **app frame** for a responsive-web app: just
+the screen, a top bar with no menu, navigation across the top, or a side
+menu. The agent shows the four and recommends one from the destinations;
+the choice is recorded in the blueprint, and wireframes, prototypes, the
+built app and the audit follow it.
 
 GDL-81. **Design first, the app last** *(added 2026-10-24, from the
 operator)*. A person starts the guide before there is an app:
@@ -663,6 +668,15 @@ and approve.
   against the targets: at most 10 approvals before testing, at least 80% of
   turns new information or decisions, no approval reopened by formatting,
   a first prototype within 30 active minutes.
+- **Held up in a real session** (US-161). A paced, simulated session (trial
+  tasks-1, 2026-10-27) found what the measures and approvals missed; each
+  is fixed: a re-wrapped paragraph keeps its approval, core-2 leads to step
+  5, only the person approves (a changed item or the map is shown before it
+  is approved again), approvals are counted per answer, a step the loop
+  leaves is not testing, a contradiction with the person's sources is asked
+  about, the brief may not call a dropped story confirmed, the prototype
+  toolbar is folded and a screen without a sample of its own is drawn from
+  its content.
 
 ##### Tasks (stage 3)
 

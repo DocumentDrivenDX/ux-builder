@@ -76,6 +76,19 @@ export function expandModalities(names = DEFAULT_MODALITIES) {
    with modalities keeps them; FEAT-014 MOD-06). */
 export const SHARED_FAMILIES = ["blueprint", "simplicity", "task", "consistency"];
 
+/* The app frames a person chooses from (US-162; the blueprint's
+   supports.frame, AppShell's frame), each with what it is in plain words. */
+export const FRAMES = {
+  screen: "Just the screen: no top bar or menus; the screen fills the window",
+  "top-bar": "A top bar with the app's name and actions (account, theme); no menu",
+  "top-nav": "The destinations across a top bar; a bottom bar on phones",
+  "side-nav": "A side menu on desktop, a rail on tablets, a bottom bar on phones",
+};
+/* The frame to recommend for a number of top-level destinations: none or
+   one, just the screen; up to five, across the top; more, at the side. The
+   person decides. */
+export const frameFor = (destinations = 0) => (destinations <= 1 ? "screen" : destinations <= 5 ? "top-nav" : "side-nav");
+
 /* The width the audit inspects each size class at (FEAT-014's matrix). */
 export const SIZE_CLASS_WIDTHS = { compact: 390, medium: 768, expanded: 1280, large: 1600 };
 export const sizeClassOfWidth = (w) => Object.keys(SIZE_CLASS_WIDTHS).find((k) => SIZE_CLASS_WIDTHS[k] === w) ?? (w < 600 ? "compact" : w < 840 ? "medium" : w < 1440 ? "expanded" : "large");

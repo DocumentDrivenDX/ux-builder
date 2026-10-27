@@ -66,7 +66,7 @@ test("US-150: a design folder installs, runs the guide, then is built in place i
   sh("npm", ["install", "--no-audit", "--no-fund"], d);
   sh("test", ["-f", join(d, ".claude/skills/ux-builder-design/SKILL.md")], d);
   assert.match(sh("npx", ["ux-builder-design", "status"], d), /No app yet: this folder holds the design/);
-  sh("npx", ["ux-builder-design", "modality", "--answer", "A web app for phones to desktops", "--modality", "responsive-web", "--size-classes", "compact,medium,expanded,large"], d);
+  sh("npx", ["ux-builder-design", "modality", "--answer", "A web app for phones to desktops", "--modality", "responsive-web", "--size-classes", "compact,medium,expanded,large", "--frame", "top-bar"], d);
   assert.match(create(d, ".", "--theme", "databricks"), /Built designed, a responsive-web app, in \. on the databricks theme/);
   sh("npm", ["install", "--no-audit", "--no-fund"], d);
   sh("npm", ["run", "build"], d);

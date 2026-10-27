@@ -358,6 +358,17 @@ export function validate(app) {
     for (const m of r.problems) problems.push({ path: c.path, message: m });
     for (const m of r.warnings) warnings.push({ path: c.path, message: m });
   }
+  // Documents that drift from the design (US-161-AC6): a contradicted claim nobody asked the person about,
+  // and a story the brief lists as confirmed that no journey carries any more.
+  let state = null;
+  try { state = JSON.parse(readFileSync(join(app, ".ux-builder/design-state.json"), "utf8")); } catch { /* no design state */ }
+  const questions = Array.isArray(state?.questions) ? state.questions : [];
+  for (const c of evidenceClaims(app)) if (c.contradicting && !questions.some((q) => q.text.includes(`${c.evidence} ${c.id}`))) warnings.push({ path: c.path, message: `${c.evidence} ${c.id} is contradicted (${c.contradicting}), and no question asks the person which holds: ux-builder-design evidence claim contradict ${c.evidence} ${c.id} --text "<what they said>"` });
+  const carried = new Set((Array.isArray(bp?.journeys) ? bp.journeys : []).map((j) => j?.story).filter(Boolean));
+  const briefPath = ux(app, "brief.md");
+  if (carried.size && existsSync(join(app, briefPath))) {
+    for (const m of readFileSync(join(app, briefPath), "utf8").matchAll(/^\s*-\s*(US-\d+)\b[^\n]*\[confirmed\]/gm)) if (!carried.has(m[1])) warnings.push({ path: briefPath, message: `the brief lists ${m[1]} as confirmed, but no journey in the blueprint carries it: drop it from the brief, or mark it deferred` });
+  }
   for (const c of cites) {
     const job = jobs?.[c.job];
     if (!job) { problems.push({ path: c.path, message: `${c.item} cites ${c.job}, which ${ux(app, "jobs.md")} does not have` }); continue; }

@@ -120,7 +120,7 @@ export function journeyModel(bp, { modalities } = {}) {
   for (const s of S) { let n = `${pascal(s.id)}Screen`; for (let i = 2; names.has(n); i++) n = `${pascal(s.id)}${i}Screen`; names.add(n); s.component = n; s.file = `src/screens/${n}.jsx`; }
   const destinations = list(bp.destinations).filter((d) => paths.has(d.screen)).map((d) => ({ id: d.id ?? d.screen, label: d.label ?? titleOf(d.screen), screen: d.screen, path: pathOf(d.screen) }));
   if (chat && !destinations.some((d) => d.path === assistantPath(ms))) destinations.push({ id: "assistant", label: "Assistant", screen: "assistant", path: assistantPath(ms) });
-  return { name: bp.name ?? "app", modalities: ms, chat, screens: S, journeys: J, destinations, sample: sampleOf(S) };
+  return { name: bp.name ?? "app", modalities: ms, chat, frame: bp.supports?.frame ?? null, screens: S, journeys: J, destinations, sample: sampleOf(S) };
 }
 
 /* ------------------------------------------------------ sample data */
@@ -231,7 +231,8 @@ import { JOURNEYS } from "./journey/blueprint.js";
 ${m.screens.map((s) => `import { ${s.component} } from "./screens/${s.component}.jsx";`).join("\n")}
 ${m.chat ? 'import { Assistant } from "./Assistant.jsx";\n' : ""}
 /* The app's frame (docs/ux-builder/blueprint/app.blueprint.json): a route per
-   screen, the destinations in AppShell's navigation, and the prototype
+   screen, the destinations in AppShell's navigation, in the frame the person
+   chose (supports.frame${m.frame ? `: ${m.frame}` : ", not chosen: side navigation"}), and the prototype
    toolbar in npm run dev (or with ?prototype). A screen reached from no
    destination marks the destination its journey started from. */
 const ROUTES = {
@@ -251,7 +252,7 @@ export function App() {
   const { path } = useRoute();
   const Screen = ROUTES[path] ?? NotFound;
   return (
-    <AppShell nav={NAV} current={currentOf(path)} onNavigate={(item) => navigate(item.href)} brand={<Brand />} actions={<ThemeSwitch />}>
+    <AppShell nav={NAV} current={currentOf(path)} onNavigate={(item) => navigate(item.href)}${m.frame ? ` frame=${JSON.stringify(m.frame)}` : ""} brand={<Brand />} actions={<ThemeSwitch />}>
       <PrototypeToolbar />
       <Screen key={path} />
     </AppShell>
@@ -295,9 +296,12 @@ test("?state= forces a state, and its retry recovers", async ({ page }) => {
   await expect(screen).toHaveAttribute("data-state", "ideal");
 });
 
-test("the prototype toolbar resets the sample data", async ({ page }) => {
+test("the prototype toolbar is folded, and opens to reset the sample data", async ({ page }) => {
   await page.goto(${JSON.stringify(`${s.path}?prototype`)});
-  await expect(page.getByRole("complementary", { name: "Prototype toolbar" }).getByRole("button", { name: "Reset prototype data" })).toBeVisible();
+  const bar = page.getByRole("complementary", { name: "Prototype toolbar" });
+  await expect(bar.getByRole("button", { name: "Reset prototype data" })).toBeHidden();
+  await bar.getByText("Prototype controls").click();
+  await expect(bar.getByRole("button", { name: "Reset prototype data" })).toBeVisible();
 });
 `;
 }

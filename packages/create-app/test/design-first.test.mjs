@@ -35,7 +35,7 @@ function folder(name, { modality = "responsive-web", sizes = "compact,expanded" 
   const r = create(tmp, name);
   assert.equal(r.status, 0, r.stderr);
   const dir = join(tmp, name);
-  if (modality) assert.equal(design(dir, "modality", "--answer", "A web app for phones and laptops", "--modality", modality, "--size-classes", sizes).status, 0);
+  if (modality) assert.equal(design(dir, "modality", "--answer", "A web app for phones and laptops", "--modality", modality, "--size-classes", sizes, ...(modality.includes("responsive-web") ? ["--frame", "side-nav"] : [])).status, 0);
   return dir;
 }
 

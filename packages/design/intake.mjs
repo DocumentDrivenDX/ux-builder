@@ -80,7 +80,7 @@ export function budget(app) {
   if (!passed("core-1")) decisions.push("checkpoint core-1");
   if (!passed("core-2")) decisions.push("the choice of approach (core-2)");
   if (pending.some((p) => p.tier === "derived") || !passed("core-2")) decisions.push("the coverage map");
-  if (!modalityStatus(app).confirmed) decisions.push("the modality and screen sizes");
+  if (!modalityStatus(app).confirmed) decisions.push("the modality, screen sizes and app frame");
   return { decisions, count: decisions.length, minutes: decisions.length * MINUTES_PER_DECISION };
 }
 

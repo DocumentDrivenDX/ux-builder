@@ -30,7 +30,7 @@ describe("status", () => {
     assert.equal(r.status, 0, r.stderr);
     assert.equal(r.stdout, [
       "Step 4 of 8: Explore alternatives (Explore, in the full loop).",
-      "About 3 decisions left before the first prototype, roughly 9 minutes of your time: the choice of approach (core-2), the coverage map, the modality and screen sizes.",
+      "About 3 decisions left before the first prototype, roughly 9 minutes of your time: the choice of approach (core-2), the coverage map, the modality, screen sizes and app frame.",
       "map-first is chosen.",
       "2 assumptions are untested.",
       "Open question: Should people sign in to save rivers?",
@@ -62,7 +62,7 @@ describe("status", () => {
     const app = tempApp();
     const r = cli(app, ["status"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /^Step 1 of 8: Define intent \(Define, in the full loop\)\.\nAbout 8 decisions left before the first prototype, roughly 24 minutes of your time: the brief, the target users table, the jobs table, the stories table, checkpoint core-1, the choice of approach \(core-2\), the coverage map, the modality and screen sizes\.\nNo alternative is chosen yet\.\nNo untested assumptions\.\nNo open questions\.\nNext \(not set; the activity.s first step\): Interview the person about what users must accomplish, then draft the brief and ask core-1\.\n$/);
+    assert.match(r.stdout, /^Step 1 of 8: Define intent \(Define, in the full loop\)\.\nAbout 8 decisions left before the first prototype, roughly 24 minutes of your time: the brief, the target users table, the jobs table, the stories table, checkpoint core-1, the choice of approach \(core-2\), the coverage map, the modality, screen sizes and app frame\.\nNo alternative is chosen yet\.\nNo untested assumptions\.\nNo open questions\.\nNext \(not set; the activity.s first step\): Interview the person about what users must accomplish, then draft the brief and ask core-1\.\n$/);
   });
 
   test("status finds the app from a folder below it", () => {

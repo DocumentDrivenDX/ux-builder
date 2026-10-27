@@ -11,8 +11,8 @@
    Checkpoints do not pass while items of the steps they close await review. */
 
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { DesignError, bpFile, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
 import { logEvent } from "./metrics.mjs";
@@ -36,11 +36,25 @@ export const tierOf = (id) => Object.keys(TIERS).find((t) => TIERS[t].includes(k
 
 /* What an item means, for its approval: a document without its
    frontmatter, each line without trailing space, list markers and blank
-   runs made one form. Formatting and metadata do not change it. */
-export function meaningOf(content) {
+   runs made one form, a paragraph's wrapped lines joined into one, and
+   bold or underline markers dropped (US-161-AC1). Formatting and metadata
+   do not change it; code blocks are kept as they are. Blueprint items,
+   shown as one "key: value" line each, keep their lines (join: false). */
+const BLOCK = /^(\s*(-|1\.)\s|#{1,6}\s|\||>|```|~~~|\s{4})/;
+export function meaningOf(content, { join = true } = {}) {
   const text = /^---\n/.test(content) ? parseDocument(content).body : content;
-  return text.replace(/\r\n?/g, "\n").split("\n").map((l) => l.replace(/\s+$/, "").replace(/^(\s*)[*+](\s)/, "$1-$2").replace(/^(\s*)\d+[.)](\s)/, "$11.$2").replace(/[ \t]+/g, " "))
-    .join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  const out = [];
+  let code = false;
+  for (const raw of text.replace(/\r\n?/g, "\n").split("\n")) {
+    if (/^\s*(```|~~~)/.test(raw)) { code = !code; out.push(raw.replace(/\s+$/, "")); continue; }
+    if (code) { out.push(raw.replace(/\s+$/, "")); continue; }
+    const l = raw.replace(/\s+$/, "").replace(/^(\s*)[*+](\s)/, "$1-$2").replace(/^(\s*)\d+[.)](\s)/, "$11.$2").replace(/\*\*|__/g, "").replace(/[ \t]+/g, " ");
+    const prev = out.at(-1);
+    // A line that carries on the paragraph or list item above it is the same line, wrapped.
+    if (join && l.trim() && prev?.trim() && !BLOCK.test(l) && !/^(#{1,6}\s|\||```|~~~)/.test(prev.trimStart())) out[out.length - 1] = `${prev} ${l.trim()}`;
+    else out.push(l);
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 /* A line diff, a before b: [{ op: " "|"-"|"+", line }], unchanged lines kept for context. */
@@ -99,29 +113,30 @@ export function reviewItems(app) {
   let state = null;
   try { state = readState(app); } catch { /* no design state */ }
   const items = [];
-  const add = (id, step, title, file, content) => {
+  const add = (id, step, title, file, content, { join = true } = {}) => {
     if (content == null) return;
-    const meaning = meaningOf(content);
-    items.push({ id, step, tier: tierOf(id), title, file, content, meaning, hash: hashOf(meaning), raw: hashOf(content) });
+    const meaning = meaningOf(content, { join });
+    items.push({ id, step, tier: tierOf(id), title, file, content, meaning, join, hash: hashOf(meaning), raw: hashOf(content) });
   };
+  const fields = { join: false };
   // 1 Define intent
   add("brief", 1, "The experience brief", ux(app, "brief.md"), read(app, ux(app, "brief.md")));
   // 2 Understand users
-  for (const [id, u] of Object.entries(usersTable(app) ?? {})) add(`user:${id}`, 2, u.user, ux(app, "users.md"), readable({ id, user: u.user, context: u.context, needs: u.needs, jobs: u.jobs.map((j) => `${j.job} ${j.importance}`), evidence: u.evidence, confidence: u.confidence, status: u.status }));
-  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) add(`job:${id}`, 2, j.job, ux(app, "jobs.md"), readable({ id, job: j.job, importance: j.importance, evidence: j.evidence, confidence: j.confidence, status: j.status }));
+  for (const [id, u] of Object.entries(usersTable(app) ?? {})) add(`user:${id}`, 2, u.user, ux(app, "users.md"), readable({ id, user: u.user, context: u.context, needs: u.needs, jobs: u.jobs.map((j) => `${j.job} ${j.importance}`), evidence: u.evidence, confidence: u.confidence, status: u.status }), fields);
+  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) add(`job:${id}`, 2, j.job, ux(app, "jobs.md"), readable({ id, job: j.job, importance: j.importance, evidence: j.evidence, confidence: j.confidence, status: j.status }), fields);
   for (const f of files(app, ux(app, "evidence"), /^EV-\d+\.md$/)) add(`evidence:${f.replace(/\.md$/, "")}`, 2, `Research evidence ${f.replace(/\.md$/, "")}`, `${ux(app)}/evidence/${f}`, read(app, `${ux(app)}/evidence/${f}`));
   // 3 Model tasks: the stories the journeys cite, the tasks, and the business rules they cite
   const us = stories(app);
   for (const id of [...new Set(list(bp.journeys).map((j) => j?.story).filter(Boolean))]) if (us[id]) add(`story:${id}`, 3, parseDocument(us[id].text).body.match(/^# (.+)$/m)?.[1] ?? id, us[id].file, us[id].text);
-  for (const t of list(bp.tasks).filter((x) => x?.id)) add(`task:${t.id}`, 3, t.goal ?? t.id, bpFile(app), readable(t));
+  for (const t of list(bp.tasks).filter((x) => x?.id)) add(`task:${t.id}`, 3, t.goal ?? t.id, bpFile(app), readable(t), fields);
   const rules = businessRules(app).rules;
-  for (const id of [...new Set(ruleCitations(bp).map((c) => c.rule))]) add(`rule:${id}`, 3, rules[id]?.text ?? id, rules[id]?.file ?? bpFile(app), readable({ rule: rules[id]?.text ?? "not defined in HELIX", ...(list(bp.businessRules).find((r) => r?.id === id) ?? {}) }));
+  for (const id of [...new Set(ruleCitations(bp).map((c) => c.rule))]) add(`rule:${id}`, 3, rules[id]?.text ?? id, rules[id]?.file ?? bpFile(app), readable({ rule: rules[id]?.text ?? "not defined in HELIX", ...(list(bp.businessRules).find((r) => r?.id === id) ?? {}) }), fields);
   // 4 Explore alternatives
-  for (const j of list(bp.journeys).filter((x) => x?.id)) add(`journey:${j.id}`, 4, j.id, bpFile(app), readable(j));
+  for (const j of list(bp.journeys).filter((x) => x?.id)) add(`journey:${j.id}`, 4, j.id, bpFile(app), readable(j), fields);
   for (const a of list(state?.alternatives)) { const text = read(app, a.file ?? bpFile(app, a.name)); if (text) add(`alternative:${a.name}`, 4, `Alternative ${a.name}`, a.file ?? bpFile(app, a.name), text); }
   for (const f of files(app, ux(app, "decisions"), /^UXD-\d+\.md$/)) add(`decision:${f.replace(/\.md$/, "")}`, 4, parseDocument(read(app, `${ux(app)}/decisions/${f}`)).body.match(/^# (.+)$/m)?.[1] ?? f, `${ux(app)}/decisions/${f}`, read(app, `${ux(app)}/decisions/${f}`));
   // 5 Design the structure
-  for (const s of list(bp.screens).filter((x) => x?.id)) add(`screen:${s.id}`, 5, s.title ?? s.id, bpFile(app), readable(s));
+  for (const s of list(bp.screens).filter((x) => x?.id)) add(`screen:${s.id}`, 5, s.title ?? s.id, bpFile(app), readable(s), fields);
   // 7 Test with people
   for (const d of files(app, ux(app, "tests"), /^TK-\d+$/)) {
     const dir = `${ux(app)}/tests/${d}`;
@@ -135,11 +150,30 @@ export function reviewItems(app) {
   return items;
 }
 
+/* What was last shown to the person (US-161-AC3): { item | "map": hash },
+   on this machine only. Approving again something that changed after its
+   approval, or the coverage map again, needs it shown as it is now. */
+const SHOWN = ".ux-builder/shown.local.json";
+const shownOf = (app) => readJson(join(app, SHOWN)) ?? {};
+function markShown(app, entries) {
+  try {
+    const p = join(app, SHOWN);
+    mkdirSync(dirname(p), { recursive: true });
+    writeFileSync(p, JSON.stringify({ ...shownOf(app), ...entries }, null, 2) + "\n");
+  } catch { /* showing never fails for want of the record */ }
+}
+const mapHash = (m) => hashOf(JSON.stringify({ rows: m.rows, exceptions: m.exceptions.map((e) => e.id), pending: m.pending, changed: m.changed.map((c) => c.id) }));
+/* The words of a text, without punctuation or case: equal words, only formatting changed. */
+const wordsOf = (t) => String(t ?? "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+
 /* The latest approval of each item: { item: review }. */
 const approvals = (state) => new Map(list(state?.reviews).filter((r) => r.item !== "map").map((r) => [r.item, r]));
 /* An approval still holds when the meaning is the one approved; an
-   approval recorded before meanings were kept compares the whole content. */
-const holds = (r, i) => !!r && (r.hash === i.hash || r.hash === i.raw);
+   approval recorded before meanings were kept compares the whole content,
+   and one kept under an earlier form of meaningOf compares its snapshot
+   in the current form. */
+const holds = (r, i) => !!r && (r.hash === i.hash || r.hash === i.raw || (r.snapshot != null && meaningOf(r.snapshot, i) === i.meaning));
+
 
 /* The items not approved in their current form, with their open feedback
    and, when they changed after approval, the diff. Records need no
@@ -151,7 +185,7 @@ export function pendingReviews(app, { steps, records = false } = {}) {
   return reviewItems(app).filter((i) => (!steps || steps.includes(i.step)) && (records || i.tier !== "record") && !holds(approved.get(i.id), i))
     .map(({ content, meaning, ...i }) => {
       const was = approved.get(i.id);
-      return { ...i, changed: !!was, ...(was?.snapshot != null ? { diff: diffText(lineDiff(was.snapshot, meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id && f.status === "open").map((f) => f.id) };
+      return { ...i, changed: !!was, ...(was?.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id && f.status === "open").map((f) => f.id) };
     });
 }
 
@@ -217,21 +251,27 @@ export function reviewList(app) {
   return { pending, count: pending.length, foundations: foundations.map((p) => p.id), derived: derived.map((p) => p.id), records: pendingReviews(app, { records: true }).filter((p) => p.tier === "record").map((p) => p.id), next };
 }
 
-/* ux-builder-design review table <kind>: every item of a foundation kind, to show as one table. */
-export function reviewTable(app, { kind } = {}) {
+/* ux-builder-design review table <kind>: every item of a foundation kind, to
+   show as one table; recorded as shown unless only read (shown: false). */
+export function reviewTable(app, { kind, shown = true } = {}) {
   if (!TIERS.foundation.includes(kind)) throw new DesignError(`review table takes a foundation kind: ${TIERS.foundation.join(", ")}; not "${kind ?? ""}". Built items are reviewed with review map.`);
   let state = null;
   try { state = readState(app); } catch { /* no design state */ }
   const approved = approvals(state);
   const items = reviewItems(app).filter((i) => kindOf(i.id) === kind).map((i) => {
     const was = approved.get(i.id);
-    return { id: i.id, title: i.title, file: i.file, content: i.content, status: holds(was, i) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i) && was.snapshot != null ? { diff: diffText(lineDiff(was.snapshot, i.meaning)) } : {}) };
+    return { id: i.id, title: i.title, file: i.file, content: i.content, status: holds(was, i) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), i.meaning)) } : {}) };
   });
+  if (shown) markShown(app, Object.fromEntries(reviewItems(app).filter((i) => kindOf(i.id) === kind).map((i) => [i.id, i.hash])));
   return { kind, items, pending: items.filter((i) => i.status !== "approved").map((i) => i.id) };
 }
 
-/* ux-builder-design review map. */
-export const reviewMap = (app) => coverageMap(app);
+/* ux-builder-design review map: the map, recorded as shown. */
+export function reviewMap(app) {
+  const m = coverageMap(app);
+  markShown(app, { map: mapHash(m) });
+  return m;
+}
 
 function find(app, id) {
   const item = reviewItems(app).find((i) => i.id === id);
@@ -245,7 +285,8 @@ export function reviewShow(app, { item } = {}) {
   const state = readState(app);
   const was = approvals(state).get(i.id);
   const { meaning, ...rest } = i;
-  return { ...rest, status: holds(was, i) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i) && was.snapshot != null ? { diff: diffText(lineDiff(was.snapshot, meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id) };
+  markShown(app, { [i.id]: i.hash });
+  return { ...rest, status: holds(was, i) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id) };
 }
 
 /* ux-builder-design review feedback <item> --text <their words>. */
@@ -284,7 +325,7 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], now
   let targets;
   if (kind) {
     if (!TIERS.foundation.includes(kind)) throw new DesignError(`--kind takes a foundation kind: ${TIERS.foundation.join(", ")}; built items are approved with the coverage map (review approve map)`);
-    targets = reviewTable(app, { kind }).pending.map((id) => find(app, id));
+    targets = reviewTable(app, { kind, shown: false }).pending.map((id) => find(app, id));
     if (!targets.length) throw new DesignError(`no ${kind} awaits review`);
   } else {
     if (!ids.length) throw new DesignError("review approve needs an item, --kind <kind>, or map");
@@ -294,10 +335,17 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], now
   const open = list(state.feedback).filter((f) => targets.some((i) => i.id === f.item) && f.status === "open");
   if (open.length) throw new DesignError(`${[...new Set(open.map((f) => f.item))].join(", ")} ${open.length === 1 ? "has" : "have"} feedback not yet addressed: ${open.map((f) => `${f.id} ("${f.text}")`).join(", ")}. Address it, record how (review respond <FB-n> --text "…"), show the item again, then ask for approval.`);
   const before = approvals(state);
+  // Approving again what changed after its approval needs the change shown to the person first (US-161-AC3).
+  const shown = shownOf(app);
+  const unseen = targets.filter((i) => before.has(i.id) && shown[i.id] !== i.hash);
+  if (unseen.length) throw new DesignError(`${unseen.map((i) => i.id).join(", ")} changed after ${unseen.length === 1 ? "it was" : "they were"} approved, and the person has not seen ${unseen.length === 1 ? "the change" : "the changes"}: show ${unseen.length === 1 ? "it" : "each"} (ux-builder-design review show ${unseen[0].id}${kind ? `, or review table ${kind}` : ""}), with the diff, and record the approval only when they give it, in their words. Nothing was recorded.`);
   const ids2 = new Set(targets.map((i) => i.id));
   state.reviews = [...list(state.reviews).filter((r) => !ids2.has(r.item)), ...targets.map((i) => record(i, answer.trim(), now, kind ? "table" : null))];
   writeState(app, state);
-  logEvent(app, "approval", { items: [...ids2], via: kind ? "table" : "item", reopened: targets.filter((i) => before.has(i.id)).map((i) => i.id) }, now);
+  const reopened = targets.filter((i) => before.has(i.id));
+  // A reopening whose words did not change was caused by formatting alone (GDL-83 target).
+  const formatOnly = reopened.filter((i) => before.get(i.id).snapshot != null && wordsOf(before.get(i.id).snapshot) === wordsOf(i.meaning)).map((i) => i.id);
+  logEvent(app, "approval", { items: [...ids2], via: kind ? "table" : "item", answer: answer.trim(), reopened: reopened.map((i) => i.id), ...(formatOnly.length ? { formatOnly } : {}) }, now);
   const left = pendingReviews(app);
   return { item: targets[0].id, items: [...ids2], approved: true, remaining: left.length, next: left[0]?.id ?? null };
 }
@@ -308,6 +356,9 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], now
 function approveMap(app, { answer, accept, now }) {
   if (!answer?.trim()) throw new DesignError("review approve map needs --answer: the person's approval of the coverage map, in their words");
   const m = coverageMap(app);
+  // The map approved again needs the map as it is now shown to the person first (US-161-AC3).
+  const state0 = readState(app);
+  if (list(state0.reviews).some((r) => r.item === "map") && shownOf(app).map !== mapHash(m)) throw new DesignError("the coverage map changed since it was approved, and the person has not seen it as it is now: show it (ux-builder-design review map), go through what changed and each exception, and record the approval only when they give it, in their words. Nothing was recorded.");
   const unknown = accept.filter((a) => !m.exceptions.some((e) => e.id === a));
   if (unknown.length) throw new DesignError(`not an exception on the map: ${unknown.join(", ")}; the map has ${m.exceptions.map((e) => e.id).join(", ") || "none"}`);
   const open = m.exceptions.filter((e) => !accept.includes(e.id));
@@ -320,7 +371,7 @@ function approveMap(app, { answer, accept, now }) {
   state.reviews = [...list(state.reviews).filter((r) => !ids.has(r.item) && r.item !== "map"), ...targets.map((i) => record(i, answer.trim(), now, "map")),
     { item: "map", hash: hashOf(JSON.stringify(m.rows)), answer: answer.trim(), at: now, accepted: accept, assumptions: list(state.assumptions).map((a) => a.id) }];
   writeState(app, state);
-  logEvent(app, "approval", { items: ["map"], via: "map", covers: [...ids], accepted: accept }, now);
+  logEvent(app, "approval", { items: ["map"], via: "map", answer: answer.trim(), covers: [...ids], accepted: accept }, now);
   const left = pendingReviews(app);
   return { item: "map", items: [...ids], accepted: accept, approved: true, remaining: left.length, next: left[0]?.id ?? null };
 }

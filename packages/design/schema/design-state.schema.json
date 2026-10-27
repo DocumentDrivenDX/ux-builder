@@ -395,7 +395,7 @@
         "answer",
         "at"
       ],
-      "description": "The person's answer to which modalities and screen sizes the app is for, before any wireframe or prototype (FEAT-018 GDL-80)",
+      "description": "The person's answer to which modalities and screen sizes the app is for, before any wireframe or prototype and the app frame they chose (FEAT-018 GDL-80; US-162)",
       "properties": {
         "modalities": {
           "type": "array",
@@ -415,6 +415,15 @@
         },
         "at": {
           "type": "string"
+        },
+        "frame": {
+          "enum": [
+            "screen",
+            "top-bar",
+            "top-nav",
+            "side-nav"
+          ],
+          "description": "The app frame the person chose (US-162); none for an app with no responsive-web modality"
         }
       }
     },

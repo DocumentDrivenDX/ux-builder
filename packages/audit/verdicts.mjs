@@ -99,7 +99,8 @@ const ALL_SIZES = ["compact", "medium", "expanded", "large"];
 const hasNav = (w) => !!w.appShell && w.appShell.nav !== 0;
 
 /* Does AppShell's navigation adapt on the audited pages, at the size classes
-   chosen: the bottom bar when compact, the side navigation from expanded?
+   chosen: the bottom bar when compact, the side navigation, or navigation
+   across the top bar (the top-nav frame, US-162), from expanded?
    true, false, or null when the audit saw none of the widths it needs. */
 function adapts(pages, classes = ALL_SIZES) {
   const narrowWanted = classes.includes("compact"), wideWanted = classes.some((c) => c === "expanded" || c === "large");
@@ -108,7 +109,7 @@ function adapts(pages, classes = ALL_SIZES) {
     const narrow = narrowWanted ? ws.filter((w) => w.width < 600) : [], wide = wideWanted ? ws.filter((w) => w.width >= 840) : [];
     if ((narrowWanted && !narrow.length) || (wideWanted && !wide.length) || (!narrow.length && !wide.length)) continue;
     seen = true;
-    if (!narrow.every((w) => w.appShell.bar && !w.appShell.side) || !wide.every((w) => w.appShell.side && !w.appShell.bar)) return false;
+    if (!narrow.every((w) => w.appShell.bar && !w.appShell.side && !w.appShell.top) || !wide.every((w) => (w.appShell.side || w.appShell.top) && !w.appShell.bar)) return false;
   }
   return seen ? true : null;
 }
@@ -151,11 +152,19 @@ export function modalityVerdicts({ modalities = null, pages = [], rules = {}, fi
       if (c.navigation) {
         c.adapts = adapts(pages, sizes);
         const want = [sizes.includes("compact") && "compact (390 px)", sizes.some((x) => x === "expanded" || x === "large") && "expanded (1280 px)"].filter(Boolean);
-        if (c.adapts === false) fixes.push("Navigation exists, and AppShell's navigation does not adapt by size class: the bottom bar shows when compact (under 600 px) and the side navigation from expanded (840 px); do not hold it in a fixed-width frame or restyle it.");
+        if (c.adapts === false) fixes.push("Navigation exists, and AppShell's navigation does not adapt by size class: the bottom bar shows when compact (under 600 px) and the side navigation, or the navigation across the top bar, from expanded (840 px); do not hold it in a fixed-width frame or restyle it.");
         if (c.adapts === null && want.length) fixes.push(`Navigation exists but was not checked at ${want.join(" and ")}; audit with --modality or --blueprint.`);
         if (c.adapts === null && !want.length) delete c.adapts;
       } else if (present) evidence.push(single ? "One top-level destination: no navigation to adapt" : "AppShell shows no navigation items: no navigation to adapt");
-      for (const p of pages) for (const w of p.widths) if (w.appShell && c.navigation) evidence.push(`${p.url} at ${w.width}px: ${w.appShell.bar ? "bottom bar" : ""}${w.appShell.bar && w.appShell.side ? " and " : ""}${w.appShell.side ? "side navigation" : ""}${!w.appShell.bar && !w.appShell.side ? "no navigation shown" : ""}`);
+      for (const p of pages) for (const w of p.widths) if (w.appShell && c.navigation) evidence.push(`${p.url} at ${w.width}px: ${[w.appShell.bar && "bottom bar", w.appShell.side && "side navigation", w.appShell.top && "navigation across the top bar"].filter(Boolean).join(" and ") || "no navigation shown"}`);
+      // The frame the person chose (supports.frame, US-162) is the frame the app was built in.
+      const chosen = blueprint?.supports?.frame;
+      const built = [...new Set(pages.flatMap((p) => p.widths.filter((w) => w.appShell).map((w) => w.appShell.frame ?? "side-nav")))];
+      if (chosen && built.length) {
+        const other = built.filter((f) => f !== chosen);
+        if (other.length) fixes.push(`The blueprint chose the ${chosen} frame, but AppShell is drawn in the ${other.join(" and ")} frame: pass frame="${chosen}" to AppShell, or record the person's new choice (ux-builder-design modality --frame).`);
+        else evidence.push(`AppShell in the ${chosen} frame the blueprint chose`);
+      }
       return c;
     };
     const components = NEEDS[modality].map((n) => {

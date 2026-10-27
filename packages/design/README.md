@@ -55,7 +55,9 @@ its own skill and `.mcp.json`. An app made before that layout (`docs/ux/`,
 `app.blueprint.json` at the top) keeps working there; `ux-builder-design
 migrate [--dry-run]` moves it with `git mv` and rewrites the app's
 references. Before any wireframe or prototype the guide asks the person which
-modalities and screen sizes the app is for (`ux-builder-design modality`).
+modalities and screen sizes the app is for and, for responsive web, its app
+frame: just the screen, a top bar, navigation across the top or a side menu
+(`ux-builder-design modality --frame`).
 HELIX changes are always proposals (`docs/ux-builder/helix-proposals/`) the
 person applies.
 People in tests appear only by pseudonym; a real name a sheet gives is kept

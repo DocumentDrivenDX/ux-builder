@@ -134,6 +134,12 @@
       "why": "It decides which patterns, navigation and rules apply, so it is settled before any screen is drawn."
     },
     {
+      "term": "app frame",
+      "step": 5,
+      "means": "What surrounds every screen of a web app: nothing (just the screen), a top bar with the app's name, navigation across the top, or a side menu. You choose it with the modality.",
+      "why": "A one-screen app needs no menus, and an app with many destinations needs a side menu; the frame should fit the app, not a template."
+    },
+    {
       "term": "size class",
       "step": 5,
       "means": "A range of screen widths the app must work at: compact (phones), medium (small tablets), expanded (tablets and small laptops), large and extra-large (desktops).",
