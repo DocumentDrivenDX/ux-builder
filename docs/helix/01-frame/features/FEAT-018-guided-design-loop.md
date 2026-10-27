@@ -611,6 +611,59 @@ the operator)*.
   the app; an app that keeps them at its top keeps working until
   `ux-builder-design migrate` moves them.
 
+GDL-83. **The person's time goes to decisions** *(added 2026-10-27, from a
+review of the first guided session: 100 human turns, 52 of them approvals,
+2.6 active hours, the loop not finished; FR-89)*. Human control stays at
+every consequential point; what changes is what the person is asked to read
+and approve.
+- **Three tiers of review** (US-153). Foundations (the brief, target users,
+  jobs, stories, business rules, decisions) are reviewed deliberately, a
+  table per kind, every row in full. What is built from them (tasks,
+  journeys, alternatives, screens, kits) is reviewed as one coverage map:
+  each job, its tasks, journeys and screens, and the exceptions (a job
+  nothing serves, a task serving no job, a journey with no story, a screen
+  on no journey, an undefined rule, a new assumption), each fixed or
+  accepted; approving the map approves the built items. Records (evidence,
+  reports, insights, experiments) need no approval: the decisions they lead
+  to are asked at the checkpoints.
+- **Approvals by meaning** (US-152). An approval keeps the meaning approved
+  (the content without frontmatter, formatting made one form), its hash and
+  the whole content's hash; metadata and formatting changes keep it, and a
+  change of meaning comes back as a diff of only what changed.
+- **A short start** (US-154). The agent reads what exists first; the
+  intake questions those sources do not answer are asked together, and a
+  narrative answer is fine. The budget of decisions left before the first
+  prototype is shown.
+- **Grounded claims** (US-155). A synthesized claim records its source,
+  whether it was observed or inferred, its confidence, what contradicts it
+  and what is unknown; one that changes the design's direction is checked
+  by the agent against its source, or labelled uncertain.
+- **HELIX changes applied by the tools** (US-156). Proposals are previewed
+  in one line each and applied all or nothing, a clashing ID renumbered and
+  its references rewritten; the build in place never installs a starter
+  HELIX document whose ID or role the design already has.
+- **Modality judged by outcome** (US-157). Responsive web passes when the
+  content fits and works at the chosen sizes, with navigation adapting only
+  where there is navigation; an app with one destination needs none, and a
+  size class nobody chose is not asked for.
+- **One report page** (US-158). The UI audit and the usability assessment
+  are listed on one page beside the design, with what each is and which
+  package versions wrote it; a `doctor` check finds incoherent package
+  versions before a session relies on them.
+- **A working prototype from the design** (US-159). The build in place
+  generates a working journey skeleton from the chosen blueprint: routes,
+  screens in their content order, sample data, the journeys' actions, each
+  state forceable, business-rule warnings, and a reset, so the person
+  reacts to the experience rather than to documents.
+- **One decision at a time** (US-160). `advance --until-decision` does the
+  safe work and stops at the next decision, with a recommendation and what
+  follows.
+- **Measured** (US-154). Turns, approvals, reopened and carried approvals
+  and the time to the first prototype are recorded locally and reported
+  against the targets: at most 10 approvals before testing, at least 80% of
+  turns new information or decisions, no approval reopened by formatting,
+  a first prototype within 30 active minutes.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each

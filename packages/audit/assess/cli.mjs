@@ -224,6 +224,9 @@ const SUB = {
     const { report } = await import("./report.mjs");
     const r = report(dir, { selfContained: !!o["self-contained"] });
     console.log(`Wrote ${dir}/report.html, report.md and evidence.json (${r.files} evidence files)`);
+    const { appOfReport, landingPath } = await import("../reports.mjs");
+    const app = appOfReport(dir);
+    if (app) console.log(`All reports: ${landingPath(app)}`);
     return 0;
   },
   async compare(args) {

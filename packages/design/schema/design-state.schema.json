@@ -98,7 +98,7 @@
     },
     "reviews": {
       "type": "array",
-      "description": "The person's approvals: each item approved in a given form (FEAT-018 GDL-79)",
+      "description": "The person's approvals: each item approved in a given meaning (FEAT-018 GDL-79, GDL-83); item map is the coverage map's approval",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -115,7 +115,8 @@
           },
           "hash": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "description": "The hash of the item's meaning: no frontmatter, no formatting (an approval recorded before GDL-83 hashed the whole content)"
           },
           "answer": {
             "type": "string",
@@ -123,6 +124,37 @@
           },
           "at": {
             "type": "string"
+          },
+          "raw": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The hash of the item's whole content, for the audit trail"
+          },
+          "snapshot": {
+            "type": "string",
+            "description": "The meaning approved, so a later change shows as a diff"
+          },
+          "via": {
+            "enum": [
+              "item",
+              "table",
+              "map"
+            ],
+            "description": "How it was approved: on its own, in its kind's table, or with the coverage map"
+          },
+          "accepted": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For the map: the exceptions the person accepted"
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For the map: the assumptions seen when it was approved"
           }
         }
       }

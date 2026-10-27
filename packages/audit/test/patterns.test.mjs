@@ -7,7 +7,7 @@
 
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join } from "node:path";
 import { tmpdir } from "node:os";
@@ -171,9 +171,11 @@ describe("SDK-20 audit at every size class", () => {
     assert.equal(r.runs[0].width, undefined);
   });
 
-  // Run the CLI without blocking this process, which serves the pages it audits.
+  // Run the CLI without blocking this process, which serves the pages it audits; its report goes in a folder of its own.
+  const cwd = mkdtempSync(join(tmpdir(), "audit-patterns-"));
+  after(() => rmSync(cwd, { recursive: true, force: true }));
   const run = (args) => new Promise((done) => {
-    const p = spawn(process.execPath, [join(PKG, "cli.mjs"), ...args]);
+    const p = spawn(process.execPath, [join(PKG, "cli.mjs"), ...args], { cwd });
     let stdout = "", stderr = "";
     p.stdout.on("data", (d) => { stdout += d; });
     p.stderr.on("data", (d) => { stderr += d; });

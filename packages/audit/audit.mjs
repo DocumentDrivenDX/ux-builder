@@ -20,9 +20,10 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, relative } from "node:path";
 import { chromium } from "playwright";
-import { DEFAULT_MODALITIES, expandModalities, MODALITIES } from "@ux-builder/ui/blueprint/modalities";
+import { DEFAULT_MODALITIES, expandModalities, MODALITIES, widthsFor } from "@ux-builder/ui/blueprint/modalities";
 import { enrich, inspect, modalEscape, prepare, ruleFor, rulesByCheck, sdkRulesIn, settle } from "./inspect.mjs";
 import { journeyIndex, modalityVerdicts, pageScreen, themeVerdict } from "./verdicts.mjs";
+import { versions as installed } from "./assess/collect.mjs";
 export { AI_CHECKS, FIXES, inspect, STATE_AFFECTING } from "./inspect.mjs";
 export { attach, checkpoint, startBrowser } from "./assess/checkpoint.mjs";
 
@@ -94,7 +95,9 @@ const loadedThemes = (page) => page.evaluate(() => {
 
 /* What the page shows of the SDK's shells, for the modality verdict
    (FEAT-014 MOD-09): the Conversation (its log and composer), an Adaptive
-   Card part, and AppShell with which of its navigations is showing; and the
+   Card part, and AppShell with which of its navigations is showing and how
+   many destinations it has; whether the page has a main landmark and fits
+   the window (no sideways scroll), for a frame other than AppShell; and the
    screen the page names (data-piq-screen). */
 const pageFacts = (page) => page.evaluate(() => {
   const shown = (e) => !!e && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== "hidden";
@@ -104,7 +107,9 @@ const pageFacts = (page) => page.evaluate(() => {
     screen: document.querySelector("[data-piq-screen]")?.getAttribute("data-piq-screen") || null,
     conversation: !!conv && !!conv.querySelector("[role=log]") && !!conv.querySelector(".piq-composer"),
     adaptiveCard: !!document.querySelector(".piq-adaptive-card:not(.piq-adaptive-card--invalid)"),
-    appShell: shell ? { bar: shown(shell.querySelector(".piq-shell__bar")), side: shown(shell.querySelector(".piq-shell__side")) } : null,
+    appShell: shell ? { bar: shown(shell.querySelector(".piq-shell__bar")), side: shown(shell.querySelector(".piq-shell__side")), nav: Math.max(shell.querySelectorAll(".piq-shell__bar-item").length, shell.querySelectorAll(".piq-shell__side a[href], .piq-shell__side button").length) } : null,
+    main: !!document.querySelector("main, [role=main]"),
+    fits: document.scrollingElement.scrollWidth <= document.documentElement.clientWidth + 1,
   };
 });
 
@@ -156,7 +161,7 @@ async function overlayShot(page, marked, path) {
 /* Audit pages of a running app. Returns the report; writes screenshots
    under out when given. Each page is switched through every width, theme
    and appearance, and inspect() checks each state. */
-export async function audit({ urls, themes, appearances = ["light", "dark"], widths, ignore = [], rules = {}, contrast = true, out = null, wait = null, cwd = process.cwd(), viewport = { width: 1280, height: 900 }, baseline = null, blueprint = null, modalities = null, log = () => {} }) {
+export async function audit({ urls, themes, appearances = ["light", "dark"], widths, ignore = [], rules = {}, contrast = true, out = null, wait = null, cwd = process.cwd(), viewport = { width: 1280, height: 900 }, baseline = null, blueprint = null, modalities = null, sizeClasses = null, log = () => {} }) {
   if (!urls?.length) throw new Error("audit: give at least one URL");
   const sdk = prepare(cwd, { contrast });
   const { manifest, interaction } = sdk;
@@ -169,7 +174,9 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
   const needed = familiesFor(mods.names, blueprint);
   const offByModality = mods.assumed ? [] : Object.keys(RULES).filter((c) => families[c].length && !families[c].some((f) => needed.includes(f)));
   rules = { ...Object.fromEntries(offByModality.map((c) => [c, false])), ...rules };
-  if (!widths?.length && !mods.assumed) widths = expandModalities(mods.names).widths;
+  // Only the size classes the app chose (supports.sizeClasses, else --size-class) are audited.
+  const chosen = Array.isArray(blueprint?.supports?.sizeClasses) && blueprint.supports.sizeClasses.length ? blueprint.supports.sizeClasses : sizeClasses?.length ? sizeClasses : null;
+  if (!widths?.length && !mods.assumed) widths = widthsFor(mods.names, chosen);
   const pages = [];
   const known = new Map(manifest.themes.map((t) => [t.name, t]));
   if (out) mkdirSync(join(out, "screens"), { recursive: true });
@@ -222,7 +229,7 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
       if (widths?.length) { await page.setViewportSize({ width, height: viewport.height }); await settle(page); }
       const seen = await pageFacts(page);
       facts.screen ??= seen.screen;
-      facts.widths.push({ width, conversation: seen.conversation, adaptiveCard: seen.adaptiveCard, appShell: seen.appShell });
+      facts.widths.push({ width, conversation: seen.conversation, adaptiveCard: seen.adaptiveCard, appShell: seen.appShell, main: seen.main, fits: seen.fits });
       for (const theme of wanted.filter((t) => shipped.includes(t))) {
         const aps = (known.get(theme)?.appearances ?? ["light", "dark"]).filter((a) => appearances.includes(a)).sort();
         for (const appearance of aps) {
@@ -260,7 +267,13 @@ export async function audit({ urls, themes, appearances = ["light", "dark"], wid
     await browser.close();
   }
   for (const p of pages) Object.assign(p, pageScreen(p, blueprint));
-  return report({ urls, runs, findings: [...groups.values()], interaction, baseline, modalities: { ...mods, widths: widths?.length ? widths : [viewport.width], ruleFamilies: needed, off: offByModality }, pages, blueprint, rules, contrast, manifest });
+  return report({ urls, runs, findings: [...groups.values()], interaction, baseline, modalities: { ...mods, widths: widths?.length ? widths : [viewport.width], ...(chosen ? { sizeClasses: chosen } : {}), ruleFamilies: needed, off: offByModality }, pages, blueprint, rules, contrast, manifest, versions: packageVersions(cwd) });
+}
+
+/* The @ux-builder packages that wrote the report (US-158-AC1): the audit, and the ui and tokens it read. */
+function packageVersions(cwd) {
+  const v = installed(cwd);
+  return Object.fromEntries([["@ux-builder/audit", VERSION], ["@ux-builder/ui", v.uiUsedByAudit], ["@ux-builder/tokens", v.tokens]].filter(([, x]) => x));
 }
 
 /* A finding's identity across audits, for the baseline (FEAT-008 AUD-03). */
@@ -276,7 +289,7 @@ export function toBaseline(report) {
 
 /* Order and count the findings; mark a colour that is the same in every
    theme as hard-coded. */
-function report({ urls, runs, findings, interaction = null, baseline = null, modalities = null, pages = [], blueprint = null, rules = {}, contrast = true, manifest = null }) {
+function report({ urls, runs, findings, interaction = null, baseline = null, modalities = null, pages = [], blueprint = null, rules = {}, contrast = true, manifest = null, versions = null }) {
   enrich(findings, interaction);
   for (const f of findings) {
     if (f.preview) f.message += ` — in the preview ${f.preview}`;
@@ -319,7 +332,7 @@ function report({ urls, runs, findings, interaction = null, baseline = null, mod
   for (const f of findings) { summary[f.severity]++; summary.byRule[f.check] = (summary.byRule[f.check] ?? 0) + 1; if (f.ruleId) summary.byRuleId[f.ruleId] = (summary.byRuleId[f.ruleId] ?? 0) + 1; }
   const verdicts = {
     theme: themeVerdict({ findings, pages, runs, rules, contrast, manifest }),
-    modality: modalityVerdicts({ modalities, pages, rules, findings, families: checkFamilies(interaction), layout: runs.some((r) => r.width != null) }),
+    modality: modalityVerdicts({ modalities, pages, rules, findings, families: checkFamilies(interaction), layout: runs.some((r) => r.width != null), blueprint }),
   };
-  return { tool: "@ux-builder/audit", version: VERSION, generatedAt: new Date().toISOString(), urls, rules: RULES, ...(modalities ? { modalities } : {}), verdicts, pages, ...(journeys.length ? { journeys } : {}), runs, findings, summary, ...(baseline ? { resolved, ...(ignored.length ? { baselineIgnored: ignored.map((b) => `${b.rule}: no such check in this version; ignored`) } : {}) } : {}) };
+  return { tool: "@ux-builder/audit", version: VERSION, ...(versions ? { versions } : {}), generatedAt: new Date().toISOString(), urls, rules: RULES, ...(modalities ? { modalities } : {}), verdicts, pages, ...(journeys.length ? { journeys } : {}), runs, findings, summary, ...(baseline ? { resolved, ...(ignored.length ? { baselineIgnored: ignored.map((b) => `${b.rule}: no such check in this version; ignored`) } : {}) } : {}) };
 }

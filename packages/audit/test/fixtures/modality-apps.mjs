@@ -56,6 +56,11 @@ export const PAGES = {
   // responsive-web: the clean shell, and one held in a fixed-width frame whose navigation never adapts.
   "/web.html": page(shell(content("Home")), { screen: "home" }),
   "/web-frozen.html": page(`<div style="inline-size:360px;block-size:100vh">${shell(content("Home"), { adapt: "container" })}</div>`, { screen: "home" }),
+  // responsive-web judged by outcome (US-157): AppShell with no navigation items (one destination), a
+  // plain main landmark that fits, and one whose content is wider than a phone.
+  "/web-single.html": page(shell(content("Home"), { nav: [] }), { screen: "home" }),
+  "/web-plain.html": page(`<header style="padding:var(--piq-space-3)">${renderToStaticMarkup(h(Logo))}</header><main>${renderToStaticMarkup(content("Home"))}</main>`, { screen: "home" }),
+  "/web-overflow.html": page(`<main>${renderToStaticMarkup(content("Home"))}<div style="inline-size:900px;block-size:8px"></div></main>`, { screen: "home" }),
   // chat: the full-screen Conversation, and a page without one.
   "/chat.html": page(conversation(MESSAGES), { screen: "assistant" }),
   "/chat-missing.html": page(renderToStaticMarkup(h("div", null, h("header", { style: { padding: "var(--piq-space-3)" } }, h(Logo)), h(Page, { title: "Assistant" }, h(Card, { title: "Ask" }, h("p", null, "Type a question below."))))), { screen: "assistant" }),

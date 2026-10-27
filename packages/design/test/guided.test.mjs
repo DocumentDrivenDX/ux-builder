@@ -34,7 +34,7 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
     assert.deepEqual(o.steps.filter((s) => s.checkpoint).map((s) => [s.n, s.checkpoint]), [[3, "core-1"], [4, "core-2"], [7, "core-3"], [8, "experiment, release"]]);
     const text = cli(a, ["overview"]).stdout;
     assert.match(text, /^Step 1 of 8: Define intent\n {2}You: /m);
-    assert.match(text, /one at a time, asks for your feedback, makes the changes, and moves on only when you approve it/);
+    assert.match(text, /moves on only when you approve it\. The foundations .* come a table per kind, every row in full/);
     assert.match(SKILL, /\*\*In the first session\*\* \(no checkpoint answered, nothing approved yet\),\n {3}start with an overview, before any question: run\n {3}`ux-builder-design overview`/);
   });
 

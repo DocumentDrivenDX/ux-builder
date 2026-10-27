@@ -79,7 +79,7 @@ kind: product
 > Evolved 2026-10-23 with FEAT-018 and ADR-036 to ADR-039 (the operator: a
 > guided process in which an AI agent and a person design the simplest
 > experience that works, from ChatGPT's human–agent UX design proposal): the
-> "Guided design" subsystem (FR-75 to FR-88), P1-13 and its sketch.
+> "Guided design" subsystem (FR-75 to FR-89), P1-13 and its sketch.
 
 ## Summary
 
@@ -733,6 +733,14 @@ rules, so it invents colours and components.
 - **FR-88** — The SDK emits journey events only to a sink the app
   supplies; the guide reads exported production data, diagnoses problems
   and runs experiments behind checkpoints. *(Added 2026-10-23.)*
+- **FR-89** — The guide spends the person's time on decisions: foundations
+  reviewed deliberately and once, what is built from them reviewed as one
+  coverage map of exceptions and changes, approvals kept through changes of
+  metadata and formatting, the intake asked together, claims grounded in
+  their sources, HELIX proposals applied by the tools, a working prototype
+  generated from the chosen design, and the guided session measured against
+  targets (at most 10 approvals before testing, a first prototype within 30
+  active minutes). *(Added 2026-10-27.)*
 
 ## Acceptance Test Sketches
 

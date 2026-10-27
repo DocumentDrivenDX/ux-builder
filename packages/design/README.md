@@ -32,9 +32,11 @@ lists each one's options.
 
 | Stage | Commands |
 |---|---|
-| Follow along | `overview` (the eight steps), `step next`, `explain <term>`, `review` (`show`, `feedback`, `respond`, `approve`): each item is shown inline and approved by the person before moving on |
+| Follow along | `overview` (the eight steps), `step next`, `explain <term>`, `advance --until-decision` (the safe work, then the one decision the person must make next), `metrics` (`turn`, `mark`: the person's time against the targets) |
+| Review | `review` by tier: foundations (brief, users, jobs, stories, rules, decisions) a table per kind (`review table <kind>`, `approve --kind <kind>`); what is built from them as one coverage map (`review map`, `approve map [--accept <exception>]`); records need no approval. `show`, `feedback`, `respond`. An approval holds until the meaning changes, and then shows the diff |
 | Set up | `init [--mcp]`, `status`, `state get [<path>]`, `state set <path> <json>`, `state checkpoint <id> --answer …`, `mode full\|change` |
-| Define | `baseline` (an existing app's first session), `brief`, `evidence add\|list`, `evidence excerpt add`, `validate` |
+| Define | `intake` (the open questions, asked together), `baseline` (an existing app's first session), `brief`, `evidence add\|list`, `evidence excerpt add`, `evidence claim add\|verify` (each claim with its source, basis and confidence), `validate` |
+| HELIX | `proposals [preview]`, `proposals apply --accepted <ids>`: the proposals `ux-builder-blueprint propose` writes, applied all or nothing, a clashing ID renumbered |
 | Explore and decide | `decision add\|status`, `rubric [--alternative <name>]`; alternatives, scores, comparisons and prototypes come from `ux-builder-blueprint` |
 | Build and change | `ready [--for testing\|production]`, `trace <id>`, `impact "<change>" [--apply --set <file>]` |
 | Validate with people | `test-kit`, `observe import <sheet> --kit TK-<n>`, `transcript add <file> --session <id> --consent-confirmed`, `report`, `route <F-id>...` |

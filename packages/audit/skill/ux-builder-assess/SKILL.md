@@ -146,7 +146,9 @@ Run them in this order. Each command writes under `<out>/<run>/` (default
 `docs/ux-builder/assessments/R-<time>/`); pass the same `--run` to every command of one
 assessment.
 
-1. **Context.** `npx ux-builder-audit assess validate`. If there is no
+1. **Context.** `npx ux-builder-audit doctor` first: if it says the installed
+   `@ux-builder` packages are incoherent (exit 1), install versions that agree
+   before assessing. Then `npx ux-builder-audit assess validate`. If there is no
    manifest, `npx ux-builder-audit assess init` proposes one; ask the owner to
    fill its placeholders. Stop on any problem.
 2. **Traceability.** `npx ux-builder-audit assess collect --run <R-id>`, then
@@ -237,6 +239,11 @@ assessment.
    for an audience that needs it. Then `assess report` again, so the report
    links each finding to its moment, and `assess validate-report`. A chapter that stopped means a step
    no longer replays: say which, rather than walking it again silently.
+
+When the run is reported, point the person at one page:
+`docs/ux-builder/reports.html` (`npx ux-builder-audit reports --open`). It
+links this run's report, every earlier run and the latest UI audit, and says
+which is which.
 
 ## Ranking (FND-04)
 

@@ -280,6 +280,33 @@ export function usersTable(app) {
   return out;
 }
 
+/* Evidence claims (GDL-83): each record's ## Claims table, one row per
+   synthesized claim: where it comes from, observed or inferred, the
+   confidence, whether it changes the design's direction, whether the agent
+   checked it against the source itself, what contradicts it and what is
+   unknown. [{ evidence, path, id, claim, source, basis, confidence, direction, verified, contradicting, unknown }]. */
+export const CLAIM_COLUMNS = ["ID", "Claim", "Source", "Basis", "Confidence", "Direction", "Verified", "Contradicting", "Unknown"];
+export function evidenceClaims(app) {
+  const dir = ux(app, "evidence");
+  if (!existsSync(join(app, dir))) return [];
+  return readdirSync(join(app, dir)).filter((f) => /^EV-[1-9][0-9]*\.md$/.test(f)).sort((a, b) => a.localeCompare(b, "en", { numeric: true })).flatMap((f) => {
+    const path = `${dir}/${f}`;
+    return tableRows(parseDocument(readFileSync(join(app, path), "utf8")).body, "Claims").filter((r) => r[0]).map(([id, claim, source, basis, confidence, direction, verified, contradicting, unknown]) => ({
+      evidence: f.replace(/\.md$/, ""), path, id, claim, source: source && source !== "–" ? source : "", basis, confidence, direction: direction === "yes", verified: verified === "yes", contradicting: contradicting && contradicting !== "–" ? contradicting : "", unknown: unknown && unknown !== "–" ? unknown : "",
+    }));
+  });
+}
+/* A claim's problems (it fails validate) and warnings. */
+export function claimChecks(c) {
+  const problems = [], warnings = [];
+  const at = `${c.evidence} ${c.id}`;
+  if (!c.source) problems.push(`${at} has no source: name where it comes from (a file and line, a screen, a quote's time)`);
+  if (!["observed", "inferred"].includes(c.basis)) problems.push(`${at}: basis is observed or inferred, not "${c.basis ?? ""}"`);
+  if (!["high", "medium", "low"].includes(c.confidence)) problems.push(`${at}: confidence is high, medium or low, not "${c.confidence ?? ""}"`);
+  if (c.direction && !c.verified && c.confidence !== "low") warnings.push(`${at} changes the design's direction but was not checked against its source: check it there (evidence claim verify ${c.evidence} ${c.id}) or mark it low confidence; until then it is uncertain`);
+  return { problems, warnings };
+}
+
 /* ux-builder-design validate: every docs/ux document, and what cites the
    jobs (blueprint tasks, decision records). Problems fail it; warnings and
    notes are reported. */
@@ -325,6 +352,11 @@ export function validate(app) {
     const user = users?.[u];
     if (!user) { problems.push({ path: bpFile(app), message: `${t.id} names ${u}, which ${ux(app, "users.md")} does not have` }); continue; }
     if (user.confidence === "low") warnings.push({ path: bpFile(app), message: `${t.id} serves ${u} ("${user.user}"), whose confidence is low` });
+  }
+  for (const c of evidenceClaims(app)) {
+    const r = claimChecks(c);
+    for (const m of r.problems) problems.push({ path: c.path, message: m });
+    for (const m of r.warnings) warnings.push({ path: c.path, message: m });
   }
   for (const c of cites) {
     const job = jobs?.[c.job];

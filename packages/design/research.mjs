@@ -6,7 +6,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { isAbsolute, join, relative } from "node:path";
 import { DesignError, ux, writeInApp } from "./app.mjs";
-import { parseDocument } from "./documents.mjs";
+import { CLAIM_COLUMNS, claimChecks, evidenceClaims, parseDocument } from "./documents.mjs";
 
 export const EVIDENCE_KINDS = ["interview", "analytics", "support", "feedback", "survey", "observation"];
 const docsDir = (app) => ux(app, "evidence");
@@ -58,3 +58,54 @@ export function evidenceList(app) {
   });
   return { evidence };
 }
+
+const cell = (s) => String(s ?? "").replace(/\|/g, "/").replace(/\s+/g, " ").trim() || "–";
+const claimRow = (c) => `| ${[c.id, c.claim, c.source, c.basis, c.confidence, c.direction ? "yes" : "no", c.verified ? "yes" : "no", c.contradicting, c.unknown].map(cell).join(" | ")} |`;
+const evidencePath = (app, id) => {
+  if (!/^EV-[1-9][0-9]*$/.test(id ?? "")) throw new DesignError(`an evidence ID is EV-<n>, not "${id ?? ""}"`);
+  const path = `${docsDir(app)}/${id}.md`;
+  if (!existsSync(join(app, path))) throw new DesignError(`no ${path}; evidence list shows the records`);
+  return path;
+};
+
+/* Rewrite a record's ## Claims table with rows, adding the section before
+   the synthesis notes when it has none. */
+function writeClaims(app, path, rows) {
+  const text = readFileSync(join(app, path), "utf8");
+  const table = ["## Claims", "", `| ${CLAIM_COLUMNS.join(" | ")} |`, `|${CLAIM_COLUMNS.map(() => "---").join("|")}|`, ...rows.map(claimRow), ""].join("\n");
+  const at = text.search(/^## Claims\s*$/m);
+  let out;
+  if (at >= 0) { const rest = text.slice(at).split("\n"); const end = rest.findIndex((l, k) => k > 0 && l.startsWith("## ")); out = text.slice(0, at) + table + "\n" + (end < 0 ? "" : rest.slice(end).join("\n")); }
+  else { const notes = text.search(/^## Synthesis notes\s*$/m); out = notes < 0 ? `${text.trimEnd()}\n\n${table}` : `${text.slice(0, notes)}${table}\n${text.slice(notes)}`; }
+  return writeInApp(app, path, out);
+}
+
+/* ux-builder-design evidence claim add <EV-n> --text --source --basis observed|inferred
+   --confidence high|medium|low [--direction] [--verified] [--contradicts] [--unknown]. */
+export function claimAdd(app, { id, text, source, basis, confidence, direction = false, verified = false, contradicts, unknown } = {}) {
+  const path = evidencePath(app, id);
+  if (!text?.trim()) throw new DesignError("evidence claim add needs --text: the claim, in one sentence");
+  const c = { evidence: id, id: "", claim: text.trim(), source: source?.trim() ?? "", basis, confidence, direction: !!direction, verified: !!verified, contradicting: contradicts ?? "", unknown: unknown ?? "" };
+  const rows = evidenceClaims(app).filter((x) => x.evidence === id);
+  c.id = `C${Math.max(0, ...rows.map((r) => Number(r.id.slice(1)) || 0)) + 1}`;
+  const { problems, warnings } = claimChecks(c);
+  if (problems.length) throw new DesignError(`not recorded: ${problems.join("; ")}`);
+  writeClaims(app, path, [...rows, c]);
+  return { evidence: id, id: c.id, path, warnings };
+}
+
+/* ux-builder-design evidence claim verify <EV-n> <Cn> [--confidence]: the
+   agent checked the claim against its source itself. */
+export function claimVerify(app, { id, claim, confidence } = {}) {
+  const path = evidencePath(app, id);
+  const rows = evidenceClaims(app).filter((x) => x.evidence === id);
+  const c = rows.find((r) => r.id === claim);
+  if (!c) throw new DesignError(`${id} has no claim ${claim ?? ""}; it has ${rows.map((r) => r.id).join(", ") || "none"}`);
+  c.verified = true;
+  if (confidence) { if (!["high", "medium", "low"].includes(confidence)) throw new DesignError(`--confidence is high, medium or low, not "${confidence}"`); c.confidence = confidence; }
+  writeClaims(app, path, rows);
+  return { evidence: id, id: c.id, verified: true, confidence: c.confidence };
+}
+
+/* Direction-changing claims not yet checked against their source, and not marked low confidence. */
+export const unverifiedClaims = (app) => evidenceClaims(app).filter((c) => claimChecks(c).warnings.length).map((c) => ({ evidence: c.evidence, id: c.id, claim: c.claim, source: c.source }));

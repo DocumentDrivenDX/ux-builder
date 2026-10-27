@@ -84,7 +84,8 @@ export async function auditOptions() {
   const src = read("packages/audit/cli.mjs");
   const { RULES } = await import(pathToFileURL(join(REPO, "packages/audit/audit.mjs")).href);
   return {
-    options: headerOptions(src), parsed: parseArgsOptions(src),
+    // The main parseArgs, after the subcommands' own (reports, doctor).
+    options: headerOptions(src), parsed: parseArgsOptions(src, src.indexOf('import { parseArgs } from "node:util"')),
     synopsis: run("packages/audit/cli.mjs", ["--help"]).split("\n")[0].trim(),
     checks: Object.entries(RULES).map(([id, text]) => ({ id, text })),
   };
@@ -202,6 +203,7 @@ export const NOTES = {
   "@ux-builder/ui ./eslint": "The ESLint plugin: no hard-coded values in JSX, and the AI voice rules",
   "@ux-builder/ui ./blueprint": "checkBlueprint, the interaction rules and the blueprint schema",
   "@ux-builder/ui ./blueprint/modalities": "The app modalities: each one's size classes, inputs, AI roles, components, rule families and audit widths",
+  "@ux-builder/ui ./blueprint/model": "A blueprint's screens, journey walks and state models, for tools that generate from it (screensOf, walkJourney, stateModels)",
   "@ux-builder/ui ./blueprint/paths": "Where an app's design work lives: the docs/ux-builder/ layout and the old one, layoutOf, alternativeFile and the write fence (FEAT-018)",
   "@ux-builder/ui ./blueprint/prototype": "Exploratory prototypes of a blueprint: writePrototype, prototypePages, archivePrototype and themeFor (FEAT-018)",
   "@ux-builder/ui ./blueprint/propose": "HELIX proposals drafted from a blueprint as patches: propose and writeProposals",
@@ -211,6 +213,8 @@ export const NOTES = {
   "@ux-builder/ui ./package.json": "The package's own metadata",
   "@ux-builder/audit .": "audit(): drive a running app through every theme and appearance and report what is off-theme",
   "@ux-builder/audit ./report": "Write the audit's HTML, Markdown and JSON reports",
+  "@ux-builder/audit ./reports": "landingPage(): the one page beside the design that lists the UI audit and every assessment run",
+  "@ux-builder/audit ./doctor": "doctor(): the installed @ux-builder versions, and any range another package or the app wants that they do not meet",
   "@ux-builder/audit ./schema/*": "The JSON Schemas of the audit report and the assessment's records",
   "@ux-builder/audit ./skill/*": "The ux-builder-assess skill: how an agent runs a UX assessment",
   "@ux-builder/audit ./assess/*": "The assessment's operations, as ux-builder-audit assess runs them",

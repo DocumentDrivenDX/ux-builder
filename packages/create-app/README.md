@@ -32,7 +32,28 @@ exists, and records the build in the design state. It writes nothing, and says
 why, when the modality is not recorded, a `--modality` given differs from it,
 `--blueprint` is given, the blueprint has an error, or a file it did not write
 is in the way. Without `--theme` it asks in a terminal and exits 1 listing the
-themes without one. `--theme` without `--modality` in an empty folder exits 1:
+themes without one.
+
+A starter HELIX document is written only where the design has none: one whose
+`ddx.id` (under any file name) or role (a feature spec, a story, a story test
+plan) the design already has is left out, and the build lists each one left
+out and why; the starter's test then cites none of the design's criteria.
+
+When the blueprint has journeys, the app opens on them rather than on an empty
+Home (`journey-app.mjs`): a route per screen in `src/screens/`, each with its
+title, purpose and content in the blueprint's order and sample data made from
+the blueprint (no network); the journeys' actions lead from step to step; the
+blueprint's dialogs and sheets open; each screen has its loading, empty, error
+(with a retry that recovers) and other states, and a warning, and a `blocked`
+state, where a task or step cites a business rule. `?state=<name>` forces a
+state on any screen; the prototype toolbar (`npm run dev`, or `?prototype`)
+forces one too, walks a journey and resets the sample data (kept in
+`localStorage`). `e2e/journeys.spec.js` walks each journey, and the assessment
+manifest names the blueprint's journeys. Each generated file starts with a
+header naming the blueprint and its hash; after changing the blueprint,
+`npm run prototype` (`npx @ux-builder/create-app --prototype .`) writes them
+again, except a file edited by hand or not written by it, which it leaves and
+lists. `--theme` without `--modality` in an empty folder exits 1:
 the theme is chosen at the build.
 
 ## The app at once

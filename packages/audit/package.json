@@ -10,6 +10,8 @@
   "exports": {
     ".": "./audit.mjs",
     "./report": "./report.mjs",
+    "./reports": "./reports.mjs",
+    "./doctor": "./doctor.mjs",
     "./package.json": "./package.json",
     "./schema/*": "./schema/*",
     "./skill/*": "./skill/*",
@@ -27,6 +29,8 @@
     "collect.js",
     "serve.mjs",
     "report.mjs",
+    "reports.mjs",
+    "doctor.mjs",
     "trace.mjs",
     "README.md",
     "THIRD-PARTY-NOTICES.md"

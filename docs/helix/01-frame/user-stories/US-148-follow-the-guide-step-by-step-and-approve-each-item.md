@@ -43,7 +43,7 @@ The guide writes its work to files, which a person can easily never open: the re
 - [ ] **US-148-AC4** — Given an app with target users, jobs, tasks and a decision, when `review` runs, then it lists every item not yet approved in its current form, in step order, each with its ID and step; and `review show <item>` prints the item's content to present inline.
 - [ ] **US-148-AC5** — Given an item, when `review feedback <item> --text` records feedback, then `review approve <item>` refuses until `review respond <FB-n>` records how it was addressed; an approval records the person's words and the item's content, and an item changed after approval is listed for review again.
 - [ ] **US-148-AC6** — Given items of steps 1 to 3 awaiting review, when `state checkpoint core-1 --answer` runs, then it exits 2 naming them and records nothing; likewise core-2 for step 4, core-3 for steps 5 to 7, and `step next` for the current step.
-- [ ] **US-148-AC7** — Given the skill, when it is read, then it tells the agent to present each item inline in the conversation, one at a time, collect and address the person's feedback, and get explicit approval before showing the next, and to say which step the person is on at each step.
+- [ ] **US-148-AC7** — Given the skill, when it is read, then it tells the agent to present each foundation kind inline in the conversation as a table, every row in full, collect and address the person's feedback, and get explicit approval before the next kind (built items as the coverage map, GDL-83), and to say which step the person is on at each step. *(Amended 2026-10-27, GDL-83: one at a time became a table per kind.)*
 
 ## Edge Cases
 
@@ -60,7 +60,7 @@ The guide writes its work to files, which a person can easily never open: the re
 | AC4 | US-148-AC4 | users, jobs, tasks, a decision | `review`, `review show` | the unapproved items in step order; inline content |
 | AC5 | US-148-AC5 | an item with feedback | `approve`, `respond`, change | refused until addressed; changed item listed again |
 | AC6 | US-148-AC6 | items awaiting review | checkpoint, `step next` | exit 2 naming them |
-| AC7 | US-148-AC7 | the skill | read | inline, one at a time, feedback, approval, step n of 8 |
+| AC7 | US-148-AC7 | the skill | read | inline, a table per kind, feedback, approval, step n of 8 |
 
 ## Dependencies
 

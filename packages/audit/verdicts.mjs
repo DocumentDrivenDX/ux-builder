@@ -10,7 +10,10 @@
      system, whether every component is the SDK's, and contrast per
      appearance, each failure with its theme.* rule;
    - modalityVerdicts: per modality, the SDK components it needs (present or
-     not) and the rule families it needs (checked or not), with the fixes. */
+     not) and the rule families it needs (checked or not), with the fixes;
+     responsive-web judged by outcome (US-157): each page framed by AppShell
+     or by a main landmark that fits every audited width, and navigation,
+     where there is any, adapting at the size classes the app chose. */
 
 import { MODALITIES, expandModalities } from "@ux-builder/ui/blueprint/modalities";
 
@@ -92,40 +95,76 @@ const NEEDS = {
   ],
 };
 
-/* Does AppShell's navigation adapt on the audited pages? true, false, or
-   null when the audit did not see both a compact and an expanded width. */
-function adapts(pages) {
-  const shells = pages.map((p) => p.widths.filter((w) => w.appShell)).filter((ws) => ws.length);
-  let seenBoth = false;
-  for (const ws of shells) {
-    const narrow = ws.filter((w) => w.width < 600), wide = ws.filter((w) => w.width >= 840);
-    if (!narrow.length || !wide.length) continue;
-    seenBoth = true;
-    if (narrow.every((w) => w.appShell.bar && !w.appShell.side) && wide.every((w) => w.appShell.side && !w.appShell.bar)) return true;
+const ALL_SIZES = ["compact", "medium", "expanded", "large"];
+const hasNav = (w) => !!w.appShell && w.appShell.nav !== 0;
+
+/* Does AppShell's navigation adapt on the audited pages, at the size classes
+   chosen: the bottom bar when compact, the side navigation from expanded?
+   true, false, or null when the audit saw none of the widths it needs. */
+function adapts(pages, classes = ALL_SIZES) {
+  const narrowWanted = classes.includes("compact"), wideWanted = classes.some((c) => c === "expanded" || c === "large");
+  let seen = false;
+  for (const ws of pages.map((p) => p.widths.filter(hasNav)).filter((ws) => ws.length)) {
+    const narrow = narrowWanted ? ws.filter((w) => w.width < 600) : [], wide = wideWanted ? ws.filter((w) => w.width >= 840) : [];
+    if ((narrowWanted && !narrow.length) || (wideWanted && !wide.length) || (!narrow.length && !wide.length)) continue;
+    seen = true;
+    if (!narrow.every((w) => w.appShell.bar && !w.appShell.side) || !wide.every((w) => w.appShell.side && !w.appShell.bar)) return false;
   }
-  return seenBoth ? false : null;
+  return seen ? true : null;
+}
+
+/* Each page's frame (US-157-AC1): AppShell, or a main landmark whose content
+   fits (no sideways scroll, no reflow finding) at every audited width. */
+function frameOf(p, findings) {
+  if (p.widths.some((w) => w.appShell)) return { url: p.url, frame: "AppShell" };
+  if (!p.widths.length || !p.widths.every((w) => w.main)) return { url: p.url, frame: null, main: false };
+  const reflowAt = (width) => findings.some((f) => f.check === "reflow" && f.url === p.url && f.severity !== "info" && (f.runs ?? []).some((r) => r.endsWith(`@${width}`)));
+  const over = p.widths.filter((w) => w.fits === false || reflowAt(w.width)).map((w) => w.width);
+  return over.length ? { url: p.url, frame: null, main: true, overflows: over } : { url: p.url, frame: "main" };
 }
 
 /* The modality-fit verdicts (FEAT-014 MOD-09; CONTRACT-004 verdicts.modality). */
-export function modalityVerdicts({ modalities = null, pages = [], rules = {}, findings = [], families = {}, layout = null }) {
+export function modalityVerdicts({ modalities = null, pages = [], rules = {}, findings = [], families = {}, layout = null, blueprint = null }) {
   if (!modalities) return [];
   const sized = layout ?? (modalities.widths ?? []).length > 1;
   const LAYOUT = new Set(["reflow", "target-size", "focus-obscured", "nav-per-breakpoint", "card-narrow-first"]);
   const ran = (c) => rules[c] !== false && (!LAYOUT.has(c) || sized);
   return modalities.names.filter((m) => MODALITIES[m]).map((modality) => {
     const fixes = [], evidence = [];
+    const sizes = modalities.sizeClasses?.length ? modalities.sizeClasses : ALL_SIZES;
+    // responsive-web by outcome: a frame on every page; navigation, where there is any, adapts (US-157).
+    const frame = (n) => {
+      const frames = pages.map((p) => frameOf(p, findings));
+      const present = frames.some((f) => f.frame === "AppShell");
+      const c = { name: n.name, present, required: true };
+      for (const f of frames) {
+        if (f.frame === "AppShell") evidence.push(`${n.name} on ${f.url}`);
+        else if (f.frame === "main") evidence.push(`${f.url}: no ${n.name}; its main landmark frames the page and the content fits at ${pages.find((p) => p.url === f.url).widths.map((w) => `${w.width}px`).join(", ")}`);
+        else if (f.main) fixes.push(`${f.url}: content overflows at ${f.overflows.map((w) => `${w}px`).join(", ")}: let it wrap at narrow widths (no fixed width wider than the window; wide tables or code scroll in a region of their own), or build the page in the SDK's AppShell.`);
+        else fixes.push(`${n.name} is missing on ${f.url}, and no main landmark frames the page instead: ${n.fix} Or give the page a main landmark whose content fits every audited width.`);
+      }
+      if (!pages.length) { evidence.push(`${n.name} on none of the 0 audited pages`); fixes.push(`${n.name} is missing: ${n.fix}`); }
+      if (!present && frames.length && frames.every((f) => f.frame === "main")) { c.required = false; c.alternative = "main"; }
+      c.framed = frames.length > 0 && frames.every((f) => f.frame);
+      const single = Array.isArray(blueprint?.destinations) && blueprint.destinations.length <= 1;
+      c.navigation = !single && pages.some((p) => p.widths.some(hasNav));
+      if (c.navigation) {
+        c.adapts = adapts(pages, sizes);
+        const want = [sizes.includes("compact") && "compact (390 px)", sizes.some((x) => x === "expanded" || x === "large") && "expanded (1280 px)"].filter(Boolean);
+        if (c.adapts === false) fixes.push("Navigation exists, and AppShell's navigation does not adapt by size class: the bottom bar shows when compact (under 600 px) and the side navigation from expanded (840 px); do not hold it in a fixed-width frame or restyle it.");
+        if (c.adapts === null && want.length) fixes.push(`Navigation exists but was not checked at ${want.join(" and ")}; audit with --modality or --blueprint.`);
+        if (c.adapts === null && !want.length) delete c.adapts;
+      } else if (present) evidence.push(single ? "One top-level destination: no navigation to adapt" : "AppShell shows no navigation items: no navigation to adapt");
+      for (const p of pages) for (const w of p.widths) if (w.appShell && c.navigation) evidence.push(`${p.url} at ${w.width}px: ${w.appShell.bar ? "bottom bar" : ""}${w.appShell.bar && w.appShell.side ? " and " : ""}${w.appShell.side ? "side navigation" : ""}${!w.appShell.bar && !w.appShell.side ? "no navigation shown" : ""}`);
+      return c;
+    };
     const components = NEEDS[modality].map((n) => {
-      const present = n.name === "AppShell" ? pages.some((p) => p.widths.some((w) => w.appShell)) : n.name === "Conversation" ? pages.some((p) => p.widths.some((w) => w.conversation)) : pages.some((p) => p.widths.some((w) => w.adaptiveCard));
+      if (n.name === "AppShell") return frame(n);
+      const where = pages.filter((p) => p.widths.some((w) => (n.name === "Conversation" ? w.conversation : w.adaptiveCard))).map((p) => p.url);
+      const present = where.length > 0;
       const c = { name: n.name, present, required: n.required };
-      const where = pages.filter((p) => p.widths.some((w) => (n.name === "AppShell" ? w.appShell : n.name === "Conversation" ? w.conversation : w.adaptiveCard))).map((p) => p.url);
       evidence.push(present ? `${n.name} on ${where.join(", ")}` : `${n.name} on none of the ${pages.length} audited page${pages.length === 1 ? "" : "s"}`);
       if (!present) fixes.push(`${n.name} is missing: ${n.fix}`);
-      if (n.name === "AppShell" && present) {
-        c.adapts = adapts(pages);
-        if (c.adapts === false) fixes.push("AppShell's navigation does not adapt by size class: the bottom bar shows when compact (under 600 px) and the side navigation from expanded (840 px); do not hold it in a fixed-width frame or restyle it.");
-        if (c.adapts === null) fixes.push("AppShell's navigation was not checked at a compact and an expanded width; audit with --modality or --blueprint (390, 768 and 1280 px).");
-        for (const p of pages) for (const w of p.widths) if (w.appShell) evidence.push(`${p.url} at ${w.width}px: ${w.appShell.bar ? "bottom bar" : ""}${w.appShell.bar && w.appShell.side ? " and " : ""}${w.appShell.side ? "side navigation" : ""}${!w.appShell.bar && !w.appShell.side ? "no navigation shown" : ""}`);
-      }
       return c;
     });
     const ruleFamilies = expandModalities([modality]).ruleFamilies.map((family) => {
@@ -135,8 +174,8 @@ export function modalityVerdicts({ modalities = null, pages = [], rules = {}, fi
       if (!on.length) fixes.push(`The ${family}.* rules were not checked (${checks.join(", ")} ${checks.length === 1 ? "is" : "are"} off${checks.some((c) => LAYOUT.has(c)) && !sized ? " or need several widths" : ""}); audit without --off for ${checks.length === 1 ? "it" : "them"}${checks.some((c) => LAYOUT.has(c)) && !sized ? ", with --modality or --blueprint" : ""}.`);
       return { family, checked: on.length > 0, checks: on };
     });
-    const required = components.filter((c) => c.required && !c.present);
-    const soft = components.some((c) => (!c.required && !c.present) || c.adapts === false || c.adapts === null) || ruleFamilies.some((f) => f.checked === false);
+    const required = components.filter((c) => (c.framed ?? c.present) === false && c.required !== false);
+    const soft = components.some((c) => (!c.required && !c.present && !c.alternative) || c.adapts === false || c.adapts === null) || ruleFamilies.some((f) => f.checked === false);
     const fams = new Set(expandModalities([modality]).ruleFamilies);
     const related = findings.filter((f) => f.severity !== "info" && (families[f.check] ?? []).some((x) => fams.has(x) && x !== "theme")).map((f) => f.id);
     return { modality, status: required.length ? "fail" : soft ? "warn" : "pass", ...(modalities.assumed ? { assumed: true, note: "No blueprint modalities and no --modality: responsive-web was assumed." } : {}), components, ruleFamilies, fixes, evidence, findings: related };

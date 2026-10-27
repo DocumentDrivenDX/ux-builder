@@ -91,7 +91,7 @@ catalogue without reading the SDK's source.
 | | `eslint`, `stylelint` | Lint plugins |
 | | `catalogue.json`, `AGENTS.md`, `skill/ux-builder-ui/` | Generated agent guidance (SDK-12, SDK-13) |
 | `@ux-builder/audit` | bin `ux-builder-audit`; `.` (`audit`, `RULES`, `VERSION`); `report` (`writeReports`, `html`, `summaryText`) | SDK-18 |
-| `@ux-builder/create-app` | `npm create @ux-builder/app <dir> -- [--theme <name>] [--name <pkg>]` (*[Amended 2026-10-24 — FEAT-018 GDL-81, US-150]* without `--modality`, a design folder; in a design folder, the app built in place: CONTRACT-008 Design first) | SDK-08 |
+| `@ux-builder/create-app` | `npm create @ux-builder/app <dir> -- [--theme <name>] [--name <pkg>]` (*[Amended 2026-10-24 — FEAT-018 GDL-81, US-150]* without `--modality`, a design folder; in a design folder, the app built in place: CONTRACT-008 Design first; *[Amended 2026-10-27 — GDL-83, US-159]* `--prototype [dir]` regenerates the journey skeleton from the blueprint, leaving files edited by hand) | SDK-08 |
 | `@ux-builder/mcp` | bin over stdio (`npx @ux-builder/mcp`) | SDK-14 |
 
 An app MUST NOT import any other path: files outside `exports` are not part
@@ -154,6 +154,7 @@ relative to the first full URL.
 | `--off <check>` | repeatable, a check name below | none |
 | `--no-contrast` | flag | contrast on |
 | `--out <dir>` | path | `audit-report` (*Amended 2026-10-26 — FEAT-018 GDL-82* `docs/ux-builder/audit-report` in an app with `docs/ux-builder/` that does not keep its assessment manifest at its top) |
+| `--size-classes <list>` *(2026-10-27, US-157)* | `compact`, `medium`, `expanded`, `large` | the blueprint's `supports.sizeClasses`, which wins; only the chosen classes' widths are audited (unknown: exit 2) |
 | `--fail-on <error\|warning\|never>` | enum | `error` |
 | `--json` | flag | summary text |
 
@@ -170,6 +171,27 @@ Checks: `token-colors`, `token-fonts`, `token-radii`, `token-overrides`,
 
 Outputs in `--out`: `report.json`, `index.html` (self-contained) and
 `screens/<page>-<theme>-<appearance>.png`.
+
+*[Amended 2026-10-27 — FEAT-018 GDL-83, US-157, US-158]*
+- `report.json` gains `versions` (the `@ux-builder/audit`, `ui` and
+  `tokens` versions that wrote it) and `modalities.sizeClasses`. In the
+  responsive-web verdict, the `AppShell` component carries `framed`,
+  `navigation`, `alternative: "main"` (`required: false`), and `adapts`
+  only when there is navigation (FEAT-014 MOD-09, by outcome).
+- Writing the report rewrites the app's **report page**,
+  `docs/ux-builder/reports.html` (`reports.html` at the top of an app on the
+  old layout; none outside an app): what the UI audit and the usability
+  assessment each are, the latest audit (date, themes, pass, warn and fail
+  checks, a link), each assessment run newest first (journeys, steps,
+  findings, a link), the latest run's journeys step by step with
+  thumbnails, and the versions that wrote each. The CLI prints "All
+  reports: <path>".
+- `ux-builder-audit reports [--open] [<app>]` rewrites the page and prints
+  its path; `--open` opens it.
+- `ux-builder-audit doctor [--json] [<app>]` lists the installed
+  `@ux-builder/*` versions and each dependency or peer range on another
+  `@ux-builder` package, or the app's own range, the installed version does
+  not meet. Exit 1 when they disagree, 0 when they agree.
 
 `report.json`:
 

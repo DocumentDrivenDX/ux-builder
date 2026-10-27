@@ -91,6 +91,8 @@ describes each command's `--json` under the function's name, except
 | `brief [--name <product>]` | Writes the experience brief from the PRD, stories and state, in seven sections: Product, Target users, Primary outcome, Primary jobs, Experience principles, Constraints, Open questions; each point marked with its status, and each hypothesis with what would confirm it. Principles a check can express go to `.ux-builder/principles.json`, which `ux-builder-blueprint check` applies as project rules | `docs/ux-builder/brief.md`, `docs/ux-builder/brief.html`, `.ux-builder/principles.json` |
 | `evidence add <file> --kind <kind> [--date] [--source] [--title]` | Records a research source and its masked excerpts | `docs/ux-builder/evidence/EV-<n>.md` |
 | `evidence list` | Lists sources | nothing |
+| `evidence claim add <EV-n> --text <claim> --source <where> --basis observed\|inferred --confidence high\|medium\|low [--direction] [--verified] [--contradicts <t>] [--unknown <t>]` | Adds a row `C<n>` to the record's `## Claims` table (before the synthesis notes): ID, Claim, Source, Basis, Confidence, Direction, Verified, Contradicting, Unknown. Refused (exit 2) without a source, a basis or a confidence (GDL-83) | that record |
+| `evidence claim verify <EV-n> <Cn> [--confidence <c>]` | Marks the claim checked against its source by the agent itself | that record |
 | `evidence excerpt add <EV-n> --participant <name or Pn> --text <quote> [--at <time>] [--role <r>]` | Adds one quote the synthesis cites to the record's Excerpts, masked, by pseudonym (a name gets the lowest free one, kept in `.ux-builder/participants.local.json`), and lists the participant | that record |
 | `decision add --question <q> --option <o>... --choice <o> --why <text> [--assumption <a>]... [--validation <v>] [--link <HELIX ID>]...` | Writes an interaction decision record, status `not-tested`, and a trace `decision` event carrying its `UXD-` ID | `docs/ux-builder/decisions/UXD-<n>.md`, the trace |
 | `decision status <UXD-n> tested\|refuted [--evidence <id>]` | Updates a decision's validation status | that record |
@@ -111,11 +113,18 @@ describes each command's `--json` under the function's name, except
 | `overview` | The eight steps (1 Define intent, 2 Understand users, 3 Model tasks, 4 Explore alternatives, 5 Design the structure, 6 Prototype, 7 Test with people, 8 Refine and improve), each with what the person does, what comes out, its terms and the checkpoint closing it; and change mode's four steps | nothing |
 | `step next\|<n>` | Moves the loop to the next (or the given) step of its mode, setting the activity; `next` refuses while items of the current step await review, and in the full loop neither form moves past a step that `core-1`, `core-2` or `core-3` closes until it has passed or been skipped (exit 2) | the state's `step` |
 | `explain [<term> \| <ID> \| ids] [--step <n>]` | What a term means and why it is valuable, from `glossary.json`; an ID (`U-1`, `J-find`, `BR-2`…) says what kind of thing it names and where it lives, with its term; `ids` lists every kind of ID; with `--step`, the terms that step introduces; with neither, every term. An unknown term exits 2 listing the known ones | nothing |
-| `review [list]` | Every item not approved in its current form, in step order: `user:U-n`, `job:J-n`, `evidence:EV-n`, `brief`, `story:US-n` (stories the blueprint's journeys cite), `task:T-n`, `rule:BR-n`, `journey:J-x`, `alternative:<name>`, `decision:UXD-n`, `screen:<id>`, `kit:TK-n`, `report:UER-n`, `insight:INS-date`, `experiment:EXP-n` | nothing |
-| `review show <item>` | The item's content, to present inline in the conversation | nothing |
+| `review [list]` | What awaits review, by tier (GDL-83): foundations (`brief`, `user:U-n`, `job:J-n`, `story:US-n` for stories the blueprint's journeys cite, `rule:BR-n`, `decision:UXD-n`), reviewed a table per kind; built items (`task:T-n`, `journey:J-x`, `alternative:<name>`, `screen:<id>`, `kit:TK-n`), reviewed as the coverage map; records (`evidence:EV-n`, `report:UER-n`, `insight:INS-date`, `experiment:EXP-n`) need no approval and hold no checkpoint. An item is pending when its meaning (its content without frontmatter, formatting made one form) differs from the one approved; a changed item carries the diff | nothing |
+| `review table <kind>` | Every item of a foundation kind, each with its status and, when its meaning changed since approved, the diff; a built or record kind exits 2 | nothing |
+| `review map` | The coverage map: each job with the tasks that serve it, their journeys and the screens they walk; the exceptions (`gap:J-n` a job nothing serves, `untraced:task:…`, `untraced:journey:…`, `untraced:screen:…`, `undefined:BR-n`, `assumption:A-n` not seen at the last map approval); the built items it would approve, and those changed with their diffs | nothing |
+| `review show <item>` | The item's content, to present inline in the conversation, and the diff when it changed since approved | nothing |
 | `review feedback <item> --text <their words>` | Records the person's feedback, `FB-<n>`, open | the state's `feedback[]` |
 | `review respond <FB-n> --text <what changed>` | Records how the feedback was addressed | that entry |
-| `review approve <item> --answer <their words>` | Records the approval with the item's content hash; refused (exit 2) while the item has open feedback | the state's `reviews[]` |
+| `review approve (<item>... \| --kind <kind> \| map [--accept <exception>]...) --answer <their words>` | Records the approval of the items, of a foundation kind's pending items (`via: table`), or of every built item awaiting review (`via: map`), each with its meaning's hash, its whole content's hash and the meaning approved; refused (exit 2) while an item has open feedback, or for the map while an exception is neither fixed nor accepted | the state's `reviews[]`; an `approval` event |
+| `intake` | The intake questions (product, users, outcome, jobs, constraints, sources) the app's sources (the brief, HELIX's PRD, the users and jobs tables, evidence, `src/`) do not answer, to ask together; those they answer, to confirm; and the budget | nothing |
+| `advance --until-decision` | Checks the documents, keeps approvals through formatting changes, works out the coverage map, finds unverified claims and pending proposals; lists the agent's own work first; then the one decision the person must make next (intake, a foundation table, the map, a checkpoint, the modality, proposals) with what to show, a recommendation, the command that records it and what follows; and the budget. Records nothing | nothing |
+| `metrics [turn --kind <kind> [--text <note>] \| mark <milestone>]` | The summary of `.ux-builder/metrics.jsonl` against the targets (at most 10 approvals before testing, at least 80% of turns `answer`, `decision`, `approval` or `correction`, no approval reopened by formatting, a first prototype within 30 active minutes, gaps over 10 minutes idle); `turn` records a human turn (`answer`, `decision`, `approval`, `correction`, `question`, `other`), `mark` a milestone (`prototype`, `testing`, `release`) | `.ux-builder/metrics.jsonl` |
+| `proposals [preview]` | Every pending HELIX proposal in `helix-proposals/` in one line: what it creates or changes, an ID HELIX already uses and what it becomes, and a patch that no longer applies | nothing |
+| `proposals apply --accepted <ids> [--dry-run]` | Applies the accepted proposals all or nothing: each patch and draft checked first (applies, frontmatter parses, `ddx.id` well formed); a new document whose `ddx.id` another document holds renumbered to the next free ID, its file renamed and every reference in the accepted set rewritten; on a failure nothing written, and a failed write restores what was there. Applied proposals move to `helix-proposals/applied/` | HELIX documents under the HELIX root; `proposals.json` |
 
 Exit codes: 0 done; 1 a check failed or a finding at error severity; 2 bad
 input or a refusal (named on stderr).
@@ -184,6 +193,34 @@ writes HELIX's starter documents where none exists and wires HELIX, sets
 the state's `app`, and traces the create episode. `status` in a design
 folder says the app is not built and what the build needs.
 
+*[Amended 2026-10-27 — FEAT-018 GDL-83, US-156, US-159]*
+- **Starter documents kept apart.** A starter HELIX document is not
+  written when the design's HELIX already has a document with its `ddx.id`
+  (under any file name), one of its type or role (`FEAT-n`, `US-n`,
+  `STP-n`, `TP-n`), or a file at its path; the starter US-001 follows a
+  skipped FEAT-001 and STP-001 a skipped US-001. The result lists each
+  skipped document as `{ id, type, path, why }`.
+- **A working journey skeleton.** When the blueprint is an app with
+  screens and journeys and its modalities include `responsive-web`, the
+  build generates `src/App.jsx` (a route per screen, History API),
+  `src/journey/blueprint.js`, `src/journey/runtime.jsx`,
+  `src/screens/<Id>Screen.jsx` and `e2e/journeys.spec.js`: each screen's
+  title, purpose and content in order with deterministic sample data, the
+  journeys' actions leading step to step (a step with no action gets
+  "Continue to <screen>"), the dialogs, the loading, empty, error, recovery
+  and blocked states, `?state=<name>` to force one, business-rule warnings
+  where a task or step cites a rule, and a prototype toolbar (in dev, or
+  with `?prototype`) that resets the sample data. Every generated file
+  starts with `// @generated by @ux-builder/create-app from <blueprint>`
+  and `// blueprint sha256:<hex> content sha256:<hex>`. The starter's
+  `Home.jsx` and its test are removed; the app gets `npm run prototype`.
+  The assessment manifest lists the blueprint's journeys. Otherwise the
+  starter's shell is kept.
+- **Regenerating.** `npx @ux-builder/create-app --prototype [dir]`
+  rewrites the generated files whose content hash still matches their
+  header, removes an unedited screen file whose screen left the blueprint,
+  and leaves and lists the files edited by hand.
+
 ### Design state
 
 `.ux-builder/design-state.json`, committed (ADR-036 rule 6), schema
@@ -211,7 +248,7 @@ folder says the app is not built and what the build needs.
 | `app` | `{ builtAt, theme, modalities[], by }` | In a design folder, the app's build in place (GDL-81); absent until then |
 | `modeReason` | string | Why the mode was set (`mode --why`) |
 | `step` | integer | The step of the current mode the person is on (0: an existing app's baseline) |
-| `reviews[]` | `{ item, hash, answer, at }` | Approvals: the person's words and the content approved; an item whose content changes needs approving again |
+| `reviews[]` | `{ item, hash, raw?, snapshot?, via?, answer, at }`; the map's approval `{ item: "map", hash, answer, at, accepted, assumptions }` | Approvals: the person's words, the hash of the meaning approved (GDL-83: no frontmatter, formatting made one form), the whole content's hash and the meaning itself, so a change of meaning shows as a diff; a change of metadata or formatting keeps the approval. An approval recorded before GDL-83 hashed the whole content and still holds while it matches |
 | `feedback[]` | `{ id: "FB-<n>", item, text, status: open\|addressed, response?, at }` | The person's feedback on an item, and how it was addressed |
 | `next` | string | The next action the guide proposes |
 
@@ -389,6 +426,9 @@ interaction decision record carries `ux: "UXD-<n>"`.
 | `experiment start` without a passed `experiment` checkpoint | Exit 2, refusal |
 | A checkpoint answered while items of the steps it closes await review (`core-1`: steps 1 to 3; `core-2`: step 4; `core-3`: steps 5 to 7; `experiment`, `release`: step 8), or `step next` while the current step's items await review, or `step` past a step an unpassed core checkpoint closes | Exit 2 naming the items; nothing recorded (a skip with a reason still records) |
 | `review approve` with open feedback on the item | Exit 2 naming the feedback |
+| `review approve map` while an exception is neither fixed nor accepted | Exit 2 naming each exception; nothing recorded |
+| `proposals apply` when any accepted proposal fails its check | Exit 2 naming each problem; nothing written |
+| `validate` on a claim with no source, basis or confidence | A problem (exit 1); a direction-changing claim neither verified nor low confidence is a warning |
 | `diagnose` with fewer than two explanations, or an unknown alternative | Exit 2; nothing written |
 
 ## Validation Checklist

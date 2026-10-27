@@ -402,6 +402,10 @@ and lists the videos in `evidence.json`.
 
 Normative from `@ux-builder/audit` 0.3.0, which shipped FEAT-015.
 
+- *[Amended 2026-10-27 — FEAT-018 GDL-83, US-158]* `assess report` also
+  rewrites the app's report page (CONTRACT-004, `reports.html`) and prints
+  "All reports: <path>"; the page is the tool's own output, so
+  `checkWrites` ignores it.
 - `assess report` orders `report.md` and `report.html` journey → state → step
   → finding. Each finding has its rule ID and full statement (or heuristic and
   source), evidence, severity 0 to 4 and fix. Findings at no step go under the
