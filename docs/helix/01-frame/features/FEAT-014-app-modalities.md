@@ -137,6 +137,16 @@ modality, with the evidence.
 - **Rules:** the rule families the modality needs were checked.
 - **Missing pieces:** each missing component or rule family is named, with
   the fix.
+- *[Amended 2026-10-27 — FEAT-018 GDL-83, US-157]* **By outcome.**
+  `responsive-web` is judged by what the app does: each audited page is
+  framed (by `AppShell`, or by a `main` landmark) and fits with no
+  horizontal overflow; navigation adapts by size class only where there is
+  navigation (an `AppShell` with nav items in a blueprint with more than one
+  destination). An `AppShell` with no navigation, or an app with one
+  destination, passes. Only the size classes the app chose (the blueprint's
+  `supports.sizeClasses`, else `--size-classes`) are audited, and one not
+  chosen is never reported as unchecked. A failure names the outcome
+  ("content overflows at 390px").
 
 MOD-10. The audit gives a **theme verdict**, with the evidence:
 - the theme the app declares is applied;

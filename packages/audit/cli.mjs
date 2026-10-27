@@ -4,6 +4,10 @@
 
      npx ux-builder-audit http://localhost:5173/
      npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/ /settings
+     npx ux-builder-audit reports [--open] [<app>]   (re)write docs/ux-builder/reports.html, the one
+                                                     page linking every UI audit and assessment, and print its path
+     npx ux-builder-audit doctor [--json] [<app>]    the @ux-builder packages installed and whether their
+                                                     versions agree (exit 1 when they do not)
 
    Options:
      --theme <name>        audit only this theme (repeat for more; default: every theme the page loads)
@@ -34,6 +38,9 @@
                            for responsive-web; 390 and 1280 for chat) and the rule families, and the
                            report gives a modality-fit verdict for each. Without either, responsive-web
                            is assumed (and the report says so), at the widths --width gives
+     --size-classes <list> the size classes the app chose when no blueprint names them (supports.sizeClasses),
+                           comma-separated: compact, medium, expanded, large. Only their widths are
+                           audited (390, 768, 1280, 1600), and a size class not chosen is never reported unchecked
 
    A URL that starts with "/" is taken relative to the first full URL. The
    browser is Playwright's Chromium: install it once with
@@ -43,6 +50,30 @@
 if (process.argv[2] === "assess") {
   const { main } = await import("./assess/cli.mjs");
   process.exit(await main(process.argv.slice(3)));
+}
+// The one page of reports, and whether the installed packages agree (US-158).
+if (process.argv[2] === "reports" || process.argv[2] === "doctor") {
+  const { parseArgs } = await import("node:util");
+  const { values: c, positionals: [dir = process.cwd()] } = parseArgs({ args: process.argv.slice(3), allowPositionals: true, options: { open: { type: "boolean" }, json: { type: "boolean" }, help: { type: "boolean", short: "h" } } });
+  if (c.help) {
+    console.log(process.argv[2] === "reports" ? "ux-builder-audit reports [--open] [<app>]\n\n(Re)write the app's reports page (docs/ux-builder/reports.html): the latest UI audit and every usability assessment run, with what each is. --open opens it." : "ux-builder-audit doctor [--json] [<app>]\n\nThe @ux-builder packages the app has installed, and whether each one's ranges on the others are met. Exit 1 when they are not.");
+    process.exit(0);
+  }
+  if (process.argv[2] === "reports") {
+    const { writeLandingPage } = await import("./reports.mjs");
+    const page = writeLandingPage(dir);
+    console.log(page.path);
+    if (c.open) {
+      const { spawn } = await import("node:child_process");
+      const [cmd, ...args] = process.platform === "darwin" ? ["open"] : process.platform === "win32" ? ["cmd", "/c", "start", ""] : ["xdg-open"];
+      spawn(cmd, [...args, page.path], { detached: true, stdio: "ignore" }).on("error", () => {}).unref();
+    }
+    process.exit(0);
+  }
+  const { doctor, doctorText } = await import("./doctor.mjs");
+  const r = doctor(dir);
+  console.log(c.json ? JSON.stringify(r, null, 2) : doctorText(r));
+  process.exit(r.coherent ? 0 : 1);
 }
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -59,12 +90,12 @@ const { values: o, positionals } = parseArgs({
     serve: { type: "string" }, wait: { type: "string" }, ignore: { type: "string", multiple: true },
     off: { type: "string", multiple: true }, "no-contrast": { type: "boolean" },
     out: { type: "string", default: reportsOf(process.cwd()).auditReport }, "fail-on": { type: "string", default: "error" },
-    json: { type: "boolean" }, "write-baseline": { type: "string" }, baseline: { type: "string" }, blueprint: { type: "string" }, modality: { type: "string", multiple: true }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
+    json: { type: "boolean" }, "write-baseline": { type: "string" }, baseline: { type: "string" }, blueprint: { type: "string" }, modality: { type: "string", multiple: true }, "size-classes": { type: "string", multiple: true }, version: { type: "boolean" }, help: { type: "boolean", short: "h" },
   },
 });
 if (o.version) { console.log(VERSION); process.exit(0); }
 if (o.help || !positionals.length) {
-  console.log(`ux-builder-audit [options] <url> [<url or /path> …]\n\nChecks: ${Object.keys(RULES).join(", ")}\nSee the package README for every option.`);
+  console.log(`ux-builder-audit [options] <url> [<url or /path> …]\nux-builder-audit reports [--open] [<app>]   (re)write docs/ux-builder/reports.html, the one page of every report\nux-builder-audit doctor [--json] [<app>]    the @ux-builder versions installed, and whether they agree\nux-builder-audit assess <command> …         the usability assessment (assess --help)\n\nChecks: ${Object.keys(RULES).join(", ")}\nSee the package README for every option.`);
   process.exit(o.help ? 0 : 2);
 }
 for (const c of o.off ?? []) if (!RULES[c]) { console.error(`ux-builder-audit: no check called "${c}"; checks: ${Object.keys(RULES).join(", ")}`); process.exit(2); }
@@ -90,6 +121,9 @@ if (o.modality) {
   const problems = modalityProblems(modalities);
   if (problems.length) { console.error(`ux-builder-audit: --modality: ${problems.join(" ")}`); process.exit(2); }
 }
+const SIZES = ["compact", "medium", "expanded", "large"];
+const sizeClasses = (o["size-classes"] ?? []).flatMap((m) => m.split(",")).map((m) => m.trim()).filter(Boolean);
+if (sizeClasses.some((x) => !SIZES.includes(x))) { console.error(`ux-builder-audit: --size-classes: ${sizeClasses.filter((x) => !SIZES.includes(x)).map((x) => `"${x}"`).join(", ")} is not a size class; use ${SIZES.join(", ")}`); process.exit(2); }
 const fromBlueprint = blueprint?.supports?.modalities;
 if (modalities.length && Array.isArray(fromBlueprint) && fromBlueprint.length && [...modalities].sort().join() !== [...fromBlueprint].sort().join()) {
   console.error(`ux-builder-audit: --modality ${modalities.join(",")} disagrees with the blueprint's supports.modalities (${fromBlueprint.join(", ")}); the blueprint's are used`);
@@ -113,7 +147,7 @@ try {
   if (!o.json) console.error(`Auditing ${urls.join(", ")} …`);
   const report = await audit({
     urls, themes: o.theme, appearances: o.appearance ?? ["light", "dark"], widths, wait: o.wait, ignore: o.ignore ?? [],
-    rules: Object.fromEntries((o.off ?? []).map((c) => [c, false])), contrast: !o["no-contrast"], out, baseline, blueprint, modalities,
+    rules: Object.fromEntries((o.off ?? []).map((c) => [c, false])), contrast: !o["no-contrast"], out, baseline, blueprint, modalities, sizeClasses,
     log: o.json ? () => {} : (m) => console.error(m),
   });
   writeReports(report, out);
@@ -125,7 +159,11 @@ try {
     if (!o.json) console.error(`Baseline: ${toBaseline(report).findings.length} findings written to ${o["write-baseline"]}`);
   }
   if (o.json) console.log(JSON.stringify(report, null, 2));
-  else console.log(`${summaryText(report)}\n\nReport: ${resolve(out, "index.html")}`);
+  else {
+    const { appOfReport, landingPath } = await import("./reports.mjs");
+    const app = appOfReport(out);
+    console.log(`${summaryText(report)}\n\nReport: ${resolve(out, "index.html")}${app ? `\nAll reports: ${landingPath(app)}` : ""}`);
+  }
   const fail = o["fail-on"] === "never" ? false : o["fail-on"] === "warning" ? report.summary.error + report.summary.warning > 0 : report.summary.error > 0;
   stop();
   process.exit(fail ? 1 : 0);

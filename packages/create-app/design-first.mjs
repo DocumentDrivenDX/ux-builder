@@ -21,10 +21,12 @@ import { checkBlueprint } from "@ux-builder/ui/blueprint";
 import { CURRENT } from "@ux-builder/ui/blueprint/paths";
 import { init as initDesign, modalityStatus, readState, STATE_FILE, writeState } from "@ux-builder/design";
 import { getHelix, install as installHelix, installed } from "./helix.mjs";
+import { generateJourneyApp, withoutHome } from "./journey-app.mjs";
 import { agentOf, marker, scaffold, sdkVersions, themes, traceCreate, uncite } from "./index.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const NAME = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+const OWN = JSON.parse(readFileSync(join(HERE, "package.json"), "utf8"));
 
 /* The files a design folder writes that the app's own replace at the build. */
 export const DESIGN_FILES = ["package.json", "README.md", "AGENTS.md", "CLAUDE.md", ".gitignore", "scripts/install-skill.mjs"];
@@ -119,15 +121,31 @@ export async function buildInPlace(dir, { theme, modalities: given, blueprint, n
     r = { ...made, dir: target };
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 
-  // HELIX: its starter documents where none exists, and the toolchain wired to it.
+  // The journey skeleton (US-159): the designed screens and journeys, in place of the empty Home.
+  r.prototype = generateJourneyApp(target, { modalities });
+  if (r.prototype.generated) {
+    const spec = join(target, "e2e/starter.spec.js");
+    if (existsSync(spec)) writeFileSync(spec, withoutHome(readFileSync(spec, "utf8")));
+    rmSync(join(target, "src/Home.jsx"), { force: true });
+    r.files = [...new Set([...r.files.filter((f) => f !== "src/Home.jsx"), ...r.prototype.written])].sort();
+    const pkgFile = join(target, "package.json");
+    const own = JSON.parse(readFileSync(pkgFile, "utf8"));
+    own.scripts = { ...own.scripts, prototype: `npx @ux-builder/create-app@${OWN.version} --prototype .` };
+    writeFileSync(pkgFile, JSON.stringify(own, null, 2) + "\n");
+  }
+
+  // HELIX: its starter documents where the design has none (by ID or role, US-156-AC3), and the toolchain wired to it.
   const helix = existsSync(join(target, ".helix.yml")) && !h.skip ? installed(target) : null;
   if (helix) {
     const docs = await import("./helix-docs.mjs");
-    const written = docs.writeStarterSet(helix, r, { log, keep: true });
+    const skipped = [];
+    const written = docs.writeStarterSet(helix, r, { log, keep: true, skipped });
+    r.helixSkipped = skipped;
     docs.wire(helix, r);
-    r.helix = { ...helix.provenance, skillFiles: 0, documents: written };
+    r.helix = { ...helix.provenance, skillFiles: 0, documents: written, skipped };
   }
-  if (!r.helix) {
+  // The starter's test cites US-001's criteria only when US-001 is the starter's.
+  if (!r.helix || r.helixSkipped?.some((s) => s.id === "US-001")) {
     const spec = join(target, "e2e/starter.spec.js");
     if (existsSync(spec)) writeFileSync(spec, uncite(readFileSync(spec, "utf8")));
   }

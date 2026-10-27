@@ -7,6 +7,7 @@
 import { recordDecision } from "@ux-builder/trace";
 import { DesignError } from "./app.mjs";
 import { CLOSES, firstOf } from "./process.mjs";
+import { logEvent } from "./metrics.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -53,7 +54,7 @@ export function checkpoint(app, { id, answer, skip = false, declined = false, re
   // A checkpoint is not passed while items of the steps it closes await the person's review (GDL-79).
   if (!skip && !declined && CLOSES[id]) {
     const waiting = pendingReviews(app, { steps: CLOSES[id] });
-    if (waiting.length) throw new DesignError(`checkpoint ${id} cannot be passed yet: ${waiting.length} item${waiting.length === 1 ? "" : "s"} await${waiting.length === 1 ? "s" : ""} the person's review: ${waiting.map((w) => w.id).join(", ")}. Show each inline, one at a time, and record the approval (ux-builder-design review approve <item> --answer "<their words>"). Nothing was recorded.`);
+    if (waiting.length) throw new DesignError(`checkpoint ${id} cannot be passed yet: ${waiting.length} item${waiting.length === 1 ? "" : "s"} await${waiting.length === 1 ? "s" : ""} the person's review: ${waiting.map((w) => w.id).join(", ")}. Show each foundation kind as a table (ux-builder-design review table <kind>) and the built items as the coverage map (review map), and record the approvals (review approve --kind <kind> | map --answer "<their words>"). Nothing was recorded.`);
   }
   const state = structuredClone(readState(app));
   // A "no" or "not yet" is an answer too, but it never counts as passed.
@@ -63,6 +64,8 @@ export function checkpoint(app, { id, answer, skip = false, declined = false, re
   const to = entry.status === "passed" && AFTER[id];
   const moved = to && advance(state, to);
   writeState(app, state);
+  logEvent(app, "checkpoint", { id, status: entry.status }, now);
+  if (moved) logEvent(app, "step", { step: state.step, mode: state.mode }, now);
   const event = traceCheckpoint(app, id, { answer, skip, declined, reason });
   return { checkpoint: entry, about: CHECKPOINTS[id], activity: state.activity, ...(moved ? { moved: true } : {}), next: state.next, trace: event ? { episode: event.episode, seq: event.seq } : null };
 }

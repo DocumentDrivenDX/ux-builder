@@ -31,6 +31,9 @@
      --model <id>       the agent's model, for its episode trace (default: UX_BUILDER_MODEL)
      --mcp              also write .mcp.json for the ux-builder MCP server (optional:
                         the guide and the skills work without it; ADR-036)
+     --prototype        in an app built from its design: generate the journey
+                        skeleton again from the blueprint (US-159; journey-app.mjs),
+                        replacing only generated files not edited by hand
 
    Design first (FEAT-018 GDL-81, US-150): without --modality or --blueprint
    it writes a design folder instead, the guide with no app code, and asks
@@ -76,6 +79,7 @@ import { init as initDesign } from "@ux-builder/design";
 import { getHelix, install as installHelix } from "./helix.mjs";
 import { blueprintFor, modalityGuide, normalize, shellFiles, starterSpec } from "./shell.mjs";
 import { buildInPlace, builtFrom, isDesignFolder, startDesign, THEME_BUILDER, themeList } from "./design-first.mjs";
+import { generateJourneyApp } from "./journey-app.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const require = createRequire(import.meta.url);
@@ -250,7 +254,7 @@ export function traceCreate(r, { agent, options = {} } = {}) {
   try {
     id = trace.openEpisode(r.dir, {
       trigger: "create", slug: "create", by,
-      goal: { text: `Create ${r.name}, a ${r.modalities.join(" and ")} app on the ${r.theme} theme`, stories: r.helix ? ["US-001"] : [], screens: [], journeys: [] },
+      goal: { text: `Create ${r.name}, a ${r.modalities.join(" and ")} app on the ${r.theme} theme`, stories: r.helix && !r.helixSkipped?.some((s) => s.id === "US-001") ? ["US-001"] : [], screens: [], journeys: [] },
       agent: agent ?? agentOf(),
       sdk: { ...r.versions, [OWN.name]: OWN.version },
     });
@@ -300,14 +304,25 @@ export async function create(dir, { helix: h = {}, log = () => {}, agent, ...opt
 
 // npm create runs the bin through a symlink in node_modules/.bin, so compare real paths.
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const { values, positionals } = parseArgs({ allowPositionals: true, options: { mcp: { type: "boolean" }, modality: { type: "string" }, theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, agent: { type: "string" }, model: { type: "string" }, help: { type: "boolean", short: "h" } } });
+  const { values, positionals } = parseArgs({ allowPositionals: true, options: { mcp: { type: "boolean" }, modality: { type: "string" }, theme: { type: "string" }, name: { type: "string" }, blueprint: { type: "string" }, "sdk-from": { type: "string" }, "helix-version": { type: "string" }, "helix-offline": { type: "boolean" }, "no-helix": { type: "boolean" }, agent: { type: "string" }, model: { type: "string" }, prototype: { type: "boolean" }, help: { type: "boolean", short: "h" } } });
+  if (values.prototype) positionals[0] ??= ".";
   if (values.help || !positionals[0]) {
-    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix] [--agent <name>] [--model <id>] [--mcp]\n\nWithout --modality or --blueprint: a design folder (the guide, no app code); in a design folder: the app built there, on --theme.\n\nModalities (--modality, comma-separated, to make the app at once):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
+    console.log(`npm create @ux-builder/app <dir> -- [--modality <list>] [--theme <name>] [--name <package>] [--blueprint <file>] [--helix-version <tag> | --helix-offline | --no-helix] [--agent <name>] [--model <id>] [--mcp]\n       npm create @ux-builder/app <app> -- --prototype\n\nWithout --modality or --blueprint: a design folder (the guide, no app code); in a design folder: the app built there, on --theme. With --prototype, in an app: the journey skeleton generated again from its blueprint.\n\nModalities (--modality, comma-separated, to make the app at once):\n${modalityList()}\n${FUTURE}\n\nThemes: ${themes().join(", ")}`);
     process.exit(values.help ? 0 : 1);
   }
   const helixOpts = { tag: values["helix-version"], offline: values["helix-offline"], skip: values["no-helix"] };
   const log = (m) => console.error(m);
   const where = (dir) => relative(process.cwd(), dir).startsWith("..") ? dir : relative(process.cwd(), dir) || ".";
+  // The journey skeleton again, from the blueprint as it is now (US-159-AC3).
+  if (values.prototype) {
+    if (!existsSync(join(positionals[0], CURRENT.blueprint)) || !existsSync(join(positionals[0], "src"))) die(`${positionals[0]} is not an app with a blueprint (${CURRENT.blueprint}) and src/; --prototype regenerates the journey skeleton of an app built from its design. Nothing was written.`);
+    const r = generateJourneyApp(positionals[0], { modalities: builtFrom(positionals[0])?.modalities });
+    if (!r.generated) die(`no journey skeleton: ${r.skip}. Nothing was written.`);
+    console.log(`Journey skeleton from ${CURRENT.blueprint} (${r.blueprintHash}): ${r.screens.length} screens, journeys ${r.journeys.map((j) => j.id).join(", ")}.
+  written:   ${r.written.join(", ") || "none"}
+  unchanged: ${r.unchanged.length} file${r.unchanged.length === 1 ? "" : "s"}${r.removed.length ? `\n  removed:   ${r.removed.join(", ")} (no longer in the blueprint, never edited)` : ""}${r.kept.length ? `\n  left as they are:\n${r.kept.map((k) => `    ${k.file} (${k.why})`).join("\n")}` : ""}`);
+    process.exit(0);
+  }
   // Design first (GDL-81): a design folder is built in place; without --modality or --blueprint, the starter makes one.
   if (isDesignFolder(positionals[0])) {
     let given = null;
@@ -327,7 +342,8 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
   npm run audit
 
 The guide goes on in Claude Code with /ux-builder-design: the validated prototype is next.`);
-    if (r.helix) console.log(`\nHELIX ${r.helix.tag}: ${r.helix.documents.length} starter documents written in docs/helix/ where none existed; docs/ux-builder/ux-assessment.yml and AGENTS.md wired to it.`);
+    if (r.prototype?.generated) console.log(`\nThe app opens on the designed journeys: ${r.prototype.screens.length} screens (src/screens/), journeys ${r.prototype.journeys.map((j) => j.id).join(", ")}, sample data, ?state=<name> on any screen and the prototype toolbar in npm run dev. After changing the blueprint: npm run prototype.${r.prototype.kept.length ? ` Left as they were: ${r.prototype.kept.map((k) => `${k.file} (${k.why})`).join(", ")}.` : ""}`);
+    if (r.helix) console.log(`\nHELIX ${r.helix.tag}: ${r.helix.documents.length} starter documents written in docs/helix/ where none existed; docs/ux-builder/ux-assessment.yml and AGENTS.md wired to it.${r.helix.skipped.length ? `\nNot written, the design has its own:\n${r.helix.skipped.map((s) => `  ${s.id}: ${s.why}`).join("\n")}` : ""}`);
   } else if (builtFrom(positionals[0])) {
     die(`${positionals[0]} was already built from its design, on the ${builtFrom(positionals[0]).theme} theme; the app is there. Nothing was written.`);
   } else if (values.modality == null && !values.blueprint) {

@@ -22,6 +22,7 @@ import { HEURISTICS } from "./heuristics.mjs";
 import { loadTypes } from "./helix.mjs";
 import { metricsLines } from "./metrics.mjs";
 import { catalogueRules, ruleOf, SEVERITY_WORDS, severityOf } from "./rules.mjs";
+import { refreshLandingPage } from "../reports.mjs";
 
 const read = (dir, f) => (existsSync(join(dir, f)) ? JSON.parse(readFileSync(join(dir, f), "utf8")) : null);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -311,6 +312,7 @@ ${md2html(md.replace(/^---\n[\s\S]*?\n---\n\n?/, ""), dir, selfContained)}
 </main></body></html>\n`);
   const index = evidenceIndex(dir, r);
   writeFileSync(join(dir, "evidence.json"), JSON.stringify(index, null, 2) + "\n");
+  refreshLandingPage(dir);
   return { md, files: index.files.length };
 }
 

@@ -531,3 +531,12 @@ the evidence a finding needs is kept.
 The report is ordered journey → step → finding with the rule spelled out
 (FEAT-015 RPT-05) and is written as a HELIX usability evaluation report
 (RPT-08).
+
+## Evolution *[2026-10-27 — FEAT-018 GDL-83, US-158]*
+
+Every report is listed on one page beside the design,
+`docs/ux-builder/reports.html`, rewritten whenever the UI audit or an
+assessment run writes its report: what each report is, the latest audit,
+each run newest first with its journeys step by step, and the package
+versions that wrote each. `ux-builder-audit doctor` checks, before an
+assessment, that the installed `@ux-builder` packages agree.

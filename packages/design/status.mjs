@@ -8,6 +8,7 @@ import { FIRST_STEP } from "./checkpoints.mjs";
 import { modalityStatus } from "./modality.mjs";
 import { progress } from "./process.mjs";
 import { migrationPlan } from "./migrate.mjs";
+import { budget, budgetText } from "./intake.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState } from "./state.mjs";
 
@@ -38,6 +39,8 @@ export function status(app) {
     // What migrate would still move (GDL-80, GDL-82): an app on the new layout may keep its assessment and audit report at its top.
     toMigrate: migrationPlan(app).map((m) => m.from),
     awaitingReview: pending.map((p) => p.id),
+    // The decisions left before the first prototype (GDL-83).
+    budget: budget(app),
     activity: s.activity,
     mode: s.mode,
     startedFrom: s.startedFrom,
@@ -76,6 +79,7 @@ export function summary(r) {
   if (r.layout === "legacy") lines.push("This app is on the old layout (docs/ux/, app.blueprint.json at the top): run ux-builder-design migrate to move it under docs/ux-builder/.");
   else if (r.toMigrate?.length) lines.push(`Still at the app's top: ${r.toMigrate.join(", ")}; run ux-builder-design migrate to move ${r.toMigrate.length === 1 ? "it" : "them"} under docs/ux-builder/.`);
   if (r.awaitingReview.length) lines.push(`Awaiting your review: ${r.awaitingReview.length} item${r.awaitingReview.length === 1 ? "" : "s"} (${r.awaitingReview.slice(0, 5).join(", ")}${r.awaitingReview.length > 5 ? ", …" : ""}).`);
+  if (r.budget?.count) lines.push(budgetText(r.budget));
   lines.push(r.chosen ? `${r.chosen} is chosen.` : "No alternative is chosen yet.");
   lines.push(r.untestedAssumptions ? `${plural(r.untestedAssumptions, "assumption is", "assumptions are")} untested.` : "No untested assumptions.");
   if (r.openQuestions.length) lines.push(`Open ${r.openQuestions.length === 1 ? "question" : "questions"}: ${r.openQuestions.join("; ")}`);

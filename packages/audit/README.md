@@ -16,6 +16,15 @@ npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4
 It prints a summary, writes `docs/ux-builder/audit-report/index.html` (with the screenshots)
 and `docs/ux-builder/audit-report/report.json`, and exits 1 if it found an error.
 
+Every report on the app is linked from one page, `docs/ux-builder/reports.html`
+(`reports.html` at the top of an app on the old layout): the latest UI audit
+and each usability assessment run, newest first, with the latest run's
+journeys step by step and the `@ux-builder` versions that wrote each. It is
+rewritten whenever either report is written; `npx ux-builder-audit reports
+[--open]` rewrites it and prints its path. `npx ux-builder-audit doctor
+[--json]` lists the installed `@ux-builder` packages and exits 1 when one's
+range on another is not met by the version installed.
+
 ## What it checks
 
 | Check | Severity | What it holds the app to |
@@ -96,15 +105,23 @@ The report opens with two verdicts (FEAT-014), in `report.json` as `verdicts`:
   the modality needs, and whether its rule families were checked, with the fix
   for anything missing. `chat` and `hybrid-chat` need the SDK's `Conversation`
   (its log and composer; missing, the verdict fails); `hybrid-chat` also an
-  Adaptive Card part (missing, it warns); `responsive-web` needs `AppShell`
-  (missing, it fails) whose navigation adapts by size class: the bottom bar
-  below 600 px and the side navigation from 840 px (not adapting, it warns).
+  Adaptive Card part (missing, it warns). `responsive-web` is judged by
+  outcome: each page is framed by `AppShell`, or by a `main` landmark whose
+  content fits (no sideways scroll) at every audited width (neither, it
+  fails, saying which: "content overflows at 390px", or AppShell missing with
+  no `main`); where there is navigation it adapts by size class, the bottom
+  bar below 600 px and the side navigation from 840 px (not adapting, it
+  warns). An app with one top-level destination, or an AppShell with no
+  navigation items, has no navigation to adapt.
 
 The modalities come from the blueprint's `supports.modalities`, else
 `--modality`, else `responsive-web`, which the report says it assumed. Named,
 they choose the widths of FEAT-014's matrix (`responsive-web` 390, 768 and
 1280; `chat` and `hybrid-chat` 390 and 1280; the union for several) unless
-`--width` is given, and the rule families: a check whose rules are of no
+`--width` is given, only those of the size classes the app chose
+(`supports.sizeClasses`, else `--size-classes`; compact 390, medium 768,
+expanded 1280, large 1600): a size class not chosen is never audited or
+reported unchecked. And they choose the rule families: a check whose rules are of no
 family the modalities need is not run (`chat` runs no `nav`, `modal` or
 `emphasis` check; only `hybrid-chat` runs the `card` checks). Assumed, every
 check runs at the widths `--width` gives, as before.
@@ -165,6 +182,7 @@ the report says so, and the favicon check is skipped.
 | `--baseline <file>` | Leave out the findings in this file: they are not reported and do not affect the exit code. New findings are reported as usual; baselined ones no longer found are listed as resolved, so the file can shrink. A check the file names that this version lacks is ignored with a note. |
 | `--blueprint <file>` | The app's blueprint (default `docs/ux-builder/blueprint/app.blueprint.json`). Its `supports.modalities` choose the widths and rule families; the report follows its journeys, step by step, matching each page to a screen by `data-piq-screen="<screen id>"`, else by the screen's `path`. AI markup on a screen whose blueprint declares no AI role is reported (`ai-declared`); the screen's `ai.roles` and `ai.takeover` apply to the agent checks. |
 | `--modality <list>` | The app's modalities when the blueprint names none, comma-separated: `responsive-web`, `chat`, `hybrid-chat`. They choose the widths and rule families, and the report gives a modality-fit verdict for each. A future modality (`ios`, `android`, `macos`, `windows`) or an unknown one exits 2. Without it or a blueprint, `responsive-web` is assumed. |
+| `--size-classes <list>` | The size classes the app chose when the blueprint names none (`supports.sizeClasses`), comma-separated: `compact`, `medium`, `expanded`, `large`. Only their widths are audited (390, 768, 1280, 1600), and one not chosen is never reported unchecked. An unknown one exits 2. |
 
 A URL that starts with `/` is relative to the first full URL. The SDK's CSS
 and theme list are read from the app's own `@ux-builder/ui` and

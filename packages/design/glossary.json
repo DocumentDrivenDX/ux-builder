@@ -20,6 +20,18 @@
       "why": "The design follows what the product is meant to do, and changes to requirements go through a reviewed proposal, never a silent edit."
     },
     {
+      "term": "foundations",
+      "step": 0,
+      "means": "What the rest of the design is built on: the experience brief, target users, jobs, user stories, business rules and decisions. You review each kind as one table, every row in full.",
+      "why": "A mistake here spreads into every journey, screen and test, so this is where your careful attention pays most; what is built from the foundations needs only its exceptions checked."
+    },
+    {
+      "term": "coverage map",
+      "step": 0,
+      "means": "One view of what is built from the foundations: each job, the tasks that serve it, their journeys and the screens they walk, with the exceptions (a job nothing serves, a screen on no journey, a new assumption) listed one by one.",
+      "why": "You check that nothing was missed or added without reading every task and screen again; approving the map approves them."
+    },
+    {
       "term": "experience brief",
       "step": 1,
       "means": "One page saying what the product is, who it is for, the outcome it should give them, the jobs it serves, its principles and constraints, and what is still unknown.",

@@ -5,10 +5,11 @@
 
 import { readFileSync } from "node:fs";
 import { DesignError } from "./app.mjs";
+import { logEvent } from "./metrics.mjs";
 import { readState, writeState } from "./state.mjs";
 
 export const STEPS = [
-  { n: 1, name: "Define intent", activity: "define", you: "Say what people should accomplish and how you'll know it worked; answer one question at a time.", produces: "The experience brief", terms: ["experience brief", "user story", "acceptance criterion", "assumption", "hypothesis"] },
+  { n: 1, name: "Define intent", activity: "define", you: "Say what people should accomplish and how you'll know it worked; the agent reads what exists first and asks the rest together, and one narrative answer is fine.", produces: "The experience brief", terms: ["experience brief", "user story", "acceptance criterion", "assumption", "hypothesis"] },
   { n: 2, name: "Understand users", activity: "define", you: "Correct the agent's hypotheses about who the users are and what they need; bring any research.", produces: "Target users, jobs to be done, research evidence", terms: ["target user", "job to be done", "evidence", "confidence"] },
   { n: 3, name: "Model tasks", activity: "define", you: "Confirm the tasks people must accomplish, the business rules they meet, and which simplifications to accept.", produces: "Tasks and business rules in the blueprint", terms: ["blueprint", "task", "business rule"], checkpoint: "core-1" },
   { n: 4, name: "Explore alternatives", activity: "explore", you: "Compare two or more ways to do the same tasks, side by side, and choose one.", produces: "Alternative blueprints, a comparison, the rubric, a decision record", terms: ["journey", "alternative", "rubric", "decision record"], checkpoint: "core-2" },
@@ -44,7 +45,7 @@ export function overview() {
   return {
     steps: STEPS.map(({ n, name, activity, you, produces, terms, checkpoint }) => ({ n, name, activity, you, produces, terms, ...(checkpoint ? { checkpoint } : {}) })),
     change: CHANGE_STEPS,
-    review: "After each step, the agent shows you each thing it produced, inline and one at a time, asks for your feedback, makes the changes, and moves on only when you approve it.",
+    review: "After each step, the agent shows you what it produced and moves on only when you approve it. The foundations (the brief, target users, jobs, stories, business rules and decisions) come a table per kind, every row in full, for your feedback and approval. What is built from them comes as one coverage map: you look at its exceptions and what changed, not each item again. Records (evidence, reports, insights) need no approval: you decide what to do about what they found. An approval holds until the meaning changes, and then you see only the change.",
     ids: "Along the way you will see short IDs: U-1 is a target user, J-1 a job to be done, J-find a journey, T-1 a task, BR-1 a business rule, US-1 a user story and UXD-1 a decision. The agent says what each is the first time; `ux-builder-design explain ids` lists them all.",
   };
 }
@@ -81,6 +82,7 @@ export function setStep(app, { to, pending = () => [] } = {}) {
   state.step = n;
   if (state.mode !== "change") state.activity = STEPS[n - 1].activity;
   writeState(app, state);
+  logEvent(app, "step", { step: n, mode: state.mode });
   return progress(state);
 }
 

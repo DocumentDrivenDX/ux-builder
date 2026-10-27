@@ -18,7 +18,9 @@
     "template",
     "THIRD-PARTY-NOTICES.md",
     "design-first.mjs",
-    "design-folder"
+    "design-folder",
+    "journey-app.mjs",
+    "journey"
   ],
   "scripts": {
     "test": "node --test 'test/*.test.mjs'",

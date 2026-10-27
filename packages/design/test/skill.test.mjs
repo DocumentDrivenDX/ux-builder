@@ -165,12 +165,12 @@ describe("business rules in the skill (US-147)", () => {
 
 describe("the guided conversation in the skill (US-148)", () => {
   // @covers US-148-AC7
-  test("AC7: each item shown inline, one at a time, feedback collected and addressed, approval before the next; the step said at each step", () => {
+  test("AC7: each foundation kind shown inline as a table, feedback collected and addressed, approval before the next kind; the step said at each step", () => {
     const review = section("Review and approval");
-    assert.match(review, /Take \*\*one item at a time\*\*\. Show it \*\*inline in the conversation\*\*/);
+    assert.match(review, /Show the whole table inline, every row in full/);
     assert.match(review, /review feedback <item> --text/);
     assert.match(review, /review respond <FB-n>/);
-    assert.match(review, /review approve <item> --answer "…"`\. Only then show the next item\./);
+    assert.match(review, /`review approve --kind <kind>\s+--answer "…"`\. Then the next kind\./);
     assert.match(review, /Never\nsend the person to a file instead/);
     assert.match(section("Where the person is"), /"Step 2 of 8: Understand users\."/);
     assert.match(section("Explaining terms"), /say what it means and why it is valuable/);

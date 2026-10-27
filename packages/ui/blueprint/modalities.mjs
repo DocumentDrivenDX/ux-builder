@@ -75,3 +75,18 @@ export function expandModalities(names = DEFAULT_MODALITIES) {
    validity, and the complexity a change adds (FEAT-018 GDL-12) (rulesFor
    with modalities keeps them; FEAT-014 MOD-06). */
 export const SHARED_FAMILIES = ["blueprint", "simplicity", "task", "consistency"];
+
+/* The width the audit inspects each size class at (FEAT-014's matrix). */
+export const SIZE_CLASS_WIDTHS = { compact: 390, medium: 768, expanded: 1280, large: 1600 };
+export const sizeClassOfWidth = (w) => Object.keys(SIZE_CLASS_WIDTHS).find((k) => SIZE_CLASS_WIDTHS[k] === w) ?? (w < 600 ? "compact" : w < 840 ? "medium" : w < 1440 ? "expanded" : "large");
+
+/* The widths to audit: the modalities' widths, only those of the size
+   classes the app chose (CONTRACT-005 supports.sizeClasses) when it names
+   any; when none of the modalities' widths is a chosen size class's, the
+   chosen ones' own widths. A size class not chosen is never audited. */
+export function widthsFor(names = DEFAULT_MODALITIES, sizeClasses = null) {
+  const all = expandModalities(names).widths;
+  if (!Array.isArray(sizeClasses) || !sizeClasses.length) return all;
+  const kept = all.filter((w) => sizeClasses.includes(sizeClassOfWidth(w)));
+  return kept.length ? kept : sizeClasses.map((s) => SIZE_CLASS_WIDTHS[s]).filter(Boolean).sort((a, b) => a - b);
+}

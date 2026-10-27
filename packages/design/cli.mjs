@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, claimAdd, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -29,16 +29,46 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       what a term means and why it is valuable; --step: the terms a step
       introduces; with neither, every term.
   review [list]
-      every item not yet approved in its current form, in step order.
+      what awaits review, by tier: foundations (the brief, target users,
+      jobs, stories, business rules, decisions), reviewed a table per kind;
+      built items (tasks, journeys, alternatives, screens, kits), reviewed as
+      the coverage map; records (evidence, reports, insights, experiments)
+      need no approval. An approval holds through formatting and metadata
+      changes; a change to the meaning shows as a diff.
+  review table <kind>
+      every item of a foundation kind, to show as one table, with what
+      changed since it was approved.
+  review map
+      the coverage map: each job, its tasks, journeys and screens, and the
+      exceptions to see one by one.
   review show <item>
       the item's content, to present inline in the conversation.
   review feedback <item> --text <their words>
       record the person's feedback on an item (FB-<n>).
   review respond <FB-n> --text <what changed>
       record how the feedback was addressed.
-  review approve <item> --answer <their words>
-      record the person's approval of the item as it is now; refused while
-      its feedback is open.
+  review approve (<item>... | --kind <kind> | map [--accept <exception>]...)
+               --answer <their words>
+      record the person's approval of items as they are now, of a
+      foundation kind's whole table, or of the coverage map (every built
+      item awaiting review; refused while an exception is neither fixed nor
+      accepted). Refused while feedback is open.
+  intake
+      the intake questions not yet answered, to ask together in one
+      message, and what the app's sources already answer.
+  advance --until-decision
+      do the safe work (check the documents, keep approvals through
+      formatting changes, work out the coverage map, find unverified claims
+      and pending proposals) and stop at the one decision the person must
+      make next, with a recommendation and what happens after it.
+  metrics [turn --kind answer|decision|approval|correction|question|other [--text <note>] | mark prototype|testing|release]
+      how the design spends the person's time, against the targets; turn
+      records one human turn, mark a milestone. Kept in .ux-builder/metrics.jsonl.
+  proposals [preview]
+      every pending HELIX proposal in one line, with ID clashes flagged.
+  proposals apply --accepted <ids> [--dry-run]
+      apply the accepted proposals to HELIX, all or nothing: checked first,
+      a clashing ID renumbered and its references rewritten.
   init [--mcp]
       put the guide in this app: the skill in .claude/skills/ux-builder-design/,
       an empty design state, a starting blueprint if there is none, and with
@@ -72,6 +102,13 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       never its text; add the masked excerpts the synthesis cites.
   evidence list
       each source's ID, kind, date, source and excerpts cited.
+  evidence claim add <EV-n> --text <claim> --source <where> --basis observed|inferred
+               --confidence high|medium|low [--direction] [--verified] [--contradicts <t>] [--unknown <t>]
+      record a synthesized claim in the record's Claims: where it comes from,
+      observed or inferred, the confidence, whether it changes the design's
+      direction and whether the agent checked it against the source itself.
+  evidence claim verify <EV-n> <Cn> [--confidence <c>]
+      the agent checked the claim against its source.
   evidence excerpt add <EV-n> --participant <name or Pn> --text <quote> [--at <time>] [--role <role>]
       add one quote the synthesis cites to the record's Excerpts: masked, by
       pseudonym (a name gets one, kept in .ux-builder/participants.local.json).
@@ -173,7 +210,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -213,15 +250,28 @@ async function main(argv) {
     return 0;
   }
   if (command === "review") {
-    const [sub = "list", target] = rest;
+    const [sub = "list", ...targets] = rest;
+    const target = targets[0];
     if (sub === "list") {
       const r = reviewList(app);
-      print(r, values.json, r.count ? [`Awaiting review (${r.count}), in order:`, ...r.pending.map((p) => `  step ${p.step}  ${p.id}  ${p.title}${p.changed ? "  (changed since approved)" : ""}${p.feedback.length ? `  open feedback ${p.feedback.join(", ")}` : ""}`), r.next].join("\n") : r.next);
+      const line = (p) => `  step ${p.step}  ${p.id}  ${p.title}${p.changed ? "  (changed since approved)" : ""}${p.feedback.length ? `  open feedback ${p.feedback.join(", ")}` : ""}`;
+      const f = r.pending.filter((p) => p.tier === "foundation"), d = r.pending.filter((p) => p.tier === "derived");
+      print(r, values.json, r.count ? [`Awaiting review (${r.count}):`, ...(f.length ? ["Foundations, a table per kind:", ...f.map(line)] : []), ...(d.length ? ["Built from them, as the coverage map:", ...d.map(line)] : []), r.next].join("\n") : r.next);
+      return 0;
+    }
+    if (sub === "table") {
+      const r = reviewTable(app, { kind: target });
+      print(r, values.json, r.items.length ? r.items.flatMap((i) => [`${i.id}: ${i.title} (${i.status}; ${i.file})`, "", i.content, ...(i.diff ? ["", "Changed since approved:", i.diff] : []), ""]).join("\n") + (r.pending.length ? `${r.pending.length} awaiting review: ux-builder-design review approve --kind ${r.kind} --answer "<their words>"` : "All approved.") : `No ${r.kind} yet.`);
+      return 0;
+    }
+    if (sub === "map") {
+      const r = reviewMap(app);
+      print(r, values.json, mapText(r));
       return 0;
     }
     if (sub === "show") {
       const r = reviewShow(app, { item: target });
-      print(r, values.json, [`${r.id}: ${r.title} (step ${r.step}, ${r.status}; ${r.file})`, "", r.content, ...(r.feedback.length ? ["", "Feedback:", ...r.feedback.map((f) => `  ${f.id} [${f.status}] ${f.text}${f.response ? ` → ${f.response}` : ""}`)] : [])].join("\n"));
+      print(r, values.json, [`${r.id}: ${r.title} (step ${r.step}, ${r.status}; ${r.file})`, "", r.content, ...(r.diff ? ["", "Changed since approved:", r.diff] : []), ...(r.feedback.length ? ["", "Feedback:", ...r.feedback.map((f) => `  ${f.id} [${f.status}] ${f.text}${f.response ? ` → ${f.response}` : ""}`)] : [])].join("\n"));
       return 0;
     }
     if (sub === "feedback") {
@@ -235,11 +285,43 @@ async function main(argv) {
       return 0;
     }
     if (sub === "approve") {
-      const r = reviewApprove(app, { item: target, answer: values.answer });
-      print(r, values.json, `${r.item} approved. ${r.remaining ? `${r.remaining} item${r.remaining === 1 ? "" : "s"} left; next: ${r.next}.` : "Nothing else awaits review."}`);
+      const r = reviewApprove(app, { items: targets, kind: values.kind, answer: values.answer, accept: values.accept ?? [] });
+      print(r, values.json, `${r.item === "map" ? `The coverage map approved: ${r.items.length} built item${r.items.length === 1 ? "" : "s"}${r.accepted.length ? `; accepted ${r.accepted.join(", ")}` : ""}` : `${r.items.join(", ")} approved`}. ${r.remaining ? `${r.remaining} item${r.remaining === 1 ? "" : "s"} left; next: ${r.next}.` : "Nothing else awaits review."}`);
       return 0;
     }
-    throw new DesignError(`unknown review command "${sub}": use list, show, feedback, respond or approve`);
+    throw new DesignError(`unknown review command "${sub}": use list, table, map, show, feedback, respond or approve`);
+  }
+  if (command === "intake") {
+    const r = intake(app);
+    print(r, values.json, r.text);
+    return 0;
+  }
+  if (command === "advance") {
+    if (!values["until-decision"]) throw new DesignError("advance runs until the next decision: ux-builder-design advance --until-decision");
+    const r = advance(app);
+    print(r, values.json, r.text);
+    return 0;
+  }
+  if (command === "metrics") {
+    const [sub, name] = rest;
+    if (sub === "turn") { const r = logTurn(app, { kind: values.kind, note: values.text }); print(r, values.json, `Turn recorded: ${r.kind}.`); return 0; }
+    if (sub === "mark") { const r = mark(app, { name }); print(r, values.json, `Milestone recorded: ${r.name}.`); return 0; }
+    if (sub) throw new DesignError(`unknown metrics command "${sub}": use turn or mark, or nothing for the summary`);
+    const r = metrics(app, { carried: carried(app) });
+    print(r, values.json, metricsText(r));
+    return 0;
+  }
+  if (command === "proposals") {
+    const [sub = "preview"] = rest;
+    if (sub === "preview") { const r = proposalsPreview(app); print(r, values.json, r.text); return 0; }
+    if (sub === "apply") {
+      const accepted = (values.accepted ?? []).flatMap((a) => a.split(",")).map((a) => a.trim()).filter(Boolean);
+      if (!accepted.length) throw new DesignError("proposals apply needs --accepted <ids>: the proposals the person accepted");
+      const r = proposalsApply(app, { accepted, dryRun: values["dry-run"] });
+      print(r, values.json, r.text);
+      return 0;
+    }
+    throw new DesignError(`unknown proposals command "${sub}": use preview or apply`);
   }
   if (command === "status") {
     const r = status(app);
@@ -381,6 +463,20 @@ async function main(argv) {
       print(r, values.json, r.evidence.length ? r.evidence.map((e) => `${e.id}  ${e.kind}  ${e.date}  ${e.excerpts} excerpt${e.excerpts === 1 ? "" : "s"}  ${e.source}`).join("\n") : "No evidence yet.");
       return 0;
     }
+    if (sub === "claim") {
+      const [, op, id, claim] = rest;
+      if (op === "add") {
+        const r = claimAdd(app, { id, text: values.text, source: values.source, basis: values.basis, confidence: values.confidence, direction: values.direction, verified: values.verified, contradicts: values.contradicts, unknown: values.unknown });
+        print(r, values.json, [`Added ${r.id} to ${r.path}.`, ...r.warnings.map((w) => `warning: ${w}`)].join("\n"));
+        return 0;
+      }
+      if (op === "verify") {
+        const r = claimVerify(app, { id, claim, confidence: values.confidence });
+        print(r, values.json, `${r.evidence} ${r.id} checked against its source (${r.confidence} confidence).`);
+        return 0;
+      }
+      throw new DesignError(`unknown evidence claim command "${op ?? ""}": use add or verify`);
+    }
     if (sub === "excerpt") {
       const [, op, id] = rest;
       if (op !== "add") throw new DesignError(`unknown evidence excerpt command "${op ?? ""}": use add`);
@@ -388,7 +484,7 @@ async function main(argv) {
       print(r, values.json, `Added to ${r.path}: ${r.excerpt}`);
       return 0;
     }
-    throw new DesignError(`unknown evidence command "${sub ?? ""}": use add, list or excerpt add`);
+    throw new DesignError(`unknown evidence command "${sub ?? ""}": use add, list, claim add|verify or excerpt add`);
   }
   if (command === "validate") {
     const r = validate(app);

@@ -9,8 +9,8 @@
    wrote it. A heading the starter fills that a template no longer has is
    added at the end, so a later HELIX's templates never break creation. */
 
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
 import { MODALITIES } from "@ux-builder/ui/blueprint/modalities";
 import { CURRENT } from "@ux-builder/ui/blueprint/paths";
 import { ref } from "./helix.mjs";
@@ -190,10 +190,36 @@ function content(r, helix) {
   };
 }
 
+/* The documents already under docs/helix/, by their ddx: frontmatter, whatever
+   their file names: [{ id, type, path }]. */
+export function helixDocuments(app) {
+  const root = join(app, "docs/helix"), out = [];
+  const walk = (d) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) { walk(p); continue; }
+      if (!e.name.endsWith(".md")) continue;
+      const fm = /^---\n([\s\S]*?)\n---/.exec(readFileSync(p, "utf8"))?.[1] ?? "";
+      const id = /^\s*id:\s*["']?([^"'\s]+)/m.exec(fm)?.[1];
+      if (id) out.push({ id, type: /^\s*type:\s*["']?([^"'\s]+)/m.exec(fm)?.[1] ?? null, path: relative(app, p).split("\\").join("/") });
+    }
+  };
+  if (existsSync(root)) walk(root);
+  return out;
+}
+
+/* A numbered type's IDs: a design with FEAT-002 already has its feature spec. */
+const ROLE = { "feature-specification": /^FEAT-\d+$/, "user-stories": /^US-\d+$/, "story-test-plan": /^STP-\d+$/, "test-plan": /^TP-\d+$/ };
+
 /* Write the starter set into the app (HLA-01). Returns the paths written.
    A type the installed HELIX has no template or location for is still
-   written, from the starter's own sections, and the problem is printed. */
-export function writeStarterSet(helix, r, { log = () => {}, keep = false } = {}) {
+   written, from the starter's own sections, and the problem is printed.
+   With keep (a design folder's build, GDL-81; US-156-AC3), a starter
+   document is not written when the design has a document with its ID or of
+   its role (by ddx: frontmatter, under any file name) or a file at its path;
+   each one left out is pushed to skipped as { id, type, path, why }, and a
+   link to a starter document left out is dropped unless the design has it. */
+export function writeStarterSet(helix, r, { log = () => {}, keep = false, skipped = [] } = {}) {
   const c = content(r, helix);
   const docs = [
     ["product-vision", { id: "product-vision", ...c.vision }],
@@ -204,18 +230,26 @@ export function writeStarterSet(helix, r, { log = () => {}, keep = false } = {})
     ["design-system", { id: "design-system", links: [["informed_by", "prd"], ["informed_by", "FEAT-001"]], ...c.design }],
     ["test-plan", { id: "TP-001", links: [["informed_by", "prd"], ["informed_by", "FEAT-001"]], ...c.tp }],
     ["story-test-plan", { id: "STP-001", number: "001", slug: "open-the-app-and-see-where-to-start", links: [["informed_by", "US-001"], ["informed_by", "TP-001"]], ...c.stp }],
-  ];
+  ].map(([type, d]) => ({ type, d, t: typeOf(helix, type) })).map((x) => ({ ...x, path: pathFor(x.t, x.d) ?? `${TYPES[x.type]}/${x.type}.md` }));
+  const have = keep ? helixDocuments(r.dir) : [];
+  const out = new Set();
+  for (const x of keep ? docs : []) {
+    const same = have.find((h) => h.id === x.d.id) ?? have.find((h) => h.type === x.type || ROLE[x.type]?.test(h.id));
+    const why = same ? (same.id === x.d.id ? `${same.path} already has the ID ${x.d.id}` : `the design already has a ${x.type} document (${same.id}, ${same.path})`)
+      : existsSync(join(r.dir, "docs/helix", x.path)) ? `docs/helix/${x.path} already exists`
+        : x.d.id === "US-001" && out.has("FEAT-001") ? "it is the story of the starter's FEAT-001, which was not written"
+          : x.d.id === "STP-001" && out.has("US-001") ? "it maps the starter's US-001, which was not written" : null;
+    if (why) { out.add(x.d.id); skipped.push({ id: x.d.id, type: x.type, path: `docs/helix/${x.path}`, why }); }
+  }
+  const known = new Set([...have.map((h) => h.id), ...docs.map((x) => x.d.id).filter((id) => !out.has(id))]);
   const written = [];
-  for (const [type, d] of docs) {
-    const t = typeOf(helix, type);
-    const path = pathFor(t, d) ?? `${TYPES[type]}/${type}.md`;
+  for (const { type, d, t, path } of docs) {
     const missing = [t.template == null && `template (${t.base}/template.md)`, !t.location && `output location (${t.base}/meta.yml)`].filter(Boolean);
+    if (out.has(d.id)) continue;
     if (missing.length) log(`HELIX ${helix.manifest.version} has no ${missing.join(" and no ")} for the ${type} type; docs/helix/${path} was drafted from the starter's own sections`);
     const file = join(r.dir, "docs/helix", path);
-    // In a design folder's build (GDL-81), a document the person already wrote is kept.
-    if (keep && existsSync(file)) continue;
     mkdirSync(dirname(file), { recursive: true });
-    writeFileSync(file, draft(t.template, { ...d, type }));
+    writeFileSync(file, draft(t.template, { ...d, links: (d.links ?? []).filter(([, to]) => known.has(to)), type }));
     written.push(`docs/helix/${path}`);
   }
   // Slot choices HELIX reads before concerns.md (its concern-selection order).
@@ -240,8 +274,7 @@ export function wire(helix, r) {
 
 This app is governed by HELIX ${helix.manifest.version}: the \`helix\` skill is installed in
 \`.claude/skills/helix/\` (see its \`HELIX-VERSION.json\`), the marker is \`.helix.yml\`, and the
-documents are in \`docs/helix/\` (vision, PRD, concerns, FEAT-001 and US-001 for the starter's
-shell, DESIGN.md, the test plans). Work in this order:
+documents are in \`docs/helix/\` (${r.helixSkipped?.length ? "the design's own, and the starter's where the design had none" : "vision, PRD, concerns, FEAT-001 and US-001 for the starter's\nshell, DESIGN.md, the test plans"}). Work in this order:
 
 1. Frame or evolve the requirement in HELIX first (\`/helix frame\`, \`/helix evolve\`): a story with
    acceptance criteria, before any code.
@@ -262,9 +295,28 @@ Other agent hosts install HELIX from https://github.com/DocumentDrivenDX/helix/b
 }
 
 /* The UX assessment's manifest: one journey, the shell's (US-001), from where
-   the app opens; the AI state applies when a modality has a conversation. */
+   the app opens; the AI state applies when a modality has a conversation.
+   With the journey skeleton (US-159), the blueprint's journeys that name a
+   story instead, each in every state the skeleton can show (?state=). */
 function manifest(r) {
   const ai = r.modalities.some((m) => m !== "responsive-web");
+  const designed = r.prototype?.generated ? r.prototype.journeys.filter((j) => j.story) : [];
+  const journeys = designed.length
+    ? designed.map((j, i) => `  - id: ${j.id}
+    blueprint: ${j.id}
+    priority: ${i ? "important" : "critical"}
+    role: member
+    states: [success, empty, loading, recoverable-error, system-failure, ${ai ? "ai, " : ""}responsive-keyboard]${ai ? "" : "\n    notApplicable:\n      ai: the journey has no AI feature"}`).join("\n")
+    : `  - id: J-start
+    story: US-001
+    priority: critical
+    role: member
+    entry: ${r.modalities.includes("responsive-web") ? "/" : assistantPath(r.modalities)}
+    states: [success, empty, ${ai ? "ai, " : ""}responsive-keyboard]
+    notApplicable:
+      loading: the starter's shell loads no data
+      recoverable-error: the starter's shell has no form that can fail
+      system-failure: the starter has no server${ai ? "" : "\n      ai: the starter has no AI feature"}`;
   return `# UX assessment manifest (FEAT-009, CONTRACT-006), written by @ux-builder/create-app.
 # It binds this app's HELIX documents through .helix.yml; the journeys name
 # stories by ID. Check it with: npx ux-builder-audit assess validate
@@ -282,16 +334,7 @@ roles:
     description: A member of the team using the app
     auth: none
 journeys:
-  - id: J-start
-    story: US-001
-    priority: critical
-    role: member
-    entry: ${r.modalities.includes("responsive-web") ? "/" : assistantPath(r.modalities)}
-    states: [success, empty, ${ai ? "ai, " : ""}responsive-keyboard]
-    notApplicable:
-      loading: the starter's shell loads no data
-      recoverable-error: the starter's shell has no form that can fail
-      system-failure: the starter has no server${ai ? "" : "\n      ai: the starter has no AI feature"}
+${journeys}
 tests:
   - id: lint
     command: npm run lint

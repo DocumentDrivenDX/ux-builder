@@ -352,7 +352,7 @@ export function DesignedWithYou() {
           <h2 id="design-h">Designed with you, not for you.</h2>
           <p className="uxh-lede">The agent leads; you decide. It opens with an overview, tells you where you are, explains each term, and never moves on without your answer.</p>
           <ul className="uxh-checks">
-            <li><Icon icon={iconCheck} />Every brief, user, job, story and screen is shown to you in the conversation, one at a time, for feedback and approval</li>
+            <li><Icon icon={iconCheck} />The foundations (brief, users, jobs, stories, rules) are shown to you a table each; what is built from them, as one map of what covers what</li>
             <li><Icon icon={iconCheck} />What people need stays a labelled hypothesis until research or a test confirms it</li>
             <li><Icon icon={iconCheck} />Every added screen, step or input must earn its complexity; the simplest flow wins</li>
             <li><Icon icon={iconCheck} />Alternatives compared side by side, a clickable prototype, and a test kit for real people</li>
