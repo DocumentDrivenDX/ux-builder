@@ -154,20 +154,24 @@ export function PrototypeToolbar() {
   const { path, params } = useRoute();
   if (!(import.meta.env?.DEV || params.has("prototype"))) return null;
   const screen = screenAt(path);
+  // Folded by default, one line above the app, so the person sees their app first; journeys by their goal, not their ID (US-161-AC7).
   return (
-    <Card as="aside" title="Prototype" aria-label="Prototype toolbar" data-prototype-toolbar="">
-      <Stack gap={2}>
-        <Cluster>
-          {screen && <Select label="Screen state" value={params.get("state") ?? ""} onChange={(e) => navigate(path, { state: e.target.value || undefined, replace: true })} options={[{ value: "", label: "As it opens" }, ...screen.states.map((s) => ({ value: s, label: s }))]} />}
-          <Button variant="secondary" onClick={resetSampleData}>Reset prototype data</Button>
-        </Cluster>
-        {JOURNEYS.map((j) => (
-          <Cluster key={j.id} as="nav" gap={1} aria-label={`Journey ${j.id}`}>
-            <span>{j.id}{j.goal ? `: ${j.goal}` : ""}</span>
-            {j.steps.map((st, k) => <Button key={k} variant="text" size="sm" aria-current={st.path === path ? "step" : undefined} onClick={() => navigate(st.path, { state: st.state })}>{k + 1}. {st.title}</Button>)}
+    <aside aria-label="Prototype toolbar" data-prototype-toolbar="" style={{ padding: "var(--piq-space-2) var(--piq-space-4)", borderBlockEnd: "1px solid var(--piq-color-border)" }}>
+      <details>
+        <summary>Prototype controls</summary>
+        <Stack gap={2}>
+          <Cluster>
+            {screen && <Select label="Screen state" value={params.get("state") ?? ""} onChange={(e) => navigate(path, { state: e.target.value || undefined, replace: true })} options={[{ value: "", label: "As it opens" }, ...screen.states.map((s) => ({ value: s, label: s }))]} />}
+            <Button variant="secondary" onClick={resetSampleData}>Reset prototype data</Button>
           </Cluster>
-        ))}
-      </Stack>
-    </Card>
+          {JOURNEYS.map((j) => (
+            <Cluster key={j.id} as="nav" gap={1} aria-label={`Journey: ${j.goal || j.id}`}>
+              <span>{j.goal || j.id}</span>
+              {j.steps.map((st, k) => <Button key={k} variant="text" size="sm" aria-current={st.path === path ? "step" : undefined} onClick={() => navigate(st.path, { state: st.state })}>{k + 1}. {st.title}</Button>)}
+            </Cluster>
+          ))}
+        </Stack>
+      </details>
+    </aside>
   );
 }

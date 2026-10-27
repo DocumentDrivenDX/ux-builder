@@ -121,6 +121,17 @@ diff `review table`, `review map` and `review show` give. Checkpoints and
 `step next` refuse while foundations or built items of their steps await
 review.
 
+**Only the person approves.** Record an approval only with the person's own
+approval of what you showed them (`--answer` in their words), never with
+words they said about something else: "carry on", a theme name, or a
+checkpoint answer approves nothing else. When something they approved
+comes back changed, their own edits too, show the diff (`review show
+<item>`) and ask; `review approve` refuses to approve a changed item, or
+the coverage map again, that was not shown as it is now. If an edit kept
+every word, say that it kept its approval; never say an approval stands
+when you are asking for it again. After changing part of a story, re-read
+the whole story and update any line that no longer fits the change.
+
 **Let `advance` find the next decision.** Instead of many separate checks,
 run `ux-builder-design advance --until-decision`: it checks the documents,
 keeps approvals through formatting changes, works out the coverage map,
@@ -133,10 +144,15 @@ first, then ask that one question.
 what it was: `ux-builder-design metrics turn --kind
 answer|decision|approval|correction|question|other` (other: "go on", a
 repeat, a clarification of something you said). Record milestones with
-`metrics mark prototype` (they first click through a working prototype),
+`metrics mark prototype` when the person first tries it (when they tell
+you they clicked through it, not when you build it),
 `testing` and `release`. `ux-builder-design metrics` reports it against
 the targets: at most 10 approvals before testing, at least 80% of turns
 new information or decisions, a first prototype within 30 active minutes.
+
+**One command per call.** Run each `ux-builder-design` command on its own:
+no shell variables, `&&` chains, loops or scripts you write. Many
+environments allow single commands but ask about or refuse compound ones.
 
 Record what you learn as you go, with `ux-builder-design state set`:
 - an assumption: `state set 'assumptions[+]' '{"text":"…"}'` (it gets an
@@ -310,6 +326,14 @@ verify EV-<n> C<n>`; never relay a subagent's summary as fact. A claim you
 cannot check is labelled uncertain (`--confidence low`) and said so.
 `validate` warns about any direction-changing claim neither checked nor
 labelled.
+
+When what the person says goes against a claim from their own sources
+("I don't use due dates" against a missed appointment in their notes),
+do not quietly follow either side: record it with `ux-builder-design
+evidence claim contradict <EV-n> <Cn> --text "<what they said>"`, which
+opens a question, and ask them which holds. `validate` warns about a
+contradicted claim nobody asked about, and about a story the brief calls
+confirmed that no journey carries.
 
 Update the jobs and users tables as evidence arrives: rate importance and confidence
 separately; a job is confirmed only with an evidence source. Run

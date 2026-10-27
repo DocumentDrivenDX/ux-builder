@@ -119,6 +119,10 @@ describe("US-159: the app built from a design opens on its journeys", () => {
     assert.match(runtime, /tone="error" role="alert" title=\{r\.blocked/);
     assert.match(runtime, /if \(!\(import\.meta\.env\?\.DEV \|\| params\.has\("prototype"\)\)\) return null;/, "the toolbar in npm run dev, or with ?prototype");
     assert.match(runtime, /<Button variant="secondary" onClick=\{resetSampleData\}>Reset prototype data<\/Button>/);
+    // @covers US-161-AC7
+    assert.match(runtime, /<details>\n\s*<summary>Prototype controls<\/summary>/, "folded by default");
+    assert.match(runtime, /aria-label=\{`Journey: \$\{j\.goal \|\| j\.id\}`\}/, "journeys by their goal");
+    assert.doesNotMatch(runtime, /<span>\{j\.id\}/);
     assert.match(runtime, /window\.localStorage\.removeItem\(KEY\)/);
     assert.match(read(dir, "e2e/journeys.spec.js"), /\?state=error[\s\S]*name: "Try again"[\s\S]*"data-state", "ideal"/);
     // The assessment's manifest walks the designed journeys in every state the skeleton shows.

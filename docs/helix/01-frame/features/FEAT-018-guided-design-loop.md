@@ -663,6 +663,15 @@ and approve.
   against the targets: at most 10 approvals before testing, at least 80% of
   turns new information or decisions, no approval reopened by formatting,
   a first prototype within 30 active minutes.
+- **Held up in a real session** (US-161). A paced, simulated session (trial
+  tasks-1, 2026-10-27) found what the measures and approvals missed; each
+  is fixed: a re-wrapped paragraph keeps its approval, core-2 leads to step
+  5, only the person approves (a changed item or the map is shown before it
+  is approved again), approvals are counted per answer, a step the loop
+  leaves is not testing, a contradiction with the person's sources is asked
+  about, the brief may not call a dropped story confirmed, the prototype
+  toolbar is folded and a screen without a sample of its own is drawn from
+  its content.
 
 ##### Tasks (stage 3)
 

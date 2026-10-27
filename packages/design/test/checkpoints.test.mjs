@@ -33,11 +33,12 @@ describe("state checkpoint", () => {
     assert.equal(d.chose, cp.answer);
     assert.equal(JSON.parse(r.stdout).trace.episode, episode);
     assert.deepEqual(validateTrace(app), []);
-    // core-1 moves the loop to Explore, and a next action that waited on it gives way; core-2 moves it to Experience.
+    // core-1 moves the loop to Explore, and a next action that waited on it gives way; core-2 moves it to step 5, Design the structure, still Explore (US-161-AC2).
     assert.equal(readState(app).activity, "explore");
     assert.match(readState(app).next, /^Draft at least two alternatives/);
     cli(app, ["state", "set", "next", JSON.stringify("Compare, then ask core-2")]);
-    assert.match(cli(app, ["state", "checkpoint", "core-2", "--answer", "Map first"]).stdout, /\nNow experience\. Next: Prototype the chosen design/);
+    assert.match(cli(app, ["state", "checkpoint", "core-2", "--answer", "Map first"]).stdout, /\nNow explore, step 5\. Next: Ask which modalities and screen sizes/);
+    assert.deepEqual([readState(app).step, readState(app).activity], [5, "explore"]);
     // A "not yet" is recorded, never counts as passed, and status says so.
     assert.equal(cli(app, ["state", "set", "prototype", JSON.stringify({ branch: "proto/map" })]).status, 0);
     assert.match(cli(app, ["state", "checkpoint", "core-3", "--answer", "Not yet: fix Saved first", "--declined"]).stdout, /^Checkpoint core-3 declined/);

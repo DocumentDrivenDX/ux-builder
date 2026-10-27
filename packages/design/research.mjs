@@ -7,6 +7,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { isAbsolute, join, relative } from "node:path";
 import { DesignError, ux, writeInApp } from "./app.mjs";
 import { CLAIM_COLUMNS, claimChecks, evidenceClaims, parseDocument } from "./documents.mjs";
+import { readState, writeState } from "./state.mjs";
 
 export const EVIDENCE_KINDS = ["interview", "analytics", "support", "feedback", "survey", "observation"];
 const docsDir = (app) => ux(app, "evidence");
@@ -105,6 +106,28 @@ export function claimVerify(app, { id, claim, confidence } = {}) {
   if (confidence) { if (!["high", "medium", "low"].includes(confidence)) throw new DesignError(`--confidence is high, medium or low, not "${confidence}"`); c.confidence = confidence; }
   writeClaims(app, path, rows);
   return { evidence: id, id: c.id, verified: true, confidence: c.confidence };
+}
+
+/* ux-builder-design evidence claim contradict <EV-n> <Cn> --text <what the
+   person said> (US-161-AC5): what the person says goes against a claim from
+   their own sources. It is written in the claim's Contradicting column and
+   opened as a question for the person, so the design never quietly follows
+   one side. */
+export function claimContradict(app, { id, claim, text } = {}) {
+  const path = evidencePath(app, id);
+  if (!text?.trim()) throw new DesignError("evidence claim contradict needs --text: what the person said, in their words");
+  const rows = evidenceClaims(app).filter((x) => x.evidence === id);
+  const c = rows.find((r) => r.id === claim);
+  if (!c) throw new DesignError(`${id} has no claim ${claim ?? ""}; it has ${rows.map((r) => r.id).join(", ") || "none"}`);
+  const said = `the person: "${text.trim()}"`;
+  c.contradicting = c.contradicting ? `${c.contradicting}; ${said}` : said;
+  writeClaims(app, path, rows);
+  const state = readState(app);
+  state.questions ??= [];
+  const q = { id: `Q-${Math.max(0, ...state.questions.map((x) => Number(x.id.slice(2)) || 0)) + 1}`, text: `${id} ${c.id} says "${c.claim}", and the person said "${text.trim()}". Which holds?`, status: "open" };
+  state.questions.push(q);
+  writeState(app, state);
+  return { evidence: id, id: c.id, path, contradicting: c.contradicting, question: q };
 }
 
 /* Direction-changing claims not yet checked against their source, and not marked low confidence. */

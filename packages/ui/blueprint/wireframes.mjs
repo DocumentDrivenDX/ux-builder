@@ -77,7 +77,30 @@ function placeholder(name, s, { h, ui, P }) {
     DescriptionList: { items: [{ label: "Owner", value: "A. Person" }, { label: "Status", value: "Open" }] },
     Timeline: { events: [{ id: 1, title: "Created", time: "2026-10-01T09:00:00" }] },
   }[name];
-  return props ?? { title, label: title, children: text("Placeholder content.") };
+  // A pattern with no sample of its own draws the screen's content items as what they are (US-161-AC8).
+  const drawn = contentElements(s, { h, ui });
+  return props ?? { title, label: title, children: drawn.length ? drawn : text("Placeholder content.") };
+}
+
+/* A screen's content items as controls and sample entries, by their kind:
+   an input is a field with the screen's primary action, data is three
+   sample entries named from the item (ticked off where the screen toggles
+   items), feedback is a notice, anything else its label as text. */
+function contentElements(s, { h, ui }) {
+  const items = (Array.isArray(s.content) ? s.content : []).filter((c) => c?.label);
+  const primary = (Array.isArray(s.actions) ? s.actions.find((a) => a?.primary)?.label : null) ?? s.primaryAction?.label ?? null;
+  const toggles = (Array.isArray(s.interactionKinds) ? s.interactionKinds : []).includes("toggle-item");
+  const noun = (label) => { const w = String(label).split(/[^\p{L}]+/u).find(Boolean) ?? "Item"; return w.length > 3 && /[^s]s$/i.test(w) ? w.slice(0, -1) : w; };
+  return items.map((c, k) => {
+    const kind = String(c.kind ?? "");
+    if (/input|field|form|entry/.test(kind)) return h("div", { key: k, "data-content": kind }, h(ui.TextField, { label: c.label, name: `content${k + 1}` }), primary ? h(ui.Button, null, primary) : null);
+    if (/data|list|collection|items|records/.test(kind)) {
+      const n = noun(c.label);
+      return h("ul", { key: k, "data-content": kind, "aria-label": c.label, style: { listStyle: "none", padding: 0 } }, [1, 2, 3].map((i) => h("li", { key: i }, toggles ? h(ui.Checkbox, { label: `${n} ${i}`, defaultChecked: i === 3 }) : `${n} ${i}`)));
+    }
+    if (/feedback|message|notice|status|toast/.test(kind)) return h(ui.Notice, { key: k, "data-content": kind, title: c.label });
+    return h("p", { key: k, "data-content": kind || "text" }, c.label);
+  });
 }
 
 const STATUSES = new Map(catalogue.patterns.map((p) => [p.name, p.statuses ?? []]));

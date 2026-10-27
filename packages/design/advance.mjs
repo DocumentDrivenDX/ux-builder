@@ -72,7 +72,7 @@ function nextDecision({ app, state, pending, map, proposals, step, passed }) {
   }
   if (foundations.length) {
     const kind = kindOf(foundations[0].id);
-    const t = reviewTable(app, { kind });
+    const t = reviewTable(app, { kind, shown: false });
     return { kind: "table", table: kind, items: t.pending, question: `approve the ${kind} table (${t.pending.length} item${t.pending.length === 1 ? "" : "s"}${t.items.some((x) => x.diff) ? ", with what changed" : ""})`, show: `ux-builder-design review table ${kind}, every row in full`, recommend: "approve it, or say what to change in any row", record: `ux-builder-design review approve --kind ${kind} --answer "<their words>"`, after: foundations.length > t.pending.length ? `the next foundation table (${kindOf(foundations.find((f) => kindOf(f.id) !== kind).id)})` : "what is built from the foundations" };
   }
   const derived = pending.filter((p) => p.tier === "derived");

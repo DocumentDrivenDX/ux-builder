@@ -295,9 +295,12 @@ test("?state= forces a state, and its retry recovers", async ({ page }) => {
   await expect(screen).toHaveAttribute("data-state", "ideal");
 });
 
-test("the prototype toolbar resets the sample data", async ({ page }) => {
+test("the prototype toolbar is folded, and opens to reset the sample data", async ({ page }) => {
   await page.goto(${JSON.stringify(`${s.path}?prototype`)});
-  await expect(page.getByRole("complementary", { name: "Prototype toolbar" }).getByRole("button", { name: "Reset prototype data" })).toBeVisible();
+  const bar = page.getByRole("complementary", { name: "Prototype toolbar" });
+  await expect(bar.getByRole("button", { name: "Reset prototype data" })).toBeHidden();
+  await bar.getByText("Prototype controls").click();
+  await expect(bar.getByRole("button", { name: "Reset prototype data" })).toBeVisible();
 });
 `;
 }

@@ -39,7 +39,7 @@ describe("US-152: an approval holds until the meaning changes, and then shows th
     assert.ok(!ids(a).includes("story:US-001"), "metadata and formatting do not reopen it");
     assert.deepEqual(carried(a), ["story:US-001"]);
     const r = readState(a).reviews.find((x) => x.item === "story:US-001");
-    assert.match(r.snapshot, /^# US-001: Find a river\n\n- \[ \] \*\*US-001-AC1\*\*/);
+    assert.match(r.snapshot, /^# US-001: Find a river\n\n- \[ \] US-001-AC1/);
     assert.ok(r.raw && r.raw !== r.hash);
   });
 
@@ -50,10 +50,10 @@ describe("US-152: an approval holds until the meaning changes, and then shows th
     edit(a, STORY, (t) => t.replace("they find one with access", "they find one with public access"));
     const p = pendingReviews(a).find((x) => x.id === "story:US-001");
     assert.equal(p.changed, true);
-    assert.match(p.diff, /^- - \[ \] \*\*US-001-AC1\*\* — Given rivers nearby, when the angler looks, then they find one with access\.\n\+ - \[ \] \*\*US-001-AC1\*\* — .*public access\.\n {2}- \[ \] \*\*US-001-AC2\*\*/m);
+    assert.match(p.diff, /^- - \[ \] US-001-AC1 — Given rivers nearby, when the angler looks, then they find one with access\.\n\+ - \[ \] US-001-AC1 — .*public access\.\n {2}- \[ \] US-001-AC2/m);
     assert.doesNotMatch(p.diff, /ddx:/, "no frontmatter in the diff");
     const shown = cli(a, ["review", "show", "story:US-001"]).stdout;
-    assert.match(shown, /changed since approved[\s\S]*Changed since approved:\n- - \[ \] \*\*US-001-AC1\*\*/);
+    assert.match(shown, /changed since approved[\s\S]*Changed since approved:\n- - \[ \] US-001-AC1/);
     reviewApprove(a, { item: "story:US-001", answer: "Yes, public access" });
     assert.deepEqual(metrics(a).reopened, { count: 1, items: ["story:US-001"] });
   });
