@@ -571,7 +571,12 @@ readable where it is until `ux-builder-design migrate` moves it (with
 `git mv`, rewriting its own references), and the tools say so. Before
 any wireframe or prototype is drawn, the guide asks the person which
 modalities and screen sizes the app is for, and records the answer;
-wireframes and prototypes wait for it.
+wireframes and prototypes wait for it. *[Amended 2026-10-27 — US-162, ADR-041]* With the modality and screen
+sizes, the person chooses the **app frame** for a responsive-web app: just
+the screen, a top bar with no menu, navigation across the top, or a side
+menu. The agent shows the four and recommends one from the destinations;
+the choice is recorded in the blueprint, and wireframes, prototypes, the
+built app and the audit follow it.
 
 GDL-81. **Design first, the app last** *(added 2026-10-24, from the
 operator)*. A person starts the guide before there is an app:

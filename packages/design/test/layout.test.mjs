@@ -59,7 +59,7 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     json(a, ["decision", "add", "--question", "Map first?", "--option", "Map", "--option", "List", "--choice", "Map", "--why", "Fewer steps"]);
     assert.equal(blueprint(a, ["alternative", "new", "list-first"]).status, 0);
     assert.equal(blueprint(a, ["compare", "docs/ux-builder/blueprint/app.blueprint.json", "docs/ux-builder/blueprint/app.blueprint.list-first.json"]).status, 0);
-    json(a, ["modality", "--answer", "A web app for phones", "--modality", "responsive-web", "--size-classes", "compact"]);
+    json(a, ["modality", "--answer", "A web app for phones", "--modality", "responsive-web", "--size-classes", "compact", "--frame", "top-bar"]);
     assert.equal(blueprint(a, ["prototype", "--explore", "--alternative", "list-first", "--question", "List first?"]).status, 0);
     const proposed = blueprint(a, ["propose"]);
     assert.equal(proposed.status, 0, proposed.stderr);
@@ -140,7 +140,7 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     assert.match(r.stderr, /unknown size class huge; use compact, medium, expanded, large, extra-large/);
     assert.equal(readFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"), before);
     assert.equal(readState(a).modality, undefined);
-    const ok = json(a, ["modality", "--answer", "Chat on phones and laptops", "--modality", "responsive-web,hybrid-chat", "--size-classes", "compact,expanded"]);
+    const ok = json(a, ["modality", "--answer", "Chat on phones and laptops", "--modality", "responsive-web,hybrid-chat", "--size-classes", "compact,expanded", "--frame", "side-nav"]);
     assert.deepEqual([ok.modalities, ok.sizeClasses], [["responsive-web", "hybrid-chat"], ["compact", "expanded"]]);
     assert.deepEqual(JSON.parse(readFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8")).supports.modalities, ["responsive-web", "hybrid-chat"]);
     assert.equal(readState(a).modality.answer, "Chat on phones and laptops");

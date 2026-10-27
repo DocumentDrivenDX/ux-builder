@@ -178,6 +178,11 @@ Outputs in `--out`: `report.json`, `index.html` (self-contained) and
   responsive-web verdict, the `AppShell` component carries `framed`,
   `navigation`, `alternative: "main"` (`required: false`), and `adapts`
   only when there is navigation (FEAT-014 MOD-09, by outcome).
+  *[Amended 2026-10-27 — US-162, ADR-041]* The audit records AppShell's
+  `frame` and whether navigation shows across the top bar (`top`); that
+  navigation counts as adapting from expanded as the side navigation does,
+  and an app drawn in a frame other than the blueprint's `supports.frame` is
+  named in the verdict's fixes.
 - Writing the report rewrites the app's **report page**,
   `docs/ux-builder/reports.html` (`reports.html` at the top of an app on the
   old layout; none outside an app): what the UI audit and the usability

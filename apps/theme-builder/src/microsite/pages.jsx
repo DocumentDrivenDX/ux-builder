@@ -390,8 +390,8 @@ function Design() {
       <p><b>Business rules</b> stay defined once in HELIX, as <code>**BR-n** — the rule</code>. The blueprint's tasks and journey steps cite the rules they depend on, and say how the user meets each: what triggers it, what they see before, what happens when they are blocked and how they recover. <code>validate</code> fails a cited rule HELIX does not define or whose experience is not designed; the test kit adds a task per rule; the report shows how people fared with each.</p>
 
       <H2 id="modality">Modality first, theme last</H2>
-      <p>Before any wireframe or prototype is drawn, the agent asks which modalities and screen sizes the app is for, and records your answer in the blueprint. Wireframes and prototypes wait for it, and ask again if the blueprint's sizes change.</p>
-      <Command text={'npx ux-builder-design modality --answer "A web app for phones and laptops" --modality responsive-web --size-classes compact,medium,expanded,large'} />
+      <p>Before any wireframe or prototype is drawn, the agent asks which modalities and screen sizes the app is for and, for a web app, its <b>app frame</b>: just the screen with no menus, a top bar, navigation across the top, or a side menu. It recommends one from your app's destinations; you choose. Your answer is recorded in the blueprint; wireframes, prototypes and the built app are drawn in that frame, and ask again if it changes.</p>
+      <Command text={'npx ux-builder-design modality --answer "A web app for phones and laptops" --modality responsive-web --size-classes compact,medium,expanded,large --frame top-nav'} />
       <p>The theme is chosen when the app is built, so the look serves the experience you designed. Make your own from a logo in the <a href={href("start", "theme-from-logo")}>theme builder</a>: it pairs a palette that passes contrast with a design system, and saving it opens a pull request; once released in <code>@ux-builder/tokens</code>, any app can wear it by name.</p>
 
       <H2 id="checkpoints">Checkpoints: you decide</H2>

@@ -401,11 +401,24 @@ first, say), draft at least two alternatives and recommend one:
 the terms *modality* and *size class* (`ux-builder-design explain modality`),
 then ask the person what kind of experience the app gives (responsive web,
 chat, hybrid chat; more than one is possible) and the screen sizes it must
-work at, and record their answer:
-`ux-builder-design modality --answer "<their words>" --modality <list> --size-classes <list>`.
+work at. For responsive web, ask in the same message which **app frame**
+it should have (`ux-builder-design explain "app frame"`), showing the four
+side by side:
+- *just the screen*: no top bar or menus, the screen fills the window
+  (`screen`), for a one-screen app;
+- *a top bar, no menu* (`top-bar`): the app's name and actions only;
+- *navigation across the top* (`top-nav`), a bottom bar on phones, for up
+  to five destinations;
+- *a side menu* (`side-nav`), a rail on tablets and a bottom bar on phones,
+  for many destinations.
+Recommend one from the destinations (`ux-builder-design status` names it
+and why); the person decides. Record their answer:
+`ux-builder-design modality --answer "<their words>" --modality <list> --size-classes <list> --frame <frame>`.
 It sets the blueprint's `supports`; `ux-builder-blueprint wireframes` and
 `prototype --explore` refuse until it is recorded, and ask again if the
-blueprint's supports change.
+blueprint's supports change. Wireframes, prototypes and the built app use
+the frame; `ux-builder-blueprint check` warns when it no longer fits the
+destinations.
 
 From the chosen flow, generate the information architecture, the
 interaction design and the interface design together, not one after

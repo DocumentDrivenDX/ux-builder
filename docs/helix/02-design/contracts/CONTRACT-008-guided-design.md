@@ -160,7 +160,7 @@ blueprint CLI's writing commands, on stderr) says to migrate. New apps
 | Command | Does | Writes |
 |---|---|---|
 | `migrate [--dry-run]` | Moves each old path to its new place (`git mv` for tracked files) and rewrites the old paths in the app's `package.json`, `ux-assessment.yml`, `CLAUDE.md`, `AGENTS.md`, `README.md`, `.github/workflows/*.yml` and design state. `--dry-run` lists the moves and files and changes nothing. Refuses (exit 2), changing nothing, when a destination exists | the moved files and those references |
-| `modality --answer <their words> --modality <list> [--size-classes <list>]` | Records which modalities (`responsive-web`, `chat`, `hybrid-chat`) and size classes the person says the app is for, setting the blueprint's `supports`; refuses future and unknown values (exit 2) | the blueprint, the state's `modality` |
+| `modality --answer <their words> --modality <list> [--size-classes <list>] [--frame <frame>]` | Records which modalities (`responsive-web`, `chat`, `hybrid-chat`) and size classes the person says the app is for and, for responsive web, the app frame they chose (`screen`, `top-bar`, `top-nav`, `side-nav`; US-162), setting the blueprint's `supports`; refuses future and unknown values, responsive web without `--frame` (naming the four and the one recommended from the destinations), and `--frame` without responsive web (exit 2) | the blueprint, the state's `modality` |
 
 In an app with a design state, `ux-builder-blueprint wireframes` and
 `prototype --explore` exit 1, drawing nothing, until the state's
@@ -245,7 +245,7 @@ folder says the app is not built and what the build needs.
 | `prototype` | `{ branch, alternative? }` | The validated prototype's branch; `status` reports it `validated` until `core-3` passes, then `production` |
 | `observations[]` | `{ id: "O-<n>", text, source: design-team, alternative? }` | What the design team noticed trying a prototype; never user evidence |
 | `consents[]` | `{ session, confirmed: true, by?, date, evidence? }` | Consent confirmed per test session before its transcript was analysed (ADR-039) |
-| `modality` | `{ modalities[], sizeClasses[], answer, at }` | The person's answer to which modalities and screen sizes the app is for (GDL-80) |
+| `modality` | `{ modalities[], sizeClasses[], frame?, answer, at }` | The person's answer to which modalities and screen sizes the app is for, and its frame (GDL-80, US-162) |
 | `app` | `{ builtAt, theme, modalities[], by }` | In a design folder, the app's build in place (GDL-81); absent until then |
 | `modeReason` | string | Why the mode was set (`mode --why`) |
 | `step` | integer | The step of the current mode the person is on (0: an existing app's baseline) |

@@ -11,7 +11,7 @@ const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CO
 
 Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
 
-  modality --answer <their words> --modality <list> [--size-classes <list>]
+  modality --answer <their words> --modality <list> [--size-classes <list>] [--frame <frame>]
       record which modalities (responsive-web, chat, hybrid-chat) and screen
       sizes the person says the app is for, in the blueprint's supports;
       wireframes and prototypes wait for it.
@@ -213,7 +213,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -228,8 +228,8 @@ async function main(argv) {
   const app = values.app ? findApp(values.app) : findApp();
 
   if (command === "modality") {
-    const r = confirmModality(app, { answer: values.answer, modalities: values.modality, sizeClasses: values["size-classes"] });
-    print(r, values.json, `Recorded: ${r.modalities.join(", ")}${r.sizeClasses.length ? ` at ${r.sizeClasses.join(", ")}` : ""}, in ${r.file}. Wireframes and prototypes can be drawn now.`);
+    const r = confirmModality(app, { answer: values.answer, modalities: values.modality, sizeClasses: values["size-classes"], frame: values.frame });
+    print(r, values.json, `Recorded: ${r.modalities.join(", ")}${r.sizeClasses.length ? ` at ${r.sizeClasses.join(", ")}` : ""}${r.frame ? `, in the ${r.frame} frame` : ""}, in ${r.file}. Wireframes and prototypes can be drawn now.`);
     return 0;
   }
   if (command === "migrate") {

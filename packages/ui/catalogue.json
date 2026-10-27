@@ -1902,6 +1902,10 @@
           "default": "\"window\""
         },
         {
+          "name": "frame",
+          "default": "\"side-nav\""
+        },
+        {
           "name": "children",
           "default": null
         },
@@ -24636,6 +24640,15 @@
                   "hybrid-chat"
                 ]
               }
+            },
+            "frame": {
+              "description": "The app frame the person chose (US-162): screen (the content alone, no top bar or navigation), top-bar (a top bar with the app's name and actions, no navigation), top-nav (destinations across the top bar from medium up, a bottom bar on phones) or side-nav (a side menu from expanded, a rail at medium, a bottom bar on phones). Without it, side-nav.",
+              "enum": [
+                "screen",
+                "top-bar",
+                "top-nav",
+                "side-nav"
+              ]
             }
           }
         },

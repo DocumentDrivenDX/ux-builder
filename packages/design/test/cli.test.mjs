@@ -47,7 +47,7 @@ const COMMANDS = [
   ["reviewFeedback", ["review", "feedback", "evidence:EV-1", "--text", "Cite the second quote too"], (app) => design.reviewFeedback(app, { item: "evidence:EV-1", text: "Cite the second quote too" })],
   ["reviewApprove", ["review", "approve", "evidence:EV-1", "--answer", "Yes"], (app) => design.reviewApprove(app, { item: "evidence:EV-1", answer: "Yes" })],
   ["reviewRespond", ["review", "respond", "FB-1", "--text", "Cited the second quote"], (app) => design.reviewRespond(app, { id: "FB-1", text: "Cited the second quote" }), (app) => { design.reviewFeedback(app, { item: "evidence:EV-1", text: "Cite the second quote too" }); return app; }],
-  ["modality", ["modality", "--answer", "A web app for phones", "--modality", "responsive-web", "--size-classes", "compact"], (app) => design.confirmModality(app, { answer: "A web app for phones", modalities: "responsive-web", sizeClasses: "compact" })],
+  ["modality", ["modality", "--answer", "A web app for phones", "--modality", "responsive-web", "--size-classes", "compact", "--frame", "top-bar"], (app) => design.confirmModality(app, { answer: "A web app for phones", modalities: "responsive-web", sizeClasses: "compact", frame: "top-bar" })],
   ["migrate", ["migrate", "--dry-run"], (app) => design.migrate(app, { dryRun: true })],
   ["mode", ["mode", "change", "--why", "A small change"], (app) => design.setMode(app, { mode: "change", why: "A small change" })],
   ["brief", ["brief", "--name", "Rivers"], (app) => design.brief(app, { name: "Rivers" })],

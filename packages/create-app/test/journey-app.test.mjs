@@ -13,7 +13,7 @@ import { after, describe, test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
 import { buildInPlace } from "../design-first.mjs";
-import { headerOf, journeyModel, stamp } from "../journey-app.mjs";
+import { generateJourneyApp, headerOf, journeyModel, stamp } from "../journey-app.mjs";
 import { bundle } from "./fixtures/helix-release.mjs";
 
 const CLI = fileURLToPath(new URL("../index.mjs", import.meta.url));
@@ -52,7 +52,7 @@ const designed = (supports) => ({
 function folder(name, prepare) {
   assert.equal(run(CLI, tmp, name).status, 0);
   const dir = join(tmp, name);
-  assert.equal(run(DESIGN, dir, "modality", "--answer", "A web app for phones and laptops", "--modality", "responsive-web", "--size-classes", "compact,expanded").status, 0);
+  assert.equal(run(DESIGN, dir, "modality", "--answer", "A web app for phones and laptops", "--modality", "responsive-web", "--size-classes", "compact,expanded", "--frame", "side-nav").status, 0);
   const bp = JSON.parse(read(dir, BP));
   writeFileSync(join(dir, BP), JSON.stringify(designed(bp.supports), null, 2) + "\n");
   prepare?.(dir);
@@ -209,5 +209,26 @@ describe("US-156: the build installs no starter document the design already has"
     assert.deepEqual(o.helix.skipped.map((s) => s.id), ["FEAT-001", "US-001", "STP-001"]);
     assert.match(o.helix.skipped[0].why, /the design already has a feature-specification document \(FEAT-007/);
     assert.doesNotMatch(read(other, "docs/helix/02-design/DESIGN.md"), /to: FEAT-001/, "no link to a starter document that was not written");
+  });
+});
+
+describe("US-162: the app is built in the frame the person chose", () => {
+  // @covers US-162-AC4
+  test("AC4: the generated App passes the blueprint's supports.frame to AppShell; without one it keeps side navigation", () => {
+    const bp = (frame) => ({ version: 1, kind: "app", name: "Tasks", supports: { modalities: ["responsive-web"], sizeClasses: ["compact"], inputs: ["coarse"], ...(frame ? { frame } : {}) },
+      destinations: [{ id: "list", label: "Tasks", screen: "list" }],
+      screens: [{ id: "list", title: "Tasks", pattern: "CollectionList", actions: [{ id: "add", label: "Add", to: "list", primary: true }] }],
+      journeys: [{ id: "J-capture", entry: "list", steps: [{ screen: "list", action: "add" }] }] });
+    const app = (frame) => {
+      const dir = mkdtempSync(join(tmp, "frame-"));
+      put(dir, BP, JSON.stringify(bp(frame), null, 2));
+      generateJourneyApp(dir);
+      return read(dir, "src/App.jsx");
+    };
+    assert.equal(journeyModel(bp("screen")).frame, "screen");
+    assert.match(app("screen"), /<AppShell nav=\{NAV\}.* frame="screen" /);
+    assert.match(app("screen"), /in the frame the person\n {3}chose \(supports\.frame: screen\)/);
+    assert.match(app("top-nav"), / frame="top-nav" /);
+    assert.doesNotMatch(app(null), /frame=/, "side navigation, AppShell's default");
   });
 });

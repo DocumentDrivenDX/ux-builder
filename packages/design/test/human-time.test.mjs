@@ -168,7 +168,7 @@ describe("US-154: the intake asked together, the budget shown, and the guide's o
   test("AC2: the budget counts the decisions left before the first prototype, and falls as they are made", () => {
     const a = app();
     const before = budget(a);
-    assert.deepEqual(before.decisions, ["the brief", "the target users table", "the jobs table", "the stories table", "the decisions table", "checkpoint core-1", "the choice of approach (core-2)", "the coverage map", "the modality and screen sizes"]);
+    assert.deepEqual(before.decisions, ["the brief", "the target users table", "the jobs table", "the stories table", "the decisions table", "checkpoint core-1", "the choice of approach (core-2)", "the coverage map", "the modality, screen sizes and app frame"]);
     assert.equal(before.minutes, 27);
     approveFoundations(a);
     assert.equal(budget(a).count, 4);

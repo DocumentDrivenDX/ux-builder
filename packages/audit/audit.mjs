@@ -107,7 +107,8 @@ const pageFacts = (page) => page.evaluate(() => {
     screen: document.querySelector("[data-piq-screen]")?.getAttribute("data-piq-screen") || null,
     conversation: !!conv && !!conv.querySelector("[role=log]") && !!conv.querySelector(".piq-composer"),
     adaptiveCard: !!document.querySelector(".piq-adaptive-card:not(.piq-adaptive-card--invalid)"),
-    appShell: shell ? { bar: shown(shell.querySelector(".piq-shell__bar")), side: shown(shell.querySelector(".piq-shell__side")), nav: Math.max(shell.querySelectorAll(".piq-shell__bar-item").length, shell.querySelectorAll(".piq-shell__side a[href], .piq-shell__side button").length) } : null,
+    // The frame the app was built in (US-162): AppShell's frame, side navigation when it names none.
+    appShell: shell ? { frame: shell.getAttribute("data-frame") ?? "side-nav", bar: shown(shell.querySelector(".piq-shell__bar")), side: shown(shell.querySelector(".piq-shell__side")), top: shown(shell.querySelector(".piq-shell__topnav")), nav: Math.max(shell.querySelectorAll(".piq-shell__bar-item").length, shell.querySelectorAll(".piq-shell__side a[href], .piq-shell__side button, .piq-shell__topnav a[href], .piq-shell__topnav button").length) } : null,
     main: !!document.querySelector("main, [role=main]"),
     fits: document.scrollingElement.scrollWidth <= document.documentElement.clientWidth + 1,
   };

@@ -208,8 +208,10 @@ export async function wireframes(bp, { theme = THEME } = {}) {
         const order = Array.isArray(s.content) && s.content.length ? `<section class="wf-content" aria-label="Content, highest priority first" style="margin:var(--piq-space-4);padding:var(--piq-space-3);border:1px dashed var(--piq-color-border);color:var(--piq-color-text);font:var(--piq-font-body, inherit)"><p><strong>Content, highest priority first</strong></p><ol>${s.content.filter((c) => c?.label).map((c) => `<li>${esc(c.label)}${c.kind ? ` <small>(${esc(c.kind)})</small>` : ""}</li>`).join("")}</ol></section>` : "";
         const content = order + (el ? render(h(P.Page, null, el)) : box(s, state));
         const marked = state === "ideal" ? content : `<div data-state="${esc(state)}" data-drawn-by="${known ? by : "box"}">${content}</div>`;
-        // A view is drawn without a shell; the host provides it.
-        markup = bp.kind === "view" || !nav.length ? `<main>${marked}</main>` : render(h(P.AppShell, { nav, current: dests.find((d) => d.screen === s.id)?.id ?? null, brand: h("strong", null, bp.name ?? "App") }, h("div", { dangerouslySetInnerHTML: { __html: marked } })));
+        // A view is drawn without a shell; the host provides it. Otherwise the frame the person chose
+        // (supports.frame, US-162): just the screen, a top bar, or navigation across the top or at the side.
+        const frame = bp.supports?.frame ?? (nav.length ? "side-nav" : "screen");
+        markup = bp.kind === "view" || frame === "screen" ? `<main>${marked}</main>` : render(h(P.AppShell, { nav: frame === "top-bar" ? [] : nav, frame, current: dests.find((d) => d.screen === s.id)?.id ?? null, brand: h("strong", null, bp.name ?? "App") }, h("div", { dangerouslySetInnerHTML: { __html: marked } })));
       } catch (e) {
         known = false;
         markup = `<main>${box({ ...s, pattern: `${s.pattern} (could not be drawn: ${e.message})` }, state)}</main>`;

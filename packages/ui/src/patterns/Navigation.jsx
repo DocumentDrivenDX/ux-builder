@@ -126,8 +126,13 @@ export function WorkspaceSwitcher({ workspaces = [], current, onSwitch, label = 
    nav and current are PrimaryNav's items and current; brand, actions and
    breadcrumbs are slots. adapt="container" lays the shell out by the width of
    the element it is in rather than the window, for a preview or an embed
-   (give that element a height). */
-export function AppShell({ nav = [], current, navLabel = "Main", brand, actions, breadcrumbs, onNavigate, moreLabel = "More", skipLabel = "Skip to content", adapt = "window", children, className }) {
+   (give that element a height).
+   frame is the app frame the person chose (US-162): "side-nav" (the
+   default, above), "top-nav" (the destinations across the top bar from
+   medium up, the bottom bar below it), "top-bar" (the top bar with the
+   brand and actions, no navigation) or "screen" (the content alone, no top
+   bar or navigation, for a one-screen app). */
+export function AppShell({ nav = [], current, navLabel = "Main", brand, actions, breadcrumbs, onNavigate, moreLabel = "More", skipLabel = "Skip to content", adapt = "window", frame = "side-nav", children, className }) {
   const [drawer, setDrawer] = useState(false);
   const mainId = useId();
   const side = useRef(null);
@@ -152,21 +157,29 @@ export function AppShell({ nav = [], current, navLabel = "Main", brand, actions,
   };
   const navigate = onNavigate ? (item, e) => { setDrawer(false); onNavigate(item, e); } : undefined;
 
+  // What the chosen frame draws: the top bar, navigation at all, and where it sits from medium up.
+  const kind = ["screen", "top-bar", "top-nav"].includes(frame) ? frame : "side-nav";
+  const top = kind !== "screen", navigates = kind === "top-nav" || kind === "side-nav";
   const shell = (
-    <div className={`piq-shell${className ? ` ${className}` : ""}`} data-adapt={adapt === "container" ? "container" : undefined}>
-      <a className="piq-shell__skip" href={`#${mainId}`}>{skipLabel}</a>
-      <header className="piq-shell__top">
-        {brand && <div className="piq-shell__brand">{brand}</div>}
-        {actions && <div className="piq-shell__actions">{actions}</div>}
-      </header>
-      <div ref={side} className="piq-shell__side">
-        <PrimaryNav items={nav} current={current} label={navLabel} onNavigate={onNavigate} />
-      </div>
+    <div className={`piq-shell${className ? ` ${className}` : ""}`} data-adapt={adapt === "container" ? "container" : undefined} data-frame={kind === "side-nav" ? undefined : kind}>
+      {top && <a className="piq-shell__skip" href={`#${mainId}`}>{skipLabel}</a>}
+      {top && (
+        <header className="piq-shell__top">
+          {brand && <div className="piq-shell__brand">{brand}</div>}
+          {kind === "top-nav" && <PrimaryNav className="piq-shell__topnav" items={nav} current={current} label={navLabel} onNavigate={onNavigate} />}
+          {actions && <div className="piq-shell__actions">{actions}</div>}
+        </header>
+      )}
+      {kind === "side-nav" && (
+        <div ref={side} className="piq-shell__side">
+          <PrimaryNav items={nav} current={current} label={navLabel} onNavigate={onNavigate} />
+        </div>
+      )}
       <main id={mainId} className="piq-shell__main" tabIndex={-1}>
         {breadcrumbs && <div className="piq-shell__breadcrumbs">{breadcrumbs}</div>}
         {children}
       </main>
-      <nav className="piq-shell__bar" aria-label={navLabel}>
+      {navigates && <nav className="piq-shell__bar" aria-label={navLabel}>
         <ul className="piq-shell__bar-list">
           {bar.map((it) => {
             const on = !it.more && holdsCurrent(it, current);
@@ -180,10 +193,12 @@ export function AppShell({ nav = [], current, navLabel = "Main", brand, actions,
             );
           })}
         </ul>
-      </nav>
-      <Sheet open={drawer} onClose={() => setDrawer(false)} label={navLabel} side="start">
-        <PrimaryNav items={nav} current={current} label={navLabel} onNavigate={navigate} />
-      </Sheet>
+      </nav>}
+      {navigates && (
+        <Sheet open={drawer} onClose={() => setDrawer(false)} label={navLabel} side="start">
+          <PrimaryNav items={nav} current={current} label={navLabel} onNavigate={navigate} />
+        </Sheet>
+      )}
     </div>
   );
   return adapt === "container" ? <div className="piq-shell-frame">{shell}</div> : shell;

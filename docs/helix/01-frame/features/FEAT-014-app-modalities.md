@@ -134,6 +134,9 @@ modality, with the evidence.
   - `chat` and `hybrid-chat` render the SDK `Conversation` (its markers);
   - `hybrid-chat` can render an Adaptive Card part;
   - `responsive-web` uses `AppShell` navigation that adapts by size class.
+    *[Amended 2026-10-27 — US-162, ADR-041]* In the app frame the person
+    chose (`supports.frame`): navigation across the top bar adapts as the
+    side navigation does, and a frame without navigation has none to adapt.
 - **Rules:** the rule families the modality needs were checked.
 - **Missing pieces:** each missing component or rule family is named, with
   the fix.

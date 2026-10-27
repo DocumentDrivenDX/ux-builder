@@ -93,6 +93,7 @@ the findings of a blueprint check or an audit by rule ID.
 | `name` | string | yes | |
 | `supports.sizeClasses` | size-class[] | yes | Non-empty |
 | `supports.inputs` | input[] | yes | Non-empty |
+| `supports.frame` | `screen`, `top-bar`, `top-nav` or `side-nav` | no | The app frame the person chose (US-162, ADR-041); without it, `side-nav` |
 | `destinations` | array | app: yes; view: no | Each `{ "id", "label", "screen" }`; `screen` names a screen `id` |
 | `screens` | array | yes | Non-empty; each below |
 | `screens[].id`, `.title`, `.pattern` | string | yes | `pattern`: a catalogue pattern |
@@ -362,6 +363,18 @@ reserved: `blueprint.valid` fails them as "future". A blueprint without the
 field is read as `["responsive-web"]`. `supports.sizeClasses` and
 `supports.inputs` must include those FEAT-014's matrix derives from the
 modalities, or `blueprint.valid` warns naming the missing values.
+
+### `supports.frame`
+*[Added 2026-10-27 — US-162, ADR-041]*
+
+The app frame the person chose for a responsive-web app: `screen` (the
+content alone), `top-bar` (the app's name and actions, no navigation),
+`top-nav` (destinations across the top bar from medium, a bottom bar on
+phones) or `side-nav` (a side menu, a rail at medium, a bottom bar on
+phones). Wireframes, prototypes and the built app are drawn in it.
+`blueprint.valid` warns when a frame without navigation has more than one
+destination, when `top-nav` or `side-nav` has one destination or none, and
+when `top-nav` has more than five.
 
 ### `screens[].path`
 

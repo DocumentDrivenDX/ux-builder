@@ -92,7 +92,7 @@ export async function buildInPlace(dir, { theme, modalities: given, blueprint, n
   if (!isDesignFolder(target)) fail(`${dir} is not a design folder waiting for its app (made by npm create @ux-builder/app without --modality)`);
   if (blueprint) fail("--blueprint is refused in a design folder: the app is built from the designed blueprint, docs/ux-builder/blueprint/app.blueprint.json. Nothing was written.");
   const m = modalityStatus(target);
-  if (!m.confirmed) fail(`the app's modalities are not recorded yet: ask the person which modalities and screen sizes the app is for, and record their answer with ux-builder-design modality --answer "<their words>" --modality <list> --size-classes <list>. Nothing was written.`);
+  if (!m.confirmed) fail(`the app's modalities are not recorded yet: ask the person which modalities and screen sizes the app is for and, for responsive web, its app frame, and record their answer with ux-builder-design modality --answer "<their words>" --modality <list> --size-classes <list> --frame <frame>. Nothing was written.`);
   const modalities = m.modalities;
   if (given && (given.length !== modalities.length || given.some((x) => !modalities.includes(x)))) fail(`--modality ${given.join(",")} differs from the modalities recorded in the design, ${modalities.join(",")}; leave out --modality, or record the new answer with ux-builder-design modality. Nothing was written.`);
   if (!theme) fail(`which theme? Choose one with --theme <name>:\n${themeList()}\n${THEME_BUILDER}`);

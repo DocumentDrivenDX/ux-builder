@@ -111,3 +111,25 @@ describe("US-157: the modality is judged by what the app does, at the size class
     assert.match(reflow.fixes[0], /^http:\/\/x\/: content overflows at 390px:/);
   });
 });
+
+describe("US-162: the audit judges the frame the person chose by what it does", () => {
+  // A page as the audit sees it, with AppShell's frame and where its navigation shows.
+  const at = (width, frame, { bar = false, side = false, top = false, nav = 3 } = {}) => ({ width, appShell: { frame, bar, side, top, nav }, main: true, fits: true });
+  const three = { ...BLUEPRINT, destinations: [1, 2, 3].map((i) => ({ id: `d${i}`, label: `D${i}`, screen: "home" })) };
+  // @covers US-162-AC6
+  test("AC6: navigation across the top adapts; a frame with no navigation passes; a frame other than the chosen one is named", () => {
+    const topNav = [{ url: "http://x/", widths: [at(390, "top-nav", { bar: true }), at(1280, "top-nav", { top: true })] }];
+    const v = verdict(topNav, { blueprint: { ...three, supports: { ...three.supports, frame: "top-nav" } } });
+    assert.deepEqual([v.status, v.components[0].adapts], ["pass", true], v.fixes.join("\n"));
+    assert.ok(v.evidence.includes("http://x/ at 1280px: navigation across the top bar"));
+    assert.ok(v.evidence.includes("AppShell in the top-nav frame the blueprint chose"));
+    // Top navigation that stays a bottom bar when wide does not adapt.
+    assert.equal(verdict([{ url: "http://x/", widths: [at(390, "top-nav", { bar: true }), at(1280, "top-nav", { bar: true })] }], { blueprint: three }).components[0].adapts, false);
+    // Just the screen, or a top bar: no navigation to adapt.
+    const screen = verdict([{ url: "http://x/", widths: [at(390, "screen", { nav: 0 }), at(1280, "screen", { nav: 0 })] }], { blueprint: { ...ONE, supports: { ...ONE.supports, frame: "screen" } } });
+    assert.equal(screen.status, "pass", screen.fixes.join("\n"));
+    // Built in another frame than the one chosen.
+    const other = verdict([{ url: "http://x/", widths: [at(390, "side-nav", { bar: true }), at(1280, "side-nav", { side: true })] }], { blueprint: { ...three, supports: { ...three.supports, frame: "top-nav" } } });
+    assert.ok(other.fixes.some((f) => /The blueprint chose the top-nav frame, but AppShell is drawn in the side-nav frame: pass frame="top-nav" to AppShell/.test(f)), other.fixes.join("\n"));
+  });
+});

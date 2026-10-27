@@ -58,7 +58,7 @@ const USAGE = `Usage:
   ux-builder-blueprint wireframes [<file>] [--out <dir>]`;
 /* Where each drawing command writes by default: under docs/ux-builder/ (paths.mjs), or the old layout's folders. */
 const OUT = { propose: "proposals", draw: "drawings", wireframes: "wireframes" };
-const MODALITY_FIRST = "Ask the person first which modalities (responsive-web, chat, hybrid-chat) and screen sizes (compact to extra-large) the app is for, and record the answer: ux-builder-design modality --answer \"<their words>\" --modality <list> --size-classes <list>. Nothing was drawn.";
+const MODALITY_FIRST = "Ask the person first which modalities (responsive-web, chat, hybrid-chat) and screen sizes (compact to extra-large) the app is for and, for responsive web, its app frame (screen, top-bar, top-nav, side-nav), and record the answer: ux-builder-design modality --answer \"<their words>\" --modality <list> --size-classes <list> --frame <frame>. Nothing was drawn.";
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 async function main(argv) {

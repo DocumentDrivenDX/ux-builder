@@ -46,6 +46,8 @@ export function status(app) {
     startedFrom: s.startedFrom,
     // A design folder (GDL-81): the app is built in place when the design is ready; null elsewhere.
     app: s.startedFrom === "design" ? (s.app ? { built: true, theme: s.app.theme, modalities: s.app.modalities } : { built: false, modalityRecorded: modalityStatus(app).confirmed }) : null,
+    // The app frame (US-162): the person's choice, or what to recommend and why.
+    frame: (() => { const m = modalityStatus(app); return m.recommended ? { chosen: m.frame, recommended: m.recommended.frame, why: m.recommended.why } : null; })(),
     chosen: chosen?.name ?? null,
     untestedAssumptions: untested.length,
     openQuestions: open.map((q) => q.text),
@@ -76,6 +78,8 @@ export function summary(r) {
   lines.push(`${r.progress.text} (${ACTIVITY[r.activity]}, in ${r.mode === "change" ? "change mode" : "the full loop"}${r.startedFrom === "existing" ? ", in an existing app" : r.startedFrom === "design" && !r.app?.built ? ", in a design folder" : ""}).`);
   if (r.app && !r.app.built) lines.push(`No app yet: this folder holds the design. ${BUILD_NEEDS(r.app.modalityRecorded)}`);
   else if (r.app?.built) lines.push(`The app was built here on the ${r.app.theme} theme (${r.app.modalities.join(", ")}).`);
+  if (r.frame?.chosen) lines.push(`App frame: ${r.frame.chosen}.`);
+  else if (r.frame && (r.progress?.step ?? 0) >= 5) lines.push(`App frame: not chosen yet; recommend ${r.frame.recommended} (${r.frame.why}), and ask with the modality.`);
   if (r.layout === "legacy") lines.push("This app is on the old layout (docs/ux/, app.blueprint.json at the top): run ux-builder-design migrate to move it under docs/ux-builder/.");
   else if (r.toMigrate?.length) lines.push(`Still at the app's top: ${r.toMigrate.join(", ")}; run ux-builder-design migrate to move ${r.toMigrate.length === 1 ? "it" : "them"} under docs/ux-builder/.`);
   if (r.awaitingReview.length) lines.push(`Awaiting your review: ${r.awaitingReview.length} item${r.awaitingReview.length === 1 ? "" : "s"} (${r.awaitingReview.slice(0, 5).join(", ")}${r.awaitingReview.length > 5 ? ", …" : ""}).`);

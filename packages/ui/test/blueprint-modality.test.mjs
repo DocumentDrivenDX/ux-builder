@@ -37,7 +37,7 @@ describe("US-149-AC4: modality before any wireframe or prototype", () => {
     assert.match(r.stderr, ASK);
     assert.ok(!existsSync(join(dir, "docs/ux-builder/wireframes")), "no wireframe drawn");
 
-    assert.equal(run(DESIGN, dir, "modality", "--answer", "A web app for phones", "--modality", "responsive-web", "--size-classes", "compact").status, 0);
+    assert.equal(run(DESIGN, dir, "modality", "--answer", "A web app for phones", "--modality", "responsive-web", "--size-classes", "compact", "--frame", "top-bar").status, 0);
     r = explore();
     assert.equal(r.status, 0, r.stderr);
     assert.ok(existsSync(join(dir, "docs/ux-builder/prototypes/list-first/index.html")));
