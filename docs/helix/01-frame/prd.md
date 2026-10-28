@@ -80,6 +80,14 @@ kind: product
 > guided process in which an AI agent and a person design the simplest
 > experience that works, from ChatGPT's human–agent UX design proposal): the
 > "Guided design" subsystem (FR-75 to FR-89), P1-13 and its sketch.
+> Evolved 2026-10-26 with ADR-042 and FEAT-019 (the visuals renderer,
+> milestone M3 of the operator's visuals PRD; framed 2026-10-22 and renumbered
+> after the guided design took FEAT-018, and again on 2026-10-28 after it took
+> US-151 to US-162, ADR-040 and FR-89): the "Visuals" subsystem (FR-90 to
+> FR-94), P1-14 and its sketch.
+> Evolved 2026-10-26 with FEAT-019 for milestone M4 (the rest of the visual
+> kinds, the React widget, lint and audit): FR-95 to FR-97 under Visuals,
+> P1-14 widened and an M4 sketch.
 
 ## Summary
 
@@ -316,6 +324,15 @@ rules, so it invents colours and components.
     decides, simplicity checked on every change, and agent predictions kept
     apart from user evidence (operator, 2026-10-23; FR-75 to FR-88,
     FEAT-018, ADR-036 to ADR-039).
+14. `@ux-builder/visuals` draws a `umf.visual` document (one picture
+    described as data, specified by umf) in any theme: the graph kinds
+    (flow, sequence, state, entities, tree) as SVG, a Mermaid text form, a
+    plate and a stepped presentation, with no browser at build time and a
+    check of every drawing against its quality bar (operator, 2026-10-22;
+    FR-90 to FR-94, FEAT-019, ADR-042). Then the rest of the kinds (stack,
+    nested, timeline, comparison, metric) and a `<Visual>` widget that
+    draws them inside an app, passing the lint and the audit (operator,
+    2026-10-26; FR-95 to FR-97).
 
 ### Nice to Have (P2)
 
@@ -373,6 +390,52 @@ rules, so it invents colours and components.
   edges clear 3:1 against the ground and surface; neighbouring series stay
   distinguishable under protanopia and deuteranopia. A theme that fails is
   not published. *(Added 2026-10-22, FEAT-017.)*
+
+### Subsystem: Visuals
+
+- **FR-90** — `@ux-builder/visuals` draws a valid `umf.visual` document
+  (umf's CONTRACT-083) of a graph kind (`flow` in its network, pipeline,
+  zoned and lanes forms; `sequence`; `state`; `structure` as entities or a
+  tree) as SVG in any theme and appearance, using only the theme's role
+  tokens (FR-73) and fonts, with no browser, network or random input at
+  render time; the same document and theme give the same bytes.
+  *(Added 2026-10-22, FEAT-019.)*
+- **FR-91** — With `appearance: both`, the SVG's colours are CSS variables
+  with the theme's values as fallbacks, so an inline visual follows the
+  page's theme and light/dark setting without being drawn again.
+  *(Added 2026-10-22, FEAT-019.)*
+- **FR-92** — Every drawing carries a layout report (every text box, node
+  box and edge path) and is checked against it: no text outside its box, no
+  edge through a node or a label, overlapping edge labels, edge crossings
+  within the form's budget, minimum text size, contrast of every text and
+  line it draws, and an accessible title, description and text equivalent.
+  A failed check fails the render's caller when asked to. *(Added
+  2026-10-22, FEAT-019.)*
+- **FR-93** — The same document also renders as a Mermaid diagram with the
+  theme's colours (the portable form for Markdown readers), as a plate (a
+  lanes visual with its takeaway, numbered walkthrough, legend, sources and
+  omissions) and as a presentation that walks the visual's steps one at a
+  time, all offline HTML. *(Added 2026-10-22, FEAT-019.)*
+- **FR-94** — A command (`ux-builder-visuals render`) renders a batch of
+  documents in one process for producers such as HELIX's documentor, and
+  Storybook shows every kind and form in every theme. *(Added 2026-10-22,
+  FEAT-019.)*
+- **FR-95** — `@ux-builder/visuals` also draws the remaining kinds and
+  forms of `umf.visual`: `structure` as a stack or nested containers;
+  `timeline` as milestones, a roadmap or a history; `comparison` as a
+  matrix, a quadrant or before and after; `metric` as a stat, a bar, a line
+  or a meter. Each has what FR-90 to FR-93 give the graph kinds: drawn only
+  with role tokens, checked, a text equivalent (a table for comparison and
+  metric), its Mermaid form or a Markdown table where Mermaid has none, and
+  a narrow fallback where the visuals PRD names one. *(Added 2026-10-26,
+  FEAT-019.)*
+- **FR-96** — An app draws a visual with a `<Visual>` React component from
+  the SDK. It follows the app's theme and appearance as the widgets do, and
+  shows the text equivalent to assistive technology. *(Added 2026-10-26,
+  FEAT-019.)*
+- **FR-97** — The lint and the audit treat `<Visual>` as the sanctioned
+  way to draw a visual in an app: neither reports its SVG, and both still
+  report a diagram the app draws itself. *(Added 2026-10-26, FEAT-019.)*
 
 ### Subsystem: Palette generation
 
@@ -757,6 +820,8 @@ rules, so it invents colours and components.
 | P1-9 (FR-46–FR-50) | Plan, check and assess an agent screen | A blueprint with an `agent` screen whose "Submit payment" action has no approval and which renders a `Wizard` inline at a 400 px column; the built screen streaming an unmarked answer with no Stop control; UI copy "I think this is right" | Blueprint findings for the missing approval and for the inline wizard's compact rules; audit findings for the missing disclosure and Stop control; one lint warning; the assessment's risky scenario stops at the approval |
 | P1-12 (FR-73, FR-74) | Diagram tokens in every theme | Every theme and preview pair, light and dark; a page drawing a status chip, a series legend, a region with a node, an edge in each weight and the three lifecycle tints with those tokens only | `npm run contrast` reports 0 failures; the audit reports no errors or warnings for that page in every theme and appearance; each theme's page lists every diagram token |
 | P1-13 (FR-75–FR-88) | Guide a new app to checkpoint 2 with no MCP | A fixture app created by the starter; no `.mcp.json`; a scripted agent answering the guide's questions; three alternative blueprints | The design state records `core-1` and `core-2`; `docs/ux-builder/brief.md` and a `UXD-` record pass `validate`; `compare` marks the alternative with the fewest steps and required inputs; no network call is made |
+| P1-14 (FR-90–FR-94) | Draw the visuals inventory | Every graph-kind document in umf's `fixtures/visual/`, in every theme and appearance | Each renders to SVG with no check failure and byte-identical on a second run; each has a Mermaid form; the lanes and stepped visuals render as a plate and a presentation; `ux-builder-visuals render` renders the batch in one process |
+| P1-14 (FR-95–FR-97) | Draw the rest of the kinds, in an app | Every stack, nested, timeline, comparison and metric document in umf's fixtures, in every theme and appearance; a starter app drawing three of them with `<Visual>` | Each renders with no check failure, byte-identical twice, with its text equivalent and its Mermaid form or table; the app's lint reports nothing and the audit reports no error or warning for the visuals in any theme |
 | P0-6 (FR-25–FR-27) | Build a list, detail and form screen from patterns | Starter app; the collection list, list-with-detail and form patterns with the app's data; Praxis Carbon then Praxis Material; 360 px and 1440 px wide | No app-written layout CSS; phone and desktop layouts per the inventory; each design system's variants; nothing moves on theme switch; the audit reports no errors |
 
 ## Technical Context
