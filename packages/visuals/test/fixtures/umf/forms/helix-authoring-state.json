@@ -1,0 +1,55 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:helix-authoring-state",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "helix-authoring-state",
+      "kind": "state",
+      "form": "machine",
+      "title": "An externally authored artifact",
+      "question": "When can a repository depend on an externally authored artifact?",
+      "source": {
+        "path": "helix:skills/helix/SKILL.md",
+        "view": "Externally authored artifacts",
+        "digest": "sha256:8dcd70d687371fc41849086979abc80a79ea72b9090e1eb966c71a1d2762b9b3"
+      },
+      "nodes": [
+        {
+          "id": "checked-out",
+          "label": "Checked out",
+          "detail": "undependable"
+        },
+        {
+          "id": "checked-in",
+          "label": "Checked in",
+          "detail": "the read surface"
+        }
+      ],
+      "state": {
+        "initial": "checked-out",
+        "transitions": [
+          {
+            "id": "check-in",
+            "from": "checked-out",
+            "to": "checked-in",
+            "event": "check in",
+            "action": "copy body, export and digest"
+          },
+          {
+            "id": "check-out",
+            "from": "checked-in",
+            "to": "checked-out",
+            "event": "check out",
+            "action": "start the next revision"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

@@ -1,0 +1,118 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-integrations",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-integrations",
+      "kind": "flow",
+      "form": "network",
+      "title": "What Beacon calls outside",
+      "question": "What does Beacon call outside?",
+      "takeaway": "Only the API and the drafter call out, and each call has one job.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/architecture-model.toml",
+        "view": "integrations",
+        "digest": "sha256:5506076ecd96344bd6b203c4d2a36ed983a7d9c37883c0e4dc65f9a59f689910"
+      },
+      "groups": [
+        {
+          "id": "process",
+          "label": "Beacon",
+          "role": "boundary"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "api",
+          "label": "Beacon API",
+          "detail": "every request runs as the agent",
+          "role": "own",
+          "status": "built",
+          "group": "process"
+        },
+        {
+          "id": "drafter",
+          "label": "Reply drafter",
+          "detail": "builds the prompt from the ticket and its history",
+          "role": "own",
+          "status": "built",
+          "group": "process"
+        },
+        {
+          "id": "gateway",
+          "label": "Model gateway",
+          "detail": "rate limits, usage, model choice",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "models",
+          "label": "Language models",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "helpdesk",
+          "label": "Helpdesk",
+          "detail": "where tickets live",
+          "role": "external",
+          "status": "built"
+        },
+        {
+          "id": "kb",
+          "label": "Knowledge base",
+          "detail": "published help articles",
+          "role": "external",
+          "status": "built"
+        }
+      ],
+      "edges": [
+        {
+          "id": "gateway--models",
+          "from": "gateway",
+          "to": "models",
+          "label": "routes to a model",
+          "why": "the gateway, not Beacon, chooses and meters the model"
+        },
+        {
+          "id": "api--drafter",
+          "from": "api",
+          "to": "drafter",
+          "label": "hands over the ticket and its history"
+        },
+        {
+          "id": "api--helpdesk",
+          "from": "api",
+          "to": "helpdesk",
+          "label": "posts the sent reply"
+        },
+        {
+          "id": "drafter--kb",
+          "from": "drafter",
+          "to": "kb",
+          "label": "searches articles"
+        },
+        {
+          "id": "drafter--gateway",
+          "from": "drafter",
+          "to": "gateway",
+          "label": "sends the prompt"
+        },
+        {
+          "id": "api--gateway",
+          "from": "api",
+          "to": "gateway",
+          "label": "asks for a draft",
+          "why": "drafting is the only call that leaves the platform's trust boundary"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

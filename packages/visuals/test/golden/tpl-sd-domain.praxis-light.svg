@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1359 167" width="1359" height="167" role="img" aria-labelledby="tpl-sd-domain-title" aria-describedby="tpl-sd-domain-desc" class="uxb-visual uxb-visual--structure-entities" data-visual="tpl-sd-domain" style="font-family:ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="tpl-sd-domain-title">Domain Model</title>
+<desc id="tpl-sd-domain-desc">What does the import domain hold?</desc>
+<rect x="0" y="0" width="1359" height="167" style="fill:#F0EEE6"/>
+<g id="tpl-sd-domain--client--import_session" class="uxb-reference">
+<path d="M164 53 L401 53" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="261" y="44" width="43" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="282.5" y="57.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">owns</text>
+<path d="M170 59 L170 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M175 59 L175 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M401 46 L389 53" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M401 60 L389 53" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M401 53 L389 53" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<circle cx="382" cy="53" r="4.5" style="fill:#F0EEE6;stroke:#6B675E;stroke-width:1.5px"/>
+</g>
+<g id="tpl-sd-domain--import_session--import_file" class="uxb-reference">
+<path d="M541 47 L795 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="637" y="38" width="62" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="668" y="51.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">contains</text>
+<path d="M547 53 L547 41" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M552 53 L552 41" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M795 40 L783 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M795 54 L783 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M795 47 L783 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M779 41 L779 53" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+</g>
+<g id="tpl-sd-domain--import_session--source_row" class="uxb-reference">
+<path d="M541 59 L553 59 Q561 59 561 67 L561 105 Q561 113 569 113 L795 113" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="649" y="104" width="59" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="678.5" y="117.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">accepts</text>
+<path d="M547 65 L547 53" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M552 65 L552 53" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M795 106 L783 113" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M795 120 L783 113" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M795 113 L783 113" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<circle cx="776" cy="113" r="4.5" style="fill:#F0EEE6;stroke:#6B675E;stroke-width:1.5px"/>
+</g>
+<g id="tpl-sd-domain--client--mapping_profile" class="uxb-reference">
+<path d="M164 65 L176 65 Q184 65 184 73 L184 111 Q184 119 192 119 L401 119" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="270" y="110" width="45" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="292.5" y="123.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">saves</text>
+<path d="M170 71 L170 59" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M175 71 L175 59" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M401 112 L389 119" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M401 126 L389 119" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M401 119 L389 119" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<circle cx="382" cy="119" r="4.5" style="fill:#F0EEE6;stroke:#6B675E;stroke-width:1.5px"/>
+</g>
+<g id="tpl-sd-domain--import_file--validation_result" class="uxb-reference">
+<path d="M935 47 L1195 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="1031" y="38" width="68" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="1065" y="51.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">produces</text>
+<path d="M941 53 L941 41" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M946 53 L946 41" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M1195 40 L1183 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M1195 54 L1183 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M1195 47 L1183 47" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<circle cx="1176" cy="47" r="4.5" style="fill:#F0EEE6;stroke:#6B675E;stroke-width:1.5px"/>
+</g>
+<g id="tpl-sd-domain--source_row--match_evidence" class="uxb-reference">
+<path d="M935 113 L1195 113" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="1033" y="104" width="65" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="1065.5" y="117.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">supports</text>
+<path d="M941 119 L941 107" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M946 119 L946 107" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M1195 106 L1183 113" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M1195 120 L1183 113" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M1195 113 L1183 113" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<circle cx="1176" cy="113" r="4.5" style="fill:#F0EEE6;stroke:#6B675E;stroke-width:1.5px"/>
+</g>
+<g id="tpl-sd-domain--client" class="uxb-entity">
+<rect x="24" y="40" width="140" height="38" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="36" y="62" style="fill:#141413;font-size:13px;font-weight:600">Client</text>
+</g>
+<g id="tpl-sd-domain--import_session" class="uxb-entity">
+<rect x="401" y="34" width="140" height="38" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="413" y="56" style="fill:#141413;font-size:13px;font-weight:600">Import Session</text>
+</g>
+<g id="tpl-sd-domain--import_file" class="uxb-entity">
+<rect x="795" y="28" width="140" height="38" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="807" y="50" style="fill:#141413;font-size:13px;font-weight:600">Import File</text>
+</g>
+<g id="tpl-sd-domain--source_row" class="uxb-entity">
+<rect x="795" y="94" width="140" height="38" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="807" y="116" style="fill:#141413;font-size:13px;font-weight:600">Source Row</text>
+</g>
+<g id="tpl-sd-domain--mapping_profile" class="uxb-entity">
+<rect x="401" y="100" width="140" height="38" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="413" y="122" style="fill:#141413;font-size:13px;font-weight:600">Mapping Profile</text>
+</g>
+<g id="tpl-sd-domain--validation_result" class="uxb-entity">
+<rect x="1195" y="28" width="140" height="38" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1207" y="50" style="fill:#141413;font-size:13px;font-weight:600">Validation Result</text>
+</g>
+<g id="tpl-sd-domain--match_evidence" class="uxb-entity">
+<rect x="1195" y="94" width="140" height="38" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1207" y="116" style="fill:#141413;font-size:13px;font-weight:600">Match Evidence</text>
+</g>
+</svg>

@@ -78,6 +78,7 @@ public themes; any other opens by its name. The site is rebuilt from `main` by
 | [`@ux-builder/ui`](packages/ui) | dependency | Widgets (React 19 and CSS), patterns, the assistant, Adaptive Cards, `ThemeProvider`, icons, `Logo`, favicon, the blueprint, lint rules, agent guidance |
 | [`@ux-builder/create-app`](packages/create-app) | `npm create` | A new React + Vite app on the SDK and on HELIX, shaped by its modalities, with lint, the audit, the trace and CI |
 | [`@ux-builder/audit`](packages/audit) | devDependency | `ux-builder-audit`: checks the running app in every theme and appearance; `assess` runs the UX assessment |
+| [`@ux-builder/visuals`](packages/visuals) | dependency | Diagrams from `umf.visual` documents, drawn in the theme: SVG, Mermaid, plates and presentations, with `ux-builder-visuals` |
 | [`@ux-builder/mcp`](packages/mcp) | `npx` | The SDK for AI coding agents over MCP, including the blueprint and card checks and the episode trace |
 | [`@ux-builder/trace`](packages/trace) | devDependency | `ux-builder-trace`: the episode trace an app keeps while it is built, and the export its owner shares by choice |
 
@@ -690,7 +691,7 @@ version on `main` that isn't on npm yet.
 
 It publishes with [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
 (OIDC), so no npm token is stored anywhere. That needs a one-time setting:
-each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`, `trace`, `design`)
+each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`, `trace`, `design`, `visuals`)
 lists GitHub Actions, `DocumentDrivenDX/ux-builder`, workflow `release.yml` as
 a trusted publisher on npmjs.com. A brand-new package has to
 be published once by hand before a trusted publisher can be added to it.

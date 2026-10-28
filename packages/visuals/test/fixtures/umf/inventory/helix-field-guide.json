@@ -1,0 +1,300 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:helix-field-guide",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "helix-field-guide",
+      "kind": "flow",
+      "form": "lanes",
+      "title": "A developer's first map of HELIX",
+      "question": "Where do I start in HELIX, and how does one request move through it?",
+      "audience": "developer",
+      "source": {
+        "path": "helix:docs/helix/02-design/architecture-model.toml",
+        "view": "context",
+        "digest": "sha256:6e13adabec034747ed6d5505668e1daef353a3df6d2c54f3e4ff799cb92acff2"
+      },
+      "groups": [
+        {
+          "id": "lane-people",
+          "label": "People",
+          "role": "lane"
+        },
+        {
+          "id": "lane-agent-host",
+          "label": "Agent host",
+          "role": "lane"
+        },
+        {
+          "id": "lane-helix",
+          "label": "HELIX",
+          "role": "lane"
+        },
+        {
+          "id": "lane-your-repository",
+          "label": "Your repository",
+          "role": "lane"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "team",
+          "label": "Software team",
+          "detail": "sets intent",
+          "role": "actor",
+          "status": "built",
+          "group": "lane-people",
+          "evidence": [
+            {
+              "path": "docs/helix/00-discover/product-vision.md",
+              "contains": "Software teams using AI agents"
+            }
+          ]
+        },
+        {
+          "id": "runtime",
+          "label": "Agent runtime",
+          "detail": "model, tools, execution",
+          "role": "external",
+          "status": "built",
+          "group": "lane-agent-host",
+          "evidence": [
+            {
+              "path": "docs/install/README.md",
+              "contains": "## Minimal runtime contract"
+            }
+          ]
+        },
+        {
+          "id": "skill",
+          "label": "Routing skill",
+          "detail": "resolves scope and mode",
+          "role": "own",
+          "status": "built",
+          "group": "lane-helix",
+          "evidence": [
+            {
+              "path": "skills/helix/SKILL.md",
+              "contains": "name: helix"
+            }
+          ]
+        },
+        {
+          "id": "catalog",
+          "label": "Artifact catalog",
+          "detail": "templates, prompts, rules",
+          "role": "store",
+          "status": "built",
+          "group": "lane-helix",
+          "evidence": [
+            {
+              "path": "workflows/graph.yml",
+              "contains": "nodes:"
+            }
+          ]
+        },
+        {
+          "id": "marker",
+          "label": ".helix.yml",
+          "detail": "project scope",
+          "role": "store",
+          "status": "built",
+          "group": "lane-your-repository",
+          "evidence": [
+            {
+              "path": "docs/install/README.md",
+              "contains": "## The marker"
+            }
+          ]
+        },
+        {
+          "id": "docs",
+          "label": "Project documents",
+          "detail": "intent, design, tests",
+          "role": "store",
+          "status": "built",
+          "group": "lane-your-repository",
+          "evidence": [
+            {
+              "path": "workflows/modes/_authoring.md",
+              "contains": "Load this contract when a mode creates or edits an artifact instance."
+            }
+          ]
+        },
+        {
+          "id": "documentor",
+          "label": "documentor",
+          "detail": "checks, views, site",
+          "role": "external",
+          "status": "built",
+          "group": "lane-agent-host",
+          "evidence": [
+            {
+              "path": "workflows/modes/guide.md",
+              "contains": "documentor (`tools/documentor/` in the HELIX repository)"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "team--runtime",
+          "from": "team",
+          "to": "runtime",
+          "label": "asks",
+          "why": "intent enters as a request",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "docs/helix/00-discover/product-vision.md",
+              "contains": "Software teams using AI agents"
+            }
+          ]
+        },
+        {
+          "id": "runtime--skill",
+          "from": "runtime",
+          "to": "skill",
+          "label": "loads",
+          "why": "one skill, any host",
+          "status": "built",
+          "evidence": [
+            {
+              "path": ".claude-plugin/plugin.json",
+              "contains": "\"skills\": \"./skills/\""
+            }
+          ]
+        },
+        {
+          "id": "skill--marker",
+          "from": "skill",
+          "to": "marker",
+          "label": "reads scope",
+          "why": "bounds every write",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "skills/helix/SKILL.md",
+              "contains": "## Project Root Resolution"
+            }
+          ]
+        },
+        {
+          "id": "skill--catalog",
+          "from": "skill",
+          "to": "catalog",
+          "label": "reads type",
+          "why": "shape comes from the catalog",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "skills/helix/SKILL.md",
+              "contains": "## Catalog Resolution"
+            }
+          ]
+        },
+        {
+          "id": "skill--docs",
+          "from": "skill",
+          "to": "docs",
+          "label": "authors and reconciles",
+          "why": "the record stays true",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "workflows/modes/_authoring.md",
+              "contains": "Load this contract when a mode creates or edits an artifact instance."
+            }
+          ]
+        },
+        {
+          "id": "docs--runtime",
+          "from": "docs",
+          "to": "runtime",
+          "label": "governs execution",
+          "why": "spec is the contract",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "workflows/principles.md",
+              "contains": "### Spec Is The Contract"
+            }
+          ]
+        },
+        {
+          "id": "runtime--documentor",
+          "from": "runtime",
+          "to": "documentor",
+          "label": "runs the guide's checks",
+          "why": "optional host tooling",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "workflows/modes/guide.md",
+              "contains": "`documentor doctor` says what the host has"
+            }
+          ]
+        }
+      ],
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Asks",
+          "caption": "A person asks the agent for work in their own words.",
+          "focus": [
+            "team--runtime"
+          ]
+        },
+        {
+          "id": "s2",
+          "title": "Loads",
+          "caption": "The host loads HELIX's one skill as a plug-in.",
+          "focus": [
+            "runtime--skill"
+          ]
+        },
+        {
+          "id": "s3",
+          "title": "Reads scope",
+          "caption": "The marker says which flows are active and where each may write.",
+          "focus": [
+            "skill--marker"
+          ]
+        },
+        {
+          "id": "s4",
+          "title": "Reads type",
+          "caption": "The artifact type's template, prompt, and rules guide the work.",
+          "focus": [
+            "skill--catalog"
+          ]
+        },
+        {
+          "id": "s5",
+          "title": "Authors and reconciles",
+          "caption": "The mode writes or aligns the governing documents.",
+          "focus": [
+            "skill--docs"
+          ]
+        },
+        {
+          "id": "s6",
+          "title": "Governs execution",
+          "caption": "Code implements the documented intent; it cannot silently redefine it.",
+          "focus": [
+            "docs--runtime"
+          ]
+        }
+      ],
+      "omissions": [
+        "This is a conceptual map, not a deployment topology."
+      ]
+    }
+  },
+  "modules": []
+}

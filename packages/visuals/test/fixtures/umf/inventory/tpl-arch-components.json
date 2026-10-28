@@ -1,0 +1,83 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:tpl-arch-components",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "tpl-arch-components",
+      "kind": "flow",
+      "form": "network",
+      "title": "Level 3: Component Diagram",
+      "question": "How is the API Service's import path built?",
+      "source": {
+        "path": "helix:workflows/activities/02-design/artifacts/architecture/example.md",
+        "view": "Level 3: Component Diagram",
+        "digest": "sha256:4c79ba17f9d9342592c062b9a51cef0232816004b59f110488f696e7a8e191b8"
+      },
+      "nodes": [
+        {
+          "id": "upload",
+          "label": "Upload Controller"
+        },
+        {
+          "id": "mapping",
+          "label": "Mapping Service"
+        },
+        {
+          "id": "validate",
+          "label": "CSV Validation Service"
+        },
+        {
+          "id": "commit",
+          "label": "Import Commit Service"
+        },
+        {
+          "id": "evidence",
+          "label": "Evidence Service"
+        },
+        {
+          "id": "db",
+          "label": "PostgreSQL",
+          "role": "store"
+        }
+      ],
+      "edges": [
+        {
+          "id": "upload--mapping",
+          "from": "upload",
+          "to": "mapping"
+        },
+        {
+          "id": "mapping--validate",
+          "from": "mapping",
+          "to": "validate"
+        },
+        {
+          "id": "validate--commit",
+          "from": "validate",
+          "to": "commit"
+        },
+        {
+          "id": "commit--evidence",
+          "from": "commit",
+          "to": "evidence"
+        },
+        {
+          "id": "commit--db",
+          "from": "commit",
+          "to": "db"
+        },
+        {
+          "id": "evidence--db",
+          "from": "evidence",
+          "to": "db"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

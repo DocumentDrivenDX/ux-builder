@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1286 366" width="1286" height="366" role="img" aria-labelledby="visuals-roadmap-title" aria-describedby="visuals-roadmap-desc" class="uxb-visual uxb-visual--timeline-roadmap" data-visual="visuals-roadmap" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="visuals-roadmap-title">Visuals milestones</title>
+<desc id="visuals-roadmap-desc">Which repository delivers each visuals milestone, in what order?</desc>
+<rect x="0" y="0" width="1286" height="366" style="fill:#09090B"/>
+<g class="uxb-axis">
+<text x="234.97" y="28" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">M0</text>
+<text x="372.91" y="28" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">M1</text>
+<text x="510.86" y="28" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">M2</text>
+<text x="648.8" y="28" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">M3</text>
+<text x="786.74" y="28" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">M4</text>
+<text x="924.68" y="28" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">M5</text>
+<text x="1062.62" y="28" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">M6</text>
+<text x="1200.57" y="28" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">M7</text>
+<rect x="16" y="46" width="1253.54" height="52" style="fill:#101012"/>
+<text x="26" y="66" style="fill:#FAFAFA;font-size:12px;font-weight:600">umf</text>
+<rect x="16" y="102" width="1253.54" height="84" style="fill:#151517"/>
+<text x="26" y="122" style="fill:#FAFAFA;font-size:12px;font-weight:600">ux-builder</text>
+<rect x="16" y="190" width="1253.54" height="68" style="fill:#101012"/>
+<text x="26" y="210" style="fill:#FAFAFA;font-size:12px;font-weight:600">helix</text>
+<rect x="16" y="262" width="1253.54" height="84" style="fill:#151517"/>
+<text x="26" y="282" style="fill:#FAFAFA;font-size:12px;font-weight:600">documentor</text>
+</g>
+<g id="visuals-roadmap--span-m1" class="uxb-span" data-status="decided">
+<text x="307.94" y="66" style="fill:#FAFAFA;font-size:12px;font-weight:400">umf: `umf.visual/1`</text>
+<rect x="307.94" y="74" width="129.94" height="14" rx="7" style="fill:#101012;stroke:#3987E5;stroke-width:2px;stroke-dasharray:5 4"/>
+</g>
+<g id="visuals-roadmap--span-m2" class="uxb-span" data-status="decided">
+<text x="445.88" y="154" style="fill:#FAFAFA;font-size:12px;font-weight:400">ux-builder: tokens</text>
+<rect x="445.88" y="162" width="129.94" height="14" rx="7" style="fill:#151517;stroke:#D95926;stroke-width:2px;stroke-dasharray:5 4"/>
+</g>
+<g id="visuals-roadmap--span-m3" class="uxb-span" data-status="decided">
+<text x="583.83" y="122" style="fill:#FAFAFA;font-size:12px;font-weight:400">ux-builder:</text>
+<text x="583.83" y="138" style="fill:#FAFAFA;font-size:12px;font-weight:400">`@ux-builder/visuals`</text>
+<text x="583.83" y="154" style="fill:#FAFAFA;font-size:12px;font-weight:400">0.1 (graph kinds)</text>
+<rect x="583.83" y="162" width="129.94" height="14" rx="7" style="fill:#151517;stroke:#D95926;stroke-width:2px;stroke-dasharray:5 4"/>
+</g>
+<g id="visuals-roadmap--span-m4" class="uxb-span" data-status="decided">
+<text x="721.77" y="138" style="fill:#FAFAFA;font-size:12px;font-weight:400">ux-builder: 0.2 (the</text>
+<text x="721.77" y="154" style="fill:#FAFAFA;font-size:12px;font-weight:400">rest)</text>
+<rect x="721.77" y="162" width="129.94" height="14" rx="7" style="fill:#151517;stroke:#D95926;stroke-width:2px;stroke-dasharray:5 4"/>
+</g>
+<g id="visuals-roadmap--span-m0" class="uxb-span" data-status="built">
+<text x="170" y="210" style="fill:#FAFAFA;font-size:12px;font-weight:400">HELIX PR #95 lands as</text>
+<text x="170" y="226" style="fill:#FAFAFA;font-size:12px;font-weight:400">it is</text>
+<rect x="170" y="234" width="129.94" height="14" rx="7" style="fill:#199E70;stroke:#199E70;stroke-width:2px"/>
+</g>
+<g id="visuals-roadmap--span-m5" class="uxb-span" data-status="decided">
+<text x="859.71" y="226" style="fill:#FAFAFA;font-size:12px;font-weight:400">HELIX: decision layer</text>
+<rect x="859.71" y="234" width="129.94" height="14" rx="7" style="fill:#101012;stroke:#199E70;stroke-width:2px;stroke-dasharray:5 4"/>
+</g>
+<g id="visuals-roadmap--span-m7" class="uxb-span" data-status="decided">
+<text x="1135.59" y="226" style="fill:#FAFAFA;font-size:12px;font-weight:400">Proof</text>
+<rect x="1135.59" y="234" width="129.94" height="14" rx="7" style="fill:#101012;stroke:#199E70;stroke-width:2px;stroke-dasharray:5 4"/>
+</g>
+<g id="visuals-roadmap--span-m6" class="uxb-span" data-status="decided">
+<text x="997.65" y="282" style="fill:#FAFAFA;font-size:12px;font-weight:400">documentor:</text>
+<text x="997.65" y="298" style="fill:#FAFAFA;font-size:12px;font-weight:400">producers and</text>
+<text x="997.65" y="314" style="fill:#FAFAFA;font-size:12px;font-weight:400">embedding</text>
+<rect x="997.65" y="322" width="129.94" height="14" rx="7" style="fill:#151517;stroke:#C98500;stroke-width:2px;stroke-dasharray:5 4"/>
+</g>
+</svg>

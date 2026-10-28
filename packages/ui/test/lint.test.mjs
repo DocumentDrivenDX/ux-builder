@@ -146,6 +146,18 @@ describe("US-022 lint", () => {
     assert.equal(r.length, 1);
     assert.match(r[0].text, /hand-drawn <svg>.*<Icon>.*registerIcons/);
   });
+
+  // @covers US-168-AC3
+  test("US-168-AC3: <Visual> from @ux-builder/visuals is not reported; a diagram hand-drawn as <svg> is, and is pointed at <Visual>", () => {
+    const code = [
+      'import { Visual } from "@ux-builder/visuals/react";',
+      "export const A = ({ doc }) => <Visual doc={doc} />;",
+      'export const B = () => <svg viewBox="0 0 400 200"><rect x="10" y="10" width="120" height="40" /><path d="M130 30 L250 30" /></svg>;',
+    ].join("\n");
+    const r = lint(code, { "ux-builder/no-inline-svg": "error" });
+    assert.deepEqual(r.map((x) => x.line), [3], "only the hand-drawn diagram");
+    assert.match(r[0].text, /for a diagram or chart, use <Visual> from @ux-builder\/visuals\/react/);
+  });
 });
 
 /* ux-builder/ai-neutral-voice (US-081, FEAT-011 AIV-01, ADR-028 decision 6). */

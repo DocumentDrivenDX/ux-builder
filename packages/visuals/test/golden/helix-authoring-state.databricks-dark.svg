@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 714 134" width="714" height="134" role="img" aria-labelledby="helix-authoring-state-title" aria-describedby="helix-authoring-state-desc" class="uxb-visual uxb-visual--state-machine" data-visual="helix-authoring-state" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="helix-authoring-state-title">An externally authored artifact</title>
+<desc id="helix-authoring-state-desc">When can a repository depend on an externally authored artifact?</desc>
+<rect x="0" y="0" width="714" height="134" style="fill:#09090B"/>
+<g id="helix-authoring-state--check-in" class="uxb-transition">
+<path d="M564 55 L204 55" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M204 51.22 L195 55 L204 58.78 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="259" y="46" width="241" height="18" rx="4" style="fill:#09090B"/>
+<text x="379.5" y="59.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">check in / copy body, export and digest</text>
+</g>
+<g id="helix-authoring-state--check-out" class="uxb-transition">
+<path d="M195 73 L212.5 73 Q215 73 215 75.5 L215 75.5 Q215 78 217.5 78 L517.5 78 Q520 78 520 75.5 L520 75.5 Q520 73 522.5 73 L555 73" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M555 76.78 L564 73 L555 69.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="264" y="69" width="208" height="18" rx="4" style="fill:#09090B"/>
+<text x="368" y="82.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">check out / start the next revision</text>
+</g>
+<g id="helix-authoring-state--checked-out" class="uxb-state">
+<rect x="564" y="36" width="118" height="56" rx="28" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="578" y="60" style="fill:#FFFFFF;font-size:14px;font-weight:600">Checked out</text>
+<text x="578" y="74" style="fill:#9F9FA9;font-size:12px;font-weight:400">undependable</text>
+</g>
+<g id="helix-authoring-state--checked-in" class="uxb-state">
+<rect x="72" y="36" width="123" height="56" rx="28" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="86" y="60" style="fill:#FFFFFF;font-size:14px;font-weight:600">Checked in</text>
+<text x="86" y="74" style="fill:#9F9FA9;font-size:12px;font-weight:400">the read surface</text>
+</g>
+<g class="uxb-initial">
+<circle cx="530" cy="64" r="7" style="fill:#FFFFFF"/>
+<path d="M537 64 L555 64" style="fill:none;stroke:#FFFFFF;stroke-width:1.5px"/>
+<path d="M555 60.2 L564 64 L555 67.8 Z" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+</g>
+</svg>
