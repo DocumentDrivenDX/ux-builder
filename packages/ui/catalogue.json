@@ -70,17 +70,17 @@
       "fonts": "@ux-builder/tokens/fonts/plain.css"
     },
     {
-      "name": "plus1-swatch-databricks",
-      "title": "Plus1 Swatch Databricks",
-      "brand": "plus1-swatch",
+      "name": "plus1-261028",
+      "title": "Plus1",
+      "brand": "plus1-261028",
       "designSystem": "databricks",
       "appearances": [
         "dark",
         "light"
       ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/plus1-swatch-databricks.css",
-      "fonts": "@ux-builder/tokens/fonts/plus1-swatch-databricks.css"
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/plus1-261028.css",
+      "fonts": "@ux-builder/tokens/fonts/plus1-261028.css"
     },
     {
       "name": "praxis",
