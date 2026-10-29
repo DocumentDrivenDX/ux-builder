@@ -441,3 +441,10 @@ interaction decision record carries `ux: "UXD-<n>"`.
 - [ ] Every `docs/ux-builder/` type has a template, prompt, example and `meta.yml`, and its example passes `validate`
 - [ ] The design state schema validates the fixtures; `state set` refuses invalid values
 - [ ] `npm run licences` passes with the new dependencies
+
+## Plugin skill distribution
+
+Explicit marketplace guidance selection and its persistence follow
+[the plugin distribution contract](plugin-distribution.md). Project-local
+installation remains the default; plugin mode skips copies without deleting
+existing guidance. Design state and checkpoint behavior are unchanged.
