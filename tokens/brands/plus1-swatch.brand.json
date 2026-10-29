@@ -1,0 +1,209 @@
+{
+  "$schema": "../schema/brand.schema.json",
+  "$description": "Generated in the theme builder by @ux-builder/engine 0.1.0, strategy faithful. Regenerate with: npm run brand -- --regenerate tokens/brands/plus1-swatch.brand.json",
+  "name": "plus1-swatch",
+  "title": "Plus1 Swatch",
+  "appearances": {
+    "light": {
+      "color": {
+        "ground": {
+          "$value": "#FFF8F6",
+          "$description": "Page ground. Generated (faithful)."
+        },
+        "ground-recessed": {
+          "$value": "#F7F0EE",
+          "$description": "Recessed ground (sidebar). Generated (faithful)."
+        },
+        "surface": {
+          "$value": "#FFFFFF",
+          "$description": "Cards, fields and menus. Generated (faithful)."
+        },
+        "surface-sunken": {
+          "$value": "#F5EEEC",
+          "$description": "Sunken panels and pills. Generated (faithful)."
+        },
+        "border": {
+          "$value": "#E6DCD8",
+          "$description": "Borders. Generated (faithful)."
+        },
+        "text-strong": {
+          "$value": "#1D1411",
+          "$description": "Headings. Generated (faithful)."
+        },
+        "text": {
+          "$value": "#2B221E",
+          "$description": "Body text. Generated (faithful)."
+        },
+        "text-muted": {
+          "$value": "#554A47",
+          "$description": "Muted text. Generated (faithful)."
+        },
+        "text-subtle": {
+          "$value": "#6C605C",
+          "$description": "Subtle text. Generated (faithful)."
+        },
+        "structure": {
+          "$value": "#D14900",
+          "$description": "Primary buttons: brand colour. Generated (faithful). #FA6B32 moved −0.110 L (OKLCH, hue kept) to clear 4.5:1."
+        },
+        "accent": {
+          "$value": "#CA4600",
+          "$description": "Links, focus, kickers: brand colour. Generated (faithful). #FA6B32 moved −0.125 L (OKLCH, hue kept) to clear 4.5:1; flagged for review."
+        },
+        "on-accent": {
+          "$value": "#FFF8F6",
+          "$description": "Text and icons on the accent. Generated (faithful). #110906 moved +0.835 L (OKLCH, hue kept) to clear 4.5:1; flagged for review."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#467922",
+          "$description": "Status: live. Generated (faithful)."
+        },
+        "limited": {
+          "$value": "#9D5D00",
+          "$description": "Status: limited. Generated (faithful). #A16000 moved −0.010 L (OKLCH, hue kept) to clear 4.5:1."
+        },
+        "purchasing": {
+          "$value": "#3959A6",
+          "$description": "Status: purchasing. Generated (faithful)."
+        },
+        "closed": {
+          "$value": "#B92845",
+          "$description": "Status: closed. Generated (faithful)."
+        },
+        "evaluation": {
+          "$value": "#554A47",
+          "$description": "Status: evaluation (muted). Generated (faithful)."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#FA6B32",
+          "$description": "The logo's top brand colour, as supplied."
+        },
+        "logo-image": {
+          "$value": "../../brand/plus1-swatch/logo.svg",
+          "$description": "The logo, as uploaded to the theme builder."
+        },
+        "logo-aspect": {
+          "$value": "1",
+          "$description": "The framed logo's width over its height."
+        }
+      }
+    },
+    "dark": {
+      "color": {
+        "ground": {
+          "$value": "#15100F",
+          "$description": "Page ground. Generated (faithful)."
+        },
+        "ground-recessed": {
+          "$value": "#0E0A09",
+          "$description": "Recessed ground (sidebar). Generated (faithful)."
+        },
+        "surface": {
+          "$value": "#201C1A",
+          "$description": "Cards, fields and menus. Generated (faithful)."
+        },
+        "surface-sunken": {
+          "$value": "#2A2523",
+          "$description": "Sunken panels and pills. Generated (faithful)."
+        },
+        "border": {
+          "$value": "#3B3331",
+          "$description": "Borders. Generated (faithful)."
+        },
+        "text-strong": {
+          "$value": "#FFF6F3",
+          "$description": "Headings. Generated (faithful)."
+        },
+        "text": {
+          "$value": "#F5E8E3",
+          "$description": "Body text. Generated (faithful)."
+        },
+        "text-muted": {
+          "$value": "#C7BBB6",
+          "$description": "Muted text. Generated (faithful)."
+        },
+        "text-subtle": {
+          "$value": "#A89B97",
+          "$description": "Subtle text. Generated (faithful)."
+        },
+        "structure": {
+          "$value": "#FA6B32",
+          "$description": "Primary buttons: brand colour. Generated (faithful)."
+        },
+        "accent": {
+          "$value": "#FA6B32",
+          "$description": "Links, focus, kickers: brand colour. Generated (faithful)."
+        },
+        "on-accent": {
+          "$value": "#110906",
+          "$description": "Text and icons on the accent. Generated (faithful)."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#89C06A",
+          "$description": "Status: live. Generated (faithful)."
+        },
+        "limited": {
+          "$value": "#FEB263",
+          "$description": "Status: limited. Generated (faithful)."
+        },
+        "purchasing": {
+          "$value": "#7CA2F6",
+          "$description": "Status: purchasing. Generated (faithful)."
+        },
+        "closed": {
+          "$value": "#F96679",
+          "$description": "Status: closed. Generated (faithful)."
+        },
+        "evaluation": {
+          "$value": "#C7BBB6",
+          "$description": "Status: evaluation (muted). Generated (faithful)."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#FA6B32",
+          "$description": "The logo's top brand colour, as supplied."
+        },
+        "logo-image": {
+          "$value": "../../brand/plus1-swatch/logo.svg",
+          "$description": "The logo, as uploaded to the theme builder."
+        },
+        "logo-aspect": {
+          "$value": "1",
+          "$description": "The framed logo's width over its height."
+        }
+      }
+    }
+  },
+  "generation": {
+    "engine": "0.1.0",
+    "extracted": [
+      "#FA6B32"
+    ],
+    "strategy": "faithful",
+    "settings": {
+      "strategies": "faithful,muted,vibrant,neutral-accent,two-colour",
+      "primaryCandidate": 0,
+      "secondaryCandidate": -1,
+      "hueShift": 0,
+      "chromaScale": 1,
+      "neutralTint": 1,
+      "groundLight": 0.985,
+      "groundDark": 0.18,
+      "stateHarmony": 0.5,
+      "minContrast": 4.5,
+      "suggestedHue": 250,
+      "appearances": "light,dark"
+    },
+    "logo": {
+      "path": "../../brand/plus1-swatch/logo.svg",
+      "sha256": "7d9cd27d7f0ccbbb385c14027cc899fb6f1d25f064e5d0dbea42b4abca967daf"
+    }
+  }
+}

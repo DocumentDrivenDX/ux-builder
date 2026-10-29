@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Plus1 Swatch on the databricks design system: the plus1-swatch brand. Made in the theme builder.",
+  "name": "plus1-swatch-databricks",
+  "title": "Plus1 Swatch Databricks",
+  "brand": "plus1-swatch",
+  "default": "light",
+  "designSystem": "databricks"
+}

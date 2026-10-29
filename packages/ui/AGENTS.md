@@ -480,6 +480,7 @@ The rules restate guidance from Apple's Human Interface Guidelines, Material Des
 | `databricks` | databricks | dark, light (default light) |
 | `img-8593-databricks` | databricks | dark, light (default light) |
 | `plain` | own anatomy | light (default light) |
+| `plus1-swatch-databricks` | databricks | dark, light (default light) |
 | `praxis` | own anatomy | dark, light (default dark) |
 | `praxis-carbon` | carbon | dark, light (default dark) |
 | `praxis-fluentui` | fluent | dark, light (default dark) |
