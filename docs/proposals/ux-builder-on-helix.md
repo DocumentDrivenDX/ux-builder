@@ -47,7 +47,7 @@ Every row is something ux-builder keeps today, with its replacement. The documen
 
 | ux-builder today | Instead |
 | :---- | :---- |
-| brief.md, its own document | A page rendered on demand from the PRD, principles.md and the stories. Nothing to keep in step |
+| brief.md, its own document | Stays in docs/ux-builder/, compiled from the PRD, principles.md and the stories. It holds nothing of its own, so there is nothing to keep in step |
 | users.md and jobs.md | The PRD's User Segments and User Needs tables |
 | Tasks kept only in the blueprint | The feature specification's Task Model. The blueprint's journeys say which task they carry out |
 | decisions/UXD-n | ADRs labelled area:ui, with an optional Validation section |
@@ -65,6 +65,7 @@ What's left in docs/ux-builder/:
 
 * the blueprint and its alternatives;  
 * the generated wireframes and prototypes;  
+* brief.md, compiled from HELIX documents;  
 * reports.html, the index of run output, which links out and copies nothing in.
 
 ## **What ux-builder uses from HELIX**
@@ -163,7 +164,7 @@ Most of the overlap can go now, without waiting for HELIX. HELIX already has ADR
 
 1. **propose patches HELIX's own sections.** It fills user-flow, wireframe and the new sections, not sections it inserts itself.  
 2. **Users, needs and tasks are read from HELIX.** They come from the PRD and the feature specification; users.md and jobs.md go.  
-3. **The brief becomes a rendered page only.**
+3. **The brief is compiled from HELIX documents only.** It stays in docs/ux-builder/.
 
 **Then**
 
@@ -174,12 +175,18 @@ A ux-builder ADR records this split; it builds on ADR-030 and replaces the docum
 
 ## **Open questions**
 
-* ☐ **Where does run output live?** DDx execution records, or a gitignored folder that reports.html indexes? The choice decides what a HELIX document cites.  
-* ☐ **May a HELIX document carry a section its template doesn't have yet?** Findings in a research plan, Validation in an ADR. If HELIX's validator objects, step 4 of "Now" waits for the templates.  
-* ☐ **What links a journey to its task when the task has no ID?** Its name is the readable link, but a rename breaks it. The fallback is a key in the Task Model's table that tools use and people never see.  
-* ☐ **Should the brief remain at all?** Or should the person read the PRD directly, with the agent summarizing on request?  
-* ☐ **How are wireframes numbered under a user flow?** As in Erik's comment (UF-004-01-\<view\>), or as WF-n with a link to the flow?  
-* ☐ **Who drafts the HELIX templates?** We have drafts in docs/proposals/helix-ux-artifact-types, and they need the renames and merges agreed above.
+* ☑ **Where does run output live?** DDx execution records, or a gitignored folder that reports.html indexes? The choice decides what a HELIX document cites.  
+  *Answered 2026-10-28:* out of the repo, in a gitignored folder that reports.html indexes, per Erik: "Audit and assess reports should be out but so too should all the various test / audit runs". A run a HELIX document cites still needs a lasting home outside the repo; ADR-042 names it.  
+* ☑ **May a HELIX document carry a section its template doesn't have yet?** Findings in a research plan, Validation in an ADR. If HELIX's validator objects, step 4 of "Now" waits for the templates.  
+  *Answered 2026-10-28:* yes. Stage 1 doesn't wait.  
+* ☑ **What links a journey to its task when the task has no ID?** Its name is the readable link, but a rename breaks it. The fallback is a key in the Task Model's table that tools use and people never see.  
+  *Answered 2026-10-28:* both. The journey names its task, and the Task Model's key column keeps the link through a rename.  
+* ☑ **Should the brief remain at all?** Or should the person read the PRD directly, with the agent summarizing on request?  
+  *Answered 2026-10-28:* it stays, outside HELIX, in docs/ux-builder/. It is a compilation of HELIX documents and adds nothing new.  
+* ☑ **How are wireframes numbered under a user flow?** As in Erik's comment (UF-004-01-\<view\>), or as WF-n with a link to the flow?  
+  *Answered 2026-10-28:* Erik's scheme, UF-\<n\>-\<nn\>-\<view\>, with no WF- prefix.  
+* ☑ **Who drafts the HELIX templates?** We have drafts in docs/proposals/helix-ux-artifact-types, and they need the renames and merges agreed above.  
+  *Answered 2026-10-28:* we draft the HELIX PR, and Erik reviews it.
 
 ## **Punch list: the HELIX pull request**
 
@@ -304,7 +311,7 @@ There are three stages. The first doesn't depend on the HELIX PR.
 * ☐ **The blueprint's tasks** reference Task Model rows by name.  
 * ☐ **The coverage map** proposes the solution design's Experience Traceability.  
 * ☐ **The modality, size classes and app frame** are proposed into DESIGN.md.  
-* ☐ **brief** renders a page from the PRD, principles.md and the stories; artifacts/experience-brief goes.  
+* ☐ **brief** compiles docs/ux-builder/brief.md from the PRD, principles.md and the stories; artifacts/experience-brief stays as its type.  
 * ☐ **Research plans** move to HELIX's per-study location.
 
 **Stage 3: move existing apps over**
