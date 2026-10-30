@@ -148,6 +148,19 @@
       "fonts": "@ux-builder/tokens/fonts/synaptiq.css"
     },
     {
+      "name": "to-do-vk",
+      "title": "To Do Vk Databricks",
+      "brand": "to-do-vk",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/to-do-vk.css",
+      "fonts": "@ux-builder/tokens/fonts/to-do-vk.css"
+    },
+    {
       "name": "ux-builder-databricks",
       "title": "UX Builder Databricks",
       "brand": "ux-builder",
