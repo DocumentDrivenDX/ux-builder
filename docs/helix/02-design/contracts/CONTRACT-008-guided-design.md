@@ -88,7 +88,8 @@ describes each command's `--json` under the function's name, except
 | `state checkpoint <id> (--answer <text> [--declined] \| --skip --reason <text>)` | Records a checkpoint answer (`--declined`: the person said no or not yet; never counts as passed) or skip; also writes a trace `decision`. A passed `core-1` moves the loop to step 4 (activity `explore`), `core-2` to step 5, Design the structure, still `explore` (forward only; US-161), replacing a `next` that waited on a passed checkpoint with what that step does first | the state, the trace |
 | `mode full\|change [--why <text>]` | Sets the working mode | the state |
 | `baseline` | Drafts the current-state baseline from the blueprint, HELIX documents and the latest audit and assessment runs | `docs/ux-builder/baseline.md` |
-| `brief [--name <product>]` | Writes the experience brief from the PRD, stories and state, in seven sections: Product, Target users, Primary outcome, Primary jobs, Experience principles, Constraints, Open questions; each point marked with its status, and each hypothesis with what would confirm it. Principles a check can express go to `.ux-builder/principles.json`, which `ux-builder-blueprint check` applies as project rules | `docs/ux-builder/brief.md`, `docs/ux-builder/brief.html`, `.ux-builder/principles.json` |
+| `brief [--name <product>]` | Writes the experience brief from the PRD, principles.md's *Experience Principles*, the stories and the state, in seven sections: Product, Target users, Primary outcome, Primary jobs, Experience principles, Constraints, Open questions; each point marked with its status, and each hypothesis with what would confirm it. Notes any principle still in an older design state | `docs/ux-builder/brief.md`, `docs/ux-builder/brief.html` |
+| `principle add --text <principle> [--rule <json>]` | Proposes the principle under principles.md's *Experience Principles* (a new principles.md when HELIX has none; ADR-042). A `rule` a check can express goes in `.ux-builder/principles.json`, keyed by the principle's words, which `ux-builder-blueprint check` applies as a project rule. Exits 2 with no HELIX or an unknown rule kind | `helix-proposals/helix/01-frame/principles.md.patch`, `.ux-builder/principles.json` |
 | `evidence add <file> --kind <kind> [--date] [--source] [--title]` | Records a research source and its masked excerpts | `docs/ux-builder/evidence/EV-<n>.md` |
 | `evidence list` | Lists sources | nothing |
 | `evidence claim add <EV-n> --text <claim> --source <where> --basis observed\|inferred --confidence high\|medium\|low [--direction] [--verified] [--contradicts <t>] [--unknown <t>]` | Adds a row `C<n>` to the record's `## Claims` table (before the synthesis notes): ID, Claim, Source, Basis, Confidence, Direction, Verified, Contradicting, Unknown. Refused (exit 2) without a source, a basis or a confidence (GDL-83) | that record |
@@ -237,7 +238,7 @@ folder says the app is not built and what the build needs.
 | `questions[]` | `{ id, text, status: open\|answered, answer? }` | Open questions |
 | `assumptions[]` | `{ id: "A-<n>", text, status: assumed\|hypothesis\|confirmed\|refuted\|current-state, evidence[], section?, confirm?, dimension? }` | `current-state` marks a baseline item, shown as *current state, assumed* |
 | `alternatives[]` | `{ name, file, status: candidate\|chosen\|rejected, reason?, date?, judgments?: [{ criterion, value, reasoning }] }` | Judgments are preliminary, shown on the comparison page |
-| `principles[]` | `{ id: "PR-<n>", text, status: confirmed\|assumed\|hypothesis\|refuted, rule? }` | Experience principles; one with a `rule` becomes a project rule (Project principles) |
+| `principles[]` | `{ id, text, status, rule? }` | An older state's experience principles: they are principles.md's now (ADR-042); `state set principles[+]` is refused, and the brief notes any left here |
 | `issues[]` | `{ finding, status: open\|fixed\|wont-fix }` | Unresolved usability issues |
 | `experiments[]` | `{ id, status: running\|ended, decision?, variant?, result?: supported\|not-supported }` | |
 | `diagnoses[]` | `{ id: "D-<n>", insight, observation, explanations[2+], hypothesis, alternative }` | From an insight to the alternative that tests it |
@@ -309,10 +310,12 @@ The guide never writes these types into `docs/helix/`.
 
 ### Project principles
 
-`.ux-builder/principles.json`: `{ principles: [{ id: "PR-<n>", text, rule?
-}] }`. A principle with a `rule` (one of the kinds in SD-006, *Project
-rules*) is checked by `ux-builder-blueprint check`, and its findings name
-the principle. One without a `rule` is a rubric note.
+`.ux-builder/principles.json`: `{ principles: [{ key, text, rule }] }`, the
+experience principles a check can express; the principles themselves are in
+principles.md's *Experience Principles* (ADR-042). Each `rule` (one of the
+kinds in SD-006, *Project rules*) is checked by `ux-builder-blueprint check`
+as `project.<key>`, and its findings name the principle by its words. An
+older file's `id` still works as the key.
 
 ### Rubric
 

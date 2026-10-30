@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, principleAdd, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -95,7 +95,11 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       marked current state, assumed.
   brief [--name <product>]
       write the experience brief (docs/ux-builder/brief.md and brief.html) from the
-      HELIX PRD and stories and the design state, and .ux-builder/principles.json.
+      HELIX PRD, principles.md, the stories and the design state.
+  principle add --text <principle> [--rule <json>]
+      propose an experience principle for HELIX's principles.md; a rule a check
+      can express ({"kind":"no-step-before","patterns":["SignIn"]}) goes in
+      .ux-builder/principles.json for ux-builder-blueprint check.
   evidence add <file> --kind interview|analytics|support|feedback|survey|observation
                [--date YYYY-MM-DD] [--source <where it is kept>] [--title <t>]
       record a research source as docs/ux-builder/evidence/EV-<n>.md: where it is kept,
@@ -215,7 +219,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, rule: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -442,16 +446,22 @@ async function main(argv) {
     print(r, values.json, rubricText(r));
     return 0;
   }
+  if (command === "principle") {
+    if (rest[0] !== "add") throw new DesignError(`unknown principle command "${rest[0] ?? ""}": use add`);
+    const r = principleAdd(app, { text: values.text, rule: values.rule });
+    print(r, values.json, `Proposed "${r.text}" for ${r.path} (Experience Principles)${r.checked ? `; ux-builder-blueprint check applies its ${r.checked.kind} rule` : ""}.`);
+    return 0;
+  }
   if (command === "decision") {
     const [sub, id, status] = rest;
     if (sub === "add") {
       const r = decisionAdd(app, { question: values.question, options: values.option, choice: values.choice, why: values.why, assumptions: values.assumption, validation: values.validation, links: values.link });
-      print(r, values.json, `Wrote ${r.path} (${r.status}).`);
+      print(r, values.json, `Proposed ${r.id} (${r.path}), not tested. Show the person: ux-builder-design proposals.`);
       return 0;
     }
     if (sub === "status") {
       const r = decisionStatus(app, { id, status, evidence: values.evidence });
-      print(r, values.json, `${r.id} is ${r.status}${r.evidence ? ` (evidence ${r.evidence})` : ""}.`);
+      print(r, values.json, `Proposed ${r.id}'s Validation: ${r.status}${r.evidence ? ` (${r.evidence})` : ""}.`);
       return 0;
     }
     throw new DesignError(`unknown decision command "${sub ?? ""}": use add or status`);

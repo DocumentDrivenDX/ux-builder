@@ -273,14 +273,15 @@ carry it to Explore, where you will design each and compare them.
 
 Record what you learn as brief points: `state set 'assumptions[+]'
 '{"text":"…","section":"users","status":"hypothesis","confirm":"…"}'`
-(sections: product, users, outcome, jobs, principles, constraints). An
-experience principle goes in `principles[+]`; give it a `rule` when a check
-can hold the design to it, for example
-`{"text":"No mandatory account creation","rule":{"kind":"no-step-before","patterns":["SignIn"]}}`.
+(sections: product, users, outcome, jobs, constraints). An experience
+principle is HELIX's: `ux-builder-design principle add --text "No mandatory
+account creation"` proposes it for principles.md. Give it a `--rule` when a
+check can hold the design to it, for example
+`--rule '{"kind":"no-step-before","patterns":["SignIn"]}'`.
 
 Then run `ux-builder-design brief` and open `docs/ux-builder/brief.html` for the
-person. Regenerate the brief whenever its sources change: the PRD, the
-stories or the design state. Ask `core-1` on the brief.
+person. Regenerate the brief whenever its sources change: the PRD,
+principles.md, the stories or the design state. Ask `core-1` on the brief.
 
 ## Understand users
 

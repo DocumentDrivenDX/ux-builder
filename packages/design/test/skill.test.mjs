@@ -119,7 +119,7 @@ describe("Define in the skill (US-122)", () => {
     const s = section("Define");
     assert.match(s, /structured interview through HELIX's `grill`/);
     assert.match(s, /record it as an open question[\s\S]*carry it to Explore/);
-    assert.match(s, /Regenerate the brief whenever its sources change: the PRD, the\s+stories or the design state/);
+    assert.match(s, /Regenerate the brief whenever its sources change: the PRD,\s+principles\.md, the stories or the design state/);
   });
 });
 

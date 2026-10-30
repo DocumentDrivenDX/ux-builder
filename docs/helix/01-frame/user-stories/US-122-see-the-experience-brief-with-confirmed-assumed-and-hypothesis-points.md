@@ -28,7 +28,7 @@ ddx:
 
 ## Context
 
-Define runs through HELIX's grill and frame activities. `ux-builder-design brief` writes `docs/ux-builder/brief.md` and a page from the PRD, stories and the design state. Principles the blueprint check can express become project rules.
+Define runs through HELIX's grill and frame activities. `ux-builder-design brief` writes `docs/ux-builder/brief.md` and a page from the PRD, principles.md's *Experience Principles*, the stories and the design state. An experience principle is HELIX's (ADR-042): `ux-builder-design principle add` proposes it for principles.md, and a principle the blueprint check can express keeps its rule in `.ux-builder/principles.json` and becomes a project rule, named by its words.
 
 ## Walkthrough
 
@@ -41,8 +41,9 @@ Define runs through HELIX's grill and frame activities. `ux-builder-design brief
 - [ ] **US-122-AC1** — Given a HELIX PRD, stories and a design state with one confirmed point, one assumption and one hypothesis, when `brief` runs, then `docs/ux-builder/brief.md` has the seven sections CONTRACT-008 names, and each point carries its status.
 - [ ] **US-122-AC2** — Given a brief with a hypothesis, when it is read, then the hypothesis lists what would confirm it.
 - [ ] **US-122-AC3** — Given an app with no HELIX marker, when `brief` runs, then it builds the brief from the design state alone and says HELIX was not found.
-- [ ] **US-122-AC4** — Given a brief principle "no mandatory account creation" and a blueprint whose J-find starts at a sign-in screen, when `ux-builder-blueprint check` runs, then it reports a finding from the project rule naming the principle.
+- [ ] **US-122-AC4** — Given a brief principle "no mandatory account creation" and a blueprint whose J-find starts at a sign-in screen, when `ux-builder-blueprint check` runs, then it reports a finding from the project rule naming the principle by its words.
 - [ ] **US-122-AC5** — Given the installed skill, when its text is read, then it says to run Define through HELIX's grill, to carry an undecided interaction model to Explore as an open question, and to regenerate the brief when its sources change.
+- [ ] **US-122-AC6** — Given `principle add --text <principle> [--rule <json>]`, when it runs, then it proposes the principle under principles.md's *Experience Principles* (creating principles.md when HELIX has none), keeps a rule a check can express in `.ux-builder/principles.json` keyed by its words, and `state set principles[+]` is refused naming `principle add`.
 
 ## Edge Cases
 
@@ -57,6 +58,7 @@ Define runs through HELIX's grill and frame activities. `ux-builder-design brief
 | AC3 | US-122-AC3 | an app with no HELIX marker | `brief` runs | it builds the brief from the design state alone and says HELIX was not found |
 | AC4 | US-122-AC4 | a brief principle "no mandatory account creation" and a blueprint whose J-find starts at a sign-in screen | `ux-builder-blueprint check` runs | it reports a finding from the project rule naming the principle |
 | AC5 | US-122-AC5 | the installed skill | its text is read | it says to run Define through HELIX's grill, to carry an undecided interaction model to Explore as an open question, and to regenerate the brief when its sources change |
+| AC6 | US-122-AC6 | `principle add --text <principle> [--rule <json>]` | it runs | it proposes the principle under principles.md's *Experience Principles*, keeps its rule in `.ux-builder/principles.json`, and the state refuses `principles[+]` |
 
 ## Dependencies
 

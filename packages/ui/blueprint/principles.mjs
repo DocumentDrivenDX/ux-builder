@@ -9,10 +9,13 @@ export const PRINCIPLE_KINDS = ["no-step-before", "max-required-inputs", "max-st
 const journeysOf = (bp) => (Array.isArray(bp?.journeys) ? bp.journeys.filter((j) => j?.id) : []);
 const screenOf = (bp, id) => (bp?.screens ?? []).find((s) => s?.id === id);
 
-/* Findings for each principle with a rule: [{ rule: "project.<PR-id>", … }]. */
+/* A principle's key: its own, else its words as a slug (ADR-042: principles go by their words, not an ID). */
+const keyOf = (p) => p.key ?? p.id ?? String(p.text ?? "principle").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+
+/* Findings for each principle with a rule: [{ rule: "project.<key>", … }]. */
 export function principleFindings(bp, principles = []) {
   const findings = [];
-  const add = (p, path, message, fix) => findings.push({ rule: `project.${p.id}`, severity: "warning", path, message: `${message} (principle ${p.id}: "${p.text}")`, fix });
+  const add = (p, path, message, fix) => findings.push({ rule: `project.${keyOf(p)}`, severity: "warning", path, message: `${message} (principle "${p.text}")`, fix });
   for (const p of principles) {
     const r = p?.rule;
     if (!r?.kind) continue;

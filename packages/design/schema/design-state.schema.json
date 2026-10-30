@@ -354,7 +354,7 @@
     },
     "principles": {
       "type": "array",
-      "description": "Experience principles (FEAT-018 GDL-16): each a rubric note, or a project rule ux-builder-blueprint check applies when it has a rule",
+      "description": "Older states' experience principles. They are HELIX's now (principles.md, ADR-042): principle add proposes them, and the brief notes any still here.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -365,8 +365,7 @@
         ],
         "properties": {
           "id": {
-            "type": "string",
-            "pattern": "^PR-[1-9][0-9]*$"
+            "type": "string"
           },
           "text": {
             "type": "string",

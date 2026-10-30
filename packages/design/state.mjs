@@ -112,7 +112,7 @@ export function stateGet(app, { path } = {}) {
 }
 
 /* Fields an appended item gets when the agent leaves them out. */
-const NEXT_ID = { assumptions: "A", questions: "Q", experiments: "EXP", principles: "PR", observations: "O" };
+const NEXT_ID = { assumptions: "A", questions: "Q", observations: "O" };
 function withDefaults(list, items, item, now) {
   if (!item || typeof item !== "object" || Array.isArray(item)) return item;
   const out = { ...item };
@@ -123,11 +123,9 @@ function withDefaults(list, items, item, now) {
   }
   if (list === "assumptions") { out.status ??= "assumed"; out.evidence ??= []; }
   if (list === "questions") out.status ??= "open";
-  if (list === "principles") out.status ??= "assumed";
   if (list === "observations") out.source ??= "design-team";
   if (list === "alternatives") out.status ??= "candidate";
   if (list === "issues") out.status ??= "open";
-  if (list === "experiments") out.status ??= "running";
   if (list === "checkpoints") out.at ??= now;
   return out;
 }
@@ -135,6 +133,8 @@ function withDefaults(list, items, item, now) {
 export function stateSet(app, { path, value, now = new Date().toISOString() } = {}) {
   const keys = parsePath(path);
   if (!keys.length) throw new DesignError("state set needs a path");
+  // Experience principles are HELIX's now (principles.md, ADR-042).
+  if (keys[0] === "principles" && keys.at(-1) === "+") throw new DesignError(`experience principles go in HELIX's principles.md: ux-builder-design principle add --text "<principle>" [--rule '<json>']`);
   const state = structuredClone(readState(app));
   let parent = state;
   for (const [i, key] of keys.slice(0, -1).entries()) {
