@@ -1,5 +1,13 @@
 # @ux-builder/create-app
 
+## 0.12.1
+
+### Patch Changes
+
+- da1fcba: Allow explicit marketplace plugin guidance with UX_BUILDER_SKILLS=plugin; persist the selection and skip project-local skill copies while retaining project mode by default.
+- Updated dependencies [da1fcba]
+  - @ux-builder/design@0.6.1
+
 ## 0.12.0
 
 ### Minor Changes

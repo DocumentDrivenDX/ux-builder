@@ -1,5 +1,11 @@
 # @ux-builder/design
 
+## 0.6.1
+
+### Patch Changes
+
+- da1fcba: Allow explicit marketplace plugin guidance with UX_BUILDER_SKILLS=plugin; persist the selection and skip project-local skill copies while retaining project mode by default.
+
 ## 0.6.0
 
 ### Minor Changes
