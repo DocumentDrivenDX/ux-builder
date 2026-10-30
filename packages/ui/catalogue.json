@@ -70,6 +70,19 @@
       "fonts": "@ux-builder/tokens/fonts/plain.css"
     },
     {
+      "name": "plus1-261028",
+      "title": "Plus1",
+      "brand": "plus1-261028",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/plus1-261028.css",
+      "fonts": "@ux-builder/tokens/fonts/plus1-261028.css"
+    },
+    {
       "name": "praxis",
       "title": "Praxis",
       "brand": "praxis",

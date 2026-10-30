@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="plus1 colour swatch">
+  <!-- Colours taken from the reference image the person shared: orange on near-black, with white. -->
+  <rect width="256" height="256" rx="48" fill="#121212"/>
+  <circle cx="128" cy="128" r="84" fill="#FA6B32"/>
+  <path d="M84 118h24V94h20v24h24v20h-24v24h-20v-24H84z" fill="#FFFFFF"/>
+  <path d="M166 100l14-8h12v72h-16v-54l-10 6z" fill="#FFFFFF"/>
+</svg>
