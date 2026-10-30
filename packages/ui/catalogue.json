@@ -32,6 +32,19 @@
   },
   "themes": [
     {
+      "name": "acme-legal-databricks",
+      "title": "Acme Legal Databricks",
+      "brand": "acme-legal",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/acme-legal-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/acme-legal-databricks.css"
+    },
+    {
       "name": "databricks",
       "title": "Databricks",
       "brand": "databricks",
