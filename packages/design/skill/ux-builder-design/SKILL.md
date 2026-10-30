@@ -213,7 +213,7 @@ approval (*Review and approval*).
   and the UX quality rubric;
 - research evidence the person supplies;
 - the task model in the blueprint;
-- decision history: the design state, `docs/ux-builder/decisions/` and the trace.
+- decision history: the design state, HELIX's ADRs tagged `area:ui` and the trace.
 
 **Tools:**
 - the assessment (`ux-builder-audit assess`), which walks journeys in a

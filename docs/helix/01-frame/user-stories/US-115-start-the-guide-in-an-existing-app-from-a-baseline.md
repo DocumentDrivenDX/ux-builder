@@ -37,8 +37,8 @@ ddx:
 ## Walkthrough
 
 1. The developer runs `npm install -D @ux-builder/design` and `npx ux-builder-design init`.
-2. They type `/ux-builder-design`. The guide runs `ux-builder-design baseline`.
-3. `docs/ux-builder/baseline.md` lists the screens, journeys, findings and drafted jobs, each marked *current state, assumed*.
+2. They type `/ux-builder-design`. The guide runs HELIX's backfill.
+3. The PRD and stories are drafted from the app as proposals, each point *current state, assumed*; the blueprint is drawn from its screens.
 4. The guide asks what to improve and enters the loop where the request fits.
 
 ## Acceptance Criteria
@@ -63,7 +63,7 @@ ddx:
 | AC2 | US-115-AC2 | an app with ux-builder and no `app.blueprint.json` | `init` runs | it also writes a starting blueprint as `ux-builder-blueprint init` does, and says the guide will help describe the current screens |
 | AC3 | US-115-AC3 | an app without `@ux-builder/ui` installed | `init` runs | it writes the state and skill, and prints that the validated prototype and the audit need the SDK, naming the adoption steps |
 | AC4 | US-115-AC4 | an app that already has `.ux-builder/design-state.json` | `init` runs | it exits 2 (a refusal, CONTRACT-008), names the file and leaves it unchanged |
-| AC5 | US-115-AC5 | an initialized app with a blueprint, HELIX stories and an assessment run | `ux-builder-design baseline` runs | `docs/ux-builder/baseline.md` lists every screen, journey, story and open finding, every drafted job and task is marked *current state, assumed*, and the state's activity is `baseline` |
+| AC5 | US-115-AC5 | an existing app | `ux-builder-design baseline` runs | it exits 2, retired in favour of HELIX's backfill; nothing written |
 | AC6 | US-115-AC6 | the installed skill | its text is read | it says that an existing app's first session runs `baseline` and then routes a specific change to impact and Explore, "too complicated" to the assessment and `simplify`, complaints to evidence, and a new feature to Define |
 
 ## Dependencies
