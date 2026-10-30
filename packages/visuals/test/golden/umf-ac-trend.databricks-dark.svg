@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 770 330" width="770" height="330" role="img" aria-labelledby="umf-ac-trend-title" aria-describedby="umf-ac-trend-desc" class="uxb-visual uxb-visual--metric-line" data-visual="umf-ac-trend" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="umf-ac-trend-title">Acceptance criteria over time</title>
+<desc id="umf-ac-trend-desc">How have satisfied and untested criteria changed?</desc>
+<rect x="0" y="0" width="770" height="330" style="fill:#09090B"/>
+<g id="umf-ac-trend--chart" class="uxb-chart">
+<path d="M50.68544 284 L656 284" style="fill:none;stroke:#9F9FA9;stroke-width:1.25px"/>
+<text x="42.69" y="288" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">0</text>
+<path d="M50.68544 232 L656 232" style="fill:none;stroke:#9F9FA9;stroke-width:0.75px"/>
+<text x="42.69" y="236" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">100</text>
+<path d="M50.68544 180 L656 180" style="fill:none;stroke:#9F9FA9;stroke-width:0.75px"/>
+<text x="42.69" y="184" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">200</text>
+<path d="M50.68544 128 L656 128" style="fill:none;stroke:#9F9FA9;stroke-width:0.75px"/>
+<text x="42.69" y="132" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">300</text>
+<path d="M50.68544 76 L656 76" style="fill:none;stroke:#9F9FA9;stroke-width:0.75px"/>
+<text x="42.69" y="80" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">400</text>
+<path d="M50.68544 24 L656 24" style="fill:none;stroke:#9F9FA9;stroke-width:0.75px"/>
+<text x="42.69" y="28" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">500</text>
+<text x="50.69" y="302" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">2 Oct</text>
+<text x="252.46" y="302" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">9 Oct</text>
+<text x="454.23" y="302" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">16 Oct</text>
+<text x="656" y="302" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">23 Oct</text>
+<path d="M50.69 255.40 L194.81 251.24 L223.63 245.52 L252.46 223.16 L281.28 223.16 L310.11 223.16 L483.05 199.24 L511.88 196.64 L656.00 190.40" style="fill:none;stroke:#3987E5;stroke-width:2px"/>
+<circle cx="656" cy="190.4" r="4" style="fill:#3987E5;stroke:#09090B;stroke-width:2px"/>
+<path d="M50.69 203.40 L194.81 203.40 L223.63 134.24 L252.46 134.24 L281.28 119.68 L310.11 119.68 L483.05 82.76 L511.88 73.40 L656.00 72.36" style="fill:none;stroke:#D95926;stroke-width:2px"/>
+<circle cx="656" cy="72.36" r="4" style="fill:#D95926;stroke:#09090B;stroke-width:2px"/>
+<text x="666" y="76.36" style="fill:#FFFFFF;font-size:12px;font-weight:600">Untested 407</text>
+<text x="666" y="194.4" style="fill:#FFFFFF;font-size:12px;font-weight:600">Satisfied 180</text>
+<text x="50.69" y="320" style="fill:#FAFAFA;font-size:12px;font-weight:400">criteria</text>
+</g>
+</svg>

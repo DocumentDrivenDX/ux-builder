@@ -1,0 +1,67 @@
+{
+  "name": "@ux-builder/visuals",
+  "version": "0.1.0",
+  "license": "MIT OR Apache-2.0",
+  "description": "Draw umf.visual documents (one picture described as data) in any ux-builder theme: SVG, Mermaid, plates and stepped presentations, with no browser at render time.",
+  "type": "module",
+  "bin": {
+    "ux-builder-visuals": "./cli.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./node": {
+      "types": "./index.d.ts",
+      "default": "./node.mjs"
+    },
+    "./player": "./src/player/player.js",
+    "./schema/*": "./schema/*",
+    "./package.json": "./package.json",
+    "./react": "./react/index.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "node.mjs",
+    "cli.mjs",
+    "src",
+    "react",
+    "scripts/api.d.ts.txt",
+    "schema",
+    "metrics",
+    "README.md",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'",
+    "metrics": "node scripts/build-metrics.mjs",
+    "types": "node scripts/build-types.mjs"
+  },
+  "dependencies": {
+    "@ux-builder/tokens": "^1.7.0",
+    "ajv": "^8.20.0",
+    "elkjs": "0.12.0"
+  },
+  "devDependencies": {
+    "fontkit": "2.0.4",
+    "mermaid": "^12.2.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DocumentDrivenDX/ux-builder.git",
+    "directory": "packages/visuals"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}

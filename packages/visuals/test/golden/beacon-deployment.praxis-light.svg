@@ -1,0 +1,256 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1375 1112" width="1375" height="1112" role="img" aria-labelledby="beacon-deployment-title" aria-describedby="beacon-deployment-desc" class="uxb-visual uxb-visual--flow-zoned" data-visual="beacon-deployment" style="font-family:ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="beacon-deployment-title">Where Beacon runs</title>
+<desc id="beacon-deployment-desc">Beacon's code runs on the app platform; its data and the models run beside it, each deployed its own way.</desc>
+<rect x="0" y="0" width="1375" height="1112" style="fill:#F0EEE6"/>
+<g id="beacon-deployment--zone-support-team" class="uxb-group" data-role="zone">
+<rect x="24" y="24" width="1326.69" height="100" rx="6" style="fill:#EBE9E1"/>
+</g>
+<g id="beacon-deployment--zone-edge" class="uxb-group" data-role="zone">
+<rect x="24" y="258" width="1326.69" height="100" rx="6" style="fill:#EBE9E1"/>
+</g>
+<g id="beacon-deployment--zone-app-platform" class="uxb-group" data-role="zone">
+<rect x="24" y="492" width="676" height="170" rx="6" style="fill:#EBE9E1"/>
+</g>
+<g id="beacon-deployment--zone-model-services" class="uxb-group" data-role="zone">
+<rect x="832" y="492" width="518.69" height="170" rx="6" style="fill:#EBE9E1"/>
+</g>
+<g id="beacon-deployment--zone-data" class="uxb-group" data-role="zone">
+<rect x="24" y="916" width="1326.69" height="122" rx="6" style="fill:#EBE9E1"/>
+</g>
+<g id="beacon-deployment--agent--proxy" class="uxb-edge">
+<path d="M358.67 112 L358.67 198 Q358.67 206 366.67 206 L928.46 206 Q936.46 206 936.46 214 L936.46 283" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M932.68 283 L936.46 292 L940.24 283 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--admin--proxy" class="uxb-edge">
+<path d="M1016.01 112 L1016.01 168 Q1016.01 176 1024.01 176 L1129.57 176 Q1137.57 176 1137.57 184 L1137.57 283" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M1133.79 283 L1137.57 292 L1141.35 283 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--proxy--idp" class="uxb-edge">
+<path d="M735.34 319 L648.34 319" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M648.34 315.22 L639.34 319 L648.34 322.78 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--gateway--models" class="uxb-edge">
+<path d="M994.84 561 L1178.84 561" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M1178.84 564.78 L1187.84 561 L1178.84 557.22 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--proxy--web" class="uxb-edge">
+<path d="M936.46 346 L936.46 402 Q936.46 410 928.46 410 L104 410 Q96 410 96 418 L96 517" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M92.22 517 L96 526 L99.78 517 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--proxy--api" class="uxb-edge">
+<path d="M1137.57 346 L1137.57 432 Q1137.57 440 1129.57 440 L372 440 Q364 440 364 448 L364 517" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M360.22 517 L364 526 L367.78 517 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--web--api" class="uxb-edge">
+<path d="M156 563 L295 563" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M295 566.78 L304 563 L295 559.22 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--api--web" class="uxb-edge" data-kind="return">
+<path d="M304 591 L165 591" style="fill:none;stroke:#706C62;stroke-width:1.5px;stroke-dasharray:4 4"/>
+<path d="M165 587.22 L156 591 L165 594.78 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--api--drafter" class="uxb-edge">
+<path d="M352 628 L352 706 Q352 714 360 714 L620 714 Q628 714 628 706 L628 637" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M631.78 637 L628 628 L624.22 637 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--api--db" class="uxb-edge">
+<path d="M328 628 L328 856 Q328 864 336 864 L608.3 864 Q616.3 864 616.3 872 L616.3 941" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M612.52 941 L616.3 950 L620.08 941 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--worker--queue" class="uxb-edge">
+<path d="M476 628 L476 766 Q476 774 468 774 L257.11 774 Q249.11 774 249.11 782 L249.11 941" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M245.33 941 L249.11 950 L252.89 941 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--worker--db" class="uxb-edge">
+<path d="M516 628 L516 796 Q516 804 524 804 L750.38 804 Q758.38 804 758.38 812 L758.38 941" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M754.6 941 L758.38 950 L762.16 941 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--api--files" class="uxb-edge" data-status="unknown">
+<path d="M400 628 L400 826 Q400 834 408 834 L1117.57 834 Q1125.57 834 1125.57 842 L1125.57 941" style="fill:none;stroke:#706C62;stroke-width:1.5px;stroke-dasharray:2 3"/>
+<path d="M1121.79 941 L1125.57 950 L1129.35 941 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--drafter--gateway" class="uxb-edge">
+<path d="M688 577 L835 577" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M835 580.78 L844 577 L835 573.22 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g id="beacon-deployment--api--gateway" class="uxb-edge">
+<path d="M376 628 L376 736 Q376 744 384 744 L911.42 744 Q919.42 744 919.42 736 L919.42 605" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
+<path d="M923.2 605 L919.42 596 L915.64 605 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+</g>
+<g class="uxb-label">
+<rect x="449.17" y="196.5" width="395" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="646.67" y="211.5" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">opens a ticket · nothing reaches Beacon without a signed-in agent</text>
+</g>
+<g class="uxb-label">
+<rect x="1033.51" y="166.5" width="85" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="1076.01" y="181.5" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">sets policies</text>
+</g>
+<g class="uxb-label">
+<rect x="659.34" y="308" width="56" height="22" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="687.34" y="323" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">signs in</text>
+</g>
+<g class="uxb-label">
+<rect x="1014.84" y="526" width="153" height="70" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="1091.34" y="541" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">routes to a model · the</text>
+<text x="1091.34" y="557" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">gateway, not Beacon,</text>
+<text x="1091.34" y="573" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">chooses and meters the</text>
+<text x="1091.34" y="589" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">model</text>
+</g>
+<g class="uxb-label">
+<rect x="418" y="400.5" width="193" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="514.5" y="415.5" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">forwards with the agent's token</text>
+</g>
+<g class="uxb-label">
+<rect x="494.5" y="430.5" width="507" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="748" y="445.5" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">forwards with the agent's token · the API acts as the agent, never as a service account</text>
+</g>
+<g class="uxb-label">
+<rect x="180.5" y="552" width="99" height="22" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="230" y="567" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">asks for a draft</text>
+</g>
+<g class="uxb-label">
+<rect x="176" y="580" width="108" height="22" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="230" y="595" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">returns the draft</text>
+</g>
+<g class="uxb-label">
+<rect x="521.5" y="687" width="93" height="54" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="568" y="702" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">hands over</text>
+<text x="568" y="718" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">the ticket and</text>
+<text x="568" y="734" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">its history</text>
+</g>
+<g class="uxb-label">
+<rect x="410.5" y="854.5" width="123" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="472" y="869.5" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">loads ticket history</text>
+</g>
+<g class="uxb-label">
+<rect x="249.61" y="764.5" width="71" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="285.11" y="779.5" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">takes jobs</text>
+</g>
+<g class="uxb-label">
+<rect x="577.5" y="794.5" width="117" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="636" y="809.5" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">re-indexes tickets</text>
+</g>
+<g class="uxb-label">
+<rect x="763" y="824.5" width="126" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="826" y="839.5" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">stores attachments</text>
+</g>
+<g class="uxb-label">
+<rect x="708" y="566" width="116" height="22" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="766" y="581" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">sends the prompt</text>
+</g>
+<g class="uxb-label">
+<rect x="624" y="725" width="248" height="38" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
+<text x="748" y="740" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">asks for a draft · drafting is the only call</text>
+<text x="748" y="756" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">that leaves the platform's trust boundary</text>
+</g>
+<g class="uxb-label">
+<rect x="32" y="32" width="105.35" height="18" rx="3" style="fill:#EBE9E1"/>
+<text x="36" y="45" style="fill:#3D3D3A;font-size:11.5px;font-weight:600;letter-spacing:0.06em">SUPPORT TEAM</text>
+</g>
+<g class="uxb-label">
+<rect x="32" y="266" width="42.2" height="18" rx="3" style="fill:#EBE9E1"/>
+<text x="36" y="279" style="fill:#3D3D3A;font-size:11.5px;font-weight:600;letter-spacing:0.06em">EDGE</text>
+</g>
+<g class="uxb-label">
+<rect x="104" y="500" width="103.98" height="18" rx="3" style="fill:#EBE9E1"/>
+<text x="108" y="513" style="fill:#3D3D3A;font-size:11.5px;font-weight:600;letter-spacing:0.06em">APP PLATFORM</text>
+</g>
+<g class="uxb-label">
+<rect x="132.05" y="642" width="187.95" height="17" rx="3" style="fill:#EBE9E1"/>
+<text x="136.05" y="655" style="fill:#3D3D3A;font-size:12px;font-weight:400">Deployed by CI on every merge</text>
+</g>
+<g class="uxb-label">
+<rect x="840" y="500" width="117.63" height="18" rx="3" style="fill:#EBE9E1"/>
+<text x="844" y="513" style="fill:#3D3D3A;font-size:11.5px;font-weight:600;letter-spacing:0.06em">MODEL SERVICES</text>
+</g>
+<g class="uxb-label">
+<rect x="32" y="924" width="40.47" height="18" rx="3" style="fill:#EBE9E1"/>
+<text x="36" y="937" style="fill:#3D3D3A;font-size:11.5px;font-weight:600;letter-spacing:0.06em">DATA</text>
+</g>
+<g class="uxb-label">
+<rect x="1180.32" y="1018" width="162.37" height="17" rx="3" style="fill:#EBE9E1"/>
+<text x="1184.32" y="1031" style="fill:#3D3D3A;font-size:12px;font-weight:400">Provisioned with Terraform</text>
+</g>
+<g id="beacon-deployment--agent" class="uxb-node" data-role="actor" data-status="built">
+<rect x="36" y="58" width="645.34" height="54" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<circle cx="53" cy="71.2" r="3.08" style="fill:none;stroke:#706C62;stroke-width:1.5px"/>
+<path d="M47.68 81 C47.68 75.68 58.32 75.68 58.32 81" style="fill:none;stroke:#706C62;stroke-width:1.5px"/>
+<text x="358.67" y="89.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Support agent</text>
+</g>
+<g id="beacon-deployment--admin" class="uxb-node" data-role="actor" data-status="built">
+<rect x="693.34" y="58" width="645.34" height="54" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<circle cx="710.34" cy="71.2" r="3.08" style="fill:none;stroke:#706C62;stroke-width:1.5px"/>
+<path d="M705.0227199999999 81 C705.0227199999999 75.68 715.66272 75.68 715.66272 81" style="fill:none;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1016.01" y="80.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Workspace admin</text>
+<text x="1016.01" y="94.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">sets policies and rules</text>
+</g>
+<g id="beacon-deployment--idp" class="uxb-node" data-role="platform" data-status="built">
+<rect x="36" y="292" width="603.34" height="54" rx="8" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="337.67" y="314.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Identity provider</text>
+<text x="337.67" y="328.3" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">single sign-on</text>
+</g>
+<g id="beacon-deployment--proxy" class="uxb-node" data-role="platform" data-status="built">
+<rect x="735.34" y="292" width="603.34" height="54" rx="8" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1037.01" y="314.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Sign-in proxy</text>
+<text x="1037.01" y="328.3" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">checks identity, forwards the agent's token</text>
+</g>
+<g id="beacon-deployment--web" class="uxb-node" data-role="own" data-status="built">
+<rect x="36" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<text x="96" y="556.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Web app</text>
+<text x="96" y="570.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">the agent's</text>
+<text x="96" y="586.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">inbox and draft</text>
+<text x="96" y="602.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">editor</text>
+</g>
+<g id="beacon-deployment--api" class="uxb-node" data-role="own" data-status="built">
+<rect x="304" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<text x="364" y="556.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Beacon API</text>
+<text x="364" y="570.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">every request</text>
+<text x="364" y="586.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">runs as the</text>
+<text x="364" y="602.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">agent</text>
+</g>
+<g id="beacon-deployment--drafter" class="uxb-node" data-role="own" data-status="built">
+<rect x="568" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<text x="628" y="548.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Reply drafter</text>
+<text x="628" y="562.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">builds the</text>
+<text x="628" y="578.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">prompt from</text>
+<text x="628" y="594.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">the ticket and</text>
+<text x="628" y="610.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">its history</text>
+</g>
+<g id="beacon-deployment--worker" class="uxb-node" data-role="own" data-status="built">
+<rect x="436" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<text x="496" y="556.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Job worker</text>
+<text x="496" y="570.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">imports,</text>
+<text x="496" y="586.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">re-indexing,</text>
+<text x="496" y="602.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">nightly digests</text>
+</g>
+<g id="beacon-deployment--db" class="uxb-node" data-role="store" data-status="built">
+<rect x="474.23" y="950" width="426.23" height="54" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<path d="M484.22848 962 L484.22848 970 C484.22848 974 498.22848 974 498.22848 970 L498.22848 962" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<ellipse cx="491.23" cy="962" rx="7" ry="3" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="687.34" y="972.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Beacon database</text>
+<text x="687.34" y="986.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">tickets, drafts, reviews</text>
+</g>
+<g id="beacon-deployment--queue" class="uxb-node" data-role="store" data-status="built">
+<rect x="36" y="950" width="426.23" height="54" rx="8" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<path d="M46 962 L46 970 C46 974 60 974 60 970 L60 962" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<ellipse cx="53" cy="962" rx="7" ry="3" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="249.11" y="981.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Job queue</text>
+</g>
+<g id="beacon-deployment--files" class="uxb-node" data-role="store" data-status="unknown">
+<rect x="912.46" y="950" width="426.23" height="54" rx="8" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px;stroke-dasharray:2 3"/>
+<path d="M922.45696 962 L922.45696 970 C922.45696 974 936.45696 974 936.45696 970 L936.45696 962" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<ellipse cx="929.46" cy="962" rx="7" ry="3" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1125.57" y="972.3" text-anchor="middle" style="fill:#3D3D3A;font-size:14px;font-weight:600">Attachment store</text>
+<text x="1125.57" y="986.3" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">object storage</text>
+</g>
+<g id="beacon-deployment--gateway" class="uxb-node" data-role="platform" data-status="built">
+<rect x="844" y="526" width="150.84" height="70" rx="8" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="919.42" y="548.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Model gateway</text>
+<text x="919.42" y="562.3" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">rate limits, usage,</text>
+<text x="919.42" y="578.3" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">model choice</text>
+</g>
+<g id="beacon-deployment--models" class="uxb-node" data-role="platform" data-status="built">
+<rect x="1187.84" y="526" width="150.84" height="70" rx="8" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1263.26" y="565.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Language models</text>
+</g>
+</svg>

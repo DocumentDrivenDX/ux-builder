@@ -1,0 +1,96 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:tpl-arch-containers",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "tpl-arch-containers",
+      "kind": "flow",
+      "form": "network",
+      "title": "Level 2: Container Diagram",
+      "question": "What runs inside DepositMatch?",
+      "source": {
+        "path": "helix:workflows/activities/02-design/artifacts/architecture/example.md",
+        "view": "Level 2: Container Diagram",
+        "digest": "sha256:4c79ba17f9d9342592c062b9a51cef0232816004b59f110488f696e7a8e191b8"
+      },
+      "nodes": [
+        {
+          "id": "web",
+          "label": "React Web App"
+        },
+        {
+          "id": "api",
+          "label": "Fastify API Service"
+        },
+        {
+          "id": "db",
+          "label": "PostgreSQL 16",
+          "role": "store"
+        },
+        {
+          "id": "s3",
+          "label": "S3 Source File Store",
+          "role": "store"
+        },
+        {
+          "id": "worker",
+          "label": "Matching Worker"
+        },
+        {
+          "id": "cw",
+          "label": "CloudWatch"
+        }
+      ],
+      "edges": [
+        {
+          "id": "web--api",
+          "from": "web",
+          "to": "api",
+          "label": "HTTPS JSON"
+        },
+        {
+          "id": "api--db",
+          "from": "api",
+          "to": "db",
+          "label": "TLS SQL"
+        },
+        {
+          "id": "api--s3",
+          "from": "api",
+          "to": "s3",
+          "label": "S3 SDK"
+        },
+        {
+          "id": "worker--db",
+          "from": "worker",
+          "to": "db",
+          "label": "TLS SQL"
+        },
+        {
+          "id": "api--db-2",
+          "from": "api",
+          "to": "db",
+          "label": "job rows"
+        },
+        {
+          "id": "api--cw",
+          "from": "api",
+          "to": "cw",
+          "label": "logs/metrics"
+        },
+        {
+          "id": "worker--cw",
+          "from": "worker",
+          "to": "cw",
+          "label": "logs/metrics"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

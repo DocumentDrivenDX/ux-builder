@@ -1,0 +1,84 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:umf-ac-status",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "kind": "metric",
+      "audience": "executive",
+      "source": {
+        "path": "umf:docs/helix/03-test/acceptance-criteria-ledger.json",
+        "digest": "sha256:5dc577fd1bce10c6da71052da019e17b351b01b2e5ea53fa59d00a3524f1ec23"
+      },
+      "id": "umf-ac-status",
+      "form": "bar",
+      "title": "Acceptance criteria by status",
+      "question": "Where do umf's acceptance criteria stand?",
+      "metric": {
+        "unit": "criteria",
+        "format": {
+          "kind": "number",
+          "decimals": 0
+        },
+        "axis": {
+          "kind": "category",
+          "categories": [
+            {
+              "id": "satisfied",
+              "label": "Satisfied"
+            },
+            {
+              "id": "untested",
+              "label": "Untested"
+            },
+            {
+              "id": "uncited-coverage",
+              "label": "Uncited Coverage"
+            },
+            {
+              "id": "asserted-unbacked",
+              "label": "Asserted Unbacked"
+            },
+            {
+              "id": "reviewed-exception",
+              "label": "Reviewed Exception"
+            }
+          ]
+        },
+        "series": [
+          {
+            "id": "criteria",
+            "label": "Criteria",
+            "points": [
+              {
+                "at": "satisfied",
+                "value": 180
+              },
+              {
+                "at": "untested",
+                "value": 407
+              },
+              {
+                "at": "uncited-coverage",
+                "value": 233
+              },
+              {
+                "at": "asserted-unbacked",
+                "value": 0
+              },
+              {
+                "at": "reviewed-exception",
+                "value": 17
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

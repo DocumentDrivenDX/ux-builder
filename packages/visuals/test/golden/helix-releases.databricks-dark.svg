@@ -1,0 +1,213 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 1262" width="448" height="1262" role="img" aria-labelledby="helix-releases-title" aria-describedby="helix-releases-desc" class="uxb-visual uxb-visual--timeline-history" data-visual="helix-releases" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="helix-releases-title">HELIX releases</title>
+<desc id="helix-releases-desc">When did each HELIX release ship?</desc>
+<rect x="0" y="0" width="448" height="1262" style="fill:#09090B"/>
+<g class="uxb-axis">
+<path d="M113.74112000000001 22 L113.74112000000001 1236" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<circle cx="113.74" cy="24" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="54" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="84" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="114" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="144" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="174" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="204" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="234" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="264" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="294" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="324" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="354" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="384" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="414" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="444" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="474" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="504" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="534" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="564" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="594" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="624" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="654" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="684" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="714" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="744" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="774" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="804" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="834" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="864" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="894" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="924" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="954" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="984" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="1014" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="1044" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="1074" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="1104" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="1134" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="1164" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="1194" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+<circle cx="113.74" cy="1224" r="5" style="fill:#FFFFFF;stroke:#FFFFFF;stroke-width:1.5px"/>
+</g>
+<g id="helix-releases--v0-1-0" class="uxb-event">
+<text x="131.74" y="28" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.1.0</text>
+<text x="99.74" y="28" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">6 Apr 2026</text>
+</g>
+<g id="helix-releases--v0-2-0" class="uxb-event">
+<text x="131.74" y="58" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.2.0</text>
+<text x="99.74" y="58" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">6 Apr 2026</text>
+</g>
+<g id="helix-releases--v0-2-1" class="uxb-event">
+<text x="131.74" y="88" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.2.1</text>
+<text x="99.74" y="88" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">6 Apr 2026</text>
+</g>
+<g id="helix-releases--v0-3-0" class="uxb-event">
+<text x="131.74" y="118" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.3.0</text>
+<text x="99.74" y="118" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">6 Apr 2026</text>
+</g>
+<g id="helix-releases--v0-3-1" class="uxb-event">
+<text x="131.74" y="148" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.3.1</text>
+<text x="99.74" y="148" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">6 Apr 2026</text>
+</g>
+<g id="helix-releases--v0-3-2" class="uxb-event">
+<text x="131.74" y="178" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.3.2</text>
+<text x="99.74" y="178" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">6 Apr 2026</text>
+</g>
+<g id="helix-releases--v0-3-3" class="uxb-event">
+<text x="131.74" y="208" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.3.3</text>
+<text x="99.74" y="208" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">7 Apr 2026</text>
+</g>
+<g id="helix-releases--v0-4-0" class="uxb-event">
+<text x="131.74" y="238" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.4.0</text>
+<text x="99.74" y="238" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">17 May 2026</text>
+</g>
+<g id="helix-releases--v0-4-1" class="uxb-event">
+<text x="131.74" y="268" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.4.1</text>
+<text x="99.74" y="268" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">17 May 2026</text>
+</g>
+<g id="helix-releases--v0-5-0" class="uxb-event">
+<text x="131.74" y="298" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.5.0</text>
+<text x="99.74" y="298" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">28 May 2026</text>
+</g>
+<g id="helix-releases--v0-5-1" class="uxb-event">
+<text x="131.74" y="328" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.5.1</text>
+<text x="99.74" y="328" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">28 May 2026</text>
+</g>
+<g id="helix-releases--v0-5-2" class="uxb-event">
+<text x="131.74" y="358" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.5.2</text>
+<text x="99.74" y="358" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">3 Jun 2026</text>
+</g>
+<g id="helix-releases--v0-6-0" class="uxb-event">
+<text x="131.74" y="388" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.6.0</text>
+<text x="99.74" y="388" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">8 Jun 2026</text>
+</g>
+<g id="helix-releases--v0-6-1" class="uxb-event">
+<text x="131.74" y="418" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.6.1</text>
+<text x="99.74" y="418" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">8 Jun 2026</text>
+</g>
+<g id="helix-releases--v0-7-0" class="uxb-event">
+<text x="131.74" y="448" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.7.0</text>
+<text x="99.74" y="448" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">13 Jun 2026</text>
+</g>
+<g id="helix-releases--v0-7-1" class="uxb-event">
+<text x="131.74" y="478" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.7.1</text>
+<text x="99.74" y="478" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">14 Jun 2026</text>
+</g>
+<g id="helix-releases--v0-8-0" class="uxb-event">
+<text x="131.74" y="508" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.8.0</text>
+<text x="99.74" y="508" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">23 Jun 2026</text>
+</g>
+<g id="helix-releases--v0-9-0" class="uxb-event">
+<text x="131.74" y="538" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.9.0</text>
+<text x="99.74" y="538" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">27 Jun 2026</text>
+</g>
+<g id="helix-releases--v0-9-1" class="uxb-event">
+<text x="131.74" y="568" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.9.1</text>
+<text x="99.74" y="568" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">29 Jun 2026</text>
+</g>
+<g id="helix-releases--v0-10-0" class="uxb-event">
+<text x="131.74" y="598" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.10.0</text>
+<text x="99.74" y="598" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">9 Jul 2026</text>
+</g>
+<g id="helix-releases--v0-10-1" class="uxb-event">
+<text x="131.74" y="628" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.10.1</text>
+<text x="99.74" y="628" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">9 Jul 2026</text>
+</g>
+<g id="helix-releases--v0-10-2" class="uxb-event">
+<text x="131.74" y="658" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.10.2</text>
+<text x="99.74" y="658" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">9 Jul 2026</text>
+</g>
+<g id="helix-releases--v0-10-3" class="uxb-event">
+<text x="131.74" y="688" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.10.3</text>
+<text x="99.74" y="688" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">15 Jul 2026</text>
+</g>
+<g id="helix-releases--v0-11-0" class="uxb-event">
+<text x="131.74" y="718" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.11.0</text>
+<text x="99.74" y="718" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">22 Jul 2026</text>
+</g>
+<g id="helix-releases--v0-11-1" class="uxb-event">
+<text x="131.74" y="748" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.11.1</text>
+<text x="99.74" y="748" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">2 Aug 2026</text>
+</g>
+<g id="helix-releases--v0-12-0" class="uxb-event">
+<text x="131.74" y="778" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.12.0</text>
+<text x="99.74" y="778" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">21 Aug 2026</text>
+</g>
+<g id="helix-releases--v0-13-0" class="uxb-event">
+<text x="131.74" y="808" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.13.0</text>
+<text x="99.74" y="808" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">15 Sep 2026</text>
+</g>
+<g id="helix-releases--v0-13-1" class="uxb-event">
+<text x="131.74" y="838" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.13.1</text>
+<text x="99.74" y="838" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">17 Sep 2026</text>
+</g>
+<g id="helix-releases--v0-13-2" class="uxb-event">
+<text x="131.74" y="868" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.13.2</text>
+<text x="99.74" y="868" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">20 Sep 2026</text>
+</g>
+<g id="helix-releases--v0-14-0" class="uxb-event">
+<text x="131.74" y="898" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.14.0</text>
+<text x="99.74" y="898" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">22 Sep 2026</text>
+</g>
+<g id="helix-releases--v0-14-1" class="uxb-event">
+<text x="131.74" y="928" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.14.1</text>
+<text x="99.74" y="928" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">1 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-15-0" class="uxb-event">
+<text x="131.74" y="958" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.15.0</text>
+<text x="99.74" y="958" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">4 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-15-1" class="uxb-event">
+<text x="131.74" y="988" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.15.1</text>
+<text x="99.74" y="988" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">9 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-15-4" class="uxb-event">
+<text x="131.74" y="1018" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.15.4</text>
+<text x="99.74" y="1018" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">9 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-15-2" class="uxb-event">
+<text x="131.74" y="1048" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.15.2</text>
+<text x="99.74" y="1048" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">10 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-15-3" class="uxb-event">
+<text x="131.74" y="1078" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.15.3</text>
+<text x="99.74" y="1078" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">10 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-16-0" class="uxb-event">
+<text x="131.74" y="1108" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.16.0</text>
+<text x="99.74" y="1108" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">11 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-17-0" class="uxb-event">
+<text x="131.74" y="1138" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.17.0</text>
+<text x="99.74" y="1138" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">13 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-18-0" class="uxb-event">
+<text x="131.74" y="1168" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.18.0</text>
+<text x="99.74" y="1168" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">19 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-19-0" class="uxb-event">
+<text x="131.74" y="1198" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.19.0</text>
+<text x="99.74" y="1198" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">22 Oct 2026</text>
+</g>
+<g id="helix-releases--v0-19-1" class="uxb-event">
+<text x="131.74" y="1228" style="fill:#FFFFFF;font-size:12px;font-weight:600">v0.19.1</text>
+<text x="99.74" y="1228" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">22 Oct 2026</text>
+</g>
+</svg>
