@@ -196,7 +196,7 @@
     {
       "term": "evaluation report",
       "step": 7,
-      "means": "The results of an evaluation: the method, the tasks, what people did against what was predicted, findings by journey and what was not tested (UER-1).",
+      "means": "The results of an evaluation: the method, the tasks, what people did against what was predicted, findings by journey and what was not tested; run output, kept out of the repository.",
       "why": "It is the evidence for deciding what to fix and whether the design is ready to build."
     },
     {

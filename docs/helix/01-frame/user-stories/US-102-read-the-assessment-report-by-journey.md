@@ -36,13 +36,13 @@ The assessment's report (FEAT-009) listed findings by priority. RPT-05 orders it
 
 1. The owner runs `assess report`.
 2. report.md and report.html list each journey, its states and steps, and the findings at each step with rule text, evidence, severity and fix.
-3. report.md has `ddx:` frontmatter of type `usability-evaluation-report`.
+3. report.md has `ux-builder:` frontmatter of type `usability-assessment-report`: a ux-builder report, not a HELIX document.
 
 ## Acceptance Criteria
 
 - [ ] **US-102-AC1** — Given an assessment run, when `assess report` runs, then the report lists each journey, the states it was walked in, its steps, and under each step its findings.
 - [ ] **US-102-AC2** — Given a finding, when it is shown, then it states its rule ID and full statement (or heuristic and source), the evidence (screenshot or video moment), its severity on a 0 to 4 scale and the fix.
-- [ ] **US-102-AC3** — Given the report, when it is written, then report.md carries `ddx:` frontmatter with `type: usability-evaluation-report`, its journeys and stories linked; when the installed HELIX defines that type, it is drafted from the type's template.
+- [ ] **US-102-AC3** — Given the report, when it is written, then report.md carries `ux-builder:` frontmatter with `type: usability-assessment-report`, naming its journeys and stories, and claims no HELIX type.
 - [ ] **US-102-AC4** — Given `assess validate-report`, when it runs on the report, then it fails a finding that names neither a rule nor a heuristic.
 
 ## Edge Cases
@@ -55,7 +55,7 @@ The assessment's report (FEAT-009) listed findings by priority. RPT-05 orders it
 |----------|-------|---------------|--------|-----------------|
 | AC1 | US-102-AC1 | an assessment run | `assess report` runs | the report lists each journey, the states it was walked in, its steps, and under each step its findings |
 | AC2 | US-102-AC2 | a finding | it is shown | it states its rule ID and full statement (or heuristic and source), the evidence (screenshot or video moment), its severity on a 0 to 4 scale and the fix |
-| AC3 | US-102-AC3 | the report | it is written | report.md carries `ddx:` frontmatter with `type: usability-evaluation-report`, its journeys and stories linked; when the installed HELIX defines that type, it is drafted from the type's template |
+| AC3 | US-102-AC3 | the report | it is written | report.md carries `ux-builder:` frontmatter with `type: usability-assessment-report`, naming its journeys and stories, and claims no HELIX type |
 | AC4 | US-102-AC4 | `assess validate-report` | it runs on the report | it fails a finding that names neither a rule nor a heuristic |
 
 ## Dependencies

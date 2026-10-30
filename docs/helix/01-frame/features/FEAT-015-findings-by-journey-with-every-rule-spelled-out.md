@@ -110,13 +110,12 @@ journey and step.
 
 ### HELIX artifacts
 
-RPT-08. The assessment's report is written as a HELIX artifact (a usability
-evaluation report):
-- when the installed HELIX defines that type, it is written at the type's
-  location, from its template;
-- until then, it is written in the run package with `ddx:` frontmatter
-  (`type: usability-evaluation-report`), and proposed to the flow with
-  `assess propose`.
+RPT-08. The assessment's report is a ux-builder usability assessment report,
+not a HELIX artifact (ADR-042: reports are run output). It is written in the
+run package with `ux-builder:` frontmatter (`type:
+usability-assessment-report`) naming its journeys and stories, and listed on
+reports.html. A finding's fix is proposed to the HELIX artifact it changes
+with `assess propose`.
 
 RPT-09. `ux-builder-blueprint propose` and `draw` also draft:
 - an **interaction-state diagram** per screen, covering every state it

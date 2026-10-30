@@ -32,7 +32,7 @@ ddx:
 
 ## Context
 
-`ux-builder-design report` writes `docs/ux-builder/runs/evaluations/<date>/report.md` (run output) from the usability-evaluation-report template proposed to HELIX (CONTRACT-008). In stage 2 it becomes HELIX's type.
+`ux-builder-design report` writes `docs/ux-builder/runs/evaluations/<date>/report.md` (run output), a ux-builder report rather than a HELIX document (ADR-042; CONTRACT-008).
 
 ## Walkthrough
 
