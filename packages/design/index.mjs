@@ -27,7 +27,8 @@ export { excerptAdd, findingIdFor, humanFindings, maskPersonal, observedDimensio
 export { evaluationFindings, report, route } from "./evaluation.mjs";
 export { insights, journeyStats, latestInsights } from "./insights.mjs";
 export { diagnose, experimentEnd, experimentStart } from "./experiments.mjs";
-export { DECISION_STATUSES, decisionAdd, decisionStatus } from "./decisions.mjs";
+export { adrPath, DECISION_STATUSES, decisionAdd, decisionStatus, readValidation, uiDecisions } from "./decisions.mjs";
+export { currentText, documentOfType, helixDocuments, nextNumber, proposeChange, proposedDocuments, sectionOf, setSection, tableUnder } from "./helix.mjs";
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml, principlesFile } from "./brief.mjs";
 export { claimAdd, claimContradict, claimVerify, EVIDENCE_KINDS, evidenceAdd, evidenceList, unverifiedClaims, writeEvidence } from "./research.mjs";
 export { ARTIFACTS, businessRules, CLAIM_COLUMNS, claimChecks, evidenceClaims, documentTypes, jobsTable, RULE_ANSWERS, ruleCitations, usersTable, PERSONAL_PATTERNS, exampleFile, helixIds, helixRoot, parseDocument, pathFor, templateFile, uxDocuments, validate, validateDocument } from "./documents.mjs";

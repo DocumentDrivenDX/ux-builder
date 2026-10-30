@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { dirname, join } from "node:path";
 import { DesignError, bpFile, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
+import { uiDecisions } from "./decisions.mjs";
 import { logEvent } from "./metrics.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -134,7 +135,7 @@ export function reviewItems(app) {
   // 4 Explore alternatives
   for (const j of list(bp.journeys).filter((x) => x?.id)) add(`journey:${j.id}`, 4, j.id, bpFile(app), readable(j), fields);
   for (const a of list(state?.alternatives)) { const text = read(app, a.file ?? bpFile(app, a.name)); if (text) add(`alternative:${a.name}`, 4, `Alternative ${a.name}`, a.file ?? bpFile(app, a.name), text); }
-  for (const f of files(app, ux(app, "decisions"), /^UXD-\d+\.md$/)) add(`decision:${f.replace(/\.md$/, "")}`, 4, parseDocument(read(app, `${ux(app)}/decisions/${f}`)).body.match(/^# (.+)$/m)?.[1] ?? f, `${ux(app)}/decisions/${f}`, read(app, `${ux(app)}/decisions/${f}`));
+  for (const d of uiDecisions(app)) add(`decision:${d.id}`, 4, d.title, d.path, d.text);
   // 5 Design the structure
   for (const s of list(bp.screens).filter((x) => x?.id)) add(`screen:${s.id}`, 5, s.title ?? s.id, bpFile(app), readable(s), fields);
   // 7 Test with people

@@ -29,7 +29,7 @@ function expApp() {
   return a;
 }
 const DIAG = ["diagnose", "--insight", "INS-2026-10-23", "--observation", "Half of J-find is abandoned on the map", "--explanation", "The map loads slowly on phones", "--explanation", "People expect a list of nearby rivers", "--hypothesis", "If the list comes first, then more people find a river, because they scan names faster than a map", "--alternative", "list-first"];
-const start = (a, ...extra) => cli(a, ["experiment", "start", "--decision", "UXD-1", "--variant", "list-first", "--metric", "find-completion", "--guardrail", "time-to-river", "--duration", "14", ...extra]);
+const start = (a, ...extra) => cli(a, ["experiment", "start", "--decision", "ADR-001", "--variant", "list-first", "--metric", "find-completion", "--guardrail", "time-to-river", "--duration", "14", ...extra]);
 
 describe("US-145: run an experiment through its checkpoints", () => {
   // @covers US-145-AC1
@@ -72,12 +72,12 @@ describe("US-145: run an experiment through its checkpoints", () => {
     assert.equal(r.path, "docs/ux-builder/experiments/EXP-1.md");
     const t = readFileSync(join(a, r.path), "utf8");
     assert.match(t, /status: running/);
-    assert.match(t, / {4}- kind: tests\n {6}to: UXD-1\n {4}- kind: informed_by\n {6}to: INS-2026-10-23/);
-    assert.match(t, /## Hypothesis\n\nIf the list comes first, then more people find a river, because they scan names faster than a map \(tests UXD-1; from D-1 on INS-2026-10-23\)/);
+    assert.match(t, / {4}- kind: tests\n {6}to: ADR-001\n {4}- kind: informed_by\n {6}to: INS-2026-10-23/);
+    assert.match(t, /## Hypothesis\n\nIf the list comes first, then more people find a river, because they scan names faster than a map \(tests ADR-001; from D-1 on INS-2026-10-23\)/);
     assert.match(t, /## Variant\n\nlist-first \(`docs\/ux-builder\/blueprint\/app\.blueprint\.list-first\.json`\)/);
     assert.match(t, /- \*\*Success\*\*: find-completion\n- \*\*Guardrails\*\*: time-to-river/);
     assert.match(t, /## Duration\n\n14 days/);
-    assert.deepEqual(readState(a).experiments, [{ id: "EXP-1", status: "running", decision: "UXD-1", variant: "list-first" }]);
+    assert.deepEqual(readState(a).experiments, [{ id: "EXP-1", status: "running", decision: "ADR-001", variant: "list-first" }]);
     assert.equal(cli(a, ["validate"]).status, 0, cli(a, ["validate"]).stdout);
     // The next experiment needs its own answer.
     assert.equal(start(a).status, 2);
@@ -98,7 +98,7 @@ describe("US-145: run an experiment through its checkpoints", () => {
     assert.match(t, /status: ended/);
     assert.match(t, /## Result\n\n- \*\*find-completion\*\*: control 0\.5, variant 0\.68 \(improved\)\n- \*\*Guardrail time-to-river\*\*: control 42, variant 38 \(held\)\n- \*\*Hypothesis\*\*: supported/);
     const s = readState(a);
-    assert.deepEqual(s.experiments[0], { id: "EXP-1", status: "ended", decision: "UXD-1", variant: "list-first", result: "supported" });
+    assert.deepEqual(s.experiments[0], { id: "EXP-1", status: "ended", decision: "ADR-001", variant: "list-first", result: "supported" });
     assert.equal(s.next, r.next);
     // A guardrail that got worse: the hypothesis is not supported, whatever the success metric did.
     const b = expApp();

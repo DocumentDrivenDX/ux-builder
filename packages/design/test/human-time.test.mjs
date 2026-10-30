@@ -79,7 +79,7 @@ describe("US-153: foundations reviewed deliberately, what is built from them as 
     writeFileSync(join(a, "notes.txt"), "interview notes");
     evidenceAdd(a, { file: "notes.txt", kind: "interview" });
     const r = reviewList(a);
-    assert.deepEqual(r.foundations, ["brief", "user:U-1", "user:U-2", "job:J-1", "job:J-2", "story:US-001", "story:US-002", "decision:UXD-1"]);
+    assert.deepEqual(r.foundations, ["brief", "user:U-1", "user:U-2", "job:J-1", "job:J-2", "story:US-001", "story:US-002", "decision:ADR-001"]);
     assert.deepEqual(r.derived, ["task:T-1", "task:T-2", "journey:J-find", "journey:J-saved", "screen:map", "screen:detail", "screen:saved"]);
     assert.deepEqual(r.records, ["evidence:EV-1"]);
     assert.match(r.next, /^Show the brief table \(ux-builder-design review table brief\), every row in full/);

@@ -10,6 +10,8 @@ import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { findSecrets } from "@ux-builder/trace";
 import { bpFile, ux } from "./app.mjs";
+import { uiDecisions } from "./decisions.mjs";
+import { proposedDocuments } from "./helix.mjs";
 
 export const ARTIFACTS = fileURLToPath(new URL("./artifacts", import.meta.url));
 
@@ -100,9 +102,6 @@ const RULES = {
       for (const [p, name] of Object.entries(names)) if (typeof name === "string" && name.trim() && named(name)) out.push(`the excerpt on line ${e.line} names a participant; use the pseudonym ${p} (ADR-039)`);
     }
     return out;
-  },
-  "decision-status"(doc, ux) {
-    return ["not-tested", "tested", "refuted"].includes(ux.status) ? [] : [`status is "${ux.status ?? ""}"; use not-tested, tested or refuted`];
   },
   // Target users (GDL-77): the jobs table's evidence rules, plus their context and the jobs they hold.
   users(doc, front, { known, appDir }) {
@@ -312,7 +311,8 @@ export function claimChecks(c) {
    notes are reported. */
 export function validate(app) {
   const documents = uxDocuments(app);
-  const known = new Set([...documents.map((d) => d.id).filter(Boolean), ...helixIds(app)]);
+  // HELIX documents on disk, and those a pending proposal creates (they exist once the person applies them).
+  const known = new Set([...documents.map((d) => d.id).filter(Boolean), ...helixIds(app), ...proposedDocuments(app).map((d) => parseDocument(d.text).front?.ddx?.id).filter(Boolean).map(String)]);
   const jobs = jobsTable(app);
   // A jobs table's rows are linkable by their J- IDs, and the users table's by their U- IDs.
   for (const id of Object.keys(jobs ?? {})) known.add(id);
@@ -328,15 +328,12 @@ export function validate(app) {
   const ids = documents.map((d) => d.id).filter(Boolean);
   for (const id of new Set(ids.filter((x, i) => ids.indexOf(x) !== i))) problems.push({ path: documents.filter((d) => d.id === id).map((d) => d.path).join(", "), message: `ID ${id} is used by more than one document` });
 
-  // What cites a job: blueprint tasks (T-<n>) and decision records (UXD-<n>).
+  // What cites a job: blueprint tasks (T-<n>) and UX decisions (ADRs tagged area:ui).
   const cites = [];
   let bp = null;
   try { bp = JSON.parse(readFileSync(join(app, bpFile(app)), "utf8")); } catch { /* no blueprint */ }
   for (const t of Array.isArray(bp?.tasks) ? bp.tasks : []) for (const j of t?.jobs ?? []) cites.push({ path: bpFile(app), item: t.id, job: j });
-  for (const d of documents.filter((x) => x.type === "ux-decision")) {
-    const text = readFileSync(join(app, d.path), "utf8");
-    for (const j of new Set(text.match(/\bJ-[1-9][0-9]*\b/g) ?? [])) cites.push({ path: d.path, item: d.id, job: j });
-  }
+  for (const d of uiDecisions(app)) for (const j of new Set(d.text.match(/\bJ-[1-9][0-9]*\b/g) ?? [])) cites.push({ path: d.path, item: d.id, job: j });
   // Business rules (GDL-78): each cited rule is defined in HELIX, and how the user meets it is designed.
   const br = businessRules(app);
   const cited = ruleCitations(bp);

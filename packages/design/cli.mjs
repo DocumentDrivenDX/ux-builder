@@ -117,9 +117,10 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       pseudonym (a name gets one, kept in .ux-builder/participants.local.json).
   decision add --question <q> --option <o> --option <o>... --choice <o> --why <text>
                [--assumption <a>]... [--validation <how it will be tested>] [--link <HELIX ID>]...
-      write docs/ux-builder/decisions/UXD-<n>.md, status not-tested, and a decision in the trace.
-  decision status <UXD-n> tested|refuted [--evidence <id>]
-      update a decision's validation status, keeping the earlier one in its history.
+      propose a HELIX ADR (docs/helix/02-design/adr/ADR-<nnn>-<slug>.md, tagged area:ui)
+      with its Validation not tested, and write a decision in the trace.
+  decision status <ADR-nnn> tested|refuted [--evidence <where>]
+      propose the ADR's new Validation result, keeping the earlier one in its history.
   trace <id>
       everything linked to a job, task, journey, screen, decision, kit task or
       finding, upstream and down, each with its file.
@@ -144,7 +145,7 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       tasks, measures, the rubric (predicted, agent-measured, observed),
       findings by journey labelled human or agent, recommendations and what
       was not tested. A contradicted prediction refutes its assumptions.
-  route <F-id>... [--decision <UXD-n> --status tested|refuted]
+  route <F-id>... [--decision <ADR-nnn> --status tested|refuted]
       the findings the person chose at checkpoint core-3 as a proposed patch
       to HELIX's improvement backlog (docs/ux-builder/helix-proposals/backlog/); with
       --decision, the decision record's new status.
@@ -159,7 +160,7 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
            --hypothesis <h> --alternative <name>
       record what an insight shows, at least two explanations, the
       hypothesis and the alternative that tests it.
-  experiment start --decision UXD-<n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>
+  experiment start --decision ADR-<nnn> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>
       after the person answers checkpoint experiment: docs/ux-builder/experiments/EXP-<n>.md,
       running; metrics HELIX does not define are proposed in docs/ux-builder/helix-proposals/metrics/.
   experiment end <EXP-n> --result <file>

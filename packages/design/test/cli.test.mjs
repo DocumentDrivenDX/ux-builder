@@ -30,6 +30,8 @@ function fixture() {
 }
 /* The fixture with its items approved, for commands a pending review would stop (US-148). */
 const reviewed = (app) => { approveAll(app); return app; };
+/* The fixture with HELIX, for commands that propose into it (ADR-042). */
+const helixed = (app) => { writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n"); mkdirSync(join(app, "docs/helix/02-design/adr"), { recursive: true }); return app; };
 /* Paths and times differ between the two apps; everything else must match. */
 const same = (a, b) => { const n = (x) => JSON.parse(JSON.stringify(x, (k, v) => (k === "app" || k === "at" ? undefined : v))); assert.deepEqual(n(a), n(b)); };
 
@@ -56,7 +58,7 @@ const COMMANDS = [
   ["evidenceAdd", ["evidence", "add", "package.json", "--kind", "survey", "--date", "2026-10-23", "--source", "Survey tool export"], (app) => design.evidenceAdd(app, { file: "package.json", kind: "survey", date: "2026-10-23", source: "Survey tool export" })],
   ["evidenceList", ["evidence", "list"], (app) => design.evidenceList(app)],
   ["rubric", ["rubric"], (app) => design.rubric(app)],
-  ["decisionAdd", ["decision", "add", "--question", "First?", "--option", "Map", "--option", "Search", "--choice", "Map", "--why", "Fewer steps"], (app) => design.decisionAdd(app, { question: "First?", options: ["Map", "Search"], choice: "Map", why: "Fewer steps" })],
+  ["decisionAdd", ["decision", "add", "--question", "First?", "--option", "Map", "--option", "Search", "--choice", "Map", "--why", "Fewer steps"], (app) => design.decisionAdd(app, { question: "First?", options: ["Map", "Search"], choice: "Map", why: "Fewer steps" }), helixed],
 ];
 
 describe("US-116-AC1: every command's --json is its function's result, and fits its schema", () => {

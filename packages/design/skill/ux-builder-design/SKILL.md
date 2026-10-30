@@ -393,7 +393,10 @@ first, say), draft at least two alternatives and recommend one:
    only if you can give your reasoning; otherwise leave it for testing.
 5. Ask `core-2`. On their choice, run
    `ux-builder-blueprint alternative choose <name> --reason "<why>"` and
-   record the decision (`ux-builder-design decision add`).
+   record the decision (`ux-builder-design decision add`). It proposes a
+   HELIX ADR tagged `area:ui`; the person applies it with the other HELIX
+   proposals. When testing settles it, `decision status ADR-<nnn>
+   tested|refuted --evidence <where>` proposes its new Validation.
 
 ## Design the structure
 
@@ -495,7 +498,7 @@ control name), success criteria, a script, a consent note, a screener and
   `dimension`) become refuted. Say plainly what was not tested.
 
 At `core-3`, the person chooses which findings to fix:
-`route <F-id>... [--decision UXD-<n> --status tested|refuted]` writes them as
+`route <F-id>... [--decision ADR-<nnn> --status tested|refuted]` writes them as
 a proposed patch to HELIX's improvement backlog. Label every finding you
 report as a human observation or your recommendation; never pass yours off
 as what people did.
@@ -512,7 +515,7 @@ When the owner exports the events (JSON Lines), and support or feedback:
 - `diagnose --insight INS-<date> --observation … --explanation …
   --explanation … --hypothesis "If …, then …, because …" --alternative <name>`:
   never one explanation; make the alternative first.
-- Ask checkpoint `experiment`, then `experiment start --decision UXD-<n>
+- Ask checkpoint `experiment`, then `experiment start --decision ADR-<nnn>
   --variant <alt> --metric <m> --guardrail <m> --duration <days>`. When it
   ends, `experiment end EXP-<n> --result <file>`, then ask `release`.
 
@@ -574,7 +577,6 @@ showing a finished one):
 | research-evidence | `docs/ux-builder/evidence/EV-<n>.md` |
 | jobs | `docs/ux-builder/jobs.md` |
 | users | `docs/ux-builder/users.md` |
-| ux-decision | `docs/ux-builder/decisions/UXD-<n>.md` |
 | test-kit | `docs/ux-builder/tests/TK-<n>/kit.md` |
 | usability-evaluation-report | `docs/ux-builder/evaluations/UER-<n>.md` |
 | insights | `docs/ux-builder/insights/INS-<yyyy-mm-dd>.md` |

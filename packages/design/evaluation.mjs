@@ -221,7 +221,7 @@ function backlogDoc(app) {
   return { path: `${root.replace(/\/$/, "")}/06-iterate/improvement-backlog.md`, text: null };
 }
 
-/* ux-builder-design route <F-id>... [--decision <UXD-n> --status tested|refuted]. */
+/* ux-builder-design route <F-id>... [--decision <ADR-nnn> --status tested|refuted]. */
 export function route(app, { findings: ids = [], decision, status } = {}) {
   if (!ids.length) throw new DesignError("route needs the findings the person selected at checkpoint core-3: route F-<id>...");
   if (decision && !status) throw new DesignError("--decision needs --status tested or refuted");

@@ -116,6 +116,7 @@
       "required": [
         "id",
         "path",
+        "proposal",
         "status",
         "trace"
       ]
@@ -125,6 +126,7 @@
       "required": [
         "id",
         "path",
+        "proposal",
         "status",
         "evidence",
         "date",

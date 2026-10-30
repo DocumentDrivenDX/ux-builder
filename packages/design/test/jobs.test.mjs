@@ -7,7 +7,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { exampleFile } from "../index.mjs";
-import { cli, tempApp } from "./helpers.mjs";
+import { cli, putUiAdr, tempApp } from "./helpers.mjs";
 
 const jobs = (rows) => `---\nux:\n  id: jobs\n  type: jobs\n---\n\n# Jobs to be done\n\n## Jobs\n\n| ID | Job | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|---|\n${rows.join("\n")}\n`;
 const evidence = readFileSync(exampleFile("research-evidence"), "utf8");
@@ -51,12 +51,11 @@ describe("US-126: jobs", () => {
   test("AC4: a task or a decision record citing a low-confidence job is warned about, naming the item and the job", () => {
     const a = app(["| J-1 | Discover nearby rivers | high | EV-1 | high | confirmed |", "| J-3 | Compare river conditions | medium | none | low | hypothesis |"]);
     writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ tasks: [{ id: "T-2", goal: "Compare two rivers", jobs: ["J-3"] }] }));
-    mkdirSync(join(a, "docs/ux-builder/decisions"), { recursive: true });
-    writeFileSync(join(a, "docs/ux-builder/decisions/UXD-1.md"), readFileSync(exampleFile("ux-decision"), "utf8").replace("- Supports immediate exploration.", "- Supports immediate exploration and J-3."));
+    const adr = putUiAdr(a, { why: "Supports immediate exploration and J-3." });
     const r = v(a);
     assert.equal(r.status, 0, r.out);
     assert.match(r.out, /warning docs\/ux-builder\/blueprint\/app\.blueprint\.json: T-2 relies on J-3 \("Compare river conditions"\), whose confidence is low/);
-    assert.match(r.out, /warning docs\/ux-builder\/decisions\/UXD-1\.md: UXD-1 relies on J-3 \("Compare river conditions"\), whose confidence is low/);
+    assert.ok(r.out.includes(`warning ${adr}: ADR-001 relies on J-3 ("Compare river conditions"), whose confidence is low`), r.out);
   });
 
   // @covers US-126-AC5

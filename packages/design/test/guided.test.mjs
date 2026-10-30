@@ -75,7 +75,7 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
   test("AC4: review lists every item not yet approved, in step order, with its ID and step; review show prints its content", () => {
     const a = reviewApp();
     const pending = json(a, ["review"]).pending;
-    assert.deepEqual(pending.map((p) => p.id), ["brief", "user:U-1", "user:U-2", "job:J-1", "job:J-2", "story:US-001", "story:US-002", "task:T-1", "task:T-2", "journey:J-find", "journey:J-saved", "decision:UXD-1", "screen:map", "screen:detail", "screen:saved"]);
+    assert.deepEqual(pending.map((p) => p.id), ["brief", "user:U-1", "user:U-2", "job:J-1", "job:J-2", "story:US-001", "story:US-002", "task:T-1", "task:T-2", "journey:J-find", "journey:J-saved", "decision:ADR-001", "screen:map", "screen:detail", "screen:saved"]);
     assert.deepEqual([...new Set(pending.map((p) => p.step))], [1, 2, 3, 4, 5]);
     const show = json(a, ["review", "show", "user:U-1"]);
     assert.equal(show.status, "awaiting review");
@@ -124,7 +124,7 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
     approveAll(a, [1, 2, 3]);
     assert.equal(cli(a, ["state", "checkpoint", "core-1", "--answer", "Yes"]).status, 0);
     // core-2 waits for step 4's journeys and decision; a "not yet" and a skip are still recorded.
-    assert.match(cli(a, ["state", "checkpoint", "core-2", "--answer", "Map"]).stderr, /journey:J-find, journey:J-saved, decision:UXD-1/);
+    assert.match(cli(a, ["state", "checkpoint", "core-2", "--answer", "Map"]).stderr, /journey:J-find, journey:J-saved, decision:ADR-001/);
     assert.equal(cli(a, ["state", "checkpoint", "core-2", "--answer", "Not yet", "--declined"]).status, 0);
     assert.equal(cli(a, ["state", "checkpoint", "core-2", "--skip", "--reason", "The person wants to see a prototype first"]).status, 0);
     approveAll(a, [4]);

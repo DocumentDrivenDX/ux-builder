@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { decisionAdd, findingIdFor, readState, testKit, validate } from "../index.mjs";
+import { currentText, decisionAdd, findingIdFor, readState, testKit, validate } from "../index.mjs";
 import { cli } from "./helpers.mjs";
 import { kitApp, SHEET } from "./kit-fixture.mjs";
 
@@ -112,7 +112,7 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     assert.match(patch, new RegExp(`^\\+\\| 2 \\| P1 \\| saved list hidden \\|.*${f2} in UER-1`, "m"));
     assert.equal(r.decision.status, "refuted");
     assert.equal(r.decision.evidence, "UER-1");
-    assert.match(readFileSync(join(a, "docs/ux-builder/decisions/UXD-1.md"), "utf8"), /status: refuted/);
+    assert.match(currentText(a, d.path).text, /\*\*Result\*\*: refuted\n\*\*Evidence\*\*: UER-1/);
     assert.ok(!existsSync(join(a, "docs/helix/06-iterate/improvement-backlog.md")), "HELIX is changed only by applying the patch");
     // With an existing backlog, the rows go after its last row; a finding already listed is left out.
     mkdirSync(join(a, "docs/helix/06-iterate"), { recursive: true });

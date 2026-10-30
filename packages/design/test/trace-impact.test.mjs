@@ -9,7 +9,7 @@ import { join } from "node:path";
 import { describe, test } from "node:test";
 import { currentEpisode, openEpisode, readEpisode } from "@ux-builder/trace";
 import { testKit } from "../index.mjs";
-import { cli, tempApp } from "./helpers.mjs";
+import { cli, putUiAdr, tempApp } from "./helpers.mjs";
 
 const put = (app, path, text) => { mkdirSync(join(app, path, ".."), { recursive: true }); writeFileSync(join(app, path), text); };
 const st = ["empty", "loading", "error"];
@@ -41,7 +41,7 @@ function app({ tested = false } = {}) {
   put(a, "docs/ux-builder/jobs.md", JOBS);
   put(a, "docs/ux-builder/prototypes/current/activity.compact.html", "<html></html>");
   put(a, "docs/ux-builder/prototypes/current/map.compact.html", "<html></html>");
-  put(a, "docs/ux-builder/decisions/UXD-1.md", `---\nux:\n  id: UXD-1\n  type: ux-decision\n  status: ${tested ? "tested" : "not-tested"}\n---\n\n# UXD-1: Ask for an activity first?\n\n## Question\n\nShould the activity screen come first?\n\n## Alternatives\n\n- Yes\n- No\n\n## Recommendation\n\nYes\n\n## Rationale\n\n- Narrows rivers on activity.\n\n## Assumptions\n\n- People know their activity.\n\n## Validation\n\n- **Status**: ${tested ? "tested" : "not-tested"}\n- **Required**: test\n`);
+  putUiAdr(a, { question: "Ask for an activity first?", choice: "Show activity first", why: "Narrows rivers on activity.", status: tested ? "tested" : "not tested" });
   testKit(a);
   put(a, "docs/ux-builder/tests/TK-1/findings.json", JSON.stringify({ findings: [{ id: "F-01", task: 1, title: "Picking an activity first slows people down", source: "human" }] }));
   return a;
@@ -152,7 +152,7 @@ describe("US-121: impact in change mode", () => {
     assert.equal(r.mode, "change");
     assert.ok(r.affected.length > 3);
     assert.equal(r.checkpointRequired, "significant-change");
-    assert.match(r.because, /UXD-1/);
+    assert.match(r.because, /ADR-001/);
   });
 
   // @covers US-121-AC3

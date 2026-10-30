@@ -535,8 +535,8 @@
           },
           "decision": {
             "type": "string",
-            "pattern": "^UXD-[1-9][0-9]*$",
-            "description": "The decision record the experiment tests"
+            "pattern": "^(ADR-[0-9]{3,}|UXD-[1-9][0-9]*)$",
+            "description": "The decision the experiment tests: its ADR (ADR-042), or an older app's UXD record"
           },
           "variant": {
             "type": "string",

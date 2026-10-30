@@ -2,7 +2,7 @@
    the CLI as a child process with the network guard loaded. */
 
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -42,4 +42,30 @@ export function cli(cwd, args) {
    tests whose subject is a later step, not the review itself. */
 export function approveAll(app) {
   for (const p of reviewList(app).pending) reviewApprove(app, { item: p.id, answer: "Approved in the test" });
+}
+
+/* An app with HELIX: .helix.yml, a PRD and ADR-007 (ADR-042: ux-builder writes into HELIX). */
+export function helixApp() {
+  const app = tempApp();
+  writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
+  mkdirSync(join(app, "docs/helix/01-frame"), { recursive: true });
+  mkdirSync(join(app, "docs/helix/02-design/adr"), { recursive: true });
+  writeFileSync(join(app, "docs/helix/01-frame/prd.md"), "---\nddx:\n  id: prd\n  type: prd\n---\n\n# PRD\n\n## Summary\n\nA list app.\n\n## Requirements\n\n- FR-1\n");
+  writeFileSync(join(app, "docs/helix/02-design/adr/ADR-007-storage.md"), "---\nddx:\n  id: ADR-007\n  type: adr\n---\n\n# ADR-007: Storage\n");
+  return app;
+}
+
+/* Give an app HELIX (.helix.yml) if it has none; returns the app. */
+export function withHelix(app) {
+  if (!existsSync(join(app, ".helix.yml"))) writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
+  mkdirSync(join(app, "docs/helix/02-design/adr"), { recursive: true });
+  return app;
+}
+
+/* An applied UX decision: docs/helix/02-design/adr/<id>-<slug>.md, tagged area:ui. */
+export function putUiAdr(app, { id = "ADR-001", question = "Show the map first?", choice = "Map first", why = "Supports immediate exploration.", status = "not tested", extra = "" } = {}) {
+  withHelix(app);
+  const path = `docs/helix/02-design/adr/${id}-${question.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}.md`;
+  writeFileSync(join(app, path), `---\nddx:\n  id: ${id}\n  type: adr\n  status: accepted\n  authoring:\n    home: repo\n  tags:\n    - area:ui\n---\n\n# ${id}: ${question}\n\n## Problem\n\n${question}\n\n## Decision\n\nWe will ${choice.toLowerCase()}.\n\n## Why We Chose This\n\n- ${why}\n${extra}\n## Consequences\n\n**Good**: ${why}\n\n## Validation\n\n**Result**: ${status}\n**Evidence**: none yet\n**Required**: a usability test\n`);
+  return path;
 }

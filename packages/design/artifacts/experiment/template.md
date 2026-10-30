@@ -5,14 +5,14 @@ ux:
   status: running
   links:
     - kind: tests
-      to: UXD-1
+      to: ADR-008
 ---
 
 # EXP-<n>: [what is tested]
 
 ## Hypothesis
 
-[If ..., then ..., because ...] (tests UXD-<n>)
+[If ..., then ..., because ...] (tests ADR-<nnn>)
 
 ## Variant
 

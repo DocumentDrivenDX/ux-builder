@@ -13,6 +13,7 @@ import { isAbsolute, join } from "node:path";
 import { parse as parseYaml, stringify as toYaml } from "yaml";
 import { DesignError, bpFile, proposalsDir, ux, writeInApp } from "./app.mjs";
 import { helixRoot, parseDocument } from "./documents.mjs";
+import { uiDecisions } from "./decisions.mjs";
 import { addDiagnosisText } from "./insights.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -85,11 +86,12 @@ function proposeMetric(app, root, name, { experiment, role }) {
   return writeInApp(app, `${proposalsDir(app)}/metrics/${name}.patch`, unifiedDiff(path, null, yaml));
 }
 
-/* ux-builder-design experiment start --decision UXD-<n> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>. */
+/* ux-builder-design experiment start --decision ADR-<nnn> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>. */
 export function experimentStart(app, { decision, variant, metric, guardrails, duration } = {}) {
   guardrails = list(guardrails);
-  if (!/^UXD-[1-9][0-9]*$/.test(decision ?? "")) throw new DesignError(`--decision names the decision the experiment tests, such as UXD-1, not "${decision ?? ""}"`);
-  if (!existsSync(join(app, `${ux(app)}/decisions/${decision}.md`))) throw new DesignError(`no decision ${decision} (${ux(app)}/decisions/${decision}.md)`);
+  if (!/^ADR-[0-9]{3,}$/.test(decision ?? "")) throw new DesignError(`--decision names the decision the experiment tests, its ADR such as ADR-008, not "${decision ?? ""}"`);
+  const tested = uiDecisions(app).find((d) => d.id === decision);
+  if (!tested) throw new DesignError(`no UX decision ${decision}: no ADR tagged area:ui has that ID`);
   if (!variant?.trim()) throw new DesignError("experiment start needs --variant: the blueprint alternative shown to some people");
   if (!metric?.trim()) throw new DesignError("experiment start needs --metric: the success metric");
   const days = Number(duration);
@@ -100,7 +102,7 @@ export function experimentStart(app, { decision, variant, metric, guardrails, du
   if (answered <= state.experiments.length) throw new DesignError(`checkpoint experiment has not been answered for this experiment: ask the person "Run this experiment?" and record it with ux-builder-design state checkpoint experiment --answer "<their words>" first. Nothing was written.`);
   const id = nextId(state.experiments, "EXP");
   const diag = [...(state.diagnoses ?? [])].reverse().find((d) => d.alternative === variant);
-  const question = parseDocument(readFileSync(join(app, `${ux(app)}/decisions/${decision}.md`), "utf8")).body.match(/^# UXD-\d+: (.+)$/m)?.[1] ?? decision;
+  const question = tested.title;
   const hypothesis = diag?.hypothesis ?? `If people get ${variant}, then ${metric} improves, because it answers "${question}" better.`;
   const links = [["tests", decision], ...(diag ? [["informed_by", diag.insight]] : [])];
   const text = ["---", "ux:", `  id: ${id}`, "  type: experiment", "  status: running", `  started: ${today()}`, "  links:", ...links.flatMap(([kind, to]) => [`    - kind: ${kind}`, `      to: ${to}`]), "---", "", `# ${id}: ${variant} for ${decision}`, "",
