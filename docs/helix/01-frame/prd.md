@@ -394,7 +394,7 @@ rules, so it invents colours and components.
 ### Subsystem: Visuals
 
 - **FR-90** — `@ux-builder/visuals` draws a valid `umf.visual` document
-  (umf's CONTRACT-083) of a graph kind (`flow` in its network, pipeline,
+  (umf-visual's CONTRACT-083) of a graph kind (`flow` in its network, pipeline,
   zoned and lanes forms; `sequence`; `state`; `structure` as entities or a
   tree) as SVG in any theme and appearance, using only the theme's role
   tokens (FR-73) and fonts, with no browser, network or random input at

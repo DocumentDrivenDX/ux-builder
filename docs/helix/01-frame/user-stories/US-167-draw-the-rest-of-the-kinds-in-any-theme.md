@@ -72,7 +72,7 @@ estate, an ADR's options matrix, a quadrant, a before-and-after, three timelines
 - **Feature Spec**: FEAT-019
 - **Feature Requirements**: KND-01 to KND-06
 - **PRD Requirements**: FR-95
-- **External**: umf's `umf.visual` 1.0.0 (CONTRACT-083); FEAT-017's tokens
+- **External**: umf-visual's `umf.visual` 1.0.0 (CONTRACT-083); FEAT-017's tokens
 
 ## Out of Scope
 

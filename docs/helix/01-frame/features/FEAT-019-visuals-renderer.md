@@ -42,7 +42,7 @@ app, and the lint and the audit learn it.
 
 Milestone M3 of the operator's visuals PRD (`~/Documents/visuals/PRD.md`, §6 and §11). A new
 package, `@ux-builder/visuals`, draws a `umf.visual` document (one picture described as data,
-defined by umf's CONTRACT-083) in any theme: as SVG for pages, as Mermaid for Markdown readers,
+defined by umf-visual's CONTRACT-083) in any theme: as SVG for pages, as Mermaid for Markdown readers,
 as a plate (the field guide) and as a stepped presentation. 0.1.0 covers the graph kinds (M3);
 0.2.0 (M4) adds the rest of the kinds (stack, nested, timeline, comparison, metric), the
 `<Visual>` React widget, and the lint and audit coverage that make the widget the sanctioned way

@@ -1,6 +1,6 @@
 {
-  "repository": "https://github.com/DocumentDrivenDX/umf",
-  "commit": "351c4802caf34eb7f4174e7b730f86f4befcf909",
+  "repository": "https://github.com/DocumentDrivenDX/umf-visual",
+  "commit": "10fdb00af3820f72a7704e7a23b949995c450424",
   "vocabulary": "umf.visual",
   "version": "1.0.0",
   "schema": {

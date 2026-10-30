@@ -1,6 +1,6 @@
-/* Admit a umf.visual document (CONTRACT-009 Input): the pinned umf payload schema, then the
-   resolution a layout depends on, with umf's diagnostic codes (umf CONTRACT-083). umf remains
-   the full validator; this is what the renderer must be sure of before it draws. */
+/* Admit a umf.visual document (CONTRACT-009 Input): the pinned umf-visual payload schema, then
+   the resolution a layout depends on, with its diagnostic codes (umf-visual CONTRACT-083).
+   umf-visual remains the full validator; this is what the renderer must be sure of before it draws. */
 
 import Ajv2020 from "ajv/dist/2020.js";
 import schema from "../../schema/umf-visual.schema.json" with { type: "json" };
@@ -36,7 +36,7 @@ const structure = ajv.compile(schema);
 
 const fail = (code, message, diagnostics) => Object.assign(new Error(message), { code, diagnostics });
 
-/* Content the schema does not name, as JSON Pointers: retained by umf, not drawn (CONTRACT-083 VISUAL_UNKNOWN). */
+/* Content the schema does not name, as JSON Pointers: retained by umf-visual, not drawn (CONTRACT-083 VISUAL_UNKNOWN). */
 function unknown(node, sch, path, out) {
   if (sch.$ref) sch = schema.$defs[sch.$ref.split("/").at(-1)];
   if (sch.oneOf) { sch = sch.oneOf.find((c) => c.properties?.kind?.const === node?.kind); if (!sch) return; }
@@ -111,7 +111,7 @@ export function admit(document, { allowIncomplete = false } = {}) {
       }
     });
   }
-  // Form rules a layout depends on (umf CONTRACT-083 VISUAL_FORM_RULE).
+  // Form rules a layout depends on (umf-visual CONTRACT-083 VISUAL_FORM_RULE).
   if (v.kind === "flow" && v.form === "zoned") {
     (v.nodes ?? []).forEach((n, i) => { if (n.group === undefined) add("VISUAL_FORM_RULE", `/nodes/${i}`, "Every node in a zoned flow is in a group"); });
     (v.groups ?? []).forEach((g, i) => { if (g.parent === undefined && g.tier === undefined) add("VISUAL_FORM_RULE", `/groups/${i}`, "Every root group in a zoned flow has a tier"); });

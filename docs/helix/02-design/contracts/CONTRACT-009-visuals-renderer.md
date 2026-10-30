@@ -18,7 +18,7 @@ ddx:
 **Type**: library API, command and output formats (`@ux-builder/visuals`, `ux-builder-visuals`)
 **Version**: v1 (`@ux-builder/visuals` 0.1.0)
 **Status**: draft — 2026-10-22, with ADR-042
-**Related**: FEAT-019, ADR-042, CONTRACT-001 (token names), umf CONTRACT-083 (`umf.visual` 1.0.0)
+**Related**: FEAT-019, ADR-042, CONTRACT-001 (token names), umf-visual CONTRACT-083 (`umf.visual` 1.0.0, DocumentDrivenDX/umf-visual)
 
 ## Purpose
 

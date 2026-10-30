@@ -1,6 +1,6 @@
 # @ux-builder/visuals
 
-Draw a `umf.visual` document (one picture described as data: umf's CONTRACT-083) in any
+Draw a `umf.visual` document (one picture described as data: umf-visual's CONTRACT-083) in any
 ux-builder theme. You get SVG for pages, Mermaid for Markdown readers, a plate (a first map of
 a codebase, with its walkthrough) and a stepped presentation. No browser, network or randomness
 at render time: the same document and theme give the same bytes.
@@ -73,7 +73,7 @@ crossings over the form's budget, text under 12 px, and contrast under 4.5:1 (te
 ## Where things come from
 
 - The `umf.visual` schema and the test fixtures are a pinned copy of umf's
-  (`schema/PINNED.json`); `node scripts/pin-umf.mjs <umf checkout> <commit>` moves the pin.
+  (`schema/PINNED.json`); `node scripts/pin-umf-visual.mjs <umf-visual checkout> <commit>` moves the pin.
 - Layout: elkjs 0.12.0 (EPL-2.0 OR GPL-3.0-or-later, used unmodified; ADR-042). Zoned
   (ported from HELIX documentor's `deploy.py`), sequence and lifecycle layouts are our own.
 - Text is measured from tables extracted from `@ux-builder/tokens`' fonts

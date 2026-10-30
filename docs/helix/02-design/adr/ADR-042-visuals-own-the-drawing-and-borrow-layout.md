@@ -24,7 +24,7 @@ ddx:
 
 ## Context
 
-`@ux-builder/visuals` draws `umf.visual` documents (umf's CONTRACT-083) in a theme. The parts
+`@ux-builder/visuals` draws `umf.visual` documents (umf-visual's CONTRACT-083) in a theme. The parts
 that make every DocumentDrivenDX picture look like one family (the shapes for each role, label
 placement, the SVG) must follow the theme's role tokens (ADR-015, FR-73) and be deterministic,
 accessible and drawn without a browser. No existing library does that. Graph layout with
