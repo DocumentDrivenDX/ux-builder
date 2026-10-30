@@ -16,21 +16,23 @@
     "contrast": "node tools/check-contrast.mjs",
     "gallery": "node tools/gen-gallery.mjs",
     "brand": "node tools/brand.mjs",
-    "check": "npm run schemas && npm run lint && node tools/gen-catalogue.mjs --check && npm run rules && npm run coverage && npm test && npm run build && npm run licences && npm run test:built && npm test --workspace @ux-builder/tokens && npm test --workspace @ux-builder/ui && npm test --workspace @ux-builder/create-app && npm test --workspace @ux-builder/mcp && npm test --workspace @ux-builder/audit && npm test --workspace @ux-builder/visuals && npm test --workspace @ux-builder/trace && npm test --workspace @ux-builder/design && npm run verify && npm run contrast && npm run gallery && npm run gallery -- --brand tests/fixtures/brands/sample.brand.json",
+    "check": "npm run plugin:check && npm run schemas && npm run lint && node tools/gen-catalogue.mjs --check && npm run rules && npm run coverage && npm test && npm run build && npm run licences && npm run test:built && npm test --workspace @ux-builder/tokens && npm test --workspace @ux-builder/ui && npm test --workspace @ux-builder/create-app && npm test --workspace @ux-builder/mcp && npm test --workspace @ux-builder/audit && npm test --workspace @ux-builder/visuals && npm test --workspace @ux-builder/trace && npm test --workspace @ux-builder/design && npm run verify && npm run contrast && npm run gallery && npm run gallery -- --brand tests/fixtures/brands/sample.brand.json",
     "storybook": "npm run build && npm run storybook --workspace @ux-builder/ui",
     "build-storybook": "npm run build && npm run build-storybook --workspace @ux-builder/ui",
     "changeset": "changeset",
-    "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts && node tools/gen-catalogue.mjs",
+    "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts && node tools/gen-catalogue.mjs && npm run plugin:build",
     "release": "npm run check && changeset publish",
     "builder": "npm run build && node apps/theme-builder/server.mjs",
-    "e2e": "npm run build && npm run e2e --workspace @ux-builder/theme-builder && npm run test:e2e --workspace @ux-builder/create-app",
+    "e2e": "npm run build && npm run e2e --workspace @ux-builder/theme-builder",
     "lint": "stylelint \"packages/ui/src/**/*.css\" \"apps/theme-builder/src/**/*.css\" && eslint \"packages/ui/src/**/*.jsx\" \"apps/theme-builder/src/**/*.jsx\"",
     "catalogue": "node tools/gen-catalogue.mjs",
     "coverage": "node tools/check-coverage.mjs",
     "rules": "node tools/check-rules.mjs",
     "licences": "node tools/check-licences.mjs",
     "learn": "node tools/learn.mjs",
-    "test:built": "node --test 'tools/__tests__/built/*.test.mjs'"
+    "test:built": "node --test 'tools/__tests__/built/*.test.mjs'",
+    "plugin:build": "node tools/plugin-package.mjs",
+    "plugin:check": "node tools/plugin-package.mjs --check && node --test tests/plugin/*.test.mjs"
   },
   "engines": {
     "node": ">=20"

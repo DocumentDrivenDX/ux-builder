@@ -46,6 +46,7 @@ describe("US-112 diagram tokens", () => {
     // Every theme in each of its appearances, and every brand × design-system preview pair.
     const expected = [...src.themes.values()].reduce((n, t) => n + themeAppearances(src, t).length, 0) + combinations(src).length;
     assert.ok(all.length >= 61 && all.length === expected, `${all.length} combinations, expected ${expected}`);
+    assert.equal(new Set(all.map(([where]) => where)).size, all.length, "each theme/preview appearance is checked once");
     for (const [where, tokens] of all) for (const n of NAMES) assert.ok(tokens[n], `${where}: --${n} is not set`);
     for (const t of src.themes.keys()) {
       const css = themeCss(src, t);

@@ -21,7 +21,7 @@ criteria; earlier features keep their tests where they are, traced by
 
 ## Testing Strategy
 
-**Goals**: every acceptance criterion is cited by a test or excepted with a reason (`npm run coverage`) | `npm run check`, the builder and starter e2e suites, the Storybook build and tests and the site build pass before a change merges.
+**Goals**: every acceptance criterion is cited by a test or excepted with a reason (`npm run coverage`) | `npm run check`, the builder e2e suite, the Storybook build and tests and the site build pass before a change merges.
 **Out of Scope**: graded agent-run samples and representative-user studies (excepted with reasons). FEAT-009 increments 2 and 3 were built 2026-10-21 and are in scope; none of their criteria is excepted.
 **Traceability Source**: the PRD, FEAT-001 to FEAT-017 and their user stories; for FEAT-009, SD-004 and the story test plans below. FEAT-011 to FEAT-017 have no story test plans: their criteria are traced by `@covers` alone, at the layers allocated below (AR-2026-10-22).
 
@@ -149,14 +149,14 @@ tests in its STP.
 | Port clashes between suites | Med | Port 0 for test servers; fixed ports only for the builder (5190) and pages preview (5192) |
 | Slow execution as journeys grow | Med | Increment-1 tests stay on fixtures; the pilot test only validates and collects |
 
-**Known Gaps**: Playwright MCP itself is not run in CI; the proof uses a second Playwright client over CDP, the same protocol. Representative-user validation is out of scope (FEAT-009 COV-03).
+**Known Gaps**: The starter e2e suite (`npm run test:e2e --workspace @ux-builder/create-app`) is not run in CI or gated before merge: it installs HELIX into the created app's `.claude/`, which the HELIX marketplace plugin replaces; run it by hand. Playwright MCP itself is not run in CI; the proof uses a second Playwright client over CDP, the same protocol. Representative-user validation is out of scope (FEAT-009 COV-03).
 
 ## Build Handoff
 
 **Commands**: `npm run check` | `npm run coverage`
 **Priority**: the implementation order above.
 
-**Blocking Gate**: `npm run check`, the builder and starter e2e suites, the Storybook build and tests and the site build all pass; every FEAT-009 criterion (increments 1 to 3) is cited by a test and none is in `tools/coverage-exceptions.json`.
+**Blocking Gate**: `npm run check`, the builder e2e suite, the Storybook build and tests and the site build all pass; every FEAT-009 criterion (increments 1 to 3) is cited by a test and none is in `tools/coverage-exceptions.json`.
 
 ## Review Checklist
 

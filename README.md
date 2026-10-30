@@ -573,6 +573,12 @@ proposes changes as patches. See
 
 ### AI coding agents
 
+The three UX Builder workflows are also packaged as a Claude Code and Codex
+plugin. See [plugin installation and prerequisites](plugin/README.md). The plugin
+uses the app’s installed SDK and keeps MCP optional; enabling it does not adopt
+a component library.
+
+
 - `node_modules/@ux-builder/ui/AGENTS.md`: the rules, set-up, and a
   reference of every component, prop, token, icon and theme.
 - The Claude Code skill `ux-builder-ui`, which the starter installs. Elsewhere,
