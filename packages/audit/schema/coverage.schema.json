@@ -28,7 +28,7 @@
         "properties": {
           "journey": {
             "type": "string",
-            "pattern": "^J-"
+            "pattern": "^(J-)?[a-z]"
           },
           "state": {
             "enum": [

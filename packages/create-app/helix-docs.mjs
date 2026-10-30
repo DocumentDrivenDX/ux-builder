@@ -310,7 +310,7 @@ function manifest(r) {
     priority: ${i ? "important" : "critical"}
     role: member
     states: [success, empty, loading, recoverable-error, system-failure, ${ai ? "ai, " : ""}responsive-keyboard]${ai ? "" : "\n    notApplicable:\n      ai: the journey has no AI feature"}`).join("\n")
-    : `  - id: J-start
+    : `  - id: start
     story: US-001
     priority: critical
     role: member

@@ -87,7 +87,7 @@ export function briefContent(app) {
   // Experience principles are HELIX's (principles.md, ADR-042); a checkable one names its rule.
   const rules = new Map((readPrinciplesFile(app).principles ?? []).map((x) => [x.key ?? slug(x.text ?? ""), x.rule?.kind]));
   for (const p of experiencePrinciples(app)) points.principles.push({ text: p.text, status: p.status, rule: rules.get(slug(p.text)) });
-  for (const q of state.questions) if (q.status === "open") points.questions.push({ text: `${q.id}: ${q.text}`, status: null });
+  for (const q of state.questions) if (q.status === "open") points.questions.push({ text: q.text, status: null });
   const notes = [];
   // Target users in the PRD's User Segments are the only source of the section (GDL-77, ADR-042).
   const users = usersTable(app);

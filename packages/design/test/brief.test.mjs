@@ -49,7 +49,7 @@ describe("brief", () => {
     assert.match(text, /- US-001: Find a river near me \[confirmed\]/);
     assert.match(text, /- No mandatory account creation \[confirmed\] \(checked: no-step-before\)\n- Progressive disclosure \[assumed\]/);
     assert.match(text, /- Mobile web application \[confirmed\]\n- Limited development resources \[confirmed\]\n- Location is available on most phones \[assumed\]/);
-    assert.match(text, /## Open questions\n\n- Q-1: Search first or map first\?/);
+    assert.match(text, /## Open questions\n\n- Search first or map first\?/);
     assert.doesNotMatch(text, /rate rivers/, "a refuted point is left out");
     assert.equal(validate(app).valid, true, JSON.stringify(validate(app).problems));
     // The page the person reads.

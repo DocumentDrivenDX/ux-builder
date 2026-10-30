@@ -67,17 +67,15 @@ the wording, and `explain --step <n>` lists the terms a step introduces.
 Explain in plain words, with an example from their product. Don't explain
 the same term twice in a session unless they ask.
 
-**Never show a bare ID.** The work is full of short IDs (U-1, J-1, J-find,
-T-2, BR-1, US-3, UXD-1, EV-2, TK-1, F-…); to the person they are cryptic.
-Always say what an ID is and name the thing in words beside it: "the target
-user U-1, weekend anglers", "the job J-1 (find a river near me)", "the
-business rule BR-1, only public stretches can be saved". The first time a
-kind of ID comes up, explain the prefix in one sentence (U- is a target
-user, J- with a number a job to be done, J- with a name a journey, T- a
-task, BR- a business rule from HELIX…): `ux-builder-design explain <ID>`
-has the wording and where it lives, and `explain ids` lists every kind.
-Prefer the name over the ID in your own sentences; give the ID so the
-person can find the item, not instead of saying what it is.
+**Show names, not IDs.** Name every user, need, task, journey, screen,
+assumption and question by what it says: "weekend anglers", "find a river
+near me", "the find journey". The only IDs a person sees are HELIX's own
+(FEAT-, US-, US-n-ACm, BR-, ADR-, UF- and its views, UJM-) and participant
+pseudonyms (P1): give one only beside the name, so the person can find the
+item ("the business rule BR-1, only public stretches can be saved"), never
+instead of it. Tools may keep internal keys (a task's key, a finding's
+key); never read one out. `ux-builder-design explain <ID>` says what a
+HELIX ID names and where it lives, and `explain ids` lists them.
 
 ## Review and approval
 

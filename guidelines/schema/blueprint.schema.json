@@ -589,7 +589,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^J-[a-z0-9]+(-[a-z0-9]+)*$"
+          "pattern": "^(J-)?[a-z][a-z0-9]*(-[a-z0-9]+)*$"
         },
         "story": {
           "type": "string",
