@@ -42,8 +42,8 @@ function knownFrom(app, q) {
   const root = helixRoot(app);
   const prd = root && ["01-frame/prd.md", "prd.md"].map((f) => `${root.replace(/\/$/, "")}/${f}`).find((f) => existsSync(join(app, f)));
   if (prd && ["product", "outcome", "constraints"].includes(q.id)) return prd;
-  if (q.id === "users" && Object.keys(usersTable(app) ?? {}).length) return ux(app, "users.md");
-  if (q.id === "jobs" && Object.keys(jobsTable(app) ?? {}).length) return ux(app, "jobs.md");
+  if (q.id === "users" && Object.keys(usersTable(app) ?? {}).length) return Object.values(usersTable(app))[0].path;
+  if (q.id === "jobs" && Object.keys(jobsTable(app) ?? {}).length) return Object.values(jobsTable(app))[0].path;
   if (q.id === "sources") {
     const st = studies(app);
     if (st.length) return st[0].path.replace(/[^/]+$/, "");

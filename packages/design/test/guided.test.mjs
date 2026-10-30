@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { describe, test } from "node:test";
 import { decisionAdd, readState } from "../index.mjs";
 import { cli, tempApp } from "./helpers.mjs";
-import { KIT_BP, kitApp } from "./kit-fixture.mjs";
+import { KIT_BP, kitApp, withUsers } from "./kit-fixture.mjs";
 
 const SKILL = readFileSync(new URL("../skill/ux-builder-design/SKILL.md", import.meta.url), "utf8");
 const json = (a, args) => { const r = cli(a, [...args, "--json"]); assert.equal(r.status, 0, r.stderr); return JSON.parse(r.stdout); };
@@ -18,7 +18,7 @@ const ids = (a) => json(a, ["review"]).pending.map((p) => p.id);
 /* The kit app (a brief, jobs, two stories, two tasks and journeys) with two target users and a decision. */
 function reviewApp() {
   const a = kitApp();
-  writeFileSync(join(a, "docs/ux-builder/users.md"), "---\nux:\n  id: users\n  type: users\n---\n\n# Target users\n\n## Users\n\n| ID | User | Context | Needs | Jobs | Evidence | Confidence | Status |\n|---|---|---|---|---|---|---|---|\n| U-1 | Weekend anglers | On a phone at the river | None known | J-1 high | none | low | hypothesis |\n| U-2 | Guides | At a desk | None known | J-2 high | none | low | hypothesis |\n");
+  withUsers(a);
   decisionAdd(a, { question: "Map first?", options: ["Map", "List"], choice: "Map", why: "Fewer steps" });
   return a;
 }
@@ -75,41 +75,41 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
   test("AC4: review lists every item not yet approved, in step order, with its ID and step; review show prints its content", () => {
     const a = reviewApp();
     const pending = json(a, ["review"]).pending;
-    assert.deepEqual(pending.map((p) => p.id), ["brief", "user:U-1", "user:U-2", "job:J-1", "job:J-2", "story:US-001", "story:US-002", "task:T-1", "task:T-2", "journey:J-find", "journey:J-saved", "decision:ADR-001", "screen:map", "screen:detail", "screen:saved"]);
+    assert.deepEqual(pending.map((p) => p.id), ["brief", "user:weekend-anglers", "user:guides", "job:find-a-river", "job:go-back-to-a-river", "story:US-001", "story:US-002", "task:T-1", "task:T-2", "journey:J-find", "journey:J-saved", "decision:ADR-001", "screen:map", "screen:detail", "screen:saved"]);
     assert.deepEqual([...new Set(pending.map((p) => p.step))], [1, 2, 3, 4, 5]);
-    const show = json(a, ["review", "show", "user:U-1"]);
+    const show = json(a, ["review", "show", "user:weekend-anglers"]);
     assert.equal(show.status, "awaiting review");
-    assert.match(show.content, /^id: U-1\nuser: Weekend anglers\ncontext: On a phone at the river\n/);
+    assert.match(show.content, /^user: Weekend anglers\ncontext: On a phone at the river\n/);
     assert.match(cli(a, ["review", "show", "story:US-001"]).stdout, /story:US-001: US-001: Find a river \(step 3, awaiting review; docs\/helix\/01-frame\/user-stories\/US-001-find\.md\)\n\n---\nddx:/);
-    assert.match(cli(a, ["review", "show", "task:T-1"]).stdout, /goal: Find a river to fish this weekend on the River map\njobs: J-1/);
+    assert.match(cli(a, ["review", "show", "task:T-1"]).stdout, /goal: Find a river to fish this weekend on the River map\nneeds: Find a river/);
     assert.equal(cli(a, ["review", "show", "task:T-9"]).status, 2);
   });
 
   // @covers US-148-AC5
   test("AC5: approval waits for feedback to be addressed, records the person's words, and a changed item is listed again", () => {
     const a = reviewApp();
-    const fb = json(a, ["review", "feedback", "user:U-1", "--text", "They fish from a kayak too, not only the bank"]);
+    const fb = json(a, ["review", "feedback", "user:weekend-anglers", "--text", "They fish from a kayak too, not only the bank"]);
     assert.equal(fb.id, "FB-1");
-    const refused = cli(a, ["review", "approve", "user:U-1", "--answer", "OK"]);
+    const refused = cli(a, ["review", "approve", "user:weekend-anglers", "--answer", "OK"]);
     assert.equal(refused.status, 2);
-    assert.match(refused.stderr, /user:U-1 has feedback not yet addressed: FB-1 \("They fish from a kayak too, not only the bank"\)/);
-    writeFileSync(join(a, "docs/ux-builder/users.md"), readFileSync(join(a, "docs/ux-builder/users.md"), "utf8").replace("On a phone at the river", "On a phone at the river or in a kayak"));
+    assert.match(refused.stderr, /user:weekend-anglers has feedback not yet addressed: FB-1 \("They fish from a kayak too, not only the bank"\)/);
+    writeFileSync(join(a, "docs/helix/01-frame/prd.md"), readFileSync(join(a, "docs/helix/01-frame/prd.md"), "utf8").replace("On a phone at the river |", "On a phone at the river or in a kayak |"));
     json(a, ["review", "respond", "FB-1", "--text", "Context now says: on a phone at the river or in a kayak"]);
-    const ok = json(a, ["review", "approve", "user:U-1", "--answer", "Yes, that's them"]);
+    const ok = json(a, ["review", "approve", "user:weekend-anglers", "--answer", "Yes, that's them"]);
     assert.equal(ok.next, "brief", "the next is the first still awaiting review, in step order");
     const s = readState(a);
-    assert.equal(s.reviews[0].item, "user:U-1");
+    assert.equal(s.reviews[0].item, "user:weekend-anglers");
     assert.equal(s.reviews[0].answer, "Yes, that's them");
     // The approval records the content approved, as its hash, so a change shows.
     assert.match(s.reviews[0].hash, /^[0-9a-f]{16,}$/);
     assert.deepEqual(s.feedback[0], { ...s.feedback[0], status: "addressed", response: "Context now says: on a phone at the river or in a kayak" });
-    assert.ok(!ids(a).includes("user:U-1"));
+    assert.ok(!ids(a).includes("user:weekend-anglers"));
     // Changed after approval: listed again, marked as changed.
-    writeFileSync(join(a, "docs/ux-builder/users.md"), readFileSync(join(a, "docs/ux-builder/users.md"), "utf8").replace("| None known | J-1 high", "| Large touch targets | J-1 high"));
-    const again = json(a, ["review"]).pending.find((p) => p.id === "user:U-1");
+    writeFileSync(join(a, "docs/helix/01-frame/prd.md"), readFileSync(join(a, "docs/helix/01-frame/prd.md"), "utf8").replace("| Find a river | none | low | assumed |\n| Guides", "| Find a river, Go back to a river | none | low | assumed |\n| Guides"));
+    const again = json(a, ["review"]).pending.find((p) => p.id === "user:weekend-anglers");
     assert.equal(again.changed, true);
     assert.equal(readState(a).reviews[0].hash, s.reviews[0].hash, "the recorded approval keeps the content it approved");
-    assert.match(cli(a, ["review"]).stdout, /step 2 {2}user:U-1 {2}Weekend anglers {2}\(changed since approved\)/);
+    assert.match(cli(a, ["review"]).stdout, /step 2 {2}user:weekend-anglers {2}Weekend anglers {2}\(changed since approved\)/);
   });
 
   // @covers US-148-AC6
@@ -118,7 +118,7 @@ describe("US-148: follow the guide step by step, and approve each item", () => {
     const before = readFileSync(join(a, ".ux-builder/design-state.json"), "utf8");
     const r = cli(a, ["state", "checkpoint", "core-1", "--answer", "Yes"]);
     assert.equal(r.status, 2);
-    assert.match(r.stderr, /checkpoint core-1 cannot be passed yet: 9 items await the person's review: brief, user:U-1, user:U-2, job:J-1, job:J-2, story:US-001, story:US-002, task:T-1, task:T-2\. /);
+    assert.match(r.stderr, /checkpoint core-1 cannot be passed yet: 9 items await the person's review: brief, user:weekend-anglers, user:guides, job:find-a-river, job:go-back-to-a-river, story:US-001, story:US-002, task:T-1, task:T-2\. /);
     assert.equal(readFileSync(join(a, ".ux-builder/design-state.json"), "utf8"), before, "nothing recorded");
     assert.match(cli(a, ["step", "next"]).stderr, /step 1 has items awaiting the person's review: brief/);
     approveAll(a, [1, 2, 3]);

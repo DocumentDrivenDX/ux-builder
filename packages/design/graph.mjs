@@ -13,6 +13,7 @@ import { recordDecision } from "@ux-builder/trace";
 import { DesignError, bpFile, proposalsDir, protoDir, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable, uxDocuments } from "./documents.mjs";
 import { uiDecisions } from "./decisions.mjs";
+import { keyOf } from "./people.mjs";
 import { readState } from "./state.mjs";
 import { kits, studyTasks, testKit } from "./testkit.mjs";
 import { studyRunDir } from "./studies.mjs";
@@ -40,10 +41,10 @@ export function buildGraph(app) {
   const bp = readJson(join(app, bpFile(app))) ?? {};
   const BP = bpFile(app);
 
-  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) node(id, "job", j.job, ux(app, "jobs.md"));
-  // Target users (GDL-77): a user holds jobs, and tasks serve users.
-  for (const [id, u] of Object.entries(usersTable(app) ?? {})) { node(id, "user", u.user, ux(app, "users.md")); for (const h of u.jobs) edge(id, h.job); }
-  for (const t of list(bp.tasks).filter((x) => x?.id)) { node(t.id, "task", t.goal, BP); for (const j of list(t.jobs)) edge(j, t.id); for (const u of list(t.users)) edge(u, t.id); }
+  // The PRD's needs and users (ADR-042), by key: a user holds needs, and tasks serve users.
+  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) node(id, "job", j.job, j.path);
+  for (const [id, u] of Object.entries(usersTable(app) ?? {})) { node(id, "user", u.user, u.path); for (const h of u.jobs) edge(id, h.job); }
+  for (const t of list(bp.tasks).filter((x) => x?.id)) { node(t.id, "task", t.goal, BP); for (const j of list(t.needs ?? t.jobs)) edge(keyOf(j), t.id); for (const u of list(t.users)) edge(keyOf(u), t.id); }
   // Business rules (GDL-78), defined in HELIX: a rule applies to the tasks and journey steps that cite it.
   const rules = businessRules(app).rules;
   for (const c of ruleCitations(bp)) {

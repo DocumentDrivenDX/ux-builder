@@ -288,14 +288,15 @@ principles.md, the stories or the design state. Ask `core-1` on the brief.
 **Hypotheses first.** From the brief and what you know of the domain,
 propose the user segments, jobs to be done, motivations, frustrations,
 usage contexts and accessibility needs. Mark every item *hypothesis*, with
-no evidence: write the jobs into `docs/ux-builder/jobs.md` from its template with
-status hypothesis, confidence low and evidence none, and the target users
-into `docs/ux-builder/users.md`: one row per user segment (`U-<n>`) with its
-context (where, on what, with what expertise), its needs (accessibility
-needs and constraints), the jobs it holds with an importance for each
-(`J-1 high, J-2 low`), evidence none, confidence low, status hypothesis.
-Describe segments, never invented people: no names, ages or biographies.
-The brief's Target users then comes from this file alone.
+no evidence. They go in the PRD, as proposals the person applies: each
+need with `ux-builder-design need add --need "<what the user needs>"
+--importance high|medium|low` (status assumed, confidence low, no
+evidence), and each target user with `ux-builder-design segment add --user
+"<who, as a segment>" --context "<where, on what, with what expertise,
+and any accessibility needs>" --need "<need>"...`. Describe segments,
+never invented people: no names, ages or biographies. Name them by what
+they say, never by an ID. The brief's Target users then comes from the
+PRD's User Segments alone.
 
 **Then evidence.** Research belongs to a **study**: one HELIX research
 plan, `docs/helix/01-frame/research/<study>.md`, named for what it asks
@@ -348,11 +349,16 @@ supports it (its name in the Evidence column). Run
 
 ## Model tasks
 
-Draft the task model from the jobs and the stories: add `tasks[]` to the
-blueprint, one per thing a user must accomplish, each with its goal, the
-jobs it serves, its trigger, required and optional inputs, system and user
+Draft the task model from the jobs and the stories. Each thing a user must
+accomplish is a row of its feature's Task Model in HELIX: propose it with
+`ux-builder-design task add --feature FEAT-<n> --task "<what they do>"
+--goal "<what they want>" --user "<who>"... --need "<need>"...`; it
+returns the task's key. Then add it to the blueprint's `tasks[]` under that
+key (`"id": "<key>"`), with its goal, the needs it serves and the users it
+serves by name (`"needs": ["Find a river"]`, `"users": ["Weekend
+anglers"]`), its trigger, required and optional inputs, system and user
 actions, success (acceptance criteria IDs), exceptions and subtasks with
-their alternative ways, and the target users it serves (`"users": ["U-1"]`).
+their alternative ways.
 
 **Business rules.** A task often depends on the business's rules ("only
 stretches with public access can be saved"). Each is defined once in
@@ -368,7 +374,7 @@ A rule the user only meets as an error is a design problem; `validate`
 fails a cited rule without the four answers, and the test kit gives each
 rule a task set in its trigger.
 
-Name each journey's task (`"task": "T-<n>"`) and run
+Name each journey's task by its key (`"task": "<key>"`) and run
 `ux-builder-blueprint check`.
 
 Then run `ux-builder-blueprint simplify` and offer its proposals: inputs to
@@ -495,7 +501,7 @@ list and `observations.csv`. The person runs the sessions. Afterwards:
   `source: human`, by pseudonym, remarks masked. Name a problem in the same
   words in every row it was seen (the `problem` column), so recurring
   problems are counted, and the target user each participant matched in the
-  screener (the `user` column, `U-<n>`), so the report breaks results down
+  screener (the `user` column, by name), so the report breaks results down
   by user.
 - `transcript add <file> --study <study> --session <id> --consent-confirmed --cite <time>...`:
   only after the person confirms that session's consent; you keep only the
@@ -589,8 +595,6 @@ showing a finished one):
 |---|---|
 | experience-brief | `docs/ux-builder/brief.md` |
 | baseline | `docs/ux-builder/baseline.md` |
-| jobs | `docs/ux-builder/jobs.md` |
-| users | `docs/ux-builder/users.md` |
 
 After writing or changing one, run `ux-builder-design validate` and fix what
 it reports.

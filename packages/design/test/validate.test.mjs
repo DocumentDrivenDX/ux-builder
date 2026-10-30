@@ -19,8 +19,8 @@ function appWithDocs() {
   writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
   put(app, "docs/helix/01-frame/prd.md", "---\nddx:\n  id: prd\n  type: prd\n---\n\n# PRD\n");
   put(app, "docs/ux-builder/brief.md", example("experience-brief"));
-  put(app, "docs/ux-builder/jobs.md", example("jobs"));
-  // The study the jobs cite (ADR-042).
+  put(app, "docs/ux-builder/baseline.md", example("baseline"));
+  // A study (ADR-042).
   put(app, "docs/helix/01-frame/research/anglers.md", "---\nddx:\n  id: research-anglers\n  type: research-plan\n---\n\n# Research plan: anglers\n");
   return app;
 }
@@ -44,25 +44,23 @@ describe("validate", () => {
   // @covers US-123-AC3
   test("a missing frontmatter field, a wrong ID format or a link to a HELIX ID that does not exist: exit 1 naming the file and the problem", () => {
     const app = appWithDocs();
-    put(app, "docs/ux-builder/jobs.md", example("jobs").replace("  id: jobs\n", ""));
+    put(app, "docs/ux-builder/baseline.md", example("baseline").replace("  id: baseline\n", ""));
     put(app, "docs/ux-builder/brief.md", example("experience-brief").replace("id: brief", "id: brief-3").replace("to: prd", "to: FEAT-404"));
     const r = cli(app, ["validate"]);
     assert.equal(r.status, 1);
     assert.match(r.stdout, /^docs\/ux-builder\/brief\.md: link to FEAT-404 \(informed_by\) does not resolve to a docs\/ux document or a HELIX document$/m);
-    assert.match(r.stdout, /^docs\/ux-builder\/jobs\.md: the frontmatter is missing ux\.id$/m);
+    assert.match(r.stdout, /^docs\/ux-builder\/baseline\.md: the frontmatter is missing ux\.id$/m);
     assert.match(r.stdout, /^docs\/ux-builder\/brief\.md: ID "brief-3" does not match brief's format \(brief\)$/m);
   });
 
-  test("type rules: a section missing, a job rated without evidence, a misplaced document", () => {
+  test("type rules: a section missing, a misplaced document", () => {
     const app = appWithDocs();
-    put(app, "docs/ux-builder/jobs.md", example("jobs").replace("| J-3 | Compare river conditions | medium | none | low | hypothesis |", "| J-3 | Compare river conditions | medium | none | high | hypothesis |"));
     put(app, "docs/ux-builder/brief.md", example("experience-brief").replace("## Constraints", "## Limits"));
-    put(app, "docs/ux-builder/old/jobs.md", example("jobs"));
+    put(app, "docs/ux-builder/old/baseline.md", example("baseline"));
     const { problems } = validate(app);
     const msgs = problems.map((p) => `${p.path}: ${p.message}`);
-    assert.ok(msgs.includes("docs/ux-builder/jobs.md: J-3: confidence high needs at least one evidence source (a study)"), msgs.join("\n"));
     assert.ok(msgs.includes('docs/ux-builder/brief.md: missing the section "## Constraints"'), msgs.join("\n"));
-    assert.ok(msgs.includes("docs/ux-builder/old/jobs.md: a jobs with ID jobs belongs at docs/ux-builder/jobs.md, not docs/ux-builder/old/jobs.md"), msgs.join("\n"));
+    assert.ok(msgs.includes("docs/ux-builder/old/baseline.md: a baseline with ID baseline belongs at docs/ux-builder/baseline.md, not docs/ux-builder/old/baseline.md"), msgs.join("\n"));
   });
 
   // @covers US-123-AC4
@@ -88,8 +86,8 @@ describe("validate", () => {
     const app = appWithDocs();
     const { documents } = JSON.parse(cli(app, ["status", "--json"]).stdout);
     assert.deepEqual(documents, [
+      { path: "docs/ux-builder/baseline.md", type: "baseline", id: "baseline" },
       { path: "docs/ux-builder/brief.md", type: "experience-brief", id: "brief" },
-      { path: "docs/ux-builder/jobs.md", type: "jobs", id: "jobs" },
     ]);
   });
 });

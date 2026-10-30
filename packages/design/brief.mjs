@@ -89,11 +89,12 @@ export function briefContent(app) {
   for (const p of experiencePrinciples(app)) points.principles.push({ text: p.text, status: p.status, rule: rules.get(slug(p.text)) });
   for (const q of state.questions) if (q.status === "open") points.questions.push({ text: `${q.id}: ${q.text}`, status: null });
   const notes = [];
-  // Target users described in users.md are the only source of the section (GDL-77).
+  // Target users in the PRD's User Segments are the only source of the section (GDL-77, ADR-042).
   const users = usersTable(app);
-  if (users) {
-    points.users = Object.entries(users).map(([id, u]) => ({ text: `${u.user} (${id}): ${u.context}`, status: u.status, id, confirm: `research evidence about these users (ux-builder-design evidence add), cited in ${ux(app, "users.md")}` }));
-    notes.push(`Target users are from ${ux(app, "users.md")}.`);
+  if (users && Object.keys(users).length) {
+    const path = Object.values(users)[0].path;
+    points.users = Object.values(users).map((u) => ({ text: `${u.user}: ${u.context}`, status: u.status, confirm: `research about these users (a study, ux-builder-design evidence add), cited in ${path}'s User Segments` }));
+    notes.push(`Target users are from ${path}, User Segments.`);
   }
   const old = statePrinciples(state);
   if (old.length) notes.push(`${old.length === 1 ? "One experience principle is" : `${old.length} experience principles are`} still in the design state; propose ${old.length === 1 ? "it" : "them"} to principles.md with ux-builder-design principle add.`);
@@ -105,7 +106,7 @@ export function briefContent(app) {
 function markdown(content, name) {
   const lines = [];
   lines.push("---", "ux:", "  id: brief", "  type: experience-brief");
-  const links = [content.prd && "prd", content.users && "users"].filter(Boolean);
+  const links = [content.prd && "prd"].filter(Boolean);
   if (links.length) lines.push("  links:", ...links.flatMap((to) => ["    - kind: informed_by", `      to: ${to}`]));
   lines.push("---", "", `# Experience brief${name ? `: ${name}` : ""}`, "");
   for (const s of content.sections) {

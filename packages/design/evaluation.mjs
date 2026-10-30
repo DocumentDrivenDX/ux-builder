@@ -19,6 +19,7 @@ import { join } from "node:path";
 import { DesignError, bpFile, proposalsDir, runsDir, writeInApp } from "./app.mjs";
 import { decisionStatus } from "./decisions.mjs";
 import { businessRules, helixRoot, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
+import { keyOf } from "./people.mjs";
 import { rubric } from "./rubric.mjs";
 import { humanFindings, kitTranscripts, observedMeasures } from "./sessions.mjs";
 import { readState, writeState } from "./state.mjs";
@@ -145,7 +146,7 @@ export function report(app) {
   if (m?.byUser.length) {
     const users = usersTable(app) ?? {};
     L.push("", "By target user:", "", "| User | Attempts | Completed | Median time | With errors | Assists |", "|---|---|---|---|---|---|",
-      ...m.byUser.map((u) => `| ${u.user ? `${u.user}${users[u.user] ? ` ${cell(users[u.user].user)}` : ""}` : "not recorded"} | ${u.attempts} (${u.sessions} sessions) | ${pct(u.completionRate)} | ${u.medianSeconds ?? "–"} s | ${pct(u.errorRate)} | ${u.assists} |`));
+      ...m.byUser.map((u) => `| ${u.user ? cell(users[keyOf(u.user)]?.user ?? u.user) : "not recorded"} | ${u.attempts} (${u.sessions} sessions) | ${pct(u.completionRate)} | ${u.medianSeconds ?? "–"} s | ${pct(u.errorRate)} | ${u.assists} |`));
   }
   if (m?.recurring.length) L.push("", "Problems seen in two or more sessions:", "", ...m.recurring.map((p) => `- ${p.problem} (${p.sessions} sessions; ${p.findings.join(", ")})`));
   L.push("");

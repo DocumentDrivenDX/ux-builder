@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, principleAdd, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, principleAdd, needAdd, segmentAdd, taskAdd, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -96,6 +96,16 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   brief [--name <product>]
       write the experience brief (docs/ux-builder/brief.md and brief.html) from the
       HELIX PRD, principles.md, the stories and the design state.
+  need add --need <need> --importance high|medium|low [--evidence <study>[,<study>]] [--confidence <c>] [--status assumed|validated|invalidated]
+      propose a row of the PRD's User Needs (HELIX), named by what the user needs.
+  segment add --user <who> --context <where, on what, with what expertise> [--need <need>]...
+              [--evidence <study>] [--confidence <c>] [--status <s>]
+      propose a row of the PRD's User Segments: a segment, never an invented person;
+      its needs are User Needs rows, by name.
+  task add --feature FEAT-<n> --task <what the person does> --goal <what they want>
+           [--user <who>]... [--need <need>]... [--business-rule BR-<n>]... [--realized-by <journey>]...
+      propose a row of the feature's Task Model; its key, the task's name as a
+      slug, is what blueprint tasks and journeys use.
   principle add --text <principle> [--rule <json>]
       propose an experience principle for HELIX's principles.md; a rule a check
       can express ({"kind":"no-step-before","patterns":["SignIn"]}) goes in
@@ -221,7 +231,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, rule: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "string" }, study: { type: "string" }, claim: { type: "string" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, rule: { type: "string" }, user: { type: "string", multiple: true }, need: { type: "string", multiple: true }, importance: { type: "string" }, context: { type: "string" }, goal: { type: "string" }, feature: { type: "string" }, task: { type: "string" }, "business-rule": { type: "string", multiple: true }, "realized-by": { type: "string", multiple: true }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "string" }, study: { type: "string" }, claim: { type: "string" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -446,6 +456,21 @@ async function main(argv) {
   if (command === "rubric") {
     const r = rubric(app, { alternative: values.alternative });
     print(r, values.json, rubricText(r));
+    return 0;
+  }
+  if (command === "need" || command === "segment" || command === "task") {
+    if (rest[0] !== "add") throw new DesignError(`unknown ${command} command "${rest[0] ?? ""}": use add`);
+    const evidence = String(values.evidence ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+    if (command === "need") {
+      const r = needAdd(app, { need: values.need?.[0], importance: values.importance, evidence, confidence: values.confidence, status: values.status });
+      print(r, values.json, `Proposed the need "${r.need}" (${r.status}) for ${r.path}, User Needs.`);
+    } else if (command === "segment") {
+      const r = segmentAdd(app, { user: values.user?.[0], context: values.context, needs: values.need, evidence, confidence: values.confidence, status: values.status });
+      print(r, values.json, `Proposed the user "${r.user}" (${r.status}) for ${r.path}, User Segments.`);
+    } else {
+      const r = taskAdd(app, { feature: values.feature, task: values.task, goal: values.goal, users: values.user, needs: values.need, rules: values["business-rule"], realizedBy: values["realized-by"] });
+      print(r, values.json, `Proposed the task "${r.task}" for ${r.feature}'s Task Model (${r.path}); journeys name it by its key, ${r.key}.`);
+    }
     return 0;
   }
   if (command === "principle") {

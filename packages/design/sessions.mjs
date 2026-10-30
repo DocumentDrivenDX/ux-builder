@@ -117,7 +117,7 @@ export function observeImport(app, { file, study } = {}) {
       remark: maskPersonal(r.remark ?? "", { app, names }),
       ...(String(r.problem ?? "").trim() ? { problem: maskPersonal(r.problem, { app, names }).trim() } : {}),
       // The target user the participant matched in the screener (GDL-77).
-      ...(/^U-[1-9][0-9]*$/.test(String(r.user ?? "").trim()) ? { user: String(r.user).trim() } : {}),
+      ...(String(r.user ?? "").trim() ? { user: String(r.user).trim() } : {}),
     };
     o.severity = severityOf(o);
     o.title = o.problem ?? (o.completed ? `${participant} completed task ${task}` : `${participant} did not complete task ${task}`);

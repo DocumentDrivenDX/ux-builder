@@ -17,7 +17,7 @@ import { proposeStudy, studyName, studyRunDir } from "./studies.mjs";
 const list = (x) => (Array.isArray(x) ? x : []);
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
 /* problem: a short name for a problem seen, in the same words across sessions, so recurring problems are counted;
-   user: the target user (U-<n>) the participant matched in the screener. */
+   user: the target user (by name) the participant matched in the screener. */
 export const OBSERVATION_COLUMNS = ["participant", "task", "completed", "seconds", "errors", "assists", "remark", "problem", "user"];
 const MISSING = "missing: the journey names no acceptance criteria";
 
@@ -69,7 +69,7 @@ export function goalText(goal, bp) {
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
-/* Target users: the records in docs/ux/users.md ({ id, user, context }), else the brief's lines. */
+/* Target users: the PRD's User Segments ({ id: key, user, context }), else the brief's lines. */
 function targetUsers(app) {
   const table = usersTable(app);
   if (table) return Object.entries(table).map(([id, u]) => ({ id, user: u.user, context: u.context }));

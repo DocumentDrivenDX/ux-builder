@@ -30,6 +30,7 @@ export { diagnose, experimentEnd, experimentStart } from "./experiments.mjs";
 export { adrPath, DECISION_STATUSES, decisionAdd, decisionStatus, readValidation, uiDecisions } from "./decisions.mjs";
 export { currentText, documentOfType, helixDocuments, nextNumber, proposeChange, proposedDocuments, sectionOf, setSection, tableUnder } from "./helix.mjs";
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml } from "./brief.mjs";
+export { keyOf, NEED_COLUMNS, needAdd, needsTable, peopleChecks, SEGMENT_COLUMNS, segmentAdd, segmentsTable, TASK_COLUMNS, taskAdd, taskModel } from "./people.mjs";
 export { experiencePrinciples, principleAdd, PRINCIPLES_FILE, readPrinciplesFile } from "./principles.mjs";
 export { claimAdd, claimContradict, claimVerify, EVIDENCE_KINDS, evidenceAdd, evidenceList, unverifiedClaims, writeEvidence } from "./research.mjs";
 export { addExcerpts, addSource, CLAIM_COLUMNS, claimChecks, excerptsOf, maskProblems, proposeStudy, sourcesOf, studies, studyChecks, studyClaims, studyName, studyOf, studyPath, studyRunDir } from "./studies.mjs";

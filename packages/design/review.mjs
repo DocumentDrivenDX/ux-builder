@@ -16,7 +16,8 @@ import { dirname, join } from "node:path";
 import { DesignError, bpFile, runsDir, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
 import { uiDecisions } from "./decisions.mjs";
-import { sectionOf } from "./helix.mjs";
+import { keyOf, taskModel } from "./people.mjs";
+import { cell, documentOfType, helixDocuments, proposeChange, proposedDocuments, sectionOf, setSection } from "./helix.mjs";
 import { studies, studyRunDir } from "./studies.mjs";
 import { kits } from "./testkit.mjs";
 import { logEvent } from "./metrics.mjs";
@@ -126,8 +127,9 @@ export function reviewItems(app) {
   // 1 Define intent
   add("brief", 1, "The experience brief", ux(app, "brief.md"), read(app, ux(app, "brief.md")));
   // 2 Understand users
-  for (const [id, u] of Object.entries(usersTable(app) ?? {})) add(`user:${id}`, 2, u.user, ux(app, "users.md"), readable({ id, user: u.user, context: u.context, needs: u.needs, jobs: u.jobs.map((j) => `${j.job} ${j.importance}`), evidence: u.evidence, confidence: u.confidence, status: u.status }), fields);
-  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) add(`job:${id}`, 2, j.job, ux(app, "jobs.md"), readable({ id, job: j.job, importance: j.importance, evidence: j.evidence, confidence: j.confidence, status: j.status }), fields);
+  // The PRD's users and needs (ADR-042), each by its name.
+  for (const [id, u] of Object.entries(usersTable(app) ?? {})) add(`user:${id}`, 2, u.user, u.path, readable({ user: u.user, context: u.context, needs: u.needs, evidence: u.evidence, confidence: u.confidence, status: u.status }), fields);
+  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) add(`job:${id}`, 2, j.job, j.path, readable({ need: j.job, importance: j.importance, evidence: j.evidence, confidence: j.confidence, status: j.status }), fields);
   // Studies are HELIX research plans (ADR-042): their sources, excerpts and claims.
   for (const st of studies(app)) add(`evidence:${st.name}`, 2, `The ${st.name} study`, st.path, st.text);
   // 3 Model tasks: the stories the journeys cite, the tasks, and the business rules they cite
@@ -219,14 +221,14 @@ export function coverageMap(app) {
   const walks = (j) => [...new Set([j.entry, ...list(j.steps).map((s) => s?.screen)].filter(Boolean))];
   const journeysOf = (t) => journeys.filter((j) => j.task === t.id);
   const rows = Object.entries(jobs).map(([id, j]) => {
-    const ts = tasks.filter((t) => list(t.jobs).includes(id));
+    const ts = tasks.filter((t) => list(t.needs ?? t.jobs).map(keyOf).includes(id));
     const js = ts.flatMap(journeysOf);
     return { job: id, title: j.job, tasks: ts.map((t) => t.id), journeys: [...new Set(js.map((x) => x.id))], screens: [...new Set(js.flatMap(walks))] };
   });
   const exceptions = [];
   const ex = (id, item, text) => exceptions.push({ id, item, text });
-  for (const r of rows) if (!r.tasks.length) ex(`gap:${r.job}`, `job:${r.job}`, `${r.job} ("${r.title}") has no task serving it`);
-  for (const t of tasks) if (!list(t.jobs).length) ex(`untraced:task:${t.id}`, `task:${t.id}`, `task ${t.id} ("${t.goal ?? t.id}") serves no job`);
+  for (const r of rows) if (!r.tasks.length) ex(`gap:${r.job}`, `job:${r.job}`, `the need "${r.title}" has no task serving it`);
+  for (const t of tasks) if (!list(t.needs ?? t.jobs).length) ex(`untraced:task:${t.id}`, `task:${t.id}`, `the task "${t.goal ?? t.id}" serves no need`);
   for (const j of journeys) if (!j.story && !j.task) ex(`untraced:journey:${j.id}`, `journey:${j.id}`, `journey ${j.id} follows no story or task`);
   const walked = new Set(journeys.flatMap(walks));
   for (const s of screens) if (!walked.has(s.id)) ex(`untraced:screen:${s.id}`, `screen:${s.id}`, `screen ${s.id} ("${s.title ?? s.id}") is on no journey`);
@@ -239,9 +241,9 @@ export function coverageMap(app) {
 }
 
 export function mapText(m) {
-  const L = ["Coverage map: each job, the tasks that serve it, their journeys and screens.", ""];
-  for (const r of m.rows) L.push(`  ${r.job} ${r.title}`, `    tasks ${r.tasks.join(", ") || "none"}; journeys ${r.journeys.join(", ") || "none"}; screens ${r.screens.join(", ") || "none"}`);
-  if (!m.rows.length) L.push("  No jobs yet.");
+  const L = ["Coverage map: each need, the tasks that serve it, their journeys and screens.", ""];
+  for (const r of m.rows) L.push(`  ${r.title}`, `    tasks ${r.tasks.join(", ") || "none"}; journeys ${r.journeys.join(", ") || "none"}; screens ${r.screens.join(", ") || "none"}`);
+  if (!m.rows.length) L.push("  No needs yet.");
   L.push("", m.exceptions.length ? `Exceptions to look at one by one (${m.exceptions.length}):` : "No exceptions.", ...m.exceptions.map((e) => `  ${e.id}: ${e.text}`));
   if (m.changed.length) L.push("", "Changed since approved:", ...m.changed.flatMap((c) => [`  ${c.id}`, ...(c.diff ? c.diff.split("\n").map((l) => `    ${l}`) : [])]));
   L.push("", m.pending.length ? `Approving the map approves ${m.pending.length} built item${m.pending.length === 1 ? "" : "s"}: ${m.pending.join(", ")}.` : "Every built item is approved.");
@@ -381,5 +383,26 @@ function approveMap(app, { answer, accept, now }) {
   writeState(app, state);
   logEvent(app, "approval", { items: ["map"], via: "map", answer: answer.trim(), covers: [...ids], accepted: accept }, now);
   const left = pendingReviews(app);
-  return { item: "map", items: [...ids], accepted: accept, approved: true, remaining: left.length, next: left[0]?.id ?? null };
+  return { item: "map", items: [...ids], accepted: accept, approved: true, traceability: proposeTraceability(app, m), remaining: left.length, next: left[0]?.id ?? null };
+}
+
+/* The approved map, proposed as the solution design's Experience
+   Traceability (ADR-042): need, task, flow and view, by name and HELIX ID.
+   A screen's flow and view are the user-flow and wireframe documents named
+   for it (UF-<n>-<nn>-<screen>); null without a solution design. */
+export function proposeTraceability(app, m = coverageMap(app)) {
+  const sd = documentOfType(app, "solution-design");
+  if (!sd) return null;
+  const views = new Map();
+  for (const d of [...helixDocuments(app), ...proposedDocuments(app)]) {
+    const x = /\/flows\/(UF-\d+)-[^/]+\/(UF-\d+-\d+-([a-z0-9-]+))\.md$/.exec(d.path);
+    if (x) views.set(x[3], { flow: x[1], view: x[2] });
+  }
+  const model = taskModel(app);
+  const bp = readJson(join(app, bpFile(app))) ?? {};
+  const taskName = (id) => model[id]?.task ?? list(bp.tasks).find((t) => t?.id === id)?.goal ?? id;
+  const rows = m.rows.flatMap((r) => (r.tasks.length ? r.tasks : [null]).flatMap((t) => (r.screens.length && t ? r.screens : [null]).map((sc) => [r.title, t ? taskName(t) : "none yet", sc ? views.get(sc)?.flow ?? "–" : "–", sc ? views.get(sc)?.view ?? sc : "–"])));
+  const body = ["| Need | Task | Flow | View |", "|------|------|------|------|", ...rows.map((r) => `| ${r.map(cell).join(" | ")} |`)].join("\n");
+  const p = proposeChange(app, sd.path, (t) => setSection(sectionOf(t, "Traceability") == null ? setSection(t, "Traceability", "") : t, "Experience Traceability", body, { level: 3, inside: "Traceability" }));
+  return { path: p.path, proposal: p.id ?? null, rows: rows.length };
 }

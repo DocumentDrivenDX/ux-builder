@@ -89,6 +89,9 @@ describes each command's `--json` under the function's name, except
 | `mode full\|change [--why <text>]` | Sets the working mode | the state |
 | `baseline` | Drafts the current-state baseline from the blueprint, HELIX documents and the latest audit and assessment runs | `docs/ux-builder/baseline.md` |
 | `brief [--name <product>]` | Writes the experience brief from the PRD, principles.md's *Experience Principles*, the stories and the state, in seven sections: Product, Target users, Primary outcome, Primary jobs, Experience principles, Constraints, Open questions; each point marked with its status, and each hypothesis with what would confirm it. Notes any principle still in an older design state | `docs/ux-builder/brief.md`, `docs/ux-builder/brief.html` |
+| `need add --need <need> --importance <l> [--evidence <study>] [--confidence <l>] [--status assumed\|validated\|invalidated]` | Proposes a row of the PRD's *User Needs* (ADR-042); the same need replaces its row. Refused with a bad level or status, or confidence above `low` with no evidence | the PRD's pending patch |
+| `segment add --user <who> --context <c> [--need <need>]... [--evidence <study>] [--confidence <l>] [--status <s>]` | Proposes a row of the PRD's *User Segments*, its needs by name (each a *User Needs* row) | the PRD's pending patch |
+| `task add --feature FEAT-<n> --task <t> --goal <g> [--user <who>]... [--need <need>]... [--business-rule BR-<n>]... [--realized-by <journey>]...` | Proposes a row of the feature's *Task Model* (after *Functional Areas*), with its key; refuses users, needs or features HELIX lacks | the feature's pending patch |
 | `principle add --text <principle> [--rule <json>]` | Proposes the principle under principles.md's *Experience Principles* (a new principles.md when HELIX has none; ADR-042). A `rule` a check can express goes in `.ux-builder/principles.json`, keyed by the principle's words, which `ux-builder-blueprint check` applies as a project rule. Exits 2 with no HELIX or an unknown rule kind | `helix-proposals/helix/01-frame/principles.md.patch`, `.ux-builder/principles.json` |
 | `evidence add <file> --kind <kind> --study <study> [--date] [--source] [--title]` | Proposes the source as a row of the study's HELIX research plan (`docs/helix/01-frame/research/<study>.md`, *Research Methods* > *Sources*; a new plan in HELIX's shape when there is none, ADR-042): kind, date and where it is kept, never its text. `--kind` is interview, analytics, support, feedback, survey or observation | `helix-proposals/helix/01-frame/research/<study>.md.patch` |
 | `evidence list` | Each study's sources, claims and excerpts | nothing |
@@ -117,11 +120,11 @@ describes each command's `--json` under the function's name, except
 | `explain [<term> \| <ID> \| ids] [--step <n>]` | What a term means and why it is valuable, from `glossary.json`; an ID (`U-1`, `J-find`, `BR-2`…) says what kind of thing it names and where it lives, with its term; `ids` lists every kind of ID; with `--step`, the terms that step introduces; with neither, every term. An unknown term exits 2 listing the known ones | nothing |
 | `review [list]` | What awaits review, by tier (GDL-83): foundations (`brief`, `user:U-n`, `job:J-n`, `story:US-n` for stories the blueprint's journeys cite, `rule:BR-n`, `decision:ADR-nnn`), reviewed a table per kind; built items (`task:T-n`, `journey:J-x`, `alternative:<name>`, `screen:<id>`, `kit:<study>`), reviewed as the coverage map; records (`evidence:<study>`, `report:<date>`, `insight:<date>`, `experiment:<DDx bead>`) need no approval and hold no checkpoint. An item is pending when its meaning (its content without frontmatter, formatting made one form) differs from the one approved; a changed item carries the diff | nothing |
 | `review table <kind>` | Every item of a foundation kind, each with its status and, when its meaning changed since approved, the diff; a built or record kind exits 2. Recorded as shown (US-161) | `.ux-builder/shown.local.json` (not committed) |
-| `review map` | The coverage map: each job with the tasks that serve it, their journeys and the screens they walk; the exceptions (`gap:J-n` a job nothing serves, `untraced:task:…`, `untraced:journey:…`, `untraced:screen:…`, `undefined:BR-n`, `assumption:A-n` not seen at the last map approval); the built items it would approve, and those changed with their diffs. Recorded as shown | `.ux-builder/shown.local.json` |
+| `review map` | The coverage map: each need (the PRD's User Needs, by name) with the tasks that serve it, their journeys and the screens they walk; the exceptions (`gap:<need>` a need nothing serves, `untraced:task:…`, `untraced:journey:…`, `untraced:screen:…`, `undefined:BR-n`, `assumption:A-n` not seen at the last map approval); the built items it would approve, and those changed with their diffs. Recorded as shown | `.ux-builder/shown.local.json` |
 | `review show <item>` | The item's content, to present inline in the conversation, and the diff when it changed since approved. Recorded as shown | `.ux-builder/shown.local.json` |
 | `review feedback <item> --text <their words>` | Records the person's feedback, `FB-<n>`, open | the state's `feedback[]` |
 | `review respond <FB-n> --text <what changed>` | Records how the feedback was addressed | that entry |
-| `review approve (<item>... \| --kind <kind> \| map [--accept <exception>]...) --answer <their words>` | Records the approval of the items, of a foundation kind's pending items (`via: table`), or of every built item awaiting review (`via: map`), each with its meaning's hash, its whole content's hash and the meaning approved; refused (exit 2) while an item has open feedback, for the map while an exception is neither fixed nor accepted, and, for an item that changed after its approval or for the map approved again, until it was shown as it is now (`review show`, `review table`, `review map`; US-161). Meaning ignores a paragraph's line wrapping and bold or underline markers; an approval kept under an earlier normalization holds when its snapshot means the same now | the state's `reviews[]`; an `approval` event with the answer, and `formatOnly` for items reopened with every word unchanged |
+| `review approve (<item>... \| --kind <kind> \| map [--accept <exception>]...) --answer <their words>` | Records the approval of the items, of a foundation kind's pending items (`via: table`), or of every built item awaiting review (`via: map`), each with its meaning's hash, its whole content's hash and the meaning approved; refused (exit 2) while an item has open feedback, for the map while an exception is neither fixed nor accepted, and, for an item that changed after its approval or for the map approved again, until it was shown as it is now (`review show`, `review table`, `review map`; US-161). Meaning ignores a paragraph's line wrapping and bold or underline markers; an approval kept under an earlier normalization holds when its snapshot means the same now Approving the map also proposes it as the solution design's *Experience Traceability* (need, task, flow, view), when HELIX has a solution design (ADR-042) | the state's `reviews[]`; an `approval` event with the answer, and `formatOnly` for items reopened with every word unchanged |
 | `intake` | The intake questions (product, users, outcome, jobs, constraints, sources) the app's sources (the brief, HELIX's PRD, the users and jobs tables, evidence, `src/`) do not answer, to ask together; those they answer, to confirm; and the budget | nothing |
 | `advance --until-decision` | Checks the documents, keeps approvals through formatting changes, works out the coverage map, finds unverified claims and pending proposals; lists the agent's own work first; then the one decision the person must make next (intake, a foundation table, the map, a checkpoint, the modality, proposals) with what to show, a recommendation, the command that records it and what follows; and the budget. Records nothing | nothing |
 | `metrics [turn --kind <kind> [--text <note>] \| mark <milestone>]` | The summary of `.ux-builder/metrics.jsonl` against the targets (at most 10 approvals before testing, at least 80% of turns `answer`, `decision`, `approval` or `correction`, no approval reopened by formatting, a first prototype within 30 active minutes, gaps over 10 minutes idle). Approvals are counted as the person gave them, one per distinct answer; testing starts at the `testing` milestone or a step 7 the loop does not leave; the formatting target counts approvals reopened with every word unchanged (US-161); `turn` records a human turn (`answer`, `decision`, `approval`, `correction`, `question`, `other`), `mark` a milestone (`prototype`, `testing`, `release`) | `.ux-builder/metrics.jsonl` |
@@ -265,8 +268,6 @@ sections from its template.
 |---|---|---|---|
 | `experience-brief` | `brief.md` | `brief` | `artifacts/experience-brief/` |
 | `baseline` | `baseline.md` | `baseline` | `artifacts/baseline/` |
-| `jobs` | `jobs.md` | `jobs` (rows `J-<n>`) | `artifacts/jobs/` |
-| `users` | `users.md` | `users` (rows `U-<n>`) | `artifacts/users/` |
 
 Type-specific rules `validate` applies:
 - Studies (ADR-042): research is HELIX's, one research plan per study,
@@ -277,19 +278,21 @@ Type-specific rules `validate` applies:
   `.ux-builder/participants.local.json` (`{ "P1": "<name>" }`, kept out of
   git), or a speaker who is not a pseudonym; and a claim with no source, a
   basis not starting observed or inferred, or no confidence.
-- `jobs`: each `J-<n>` row has importance, evidence (the studies that support it, by name) and
-  confidence (`low`, `medium`, `high`); confidence above `low` needs at
-  least one evidence source. A task or decision citing a `low` job gets a
-  warning.
-- `users` *(2026-10-24, GDL-77)*: each `U-<n>` row has the user, context,
-  needs, jobs (`J-<n> <importance>`, comma-separated, each job in
-  `jobs.md`), evidence, confidence and status (`hypothesis`, `confirmed`,
-  `current-state`), with the jobs table's evidence rules. When the file
-  exists, the brief's *Target users* is generated from it alone. A task's
-  `users` (`U-<n>`) must be rows here; a task citing a `low` user gets a
-  warning. The study's *Screener* asks about each user and its context,
-  the run's task list names each task's users, and `observations.csv` has
-  a `user` column, which `observe import` keeps on each
+- Users, needs and tasks (ADR-042) are HELIX's: the PRD's *User Segments*
+  (User, Context, Needs, Evidence, Confidence, Status) and *User Needs*
+  (Need, Importance, Evidence, Confidence, Status), and a feature's *Task
+  Model* (Task, Goal, Users, Needs, Rules, Realized by, Key), each row named
+  by what it says and keyed by its name as a slug. `segment add`, `need add`
+  and `task add` propose rows. `validate` checks them: importance and
+  confidence are `low`, `medium` or `high`; confidence above `low` needs an
+  evidence source (a study); an `assumed` row lists none; status is
+  `assumed`, `validated` or `invalidated`; a user's needs are *User Needs*
+  rows; a task's users, needs and rules exist. A blueprint task cites its
+  `needs` and `users` by name; a missing one fails, a `low` one warns, and a
+  task that is not a Task Model key warns. The brief's *Target users* comes
+  from *User Segments* alone. The study's *Screener* asks about each user and
+  its context, the run's task list names each task's users, and
+  `observations.csv` has a `user` column, which `observe import` keeps on each
   finding and `report` breaks its measures down by.
 - Business rules *(2026-10-24, GDL-78)*: a rule is defined once in HELIX
   as a line `**BR-<n>** — <rule>` (like an acceptance criterion). Blueprint
@@ -341,11 +344,11 @@ only when it is there. Every command's `--json` output is described by
 
 ## Amendment to CONTRACT-005 (blueprint) *[FEAT-018]*
 
-- Top-level `tasks[]`: `{ id: "T-<n>", goal, jobs: ["J-<n>"], trigger,
+- Top-level `tasks[]`: `{ id: <Task Model key> (an older blueprint's "T-<n>"), goal, needs: [<need>], users: [<user>], trigger,
   inputs: { required[], optional[] }, systemActions[], userActions[],
   success: ["US-<n>-AC<m>"], exceptions[], subtasks: [{ goal, ways[] }],
   interactionKinds[] }`.
-- `journeys[].task`: the `T-` ID a journey realizes.
+- `journeys[].task`: the Task Model key of the task a journey realizes (ADR-042).
 - `journeys[].steps[]` may add `inputs: { required[], inferable[] }`,
   `decision`, `system`.
 - `screens[].purpose` (string), `screens[].content` (objects `{ label,
