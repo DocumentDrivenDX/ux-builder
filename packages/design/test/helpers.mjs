@@ -2,7 +2,7 @@
    the CLI as a child process with the network guard loaded. */
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -68,4 +68,23 @@ export function putUiAdr(app, { id = "ADR-001", question = "Show the map first?"
   const path = `docs/helix/02-design/adr/${id}-${question.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}.md`;
   writeFileSync(join(app, path), `---\nddx:\n  id: ${id}\n  type: adr\n  status: accepted\n  authoring:\n    home: repo\n  tags:\n    - area:ui\n---\n\n# ${id}: ${question}\n\n## Problem\n\n${question}\n\n## Decision\n\nWe will ${choice.toLowerCase()}.\n\n## Why We Chose This\n\n- ${why}\n${extra}\n## Consequences\n\n**Good**: ${why}\n\n## Validation\n\n**Result**: ${status}\n**Evidence**: none yet\n**Required**: a usability test\n`);
   return path;
+}
+
+/* A stand-in for DDx (ADR-042: experiments are DDx beads): UX_BUILDER_DDX
+   points at a script that records each `ddx bead` call and answers create
+   with exp-<n>. calls() reads what was asked. */
+export function fakeDdx() {
+  const dir = mkdtempSync(join(tmpdir(), "fake-ddx-"));
+  made.push(dir);
+  const bin = join(dir, "ddx");
+  writeFileSync(bin, `#!/usr/bin/env node
+const fs = require("node:fs");
+const log = ${JSON.stringify(join(dir, "calls.jsonl"))};
+const args = process.argv.slice(2);
+fs.appendFileSync(log, JSON.stringify(args) + "\\n");
+if (args[1] === "create") console.log("exp-" + fs.readFileSync(log, "utf8").split("\\n").filter((l) => l.includes('"create"')).length);
+`);
+  chmodSync(bin, 0o755);
+  process.env.UX_BUILDER_DDX = bin;
+  return { bin, calls: () => (existsSync(join(dir, "calls.jsonl")) ? readFileSync(join(dir, "calls.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l)) : []) };
 }

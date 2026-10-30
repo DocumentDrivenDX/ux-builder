@@ -7,8 +7,8 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { decisionAdd, readState } from "../index.mjs";
-import { approveAll, cli } from "./helpers.mjs";
+import { currentText, decisionAdd, readState, uiDecisions } from "../index.mjs";
+import { approveAll, cli, fakeDdx } from "./helpers.mjs";
 import { kitApp } from "./kit-fixture.mjs";
 
 const json = (a, args) => { const r = cli(a, [...args, "--json"]); assert.equal(r.status, 0, r.stderr); return JSON.parse(r.stdout); };
@@ -51,11 +51,12 @@ describe("US-145: run an experiment through its checkpoints", () => {
   // @covers US-145-AC2
   test("AC2: without an answered experiment checkpoint, experiment start refuses and names the checkpoint", () => {
     const a = expApp();
+    const ddx = fakeDdx();
     json(a, DIAG);
     const r = start(a);
     assert.equal(r.status, 2);
     assert.match(r.stderr, /checkpoint experiment has not been answered for this experiment/);
-    assert.equal(existsSync(join(a, "docs/ux-builder/experiments")), false);
+    assert.deepEqual(ddx.calls(), [], "no bead is created");
     assert.deepEqual(readState(a).experiments, []);
     // A skipped checkpoint is not an answer.
     assert.equal(cli(a, ["state", "checkpoint", "experiment", "--skip", "--reason", "later"]).status, 0);
@@ -63,69 +64,73 @@ describe("US-145: run an experiment through its checkpoints", () => {
   });
 
   // @covers US-145-AC3
-  test("AC3: after the checkpoint, experiment start writes EXP-<n>.md with the variant, metric, guardrails and duration, running in the design state", () => {
+  test("AC3: after the checkpoint, experiment start creates a DDx bead with the hypothesis, variant, metrics, duration and stopping rule, running in the design state", () => {
     const a = expApp();
+    const ddx = fakeDdx();
     json(a, DIAG);
     approveAll(a);
     assert.equal(cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes, two weeks on 10% of people"]).status, 0);
     const r = JSON.parse(start(a, "--json").stdout);
-    assert.equal(r.path, "docs/ux-builder/experiments/EXP-1.md");
-    const t = readFileSync(join(a, r.path), "utf8");
-    assert.match(t, /status: running/);
-    assert.match(t, / {4}- kind: tests\n {6}to: ADR-001\n {4}- kind: informed_by\n {6}to: INS-2026-10-23/);
-    assert.match(t, /## Hypothesis\n\nIf the list comes first, then more people find a river, because they scan names faster than a map \(tests ADR-001; from D-1 on INS-2026-10-23\)/);
-    assert.match(t, /## Variant\n\nlist-first \(`docs\/ux-builder\/blueprint\/app\.blueprint\.list-first\.json`\)/);
-    assert.match(t, /- \*\*Success\*\*: find-completion\n- \*\*Guardrails\*\*: time-to-river/);
-    assert.match(t, /## Duration\n\n14 days/);
-    assert.deepEqual(readState(a).experiments, [{ id: "EXP-1", status: "running", decision: "ADR-001", variant: "list-first" }]);
-    assert.equal(cli(a, ["validate"]).status, 0, cli(a, ["validate"]).stdout);
+    assert.equal(r.bead, "exp-1");
+    const [create] = ddx.calls();
+    assert.deepEqual(create.slice(0, 3), ["bead", "create", "Experiment: list-first for ADR-001"]);
+    const arg = (k) => create[create.indexOf(k) + 1];
+    assert.equal(arg("--labels"), "kind:experiment,area:ui");
+    assert.equal(arg("--set"), "decision=ADR-001");
+    const d = arg("--description");
+    assert.match(d, /^Hypothesis: If the list comes first, then more people find a river, because they scan names faster than a map \(from D-1 on INS-2026-10-23\)$/m);
+    assert.match(d, /^Variant: list-first \(docs\/ux-builder\/blueprint\/app\.blueprint\.list-first\.json\)/m);
+    assert.match(d, /^Success metric: find-completion\nGuardrails: time-to-river\nDuration: 14 days, from \d{4}-\d{2}-\d{2}\nStopping rule: Stop after 14 days, or sooner if a guardrail gets worse by more than its tolerance\.$/m);
+    assert.deepEqual(readState(a).experiments, [{ id: "exp-1", status: "running", decision: "ADR-001", variant: "list-first", metric: "find-completion", guardrails: ["time-to-river"] }]);
+    assert.equal(existsSync(join(a, "docs/ux-builder/experiments")), false, "no experiment document of ux-builder's own");
     // The next experiment needs its own answer.
     assert.equal(start(a).status, 2);
+    // Without DDx, it says to install it.
+    process.env.UX_BUILDER_DDX = join(a, "no-such-ddx");
+    cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes"]);
+    assert.match(start(a).stderr, /DDx is not installed: experiments are DDx beads/);
   });
 
   // @covers US-145-AC4
-  test("AC4: experiment end compares task success and each guardrail, records the result against the hypothesis and asks release", () => {
-    const a = expApp();
-    json(a, DIAG);
-    approveAll(a); cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes"]);
-    start(a);
-    writeFileSync(join(a, "result.json"), JSON.stringify({ metric: "find-completion", control: 0.5, variant: 0.68, guardrails: [{ metric: "time-to-river", control: 42, variant: 38, better: "lower" }] }));
-    const r = json(a, ["experiment", "end", "EXP-1", "--result", "result.json"]);
+  test("AC4: experiment end compares task success and each guardrail, closes the bead with the result, proposes the decision's Validation and asks release", () => {
+    const run = (result, metrics) => {
+      const a = expApp();
+      const ddx = fakeDdx();
+      if (metrics) { mkdirSync(join(a, "docs/helix/06-iterate/metrics"), { recursive: true }); writeFileSync(join(a, "docs/helix/06-iterate/metrics/time-to-river.yaml"), metrics); }
+      json(a, DIAG); approveAll(a); cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(a);
+      writeFileSync(join(a, "result.json"), JSON.stringify(result));
+      return { a, ddx, r: json(a, ["experiment", "end", "exp-1", "--result", "result.json"]) };
+    };
+    const { a, ddx, r } = run({ metric: "find-completion", control: 0.5, variant: 0.68, guardrails: [{ metric: "time-to-river", control: 42, variant: 38, better: "lower" }] });
     assert.equal(r.supported, true);
     assert.deepEqual(r.guardrails, [{ metric: "time-to-river", control: 42, variant: 38, better: "lower", held: true }]);
     assert.match(r.next, /^Ask checkpoint release: "Release list-first to everyone\?"/);
-    const t = readFileSync(join(a, "docs/ux-builder/experiments/EXP-1.md"), "utf8");
-    assert.match(t, /status: ended/);
-    assert.match(t, /## Result\n\n- \*\*find-completion\*\*: control 0\.5, variant 0\.68 \(improved\)\n- \*\*Guardrail time-to-river\*\*: control 42, variant 38 \(held\)\n- \*\*Hypothesis\*\*: supported/);
+    const [, update, close] = ddx.calls();
+    assert.deepEqual(close, ["bead", "close", "exp-1"]);
+    assert.match(update[4], /- find-completion: control 0\.5, variant 0\.68 \(improved\)\n- Guardrail time-to-river: control 42, variant 38 \(held\)\n- Hypothesis: supported/);
+    // The variant beat the decision, so the decision's ADR is proposed refuted, citing the experiment.
+    assert.match(currentText(a, uiDecisions(a)[0].path).text, /\*\*Result\*\*: refuted\n\*\*Evidence\*\*: DDx experiment exp-1 \(list-first: supported\)/);
     const s = readState(a);
-    assert.deepEqual(s.experiments[0], { id: "EXP-1", status: "ended", decision: "ADR-001", variant: "list-first", result: "supported" });
+    assert.deepEqual(s.experiments[0], { id: "exp-1", status: "ended", decision: "ADR-001", variant: "list-first", metric: "find-completion", guardrails: ["time-to-river"], result: "supported" });
     assert.equal(s.next, r.next);
-    // A guardrail that got worse: the hypothesis is not supported, whatever the success metric did.
-    const b = expApp();
-    json(b, DIAG); approveAll(b); cli(b, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(b);
-    writeFileSync(join(b, "result.json"), JSON.stringify({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 42, variant: 60, better: "lower" }] }));
-    const w = json(b, ["experiment", "end", "EXP-1", "--result", "result.json"]);
-    assert.equal(w.hypothesis, "not supported: a guardrail got worse");
-    assert.match(w.next, /Keep the current design, or try another alternative\?/);
+    // A guardrail that got worse: the hypothesis is not supported, whatever the success metric did; the decision held.
+    const w = run({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 42, variant: 60, better: "lower" }] });
+    assert.equal(w.r.hypothesis, "not supported: a guardrail got worse");
+    assert.match(w.r.next, /Keep the current design, or try another alternative\?/);
+    assert.equal(w.r.decision.status, "tested");
     // A change within the guardrail's tolerance holds: the result's own, else HELIX's metric definition's.
-    const c = expApp();
-    json(c, DIAG); approveAll(c); cli(c, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(c);
-    writeFileSync(join(c, "result.json"), JSON.stringify({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 40, variant: 43, better: "lower", tolerance: "10%" }] }));
-    const tol = json(c, ["experiment", "end", "EXP-1", "--result", "result.json"]);
-    assert.equal(tol.supported, true);
-    assert.match(readFileSync(join(c, "docs/ux-builder/experiments/EXP-1.md"), "utf8"), /- \*\*Guardrail time-to-river\*\*: control 40, variant 43 \(held, within the tolerance 10%\)/);
-    const e = expApp();
-    mkdirSync(join(e, "docs/helix/06-iterate/metrics"), { recursive: true });
-    writeFileSync(join(e, "docs/helix/06-iterate/metrics/time-to-river.yaml"), "name: time-to-river\nunit: seconds\ndirection: lower\ntolerance: 2s\n");
-    json(e, DIAG); approveAll(e); cli(e, ["state", "checkpoint", "experiment", "--answer", "Yes"]); start(e);
-    writeFileSync(join(e, "result.json"), JSON.stringify({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 40, variant: 43, better: "lower" }] }));
-    assert.equal(json(e, ["experiment", "end", "EXP-1", "--result", "result.json"]).supported, false);
-    assert.match(readFileSync(join(e, "docs/ux-builder/experiments/EXP-1.md"), "utf8"), /\(got worse by more than the tolerance 2s; lower is better\)/);
+    const tol = run({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 40, variant: 43, better: "lower", tolerance: "10%" }] });
+    assert.equal(tol.r.supported, true);
+    assert.ok(tol.r.result.includes("- Guardrail time-to-river: control 40, variant 43 (held, within the tolerance 10%)"));
+    const e = run({ control: 0.5, variant: 0.7, guardrails: [{ metric: "time-to-river", control: 40, variant: 43, better: "lower" }] }, "name: time-to-river\nunit: seconds\ndirection: lower\ntolerance: 2s\n");
+    assert.equal(e.r.supported, false);
+    assert.ok(e.r.result.some((l) => l.includes("(got worse by more than the tolerance 2s; lower is better)")));
   });
 
   // @covers US-145-AC5
   test("AC5: metrics HELIX does not define are written only as proposed metric-definition patches", () => {
     const a = expApp();
+    fakeDdx();
     mkdirSync(join(a, "docs/helix/06-iterate/metrics"), { recursive: true });
     writeFileSync(join(a, "docs/helix/06-iterate/metrics/time-to-river.yaml"), "name: time-to-river\nunit: seconds\ndirection: lower\n");
     approveAll(a); cli(a, ["state", "checkpoint", "experiment", "--answer", "Yes"]);

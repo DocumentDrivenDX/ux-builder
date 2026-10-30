@@ -11,7 +11,7 @@ import { describe, test } from "node:test";
 import { ARTIFACTS, documentTypes, exampleFile, parseDocument, validateDocument } from "../index.mjs";
 
 /* The types CONTRACT-008's Documents table names. */
-const CONTRACT = ["experience-brief", "baseline", "research-evidence", "jobs", "users", "test-kit", "usability-evaluation-report", "insights", "experiment"];
+const CONTRACT = ["experience-brief", "baseline", "research-evidence", "jobs", "users", "test-kit", "usability-evaluation-report", "insights"];
 
 describe("the docs/ux types", () => {
   // @covers US-123-AC1

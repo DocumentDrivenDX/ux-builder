@@ -161,11 +161,12 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       record what an insight shows, at least two explanations, the
       hypothesis and the alternative that tests it.
   experiment start --decision ADR-<nnn> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>
-      after the person answers checkpoint experiment: docs/ux-builder/experiments/EXP-<n>.md,
-      running; metrics HELIX does not define are proposed in docs/ux-builder/helix-proposals/metrics/.
-  experiment end <EXP-n> --result <file>
-      compare the success metric and each guardrail, record the result against
-      the hypothesis, then ask checkpoint release.
+      after the person answers checkpoint experiment: a DDx bead with the hypothesis,
+      the metrics and the stopping rule; metrics HELIX does not define are
+      proposed in docs/ux-builder/helix-proposals/metrics/.
+  experiment end <bead> --result <file>
+      compare the success metric and each guardrail, close the bead with the
+      result, propose the decision's ADR Validation, then ask checkpoint release.
   ready [--for testing|production]
       is the validated prototype ready? testing: lint, check:blueprint and the
       audit pass. production (default): also every criterion its journeys
@@ -421,12 +422,12 @@ async function main(argv) {
     const [sub, id] = rest;
     if (sub === "start") {
       const r = experimentStart(app, { decision: values.decision, variant: values.variant, metric: values.metric, guardrails: values.guardrail, duration: values.duration });
-      print(r, values.json, [`Wrote ${r.path}: ${r.variant} for ${r.decision}, ${r.duration} days, running.`, ...r.proposed.map((p) => `Proposed a metric definition: ${p}`)].join("\n"));
+      print(r, values.json, [`Started ${r.bead} (DDx): ${r.variant} for ${r.decision}, ${r.duration} days, running.`, ...r.proposed.map((p) => `Proposed a metric definition: ${p}`)].join("\n"));
       return 0;
     }
     if (sub === "end") {
       const r = experimentEnd(app, { id, result: values.result });
-      print(r, values.json, [`${r.id} ended: ${r.metric} ${r.control} → ${r.variant}; hypothesis ${r.hypothesis}.`, r.next].join("\n"));
+      print(r, values.json, [`${r.id} ended and closed: ${r.metric} ${r.control} → ${r.variant}; hypothesis ${r.hypothesis}.`, ...(r.decision ? [`Proposed ${r.decision.id}'s Validation: ${r.decision.status}.`] : []), r.next].join("\n"));
       return 0;
     }
     throw new DesignError(`unknown experiment command "${sub ?? ""}": use start or end`);

@@ -197,7 +197,6 @@
       "type": "object",
       "required": [
         "id",
-        "path",
         "status",
         "metric",
         "control",
@@ -206,6 +205,7 @@
         "guardrails",
         "hypothesis",
         "supported",
+        "result",
         "next"
       ],
       "properties": {
@@ -218,14 +218,15 @@
       "type": "object",
       "required": [
         "id",
-        "path",
+        "bead",
         "status",
         "decision",
         "variant",
         "metric",
         "guardrails",
         "duration",
-        "hypothesis"
+        "hypothesis",
+        "stopping"
       ],
       "properties": {
         "status": {

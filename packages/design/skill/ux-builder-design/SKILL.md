@@ -516,8 +516,10 @@ When the owner exports the events (JSON Lines), and support or feedback:
   --explanation … --hypothesis "If …, then …, because …" --alternative <name>`:
   never one explanation; make the alternative first.
 - Ask checkpoint `experiment`, then `experiment start --decision ADR-<nnn>
-  --variant <alt> --metric <m> --guardrail <m> --duration <days>`. When it
-  ends, `experiment end EXP-<n> --result <file>`, then ask `release`.
+  --variant <alt> --metric <m> --guardrail <m> --duration <days>`: it opens
+  a DDx bead with the hypothesis, the metrics and the stopping rule. When it
+  ends, `experiment end <bead> --result <file>` closes the bead and proposes
+  the decision's ADR Validation; then ask `release`.
 
 ## Change what exists
 
@@ -580,7 +582,6 @@ showing a finished one):
 | test-kit | `docs/ux-builder/tests/TK-<n>/kit.md` |
 | usability-evaluation-report | `docs/ux-builder/evaluations/UER-<n>.md` |
 | insights | `docs/ux-builder/insights/INS-<yyyy-mm-dd>.md` |
-| experiment | `docs/ux-builder/experiments/EXP-<n>.md` |
 
 After writing or changing one, run `ux-builder-design validate` and fix what
 it reports.

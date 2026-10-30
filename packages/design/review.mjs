@@ -147,7 +147,8 @@ export function reviewItems(app) {
   for (const f of files(app, ux(app, "evaluations"), /^UER-\d+\.md$/)) add(`report:${f.replace(/\.md$/, "")}`, 7, `UX evaluation report ${f.replace(/\.md$/, "")}`, `${ux(app)}/evaluations/${f}`, read(app, `${ux(app)}/evaluations/${f}`));
   // 8 Refine and improve
   for (const f of files(app, ux(app, "insights"), /^INS-[\d-]+\.md$/)) add(`insight:${f.replace(/\.md$/, "")}`, 8, `Production insights ${f.replace(/\.md$/, "")}`, `${ux(app)}/insights/${f}`, read(app, `${ux(app)}/insights/${f}`));
-  for (const f of files(app, ux(app, "experiments"), /^EXP-\d+\.md$/)) add(`experiment:${f.replace(/\.md$/, "")}`, 8, `Experiment ${f.replace(/\.md$/, "")}`, `${ux(app)}/experiments/${f}`, read(app, `${ux(app)}/experiments/${f}`));
+  // Experiments are DDx beads (ADR-042); the design state names each one.
+  for (const e of list(state?.experiments)) add(`experiment:${e.id}`, 8, `Experiment ${e.variant ?? e.id} for ${e.decision ?? "a decision"}`, `DDx bead ${e.id}`, readable(e));
   return items;
 }
 
