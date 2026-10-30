@@ -46,7 +46,10 @@ in `helix-proposals/`, comparisons, drawings and wireframes in their own
 folders. The design state stays in `.ux-builder/`. If `status` says the app
 is on the old layout (`docs/ux/`, `app.blueprint.json` at the top), offer
 `ux-builder-design migrate --dry-run`, show the person what would move, and
-run `migrate` when they agree.
+run `migrate` when they agree. Do the same when the app still has design
+documents ux-builder used to keep (`jobs.md`, `users.md`, decision or
+evidence records): `migrate` proposes them into HELIX and moves kits,
+reports and insights to run output; then show the person the proposals.
 
 ## Where the person is
 

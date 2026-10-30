@@ -5,14 +5,17 @@
    drawings and wireframes move under docs/ux-builder/, with git mv in a git
    repository so their history follows; the app's own references to them
    (its package.json scripts, ux-assessment.yml, CI workflows, CLAUDE.md,
-   AGENTS.md and the design state) are rewritten. --dry-run lists it all
-   and changes nothing. .ux-builder/ stays where it is. */
+   AGENTS.md and the design state) are rewritten. Then the app's own design
+   documents move into HELIX as proposals, or to run output (ADR-042,
+   migrate-docs.mjs). --dry-run lists it all and changes nothing.
+   .ux-builder/ stays where it is. */
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { CURRENT, LEGACY } from "@ux-builder/ui/blueprint/paths";
 import { DesignError } from "./app.mjs";
+import { documentsPlan, migrateDocuments } from "./migrate-docs.mjs";
 
 const FOLDERS = [["docs", "docs"], ["prototypes", "prototypes"], ["proposals", "proposals"], ["compare", "compare"], ["drawings", "drawings"], ["wireframes", "wireframes"],
   // The assessment's manifest and runs and the UI audit's report (GDL-82); an app on the new layout may still keep these at its top.
@@ -59,12 +62,17 @@ function referrers(app) {
 /* ux-builder-design migrate [--dry-run]. */
 export function migrate(app, { dryRun = false } = {}) {
   const moves = migrationPlan(app);
-  if (!moves.length) return { migrated: false, moves: [], updated: [], git: false, message: "Nothing to migrate: the app is on the docs/ux-builder/ layout." };
+  if (!moves.length) {
+    // On the layout already: only the documents, if any are left to move into HELIX.
+    const docs = migrateDocuments(app, { dryRun });
+    if (!docs.proposals.length && !docs.moves.length) return { migrated: false, moves: [], updated: [], git: false, documents: docs, message: "Nothing to migrate: the app is on the docs/ux-builder/ layout, and its design documents are HELIX's." };
+    return { migrated: !dryRun, ...(dryRun ? { dryRun: true } : {}), moves: [], updated: [], git: inGit(app), documents: docs, message: `${dryRun ? "Would propose" : "Proposed"} ${docs.proposals.length} document${docs.proposals.length === 1 ? "" : "s"} for HELIX and ${dryRun ? "move" : "moved"} ${docs.moves.length} to run output; apply them with ux-builder-design proposals.` };
+  }
   const clash = moves.filter((m) => existsSync(join(app, m.to)) && !(m.from === LEGACY.docs));
   if (clash.length) throw new DesignError(`cannot migrate: ${clash.map((m) => m.to).join(", ")} already exist${clash.length === 1 ? "s" : ""}; move or remove ${clash.length === 1 ? "it" : "them"} first. Nothing was changed.`);
   const updated = referrers(app).filter((f) => rewritePaths(readFileSync(join(app, f), "utf8")) !== readFileSync(join(app, f), "utf8"));
   const useGit = inGit(app);
-  if (dryRun) return { migrated: false, dryRun: true, moves, updated, git: useGit };
+  if (dryRun) return { migrated: false, dryRun: true, moves, updated, git: useGit, documents: { proposals: [], moves: [], removes: [], note: "after the layout moves, migrate again to move the design documents into HELIX" } };
   for (const m of moves) {
     // docs/ux/ into an existing docs/ux-builder/ (an app that already has the blueprint folder): move its entries one by one.
     if (m.from === LEGACY.docs && existsSync(join(app, m.to))) {
@@ -76,7 +84,8 @@ export function migrate(app, { dryRun = false } = {}) {
   // A referrer that moved (the manifest) is rewritten where it now is.
   const now = (f) => moves.find((m) => m.from === f)?.to ?? f;
   for (const f of updated) writeFileSync(join(app, now(f)), rewritePaths(readFileSync(join(app, now(f)), "utf8")));
-  return { migrated: true, moves, updated, git: useGit, message: `Moved ${moves.length} item${moves.length === 1 ? "" : "s"} under ${CURRENT.docs}/${updated.length ? ` and updated ${updated.join(", ")}` : ""}.` };
+  const documents = migrateDocuments(app);
+  return { migrated: true, moves, updated, git: useGit, documents, message: `Moved ${moves.length} item${moves.length === 1 ? "" : "s"} under ${CURRENT.docs}/${updated.length ? ` and updated ${updated.join(", ")}` : ""}${documents.proposals.length ? `; proposed ${documents.proposals.length} design document${documents.proposals.length === 1 ? "" : "s"} for HELIX (ux-builder-design proposals)` : ""}.` };
 }
 
 function move(app, from, to, useGit) {
