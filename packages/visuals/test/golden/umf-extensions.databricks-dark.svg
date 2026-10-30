@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1143 148" width="1143" height="148" role="img" aria-labelledby="umf-extensions-title" aria-describedby="umf-extensions-desc" class="uxb-visual uxb-visual--structure-tree" data-visual="umf-extensions" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="umf-extensions-title">umf's extensions</title>
+<desc id="umf-extensions-desc">Which extensions does umf's TypeScript core implement?</desc>
+<rect x="0" y="0" width="1143" height="148" style="fill:#09090B"/>
+<g class="uxb-edge" data-kind="data">
+<path d="M572 62 L572 68 Q572 74 566 74 L86 74 Q80 74 80 80 L80 86" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+</g>
+<g class="uxb-edge" data-kind="data">
+<path d="M572 62 L572 68 Q572 74 566 74 L222 74 Q216 74 216 80 L216 86" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+</g>
+<g class="uxb-edge" data-kind="data">
+<path d="M572 62 L572 68 Q572 74 566 74 L358 74 Q352 74 352 80 L352 86" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+</g>
+<g class="uxb-edge" data-kind="data">
+<path d="M572 62 L572 68 Q572 74 566 74 L494 74 Q488 74 488 80 L488 86" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+</g>
+<g class="uxb-edge" data-kind="data">
+<path d="M572 62 L572 68 Q572 74 578 74 L618 74 Q624 74 624 80 L624 86" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+</g>
+<g class="uxb-edge" data-kind="data">
+<path d="M572 62 L572 68 Q572 74 578 74 L770 74 Q776 74 776 80 L776 86" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+</g>
+<g class="uxb-edge" data-kind="data">
+<path d="M572 62 L572 68 Q572 74 578 74 L921 74 Q927 74 927 80 L927 86" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+</g>
+<g class="uxb-edge" data-kind="data">
+<path d="M572 62 L572 68 Q572 74 578 74 L1057 74 Q1063 74 1063 80 L1063 86" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+</g>
+<g id="umf-extensions--extensions" class="uxb-node">
+<rect x="506" y="24" width="132" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="520" y="48" style="fill:#FFFFFF;font-size:14px;font-weight:600">src/extensions</text>
+</g>
+<g id="umf-extensions--actions" class="uxb-node">
+<rect x="24" y="86" width="112" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="38" y="110" style="fill:#FFFFFF;font-size:14px;font-weight:600">actions</text>
+</g>
+<g id="umf-extensions--binding" class="uxb-node">
+<rect x="160" y="86" width="112" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="174" y="110" style="fill:#FFFFFF;font-size:14px;font-weight:600">binding</text>
+</g>
+<g id="umf-extensions--dashboard" class="uxb-node">
+<rect x="296" y="86" width="112" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="310" y="110" style="fill:#FFFFFF;font-size:14px;font-weight:600">dashboard</text>
+</g>
+<g id="umf-extensions--ddd" class="uxb-node">
+<rect x="432" y="86" width="112" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="446" y="110" style="fill:#FFFFFF;font-size:14px;font-weight:600">ddd</text>
+</g>
+<g id="umf-extensions--security" class="uxb-node">
+<rect x="568" y="86" width="112" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="582" y="110" style="fill:#FFFFFF;font-size:14px;font-weight:600">security</text>
+</g>
+<g id="umf-extensions--semantic-types" class="uxb-node">
+<rect x="704.5" y="86" width="143" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="718.5" y="110" style="fill:#FFFFFF;font-size:14px;font-weight:600">semantic-types</text>
+</g>
+<g id="umf-extensions--tables" class="uxb-node">
+<rect x="871" y="86" width="112" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="885" y="110" style="fill:#FFFFFF;font-size:14px;font-weight:600">tables</text>
+</g>
+<g id="umf-extensions--visual" class="uxb-node">
+<rect x="1007" y="86" width="112" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="1021" y="110" style="fill:#FFFFFF;font-size:14px;font-weight:600">visual</text>
+</g>
+</svg>

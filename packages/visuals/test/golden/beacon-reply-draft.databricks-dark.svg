@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1927 524" width="1927" height="524" role="img" aria-labelledby="beacon-reply-draft-title" aria-describedby="beacon-reply-draft-desc" class="uxb-visual uxb-visual--sequence-lifelines" data-visual="beacon-reply-draft" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="beacon-reply-draft-title">Drafting a reply</title>
+<desc id="beacon-reply-draft-desc">Eight hand-offs from an open ticket to a draft the agent can edit, and every one runs as the agent.</desc>
+<rect x="0" y="0" width="1927" height="524" style="fill:#09090B"/>
+<g id="beacon-reply-draft--agent" class="uxb-participant" data-role="actor" data-status="built">
+<path d="M100.5 104 L100.5 500" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:3 4"/>
+<rect x="24" y="66" width="153" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<circle cx="47" cy="82.4" r="3.96" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M40.16 95 C40.16 88.16 53.84 88.16 53.84 95" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="62" y="90" style="fill:#FFFFFF;font-size:14px;font-weight:600">Support agent</text>
+</g>
+<g id="beacon-reply-draft--proxy" class="uxb-participant" data-role="platform" data-status="built">
+<path d="M322.5 104 L322.5 500" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:3 4"/>
+<rect x="225" y="32" width="195" height="72" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="239" y="56" style="fill:#FFFFFF;font-size:14px;font-weight:600">Sign-in proxy</text>
+<text x="239" y="70" style="fill:#FAFAFA;font-size:12px;font-weight:400">checks identity, forwards the</text>
+<text x="239" y="86" style="fill:#FAFAFA;font-size:12px;font-weight:400">agent's token</text>
+</g>
+<g id="beacon-reply-draft--web" class="uxb-participant" data-role="own" data-status="built">
+<path d="M578.5 104 L578.5 500" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:3 4"/>
+<rect x="468" y="48" width="221" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="482" y="72" style="fill:#FFFFFF;font-size:14px;font-weight:600">Web app</text>
+<text x="482" y="86" style="fill:#9F9FA9;font-size:12px;font-weight:400">the agent's inbox and draft editor</text>
+</g>
+<g id="beacon-reply-draft--api" class="uxb-participant" data-role="own" data-status="built">
+<path d="M842.5 104 L842.5 500" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:3 4"/>
+<rect x="737" y="48" width="211" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="751" y="72" style="fill:#FFFFFF;font-size:14px;font-weight:600">Beacon API</text>
+<text x="751" y="86" style="fill:#9F9FA9;font-size:12px;font-weight:400">every request runs as the agent</text>
+</g>
+<g id="beacon-reply-draft--db" class="uxb-participant" data-role="store" data-status="built">
+<path d="M1086.5 104 L1086.5 500" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:3 4"/>
+<rect x="996" y="48" width="181" height="56" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1010 62 L1010 74 C1010 78 1028 78 1028 74 L1028 62" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<ellipse cx="1019" cy="62" rx="9" ry="3" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="1034" y="72" style="fill:#FFFFFF;font-size:14px;font-weight:600">Beacon database</text>
+<text x="1034" y="86" style="fill:#9F9FA9;font-size:12px;font-weight:400">tickets, drafts, reviews</text>
+</g>
+<g id="beacon-reply-draft--drafter" class="uxb-participant" data-role="own" data-status="built">
+<path d="M1335.5 104 L1335.5 500" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:3 4"/>
+<rect x="1225" y="32" width="221" height="72" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="1239" y="56" style="fill:#FFFFFF;font-size:14px;font-weight:600">Reply drafter</text>
+<text x="1239" y="70" style="fill:#9F9FA9;font-size:12px;font-weight:400">builds the prompt from the ticket</text>
+<text x="1239" y="86" style="fill:#9F9FA9;font-size:12px;font-weight:400">and its history</text>
+</g>
+<g id="beacon-reply-draft--gateway" class="uxb-participant" data-role="platform" data-status="built">
+<path d="M1599 104 L1599 500" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:3 4"/>
+<rect x="1494" y="48" width="210" height="56" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="1508" y="72" style="fill:#FFFFFF;font-size:14px;font-weight:600">Model gateway</text>
+<text x="1508" y="86" style="fill:#FAFAFA;font-size:12px;font-weight:400">rate limits, usage, model choice</text>
+</g>
+<g id="beacon-reply-draft--models" class="uxb-participant" data-role="platform" data-status="built">
+<path d="M1827.5 104 L1827.5 500" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:3 4"/>
+<rect x="1752" y="66" width="151" height="38" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="1766" y="90" style="fill:#FFFFFF;font-size:14px;font-weight:600">Language models</text>
+</g>
+<g id="beacon-reply-draft--m1" class="uxb-message" data-kind="call" data-steps="s1">
+<path d="M100.5 140 L313.5 140" style="fill:none;stroke:#FAFAFA;stroke-width:2px"/>
+<path d="M313.5 143.78 L322.5 140 L313.5 136.22 Z" style="fill:#FAFAFA;stroke:#FAFAFA;stroke-width:2px"/>
+<rect x="177.6" y="116" width="89.79" height="18" rx="4" style="fill:#09090B"/>
+<text x="181.6" y="130" style="fill:#FAFAFA;font-size:12px;font-weight:400">opens a ticket</text>
+<circle cx="162.6" cy="125" r="11" style="fill:#1685DF"/>
+<text x="162.6" y="129.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">1</text>
+</g>
+<g id="beacon-reply-draft--m2" class="uxb-message" data-kind="call" data-steps="s2">
+<path d="M322.5 184 L569.5 184" style="fill:none;stroke:#FAFAFA;stroke-width:2px"/>
+<path d="M569.5 187.78 L578.5 184 L569.5 180.22 Z" style="fill:#FAFAFA;stroke:#FAFAFA;stroke-width:2px"/>
+<rect x="367.15" y="160" width="188.7" height="18" rx="4" style="fill:#09090B"/>
+<text x="371.15" y="174" style="fill:#FAFAFA;font-size:12px;font-weight:400">forwards with the agent's token</text>
+<circle cx="352.15" cy="169" r="11" style="fill:#1685DF"/>
+<text x="352.15" y="173.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">2</text>
+</g>
+<g id="beacon-reply-draft--m3" class="uxb-message" data-kind="call" data-steps="s3">
+<path d="M578.5 228 L833.5 228" style="fill:none;stroke:#FAFAFA;stroke-width:2px"/>
+<path d="M833.5 231.78 L842.5 228 L833.5 224.22 Z" style="fill:#FAFAFA;stroke:#FAFAFA;stroke-width:2px"/>
+<rect x="674.31" y="204" width="94.37" height="18" rx="4" style="fill:#09090B"/>
+<text x="678.31" y="218" style="fill:#FAFAFA;font-size:12px;font-weight:400">asks for a draft</text>
+<circle cx="659.31" cy="213" r="11" style="fill:#1685DF"/>
+<text x="659.31" y="217.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">3</text>
+</g>
+<g id="beacon-reply-draft--m4" class="uxb-message" data-kind="call" data-steps="s4">
+<path d="M842.5 272 L1077.5 272" style="fill:none;stroke:#FAFAFA;stroke-width:2px"/>
+<path d="M1077.5 275.78 L1086.5 272 L1077.5 268.22 Z" style="fill:#FAFAFA;stroke:#FAFAFA;stroke-width:2px"/>
+<rect x="916.41" y="248" width="118.17" height="18" rx="4" style="fill:#09090B"/>
+<text x="920.41" y="262" style="fill:#FAFAFA;font-size:12px;font-weight:400">loads ticket history</text>
+<circle cx="901.41" cy="257" r="11" style="fill:#1685DF"/>
+<text x="901.41" y="261.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">4</text>
+</g>
+<g id="beacon-reply-draft--m5" class="uxb-message" data-kind="call" data-steps="s5">
+<path d="M842.5 316 L1326.5 316" style="fill:none;stroke:#FAFAFA;stroke-width:2px"/>
+<path d="M1326.5 319.78 L1335.5 316 L1326.5 312.22 Z" style="fill:#FAFAFA;stroke:#FAFAFA;stroke-width:2px"/>
+<rect x="992.12" y="292" width="215.75" height="18" rx="4" style="fill:#09090B"/>
+<text x="996.12" y="306" style="fill:#FAFAFA;font-size:12px;font-weight:400">hands over the ticket and its history</text>
+<circle cx="977.12" cy="301" r="11" style="fill:#1685DF"/>
+<text x="977.12" y="305.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">5</text>
+</g>
+<g id="beacon-reply-draft--m6" class="uxb-message" data-kind="call" data-steps="s6">
+<path d="M1335.5 360 L1590 360" style="fill:none;stroke:#FAFAFA;stroke-width:2px"/>
+<path d="M1590 363.78 L1599 360 L1590 356.22 Z" style="fill:#FAFAFA;stroke:#FAFAFA;stroke-width:2px"/>
+<rect x="1422.46" y="336" width="111.57" height="18" rx="4" style="fill:#09090B"/>
+<text x="1426.46" y="350" style="fill:#FAFAFA;font-size:12px;font-weight:400">sends the prompt</text>
+<circle cx="1407.46" cy="345" r="11" style="fill:#1685DF"/>
+<text x="1407.46" y="349.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">6</text>
+</g>
+<g id="beacon-reply-draft--m7" class="uxb-message" data-kind="call" data-steps="s7">
+<path d="M1599 404 L1818.5 404" style="fill:none;stroke:#FAFAFA;stroke-width:2px"/>
+<path d="M1818.5 407.78 L1827.5 404 L1818.5 400.22 Z" style="fill:#FAFAFA;stroke:#FAFAFA;stroke-width:2px"/>
+<rect x="1669.21" y="380" width="110.09" height="18" rx="4" style="fill:#09090B"/>
+<text x="1673.21" y="394" style="fill:#FAFAFA;font-size:12px;font-weight:400">routes to a model</text>
+<circle cx="1654.21" cy="389" r="11" style="fill:#1685DF"/>
+<text x="1654.21" y="393.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">7</text>
+</g>
+<g id="beacon-reply-draft--m8" class="uxb-message" data-kind="return" data-steps="s8">
+<path d="M842.5 448 L587.5 448" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:4 4"/>
+<path d="M587.5 444.22 L578.5 448 L587.5 451.78 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="669.75" y="424" width="103.51" height="18" rx="4" style="fill:#09090B"/>
+<text x="673.75" y="438" style="fill:#FAFAFA;font-size:12px;font-weight:400">returns the draft</text>
+<circle cx="654.75" cy="433" r="11" style="fill:#1685DF"/>
+<text x="654.75" y="437.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">8</text>
+</g>
+</svg>

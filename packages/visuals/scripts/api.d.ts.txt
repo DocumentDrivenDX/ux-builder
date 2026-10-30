@@ -1,0 +1,84 @@
+// --- @ux-builder/visuals API (CONTRACT-009) ---
+
+/** A UMF document carrying one visual. */
+export interface VisualDocument {
+  umf: string;
+  id: string;
+  vocabularies: { "umf.visual": { version: string } } & Record<string, { version: string }>;
+  extensions: { "umf.visual": Visual } & Record<string, unknown>;
+  modules: unknown[];
+}
+
+/** A resolved theme as @ux-builder/tokens writes it (resolved/<theme>.<appearance>.json). */
+export interface ResolvedTheme {
+  theme: string;
+  appearance: "light" | "dark";
+  tokens: Record<string, string>;
+}
+
+export type Appearance = "light" | "dark" | "both";
+export type Output = "svg" | "mermaid" | "plate" | "presentation";
+
+export interface RenderOptions {
+  /** A resolved theme, or { light, dark } for "both"; @ux-builder/visuals/node also takes a theme name. */
+  theme: ResolvedTheme | { light: ResolvedTheme; dark: ResolvedTheme } | string;
+  appearance?: Appearance;
+  output?: Output;
+  /** The column the visual must fit; below a form's minimum it falls back (sequence lifelines to ladder). */
+  width?: number;
+  /** Draw a document with content this renderer does not read, with a warning, instead of refusing it. */
+  allowIncomplete?: boolean;
+}
+
+export interface Warning { code: "FONT_STAND_IN" | "NARROW_FALLBACK" | "INCOMPLETE"; message: string }
+
+export interface LayoutReport {
+  width: number;
+  height: number;
+  form: string;
+  font: { family: string; standIn: boolean; intended?: string };
+  boxes: { id: string; kind: string; x: number; y: number; width: number; height: number }[];
+  texts: { id: string; text: string; box: string | null; x: number; y: number; width: number; height: number; size: number }[];
+  edges: { id: string; from: string; to: string; points: [number, number][]; label: string | null }[];
+  colors: { id: string; kind: "text" | "line"; fg: string; bg: string }[];
+}
+
+export interface RenderResult {
+  /** The SVG, Mermaid, Markdown or HTML text. */
+  content: string;
+  /** What content is: "markdown" when the portable form of a stack, nested, comparison or metric visual is a table. */
+  format: "svg" | "mermaid" | "markdown" | "html";
+  warnings: Warning[];
+  layout: LayoutReport;
+  /** The text equivalent, as Markdown. */
+  text: string;
+}
+
+export interface Finding {
+  code: "TEXT_OVERFLOW" | "EDGE_THROUGH_NODE" | "EDGE_THROUGH_LABEL" | "LABEL_OVERLAP" | "CROSSINGS" | "TEXT_TOO_SMALL" | "CONTRAST";
+  ids: string[];
+  message: string;
+}
+
+/** Rejections carry code VISUAL_VERSION, VISUAL_INVALID, VISUAL_INCOMPLETE, VISUAL_UNSUPPORTED, VISUAL_NO_STEPS or VISUAL_THEME. */
+export interface VisualError extends Error { code: string; diagnostics: { code: string; path: string; message: string }[] }
+
+export function render(document: VisualDocument, options: RenderOptions): Promise<RenderResult>;
+export function renderAll(documents: VisualDocument[], options: RenderOptions): Promise<(RenderResult & { id: string } | { id: string; error: { code: string; message: string; diagnostics: unknown[] } })[]>;
+/** Whether a visual's portable form is a Markdown table rather than Mermaid (visuals PRD §6.4). */
+export function portableIsTable(visual: Visual): boolean;
+export function check(layout: LayoutReport, options?: { theme?: Theme; scale?: number; minText?: number }): Finding[];
+export function createTheme(theme: ResolvedTheme | { light: ResolvedTheme; dark: ResolvedTheme }, appearance?: Appearance): Theme;
+export function admit(document: VisualDocument, options?: { allowIncomplete?: boolean }): { visual: Visual; unknown: string[] };
+export function loadTheme(name: string, appearance?: Appearance): ResolvedTheme | { light: ResolvedTheme; dark: ResolvedTheme };
+export const FORMS: Record<VisualKind, VisualForm[]>;
+export const SUPPORTED: Set<string>;
+
+export interface Theme {
+  name: string;
+  appearance: Appearance;
+  font: string;
+  color(token: string): string;
+  hex(token: string, appearance?: "light" | "dark"): string;
+  px(token: string): number;
+}

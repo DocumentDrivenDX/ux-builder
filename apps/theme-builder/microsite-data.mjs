@@ -227,6 +227,12 @@ export const NOTES = {
   "@ux-builder/design ./artifacts/*": "The design document types: each one's meta.yml, template, prompt and example, as validate reads them (docs/ux-builder/)",
   "@ux-builder/design ./schema/*": "The JSON Schema of the design state, .ux-builder/design-state.json",
   "@ux-builder/design ./package.json": "The package's own metadata",
+  "@ux-builder/visuals .": "render(): a umf.visual document as SVG, Mermaid, a plate or a presentation in a theme; check() on its layout",
+  "@ux-builder/visuals ./node": "render() and loadTheme() with themes by name from @ux-builder/tokens, for Node and the ux-builder-visuals command",
+  "@ux-builder/visuals ./player": "The walkthrough player a presentation inlines: steps by buttons and arrow keys",
+  "@ux-builder/visuals ./react": "<Visual doc>: draws a document inside a React app in the page's theme, with its text equivalent",
+  "@ux-builder/visuals ./schema/*": "The pinned umf.visual schema and where it was pinned from",
+  "@ux-builder/visuals ./package.json": "The package's own metadata",
 };
 
 /* What a wildcard export matches today, from the package's files. */

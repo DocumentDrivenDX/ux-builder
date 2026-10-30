@@ -1,0 +1,192 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-field-guide",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-field-guide",
+      "kind": "flow",
+      "form": "lanes",
+      "title": "A developer's first map of Beacon",
+      "question": "Where do I start in Beacon, and how is one draft asked for?",
+      "takeaway": "Start at the API: it is the only part that acts for an agent, and the only part that calls the model gateway.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/architecture-model.toml",
+        "view": "field-guide",
+        "digest": "sha256:5506076ecd96344bd6b203c4d2a36ed983a7d9c37883c0e4dc65f9a59f689910"
+      },
+      "groups": [
+        {
+          "id": "people",
+          "label": "People",
+          "role": "lane"
+        },
+        {
+          "id": "front-door",
+          "label": "Front door",
+          "role": "lane"
+        },
+        {
+          "id": "beacon-app",
+          "label": "Beacon",
+          "role": "lane"
+        },
+        {
+          "id": "platform",
+          "label": "Platform",
+          "role": "lane"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "agent",
+          "label": "Support agent",
+          "role": "actor",
+          "status": "built",
+          "group": "people"
+        },
+        {
+          "id": "proxy",
+          "label": "Sign-in proxy",
+          "detail": "checks identity, forwards the agent's token",
+          "role": "platform",
+          "status": "built",
+          "group": "front-door"
+        },
+        {
+          "id": "api",
+          "label": "Beacon API",
+          "detail": "every request runs as the agent",
+          "role": "own",
+          "status": "built",
+          "group": "beacon-app"
+        },
+        {
+          "id": "gateway",
+          "label": "Model gateway",
+          "detail": "rate limits, usage, model choice",
+          "role": "platform",
+          "status": "built",
+          "group": "platform"
+        },
+        {
+          "id": "models",
+          "label": "Language models",
+          "role": "platform",
+          "status": "built",
+          "group": "platform"
+        },
+        {
+          "id": "telemetry",
+          "label": "Telemetry collector",
+          "detail": "traces and audit spans",
+          "role": "platform",
+          "status": "built",
+          "group": "platform"
+        },
+        {
+          "id": "secrets",
+          "label": "Secret vault",
+          "role": "platform",
+          "status": "built",
+          "group": "platform"
+        }
+      ],
+      "edges": [
+        {
+          "id": "agent--proxy",
+          "from": "agent",
+          "to": "proxy",
+          "label": "opens a ticket",
+          "why": "nothing reaches Beacon without a signed-in agent"
+        },
+        {
+          "id": "gateway--models",
+          "from": "gateway",
+          "to": "models",
+          "label": "routes to a model",
+          "why": "the gateway, not Beacon, chooses and meters the model"
+        },
+        {
+          "id": "proxy--api",
+          "from": "proxy",
+          "to": "api",
+          "label": "forwards with the agent's token",
+          "why": "the API acts as the agent, never as a service account"
+        },
+        {
+          "id": "api--gateway",
+          "from": "api",
+          "to": "gateway",
+          "label": "asks for a draft",
+          "why": "drafting is the only call that leaves the platform's trust boundary"
+        },
+        {
+          "id": "api--secrets",
+          "from": "api",
+          "to": "secrets",
+          "label": "reads the gateway key"
+        },
+        {
+          "id": "api--telemetry",
+          "from": "api",
+          "to": "telemetry",
+          "label": "audit spans, OTLP",
+          "why": "every draft and every send is traced back to the agent who asked"
+        }
+      ],
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Opens a ticket",
+          "caption": "The proxy signs the agent in through the identity provider and keeps their token.",
+          "focus": [
+            "agent--proxy"
+          ]
+        },
+        {
+          "id": "s2",
+          "title": "Forwards with the agent's token",
+          "caption": "Every later call carries the agent's identity, so the helpdesk's own permissions still apply.",
+          "focus": [
+            "proxy--api"
+          ]
+        },
+        {
+          "id": "s3",
+          "title": "Asks for a draft",
+          "caption": "The API sends the ticket, its history and the matching articles in one prompt.",
+          "focus": [
+            "api--gateway"
+          ]
+        },
+        {
+          "id": "s4",
+          "title": "Routes to a model",
+          "caption": "Beacon names a purpose, not a model, so the platform can change models without a release.",
+          "focus": [
+            "gateway--models"
+          ]
+        },
+        {
+          "id": "throughout-audit-spans-otlp",
+          "title": "Audit spans, OTLP",
+          "caption": "Spans carry the ticket and the agent, never the ticket's text.",
+          "focus": [
+            "api--telemetry"
+          ],
+          "when": "throughout"
+        }
+      ],
+      "omissions": [
+        "This is a conceptual map, not a deployment topology. Left out on purpose, by layer: People (Customer, Workspace admin); Front door (Identity provider); Beacon (Beacon, Web app, Reply drafter, Job worker, Policy rules); Beacon data (Beacon database, Job queue, Attachment store); Neighbours (Helpdesk, Knowledge base); Delivery (CI runner). Not real yet: Policy rules (placeholder), Attachment store (unknown)."
+      ]
+    }
+  },
+  "modules": []
+}

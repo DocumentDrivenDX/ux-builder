@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 356" width="390" height="356" role="img" aria-labelledby="helix-request-ladder-title" aria-describedby="helix-request-ladder-desc" class="uxb-visual uxb-visual--sequence-ladder" data-visual="helix-request-ladder" style="font-family:ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="helix-request-ladder-title">A request becomes a governing document</title>
+<desc id="helix-request-ladder-desc">The runtime acts; HELIX gives it the scope, the shape, and the record.</desc>
+<rect x="0" y="0" width="390" height="356" style="fill:#F0EEE6"/>
+<g class="uxb-ladder">
+<path d="M35 32 L35 302" style="fill:none;stroke:#706C62;stroke-width:1.5px"/>
+</g>
+<g id="helix-request-ladder--m1" class="uxb-message" data-kind="call" data-steps="s1">
+<text x="58" y="36" style="fill:#141413;font-size:12px;font-weight:600">Software team → Agent runtime</text>
+<text x="58" y="52" style="fill:#3D3D3A;font-size:12px;font-weight:400">asks for work</text>
+<circle cx="35" cy="32" r="11" style="fill:#D12800"/>
+<text x="35" y="36.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">1</text>
+</g>
+<g id="helix-request-ladder--m2" class="uxb-message" data-kind="call" data-steps="s2">
+<text x="58" y="90" style="fill:#141413;font-size:12px;font-weight:600">Agent runtime → Routing skill</text>
+<text x="58" y="106" style="fill:#3D3D3A;font-size:12px;font-weight:400">loads the skill</text>
+<circle cx="35" cy="86" r="11" style="fill:#D12800"/>
+<text x="35" y="90.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">2</text>
+</g>
+<g id="helix-request-ladder--m3" class="uxb-message" data-kind="call" data-steps="s3">
+<text x="58" y="144" style="fill:#141413;font-size:12px;font-weight:600">Routing skill → .helix.yml</text>
+<text x="58" y="160" style="fill:#3D3D3A;font-size:12px;font-weight:400">reads the scope</text>
+<circle cx="35" cy="140" r="11" style="fill:#D12800"/>
+<text x="35" y="144.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">3</text>
+</g>
+<g id="helix-request-ladder--m4" class="uxb-message" data-kind="call" data-steps="s4">
+<text x="58" y="198" style="fill:#141413;font-size:12px;font-weight:600">Routing skill → Artifact catalog</text>
+<text x="58" y="214" style="fill:#3D3D3A;font-size:12px;font-weight:400">reads the artifact type</text>
+<circle cx="35" cy="194" r="11" style="fill:#D12800"/>
+<text x="35" y="198.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">4</text>
+</g>
+<g id="helix-request-ladder--m5" class="uxb-message" data-kind="call" data-steps="s5">
+<text x="58" y="252" style="fill:#141413;font-size:12px;font-weight:600">Routing skill → Project documents</text>
+<text x="58" y="268" style="fill:#3D3D3A;font-size:12px;font-weight:400">authors and reconciles</text>
+<circle cx="35" cy="248" r="11" style="fill:#D12800"/>
+<text x="35" y="252.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">5</text>
+</g>
+<g id="helix-request-ladder--m6" class="uxb-message" data-kind="return" data-steps="s6">
+<text x="58" y="306" style="fill:#141413;font-size:12px;font-weight:600">Project documents → Agent runtime</text>
+<text x="58" y="322" style="fill:#6B675E;font-size:12px;font-weight:400">governs what runs next</text>
+<circle cx="35" cy="302" r="11" style="fill:#D12800"/>
+<text x="35" y="306.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">6</text>
+</g>
+</svg>

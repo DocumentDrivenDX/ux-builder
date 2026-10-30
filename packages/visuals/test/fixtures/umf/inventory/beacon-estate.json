@@ -1,0 +1,82 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-estate",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-estate",
+      "kind": "flow",
+      "form": "network",
+      "title": "Support tools estate: connections",
+      "question": "How do Beacon and its sibling systems fit together?",
+      "source": {
+        "path": "umf:fixtures/visual/sources/estate/estate.mmd",
+        "digest": "sha256:67e0ca2948db794b31a2c1b0d8de8f876912098dc4d0705813879b286cdb6ceb"
+      },
+      "nodes": [
+        {
+          "id": "beacon",
+          "label": "Beacon",
+          "detail": "drafts support replies",
+          "role": "own"
+        },
+        {
+          "id": "ledger",
+          "label": "Ledger",
+          "detail": "billing and invoices",
+          "role": "own"
+        },
+        {
+          "id": "portal",
+          "label": "Customer portal",
+          "detail": "self-service help",
+          "role": "own"
+        },
+        {
+          "id": "insight",
+          "label": "Insight",
+          "detail": "support analytics",
+          "role": "own"
+        }
+      ],
+      "edges": [
+        {
+          "id": "portal--beacon",
+          "from": "portal",
+          "to": "beacon",
+          "label": "hands unsolved questions to"
+        },
+        {
+          "id": "beacon--ledger",
+          "from": "beacon",
+          "to": "ledger",
+          "label": "looks up a customer's plan in"
+        },
+        {
+          "id": "portal--ledger",
+          "from": "portal",
+          "to": "ledger",
+          "label": "shows invoices from"
+        },
+        {
+          "id": "beacon--insight",
+          "from": "beacon",
+          "to": "insight",
+          "label": "sends ticket events to"
+        },
+        {
+          "id": "ledger--insight",
+          "from": "ledger",
+          "to": "insight",
+          "label": "sends usage to",
+          "kind": "control"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

@@ -106,8 +106,10 @@ const foreign = {
 /* ux-builder/no-inline-svg: an <svg> written in app JSX is an icon or a loader
    drawn by hand, which keeps its shape whatever the theme's design system.
    Use <Icon> (any of @ux-builder/ui/icons, or registerIcons for the app's own
-   drawing) or the loading widgets. Charts and illustrations can opt out with
-   allow: ["chart"] matching a className or id on the <svg>. */
+   drawing) or the loading widgets; a diagram or chart is a umf.visual document
+   drawn with <Visual> from @ux-builder/visuals/react, which writes no <svg> in
+   app source (US-168). Charts and illustrations can opt out with allow:
+   ["chart"] matching a className or id on the <svg>. */
 const inlineSvg = {
   meta: {
     type: "suggestion",
@@ -122,7 +124,7 @@ const inlineSvg = {
         if (el.name.type !== "JSXIdentifier" || el.name.name !== "svg") return;
         const ids = `${attr(el, "className") ?? ""} ${attr(el, "id") ?? ""}`;
         if (allow.some((a) => ids.split(/\s+/).includes(a))) return;
-        context.report({ node: el, message: "a hand-drawn <svg> does not follow the theme's icon set: use <Icon> (import it from @ux-builder/ui/icons, or registerIcons({ name, glyphs }) for your own drawing) (ux-builder/no-inline-svg)" });
+        context.report({ node: el, message: "a hand-drawn <svg> does not follow the theme's icon set: use <Icon> (import it from @ux-builder/ui/icons, or registerIcons({ name, glyphs }) for your own drawing); for a diagram or chart, use <Visual> from @ux-builder/visuals/react (ux-builder/no-inline-svg)" });
       },
     };
   },

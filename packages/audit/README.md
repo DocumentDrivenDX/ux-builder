@@ -34,7 +34,7 @@ range on another is not met by the version installed.
 | `token-radii` | warning | Corners use one of the theme's radii (or are fully round). |
 | `token-overrides` | error | No app stylesheet sets `--piq-*` tokens; the theme does. |
 | `widget-overrides` | warning | No app stylesheet restyles an SDK widget, even under the SDK's own selector. |
-| `sdk-widgets` | error / warning | No icon (`<svg>`) or logo image the app draws itself (errors); no native button, field, checkbox, table, progress bar or endless animation where the SDK has a widget (warnings). |
+| `sdk-widgets` | error / warning | No icon (`<svg>`) or logo image the app draws itself (errors); no diagram or chart the app draws as its own `<svg>`, where `<Visual>` from `@ux-builder/visuals/react` draws it (a warning; `.chart` or `data-audit-chart` opts out); no native button, field, checkbox, table, progress bar or endless animation where the SDK has a widget (warnings). |
 | `foreign-components` | warning | No other UI kit's components (Material UI, Ant Design, Chakra, Carbon React, Fluent UI, Mantine, Blueprint, PrimeReact). |
 | `outside-theme` | warning | Nothing visible is outside the themed element, where it would never change. |
 | `brand` | error / warning | The page's favicon is the theme's; a theme with a logo has `<Logo />` on the page. |

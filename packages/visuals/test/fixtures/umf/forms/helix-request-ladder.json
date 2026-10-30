@@ -1,0 +1,160 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:helix-request-ladder",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "helix-request-ladder",
+      "kind": "sequence",
+      "form": "ladder",
+      "title": "A request becomes a governing document",
+      "question": "How does a request become a governing document, on a narrow screen?",
+      "takeaway": "The runtime acts; HELIX gives it the scope, the shape, and the record.",
+      "audience": "developer",
+      "source": {
+        "path": "helix:docs/helix/02-design/architecture-model.toml",
+        "view": "request",
+        "digest": "sha256:6e13adabec034747ed6d5505668e1daef353a3df6d2c54f3e4ff799cb92acff2"
+      },
+      "sequence": {
+        "participants": [
+          {
+            "id": "team",
+            "label": "Software team",
+            "detail": "sets intent",
+            "role": "actor",
+            "status": "built"
+          },
+          {
+            "id": "runtime",
+            "label": "Agent runtime",
+            "detail": "model, tools, execution",
+            "role": "external",
+            "status": "built"
+          },
+          {
+            "id": "skill",
+            "label": "Routing skill",
+            "detail": "resolves scope and mode",
+            "role": "own",
+            "status": "built"
+          },
+          {
+            "id": "marker",
+            "label": ".helix.yml",
+            "detail": "project scope",
+            "role": "store",
+            "status": "built"
+          },
+          {
+            "id": "catalog",
+            "label": "Artifact catalog",
+            "detail": "templates, prompts, rules",
+            "role": "store",
+            "status": "built"
+          },
+          {
+            "id": "docs",
+            "label": "Project documents",
+            "detail": "intent, design, tests",
+            "role": "store",
+            "status": "built"
+          }
+        ],
+        "messages": [
+          {
+            "id": "m1",
+            "from": "team",
+            "to": "runtime",
+            "label": "asks for work",
+            "kind": "call"
+          },
+          {
+            "id": "m2",
+            "from": "runtime",
+            "to": "skill",
+            "label": "loads the skill",
+            "kind": "call"
+          },
+          {
+            "id": "m3",
+            "from": "skill",
+            "to": "marker",
+            "label": "reads the scope",
+            "kind": "call"
+          },
+          {
+            "id": "m4",
+            "from": "skill",
+            "to": "catalog",
+            "label": "reads the artifact type",
+            "kind": "call"
+          },
+          {
+            "id": "m5",
+            "from": "skill",
+            "to": "docs",
+            "label": "authors and reconciles",
+            "kind": "call"
+          },
+          {
+            "id": "m6",
+            "from": "docs",
+            "to": "runtime",
+            "label": "governs what runs next",
+            "kind": "return"
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Asks for work",
+          "focus": [
+            "m1"
+          ]
+        },
+        {
+          "id": "s2",
+          "title": "Loads the skill",
+          "focus": [
+            "m2"
+          ]
+        },
+        {
+          "id": "s3",
+          "title": "Reads the scope",
+          "focus": [
+            "m3"
+          ]
+        },
+        {
+          "id": "s4",
+          "title": "Reads the artifact type",
+          "focus": [
+            "m4"
+          ]
+        },
+        {
+          "id": "s5",
+          "title": "Authors and reconciles",
+          "focus": [
+            "m5"
+          ]
+        },
+        {
+          "id": "s6",
+          "title": "Governs what runs next",
+          "focus": [
+            "m6"
+          ]
+        }
+      ]
+    }
+  },
+  "modules": []
+}
