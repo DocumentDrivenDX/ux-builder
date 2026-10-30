@@ -4,10 +4,10 @@
      npm test --workspace @ux-builder/design */
 
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { proposalsApply } from "../index.mjs";
+import { proposalsApply, validate } from "../index.mjs";
 import { currentText, documentOfType, nextNumber, proposeChange, sectionOf, setSection, tableUnder } from "../helix.mjs";
 import { helixApp, tempApp } from "./helpers.mjs";
 
@@ -58,4 +58,16 @@ describe("HELIX proposals", () => {
     const app = tempApp();
     assert.throws(() => proposeChange(app, "docs/helix/01-frame/prd.md", (t) => t), /has no HELIX.*frame/);
   });
+
+  test("a proposal whose document changed under it: readers see the document as it is, a new change is refused, and validate names it", () => {
+    const app = helixApp();
+    const prd = "docs/helix/01-frame/prd.md";
+    const a = proposeChange(app, prd, (t) => t.replace("A list app.", "A list app for anglers."));
+    writeFileSync(join(app, prd), readFileSync(join(app, prd), "utf8").replace("A list app.", "A river app."));
+    assert.equal(currentText(app, prd).stale, a.patch);
+    assert.match(currentText(app, prd).text, /A river app\./);
+    assert.throws(() => proposeChange(app, prd, (t) => t + "x\n"), /no longer applies/);
+    assert.ok(validate(app).problems.some((p) => p.path === a.patch && /no longer applies to docs\/helix\/01-frame\/prd\.md/.test(p.message)));
+  });
 });
+

@@ -75,14 +75,25 @@ export function proposedDocuments(app) {
   return out;
 }
 
-/* A HELIX document as it will be once its pending changes are applied: { path, text, base, pending }. */
-export function currentText(app, path) {
+/* A HELIX document as it will be once its pending changes are applied:
+   { path, text, base, pending, stale }. A pending patch that no longer
+   applies (the document changed under it) is stale: readers get the
+   document as it is; a writer (strict) is refused. */
+export function currentText(app, path, { strict = false } = {}) {
   const base = existsSync(join(app, path)) ? readFileSync(join(app, path), "utf8") : null;
   const patch = join(app, patchFor(app, path));
   if (!existsSync(patch)) return { path, text: base, base, pending: false };
   const text = patchedText(base, readFileSync(patch, "utf8"));
-  if (text == null) throw new DesignError(`${patchFor(app, path)} no longer applies to ${path}: apply or remove it first (ux-builder-design proposals)`);
+  if (text == null) {
+    if (strict) throw new DesignError(`${patchFor(app, path)} no longer applies to ${path}: apply or remove it first (ux-builder-design proposals)`);
+    return { path, text: base, base, pending: false, stale: patchFor(app, path) };
+  }
   return { path, text, base, pending: true };
+}
+
+/* Pending patches that no longer apply to their document: [{ patch, path }]. */
+export function stalePatches(app) {
+  return helixDocuments(app).map((d) => currentText(app, d.path)).filter((c) => c.stale).map((c) => ({ patch: c.stale, path: c.path }));
 }
 
 /* Propose a change to one HELIX document: change(text or null) returns its
@@ -90,7 +101,7 @@ export function currentText(app, path) {
    disk to the result; a result equal to what is on disk removes it. */
 export function proposeChange(app, path, change) {
   requireHelix(app, `a change to ${path}`);
-  const cur = currentText(app, path);
+  const cur = currentText(app, path, { strict: true });
   const next = change(cur.text);
   const file = patchFor(app, path);
   if (next === cur.base) { rmSync(join(app, file), { force: true }); return { path, patch: null, text: next }; }

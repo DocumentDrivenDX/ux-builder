@@ -99,6 +99,8 @@ describe("brief", () => {
     const text = currentText(app, "docs/helix/01-frame/principles.md").text;
     assert.match(text, /^---\nddx:\n  id: principles\n  type: principles\n/);
     assert.match(text, /## Experience Principles\n\n- No mandatory account creation\n- Progressive disclosure\n/);
+    // A new principles.md has HELIX's required sections (its validator blocks without them).
+    for (const h of ["Principles", "Tension Resolution"]) assert.match(text, new RegExp(`^## ${h}$`, "m"), h);
     assert.deepEqual(JSON.parse(readFileSync(join(app, ".ux-builder/principles.json"), "utf8")).principles, [{ key: "no-mandatory-account-creation", text: "No mandatory account creation", rule: { kind: "no-step-before", patterns: ["SignIn"] } }]);
     assert.equal(cli(app, ["principle", "add", "--text", "x", "--rule", '{"kind":"nope"}']).status, 2);
     const refused = cli(app, ["state", "set", "principles[+]", '{"text":"Be brief"}']);

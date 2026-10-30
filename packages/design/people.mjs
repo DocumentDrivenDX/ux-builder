@@ -32,7 +32,17 @@ function upsertRow(text, { section, heading, cols, row }) {
   let t = sectionOf(text, section) == null ? setSection(text, section, "") : text;
   const rows = tableUnder(t, heading, 3).filter((r) => r[0].toLowerCase() !== String(row[0]).toLowerCase());
   rows.push(row);
-  return setSection(t, heading, table(cols, rows), { level: 3, inside: section });
+  const out = setSection(t, heading, table(cols, rows), { level: 3, inside: section });
+  // HELIX's PRD lists User Segments before User Needs.
+  if (heading !== "User Segments") return out;
+  const at = (h) => out.search(new RegExp(`^### ${h}\\s*$`, "m"));
+  const seg = at("User Segments"), needs = at("User Needs");
+  if (needs < 0 || seg < needs) return out;
+  const end = out.slice(seg).search(/\n#{1,3} /);
+  const block = out.slice(seg, end < 0 ? undefined : seg + end + 1);
+  const rest = out.slice(0, seg) + out.slice(seg + block.length);
+  const n = rest.search(new RegExp(`^### User Needs\\s*$`, "m"));
+  return (rest.slice(0, n) + block.replace(/\n*$/, "\n\n") + rest.slice(n)).replace(/\n{3,}/g, "\n\n");
 }
 
 /* ------------------------------------------------------------ reading */

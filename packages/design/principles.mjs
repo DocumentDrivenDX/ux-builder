@@ -44,7 +44,8 @@ export function principleAdd(app, { text, rule } = {}) {
   }
   const path = principlesPath(app);
   const p = proposeChange(app, path, (t) => {
-    const base = t ?? ["---", "ddx:", "  id: principles", "  type: principles", "  authoring:", "    home: repo", "---", "", "# Principles", ""].join("\n");
+    // A new principles.md in HELIX's shape (v0.20.0): its required Principles and Tension Resolution, to agree with the person.
+    const base = t ?? ["---", "ddx:", "  id: principles", "  type: principles", "  authoring:", "    home: repo", "---", "", "# Project Principles", "", "## Principles", "", "- To agree with the person.", "", "## Experience Principles", "", "## Tension Resolution", "", "- To agree with the person.", ""].join("\n");
     const lines = (sectionOf(base, HEADING) ?? "").split("\n").filter((l) => l.trim() && !/^\[.*\]$/.test(l.trim()));
     if (!lines.some((l) => l.replace(/^\s*[-*]\s*/, "").trim() === text)) lines.push(`- ${text}`);
     return setSection(base, HEADING, lines.join("\n"));

@@ -89,6 +89,9 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       experiment, release.
   mode full|change [--why <text>]
       the full loop, or change mode for an everyday change.
+  baseline
+      retired (ADR-042): for an existing app, HELIX's backfill drafts the PRD and
+      stories, as proposals; this says so and exits 2.
   brief [--name <product>]
       write the experience brief (docs/ux-builder/brief.md and brief.html) from the
       HELIX PRD, principles.md, the stories and the design state.

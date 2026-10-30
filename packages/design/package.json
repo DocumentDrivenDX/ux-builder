@@ -20,7 +20,6 @@
     "status.mjs",
     "checkpoints.mjs",
     "init.mjs",
-    "baseline.mjs",
     "brief.mjs",
     "research.mjs",
     "decisions.mjs",
@@ -47,7 +46,13 @@
     "schema",
     "skill",
     "README.md",
-    "THIRD-PARTY-NOTICES.md"
+    "THIRD-PARTY-NOTICES.md",
+    "helix.mjs",
+    "migrate-docs.mjs",
+    "people.mjs",
+    "principles.mjs",
+    "studies.mjs",
+    "examples"
   ],
   "scripts": {
     "test": "node --test 'test/*.test.mjs'"

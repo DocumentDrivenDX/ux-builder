@@ -36,7 +36,7 @@ function newPlan(study) {
   const name = studyName(study);
   return ["---", "ddx:", `  id: research-${name}`, "  type: research-plan", "  authoring:", "    home: repo", "---", "",
     `# Research plan: ${String(study).trim()}`, "",
-    "## Research Objectives", "", "- To agree with the person: what this study must answer, and how its answer changes the design.", "",
+    "## Research Objectives", "", "### Primary Research Questions", "", "1. **Question**: to agree with the person: what this study must answer.", "   - **Why Important**: how its answer changes the design.", "",
     "## Research Methods", "",
     "## Timeline", "", "- To agree with the person.", "",
     "## Research Risks", "", "- To agree with the person.", "",

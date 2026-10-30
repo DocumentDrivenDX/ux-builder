@@ -39,6 +39,7 @@ describe("US-125: evidence in a study", () => {
     const text = plan(app);
     assert.match(text, /^---\nddx:\n  id: research-anglers\n  type: research-plan\n/);
     for (const h of ["Research Objectives", "Research Methods", "Timeline", "Research Risks", "Completion Criteria"]) assert.match(text, new RegExp(`^## ${h}$`, "m"), h);
+    assert.match(text, /^1\. \*\*Question\*\*: /m, "HELIX's validator needs a research question");
     assert.match(text, /### Sources\n\n\| Source \| Kind \| Date \| Where it is kept \|\n\|---\|---\|---\|---\|\n\| interview 1 \| interview \| 2026-10-20 \| Research drive, interviews; not copied here \|/);
     assert.doesNotMatch(text, /Clackamas|Sam Rivera|Where do you fish/);
     r = cli(app, ["evidence", "add", "research/interview-1.txt", "--kind", "support", "--study", "anglers", "--json"]);

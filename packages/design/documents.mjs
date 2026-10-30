@@ -9,7 +9,7 @@ import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 import { bpFile, proposalsDir, runsDir, ux } from "./app.mjs";
-import { proposedDocuments } from "./helix.mjs";
+import { proposedDocuments, stalePatches } from "./helix.mjs";
 import { studies, studyChecks, studyClaims } from "./studies.mjs";
 import { keyOf, needsTable, peopleChecks, segmentsTable, taskModel } from "./people.mjs";
 import { briefStale } from "./brief.mjs";
@@ -239,6 +239,8 @@ export function validate(app) {
   if (carried.size && existsSync(join(app, briefPath))) {
     for (const m of readFileSync(join(app, briefPath), "utf8").matchAll(/^\s*-\s*(US-\d+)\b[^\n]*\[confirmed\]/gm)) if (!carried.has(m[1])) warnings.push({ path: briefPath, message: `the brief lists ${m[1]} as confirmed, but no journey in the blueprint carries it: drop it from the brief, or mark it deferred` });
   }
+  // A proposal whose document changed under it (ADR-042): it cannot be applied as it is.
+  for (const s of stalePatches(app)) problems.push({ path: s.patch, message: `this proposal no longer applies to ${s.path}, which changed after it was proposed: remove it and propose the change again` });
   const stale = briefStale(app);
   if (stale) warnings.push(stale);
   for (const c of cites) {

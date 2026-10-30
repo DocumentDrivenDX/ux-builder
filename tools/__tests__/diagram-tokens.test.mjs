@@ -43,7 +43,8 @@ describe("US-112 diagram tokens", () => {
   // @covers US-112-AC1
   test("AC1: every theme and preview pair sets all 28 in every appearance, and every theme's CSS declares them", () => {
     const all = everything();
-    assert.equal(all.length, 61);
+    // The themes in each appearance and the brand × design-system preview pairs (71 with the img-8593 brand, PR #68).
+    assert.equal(all.length, 71);
     for (const [where, tokens] of all) for (const n of NAMES) assert.ok(tokens[n], `${where}: --${n} is not set`);
     for (const t of src.themes.keys()) {
       const css = themeCss(src, t);
