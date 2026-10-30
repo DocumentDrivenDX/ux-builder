@@ -18,7 +18,6 @@ export { logEvent, logTurn, mark, METRICS_FILE, metrics, metricsText, MILESTONES
 export { budget, budgetText, INTAKE, intake, MINUTES_PER_DECISION } from "./intake.mjs";
 export { advance } from "./advance.mjs";
 export { proposalsApply, proposalsPreview } from "./proposals.mjs";
-export { baseline } from "./baseline.mjs";
 export { applyImpact, buildGraph, impact, summaryOf, trace } from "./graph.mjs";
 export { goalText, kits, kitTasks, OBSERVATION_COLUMNS, testKit } from "./testkit.mjs";
 export { ready, readyText } from "./ready.mjs";

@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-036
@@ -45,8 +47,8 @@ ddx:
 - [ ] **US-115-AC2** — Given an app with ux-builder and no `app.blueprint.json`, when `init` runs, then it also writes a starting blueprint as `ux-builder-blueprint init` does, and says the guide will help describe the current screens.
 - [ ] **US-115-AC3** — Given an app without `@ux-builder/ui` installed, when `init` runs, then it writes the state and skill, and prints that the validated prototype and the audit need the SDK, naming the adoption steps.
 - [ ] **US-115-AC4** — Given an app that already has `.ux-builder/design-state.json`, when `init` runs, then it exits 2 (a refusal, CONTRACT-008), names the file and leaves it unchanged.
-- [ ] **US-115-AC5** — Given an initialized app with a blueprint, HELIX stories and an assessment run, when `ux-builder-design baseline` runs, then `docs/ux-builder/baseline.md` lists every screen, journey, story and open finding, every drafted job and task is marked *current state, assumed*, and the state's activity is `baseline`.
-- [ ] **US-115-AC6** — Given the installed skill, when its text is read, then it says that an existing app's first session runs `baseline` and then routes a specific change to impact and Explore, "too complicated" to the assessment and `simplify`, complaints to evidence, and a new feature to Define.
+- [ ] **US-115-AC5** — Given an existing app, when `ux-builder-design baseline` runs, then it exits 2 saying the command is retired and that HELIX's backfill drafts the PRD and stories from the app, as proposals (ADR-042); it writes nothing, and there is no baseline document type.
+- [ ] **US-115-AC6** — Given the installed skill, when its text is read, then it says that an existing app's first session runs HELIX's `backfill` and then routes a specific change to impact and Explore, "too complicated" to the assessment and `simplify`, complaints to evidence, and a new feature to Define.
 
 ## Edge Cases
 

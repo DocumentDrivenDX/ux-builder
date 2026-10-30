@@ -5,7 +5,7 @@
 
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, principleAdd, needAdd, segmentAdd, taskAdd, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, principleAdd, needAdd, segmentAdd, taskAdd, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -89,10 +89,6 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       experiment, release.
   mode full|change [--why <text>]
       the full loop, or change mode for an everyday change.
-  baseline
-      an existing app's first session: docs/ux-builder/baseline.md from the blueprint,
-      the HELIX stories and the latest assessment run, every drafted point
-      marked current state, assumed.
   brief [--name <product>]
       write the experience brief (docs/ux-builder/brief.md and brief.html) from the
       HELIX PRD, principles.md, the stories and the design state.
@@ -369,11 +365,8 @@ async function main(argv) {
     }
     throw new DesignError(`unknown state command "${sub ?? ""}": use get, set or checkpoint`);
   }
-  if (command === "baseline") {
-    const r = baseline(app);
-    print(r, values.json, `Wrote ${r.written.join(", ")}: ${r.screens} screens, ${r.journeys} journeys, ${r.stories} stories, ${r.findings} open findings; drafted ${r.drafted.join(", ") || "nothing"} as current state, assumed.`);
-    return 0;
-  }
+  if (command === "baseline") throw new DesignError("baseline is retired (ADR-042): for an existing app, HELIX's backfill drafts the PRD and stories from the app, as proposals; draw the blueprint from its screens (ux-builder-blueprint), then route what the person wants to improve");
+
   if (command === "brief") {
     const r = brief(app, { name: values.name });
     print(r, values.json, [`Wrote ${r.written.join(", ")}.`, ...r.notes].join("\n"));

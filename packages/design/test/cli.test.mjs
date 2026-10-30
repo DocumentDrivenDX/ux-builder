@@ -55,7 +55,6 @@ const COMMANDS = [
   ["migrate", ["migrate", "--dry-run"], (app) => design.migrate(app, { dryRun: true })],
   ["mode", ["mode", "change", "--why", "A small change"], (app) => design.setMode(app, { mode: "change", why: "A small change" })],
   ["brief", ["brief", "--name", "Rivers"], (app) => design.brief(app, { name: "Rivers" })],
-  ["baseline", ["baseline"], (app) => design.baseline(app)],
   ["validate", ["validate"], (app) => design.validate(app)],
   ["evidenceAdd", ["evidence", "add", "package.json", "--kind", "survey", "--study", "anglers", "--date", "2026-10-23", "--source", "Survey tool export"], (app) => design.evidenceAdd(app, { file: "package.json", kind: "survey", study: "anglers", date: "2026-10-23", source: "Survey tool export" })],
   ["evidenceList", ["evidence", "list"], (app) => design.evidenceList(app)],

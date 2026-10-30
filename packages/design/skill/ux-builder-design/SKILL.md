@@ -172,10 +172,10 @@ prototypes*).
 ## Starting in an existing app
 
 `ux-builder-design init` starts an existing app at Baseline. In its first
-session, run `ux-builder-design baseline`: it writes `docs/ux-builder/baseline.md`
-from the blueprint, the HELIX stories and the latest assessment run (run
-`ux-builder-audit assess` first if there is none), with every drafted brief
-point, job and task marked current state, assumed. Go through it with the
+session, run HELIX's `backfill`: it drafts the PRD and stories from the app
+as it is, as proposals the person applies, each point current state,
+assumed. Draw the blueprint from the app's screens (`ux-builder-blueprint`),
+and run `ux-builder-audit assess` for the findings. Go through them with the
 person, then ask what they want to improve and route the request:
 - **a specific change** ("move the filters") → impact, then Explore;
 - **"it feels too complicated"** → the assessment, then `simplify`;
@@ -259,9 +259,10 @@ on one another. Ask those together, in one message; a narrative answer is
 fine, and a part they skip becomes an assumption to test. Tell them the
 budget `intake` and `status` give ("About 9 decisions and 25 minutes
 before the first prototype"). Follow up only where the answer would change
-the design. Then go on as a structured interview through HELIX's `grill`,
-drafting or updating the PRD and stories as it goes (through proposals the
-person accepts). Ask "What are the three most important things people
+the design. Then run HELIX's `frame` to write the PRD and principles.md,
+and go on as a structured interview through HELIX's `grill` for what the
+sources cannot answer, drafting or updating the PRD and stories as it goes
+(through proposals the person accepts). Ask "What are the three most important things people
 should accomplish?" before anything about screens.
 
 When the person is unsure between interaction models (search first or map
@@ -540,6 +541,11 @@ When the owner exports the events (JSON Lines), and support or feedback:
 
 ## Change what exists
 
+When the change is to a requirement (what the product must do, not how the
+interface does it), run HELIX's `evolve` first: it threads the change
+through the PRD, features and stories. Then regenerate what derives from
+the blueprint, as below.
+
 When the person asks for a change ("remove the activity selection before
 exploring"), first run `ux-builder-design impact "<their words>"`: it lists
 every task, journey, screen, pattern, prototype page, kit task, finding and
@@ -592,10 +598,12 @@ showing a finished one):
 | Type | Path |
 |---|---|
 | experience-brief | `docs/ux-builder/brief.md` |
-| baseline | `docs/ux-builder/baseline.md` |
 
 After writing or changing one, run `ux-builder-design validate` and fix what
-it reports.
+it reports. It checks the blueprint and its links into HELIX (the needs,
+users, rules and Task Model keys it names), the brief, and the rules on
+what the guide proposes (masked excerpts, rated evidence). Drift between
+HELIX documents is HELIX's to find: run HELIX's `validate` and `align`.
 
 ## HELIX documents
 

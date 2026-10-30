@@ -110,13 +110,17 @@ describe("checkpoints, HELIX, challenge and change mode in the skill", () => {
     assert.equal(steps.length, 4);
     assert.match(steps.join("\n"), /challenge[\s\S]*impact[\s\S]*complexity[\s\S]*decision/);
     assert.match(s, /Tell the person which mode you are\s+in and why, and that they can switch/);
+    // A requirement change goes through HELIX's evolve first; drift is HELIX's validate and align (ADR-042 decision 4).
+    assert.match(section("Change what exists"), /run HELIX's `evolve` first: it threads the change\s+through the PRD, features and stories/);
+    assert.match(SKILL, /Drift between\s+HELIX documents is HELIX's to find: run HELIX's `validate` and `align`/);
   });
 });
 
 describe("Define in the skill (US-122)", () => {
   // @covers US-122-AC5
-  test("runs Define through HELIX's grill, carries an undecided interaction model to Explore as an open question, and regenerates the brief when its sources change", () => {
+  test("runs Define through HELIX's frame and grill, carries an undecided interaction model to Explore as an open question, and regenerates the brief when its sources change", () => {
     const s = section("Define");
+    assert.match(s, /run HELIX's `frame` to write the PRD and principles\.md/);
     assert.match(s, /structured interview through HELIX's `grill`/);
     assert.match(s, /record it as an open question[\s\S]*carry it to Explore/);
     assert.match(s, /Regenerate the brief whenever its sources change: the PRD,\s+principles\.md, the stories or the design state/);
@@ -125,9 +129,9 @@ describe("Define in the skill (US-122)", () => {
 
 describe("starting in an existing app (US-115)", () => {
   // @covers US-115-AC6
-  test("the first session runs baseline, then routes a change, 'too complicated', complaints and a new feature", () => {
+  test("the first session runs HELIX's backfill, then routes a change, 'too complicated', complaints and a new feature", () => {
     const s = section("Starting in an existing app");
-    assert.match(s, /run `ux-builder-design baseline`/);
+    assert.match(s, /run HELIX's `backfill`: it drafts the PRD and stories from the app/);
     assert.match(s, /\*\*a specific change\*\*.*→ impact, then Explore/);
     assert.match(s, /\*\*"it feels too complicated"\*\* → the assessment, then `simplify`/);
     assert.match(s, /\*\*user complaints\*\* → evidence/);
