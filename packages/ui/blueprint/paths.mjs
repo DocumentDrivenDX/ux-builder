@@ -27,6 +27,8 @@ export const CURRENT = {
   assessmentManifest: "docs/ux-builder/ux-assessment.yml",
   assessments: "docs/ux-builder/assessments",
   auditReport: "docs/ux-builder/audit-report",
+  // Run output (ADR-042 decision 6): studies' materials and results, insight exports; gitignored.
+  runs: "docs/ux-builder/runs",
 };
 export const LEGACY = {
   name: "legacy",
@@ -41,6 +43,7 @@ export const LEGACY = {
   assessmentManifest: "ux-assessment.yml",
   assessments: "ux-assessment",
   auditReport: "audit-report",
+  runs: "ux-builder-runs",
 };
 export const MIGRATE_HINT = "this app is on the old layout (app.blueprint.json, docs/ux/ at the top); `npx ux-builder-design migrate` moves it under docs/ux-builder/";
 
@@ -84,7 +87,7 @@ export function writable(path) {
   const p = String(path);
   for (const l of [CURRENT, LEGACY]) {
     if (l === CURRENT && (p === l.docs || p.startsWith(`${l.docs}/`))) return true;
-    if (l === LEGACY && [l.docs, l.prototypes, l.proposals, l.compare].some((d) => p.startsWith(`${d}/`))) return true;
+    if (l === LEGACY && [l.docs, l.prototypes, l.proposals, l.compare, l.runs].some((d) => p.startsWith(`${d}/`))) return true;
   }
   return /^app\.blueprint(\.[a-z0-9-]+)?\.json$/.test(p);
 }

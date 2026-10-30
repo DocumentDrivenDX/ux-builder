@@ -16,17 +16,18 @@
      Screen Flow (after System Decomposition);
    - the primary journey's sequence diagram, as architecture's Data Flow;
    - DESIGN.md's navigation table (Destinations by Size Class, under
-     Navigation and Active State);
+     Navigation and Active State), and its Modalities, Size Classes and App
+     Frame (before Navigation and Active State; ADR-041, ADR-042);
    - the story test plan's Journey Scenarios (after Acceptance Criteria Test
      Mapping).
-   - for HELIX's UX types (FEAT-015 RPT-09; US-104): an
-     interaction-state-diagram and a wireframe per screen, a screen-flow for
-     the feature and a user-journey-map per journey (ux-docs.mjs). When the
-     installed HELIX defines the type, each is a patch like the rest; when it
-     does not, the result names the missing types and holds each document as
-     a draft (result.drafts), written under the output's drafts/ at the path
-     the type would give it, from ux-builder's proposed template
-     (helix-types/, a copy of docs/proposals/helix-ux-artifact-types).
+   - HELIX's UX types (HELIX v0.20.0; ADR-042 decision 2; FEAT-015 RPT-09;
+     US-104), from ux-docs.mjs: a user-flow per feature the journeys' stories
+     belong to (UF-<FEAT number>, in flows/UF-<n>-<feature>/), a wireframe
+     per screen of it (UF-<n>-<nn>-<view>, beside the flow, with the screen's
+     state diagram in its States and Events), and a user-journey-map per
+     journey. An installed HELIX without one of these types' templates gets
+     the document drafted from the blueprint alone, at v0.20.0's location,
+     and the problem says so.
    A section that is missing, empty or still the template's placeholder is
    drafted; one that already says the same is left; one that says something
    else is reported as a disagreement with both texts, and gets no patch. A
@@ -36,19 +37,18 @@
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
 import { findMarker, readMarker } from "./helix.mjs";
 import { unifiedDiff } from "./diff.mjs";
 import { flowchartBlock, navTable, scenarioRows, screensOf, sequence, walkthrough } from "./project.mjs";
 import { stateModels } from "./states.mjs";
-import { UX_TYPES, journeyMapSections, screenFlowSections, stateDiagramSections, wireframeSections } from "./ux-docs.mjs";
+import { checkBlueprint } from "./index.mjs";
+import { journeyMapSections, modalitySection, userFlowSections, wireframeSections } from "./ux-docs.mjs";
 
 const SKIP = new Set(["node_modules", ".git", "dist", "build"]);
-const PHASE = { "user-stories": "01-frame", "feature-specification": "01-frame", "user-journey-map": "01-frame", "solution-design": "02-design", architecture: "02-design", "design-system": "02-design", "screen-flow": "02-design", wireframe: "02-design", "interaction-state-diagram": "02-design", "story-test-plan": "03-test" };
-// ux-builder's proposed HELIX UX types (docs/proposals/helix-ux-artifact-types), for drafts when HELIX has none.
-const PROPOSED = fileURLToPath(new URL("./helix-types", import.meta.url));
-// Where a type's instance goes when the installed HELIX has no meta.yml for it (HELIX v0.18.0's).
-const LOCATION = { "solution-design": "docs/helix/02-design/solution-designs/SD-{id}-{name}.md", architecture: "docs/helix/02-design/architecture.md", "design-system": "docs/helix/02-design/DESIGN.md", "story-test-plan": "docs/helix/03-test/test-plans/STP-{id}-{name}.md" };
+const PHASE = { "user-stories": "01-frame", "feature-specification": "01-frame", "user-journey-map": "01-frame", "solution-design": "02-design", architecture: "02-design", "design-system": "02-design", "user-flow": "02-design", wireframe: "02-design", "story-test-plan": "03-test" };
+// Where a type's instance goes when the installed HELIX has no meta.yml for it (HELIX v0.18.0's; the UX types v0.20.0's).
+const LOCATION = { "solution-design": "docs/helix/02-design/solution-designs/SD-{id}-{name}.md", architecture: "docs/helix/02-design/architecture.md", "design-system": "docs/helix/02-design/DESIGN.md", "story-test-plan": "docs/helix/03-test/test-plans/STP-{id}-{name}.md",
+  "user-flow": "docs/helix/02-design/flows/UF-{n}-{feature}/UF-{n}.md", wireframe: "docs/helix/02-design/flows/UF-{n}-{feature}/UF-{n}-{nn}-{view}.md", "user-journey-map": "docs/helix/01-frame/journey-maps/UJM-{n}-{name}.md" };
 const INSTALLED = [".claude/skills/helix/references", ".agents/skills/helix/references", "skills/helix/references"];
 const posix = (p) => p.split(sep).join("/");
 const byName = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
@@ -78,15 +78,16 @@ function headings(lines) {
 export const key = (s) => s.toLowerCase().replace(/\[[^\]]*\]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
 
 /* A section's own lines: from its heading to the next heading at its level or above. */
-function sectionAt(lines, hs, k) {
+function sectionAt(lines, hs, k, top = false) {
   const h = hs[k];
-  const next = hs.slice(k + 1).find((x) => x.level <= h.level);
+  // top: only the text above the section's first subsection.
+  const next = hs.slice(k + 1).find((x) => top || x.level <= h.level);
   return { ...h, start: h.index + 1, end: next ? next.index : lines.length };
 }
-function find(lines, title) {
+function find(lines, title, top = false) {
   const hs = headings(lines);
   const k = hs.findIndex((h) => key(h.title) === key(title));
-  return k < 0 ? null : sectionAt(lines, hs, k);
+  return k < 0 ? null : sectionAt(lines, hs, k, top);
 }
 const body = (lines, s) => lines.slice(s.start, s.end).join("\n").trim();
 const norm = (t) => t.replace(/<!--[\s\S]*?-->/g, "").replace(/\s+/g, " ").trim();
@@ -132,6 +133,8 @@ export function draft(template, { id, type, title, links = [], intro, fields = {
     const at = fm.findIndex((l) => /status: draft/.test(l));
     fm.splice(at + 1, 0, "  links:", ...links.flatMap(([kind, to]) => [`    - kind: ${kind}`, `      to: ${to}`]));
   }
+  // HELIX's validator needs every document's authoring home.
+  if (!fm.some((l) => /^\s{2}authoring:/.test(l))) fm.splice(fm.findIndex((l) => /status: draft/.test(l)) + 1, 0, "  authoring:", "    home: repo");
   const out = [];
   for (const [i, s] of t.sections.entries()) {
     out.push(`${"#".repeat(s.level)} ${i === 0 && title ? title : s.title}`);
@@ -140,10 +143,10 @@ export function draft(template, { id, type, title, links = [], intro, fields = {
     out.push(...fieldLines(s.lines));
   }
   if (!t.sections.length && title) out.push(`# ${title}`, "", intro ?? "");
-  const prefix = { "story-test-plan": "STP", "solution-design": "SD", "interaction-state-diagram": "ISD", wireframe: "WF", "screen-flow": "SF", "user-journey-map": "UJM" }[type] ?? "NONE";
+  const prefix = { "story-test-plan": "STP", "solution-design": "SD", "user-flow": "UF", "user-journey-map": "UJM" }[type] ?? "NONE";
   let text = `---\n${fm.join("\n")}\n---\n${t.head.trim() ? `\n${t.head.trim()}\n` : ""}\n${out.join("\n").replace(/\n{3,}/g, "\n\n").trim()}\n`
     .replace(new RegExp(`\\b${prefix}-XXX`, "g"), id);
-  // Other IDs the template names (depends_on: SF-XXX): the ones known, and the rest dropped from depends_on.
+  // Other IDs the template names (depends_on: UF-XXX): the ones known, and the rest dropped from depends_on.
   for (const [from, to] of Object.entries(refs)) if (to) text = text.replace(new RegExp(`\\b${from}\\b`, "g"), to);
   return text.replace(/^---\n[\s\S]*?\n---\n/, (f) => f.replace(/^[ \t]+-[ \t]+[A-Z]+-XXX\n/gm, "").replace(/^([ \t]+)depends_on:\n(?!\1[ \t])/m, ""));
 }
@@ -160,7 +163,7 @@ function typeInfo(refs, type) {
   const read = (f) => (base && existsSync(join(base, f)) ? readFileSync(join(base, f), "utf8") : null);
   const meta = read("meta.yml") ?? "";
   const location = (/^\s*location:\s*"?([^"\n]+)"?/m.exec(meta)?.[1] ?? "").trim();
-  return { template: read("template.md"), location: location || LOCATION[type] || null, base: `activities/${PHASE[type]}/artifacts/${type}`, proposed: refs === PROPOSED };
+  return { template: read("template.md"), location: location || LOCATION[type] || null, base: `activities/${PHASE[type]}/artifacts/${type}` };
 }
 
 /* Every HELIX document of the flow: { path, rel, text, id, type, links }. */
@@ -204,19 +207,20 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
   const docs = documents(flowRoot, root);
   const screens = screensOf(bp);
   const journeys = (Array.isArray(bp.journeys) ? bp.journeys : []).filter((j) => j && typeof j === "object" && typeof j.id === "string");
-  const result = { marker: posix(relative(process.cwd(), marker)) || ".helix.yml", flow: flow?.id ?? null, helix: refs ? posix(relative(root, refs)) : null, proposals: [], disagreements: [], current: [], problems: [], drafts: [], uxTypes: { installed: [], missing: [] } };
+  const result = { marker: posix(relative(process.cwd(), marker)) || ".helix.yml", flow: flow?.id ?? null, helix: refs ? posix(relative(root, refs)) : null, proposals: [], disagreements: [], current: [], problems: [],
+    // Always empty since HELIX v0.20.0 defines the UX types; kept until packages/design/graph.mjs stops reading it.
+    drafts: [] };
   if (!refs) result.problems.push(`No installed HELIX templates (${INSTALLED.join(", ")}) under ${posix(relative(process.cwd(), root)) || "."}: new documents and sections are drafted without them.`);
 
   // Documents changed in memory, by path, so two sections of one document compose.
   const texts = new Map();
   const locate = (type, location, vars) => {
-    const rel = location.replace(/^docs\/helix\//, "").replace(/\{id\}/g, vars.number ?? "").replace(/\{(name|screen)\}/g, vars.slug ?? "");
+    const rel = location.replace(/^docs\/helix\//, "").replace(/\{(id|n)\}/g, vars.number ?? "").replace(/\{(name|screen|feature)\}/g, vars.slug ?? "").replace(/\{nn\}/g, vars.nn ?? "").replace(/\{view\}/g, vars.view ?? "");
     return join(flowRoot, rel);
   };
 
   /* Sections of one document: draft them, leave them, or report them. One
-     proposal per document; a type HELIX does not define (info.proposed) is
-     held as a draft instead of a patch. */
+     proposal per document. */
   const apply = ({ id, kind, doc, create, type, parts, info = typeInfo(refs, type), intro }) => {
     let path, before, isNew = false;
     if (doc) { path = doc.path; before = texts.get(path) ?? doc.text; }
@@ -225,16 +229,16 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
       path = locate(type, info.location, create);
       isNew = !texts.has(path);
       if (!info.template) result.problems.push(`HELIX has no template for the ${type} type (${info.base}/template.md): ${posix(relative(root, path))} is drafted from the blueprint alone.`);
-      before = texts.get(path) ?? draft(info.template, { ...create, type, intro: intro ?? `> Drafted by \`ux-builder-blueprint propose\` from the blueprint${info.proposed ? ` and ux-builder's proposed ${type} template (docs/proposals/helix-ux-artifact-types)` : version ? ` and HELIX ${version}'s template` : ""}. A person reviews and applies it.` });
+      before = texts.get(path) ?? draft(info.template, { ...create, type, intro: intro ?? `> Drafted by \`ux-builder-blueprint propose\` from the blueprint${info.template && version ? ` and HELIX ${version}'s template` : ""}. A person reviews and applies it.` });
     }
     const rel = posix(relative(root, path));
     const lines = before.replace(/\n$/, "").split("\n");
     const tmpl = info.template ? info.template.split("\n") : null;
     const changed = [];
-    for (const { heading, level = 2, anchor, inside = false, text } of parts) {
-      const tsec = tmpl && find(tmpl, heading);
+    for (const { heading, level = 2, anchor, before: ahead, inside = false, top = false, text } of parts) {
+      const tsec = tmpl && find(tmpl, heading, top);
       const templateBody = tsec ? body(tmpl, tsec) : null;
-      const found = find(lines, heading);
+      const found = find(lines, heading, top);
       const block = text.trim();
       if (found) {
         const have = body(lines, found);
@@ -242,11 +246,12 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
         if (!unwritten(have, templateBody)) { result.disagreements.push({ id, kind, path: rel, section: heading, helix: have, blueprint: block }); continue; }
         lines.splice(found.start, found.end - found.start, "", block, "");
       } else {
-        // Heading merge: under (or after) the anchor the template places it by; else at the end, and say so.
-        const a = anchor && find(lines, anchor);
-        const at = a ? a.end : lines.length;
-        const lvl = a ? (inside ? a.level + 1 : a.level) : level;
-        if (anchor && !a && !(tmpl && find(tmpl, anchor))) result.problems.push(`HELIX's ${type} template has no "${anchor}" section: "${heading}" is drafted at the end of ${rel}.`);
+        // Heading merge: before the section, or under (or after) the anchor, the template places it by; else at the end, and say so.
+        const b = ahead && find(lines, ahead);
+        const a = !b && anchor && find(lines, anchor);
+        const at = b ? b.index : a ? a.end : lines.length;
+        const lvl = b ? b.level : a ? (inside ? a.level + 1 : a.level) : level;
+        for (const x of [ahead, anchor]) if (x && !b && !a && !(tmpl && find(tmpl, x))) { result.problems.push(`HELIX's ${type} template has no "${x}" section: "${heading}" is drafted at the end of ${rel}.`); break; }
         lines.splice(at, 0, ...(at > 0 && lines[at - 1].trim() ? [""] : []), `${"#".repeat(lvl)} ${heading}`, "", block, "");
       }
       changed.push(heading);
@@ -254,12 +259,11 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
     if (!changed.length) return;
     const after = lines.join("\n").replace(/\n{3,}/g, "\n\n").replace(/\n*$/, "\n");
     texts.set(path, after);
-    if (info.proposed) { result.drafts.push({ id, kind, type, path: rel, sections: changed, text: after }); return; }
     const original = doc ? doc.text : null;
     result.proposals.push({ id, kind, path: rel, section: changed.join(", "), target: doc ? { kind: "existing", id: doc.id, type: doc.type } : { kind: "new", id: create.id, type }, isNew, original, after });
   };
   /* One section of one document. */
-  const section = ({ heading, level, anchor, inside, text, ...rest }) => apply({ ...rest, parts: [{ heading, level, anchor, inside, text }] });
+  const section = ({ heading, level, anchor, before, inside, text, ...rest }) => apply({ ...rest, parts: [{ heading, level, anchor, before, inside, text }] });
 
   const stories = new Map(docs.filter((d) => isType(d, "user-stories") && /^US-\d+$/.test(d.id ?? "")).map((d) => [d.id, d]));
   const journeysOf = (story) => journeys.filter((j) => j.story === story);
@@ -273,12 +277,13 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
   }
 
   // 2. The flowchart, in the solution design of the stories' feature (US-089-AC2).
-  const features = [...new Set(storyIds.flatMap((sid) => {
+  const featuresOf = (sid) => {
     const s = stories.get(sid);
     if (!s) return [];
     const line = /^\*\*Feature\*\*:\s*\[{0,2}(FEAT-\d+)/m.exec(s.text)?.[1];
     return [...s.links.filter((l) => /^FEAT-\d+$/.test(l)), ...(line ? [line] : [])];
-  }))];
+  };
+  const features = [...new Set(storyIds.flatMap(featuresOf))];
   const governs = (d, f) => d.links.includes(f) || new RegExp(`^\\*\\*Feature\\*\\*:.*\\b${f}\\b`, "m").test(d.text);
   const governing = () => features.find((f) => docs.some((d) => isType(d, "solution-design") && governs(d, f))) ?? features[0] ?? null;
   const hasActions = [...screens.values()].some(({ s, modals }) => Array.isArray(s.actions) || [...modals.values()].some((m) => Array.isArray(m.actions)));
@@ -300,11 +305,14 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
     }
   }
 
-  // 4. DESIGN.md's navigation table (US-089-AC3).
+  // 4. DESIGN.md's navigation table (US-089-AC3), and its modalities, size classes and app frame (ADR-041, ADR-042).
+  const design = docs.find((d) => isType(d, "design-system") || d.id === "design-system");
+  const designCreate = { id: "design-system", links: [["informed_by", "prd"]], title: `DESIGN.md — ${bp.name ?? "App"}` };
   if (bp.kind !== "view" && Array.isArray(bp.destinations) && bp.destinations.length) {
-    const design = docs.find((d) => isType(d, "design-system") || d.id === "design-system");
-    section({ id: "design-system-navigation", kind: "navigation", doc: design, heading: "Destinations by Size Class", anchor: "Navigation and Active State", inside: true, text: navTable(bp), type: "design-system",
-      create: { id: "design-system", links: [["informed_by", "prd"]], title: `DESIGN.md — ${bp.name ?? "App"}` } });
+    section({ id: "design-system-navigation", kind: "navigation", doc: design, heading: "Destinations by Size Class", anchor: "Navigation and Active State", inside: true, text: navTable(bp), type: "design-system", create: designCreate });
+  }
+  if (design || result.proposals.some((p) => p.kind === "navigation")) {
+    section({ id: "design-system-modalities", kind: "modalities", doc: design, heading: "Modalities, Size Classes and App Frame", before: "Navigation and Active State", text: modalitySection(bp), type: "design-system", create: designCreate });
   }
 
   // 5. Each story's test plan scenarios, from its journeys (US-089-AC4).
@@ -322,8 +330,8 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
         fields: { "User Story": `[[${story.rel.split("/").pop().replace(/\.md$/, "")}]]`, ...(sdRef ? { "Related Solution Design": `[[${sdRef}]]` } : {}) } } });
   }
 
-  // 6. HELIX's UX types (US-104-AC3): patches where HELIX defines the type, drafts where it does not.
-  uxTypes({ bp, docs, refs, screens, journeys, stories, feature: governing(), result, apply });
+  // 6. HELIX's UX types (US-104-AC3): user flows, their wireframes and the journey maps.
+  uxTypes({ bp, docs, refs, screens, journeys, stories, features, featuresOf, feature: governing(), result, apply });
 
   // The patches, each from the document as HELIX has it (or nothing) to the document with this section.
   // Two sections of one document: the second patch is against the first's result, and both are listed.
@@ -341,86 +349,98 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
 
 /* --------------------------------------------------- HELIX's UX types */
 
-const pad = (n) => String(n).padStart(3, "0");
+const pad = (n, w = 3) => String(n).padStart(w, "0");
 const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const slug = (s) => String(s ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "app";
+const FLOW_RULES = new Set(["flow.reachable", "flow.no-dead-end", "flow.target-exists"]);
 
-/* The UX documents (US-104-AC3): an interaction-state-diagram and a
-   wireframe per screen (one number for both), a screen-flow for the
-   governing feature and a user-journey-map per journey. A document HELIX
-   already has for the screen, feature or journey is updated; a new one takes
-   the next free number. */
-function uxTypes({ bp, docs, refs, screens, journeys, stories, feature, result, apply }) {
-  const info = {};
-  for (const type of Object.keys(UX_TYPES)) {
-    const own = typeInfo(refs, type);
-    if (own.template) { info[type] = own; result.uxTypes.installed.push(type); }
-    else { info[type] = typeInfo(PROPOSED, type); result.uxTypes.missing.push(type); }
-  }
-  const missing = result.uxTypes.missing;
-  if (missing.length) result.problems.push(`The installed HELIX${refs ? "" : " (none found)"} does not define ${missing.join(", ")}: those documents are drafts in the output's drafts/ (at the path HELIX would give them), from ux-builder's proposed templates (docs/proposals/helix-ux-artifact-types), not patches.`);
-
-  const ofType = (type) => (info[type].proposed ? [] : docs.filter((d) => d.type === type));
-  const used = (types) => new Set(types.flatMap((t) => ofType(t)).map((d) => Number(numberOf(d.id))).filter((n) => n > 0));
-  const next = (taken) => { let n = 1; while (taken.has(n)) n++; taken.add(n); return n; };
+/* The UX documents (US-104-AC3; ADR-042 decision 2): a user-flow per
+   feature (UF-<FEAT number>), a wireframe per screen of its flow
+   (UF-<n>-<nn>-<view>, the view number the next free one in the flow's
+   folder, kept once given) and a user-journey-map per journey. A screen
+   belongs to the first feature of the stories it serves or its journeys
+   visit, else to the governing feature. A document HELIX already has for
+   the feature, screen or journey is updated; a new one is drafted. */
+function uxTypes({ bp, docs, refs, screens, journeys, stories, features, featuresOf, feature, result, apply }) {
+  const info = Object.fromEntries(["user-flow", "wireframe", "user-journey-map"].map((t) => [t, typeInfo(refs, t)]));
+  const isFlow = (d) => d.type === "user-flow" || (!d.type && /^UF-\d+$/.test(d.id ?? ""));
+  const isWireframe = (d) => d.type === "wireframe" || (!d.type && /^UF-\d+-\d{2}-/.test(d.id ?? ""));
   const storyTitle = (sid) => { const d = stories.get(sid); return d ? /^#\s+(?:US-\d+:\s*)?(.*)$/m.exec(d.text)?.[1] ?? sid : sid; };
+  const featTitle = (f) => { const d = f && docs.find((x) => x.id === f); return d ? /^#\s+(?:.*?—\s*)?(.*)$/m.exec(d.text)?.[1] ?? f : null; };
+  const strs = (x) => (Array.isArray(x) ? x.filter((y) => typeof y === "string") : []);
 
-  // The screen flow: one per feature, numbered as the feature.
-  const featNo = numberOf(feature);
-  const sfDoc = ofType("screen-flow").find((d) => (featNo && d.id === `SF-${featNo}`) || (feature && (d.links.includes(feature) || d.text.includes(`[[${feature}]]`))));
-  const sfId = sfDoc?.id ?? `SF-${featNo ?? pad(next(used(["screen-flow"])))}`;
-  const featDoc = feature && docs.find((d) => d.id === feature);
-  const sd = feature && docs.find((d) => isType(d, "solution-design") && d.links.includes(feature));
-
-  // One number per screen for its wireframe and its state diagram.
+  // Each screen's feature: its own stories', then the stories of the journeys that visit it.
+  const visits = new Map();
+  for (const j of journeys) for (const st of Array.isArray(j.steps) ? j.steps : []) if (typeof st?.screen === "string" && screens.has(st.screen)) visits.set(st.screen, [...(visits.get(st.screen) ?? []), j.story]);
+  const groups = new Map();
+  for (const [id, { s }] of screens) {
+    const f = [...strs(s.stories), ...strs(visits.get(id))].flatMap(featuresOf).find((x) => features.includes(x)) ?? feature;
+    if (!groups.has(f)) groups.set(f, []);
+    groups.get(f).push(id);
+  }
+  const order = [...features, null].filter((f) => groups.has(f)).concat([...groups.keys()].filter((f) => f && !features.includes(f)));
   const models = new Map(stateModels(bp).map((m) => [m.screen, m]));
-  const taken = used(["wireframe", "interaction-state-diagram"]);
-  const subject = (type, id) => ofType(type).find((d) => new RegExp(`^\\*\\*(Subject|Screen flow node)\\*\\*:.*\`${escRe(id)}\``, "m").test(d.text));
-  const numbers = new Map();
-  for (const id of screens.keys()) {
-    const have = subject("interaction-state-diagram", id) ?? subject("wireframe", id);
-    numbers.set(id, have ? numberOf(have.id) : null);
+  const findings = checkBlueprint(bp).filter((f) => FLOW_RULES.has(f.rule));
+  const screenAt = (path) => { const i = /^\/screens\/(\d+)/.exec(path ?? "")?.[1]; return i == null ? null : bp.screens?.[Number(i)]?.id ?? null; };
+  const flowNumbers = new Set(docs.filter(isFlow).map((d) => Number(numberOf(d.id))).filter((n) => n > 0));
+  const next = (taken) => { let n = 1; while (taken.has(n)) n++; taken.add(n); return n; };
+  const ujmIds = new Map();
+
+  for (const f of order) {
+    const ids = groups.get(f);
+    const own = new Set(ids);
+    const featNo = numberOf(f);
+    const ufDoc = docs.filter(isFlow).find((d) => (featNo && d.id === `UF-${featNo}`) || (f && (d.links.includes(f) || d.text.includes(`[[${f}]]`))));
+    if (!f && !ufDoc) result.problems.push(`No feature for ${ids.map((x) => `\`${x}\``).join(", ")}: the journeys name no HELIX story with a FEAT link, so their user flow takes the next free UF number.`);
+    const ufId = ufDoc?.id ?? `UF-${featNo ?? pad(next(flowNumbers))}`;
+    const n = ufId.slice(3);
+    const featDoc = f && docs.find((d) => d.id === f);
+    const folder = ufDoc ? ufDoc.rel.split("/").slice(-2, -1)[0].replace(/^UF-\d+-?/, "") : featDoc ? slugOf(featDoc.rel) : slug(bp.name);
+    const sd = f && docs.find((d) => isType(d, "solution-design") && d.links.includes(f));
+
+    // The flow's own blueprint: all of it for one flow, else its screens, destinations and journeys.
+    const sub = order.length === 1 ? bp : { ...bp, screens: (bp.screens ?? []).filter((x) => own.has(x?.id)), destinations: (bp.destinations ?? []).filter((d) => own.has(d?.screen)), journeys: journeys.filter((j) => strs((j.steps ?? []).map((st) => st?.screen)).some((x) => own.has(x))) };
+    const flowJourneys = order.length === 1 ? journeys : sub.journeys;
+    const flowStories = [...new Set([...ids.flatMap((id) => strs(screens.get(id).s.stories)), ...strs(flowJourneys.map((j) => j.story))])];
+
+    // The wireframes: one per screen, numbered in the flow's folder.
+    const wfDocs = docs.filter((d) => isWireframe(d) && (d.id ?? "").startsWith(`${ufId}-`));
+    const taken = new Set(wfDocs.map((d) => Number(/^UF-\d+-(\d{2})-/.exec(d.id)?.[1])).filter((x) => x > 0));
+    const subject = (id) => wfDocs.find((d) => new RegExp(`^\\*\\*User flow\\*\\*:.*view \`${escRe(id)}\``, "m").test(d.text) || d.id.endsWith(`-${slug(id)}`));
+    const wf = new Map();
+    for (const id of ids) { const have = subject(id); wf.set(id, { doc: have, id: have?.id ?? null }); }
+    for (const id of ids) if (!wf.get(id).id) wf.get(id).id = `${ufId}-${pad(next(taken), 2)}-${slug(id)}`;
+
+    // Its journeys' maps, by number.
+    const ujmTaken = new Set(docs.filter((d) => d.type === "user-journey-map" || /^UJM-\d+$/.test(d.id ?? "")).map((d) => Number(numberOf(d.id))).filter((x) => x > 0));
+    for (const j of flowJourneys) if (!ujmIds.has(j.id)) {
+      const have = docs.find((d) => (d.type === "user-journey-map" || /^UJM-\d+$/.test(d.id ?? "")) && new RegExp(`journey ${escRe(j.id)}\\b`).test(d.text));
+      ujmIds.set(j.id, { j, doc: have, id: have?.id ?? `UJM-${pad(next(ujmTaken))}`, f });
+    }
+    const maps = [...ujmIds.values()].filter((u) => u.f === f).map((u) => u.id);
+
+    const deadEnds = findings.filter((x) => { const sc = screenAt(x.path); return sc ? own.has(sc) : order.length === 1; }).map((x) => x.message);
+    apply({ id: `${ufId}-user-flow`, kind: "user-flow", type: "user-flow", doc: ufDoc, info: info["user-flow"],
+      create: { id: ufId, number: n, slug: folder, title: `${ufId}: ${featTitle(f) ?? bp.name ?? "App"} User Flow`, refs: { "FEAT-XXX": f, "US-XXX": flowStories[0], "SD-XXX": sd?.id, "UJM-XXX": maps[0] },
+        fields: { Feature: `${f ? `[[${f}]]` : "none"} | **Solution design**: ${sd ? `[[${sd.id}]]` : "none"} | **Journey maps**: ${maps.length ? maps.map((x) => `[[${x}]]`).join(", ") : "none"}` } },
+      parts: chain(userFlowSections(sub, { stories: flowStories, wireframes: new Map([...wf].map(([k, v]) => [k, v.id])), deadEnds })) });
+
+    for (const id of ids) {
+      const { doc, id: wfId } = wf.get(id);
+      const screen = screens.get(id), m = models.get(id);
+      const mine = strs(screen.s.stories);
+      apply({ id: `${wfId}-wireframe`, kind: "wireframe", type: "wireframe", doc, info: info.wireframe,
+        create: { id: wfId, number: n, slug: folder, nn: wfId.slice(ufId.length + 1, ufId.length + 3), view: slug(id), title: `${wfId}: ${m.title}`, refs: { "UF-XXX-NN-view-name": wfId, "UF-XXX": ufId, "US-XXX": mine[0] },
+          fields: { "User flow": `[[${ufId}]] view \`${id}\` | **Stories**: ${mine.length ? mine.map((x) => `[[${x}]]`).join(", ") : "none"}` } },
+        parts: chain(wireframeSections(m, { bp, screen, id: wfId })) });
+    }
   }
-  for (const id of screens.keys()) if (!numbers.get(id)) numbers.set(id, pad(next(taken)));
 
-  const allStories = [...new Set([...screens.values()].flatMap(({ s }) => (Array.isArray(s.stories) ? s.stories : [])).concat(journeys.map((j) => j.story)).filter((x) => typeof x === "string"))];
-  for (const [id, screen] of screens) {
-    const n = numbers.get(id), m = models.get(id);
-    const isd = `ISD-${n}`, wf = `WF-${n}`;
-    const own = Array.isArray(screen.s.stories) ? screen.s.stories.filter((x) => typeof x === "string") : [];
-    const storiesLine = own.length ? own.map((x) => `[[${x}]]`).join(", ") : "none";
-    const isdDoc = subject("interaction-state-diagram", id);
-    apply({ id: `${isdDoc?.id ?? isd}-states`, kind: "state-diagram", type: "interaction-state-diagram", doc: isdDoc, info: info["interaction-state-diagram"],
-      create: { id: isd, number: n, slug: slug(id), title: `${isd}: ${m.title} States`, refs: { "SF-XXX": sfId, "WF-XXX": wf, "US-XXX": own[0] },
-        fields: { Subject: `\`${id}\` in [[${sfId}]] | **Wireframe**: [[${wf}]] | **Stories**: ${storiesLine}` } },
-      parts: chain(stateDiagramSections(m, { screen, wf, sf: sfId })) });
-    const wfDoc = subject("wireframe", id);
-    apply({ id: `${wfDoc?.id ?? wf}-wireframe`, kind: "wireframe", type: "wireframe", doc: wfDoc, info: info.wireframe,
-      create: { id: wf, number: n, slug: slug(id), title: `${wf}: ${m.title}`, refs: { "SF-XXX": sfId, "ISD-XXX": isd, "US-XXX": own[0] },
-        fields: { "Screen flow node": `[[${sfId}]] \`${id}\` | **Stories**: ${storiesLine} | **State diagram**: [[${isd}]]` } },
-      parts: chain(wireframeSections(m, { bp, screen, id: wf, isd })) });
-  }
-
-  const ujmTaken = used(["user-journey-map"]);
-  const ujms = journeys.map((j) => {
-    const have = ofType("user-journey-map").find((d) => new RegExp(`journey ${escRe(j.id)}\\b`).test(d.text));
-    return { j, doc: have, id: have?.id ?? null };
-  });
-  for (const u of ujms) if (!u.id) u.id = `UJM-${pad(next(ujmTaken))}`;
-
-  if (featNo || screens.size) {
-    apply({ id: `${sfId}-screen-flow`, kind: "screen-flow", type: "screen-flow", doc: sfDoc, info: info["screen-flow"],
-      create: { id: sfId, number: sfId.slice(3), slug: featDoc ? slugOf(featDoc.rel) : slug(bp.name), title: `${sfId}: ${featDoc ? /^#\s+(?:.*?—\s*)?(.*)$/m.exec(featDoc.text)?.[1] ?? feature : bp.name ?? "App"} Screen Flow`,
-        refs: { "FEAT-XXX": feature, "US-XXX": allStories[0] },
-        fields: { Feature: `${feature ? `[[${feature}]]` : "none"} | **Solution design**: ${sd ? `[[${sd.id}]]` : "none"} | **Journey maps**: ${ujms.length ? ujms.map((u) => `[[${u.id}]]`).join(", ") : "none"}` } },
-      parts: chain(screenFlowSections(bp, { stories: allStories })) });
-  }
-
-  for (const { j, doc, id } of ujms) {
+  for (const { j, doc, id, f } of ujmIds.values()) {
     const sid = typeof j.story === "string" ? j.story : null;
     apply({ id: `${id}-journey-map`, kind: "journey-map", type: "user-journey-map", doc, info: info["user-journey-map"],
-      create: { id, number: id.slice(4), slug: slug(sid && stories.get(sid) ? storyTitle(sid) : j.id), title: `${id}: ${sid ? storyTitle(sid) : j.id}`, refs: { "FEAT-XXX": feature, "US-XXX": sid, "SF-XXX": sfId },
-        fields: { Feature: `${feature ? `[[${feature}]]` : "none"} | **Map kind**: future-state | **Evidence**: assumption-based (from blueprint journey ${j.id})` } },
+      create: { id, number: id.slice(4), slug: slug(sid && stories.get(sid) ? storyTitle(sid) : j.id), title: `${id}: ${sid ? storyTitle(sid) : j.id}`, refs: { "FEAT-XXX": f, "US-XXX": sid },
+        fields: { Feature: `${f ? `[[${f}]]` : "none"} | **Map kind**: future-state | **Evidence**: assumption-based (from blueprint journey ${j.id})` } },
       parts: chain(journeyMapSections(bp, j)) });
   }
 }
@@ -439,16 +459,6 @@ export function report(r) {
   if (!r.disagreements.length) out.push("None.", "");
   for (const d of r.disagreements) out.push(`### ${d.path} — ${d.section}`, "", "No patch: the section already says something else. HELIX governs; change the blueprint, or the document, so they agree.", "", "HELIX says:", "", "````markdown", d.helix, "````", "", "The blueprint gives:", "", "````markdown", d.blueprint, "````", "");
   if (r.current.length) { out.push("## Already current", ""); for (const c of r.current) out.push(`- ${c.path}, *${c.section}*`); out.push(""); }
-  if (r.uxTypes) {
-    out.push("## HELIX UX types", "");
-    out.push(`- Defined by the installed HELIX (patches above): ${r.uxTypes.installed.length ? r.uxTypes.installed.join(", ") : "none"}`);
-    out.push(`- Missing from it (drafts below, not patches): ${r.uxTypes.missing.length ? r.uxTypes.missing.join(", ") : "none"}`, "");
-    if (r.drafts?.length) {
-      out.push("### Drafts", "", "Shaped after ux-builder's proposed templates (docs/proposals/helix-ux-artifact-types). Once HELIX defines the type, run propose again to get patches; until then, copy a draft to its path if the team keeps it.", "");
-      for (const d of r.drafts) out.push(`- \`drafts/${d.path}\` — ${d.type}`);
-      out.push("");
-    }
-  }
   out.push("## Problems", "");
   if (!r.problems.length) out.push("None.", "");
   for (const p of r.problems) out.push(`- ${p}`);
@@ -460,17 +470,12 @@ export function report(r) {
 export function writeProposals(r, dir) {
   mkdirSync(dir, { recursive: true });
   for (const f of readdirSync(dir)) if (f.endsWith(".patch")) rmSync(join(dir, f));
+  // An earlier ux-builder's drafts/ (before HELIX v0.20.0 defined the UX types) goes too.
   rmSync(join(dir, "drafts"), { recursive: true, force: true });
   const files = [];
   for (const p of r.proposals) { writeFileSync(join(dir, p.file), p.patch); files.push(p.file); }
-  for (const d of r.drafts ?? []) {
-    const to = join(dir, "drafts", ...d.path.split("/"));
-    mkdirSync(dirname(to), { recursive: true });
-    writeFileSync(to, d.text);
-    files.push(`drafts/${d.path}`);
-  }
   writeFileSync(join(dir, "report.md"), report(r));
   const { marker, ...rest } = r;
-  writeFileSync(join(dir, "proposals.json"), JSON.stringify({ ...rest, proposals: r.proposals.map(({ patch, ...p }) => p), drafts: (r.drafts ?? []).map(({ text, ...d }) => ({ ...d, file: `drafts/${d.path}` })) }, null, 2) + "\n");
+  writeFileSync(join(dir, "proposals.json"), JSON.stringify({ ...rest, proposals: r.proposals.map(({ patch, ...p }) => p) }, null, 2) + "\n");
   return [...files, "report.md", "proposals.json"];
 }

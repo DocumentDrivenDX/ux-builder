@@ -1,0 +1,147 @@
+# Metadata for Design System (DESIGN.md)
+
+artifact:
+  name: Design System
+  id: design-system
+  type: document
+  activity: design
+  level: project
+
+voice: artifact-signal
+
+description: |
+  The per-project interface-system instance: the concrete UX/design-system
+  decisions this app commits to. It captures the navigation model and
+  active-state convention, the visual hierarchy, the applicable interaction
+  states, and the design tokens (color / spacing / type). It is the
+  app-specific instance of the interface-quality guidelines the `ux-interaction-patterns`
+  concern prescribes — NOT a mirror or copy of the concern library. One
+  DESIGN.md per project, like the architecture document.
+
+output:
+  location: docs/helix/02-design/DESIGN.md
+  format: markdown
+  naming: DESIGN.md
+
+validation:
+  required_sections:
+    - navigation_and_active_state
+    - visual_hierarchy
+    - interaction_states
+    - tokens
+    - non_goals
+
+  quality_checks:
+    - check: active_state_convention_defined
+      description: The navigation section names the active-state convention AND requires aria-current="page" where page navigation exists, or explains its absence
+      severity: blocking
+
+    - check: applicable_states_only
+      description: Interaction states are scoped where-applicable (hover/focus-visible for enabled controls, disabled where it exists, loading for async, empty/error for data/form/content) — not a demand that every element carry every state
+      severity: warning
+
+    - check: tokens_concrete
+      description: Tokens name concrete local values or versioned external role-token references, not placeholders
+      severity: blocking
+
+    - check: non_goals_present
+      description: The non-goals section explicitly excludes runtime architecture, data flow, component implementation internals, and ADR material
+      severity: blocking
+
+    - check: review_navigation_section_names_the_active_01
+      description: >-
+        Navigation section names the active-state convention AND requires `aria-current="page"` where page navigation exists, or explains its absence
+      severity: warning
+    - check: review_active_visual_cue_derived_bound
+      description: >-
+        Active visual cue is derived from / bound to the active state, not a free-floating style
+      severity: warning
+    - check: review_interaction_states_scoped_where_applicable
+      description: >-
+        Interaction states are scoped where-applicable, not demanded universally
+      severity: warning
+    - check: review_visual_hierarchy_concrete_enough_build
+      description: >-
+        Visual hierarchy is concrete enough to build against
+      severity: warning
+    - check: review_tokens_name_real_values_palette
+      description: >-
+        Tokens name local values or versioned external role-token references
+      severity: warning
+    - check: review_non_goals_section_keeps_architecture
+      description: >-
+        Non-goals section keeps architecture, data flow, component internals, and ADR material out of this document
+      severity: warning
+    - check: review_reads_as_app_s_instance
+      description: >-
+        Reads as this app's instance of the guidelines, not a copy of the `ux-interaction-patterns` concern library
+      severity: warning
+
+  pattern_checks:
+    - pattern: 'aria-current|Page navigation: not-applicable;[^\n]*\S'
+      expected: ">=1"
+      message: >-
+        State the active-nav semantic requirement or Page navigation: not-applicable; with a concrete reason
+
+    - pattern: "\\[TBD\\]|\\[TODO\\]|\\[NEEDS CLARIFICATION"
+      expected: 0
+      message: Resolve uncertainty that materially affects the scoped work
+
+variables:
+  - name: app_name
+    description: Name of the application this design system governs
+    required: true
+
+  - name: navigation_model
+    description: The app's navigation shape — top nav, sidebar, tabs, or a combination
+    required: true
+
+prompts:
+  generation: prompt.md
+  review: |
+    Review this DESIGN.md for:
+    1. Whether the navigation section names a concrete active-state convention
+       AND requires aria-current="page" where page navigation exists, or explains its absence
+    2. Whether interaction states are scoped where-applicable, not universally
+    3. Whether the visual hierarchy is concrete enough to build against
+    4. Whether tokens name local values or versioned external references, not placeholders
+    5. Whether the non-goals section keeps architecture, data flow, component
+       implementation internals, and ADR material OUT of this document
+    6. Whether it reads as this app's instance of the guidelines, not a copy of
+       the ux-interaction-patterns concern library
+
+template:
+  file: template.md
+  sections:
+    - navigation_and_active_state: "The navigation model and the active-state convention (visible active state + aria-current='page' on the active item)."
+    - visual_hierarchy: "How the interface ranks importance — layout, type scale, weight, spacing, and emphasis rules."
+    - interaction_states: "The interaction states this app uses, where applicable (hover/focus-visible, disabled, loading, empty/error)."
+    - tokens: "The design tokens — color palette, spacing scale, type scale — as concrete local values or versioned external references."
+    - non_goals: "What this document deliberately does NOT cover (architecture, data flow, component internals, ADRs)."
+
+example:
+  file: example.md
+
+relationships:
+  informed_by:
+    - prd
+    - feature-specification
+
+  informs:
+    - solution-design
+    - technical-design
+    - story-test-plan
+    - wireframe
+
+  references:
+    - architecture
+
+tags:
+  - design
+  - design-system
+  - ux
+  - interface
+  - tokens
+
+version: 1.0.0
+last_updated: 2026-05-25

@@ -1,13 +1,14 @@
 /* HELIX content drafted from the blueprint, as proposals (FEAT-012 DRF-01,
    DRF-02; US-089; ADR-030; CONTRACT-004 Flows and journeys): the review
-   blueprint in a HELIX-governed app (test/helix-app.mjs) with HELIX
-   v0.18.0's templates installed.
+   blueprint in a HELIX-governed app (test/helix-app.mjs) with HELIX's
+   templates installed (v0.20.0's user-flow, wireframe, user-journey-map and
+   DESIGN.md).
 
      npm test --workspace @ux-builder/ui */
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { after, describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -105,6 +106,33 @@ describe("US-089: ux-builder-blueprint propose", () => {
     assert.ok(text.indexOf("## Navigation and Active State") < text.indexOf("### Destinations by Size Class") && text.indexOf("### Destinations by Size Class") < text.indexOf("## Visual Hierarchy"));
   });
 
+  // @covers US-089-AC3
+  test("AC3: a patch for DESIGN.md's Modalities, Size Classes and App Frame, from the blueprint's supports, before Navigation and Active State", () => {
+    const a = app();
+    const b = JSON.parse(readFileSync(a.blueprint, "utf8"));
+    b.supports = { ...b.supports, modalities: ["responsive-web", "hybrid-chat"], frame: "top-nav" };
+    writeFileSync(a.blueprint, JSON.stringify(b, null, 2));
+    const r = run(a);
+    assert.equal(r.status, 0, r.stderr);
+    const p = patch(a, "design-system-modalities.patch");
+    assert.match(p, /^--- a\/docs\/helix\/02-design\/DESIGN\.md$/m);
+    assert.deepEqual(added(p).filter((l) => l.startsWith("- ")), [
+      "- **Supported modalities**: screen, chat (responsive-web, hybrid-chat)",
+      "- **Size classes**: compact below 600 px, expanded from 840 px",
+      "- **App frame**: top-nav — The destinations across a top bar; a bottom bar on phones",
+    ]);
+    assert.match(r.stdout, /design-system-modalities\.patch {2}docs\/helix\/02-design\/DESIGN\.md \(Modalities, Size Classes and App Frame\)/);
+    assert.equal(apply(a, "design-system-navigation.patch").status, 0);
+    assert.equal(apply(a, "design-system-modalities.patch").status, 0, "applies after the navigation patch");
+    const text = readFileSync(join(a.dir, "docs/helix/02-design/DESIGN.md"), "utf8");
+    assert.ok(text.indexOf("# DESIGN.md") < text.indexOf("## Modalities, Size Classes and App Frame") && text.indexOf("## Modalities, Size Classes and App Frame") < text.indexOf("## Navigation and Active State"));
+    // Without a frame, the recommendation for the destinations, for the person to choose.
+    delete b.supports.frame;
+    writeFileSync(a.blueprint, JSON.stringify(b, null, 2));
+    const again = propose(b, { blueprintFile: a.blueprint });
+    assert.ok(again.disagreements.some((d) => d.section === "Modalities, Size Classes and App Frame" && /recommends top-nav/.test(d.blueprint)));
+  });
+
   // @covers US-089-AC4
   test("AC4: story test plan scenarios, one per step and per alternate, citing the criteria", () => {
     const a = app();
@@ -188,99 +216,112 @@ describe("US-089: ux-builder-blueprint propose", () => {
   });
 });
 
-const PROPOSED = fileURLToPath(new URL("../blueprint/helix-types/activities", import.meta.url));
-const PROPOSAL = fileURLToPath(new URL("../../../docs/proposals/helix-ux-artifact-types/activities", import.meta.url));
-const UX = { "interaction-state-diagram": "02-design", wireframe: "02-design", "screen-flow": "02-design", "user-journey-map": "01-frame" };
+const FLOW = "docs/helix/02-design/flows/UF-012-time-review";
 
 describe("US-104: HELIX's UX artifact types", () => {
   // @covers US-104-AC3
-  test("AC3: an installed HELIX that defines the UX types gets each drafted from its template, as a patch", () => {
+  test("AC3: HELIX's user-flow for the feature and a wireframe per view in its folder, each from its template, as patches", () => {
     const a = app();
-    // A HELIX that has the proposed types (docs/proposals/helix-ux-artifact-types) installed.
-    for (const [type, phase] of Object.entries(UX)) cpSync(join(PROPOSAL, phase, "artifacts", type), join(a.dir, ".claude/skills/helix/references/activities", phase, "artifacts", type), { recursive: true });
-    // One already written: the queue's state diagram, whose statechart says something else.
-    a.write("docs/helix/02-design/state-diagrams/ISD-007-queue.md", "---\nddx:\n  id: ISD-007\n  type: interaction-state-diagram\n---\n\n# ISD-007: Review queue States\n\n**Subject**: `queue` in [[SF-012]]\n\n## Statechart\n\n```mermaid\nstateDiagram-v2\n  [*] --> ideal\n```\n");
     const before = docs(a);
     const r = run(a);
     assert.equal(r.status, 0, r.stderr);
     assert.deepEqual(docs(a), before, "no HELIX document is written");
-    assert.doesNotMatch(r.stdout, /^missing/m);
+    assert.doesNotMatch(r.stdout, /^(missing|draft) /m, "no draft fallback");
     const files = readdirSync(join(a.dir, "helix-proposals"));
     assert.ok(!files.includes("drafts"));
-    for (const f of ["ISD-007-states.patch", "WF-007-wireframe.patch", "ISD-001-states.patch", "WF-001-wireframe.patch", "SF-012-screen-flow.patch", "UJM-001-journey-map.patch", "UJM-002-journey-map.patch"]) assert.ok(files.includes(f), f);
-    // The queue keeps its number (ISD-007, so WF-007); the next screen takes the first free one.
-    assert.match(r.stdout, /^patch {4}helix-proposals\/WF-007-wireframe\.patch {2}docs\/helix\/02-design\/wireframes\/WF-007-queue\.md/m);
+    assert.ok(!files.some((f) => /^(ISD|WF|SF)-/.test(f)), "none of ux-builder's own types");
+    assert.match(r.stdout, /^patch {4}helix-proposals\/UF-012-user-flow\.patch {2}docs\/helix\/02-design\/flows\/UF-012-time-review\/UF-012\.md \(Scope, Views, Flow Diagram, Transitions, Alternate Paths, Story Traceability, Dead Ends\)$/m);
 
-    // A new state diagram, from HELIX's template: every state, the statechart, the matrix and the transitions.
-    const isd = patch(a, "ISD-001-states.patch");
-    assert.match(isd, /^\+\+\+ b\/docs\/helix\/02-design\/state-diagrams\/ISD-001-entry\.md$/m);
-    const doc = added(isd).join("\n");
-    assert.match(doc, /^---\nddx:\n {2}id: ISD-001\n {2}type: interaction-state-diagram\n {2}status: draft\n {2}authoring:\n {4}home: repo\n {2}depends_on:\n {4}- SF-012\n {4}- WF-001\n---/);
-    assert.match(doc, /^# ISD-001: Entry States$/m);
-    assert.match(doc, /^\*\*Subject\*\*: `entry` in \[\[SF-012\]\] \| \*\*Wireframe\*\*: \[\[WF-001\]\] \| \*\*Stories\*\*: \[\[US-012\]\]$/m);
-    assert.match(doc, /## Statechart\n\n<!--[^\n]*-->\n```mermaid\nstateDiagram-v2\n {4}ideal\n {4}loading\n {4}empty\n {4}error\n/);
-    assert.match(doc, /## State Matrix\n\n<!--[^\n]*-->\n\| State \| Entered when \| User sees \| Available actions \| Announcement \| Exit \|/);
-    assert.match(doc, /\| error \| Try again \| — \| loading \| From the blueprint \(J-review alternate 2 step 1\) \|/);
-    assert.ok(!doc.includes("LOADED [items > 0]"), "the template's example statechart is replaced");
-    assert.match(doc, /## Timing\n\n- \*\*Slow threshold\*\*: \[When loading/, "a section the blueprint cannot fill stays the template's");
-    assert.equal(apply(a, "ISD-001-states.patch").status, 0);
+    // The user flow: numbered as the feature, from HELIX's template, with the authoring home HELIX's validator needs.
+    const uf = added(patch(a, "UF-012-user-flow.patch")).join("\n");
+    assert.match(uf, /^---\nddx:\n {2}id: UF-012\n {2}type: user-flow\n {2}status: draft\n {2}authoring:\n {4}home: repo\n {2}depends_on:\n {4}- FEAT-012\n {4}- US-012\n---/);
+    assert.match(uf, /^# UF-012: Time review User Flow$/m);
+    assert.match(uf, /^\*\*Feature\*\*: \[\[FEAT-012\]\] \| \*\*Solution design\*\*: \[\[SD-012\]\] \| \*\*Journey maps\*\*: \[\[UJM-001\]\], \[\[UJM-002\]\]$/m);
+    for (const h of ["## Scope", "## Views", "## Flow Diagram", "## Transitions", "## Alternate Paths", "## Story Traceability", "## Dead Ends"]) assert.ok(uf.includes(`\n${h}\n`), h);
+    assert.match(uf, /^\| Review queue \| screen \| WorkQueue \| US-012 \| \[\[UF-012-01-queue\]\] \|$/m);
+    assert.match(uf, /^\| Reject entry \| modal \| dialog over Entry \| — \| \[\[UF-012-02-entry\]\] \(its dialog\) \|$/m);
+    assert.match(uf, /^\| Approve \| Entry \| button \| none \| Review queue \| the view it opens \| full view \|$/m);
+    assert.match(uf, /^\| J-review \| — \| US-012-AC1, US-012-AC2 \| Open entry → Approve → Review queue \|$/m);
+    assert.match(uf, /## Dead Ends\n\n<!--[^\n]*-->\n- "Legacy report" is unreachable/);
+    assert.ok(!uf.includes("[Action]"), "the template's placeholder rows are replaced");
+    assert.equal(apply(a, "UF-012-user-flow.patch").status, 0);
 
-    // The one HELIX has: its statechart differs, so no patch for it, both texts in the report; its other sections are drafted.
-    assert.match(r.stdout, /^differs {2}docs\/helix\/02-design\/state-diagrams\/ISD-007-queue\.md \(Statechart\)/m);
-    const own = patch(a, "ISD-007-states.patch");
-    assert.match(own, /^--- a\/docs\/helix\/02-design\/state-diagrams\/ISD-007-queue\.md$/m);
-    assert.ok(added(own).includes("## State Matrix") && !added(own).includes("## Statechart"));
-    assert.equal(apply(a, "ISD-007-states.patch").status, 0);
+    // A wireframe per screen, nested under the flow: UF-<n>-<nn>-<view>, the state diagram in States and Events.
+    const ids = ["01-queue", "02-entry", "03-list", "04-form", "05-settings", "06-legacy"];
+    for (const id of ids) assert.match(r.stdout, new RegExp(`^patch {4}helix-proposals/UF-012-${id}-wireframe\\.patch {2}${FLOW}/UF-012-${id}\\.md \\(Scope and Fidelity, Layouts, States and Events, Accessibility, Open Questions\\)$`, "m"), id);
+    const wf = added(patch(a, "UF-012-02-entry-wireframe.patch")).join("\n");
+    assert.match(wf, /^---\nddx:\n {2}id: UF-012-02-entry\n {2}type: wireframe\n {2}status: draft\n {2}authoring:\n {4}home: repo\n {2}depends_on:\n {4}- UF-012\n {4}- US-012\n---/);
+    assert.match(wf, /^# UF-012-02-entry: Entry$/m);
+    assert.match(wf, /^\*\*User flow\*\*: \[\[UF-012\]\] view `entry` \| \*\*Stories\*\*: \[\[US-012\]\]$/m);
+    assert.match(wf, /^- \*\*Modality\*\*: screen$/m);
+    assert.match(wf, /^- \*\*Fidelity\*\*: mid$/m);
+    assert.match(wf, /### compact\n\n!\[UF-012-02-entry compact\]\(assets\/UF-012-02-entry-compact\.png\)/);
+    assert.match(wf, /### Annotations\n\n<!--[^\n]*-->\n\| Element \| Kind \| Annotation \| Size classes \| Links \|/);
+    assert.match(wf, /^\| Approve \| control \| The primary action: opens Review queue \| all \| transition "Approve" \|$/m);
+    assert.match(wf, /## States and Events\n\n### States\n\n<!--[^\n]*-->\n\| State \| Applies \| Entered when \| Person sees \| Available actions \| Announcement \| Exit \|/);
+    for (const st of ["ideal", "empty", "loading", "partial", "error", "offline", "slow", "permission-denied", "success"]) assert.match(wf, new RegExp(`^\\| ${st} \\| (yes|no: [^|]+) \\|`, "m"), st);
+    assert.match(wf, /### Statechart\n\n<!--[^\n]*-->\n```mermaid\nstateDiagram-v2\n {4}ideal\n {4}loading\n {4}empty\n {4}error\n/);
+    assert.match(wf, /### Events\n\n<!--[^\n]*-->\n\| Event \| From \| Guard \| To \| Effect \|/);
+    assert.match(wf, /^\| Try again \| error \| none \| loading \| From the blueprint \(J-review alternate 2 step 1\) \|$/m);
+    assert.ok(!wf.includes("LOADED [items > 0]") && !wf.includes("┌"), "the template's example statechart and box drawing are replaced");
+    for (const id of ids) assert.equal(apply(a, `UF-012-${id}-wireframe.patch`).status, 0, id);
 
-    // The wireframe, the screen flow and the journey map, each from its template.
-    const wf = added(patch(a, "WF-001-wireframe.patch")).join("\n");
-    assert.match(wf, /\*\*Fidelity\*\*: mid/);
-    assert.match(wf, /\| loading \| `entry\.loading\.compact\.png`, `entry\.loading\.expanded\.png` \| \[\[ISD-001\]\] \|/);
-    const sf = added(patch(a, "SF-012-screen-flow.patch")).join("\n");
-    assert.match(sf, /^# SF-012: Time review Screen Flow$/m);
-    assert.match(sf, /\| J-review \| US-012-AC1, US-012-AC2 \| T1 → T3 \| — \|/);
-    const ujm = added(patch(a, "UJM-001-journey-map.patch")).join("\n");
-    assert.match(ujm, /^# UJM-001: Review entries$/m);
-    assert.match(ujm, /\| 1\. Review queue \| On Review queue, the user chooses Open entry; Entry opens\. \|/);
-    for (const f of ["WF-001-wireframe.patch", "SF-012-screen-flow.patch", "UJM-001-journey-map.patch"]) assert.equal(apply(a, f).status, 0, f);
+    // Once applied, a second run finds them current; a new screen takes the next free view number.
+    const b = JSON.parse(readFileSync(a.blueprint, "utf8"));
+    b.screens.push({ id: "help", title: "Help", pattern: "RecordDetail", stories: ["US-012"], states: ["loading", "error"], actions: [{ id: "back", label: "Back", to: "back" }] });
+    const again = propose(b, { blueprintFile: a.blueprint });
+    assert.ok(!again.proposals.some((p) => /^UF-012-0[1-6]-/.test(p.id)), "the applied wireframes are current");
+    assert.ok(again.proposals.some((p) => p.id === "UF-012-07-help-wireframe" && p.path === `${FLOW}/UF-012-07-help.md`));
   });
 
   // @covers US-104-AC3
-  test("AC3: a HELIX without the UX types: propose names the missing types and writes the drafts under its output", () => {
+  test("AC3: a wireframe HELIX already has keeps its number, and a section it wrote differently is reported, not patched", () => {
     const a = app();
+    a.write(`${FLOW}/UF-012-04-queue.md`, "---\nddx:\n  id: UF-012-04-queue\n  type: wireframe\n  authoring:\n    home: repo\n---\n\n# UF-012-04-queue: Review queue\n\n**User flow**: [[UF-012]] view `queue`\n\n## States and Events\n\nThe queue is always ready.\n");
     const r = run(a);
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /^missing {2}interaction-state-diagram, wireframe, screen-flow, user-journey-map: not defined by the installed HELIX; drafted under helix-proposals\/drafts\/ instead of patched$/m);
-    assert.match(r.stdout, /^draft {4}helix-proposals\/drafts\/docs\/helix\/02-design\/state-diagrams\/ISD-001-queue\.md {2}\(interaction-state-diagram\)$/m);
+    assert.match(r.stdout, /^differs {2}docs\/helix\/02-design\/flows\/UF-012-time-review\/UF-012-04-queue\.md \(States and Events\)/m);
+    const own = patch(a, "UF-012-04-queue-wireframe.patch");
+    assert.match(own, /^--- a\/docs\/helix\/02-design\/flows\/UF-012-time-review\/UF-012-04-queue\.md$/m);
+    assert.ok(added(own).includes("## Layouts") && !added(own).includes("## States and Events"));
+    assert.equal(apply(a, "UF-012-04-queue-wireframe.patch").status, 0);
+    // The other screens skip the number taken.
     const files = readdirSync(join(a.dir, "helix-proposals"));
-    assert.ok(!files.some((f) => /^(ISD|WF|SF|UJM)-/.test(f)), "no patch for a type HELIX does not define");
-    const draft = (p) => readFileSync(join(a.dir, "helix-proposals/drafts", p), "utf8");
-    const isd = draft("docs/helix/02-design/state-diagrams/ISD-002-entry.md");
-    assert.match(isd, /^---\nddx:\n {2}id: ISD-002\n {2}type: interaction-state-diagram\n/);
-    assert.match(isd, /> Drafted by `ux-builder-blueprint propose` from the blueprint and ux-builder's proposed interaction-state-diagram template \(docs\/proposals\/helix-ux-artifact-types\)\./);
-    for (const h of ["## Scope", "## State Inventory", "## Statechart", "## State Matrix", "## Events and Transitions", "## Timing", "## Open Questions"]) assert.ok(isd.includes(`\n${h}\n`), h);
-    assert.match(draft("docs/helix/02-design/wireframes/WF-002-entry.md"), /^# WF-002: Entry$/m);
-    assert.match(draft("docs/helix/02-design/screen-flows/SF-012-time-review.md"), /^# SF-012: Time review Screen Flow$/m);
-    assert.match(draft("docs/helix/01-frame/journey-maps/UJM-002-add-an-entry.md"), /^# UJM-002: Add an entry$/m);
-    // A screen with no declared states: ideal only, and the missing states noted.
-    assert.match(draft("docs/helix/02-design/state-diagrams/ISD-005-settings.md"), /- "Settings" declares no states: the diagram has the ideal state only\. Missing: empty, loading, error\./);
-    const report = readFileSync(join(a.dir, "helix-proposals/report.md"), "utf8");
-    assert.match(report, /## HELIX UX types\n\n- Defined by the installed HELIX \(patches above\): none\n- Missing from it \(drafts below, not patches\): interaction-state-diagram, wireframe, screen-flow, user-journey-map/);
-    const json = JSON.parse(readFileSync(join(a.dir, "helix-proposals/proposals.json"), "utf8"));
-    assert.deepEqual(json.uxTypes.missing, Object.keys(UX));
-    assert.equal(json.drafts.length, 6 * 2 + 1 + 2);
-    // Drafts are deterministic, and a later run replaces them.
-    const first = tree(join(a.dir, "helix-proposals/drafts"));
-    assert.equal(run(a).status, 0);
-    const second = tree(join(a.dir, "helix-proposals/drafts"));
-    assert.deepEqual(Object.keys(second).sort(), Object.keys(first).sort());
-    for (const k of Object.keys(first)) assert.equal(second[k][1], first[k][1], k);
+    assert.deepEqual(files.filter((f) => /^UF-012-\d\d-/.test(f)).sort(), ["UF-012-01-entry-wireframe.patch", "UF-012-02-list-wireframe.patch", "UF-012-03-form-wireframe.patch", "UF-012-04-queue-wireframe.patch", "UF-012-05-settings-wireframe.patch", "UF-012-06-legacy-wireframe.patch"]);
+    assert.match(added(patch(a, "UF-012-user-flow.patch")).join("\n"), /^\| Review queue \| screen \| WorkQueue \| US-012 \| \[\[UF-012-04-queue\]\] \|$/m);
   });
 
-  test("the bundled UX templates are the proposal's (docs/proposals/helix-ux-artifact-types)", () => {
-    for (const [type, phase] of Object.entries(UX)) for (const f of ["template.md", "meta.yml"]) {
-      assert.equal(readFileSync(join(PROPOSED, phase, "artifacts", type, f), "utf8"), readFileSync(join(PROPOSAL, phase, "artifacts", type, f), "utf8"), `${type}/${f}`);
-    }
+  // @covers US-104-AC3
+  test("AC3: a user-journey-map per journey, from HELIX's template", () => {
+    const a = app();
+    assert.equal(run(a).status, 0);
+    const p = patch(a, "UJM-001-journey-map.patch");
+    assert.match(p, /^\+\+\+ b\/docs\/helix\/01-frame\/journey-maps\/UJM-001-review-entries\.md$/m);
+    const ujm = added(p).join("\n");
+    assert.match(ujm, /^# UJM-001: Review entries$/m);
+    assert.match(ujm, /^- \*\*Person\*\*: /m);
+    assert.match(ujm, /### Goals and Expectations\n/, "the template's subsection is kept");
+    assert.match(ujm, /\| 1\. Review queue \| On Review queue, the user chooses Open entry; Entry opens\. \|/);
+    assert.equal(apply(a, "UJM-001-journey-map.patch").status, 0);
+    assert.match(patch(a, "UJM-002-journey-map.patch"), /UJM-002-add-an-entry\.md/);
+  });
+
+  // @covers US-104-AC3
+  test("AC3: an installed HELIX without the UX types: the documents are still patches at HELIX's location, drafted from the blueprint alone, and the run says so", () => {
+    const a = app();
+    for (const t of ["02-design/artifacts/user-flow", "02-design/artifacts/wireframe", "01-frame/artifacts/user-journey-map"]) rmSync(join(a.dir, ".claude/skills/helix/references/activities", t), { recursive: true });
+    const r = run(a);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /^note {5}HELIX has no template for the user-flow type \(activities\/02-design\/artifacts\/user-flow\/template\.md\): docs\/helix\/02-design\/flows\/UF-012-time-review\/UF-012\.md is drafted from the blueprint alone\.$/m);
+    assert.match(r.stdout, /^note {5}HELIX has no template for the wireframe type/m);
+    assert.ok(!readdirSync(join(a.dir, "helix-proposals")).includes("drafts"));
+    const uf = added(patch(a, "UF-012-user-flow.patch")).join("\n");
+    assert.match(uf, /^---\nddx:\n {2}id: UF-012\n {2}type: user-flow\n {2}status: draft\n {2}authoring:\n {4}home: repo\n/);
+    for (const h of ["## Scope", "## Views", "## Dead Ends"]) assert.ok(uf.includes(`\n${h}\n`), h);
+    assert.equal(apply(a, "UF-012-user-flow.patch").status, 0);
+    assert.match(patch(a, "UF-012-05-settings-wireframe.patch"), /^\+\+\+ b\/docs\/helix\/02-design\/flows\/UF-012-time-review\/UF-012-05-settings\.md$/m);
+    // A screen with no declared states: ideal only, and the missing states noted.
+    assert.match(added(patch(a, "UF-012-05-settings-wireframe.patch")).join("\n"), /- "Settings" declares no states: the diagram has the ideal state only\. Missing: empty, loading, error\./);
   });
 });
 

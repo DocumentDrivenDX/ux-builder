@@ -8,21 +8,59 @@
    to its report.html), the latest run's journeys step by step with their
    screenshots, and the @ux-builder versions that wrote each.
 
+   Run output stays out of the repository (ADR-042 decision 6): every
+   assessment run and every folder under docs/ux-builder/runs/ (a study's
+   material, an insight export, evaluation results) is listed by its path
+   and modified date and linked; nothing in them is copied into the page.
+
      landingPage(app)       { path, html, reports }: reads, writes nothing
      writeLandingPage(app)  writes it; returns the same
      appOfReport(dir)       the app a report directory belongs to, or null */
 
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, relative, resolve, sep } from "node:path";
-import { reportsOf } from "@ux-builder/ui/blueprint/paths";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { CURRENT, LEGACY, reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 export const WHAT = {
   audit: "UI audit: the running app in every theme, against the rules.",
   assessment: "Usability assessment: each journey from your user stories, walked step by step.",
+  runs: "Other runs: studies' material and results, insight exports and evaluation results, kept out of the repository and listed here by path.",
 };
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const read = (f) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return null; } };
 const href = (from, to) => relative(from, to).split(sep).join("/");
+const rel = (app, p) => relative(app, p).split(sep).join("/");
+
+/* The newest modification time under a path, as an ISO date. */
+function modified(p) {
+  let t = 0;
+  const visit = (q, depth) => {
+    let s;
+    try { s = statSync(q); } catch { return; }
+    if (s.isDirectory()) { if (depth < 6) for (const n of readdirSync(q)) visit(join(q, n), depth + 1); if (!t) t = s.mtimeMs; } else t = Math.max(t, s.mtimeMs);
+  };
+  visit(p, 0);
+  return t ? new Date(t).toISOString() : null;
+}
+
+/* The run folder (ADR-042 decision 6): docs/ux-builder/runs/ on the current layout. */
+const runsDirOf = (app) => resolve(app, (reportsOf(app).layout === "legacy" ? LEGACY : CURRENT).runs ?? "docs/ux-builder/runs");
+
+/* Every entry two levels under the run folder (runs/<kind>/<name>), by path:
+   { kind, name, path, date, link }. Nothing is read from inside them. */
+function otherRuns(app, page) {
+  const root = runsDirOf(app), out = [];
+  const list = (d) => { try { return readdirSync(d, { withFileTypes: true }).filter((e) => !e.name.startsWith(".")); } catch { return []; } };
+  for (const k of list(root)) {
+    const kindDir = join(root, k.name);
+    if (!k.isDirectory()) { out.push({ kind: null, name: k.name, path: rel(app, kindDir), date: modified(kindDir), link: href(dirname(page), kindDir) }); continue; }
+    for (const e of list(kindDir)) {
+      const p = join(kindDir, e.name);
+      out.push({ kind: k.name, name: e.name, path: rel(app, p) + (e.isDirectory() ? "/" : ""), date: modified(p), link: href(dirname(page), p) + (e.isDirectory() ? "/" : "") });
+    }
+  }
+  return out.sort((a, b) => String(a.kind ?? "").localeCompare(String(b.kind ?? "")) || String(b.date ?? "").localeCompare(String(a.date ?? "")) || a.name.localeCompare(b.name));
+}
 
 /* Where the landing page goes: beside the design, or at an old app's top. */
 export const landingPath = (app) => join(app, reportsOf(app).layout === "legacy" ? "reports.html" : "docs/ux-builder/reports.html");
@@ -68,8 +106,9 @@ function auditOf(app, page) {
 }
 
 function runOf(app, dir, page) {
+  const path = `${rel(app, dir)}/`;
   const run = read(join(dir, "run.json"));
-  if (!run) return null;
+  if (!run) return { kind: "assessment", what: WHAT.assessment, id: basename(dir), path, date: modified(dir), journeys: [], findings: 0, link: href(dirname(page), dir) + "/", versions: {} };
   const walk = read(join(dir, "walkthrough.json"));
   const backlog = read(join(dir, "backlog.json"));
   const report = ["report.html", "video/index.html"].find((f) => existsSync(join(dir, f)));
@@ -81,7 +120,7 @@ function runOf(app, dir, page) {
     }),
   }));
   return {
-    kind: "assessment", what: WHAT.assessment, id: run.id, date: run.startedAt ?? null,
+    kind: "assessment", what: WHAT.assessment, id: run.id, path, date: run.startedAt ?? null,
     journeys: journeys.length ? journeys : (run.config?.journeys ?? []).map((id) => ({ id, steps: [] })),
     findings: backlog?.findings?.length ?? 0,
     link: report ? href(dirname(page), join(dir, report)) : null,
@@ -89,16 +128,16 @@ function runOf(app, dir, page) {
   };
 }
 
-/* The landing page: { path, html, reports: { audit, assessments } }. */
+/* The landing page: { path, html, reports: { audit, assessments, runs } }. */
 export function landingPage(app = process.cwd()) {
   app = resolve(app);
   const path = landingPath(app);
   const runsDir = resolve(app, reportsOf(app).assessments);
   let names = [];
   try { names = readdirSync(runsDir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name); } catch { /* no runs yet */ }
-  const assessments = names.map((n) => runOf(app, join(runsDir, n), path)).filter(Boolean)
+  const assessments = names.filter((n) => /^R-/.test(n) || existsSync(join(runsDir, n, "run.json"))).map((n) => runOf(app, join(runsDir, n), path)).filter(Boolean)
     .sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")) || String(b.id).localeCompare(String(a.id)));
-  const reports = { audit: auditOf(app, path), assessments };
+  const reports = { audit: auditOf(app, path), assessments, runs: otherRuns(app, path) };
   return { path, html: html(app, reports), reports };
 }
 
@@ -119,14 +158,18 @@ const when = (d) => (d ? esc(new Date(d).toISOString().replace("T", " ").replace
 const by = (v) => (Object.keys(v).length ? `Written by ${Object.entries(v).map(([k, x]) => `<code>${esc(k)} ${esc(x)}</code>`).join(", ")}` : "Versions not recorded");
 const stepCount = (r) => r.journeys.reduce((n, j) => n + j.steps.length, 0);
 
-function html(app, { audit, assessments }) {
+function html(app, { audit, assessments, runs }) {
   const latest = assessments[0];
   const auditHtml = audit
     ? `<p><b>Latest:</b> ${when(audit.date)} · ${audit.themes} theme${audit.themes === 1 ? "" : "s"} · checks <span class="pass">${audit.checks.pass} pass</span>, <span class="warn">${audit.checks.warn} warn</span>, <span class="fail">${audit.checks.fail} fail</span> (${audit.findings.error} errors, ${audit.findings.warning} warnings) · ${audit.link ? `<a href="${esc(audit.link)}">open the UI audit</a>` : "no index.html"}</p><p class="meta">${by(audit.versions)}</p>`
     : `<p class="meta">No UI audit yet: run <code>npx ux-builder-audit --blueprint ${esc(reportsOf(app).layout === "legacy" ? "app.blueprint.json" : "docs/ux-builder/blueprint/app.blueprint.json")} &lt;url&gt;</code>.</p>`;
   const runsHtml = assessments.length
-    ? `<table><thead><tr><th>Run</th><th>Journeys</th><th class="n">Steps</th><th class="n">Findings</th><th>Report</th></tr></thead><tbody>${assessments.map((r) => `<tr><td><code>${esc(r.id)}</code><br><span class="meta">${when(r.date)}</span></td><td>${r.journeys.map((j) => `<code>${esc(j.id)}</code> (${j.steps.length} step${j.steps.length === 1 ? "" : "s"})`).join(", ") || "none walked"}</td><td class="n">${stepCount(r)}</td><td class="n">${r.findings}</td><td>${r.link ? `<a href="${esc(r.link)}">open</a>` : "not written yet"}<br><span class="meta">${by(r.versions)}</span></td></tr>`).join("")}</tbody></table>`
+    ? `<table><thead><tr><th>Run</th><th>Journeys</th><th class="n">Steps</th><th class="n">Findings</th><th>Report</th></tr></thead><tbody>${assessments.map((r) => `<tr><td><code>${esc(r.id)}</code><br><span class="meta">${when(r.date)}</span><br><code class="meta">${esc(r.path)}</code></td><td>${r.journeys.map((j) => `<code>${esc(j.id)}</code> (${j.steps.length} step${j.steps.length === 1 ? "" : "s"})`).join(", ") || "none walked"}</td><td class="n">${stepCount(r)}</td><td class="n">${r.findings}</td><td>${r.link ? `<a href="${esc(r.link)}">open</a>` : "not written yet"}<br><span class="meta">${by(r.versions)}</span></td></tr>`).join("")}</tbody></table>`
     : `<p class="meta">No usability assessment yet: run <code>npx ux-builder-audit assess init</code>, then follow the ux-builder-assess skill.</p>`;
+  const runsDir = rel(app, runsDirOf(app));
+  const otherHtml = runs.length
+    ? `<table><thead><tr><th>Path</th><th>Kind</th><th>Modified</th><th>Open</th></tr></thead><tbody>${runs.map((r) => `<tr><td><code>${esc(r.path)}</code></td><td>${esc(r.kind ?? "")}</td><td class="meta">${when(r.date)}</td><td><a href="${esc(r.link)}">open</a></td></tr>`).join("")}</tbody></table>`
+    : `<p class="meta">No other runs yet in <code>${esc(runsDir)}/</code>.</p>`;
   const walkHtml = latest?.journeys.some((j) => j.steps.length)
     ? `<section><h2>The latest run's journeys, step by step <span class="meta">${esc(latest.id)}</span></h2>${latest.journeys.map((j) => `<article><h3><code>${esc(j.id)}</code>${j.status ? ` <span class="meta">${esc(j.status)}</span>` : ""}</h3><ol>${j.steps.map((s) => `<li value="${esc(s.n)}">${s.screenshot ? `<a href="${esc(s.screenshot)}"><img src="${esc(s.screenshot)}" alt="${esc(`Step ${s.n}: ${s.action}`)}" loading="lazy"></a>` : ""}<span>${esc(s.action)}${s.screen ? ` <code>${esc(s.screen)}</code>` : ""} <span class="meta">${esc(s.status)}</span></span></li>`).join("")}</ol></article>`).join("")}</section>`
     : "";
@@ -150,6 +193,7 @@ img { width: 160px; max-width: 40vw; border: 1px solid var(--line); border-radiu
 <header><h1>Reports</h1><p class="meta">Every report on this app, in one place. Refreshed whenever a report is written, or by <code>npx ux-builder-audit reports</code>.</p></header>
 <section id="audit"><h2>UI audit</h2><p>${esc(WHAT.audit)}</p>${auditHtml}</section>
 <section id="assessments"><h2>Usability assessments</h2><p>${esc(WHAT.assessment)}</p>${runsHtml}</section>
+<section id="runs"><h2>Other runs</h2><p>${esc(WHAT.runs)}</p>${otherHtml}</section>
 ${walkHtml}
 </main></body></html>
 `;

@@ -70,9 +70,9 @@ describe("US-132: the experience architecture", () => {
     writeFileSync(a.blueprint, JSON.stringify(b, null, 2));
     const r = spawnSync(process.execPath, [CLI, "propose"], { cwd: a.dir, encoding: "utf8" });
     assert.equal(r.status, 0, r.stderr);
-    // This HELIX lacks the UX types, so the wireframes are drafts at the path HELIX would give them.
-    const dir = join(a.dir, "helix-proposals/drafts/docs/helix/02-design/wireframes");
-    const wf = readFileSync(join(dir, readdirSync(dir).find((f) => f.endsWith(`-${b.screens[0].id}.md`))), "utf8");
+    // HELIX's wireframe for the screen, UF-<n>-<nn>-<view>, as a patch.
+    const dir = join(a.dir, "helix-proposals");
+    const wf = readFileSync(join(dir, readdirSync(dir).find((f) => f.endsWith(`-${b.screens[0].id}-wireframe.patch`))), "utf8").split("\n").filter((l) => l.startsWith("+")).map((l) => l.slice(1)).join("\n");
     assert.match(wf, /^- \*\*Purpose\*\*: Review the next entry$/m);
     assert.match(wf, /^- \*\*Content, highest priority first\*\*: 1\. The entry; 2\. Its history \(data\)$/m);
   });

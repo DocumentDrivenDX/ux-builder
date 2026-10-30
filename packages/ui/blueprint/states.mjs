@@ -263,13 +263,24 @@ export function stateTable(m) {
   ].join("\n");
 }
 
-/* The state matrix of the proposed interaction-state-diagram type. */
-export function stateMatrix(m) {
-  return [
-    "| State | Entered when | User sees | Available actions | Announcement | Exit |",
-    "|---|---|---|---|---|---|",
-    ...m.rows.map((r) => `| ${r.state} | ${joined(r.entered, "—")} | ${cell(r.sees)} | ${joined(r.actions, none(r.state))} | ${cell(r.announcement)} | ${joined(r.exits, "none — final")} |`),
-  ].join("\n");
+/* The States table of HELIX's wireframe (States and Events): every standard
+   state, applying or excluded with its reason, then the screen's own. */
+export const STANDARD_STATES = ["ideal", "empty", "loading", "partial", "error", "offline", "slow", "permission-denied", "success"];
+const EXCLUDED = {
+  partial: "no: not declared in the blueprint; if part of the content can fail on its own, add it to screens[].states",
+  offline: "no: not modelled in the blueprint; the app's connection handling covers it, or add it here",
+  slow: "no: not modelled in the blueprint; loading shows until the content arrives",
+  "permission-denied": "no: not declared in the blueprint; if access can be refused here, add forbidden to screens[].states",
+  success: "no: not modelled in the blueprint; an action's confirmation is its transition's feedback in the user flow",
+};
+export function stateRows(m) {
+  const row = (r, name = r.state) => `| ${name}${name !== r.state ? ` (${r.state})` : ""} | yes | ${joined(r.entered, "—")} | ${cell(r.sees)} | ${joined(r.actions, none(r.state))} | ${cell(r.announcement)} | ${joined(r.exits, "none — final")} |`;
+  const byState = new Map(m.rows.map((r) => [r.state, r]));
+  // The blueprint's forbidden is HELIX's permission-denied.
+  const own = (st) => byState.get(st === "permission-denied" ? "forbidden" : st);
+  const rows = STANDARD_STATES.map((st) => (own(st) ? row(own(st), st) : `| ${st} | ${EXCLUDED[st] ?? "no: not declared in the blueprint; add it to screens[].states, or give the reason here"} | — | — | — | — | — |`));
+  for (const r of m.rows.filter((x) => !STANDARD_STATES.includes(x.state) && x.state !== "forbidden")) rows.push(row(r));
+  return ["| State | Applies | Entered when | Person sees | Available actions | Announcement | Exit |", "|---|---|---|---|---|---|---|", ...rows].join("\n");
 }
 
 const effect = (t) => {
@@ -280,20 +291,13 @@ const effect = (t) => {
   return t.via.startsWith("opens ") ? `Opens ${t.via.slice(6)}` : `Goes ${t.via}`;
 };
 
-/* Its events and transitions table. */
-export function transitionTable(m) {
+/* The Events table of HELIX's wireframe: event, from, guard, to, effect. */
+export function eventTable(m) {
   return [
-    "| From | Event | Guard | To | Effect |",
+    "| Event | From | Guard | To | Effect |",
     "|---|---|---|---|---|",
-    ...m.transitions.map((t) => `| ${t.from === "[*]" ? "start" : t.from} | ${cell(t.event)} | ${cell(t.guard ?? "—")} | ${t.to === "[*]" ? "leaves the screen" : t.to} | ${cell(effect(t))} |`),
+    ...m.transitions.map((t) => `| ${cell(t.event)} | ${t.from === "[*]" ? "start" : t.from} | ${cell(t.guard ?? "none")} | ${t.to === "[*]" ? "leaves the screen" : t.to} | ${cell(effect(t))} |`),
   ].join("\n");
-}
-
-/* The state inventory: each UI-stack state, applies or not, and why. */
-export function inventory(m) {
-  const rows = ["ideal", "empty", "loading", "partial", "error"].map((st) => `| ${st} | ${m.states.includes(st) ? "yes" : "no"} | ${m.states.includes(st) ? "—" : st === "partial" ? "Not declared in the blueprint; if part of the content can fail on its own, add it" : "Not declared in the blueprint: add it to screens[].states, or give the reason here"} |`);
-  for (const st of m.states.filter((x) => !["ideal", "empty", "loading", "partial", "error"].includes(x))) rows.push(`| ${st} | yes | — |`);
-  return ["| State | Applies | Reason if not |", "|---|---|---|", ...rows].join("\n");
 }
 
 /* A screen's state document: the diagram, the table and the notes. */

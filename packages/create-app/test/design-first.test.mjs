@@ -39,6 +39,18 @@ function folder(name, { modality = "responsive-web", sizes = "compact,expanded" 
   return dir;
 }
 
+describe("ADR-042 decision 6: run output stays out of a design folder's repository", () => {
+  // @covers US-150-AC1
+  test("the design folder's .gitignore ignores the assessment runs and the run folder (docs/ux-builder/runs/)", () => {
+    const r = create(tmp, "run-output");
+    assert.equal(r.status, 0, r.stderr);
+    const ignore = readFileSync(join(tmp, "run-output/.gitignore"), "utf8");
+    assert.match(ignore, /^docs\/ux-builder\/assessments\/$/m);
+    assert.match(ignore, /^docs\/ux-builder\/runs\/$/m);
+    assert.match(ignore, /^# Run output stays out of the repository \(ADR-042\)/m);
+  });
+});
+
 describe("US-150: design first, and build the app in place at the end", () => {
   // @covers US-150-AC1
   test("AC1: without --modality it asks nothing and writes a design folder: the guide, HELIX's skill and marker, no app code or theme", () => {
