@@ -72,8 +72,8 @@ crossings over the form's budget, text under 12 px, and contrast under 4.5:1 (te
 
 ## Where things come from
 
-- The `umf.visual` schema and the test fixtures are a pinned copy of umf's
-  (`schema/PINNED.json`); `node scripts/pin-umf-visual.mjs <umf-visual checkout> <commit>` moves the pin.
+- Each `umf.visual` schema the renderer reads (1.0.0 and 1.1.0) and the test fixtures are a pinned
+  copy of umf-visual's (`schema/PINNED.json`); `node scripts/pin-umf-visual.mjs <umf-visual checkout> <commit>` moves the pin.
 - Layout: elkjs 0.12.0 (EPL-2.0 OR GPL-3.0-or-later, used unmodified; ADR-042). Zoned
   (ported from HELIX documentor's `deploy.py`), sequence and lifecycle layouts are our own.
 - Text is measured from tables extracted from `@ux-builder/tokens`' fonts

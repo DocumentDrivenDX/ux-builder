@@ -4,6 +4,7 @@
 import { stepMarks } from "./grammar.mjs";
 import { formatValue, withUnit } from "./layout/chart.mjs";
 import { comparisonTable, markdownTable, metricTable, stackRows, timelineRows } from "./tables.mjs";
+import { fieldIndex } from "./layout/structure.mjs";
 
 const md = (s) => String(s).replace(/([\\`*_[\]|])/g, "\\$1");
 
@@ -23,7 +24,16 @@ export function textEquivalent(v) {
     }
     if (v.structure?.references?.length) {
       lines.push("", "References:", "");
-      for (const r of v.structure.references) lines.push(`- ${name(r.from.node)} → ${name(r.to.node)}${r.to.field ? `.${md(r.to.field)}` : ""}${r.label ? `: ${md(r.label)}` : ""}`);
+      // Counts in words: a cardinality, or an exact multiplicity in its own notation (umf.visual 1.1.0).
+      const fieldsOf = new Map((v.structure.entities ?? []).map((e) => [e.node, e.fields]));
+      const count = (card, mult) => card ? card.replaceAll("-", " ") : mult ? (mult.text ?? `${mult.min}..${mult.max ?? "*"}`) : null;
+      for (const r of v.structure.references) {
+        const field = (fieldsOf.get(r.to.node) ?? [])[fieldIndex(fieldsOf.get(r.to.node), r.to)]?.name;
+        const from = count(r.fromCardinality, r.fromMultiplicity), to = count(r.toCardinality, r.toMultiplicity);
+        // Only where an exact multiplicity is stated, so a 1.0.0 document reads as it always has.
+        const counts = r.fromMultiplicity || r.toMultiplicity ? ` (${from ?? "unstated"} to ${to ?? "unstated"})` : "";
+        lines.push(`- ${name(r.from.node)} → ${name(r.to.node)}${field ? `.${md(field)}` : ""}${r.label ? `: ${md(r.label)}` : ""}${counts}`);
+      }
     }
   }
   if (v.kind === "timeline") {

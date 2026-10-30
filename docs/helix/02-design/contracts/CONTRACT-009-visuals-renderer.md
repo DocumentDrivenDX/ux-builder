@@ -18,7 +18,7 @@ ddx:
 **Type**: library API, command and output formats (`@ux-builder/visuals`, `ux-builder-visuals`)
 **Version**: v1 (`@ux-builder/visuals` 0.1.0)
 **Status**: draft — 2026-10-22, with ADR-042
-**Related**: FEAT-019, ADR-042, CONTRACT-001 (token names), umf-visual CONTRACT-083 (`umf.visual` 1.0.0, DocumentDrivenDX/umf-visual)
+**Related**: FEAT-019, ADR-042, CONTRACT-001 (token names), umf-visual CONTRACT-083 (`umf.visual` 1.0.0 and 1.1.0, DocumentDrivenDX/umf-visual)
 
 ## Purpose
 
@@ -40,8 +40,15 @@ adds. The renderer does not produce documents, check evidence, or decide when to
 ### Input
 
 A UMF document whose vocabulary `umf.visual` is version `1.x`; another major is
-`VISUAL_VERSION`. The package carries a pinned copy of umf's payload schema
-(`schema/umf-visual.schema.json`, with `schema/PINNED.json` naming the umf commit and digest).
+`VISUAL_VERSION`. The package carries a pinned copy of each `umf.visual` payload schema
+(`schema/umf-visual-<version>.schema.json`, 1.0.0 and 1.1.0, with `schema/PINNED.json` naming the
+umf-visual commit and each digest). A document is checked against the newest pinned version not
+newer than the one it declares, so a 1.0.0 document using a 1.1.0 field is incomplete, and a
+later 1.x minor is read as the newest pinned one with its additions unknown. *[Amended 2026-10-30:
+US-169]* For 1.1.0's entity references, a field id the entity lacks, `field` and `fieldId` naming
+different fields, or a multiplicity whose bounds are reversed or contradict its cardinality is
+`VISUAL_INVALID`. A multiplicity no crow's foot states is written beside the end of its line; the
+Mermaid `erDiagram` takes the nearest crow's foot and carries the exact notation in the label.
 A document that fails it, names a form outside its kind, or has an id that does not resolve is
 refused with `VISUAL_INVALID` and its diagnostics, as is a `flow/zoned` visual with a node outside
 every group or a root group without a tier (umf's `VISUAL_FORM_RULE`). Unknown fields make a document incomplete,

@@ -6,6 +6,9 @@
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAY = 86400000;
 
+/* A UTC calendar day as days since the epoch. Unlike Date.UTC, a year below 100 stays that year. */
+const utcDay = (year, monthIndex, date) => { const t = new Date(0); t.setUTCFullYear(year, monthIndex, date); return t.getTime() / DAY; };
+
 /** An ISO-8601 date (or date-time) as whole UTC days since the epoch. */
 export const day = (iso) => Math.floor(Date.parse(String(iso).length <= 10 ? `${iso}T00:00:00Z` : iso) / DAY);
 
@@ -29,7 +32,7 @@ export function dateTicks(a, b) {
   let y = first.getUTCFullYear(), mo = first.getUTCMonth() + 1;
   if (monthStep === 12) { y += 1; mo = 0; }
   for (;;) {
-    const d = Date.UTC(y, mo, 1) / DAY;
+    const d = utcDay(y, mo, 1);
     if (d > b) break;
     out.push({ at: d, label: monthStep === 12 ? String(y) : `${MONTHS[mo]}${mo === 0 || out.length === 0 ? ` ${y}` : ""}` });
     mo += monthStep;
