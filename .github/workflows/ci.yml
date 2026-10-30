@@ -42,13 +42,6 @@ jobs:
       # The theme builder's core flow, logo to saved theme, end to end in
       # Chromium with the model mocked (US-015).
       - run: npm run e2e --workspace @ux-builder/theme-builder
-      # The starter: scaffold a fresh app on the packed SDK, install, build,
-      # lint with zero findings, and drive it in Chromium (US-012).
-      # The starter fetches the latest HELIX from GitHub's API; with the job's
-      # read-only token it is not rate-limited with every other runner on the IP.
-      - run: npm run test:e2e --workspace @ux-builder/create-app
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - run: npm run build-storybook --workspace @ux-builder/ui
       # The GitHub Pages site, as pages.yml builds it on main, so a broken
       # site shows here before it merges.

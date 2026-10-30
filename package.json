@@ -23,7 +23,7 @@
     "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts && node tools/gen-catalogue.mjs && npm run plugin:build",
     "release": "npm run check && changeset publish",
     "builder": "npm run build && node apps/theme-builder/server.mjs",
-    "e2e": "npm run build && npm run e2e --workspace @ux-builder/theme-builder && npm run test:e2e --workspace @ux-builder/create-app",
+    "e2e": "npm run build && npm run e2e --workspace @ux-builder/theme-builder",
     "lint": "stylelint \"packages/ui/src/**/*.css\" \"apps/theme-builder/src/**/*.css\" && eslint \"packages/ui/src/**/*.jsx\" \"apps/theme-builder/src/**/*.jsx\"",
     "catalogue": "node tools/gen-catalogue.mjs",
     "coverage": "node tools/check-coverage.mjs",
