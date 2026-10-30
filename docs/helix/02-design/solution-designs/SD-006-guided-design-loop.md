@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-036
@@ -23,6 +25,9 @@ ddx:
 ---
 
 # SD-006: Guided design loop
+
+
+*Amended 2026-10-29 by ADR-042: ux-builder writes into HELIX's documents and keeps none of its own beyond the blueprint and the compiled brief; the docs/ux-builder document types below are replaced by their HELIX homes (see ADR-042 decision 2), and `helix.mjs`, `people.mjs`, `studies.mjs` and `migrate-docs.mjs` carry the new paths.*
 
 ## Scope
 
@@ -132,7 +137,8 @@ frontmatter adapted to `docs/ux-builder/`.
 ### Baseline (GDL-74)
 
 Reads the blueprint, the HELIX PRD and stories (through the marker), the
-latest audit report and assessment run. Writes `docs/ux-builder/baseline.md` with
+latest audit report and assessment run. *Retired by ADR-042: an existing app now starts
+from HELIX's backfill.* Wrote `docs/ux-builder/baseline.md` with
 the current destinations, screens, journeys, findings by journey and a
 draft brief, jobs and task list, every item an `A-<n>` assumption with
 status `current-state`. The agent then edits it with the person.
@@ -194,13 +200,13 @@ assumes.
 
 `check --diff <base>` compares two blueprints by IDs: screens, steps per
 journey, required inputs and decisions. A journey that grows with no
-`decision` event naming it (trace, or a `UXD-` record linking it) gets
+`decision` event naming it (trace, or a UX decision ADR linking it) gets
 `simplicity.delta-decided`.
 
 ### Impact and trace (GDL-47 to GDL-49)
 
 An ID graph built from: jobs (`J-`) ← tasks (`T-`) ← journeys ← screens ←
-prototype pages ← test-kit tasks ← findings (`F-`), plus `UXD-` links and
+prototype pages ← study tasks ← findings (`F-`), plus UX decision ADRs and
 HELIX story and AC IDs. `trace <id>` walks it both ways. `impact` matches
 the change's words to blueprint items (screen and action labels, task
 goals, step names), lists everything reachable downstream, and sets
@@ -274,9 +280,10 @@ screen paths they carry.
 
 ### Target users and business rules (GDL-77, GDL-78)
 
-`docs/ux-builder/users.md` is a document type (`users`) whose table rows
-(`U-<n>`) `documents.usersTable` parses; the brief's Target users section
-reads only it, and jobs, tasks and test-kit scenarios cite `U-` IDs.
+Target users are the PRD's *User Segments* (ADR-042), rows named by who
+they are, which `people.segmentsTable` parses (applied or proposed); the
+brief's Target users section reads only them, and tasks and studies cite
+users by name.
 Business rules stay in HELIX as `**BR-<n>** — <rule>`
 (`documents.businessRules` reads them through the marker); blueprint tasks
 and journey steps cite them in `rules`, and the blueprint's

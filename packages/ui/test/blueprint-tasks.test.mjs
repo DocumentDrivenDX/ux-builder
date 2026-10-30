@@ -37,11 +37,11 @@ describe("US-127: tasks", () => {
   // @covers US-127-AC2
   test("AC2: a task missing goal or success, or with a bad ID, is an error naming the task and the field", () => {
     const { goal, success, ...rest } = TASK;
-    const f = checkBlueprint(bp({ tasks: [{ ...rest, success }, { ...rest, id: "T-2", goal: "x" }, { ...TASK, id: "task-3" }] }));
+    const f = checkBlueprint(bp({ tasks: [{ ...rest, success }, { ...rest, id: "T-2", goal: "x" }, { ...TASK, id: "Task 3!" }] }));
     const msgs = f.filter((x) => x.rule === "blueprint.valid").map((x) => x.message);
     assert.ok(msgs.includes('Task T-1 (/tasks/0) needs "goal".'), msgs.join("\n"));
     assert.ok(msgs.includes('Task T-2 (/tasks/1) needs "success".'), msgs.join("\n"));
-    assert.ok(msgs.some((m) => m.startsWith("Task task-3 (/tasks/2/id)")), msgs.join("\n"));
+    assert.ok(msgs.some((m) => m.startsWith("Task Task 3! (/tasks/2/id)")), msgs.join("\n"));
   });
 
   // @covers US-127-AC3

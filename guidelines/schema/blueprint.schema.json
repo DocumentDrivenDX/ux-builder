@@ -589,7 +589,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^J-[a-z0-9]+(-[a-z0-9]+)*$"
+          "pattern": "^(J-)?[a-z][a-z0-9]*(-[a-z0-9]+)*$"
         },
         "story": {
           "type": "string",
@@ -651,8 +651,8 @@
         },
         "task": {
           "type": "string",
-          "pattern": "^T-[1-9][0-9]*$",
-          "description": "The task this journey realizes (FEAT-018 GDL-23)"
+          "pattern": "^(T-[1-9][0-9]*|[a-z0-9]+(-[a-z0-9]+)*)$",
+          "description": "The task this journey realizes, by its Task Model key (FEAT-018 GDL-23, ADR-042)"
         }
       }
     },
@@ -668,7 +668,8 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^T-[1-9][0-9]*$"
+          "pattern": "^(T-[1-9][0-9]*|[a-z0-9]+(-[a-z0-9]+)*)$",
+          "description": "The task's key in its feature's Task Model (ADR-042: the task's name as a slug); an older blueprint's T-<n>"
         },
         "goal": {
           "type": "string",
@@ -682,14 +683,14 @@
             "type": "string",
             "pattern": "^J-[1-9][0-9]*$"
           },
-          "description": "The jobs it serves (docs/ux/jobs.md)"
+          "description": "An older blueprint's jobs (J-<n>); new tasks name their needs"
         },
         "users": {
           "type": "array",
-          "description": "The target users this task serves, by ID from docs/ux/users.md (FEAT-018 GDL-77)",
+          "description": "The PRD's User Segments this task serves, by name (FEAT-018 GDL-77, ADR-042); an older blueprint's U-<n>",
           "items": {
             "type": "string",
-            "pattern": "^U-[1-9][0-9]*$"
+            "minLength": 1
           }
         },
         "rules": {
@@ -790,6 +791,15 @@
             "minLength": 1
           },
           "description": "Kinds of interaction it needs, such as choose-location (FEAT-018 GDL-34)"
+        },
+        "needs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "The PRD's User Needs it serves, by name (ADR-042)"
         }
       }
     }

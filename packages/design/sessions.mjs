@@ -1,20 +1,21 @@
 /* Human usability testing (CONTRACT-008 Commands, FEAT-018 GDL-55 to
-   GDL-58; ADR-039): observations from a test kit's sessions imported as
-   findings with source: human, consented transcripts kept as masked, cited
-   excerpts, and the measures across sessions the rubric's observed column
+   GDL-58; ADR-039, ADR-042): observations from a study's sessions imported
+   as findings with source: human (run output, in the study's run folder);
+   consented transcripts cited as masked excerpts in the study's research
+   plan; and the measures across sessions the rubric's observed column
    reads. Participants appear only by pseudonym; a real name given in a
    sheet is kept in .ux-builder/participants.local.json, out of git. */
 
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { extname, isAbsolute, join, relative, sep } from "node:path";
-import { parse as parseYaml, stringify as toYaml } from "yaml";
 import { mask } from "@ux-builder/trace";
 import { DesignError, ux, writeInApp } from "./app.mjs";
 import { PERSONAL_PATTERNS } from "./documents.mjs";
 import { writeEvidence } from "./research.mjs";
 import { readState, writeState } from "./state.mjs";
-import { kits } from "./testkit.mjs";
+import { addExcerpts, runJson, studyName, studyOf, studyRunDir } from "./studies.mjs";
+import { kits, studyTasks } from "./testkit.mjs";
 
 const PARTICIPANTS = ".ux-builder/participants.local.json";
 const PSEUDONYM = /^P[1-9][0-9]*$/;
@@ -75,27 +76,20 @@ export function maskPersonal(text, { app, names = {} } = {}) {
   return t;
 }
 
-/* The kit's tasks from its scenarios table: [{ n, journey }]. */
-function kitTaskList(app, kit) {
-  const file = join(app, ux(app, "tests"), kit, "scenarios.md");
-  if (!existsSync(file)) throw new DesignError(`no kit ${kit} (${ux(app)}/tests/${kit}/scenarios.md); write one with ux-builder-design test-kit`);
-  return readFileSync(file, "utf8").split("\n").map((l) => /^\|\s*(\d+)\s*\|\s*(J-[^|\s]+)\s*\|/.exec(l)).filter(Boolean).map((m) => ({ n: Number(m[1]), journey: m[2] }));
-}
-
 const yes = (v) => /^(y|yes|true|1|done|completed)$/i.test(String(v ?? "").trim());
 const num = (v) => { const n = Number(String(v ?? "").trim()); return String(v ?? "").trim() !== "" && Number.isFinite(n) ? n : null; };
-export const findingIdFor = (kit, participant, task) => `F-${createHash("sha256").update(`${kit}|${participant}|${task}`).digest("hex").slice(0, 8)}`;
+export const findingIdFor = (study, participant, task) => `F-${createHash("sha256").update(`${study}|${participant}|${task}`).digest("hex").slice(0, 8)}`;
 
 /* Severity on Nielsen's 0 to 4 scale, from what was observed. */
 const severityOf = (o) => (!o.completed ? 3 : o.assists || o.errors ? 2 : o.problem ? 1 : 0);
 
-/* ux-builder-design observe import <file> --kit <TK-n>. */
-export function observeImport(app, { file, kit } = {}) {
-  if (!file) throw new DesignError("observe import needs the sheet: observe import <file> --kit TK-<n>");
-  if (!/^TK-[1-9][0-9]*$/.test(kit ?? "")) throw new DesignError(`--kit names the test kit, such as TK-1, not "${kit ?? ""}"`);
+/* ux-builder-design observe import <file> --study <name>: the findings go in the study's run folder. */
+export function observeImport(app, { file, study } = {}) {
+  if (!file) throw new DesignError("observe import needs the sheet: observe import <file> --study <name>");
+  const kit = studyName(study);
   const path = abs(app, file);
   if (!existsSync(path)) throw new DesignError(`no such file: ${file}`);
-  const tasks = kitTaskList(app, kit);
+  const tasks = studyTasks(app, kit);
   const text = readFileSync(path, "utf8");
   let rows;
   if (/\.json$/i.test(path)) {
@@ -113,17 +107,17 @@ export function observeImport(app, { file, kit } = {}) {
   for (const [i, r] of rows.entries()) {
     const task = num(r.task);
     const t = tasks.find((x) => x.n === task);
-    if (!t) { skipped.push({ row: i + 1, task: r.task ?? null, reason: `task ${r.task ?? "(none)"} is not in ${kit} (tasks ${tasks.map((x) => x.n).join(", ")})` }); continue; }
+    if (!t) { skipped.push({ row: i + 1, task: r.task ?? null, reason: `task ${r.task ?? "(none)"} is not in the ${kit} study's kit (tasks ${tasks.map((x) => x.n).join(", ")})` }); continue; }
     const participant = people.of(r.participant);
     if (!participant) { skipped.push({ row: i + 1, task, reason: "no participant" }); continue; }
     const names = { ...people.names(), ...Object.fromEntries(sheetNames.map((n) => [people.of(n), n])) };
     const o = {
-      id: findingIdFor(kit, participant, task), source: "human", kit, participant, task, journey: t.journey,
+      id: findingIdFor(kit, participant, task), source: "human", study: kit, participant, task, journey: t.journey,
       completed: yes(r.completed), seconds: num(r.seconds ?? r.time), errors: num(r.errors) ?? 0, assists: num(r.assists) ?? 0,
       remark: maskPersonal(r.remark ?? "", { app, names }),
       ...(String(r.problem ?? "").trim() ? { problem: maskPersonal(r.problem, { app, names }).trim() } : {}),
       // The target user the participant matched in the screener (GDL-77).
-      ...(/^U-[1-9][0-9]*$/.test(String(r.user ?? "").trim()) ? { user: String(r.user).trim() } : {}),
+      ...(String(r.user ?? "").trim() ? { user: String(r.user).trim() } : {}),
     };
     o.severity = severityOf(o);
     o.title = o.problem ?? (o.completed ? `${participant} completed task ${task}` : `${participant} did not complete task ${task}`);
@@ -142,13 +136,13 @@ export function observeImport(app, { file, kit } = {}) {
     const lines = [head.join(","), ...body.map((r) => r.map((v, i) => (i === at("participant") ? people.of(v) ?? v : ["remark", "problem"].includes(cols[i]) ? maskPersonal(v, { app, names }) : v)).map(cellOut).join(","))];
     rewritten = writeInApp(app, rel, lines.join("\n") + "\n");
   }
-  const out = `${ux(app)}/tests/${kit}/findings.json`;
+  const out = `${studyRunDir(app, kit)}/findings.json`;
   const was = readJson(join(app, out)) ?? {};
   const fresh = new Set(findings.map((f) => f.id));
   const all = [...(was.findings ?? []).filter((f) => !fresh.has(f.id)), ...findings].sort((a, b) => (a.task ?? 0) - (b.task ?? 0) || String(a.participant ?? "").localeCompare(String(b.participant ?? ""), "en", { numeric: true }) || (a.id < b.id ? -1 : 1));
   const sessions = [...new Set(all.filter((f) => f.source === "human").map((f) => f.participant))].sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
-  writeInApp(app, out, JSON.stringify({ kit, sessions, findings: all }, null, 2) + "\n");
-  return { kit, path: out, imported: findings.length, findings, skipped, sessions, ...(rewritten ? { rewritten } : {}) };
+  writeInApp(app, out, JSON.stringify({ study: kit, sessions, findings: all }, null, 2) + "\n");
+  return { study: kit, path: out, imported: findings.length, findings, skipped, sessions, ...(rewritten ? { rewritten } : {}) };
 }
 
 const MEDIA = new Set([".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".oga", ".opus", ".mp4", ".mov", ".m4v", ".webm", ".mkv", ".avi", ".wmv"]);
@@ -159,9 +153,10 @@ export function transcriptLines(text) {
   return String(text).split("\n").map((l) => /^\s*\[?(\d{1,2}:\d{2}(?::\d{2})?)\]?\s+([^:]{1,40}):\s*(.*)$/.exec(l)).filter(Boolean).map((m) => ({ at: m[1], speaker: m[2].trim(), text: m[3].trim() }));
 }
 
-/* ux-builder-design transcript add <file> --session <id> --consent-confirmed [--by <name>] [--kit TK-<n>] [--cite <time>]... */
-export function transcriptAdd(app, { file, session, consentConfirmed = false, by, cite = [], date = today(), source, kit } = {}) {
-  if (kit && !/^TK-[1-9][0-9]*$/.test(kit)) throw new DesignError(`--kit names the test kit the session ran, such as TK-1, not "${kit}"`);
+/* ux-builder-design transcript add <file> --study <name> --session <id> --consent-confirmed [--by <name>] [--cite <time>]...:
+   the transcript is a source of the study (where the owner keeps it), and its cited lines masked excerpts in the study's Findings. */
+export function transcriptAdd(app, { file, study, session, consentConfirmed = false, by, cite = [], date = today(), source } = {}) {
+  const name = studyName(study);
   if (!session?.trim()) throw new DesignError("transcript add needs --session: the session the transcript is of");
   if (!consentConfirmed) throw new DesignError(`consent must be confirmed for session ${session} before its transcript is analysed: ask the owner, then add --consent-confirmed (ADR-039). Nothing was written.`);
   if (!file) throw new DesignError("transcript add needs the transcript file");
@@ -176,33 +171,28 @@ export function transcriptAdd(app, { file, session, consentConfirmed = false, by
   const staff = (s) => /^(facilitator|moderator|observer|interviewer)$/i.test(s);
   const speakers = Object.fromEntries(cited.filter((l) => !staff(l.speaker)).map((l) => [l.speaker, people.of(l.speaker)]));
   const names = { ...people.names() };
-  const excerpts = cited.map((l) => `${staff(l.speaker) ? l.speaker : speakers[l.speaker]}: [${l.at}] "${maskPersonal(l.text, { app, names }).replace(/"/g, "'")}"`);
+  const title = `transcript of session ${session}`;
+  const excerpts = cited.map((l) => `- ${staff(l.speaker) ? l.speaker : speakers[l.speaker]} (${title}, ${l.at}): "${maskPersonal(l.text, { app, names }).replace(/"/g, "'")}"`);
   people.save();
-  const participants = Object.fromEntries(Object.values(speakers).map((p) => [p, "participant"]));
-  const ev = writeEvidence(app, { file, kind: "transcript", date, source: source ?? file, title: `transcript of session ${session}`, excerpts, participants,
-    extra: [`  session: ${JSON.stringify(session)}`, ...(kit ? [`  kit: ${kit}`] : []), "  consent:", "    confirmed: true", ...(by ? [`    by: ${JSON.stringify(by)}`] : []), `    date: ${date}`] });
+  const ev = writeEvidence(app, { study: name, file, kind: "transcript", date, source: source ?? file, title });
+  if (excerpts.length) addExcerpts(app, name, excerpts);
+  const participants = [...new Set(Object.values(speakers))];
   const state = readState(app);
-  state.consents = [...(state.consents ?? []).filter((c) => c.session !== session), { session, confirmed: true, ...(by ? { by } : {}), date, evidence: ev.id }];
+  state.consents = [...(state.consents ?? []).filter((c) => c.session !== session), { session, confirmed: true, ...(by ? { by } : {}), date, study: name, participants }];
   writeState(app, state);
   return { ...ev, session, excerpts: excerpts.length, consent: { confirmed: true, ...(by ? { by } : {}), date } };
 }
 
-/* The transcript records of a kit's sessions: [{ id, kit, session, participants }].
-   A record belongs to a kit when it names it (--kit) or its session does. */
+/* The transcripts of each study's sessions, from the consents recorded: [{ study, session, participants }]. */
 export function kitTranscripts(app) {
-  const dir = join(app, ux(app, "evidence"));
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir).filter((f) => /^EV-\d+\.md$/.test(f)).map((f) => {
-    const m = readFileSync(join(dir, f), "utf8").match(/^---\n([\s\S]*?)\n---/);
-    let ux = {};
-    try { ux = parseYaml(m?.[1] ?? "")?.ux ?? {}; } catch { /* not YAML */ }
-    return { id: String(ux.id ?? f.replace(/\.md$/, "")), kind: ux.kind, kit: ux.kit ?? String(ux.session ?? "").match(/TK-[1-9][0-9]*/)?.[0] ?? null, session: ux.session ?? null, participants: Object.keys(ux.participants ?? {}) };
-  }).filter((x) => x.kind === "transcript" && x.kit);
+  let state = null;
+  try { state = readState(app); } catch { return []; }
+  return (state.consents ?? []).filter((c) => c.study).map((c) => ({ study: c.study, kit: c.study, session: c.session, participants: c.participants ?? [] }));
 }
 
-/* Every human finding across the kits: [{ ...finding }]. */
+/* Every human finding across the studies' run folders: [{ kit: <study>, ...finding }]. */
 export function humanFindings(app) {
-  return kits(app).flatMap((k) => (readJson(join(app, ux(app, "tests"), k, "findings.json"))?.findings ?? []).map((f) => ({ kit: k, ...f })).filter((f) => f.source === "human"));
+  return kits(app).flatMap((k) => (runJson(app, k, "findings.json")?.findings ?? []).map((f) => ({ kit: k, ...f })).filter((f) => f.source === "human"));
 }
 
 const median = (xs) => { if (!xs.length) return null; const s = [...xs].sort((a, b) => a - b), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
@@ -262,42 +252,23 @@ export function observedDimensions(app, predicted = {}) {
   return out;
 }
 
-/* ux-builder-design evidence excerpt add <EV-n> --participant <name or Pn> --text <quote> [--at <time>] [--role <role>]:
-   one quote the synthesis cites, masked and by pseudonym, in the record's Excerpts. */
-export function excerptAdd(app, { id, participant, text, at, role = "participant" } = {}) {
-  if (!/^EV-[1-9][0-9]*$/.test(id ?? "")) throw new DesignError(`evidence excerpt add needs an evidence ID such as EV-1, not "${id ?? ""}"`);
+/* ux-builder-design evidence excerpt add --study <name> --participant <name or Pn> --text <quote> [--at <time>] [--source <which source>]:
+   one quote the synthesis cites, masked and by pseudonym, in the study's Findings > Excerpts. */
+export function excerptAdd(app, { study, participant, text, at, source } = {}) {
+  const name = studyName(study);
   if (!participant?.trim()) throw new DesignError("evidence excerpt add needs --participant: who said it (a name is replaced by a pseudonym)");
   if (!text?.trim()) throw new DesignError("evidence excerpt add needs --text: the words the synthesis relies on");
   if (at && !/^\d{1,2}:\d{2}(:\d{2})?$/.test(at)) throw new DesignError(`--at is a time in the source, such as 00:12:30, not "${at}"`);
-  const path = `${ux(app)}/evidence/${id}.md`;
-  if (!existsSync(join(app, path))) throw new DesignError(`no evidence ${id} (${path}): record the source first with evidence add`);
+  if (!studyOf(app, name)) throw new DesignError(`no study ${name}: record its source first with evidence add --study ${name}`);
   const people = pseudonyms(app);
   const p = people.of(participant);
   people.save();
   const quote = maskPersonal(text.trim(), { app, names: people.names() }).replace(/"/g, "'");
-  const line = `- ${p}: ${at ? `[${at}] ` : ""}"${quote}"`;
-  const source = readFileSync(join(app, path), "utf8");
-  const m = source.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  if (!m) throw new DesignError(`${path} has no frontmatter`);
-  // The participant is listed in the frontmatter; the quote goes at the end of Excerpts, replacing the placeholder.
-  const front = parseYaml(m[1]) ?? {};
-  front.ux ??= {};
-  if (!front.ux.participants || typeof front.ux.participants !== "object") front.ux.participants = {};
-  front.ux.participants[p] ??= role;
-  let body = m[2].replace(/^- None cited yet\.[^\n]*\n/m, "");
-  const lines = body.split("\n");
-  const start = lines.findIndex((l) => /^## Excerpts\s*$/.test(l));
-  if (start < 0) throw new DesignError(`${path} has no "## Excerpts" section`);
-  let end = lines.findIndex((l, i) => i > start && /^## /.test(l));
-  if (end < 0) end = lines.length;
-  let last = end - 1;
-  while (last > start && !lines[last].trim()) last--;
-  lines.splice(last + 1, 0, ...(last === start ? ["", line] : [line]));
-  body = lines.join("\n").replace(/\n{3,}/g, "\n\n");
-  writeInApp(app, path, `---\n${toYaml(front).trimEnd()}\n---\n${body}`);
-  return { id, path, participant: p, excerpt: line };
+  const where = [source?.trim(), at].filter(Boolean).join(", ");
+  const line = `- ${p}${where ? ` (${where})` : ""}: "${quote}"`;
+  const r = addExcerpts(app, name, [line]);
+  return { study: name, path: r.path, proposal: r.proposal, participant: p, excerpt: line };
 }
 
-/* Kits whose findings.json exists. */
-export const kitsWithFindings = (app) => kits(app).filter((k) => existsSync(join(app, ux(app, "tests"), k, "findings.json")));
-export const evidenceFiles = (app) => (existsSync(join(app, ux(app, "evidence"))) ? readdirSync(join(app, ux(app, "evidence"))).filter((f) => /^EV-\d+\.md$/.test(f)) : []);
+/* Studies whose findings.json exists. */
+export const kitsWithFindings = (app) => kits(app).filter((k) => runJson(app, k, "findings.json"));

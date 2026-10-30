@@ -1,4 +1,5 @@
-/* The evidence-linked jobs table (US-126; FEAT-018 GDL-20, GDL-21).
+/* The PRD's User Needs, rated for importance and evidence (US-126;
+   FEAT-018 GDL-20, GDL-21; ADR-042).
 
      npm test --workspace @ux-builder/design */
 
@@ -6,65 +7,76 @@ import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { exampleFile } from "../index.mjs";
-import { cli, tempApp } from "./helpers.mjs";
+import { currentText, needsTable, sectionOf } from "../index.mjs";
+import { cli, helixApp } from "./helpers.mjs";
 
-const jobs = (rows) => `---\nux:\n  id: jobs\n  type: jobs\n---\n\n# Jobs to be done\n\n## Jobs\n\n| ID | Job | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|---|\n${rows.join("\n")}\n`;
-const evidence = readFileSync(exampleFile("research-evidence"), "utf8");
-
-function app(rows, { ev = true } = {}) {
-  const a = tempApp();
-  mkdirSync(join(a, "docs/ux-builder/evidence"), { recursive: true });
-  writeFileSync(join(a, "docs/ux-builder/jobs.md"), jobs(rows));
-  if (ev) writeFileSync(join(a, "docs/ux-builder/evidence/EV-1.md"), evidence);
+const PRD = "docs/helix/01-frame/prd.md";
+const STUDY = "---\nddx:\n  id: research-anglers\n  type: research-plan\n---\n\n# Research plan: anglers\n";
+function app() {
+  const a = helixApp();
+  mkdirSync(join(a, "docs/helix/01-frame/research"), { recursive: true });
+  writeFileSync(join(a, "docs/helix/01-frame/research/anglers.md"), STUDY);
   return a;
 }
+/* The PRD with these User Needs rows, applied. */
+const withNeeds = (a, rows) => writeFileSync(join(a, PRD), `---\nddx:\n  id: prd\n  type: prd\n---\n\n# PRD\n\n## Users and Scope\n\n### User Needs\n\n| Need | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|\n${rows.join("\n")}\n`);
 const v = (a) => { const r = cli(a, ["validate"]); return { status: r.status, out: r.stdout }; };
 
-describe("US-126: jobs", () => {
+describe("US-126: the PRD's User Needs", () => {
   // @covers US-126-AC1
-  test("AC1: every job has a unique J- ID, an importance, a confidence and an evidence list, each its own field", () => {
-    assert.equal(v(app(["| J-1 | Discover nearby rivers | high | EV-1 | high | confirmed |"])).status, 0);
-    const r = v(app(["| J-1 | Discover nearby rivers | high | EV-1 | high | confirmed |", "| J-1 | Find access | urgent | EV-1 | sure | confirmed |", "| Find | x | high | none | low | hypothesis |"]));
-    assert.equal(r.status, 1);
-    assert.match(r.out, /J-1 is used by more than one job/);
-    assert.match(r.out, /J-1: importance is "urgent"; use high, medium or low/);
-    assert.match(r.out, /J-1: confidence is "sure"; use high, medium or low/);
-    assert.match(r.out, /job row "Find" needs an ID J-<n>/);
+  test("AC1: need add proposes a row of the PRD's User Needs, named by the need, with its importance, evidence, confidence and status, each its own field", () => {
+    const a = app();
+    const r = JSON.parse(cli(a, ["need", "add", "--need", "Discover nearby rivers", "--importance", "high", "--evidence", "anglers", "--confidence", "high", "--status", "validated", "--json"]).stdout);
+    assert.deepEqual({ need: r.need, key: r.key, path: r.path }, { need: "Discover nearby rivers", key: "discover-nearby-rivers", path: PRD });
+    assert.ok(!readFileSync(join(a, PRD), "utf8").includes("Discover"), "HELIX is written only by applying the proposal");
+    const table = sectionOf(currentText(a, PRD).text, "User Needs", 3);
+    assert.equal(table, "| Need | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|\n| Discover nearby rivers | high | anglers | high | validated |");
+    // The same need again replaces its row; another importance or confidence is refused.
+    cli(a, ["need", "add", "--need", "Discover nearby rivers", "--importance", "medium", "--evidence", "anglers", "--confidence", "medium", "--status", "validated"]);
+    assert.equal(Object.keys(needsTable(a)).length, 1);
+    assert.equal(needsTable(a)["discover-nearby-rivers"].importance, "medium");
+    assert.match(cli(a, ["need", "add", "--need", "Find access", "--importance", "urgent"]).stderr, /--importance is high, medium or low, not "urgent"/);
+    assert.match(cli(a, ["need", "add", "--need", "Find access", "--importance", "high", "--confidence", "sure"]).stderr, /--confidence is high, medium or low, not "sure"/);
+    assert.equal(cli(a, ["validate"]).status, 0, cli(a, ["validate"]).stdout);
   });
 
   // @covers US-126-AC2
-  test("AC2: a job citing EV-9, which does not exist, fails naming the job and the source", () => {
-    const r = v(app(["| J-1 | Discover nearby rivers | high | EV-1, EV-9 | high | confirmed |"]));
+  test("AC2: a need citing a study that does not exist fails validate, naming the need and the source", () => {
+    const a = app();
+    withNeeds(a, ["| Discover nearby rivers | high | anglers, nope | high | validated |"]);
+    const r = v(a);
     assert.equal(r.status, 1);
-    assert.match(r.out, /docs\/ux-builder\/jobs\.md: J-1: evidence EV-9 does not exist in docs\/ux-builder\/evidence\//);
+    assert.match(r.out, /docs\/helix\/01-frame\/prd\.md: need "Discover nearby rivers": evidence nope is not a study \(docs\/helix\/01-frame\/research\/\)/);
   });
 
   // @covers US-126-AC3
-  test("AC3: high confidence with no evidence fails: confidence above low needs a source", () => {
-    const r = v(app(["| J-1 | Discover nearby rivers | high | none | high | confirmed |"]));
+  test("AC3: confidence above low with no evidence is refused by need add, and fails validate when written by hand", () => {
+    const a = app();
+    assert.match(cli(a, ["need", "add", "--need", "Discover nearby rivers", "--importance", "high", "--confidence", "high", "--status", "validated"]).stderr, /confidence high needs at least one evidence source \(a study\)/);
+    withNeeds(a, ["| Discover nearby rivers | high | none | high | validated |"]);
+    const r = v(a);
     assert.equal(r.status, 1);
-    assert.match(r.out, /J-1: confidence high needs at least one evidence source \(EV-<n>\)/);
+    assert.match(r.out, /need "Discover nearby rivers": confidence high needs at least one evidence source \(a study\)/);
   });
 
   // @covers US-126-AC4
-  test("AC4: a task or a decision record citing a low-confidence job is warned about, naming the item and the job", () => {
-    const a = app(["| J-1 | Discover nearby rivers | high | EV-1 | high | confirmed |", "| J-3 | Compare river conditions | medium | none | low | hypothesis |"]);
-    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ tasks: [{ id: "T-2", goal: "Compare two rivers", jobs: ["J-3"] }] }));
-    mkdirSync(join(a, "docs/ux-builder/decisions"), { recursive: true });
-    writeFileSync(join(a, "docs/ux-builder/decisions/UXD-1.md"), readFileSync(exampleFile("ux-decision"), "utf8").replace("- Supports immediate exploration.", "- Supports immediate exploration and J-3."));
+  test("AC4: a task citing a low-confidence need is warned about, naming the task and the need", () => {
+    const a = app();
+    withNeeds(a, ["| Discover nearby rivers | high | anglers | high | validated |", "| Compare river conditions | medium | none | low | assumed |"]);
+    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ tasks: [{ id: "compare", goal: "Compare two rivers", needs: ["Compare river conditions"] }] }));
     const r = v(a);
     assert.equal(r.status, 0, r.out);
-    assert.match(r.out, /warning docs\/ux-builder\/blueprint\/app\.blueprint\.json: T-2 relies on J-3 \("Compare river conditions"\), whose confidence is low/);
-    assert.match(r.out, /warning docs\/ux-builder\/decisions\/UXD-1\.md: UXD-1 relies on J-3 \("Compare river conditions"\), whose confidence is low/);
+    assert.match(r.out, /warning docs\/ux-builder\/blueprint\/app\.blueprint\.json: compare relies on the need "Compare river conditions", whose confidence is low/);
+    assert.match(r.out, /note {4}docs\/helix\/01-frame\/prd\.md: need "Compare river conditions" is assumed/);
   });
 
   // @covers US-126-AC5
-  test("AC5: a task citing a job jobs.md lacks fails, naming the task and the ID", () => {
-    const a = app(["| J-1 | Discover nearby rivers | high | EV-1 | high | confirmed |"]);
-    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ tasks: [{ id: "T-1", goal: "Find a river", jobs: ["J-1", "J-7"] }] }));
+  test("AC5: a task citing a need the PRD lacks fails, naming the task and the need", () => {
+    const a = app();
+    withNeeds(a, ["| Discover nearby rivers | high | anglers | high | validated |"]);
+    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify({ tasks: [{ id: "find", goal: "Find a river", needs: ["Discover nearby rivers", "Rate rivers"] }] }));
     const r = v(a);
     assert.equal(r.status, 1);
-    assert.match(r.out, /docs\/ux-builder\/blueprint\/app\.blueprint\.json: T-1 cites J-7, which docs\/ux-builder\/jobs\.md does not have/);
+    assert.match(r.out, /docs\/ux-builder\/blueprint\/app\.blueprint\.json: find cites the need Rate rivers, which the PRD's User Needs does not have/);
   });
 });

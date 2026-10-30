@@ -64,7 +64,7 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     const proposed = blueprint(a, ["propose"]);
     assert.equal(proposed.status, 0, proposed.stderr);
     const files = listAll(a).filter((f) => f !== "package.json" && f !== ".helix.yml");
-    for (const f of ["docs/ux-builder/blueprint/app.blueprint.json", "docs/ux-builder/blueprint/app.blueprint.list-first.json", "docs/ux-builder/brief.md", "docs/ux-builder/decisions/UXD-1.md", "docs/ux-builder/compare/compare.html", "docs/ux-builder/prototypes/list-first/index.html", "docs/ux-builder/users.md", "docs/ux-builder/helix-proposals/report.md"]) assert.ok(files.includes(f), f);
+    for (const f of ["docs/ux-builder/blueprint/app.blueprint.json", "docs/ux-builder/blueprint/app.blueprint.list-first.json", "docs/ux-builder/brief.md", "docs/ux-builder/helix-proposals/helix/02-design/adr/ADR-001-map-first.md.patch", "docs/ux-builder/compare/compare.html", "docs/ux-builder/prototypes/list-first/index.html", "docs/ux-builder/users.md", "docs/ux-builder/helix-proposals/report.md"]) assert.ok(files.includes(f), f);
     const outside = files.filter((f) => !f.startsWith("docs/ux-builder/") && !f.startsWith(".ux-builder/") && !f.startsWith(".claude/skills/ux-builder-design/"));
     assert.deepEqual(outside, [], "nothing at the app's top but .ux-builder/ and the skill");
     assert.equal(json(a, ["status"]).layout, "current");
@@ -73,8 +73,9 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
   // @covers US-149-AC2
   test("AC2: an app on the old layout keeps its paths, and status says to migrate", () => {
     const a = oldApp();
+    writeFileSync(join(a, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
     json(a, ["decision", "add", "--question", "List first?", "--option", "Map", "--option", "List", "--choice", "List", "--why", "Faster"]);
-    assert.ok(existsSync(join(a, "docs/ux/decisions/UXD-1.md")));
+    assert.ok(existsSync(join(a, "helix-proposals/helix/02-design/adr/ADR-001-list-first.md.patch")));
     assert.ok(!existsSync(join(a, "docs/ux-builder")));
     assert.match(json(a, ["rubric", "--alternative", "list-first"]).file, /^app\.blueprint\.list-first\.json$/);
     assert.match(cli(a, ["status"]).stdout, /This app is on the old layout \(docs\/ux\/, app\.blueprint\.json at the top\): run ux-builder-design migrate to move it under docs\/ux-builder\//);

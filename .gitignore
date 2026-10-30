@@ -14,3 +14,6 @@ ux-assessment/
 
 # The HELIX package bundled at pack time (scripts/bundle-helix.mjs).
 packages/create-app/helix/
+
+# DDx-installed plugins: symlinks into ~/.ddx/plugins on each machine.
+.ddx/plugins/

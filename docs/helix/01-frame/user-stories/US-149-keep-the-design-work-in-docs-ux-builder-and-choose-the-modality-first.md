@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: CONTRACT-008
@@ -42,6 +44,7 @@ The design work used to be spread over the app's top: `docs/ux/`, `app.blueprint
 - [ ] **US-149-AC4** — Given a guided app whose modality is not recorded, when `ux-builder-blueprint wireframes` or `prototype --explore` runs, then it exits 1 asking for the modality and draws nothing; after `ux-builder-design modality --answer … --modality … --size-classes …`, they draw; and a later change to the blueprint's supports asks again.
 - [ ] **US-149-AC5** — Given `modality` with a future or unknown modality or size class, when it runs, then it exits 2 naming the value and the allowed ones, and changes nothing.
 - [ ] **US-149-AC6** — Given a new app from create-app, when it is created, then its blueprint is at `docs/ux-builder/blueprint/app.blueprint.json` and its `check:blueprint` and `audit` scripts, the audit's manifest default and the MCP server's defaults all find it there.
+- [ ] **US-149-AC7** — Given an app with the design documents ux-builder used to keep (jobs, users, decision records, evidence records, principles in the design state, test kits, evaluation reports, insights, experiment records, a baseline), when `ux-builder-design migrate` runs, then jobs and users become the PRD's *User Needs* and *User Segments*, decisions ADRs with their result, evidence one study's research plan and principles principles.md, all as proposals; kits, reports, insights, experiments and the baseline move to `docs/ux-builder/runs/`; the originals are removed; `--dry-run` changes nothing; and without HELIX the documents wait, saying to run HELIX's frame (ADR-042 decision 9).
 
 ## Edge Cases
 

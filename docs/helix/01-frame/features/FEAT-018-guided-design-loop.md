@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: prd
     - kind: informed_by
       to: FEAT-008
@@ -477,7 +479,8 @@ labelled *hypothesis* and carries no evidence.
 GDL-18. **Evidence mode.** The human supplies research material: interview
 notes or transcripts, analytics exports, support tickets, survey results,
 or usability observations. `ux-builder-design evidence add` records each
-source, with its kind, date and provenance, as `docs/ux-builder/evidence/EV-<n>.md`.
+source, with its kind, date and provenance, as a row of its study's HELIX
+research plan (`docs/helix/01-frame/research/<study>.md`, ADR-042).
 The research capability
 synthesizes them and reports:
 - repeated frustrations;
@@ -493,17 +496,16 @@ source.
 
 GDL-20. The result is an **evidence-linked jobs table**. Each job has
 importance, evidence (the sources that support it) and confidence, rated
-separately. A job can be important and low-confidence. In stage 1 the
-table lives in `docs/ux-builder/jobs.md`; in stage 2 it moves to the PRD's user
-needs section (D-4, H-2).
+separately. A job can be important and low-confidence. The table is the
+PRD's *User Needs* (D-4, H-2, ADR-042), proposed with `need add`.
 
 GDL-21. Each job has a stable ID (`J-<n>`) so tasks, journeys and test
 results can trace to it. A job whose confidence is low is flagged wherever
 a design decision relies on it.
 
 GDL-77. **Structured target users** *(added 2026-10-24)*. The people the
-product is for are records, not a list of names: `docs/ux-builder/users.md` holds a
-row per target user (`U-<n>`) with their context (where, on what device,
+product is for are records, not a list of names: the PRD's *User Segments*
+hold a row per target user, named by who they are (`segment add`, ADR-042), with their context (where, on what device,
 with what expertise), their needs (accessibility needs and constraints),
 the jobs they hold with an importance for each (the same job can matter
 more to one user than another), and evidence, confidence and status rated
@@ -745,9 +747,9 @@ rendered by `@ux-builder/ui` without the design package.)*
 GDL-31. Each major UX decision is recorded as an **interaction decision
 record**: the question, the alternatives, the recommendation, the
 rationale, the assumptions, and a validation status (*not tested*,
-*tested*, *refuted*) with the validation it requires. In stage 1 it is
-written as `docs/ux-builder/decisions/UXD-<n>.md`; in stage 2 it maps to a HELIX
-ADR or the solution design's *Solution Approaches* (H-3).
+*tested*, *refuted*) with the validation it requires. It is a HELIX ADR
+tagged `area:ui`, with *Assumptions* and *Validation* (H-3, ADR-042),
+proposed by `decision add`.
 
 ##### Architecture (stage 5)
 
@@ -882,8 +884,10 @@ not see.
 
 ##### Human usability testing (stage 7C)
 
-GDL-54. `ux-builder-design test-kit` writes a test kit,
-`docs/ux-builder/tests/TK-<n>/`, from the journeys:
+GDL-54. `ux-builder-design test-kit --study <study>` writes a test kit
+from the journeys: the scenarios, success criteria and screener in the
+study's HELIX research plan, and the session materials as run output in
+`docs/ux-builder/runs/studies/<study>/` (ADR-042):
 test scenarios phrased as user goals with no interface words, success
 criteria from the acceptance criteria, a facilitator script, a consent
 note, a recruiting screener from the brief's target users, and an
@@ -916,10 +920,9 @@ it, and the assumptions behind the prediction move to *refuted*.
 
 GDL-60. The results are written as a **UX evaluation report**: method,
 tasks, findings by journey with evidence and severity, proposed
-corrections, the rubric with both columns, and what was not tested. In
-stage 1 it is `docs/ux-builder/evaluations/UER-<n>.md`, from the
-`usability-evaluation-report` template already proposed to HELIX; in
-stage 2 it becomes HELIX's type (H-1).
+corrections, the rubric with both columns, and what was not tested. It is
+run output, `docs/ux-builder/runs/evaluations/<date>/report.md`, and what
+people did is proposed as claims in each study's *Findings* (ADR-042).
 
 GDL-61. Findings are prioritized into proposed improvements. At the third
 checkpoint the human decides which to implement; they go to HELIX's
@@ -937,7 +940,7 @@ SDK sends nothing anywhere itself (Decision D-1).
 
 GDL-63. The app's owner exports journey events, support requests and
 feedback as files. `ux-builder-design insights` reads them and writes
-`docs/ux-builder/insights/INS-<date>.md`, reporting per journey: completion, abandonment points, failed searches, feature use and
+`docs/ux-builder/runs/insights/<date>/` (run output, ADR-042), and proposes each journey's funnel for the metrics dashboard, reporting per journey: completion, abandonment points, failed searches, feature use and
 the steps where time is spent. It never fetches data itself.
 
 GDL-64. The guide runs the loop *observe → diagnose → hypothesize → design
@@ -983,46 +986,58 @@ update as the app is used.
 
 ## Asks of HELIX
 
-These belong in HELIX and are proposed to it, not built here.
+*Revised 2026-10-29 (ADR-042).* The short list agreed with HELIX's
+maintainer, shipped in HELIX v0.20.0 (DocumentDrivenDX/helix#103 and #104).
+Every addition is optional, so a HELIX project without a UI sees no change.
+ux-builder writes into these documents, always as proposals the person
+applies, and keeps no copies of its own.
 
-- **H-1. Accept the five UX artifact types** in
-  `docs/proposals/helix-ux-artifact-types`: user-journey-map, screen-flow,
-  wireframe, interaction-state-diagram and usability-evaluation-report.
-  HELIX v0.19.1 (2026-10-22) has none of them.
-- **H-2. Evidence-rated user needs**: a section of the PRD or research
-  plan that rates each need for importance, evidence and confidence
-  separately, with stable IDs.
-- **H-3. Validation status on UX decisions**: *not tested*, *tested* or
-  *refuted*, on ADRs or a UX form of them.
-- **H-4. Checkpoints as stop triggers**: the core and conditional
-  checkpoints added to `stop-triggers.yml`, so HELIX stops for a human at
-  these moments without adding document approval gates.
-- **H-5. A UX lane** in the HELIX skill that hands design work to
-  `ux-builder-design` when the repository has a blueprint.
-- **H-6. A task model home**: either a section of the feature
-  specification or the screen-flow type (H-1), so the blueprint's tasks
-  project into a HELIX document.
-- **H-7. Experiments linked to UX decisions**: HELIX's experiment mode
-  records which UX decision and hypothesis an experiment tests.
+- **H-1. Three UX types** *(revised; shipped)*: `user-flow` (UF-<n>, one per
+  feature), `wireframe` (UF-<n>-<nn>-<view>, nested under its flow, with the
+  interaction-state diagram folded into its States and Events) and an
+  optional `user-journey-map` (UJM-<n>). The screen-flow,
+  interaction-state-diagram and usability-evaluation-report drafts are
+  withdrawn, with research-evidence, usability-test-kit and experiment.
+- **H-2. Evidence-rated user needs** *(kept; shipped)*: the PRD's optional
+  *User Segments* and *User Needs*, each rated for evidence and confidence,
+  rows named by what they say.
+- **H-3. Validation status on UX decisions** *(kept; shipped)*: an ADR's
+  optional *Assumptions* and *Validation* (not tested, tested, refuted).
+- **H-4. Checkpoints as stop triggers** *(withdrawn)*: the guide's
+  checkpoints stay in the guide.
+- **H-5. A UX lane in the HELIX skill** *(withdrawn)*: HELIX need not know
+  ux-builder exists; ux-builder writes into HELIX's documents.
+- **H-6. A task model home** *(kept; shipped)*: the feature specification's
+  optional *Task Model*, with a key column tools use.
+- **H-7. Experiments linked to UX decisions** *(withdrawn)*: experiments are
+  DDx beads, and their result goes in the decision ADR's *Validation*.
+
+Shipped with them, also optional: per-study research plans with Scenarios,
+Success Criteria, Screener and *Findings* (claims); principles.md's
+*Experience Principles*; the solution design's stable BR-n business rules
+and *Experience Traceability*; DESIGN.md's modalities, size classes, app
+frame and destinations by size class; the story test plan's *Journey
+Scenarios* and an Evidence column in *UX Coverage*; and the metrics
+dashboard's *Journey Funnels*.
 
 ## How This Reconciles the Proposal with HELIX
 
 | Proposal idea | Here |
 |---|---|
 | One Experience Specification as the system of record | Split by kind, as ADR-030 decided: HELIX documents hold intent, evidence and rationale and govern; the blueprint holds structure (tasks, flows, journeys, screens, states) and projects them. The guide's artifact management keeps them consistent through `check`, `impact`, `propose` and the design state. The prototype is generated from the blueprint, as the proposal intends |
-| Approval gates | Checkpoints where the guide stops and asks (GDL-05, GDL-06, H-4). Documents need no sign-off |
+| Approval gates | Checkpoints where the guide stops and asks (GDL-05, GDL-06). Documents need no sign-off |
 
 The proposal's seven connected artifacts, and its rubric:
 
 | Proposal artifact | Where it lives |
 |---|---|
 | Product Experience Brief | HELIX PRD and stories, rendered as the brief (GDL-14) |
-| User Jobs and Task Model | Jobs in the PRD (GDL-20, H-2); tasks in the blueprint (GDL-22) |
-| Optimized Interaction Flows | Blueprint alternatives and journeys; screen-flow documents (H-1) |
+| User Jobs and Task Model | The PRD's User Needs and User Segments (GDL-20, H-2); the feature's Task Model (H-6), keyed by the blueprint's tasks (GDL-22) |
+| Optimized Interaction Flows | Blueprint alternatives and journeys; HELIX user-flow documents (H-1) |
 | Experience Architecture | The blueprint (GDL-32); design system and wireframe documents |
 | Executable Prototype | Exploratory and validated prototypes (GDL-40 to GDL-46) |
-| UX Evaluation Report | GDL-60, H-1 |
-| UX Decision Log | Interaction decision records in HELIX (GDL-31); design state; trace |
+| UX Evaluation Report | Run output (GDL-60, ADR-042); what people did goes in the study's Findings |
+| UX Decision Log | HELIX ADRs tagged area:ui, with Validation (GDL-31, H-3); design state; trace |
 | UX Quality Rubric | `guidelines/rubric.json` (GDL-37) |
 
 ## User Stories
@@ -1138,8 +1153,8 @@ proposed"). Each is recorded in an ADR.
 |---|---|---|
 | D-1 | Journey events: the SDK may emit events to a sink the app supplies, and never sends anything itself. The "nothing reported" principle stands, clarified | ADR-038 |
 | D-2 | Generated *exploratory* prototypes are allowed outside the app's source; the validated prototype is app code the agent builds from the SDK's patterns. ADR-025 decision 3 stands for app code | ADR-037 |
-| D-3 | The guide is a ux-builder skill; HELIX hands design work to it (H-5) | ADR-036 |
-| D-4 | Jobs and evidence: `docs/ux-builder/` in stage 1; the PRD's user needs section in stage 2 (H-2) | ADR-036, ADR-039 |
+| D-3 | The guide is a ux-builder skill; it writes into HELIX's documents (H-5 withdrawn) | ADR-036, ADR-042 |
+| D-4 | Jobs and evidence: the PRD's User Needs and User Segments, and per-study research plans (H-2) | ADR-042, ADR-039 |
 | D-5 | Transcripts only; recordings stay with the owner, outside the repository | ADR-039 |
 | D-6 | Building the validated prototype and experiments in the app stays within the vision: the agent builds them with the SDK in the app's own code | ADR-037 |
 | D-7 | Design and build: the guide designs, then builds the validated prototype and experiments, always behind checkpoints | ADR-037 |
@@ -1167,7 +1182,7 @@ remaining comprehension check last. Bead priorities follow that order.
   new blueprint commands), CONTRACT-006 (task metrics, heuristic pass,
   human findings) and CONTRACT-007 (decision fields).
 - **Solution design**: SD-006.
-- **HELIX**: H-1 to H-7, in stage 2. The guide works without them.
+- **HELIX**: v0.20.0's UX types and optional sections (H-1, H-2, H-3, H-6); H-4, H-5 and H-7 withdrawn (ADR-042).
 
 ## Out of Scope
 

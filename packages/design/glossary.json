@@ -1,5 +1,5 @@
 {
-  "$comment": "The guided design loop's terms (FEAT-018 GDL-79): what each means, and why it is valuable to the person. The agent explains each the first time it comes up; ux-builder-design explain prints them. ids: the short IDs the guide shows, what kind of thing each names and where it lives; the agent names the kind with an ID the first time it shows one.",
+  "$comment": "The guided design loop's terms (FEAT-018 GDL-79): what each means, and why it is valuable to the person. The agent explains each the first time it comes up; ux-builder-design explain prints them. ids: the short IDs the guide shows, what kind of thing each names and where it lives; the agent names the kind with an ID the first time it shows one. ids: only HELIX's own IDs and participant pseudonyms (ADR-042 decision 5); everything else is named by what it says.",
   "terms": [
     {
       "term": "checkpoint",
@@ -196,7 +196,7 @@
     {
       "term": "evaluation report",
       "step": 7,
-      "means": "The results of an evaluation: the method, the tasks, what people did against what was predicted, findings by journey and what was not tested (UER-1).",
+      "means": "The results of an evaluation: the method, the tasks, what people did against what was predicted, findings by journey and what was not tested; run output, kept out of the repository.",
       "why": "It is the evidence for deciding what to fix and whether the design is ready to build."
     },
     {
@@ -259,111 +259,34 @@
       "where": "defined once in HELIX; the blueprint designs how the user meets it"
     },
     {
-      "id": "U-<n>",
-      "pattern": "^U-\\d+$",
-      "kind": "target user",
-      "term": "target user",
-      "where": "docs/ux-builder/users.md"
+      "id": "ADR-<nnn>",
+      "pattern": "^ADR-\\d+$",
+      "kind": "decision, a HELIX ADR (a UX decision is tagged area:ui)",
+      "where": "HELIX's ADRs (docs/helix/02-design/adr/)"
     },
     {
-      "id": "J-<n>",
-      "pattern": "^J-\\d+$",
-      "kind": "job to be done (a number)",
-      "term": "job to be done",
-      "where": "docs/ux-builder/jobs.md"
+      "id": "UF-<n>",
+      "pattern": "^UF-\\d+$",
+      "kind": "user flow, one per feature",
+      "where": "HELIX's user flows (docs/helix/02-design/flows/)"
     },
     {
-      "id": "J-<name>",
-      "pattern": "^J-[a-z][a-z0-9-]*$",
-      "kind": "journey (a name)",
-      "term": "journey",
-      "where": "the blueprint, docs/ux-builder/blueprint/app.blueprint.json"
+      "id": "UF-<n>-<nn>-<view>",
+      "pattern": "^UF-\\d+-\\d+-[a-z0-9-]+$",
+      "kind": "wireframe of one view in a user flow",
+      "where": "beside its user flow (docs/helix/02-design/flows/UF-<n>-<feature>/)"
     },
     {
-      "id": "T-<n>",
-      "pattern": "^T-\\d+$",
-      "kind": "task",
-      "term": "task",
-      "where": "the blueprint's task model"
-    },
-    {
-      "id": "A-<n>",
-      "pattern": "^A-\\d+$",
-      "kind": "assumption",
-      "term": "assumption",
-      "where": "the design state"
-    },
-    {
-      "id": "PR-<n>",
-      "pattern": "^PR-\\d+$",
-      "kind": "experience principle",
-      "where": "the brief, and the design state"
-    },
-    {
-      "id": "UXD-<n>",
-      "pattern": "^UXD-\\d+$",
-      "kind": "interaction decision",
-      "where": "docs/ux-builder/decisions/"
-    },
-    {
-      "id": "EV-<n>",
-      "pattern": "^EV-\\d+$",
-      "kind": "research evidence",
-      "where": "docs/ux-builder/evidence/"
+      "id": "UJM-<n>",
+      "pattern": "^UJM-\\d+$",
+      "kind": "user journey map",
+      "where": "HELIX's journey maps (docs/helix/01-frame/journey-maps/)"
     },
     {
       "id": "P<n>",
       "pattern": "^P\\d+$",
       "kind": "test participant, by pseudonym",
       "where": "test sessions; the real name never leaves this machine"
-    },
-    {
-      "id": "TK-<n>",
-      "pattern": "^TK-\\d+$",
-      "kind": "usability test kit",
-      "where": "docs/ux-builder/tests/"
-    },
-    {
-      "id": "F-<code>",
-      "pattern": "^F-[0-9a-f]{6,}$",
-      "kind": "finding from a test or the assessment",
-      "where": "the evaluation report"
-    },
-    {
-      "id": "UER-<n>",
-      "pattern": "^UER-\\d+$",
-      "kind": "UX evaluation report",
-      "where": "docs/ux-builder/evaluations/"
-    },
-    {
-      "id": "INS-<date>",
-      "pattern": "^INS-\\d{4}-\\d{2}-\\d{2}$",
-      "kind": "production insights",
-      "where": "docs/ux-builder/insights/"
-    },
-    {
-      "id": "D-<n>",
-      "pattern": "^D-\\d+$",
-      "kind": "diagnosis (why people struggled)",
-      "where": "the design state"
-    },
-    {
-      "id": "EXP-<n>",
-      "pattern": "^EXP-\\d+$",
-      "kind": "experiment",
-      "where": "docs/ux-builder/experiments/"
-    },
-    {
-      "id": "FB-<n>",
-      "pattern": "^FB-\\d+$",
-      "kind": "your feedback on an item",
-      "where": "the design state"
-    },
-    {
-      "id": "O-<n>",
-      "pattern": "^O-\\d+$",
-      "kind": "observation by the design team (not user evidence)",
-      "where": "the design state"
     }
   ]
 }

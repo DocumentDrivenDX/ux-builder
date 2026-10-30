@@ -46,7 +46,10 @@ in `helix-proposals/`, comparisons, drawings and wireframes in their own
 folders. The design state stays in `.ux-builder/`. If `status` says the app
 is on the old layout (`docs/ux/`, `app.blueprint.json` at the top), offer
 `ux-builder-design migrate --dry-run`, show the person what would move, and
-run `migrate` when they agree.
+run `migrate` when they agree. Do the same when the app still has design
+documents ux-builder used to keep (`jobs.md`, `users.md`, decision or
+evidence records): `migrate` proposes them into HELIX and moves kits,
+reports and insights to run output; then show the person the proposals.
 
 ## Where the person is
 
@@ -67,17 +70,15 @@ the wording, and `explain --step <n>` lists the terms a step introduces.
 Explain in plain words, with an example from their product. Don't explain
 the same term twice in a session unless they ask.
 
-**Never show a bare ID.** The work is full of short IDs (U-1, J-1, J-find,
-T-2, BR-1, US-3, UXD-1, EV-2, TK-1, F-…); to the person they are cryptic.
-Always say what an ID is and name the thing in words beside it: "the target
-user U-1, weekend anglers", "the job J-1 (find a river near me)", "the
-business rule BR-1, only public stretches can be saved". The first time a
-kind of ID comes up, explain the prefix in one sentence (U- is a target
-user, J- with a number a job to be done, J- with a name a journey, T- a
-task, BR- a business rule from HELIX…): `ux-builder-design explain <ID>`
-has the wording and where it lives, and `explain ids` lists every kind.
-Prefer the name over the ID in your own sentences; give the ID so the
-person can find the item, not instead of saying what it is.
+**Show names, not IDs.** Name every user, need, task, journey, screen,
+assumption and question by what it says: "weekend anglers", "find a river
+near me", "the find journey". The only IDs a person sees are HELIX's own
+(FEAT-, US-, US-n-ACm, BR-, ADR-, UF- and its views, UJM-) and participant
+pseudonyms (P1): give one only beside the name, so the person can find the
+item ("the business rule BR-1, only public stretches can be saved"), never
+instead of it. Tools may keep internal keys (a task's key, a finding's
+key); never read one out. `ux-builder-design explain <ID>` says what a
+HELIX ID names and where it lives, and `explain ids` lists them.
 
 ## Review and approval
 
@@ -174,10 +175,10 @@ prototypes*).
 ## Starting in an existing app
 
 `ux-builder-design init` starts an existing app at Baseline. In its first
-session, run `ux-builder-design baseline`: it writes `docs/ux-builder/baseline.md`
-from the blueprint, the HELIX stories and the latest assessment run (run
-`ux-builder-audit assess` first if there is none), with every drafted brief
-point, job and task marked current state, assumed. Go through it with the
+session, run HELIX's `backfill`: it drafts the PRD and stories from the app
+as it is, as proposals the person applies, each point current state,
+assumed. Draw the blueprint from the app's screens (`ux-builder-blueprint`),
+and run `ux-builder-audit assess` for the findings. Go through them with the
 person, then ask what they want to improve and route the request:
 - **a specific change** ("move the filters") → impact, then Explore;
 - **"it feels too complicated"** → the assessment, then `simplify`;
@@ -212,7 +213,7 @@ approval (*Review and approval*).
   and the UX quality rubric;
 - research evidence the person supplies;
 - the task model in the blueprint;
-- decision history: the design state, `docs/ux-builder/decisions/` and the trace.
+- decision history: the design state, HELIX's ADRs tagged `area:ui` and the trace.
 
 **Tools:**
 - the assessment (`ux-builder-audit assess`), which walks journeys in a
@@ -261,9 +262,10 @@ on one another. Ask those together, in one message; a narrative answer is
 fine, and a part they skip becomes an assumption to test. Tell them the
 budget `intake` and `status` give ("About 9 decisions and 25 minutes
 before the first prototype"). Follow up only where the answer would change
-the design. Then go on as a structured interview through HELIX's `grill`,
-drafting or updating the PRD and stories as it goes (through proposals the
-person accepts). Ask "What are the three most important things people
+the design. Then run HELIX's `frame` to write the PRD and principles.md,
+and go on as a structured interview through HELIX's `grill` for what the
+sources cannot answer, drafting or updating the PRD and stories as it goes
+(through proposals the person accepts). Ask "What are the three most important things people
 should accomplish?" before anything about screens.
 
 When the person is unsure between interaction models (search first or map
@@ -273,79 +275,92 @@ carry it to Explore, where you will design each and compare them.
 
 Record what you learn as brief points: `state set 'assumptions[+]'
 '{"text":"…","section":"users","status":"hypothesis","confirm":"…"}'`
-(sections: product, users, outcome, jobs, principles, constraints). An
-experience principle goes in `principles[+]`; give it a `rule` when a check
-can hold the design to it, for example
-`{"text":"No mandatory account creation","rule":{"kind":"no-step-before","patterns":["SignIn"]}}`.
+(sections: product, users, outcome, jobs, constraints). An experience
+principle is HELIX's: `ux-builder-design principle add --text "No mandatory
+account creation"` proposes it for principles.md. Give it a `--rule` when a
+check can hold the design to it, for example
+`--rule '{"kind":"no-step-before","patterns":["SignIn"]}'`.
 
 Then run `ux-builder-design brief` and open `docs/ux-builder/brief.html` for the
-person. Regenerate the brief whenever its sources change: the PRD, the
-stories or the design state. Ask `core-1` on the brief.
+person. Regenerate the brief whenever its sources change: the PRD,
+principles.md, the stories or the design state. Ask `core-1` on the brief.
 
 ## Understand users
 
 **Hypotheses first.** From the brief and what you know of the domain,
 propose the user segments, jobs to be done, motivations, frustrations,
 usage contexts and accessibility needs. Mark every item *hypothesis*, with
-no evidence: write the jobs into `docs/ux-builder/jobs.md` from its template with
-status hypothesis, confidence low and evidence none, and the target users
-into `docs/ux-builder/users.md`: one row per user segment (`U-<n>`) with its
-context (where, on what, with what expertise), its needs (accessibility
-needs and constraints), the jobs it holds with an importance for each
-(`J-1 high, J-2 low`), evidence none, confidence low, status hypothesis.
-Describe segments, never invented people: no names, ages or biographies.
-The brief's Target users then comes from this file alone.
+no evidence. They go in the PRD, as proposals the person applies: each
+need with `ux-builder-design need add --need "<what the user needs>"
+--importance high|medium|low` (status assumed, confidence low, no
+evidence), and each target user with `ux-builder-design segment add --user
+"<who, as a segment>" --context "<where, on what, with what expertise,
+and any accessibility needs>" --need "<need>"...`. Describe segments,
+never invented people: no names, ages or biographies. Name them by what
+they say, never by an ID. The brief's Target users then comes from the
+PRD's User Segments alone.
 
-**Then evidence.** When the person supplies research (interview notes or
-transcripts, analytics exports, support tickets, surveys, observations),
-record each source with `ux-builder-design evidence add <file> --kind
-<kind> --source "<where it is kept>"`. Add to its record only the short
-excerpts your synthesis relies on, with `ux-builder-design evidence excerpt
-add EV-<n> --participant "<who>" --text "<their words>"`: it masks them and
-gives the speaker a pseudonym (P1, P2); the
+**Then evidence.** Research belongs to a **study**: one HELIX research
+plan, `docs/helix/01-frame/research/<study>.md`, named for what it asks
+(`anglers`, `night-planning`). When the person supplies research (interview
+notes or transcripts, analytics exports, support tickets, surveys,
+observations), record each source with `ux-builder-design evidence add
+<file> --kind <kind> --study <study> --source "<where it is kept>"`: it
+proposes a row of the plan's Sources, never the source's text. Add only
+the short excerpts your synthesis relies on, with `ux-builder-design
+evidence excerpt add --study <study> --participant "<who>" --text "<their
+words>"`: it masks them and gives the speaker a pseudonym (P1, P2); the
 owner may list each pseudonym's real name in
 `.ux-builder/participants.local.json` (kept out of git) so `validate` can
-catch one that slips in. Then
-report, each point citing the evidence IDs (EV-<n>) behind it:
+catch one that slips in. Then report, each point citing its study:
 - repeated frustrations;
 - common task sequences;
 - unmet needs;
 - differences between segments;
 - conflicts between what users say and what they do.
 
-**Ground every claim.** Each synthesized claim that matters goes in its
-record's Claims, with where it comes from (a file and line, a screen, a
-quote's time), whether it was observed or inferred, the confidence, what
-contradicts it and what is unknown: `ux-builder-design evidence claim add
-EV-<n> --text "…" --source "…" --basis observed|inferred --confidence
-high|medium|low [--direction] [--contradicts "…"] [--unknown "…"]`. Mark
-`--direction` when the claim would change the design's direction. Before
-you present such a claim, check it against its source yourself (read the
-code, open the screen, find the quote) and record it with `evidence claim
-verify EV-<n> C<n>`; never relay a subagent's summary as fact. A claim you
+**Ground every claim.** Each synthesized claim that matters goes in the
+study's Findings > Claims, HELIX's columns: where it comes from (a session,
+a document, a quote's time), its basis (observed or inferred, and how
+often), the confidence, its direction (what it supports, weakens or
+refutes), what contradicts it and what is unknown: `ux-builder-design
+evidence claim add --study <study> --text "…" --source "…" --basis
+"observed in 4 of 6 sessions" --confidence high|medium|low [--direction
+"refutes: <assumption or decision>"] [--contradicts "…"] [--unknown "…"]`.
+Before you present a claim that weakens or refutes something, check it
+against its source yourself (read the code, open the screen, find the
+quote) and record it with `evidence claim verify --study <study> --claim
+"<its words>"`; never relay a subagent's summary as fact. A claim you
 cannot check is labelled uncertain (`--confidence low`) and said so.
 `validate` warns about any direction-changing claim neither checked nor
-labelled.
+labelled. All of it is proposed: the person applies it with the other
+HELIX proposals.
 
 When what the person says goes against a claim from their own sources
 ("I don't use due dates" against a missed appointment in their notes),
 do not quietly follow either side: record it with `ux-builder-design
-evidence claim contradict <EV-n> <Cn> --text "<what they said>"`, which
-opens a question, and ask them which holds. `validate` warns about a
-contradicted claim nobody asked about, and about a story the brief calls
-confirmed that no journey carries.
+evidence claim contradict --study <study> --claim "<its words>" --text
+"<what they said>"`, which opens a question, and ask them which holds.
+`validate` warns about a contradicted claim nobody asked about, and about
+a story the brief calls confirmed that no journey carries.
 
 Update the jobs and users tables as evidence arrives: rate importance and confidence
-separately; a job is confirmed only with an evidence source. Run
+separately; a job is confirmed only with an evidence source, the study that
+supports it (its name in the Evidence column). Run
 `ux-builder-design validate` after each change.
 
 ## Model tasks
 
-Draft the task model from the jobs and the stories: add `tasks[]` to the
-blueprint, one per thing a user must accomplish, each with its goal, the
-jobs it serves, its trigger, required and optional inputs, system and user
+Draft the task model from the jobs and the stories. Each thing a user must
+accomplish is a row of its feature's Task Model in HELIX: propose it with
+`ux-builder-design task add --feature FEAT-<n> --task "<what they do>"
+--goal "<what they want>" --user "<who>"... --need "<need>"...`; it
+returns the task's key. Then add it to the blueprint's `tasks[]` under that
+key (`"id": "<key>"`), with its goal, the needs it serves and the users it
+serves by name (`"needs": ["Find a river"]`, `"users": ["Weekend
+anglers"]`), its trigger, required and optional inputs, system and user
 actions, success (acceptance criteria IDs), exceptions and subtasks with
-their alternative ways, and the target users it serves (`"users": ["U-1"]`).
+their alternative ways.
 
 **Business rules.** A task often depends on the business's rules ("only
 stretches with public access can be saved"). Each is defined once in
@@ -361,7 +376,7 @@ A rule the user only meets as an error is a design problem; `validate`
 fails a cited rule without the four answers, and the test kit gives each
 rule a task set in its trigger.
 
-Name each journey's task (`"task": "T-<n>"`) and run
+Name each journey's task by its key (`"task": "<key>"`) and run
 `ux-builder-blueprint check`.
 
 Then run `ux-builder-blueprint simplify` and offer its proposals: inputs to
@@ -393,7 +408,10 @@ first, say), draft at least two alternatives and recommend one:
    only if you can give your reasoning; otherwise leave it for testing.
 5. Ask `core-2`. On their choice, run
    `ux-builder-blueprint alternative choose <name> --reason "<why>"` and
-   record the decision (`ux-builder-design decision add`).
+   record the decision (`ux-builder-design decision add`). It proposes a
+   HELIX ADR tagged `area:ui`; the person applies it with the other HELIX
+   proposals. When testing settles it, `decision status ADR-<nnn>
+   tested|refuted --evidence <where>` proposes its new Validation.
 
 ## Design the structure
 
@@ -474,28 +492,32 @@ Inspect before anyone sees it: run the assessment's heuristic pass on the
 prototype (`ux-builder-audit assess heuristics`), and fix what it finds.
 Its task metrics are agent-measured; never present them as how people do.
 
-Then test with people. `ux-builder-design test-kit` writes
-`docs/ux-builder/tests/TK-<n>/`: scenarios as the user's goals (never a screen or
-control name), success criteria, a script, a consent note, a screener and
-`observations.csv`. The person runs the sessions. Afterwards:
+Then test with people, as a study. `ux-builder-design test-kit --study
+<study>` proposes the study's scenarios (the user's goals, never a screen or
+control name), success criteria and screener for its HELIX research plan,
+and writes the session materials as run output in
+`docs/ux-builder/runs/studies/<study>/`: a script, a consent note, the task
+list and `observations.csv`. The person runs the sessions. Afterwards:
 
-- `observe import <sheet> --kit TK-<n>`: each row a finding with
+- `observe import <sheet> --study <study>`: each row a finding with
   `source: human`, by pseudonym, remarks masked. Name a problem in the same
   words in every row it was seen (the `problem` column), so recurring
   problems are counted, and the target user each participant matched in the
-  screener (the `user` column, `U-<n>`), so the report breaks results down
+  screener (the `user` column, by name), so the report breaks results down
   by user.
-- `transcript add <file> --session <id> --kit TK-<n> --consent-confirmed --cite <time>...`:
+- `transcript add <file> --study <study> --session <id> --consent-confirmed --cite <time>...`:
   only after the person confirms that session's consent; you keep only the
   cited lines, masked. Never take a recording.
 - `rubric`: the observed column beside the predicted one, per task
   completion, median time, errors, assists, and the problems seen twice.
-- `report`: `docs/ux-builder/evaluations/UER-<n>.md`. A prediction the people
+- `report`: the evaluation, as run output in
+  `docs/ux-builder/runs/evaluations/<date>/report.md`, and what people did
+  proposed as claims in the study's Findings. A prediction the people
   contradicted is highlighted, and the assumptions behind it (those with a
   `dimension`) become refuted. Say plainly what was not tested.
 
 At `core-3`, the person chooses which findings to fix:
-`route <F-id>... [--decision UXD-<n> --status tested|refuted]` writes them as
+`route <F-id>... [--decision ADR-<nnn> --status tested|refuted]` writes them as
 a proposed patch to HELIX's improvement backlog. Label every finding you
 report as a human observation or your recommendation; never pass yours off
 as what people did.
@@ -508,15 +530,24 @@ The app reports journeys only if it chooses to: wrap it in
 When the owner exports the events (JSON Lines), and support or feedback:
 
 - `insights <events.jsonl> [--support <file>] [--feedback <file>]` writes
-  `docs/ux-builder/insights/INS-<date>.md`; the jobs and the rubric cite it.
-- `diagnose --insight INS-<date> --observation … --explanation …
+  the dated insights as run output (`docs/ux-builder/runs/insights/<date>/`)
+  and proposes each journey's funnel for HELIX's metrics dashboard; the
+  rubric cites it.
+- `diagnose --insight <date> --journey <id> --observation … --explanation …
   --explanation … --hypothesis "If …, then …, because …" --alternative <name>`:
   never one explanation; make the alternative first.
-- Ask checkpoint `experiment`, then `experiment start --decision UXD-<n>
-  --variant <alt> --metric <m> --guardrail <m> --duration <days>`. When it
-  ends, `experiment end EXP-<n> --result <file>`, then ask `release`.
+- Ask checkpoint `experiment`, then `experiment start --decision ADR-<nnn>
+  --variant <alt> --metric <m> --guardrail <m> --duration <days>`: it opens
+  a DDx bead with the hypothesis, the metrics and the stopping rule. When it
+  ends, `experiment end <bead> --result <file>` closes the bead and proposes
+  the decision's ADR Validation; then ask `release`.
 
 ## Change what exists
+
+When the change is to a requirement (what the product must do, not how the
+interface does it), run HELIX's `evolve` first: it threads the change
+through the PRD, features and stories. Then regenerate what derives from
+the blueprint, as below.
 
 When the person asks for a change ("remove the activity selection before
 exploring"), first run `ux-builder-design impact "<their words>"`: it lists
@@ -570,18 +601,12 @@ showing a finished one):
 | Type | Path |
 |---|---|
 | experience-brief | `docs/ux-builder/brief.md` |
-| baseline | `docs/ux-builder/baseline.md` |
-| research-evidence | `docs/ux-builder/evidence/EV-<n>.md` |
-| jobs | `docs/ux-builder/jobs.md` |
-| users | `docs/ux-builder/users.md` |
-| ux-decision | `docs/ux-builder/decisions/UXD-<n>.md` |
-| test-kit | `docs/ux-builder/tests/TK-<n>/kit.md` |
-| usability-evaluation-report | `docs/ux-builder/evaluations/UER-<n>.md` |
-| insights | `docs/ux-builder/insights/INS-<yyyy-mm-dd>.md` |
-| experiment | `docs/ux-builder/experiments/EXP-<n>.md` |
 
 After writing or changing one, run `ux-builder-design validate` and fix what
-it reports.
+it reports. It checks the blueprint and its links into HELIX (the needs,
+users, rules and Task Model keys it names), the brief, and the rules on
+what the guide proposes (masked excerpts, rated evidence). Drift between
+HELIX documents is HELIX's to find: run HELIX's `validate` and `align`.
 
 ## HELIX documents
 

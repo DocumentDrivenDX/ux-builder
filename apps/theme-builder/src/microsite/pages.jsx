@@ -241,7 +241,7 @@ function ExistingApp() {
       <H2 id="wrap">3. Wrap the app</H2>
       <Command code text={'import { ThemeProvider } from "@ux-builder/ui";\n\n<ThemeProvider theme="ux-builder-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} />
       <H2 id="design">Design what comes next with your agent</H2>
-      <p>To design or redesign the app's experience, add the guide and start it. Its first session is a baseline of what exists; then it asks what to improve (<a href={href("start", "design")}>Design the UX with your agent</a>).</p>
+      <p>To design or redesign the app's experience, add the guide and start it. Its first session starts from HELIX's backfill of what exists; then it asks what to improve (<a href={href("start", "design")}>Design the UX with your agent</a>).</p>
       <Command text="npm install -D @ux-builder/design@latest" />
       <Command text="npx ux-builder-design init" />
       <H2 id="no-react">Without React</H2>
@@ -323,18 +323,18 @@ const CHECKPOINTS = [
   ["release", "After an experiment", "Release it, or keep what we have?"],
 ];
 const DOCS = [
-  ["brief.md", "The experience brief: product, users, outcome, jobs, principles, constraints, open questions"],
-  ["users.md", "Target users: one record per segment, with its context, goals, constraints and evidence"],
-  ["jobs.md", "Jobs to be done, each with its importance, evidence and confidence"],
-  ["blueprint/", "The blueprint (app.blueprint.json): screens, tasks, journeys and how each business rule is met; and its alternatives"],
-  ["evidence/EV-n.md", "A research source: where its owner keeps it, and only the masked quotes the synthesis cites"],
-  ["decisions/UXD-n.md", "An interaction decision: the alternatives, the choice and why, its assumptions and whether it was tested"],
-  ["compare/, prototypes/", "The comparison page, and disposable clickable prototypes"],
-  ["tests/TK-n/", "A usability test kit: scenarios, script, consent, screener and observation sheet"],
-  ["evaluations/UER-n.md", "The UX evaluation report: the rubric predicted, agent-measured and observed, findings by journey"],
-  ["insights/INS-date.md", "What people did in production, per journey"],
-  ["experiments/EXP-n.md", "An experiment: hypothesis, variant, metrics, duration and result"],
-  ["helix-proposals/", "Changes to HELIX's documents, drafted as patches for you to apply"],
+  ["docs/helix/01-frame/prd.md", "HELIX's PRD: its User Segments and User Needs, each rated for evidence and confidence (need add, segment add)"],
+  ["docs/helix/01-frame/features/FEAT-n…", "A feature's Task Model: what people must accomplish, keyed for the blueprint (task add)"],
+  ["docs/helix/01-frame/principles.md", "Experience Principles (principle add)"],
+  ["docs/helix/02-design/adr/ADR-n…", "A UX decision, tagged area:ui: the alternatives, the choice and why, its assumptions and Validation (decision add)"],
+  ["docs/helix/01-frame/research/<study>.md", "A study: its sources, scenarios, success criteria and screener, and in Findings the masked quotes and claims"],
+  ["docs/helix/02-design/flows/UF-n…", "User flows and their wireframes, drafted from the blueprint (ux-builder-blueprint propose)"],
+  ["docs/ux-builder/brief.md", "The experience brief, compiled from HELIX: product, users, outcome, needs, principles, constraints, open questions"],
+  ["docs/ux-builder/blueprint/", "The blueprint (app.blueprint.json): screens, tasks, journeys and how each business rule is met; and its alternatives"],
+  ["docs/ux-builder/compare/, prototypes/", "The comparison page, and disposable clickable prototypes"],
+  ["docs/ux-builder/helix-proposals/", "Every change to HELIX's documents, drafted as patches for you to apply"],
+  ["docs/ux-builder/runs/", "Run output, not committed: a study's session materials and observations, evaluations, insight exports"],
+  ["DDx beads", "Experiments: hypothesis, variant, metrics and stopping rule; the result goes in the decision's Validation"],
 ];
 const EXPECT = [
   ["An overview first", "The first session opens with the eight steps: what you do in each, what comes out, and where it stops for you."],
@@ -365,8 +365,8 @@ function Design() {
       <H2 id="other-starts">Other ways in</H2>
       <ul>
         <li><b>An app made at once</b> (<code>npm create @ux-builder/app@latest my-app -- --modality responsive-web --theme databricks</code>) has the guide too: type <code>/ux-builder-design</code>.</li>
-        <li><b>An existing app</b>: install the guide and start it. Its first session is a <b>baseline</b>: the agent drafts what exists from the blueprint, the HELIX stories and the latest assessment, each point marked current state, assumed, then asks what to improve.<Command text="npm install -D @ux-builder/design@latest" /><Command text="npx ux-builder-design init" /></li>
-        <li><b>An app from before <code>docs/ux-builder/</code></b> (its design in <code>docs/ux/</code>, <code>app.blueprint.json</code> at the top) keeps working; <code>status</code> says so, and <code>migrate</code> moves it, with <code>git mv</code>, rewriting its scripts, CI and guidance. <code>--dry-run</code> shows the moves first.<Command text="npx ux-builder-design migrate --dry-run" /></li>
+        <li><b>An existing app</b>: install the guide and start it. Its first session runs HELIX's <b>backfill</b>: the PRD and stories drafted from what exists, as proposals, each point marked current state, assumed; the blueprint is drawn from the app's screens; then it asks what to improve.<Command text="npm install -D @ux-builder/design@latest" /><Command text="npx ux-builder-design init" /></li>
+        <li><b>An app from before <code>docs/ux-builder/</code></b> (its design in <code>docs/ux/</code>, <code>app.blueprint.json</code> at the top) keeps working; <code>status</code> says so, and <code>migrate</code> moves it, with <code>git mv</code>, rewriting its scripts, CI and guidance. It also proposes the design documents ux-builder used to keep (users, jobs, decision and evidence records) into HELIX, and moves kits and reports to run output. <code>--dry-run</code> shows the moves first.<Command text="npx ux-builder-design migrate --dry-run" /></li>
       </ul>
       <Notice tone="info" title="CLI first; MCP optional; nothing hosted">Every capability is a command with <code>--json</code> output, run through the agent's shell. <code>init --mcp</code> also writes <code>.mcp.json</code> for the ux-builder MCP server, whose design tools return the same results. The package makes no network request and calls no model.</Notice>
 
@@ -386,8 +386,8 @@ function Design() {
       <p>The agent explains each of its {glossary.length} terms the first time it comes up: what it means, and why it is worth your time. <code>ux-builder-design explain &lt;term&gt;</code> prints one; the <a href={href("reference", "glossary")}>design glossary</a> lists them all. To see the documents the guide writes, read <a href={href("proof", "worked-example")}>a worked example</a>.</p>
 
       <H2 id="users-rules">Target users and business rules</H2>
-      <p><b>Target users</b> are evidence-backed records in <code>docs/ux-builder/users.md</code>, one per segment (<code>U-1</code>…): their context, goals, constraints and the evidence for each, starting as hypotheses until research confirms them. Jobs, tasks and test scenarios name the users they serve.</p>
-      <p><b>Business rules</b> stay defined once in HELIX, as <code>**BR-n** — the rule</code>. The blueprint's tasks and journey steps cite the rules they depend on, and say how the user meets each: what triggers it, what they see before, what happens when they are blocked and how they recover. <code>validate</code> fails a cited rule HELIX does not define or whose experience is not designed; the test kit adds a task per rule; the report shows how people fared with each.</p>
+      <p><b>Target users</b> are evidence-backed rows of HELIX's PRD, its User Segments, one per segment, named by who they are: their context, needs and the evidence for each, starting as assumed until research confirms them. Tasks and studies name the users they serve.</p>
+      <p><b>Business rules</b> stay defined once in HELIX, as <code>**BR-n** — the rule</code>. The blueprint's tasks and journey steps cite the rules they depend on, and say how the user meets each: what triggers it, what they see before, what happens when they are blocked and how they recover. <code>validate</code> fails a cited rule HELIX does not define or whose experience is not designed; a study's test kit adds a scenario per rule; the report shows how people fared with each.</p>
 
       <H2 id="modality">Modality first, theme last</H2>
       <p>Before any wireframe or prototype is drawn, the agent asks which modalities and screen sizes the app is for and, for a web app, its <b>app frame</b>: just the screen with no menus, a top bar, navigation across the top, or a side menu. It recommends one from your app's destinations; you choose. Your answer is recorded in the blueprint; wireframes, prototypes and the built app are drawn in that frame, and ask again if it changes.</p>
@@ -498,7 +498,7 @@ function Assess() {
       <H2 id="report">5. The report</H2>
       <p><code>assess merge</code> makes one finding per user problem, each with a stable ID and every piece of evidence. <code>assess propose</code> writes a change to a HELIX artifact as a patch, applied only by a person. Then:</p>
       <Command text="npx ux-builder-audit assess report docs/ux-builder/assessments/<run>" />
-      <p>It writes <code>report.html</code>, <code>report.md</code> and <code>evidence.json</code>: what was checked, seen and left uncertain. Findings are grouped by journey, then the state it was walked in, then step, each with its rule's ID and full statement (or its heuristic and source), the evidence, a severity on Nielsen's 0 to 4 scale and the fix. <code>report.md</code> is a HELIX <i>usability-evaluation-report</i>. Every conclusion is labelled deterministic, observed, heuristic, SDK adoption or real user; confusion, trust and time saved are left for representative users. <code>assess compare</code> says which findings are new, persistent, resolved or regressed between two runs, and <code>assess gate --fail-on P1</code> fails CI on an open finding at that priority.</p>
+      <p>It writes <code>report.html</code>, <code>report.md</code> and <code>evidence.json</code>: what was checked, seen and left uncertain. Findings are grouped by journey, then the state it was walked in, then step, each with its rule's ID and full statement (or its heuristic and source), the evidence, a severity on Nielsen's 0 to 4 scale and the fix. <code>report.md</code> is a ux-builder usability assessment report, kept as run output rather than a HELIX document. Every conclusion is labelled deterministic, observed, heuristic, SDK adoption or real user; confusion, trust and time saved are left for representative users. <code>assess compare</code> says which findings are new, persistent, resolved or regressed between two runs, and <code>assess gate --fail-on P1</code> fails CI on an open finding at that priority.</p>
       <H2 id="video">6. Walkthrough videos</H2>
       <p><code>assess video</code> replays each walked journey in a browser of its own, signed in as its role, with sensitive data masked from the first frame, and pauses at each finding. For every journey it writes an MP4 with the findings drawn in, captions and a chapter per step, and a player whose findings pop up, pause the video and link to the report. Each caption gives the problem in plain English, the rule and the fix. It needs <code>ffmpeg</code> on the path.</p>
       <Command text="npx ux-builder-audit assess video --run <run> --pace slow" />

@@ -162,7 +162,7 @@
         "screen": { "$ref": "#/$defs/nullableString" },
         "decisionKind": { "enum": ["addition", "checkpoint"], "description": "addition: a new destination, screen, modal, required input or step, with the five answers (FEAT-018 GDL-11); checkpoint: a checkpoint's answer (CONTRACT-008)" },
         "checkpoint": { "enum": ["core-1", "core-2", "core-3", "significant-change", "experiment", "release"] },
-        "ux": { "type": "string", "pattern": "^UXD-[1-9][0-9]*$", "description": "The interaction decision record this event belongs to (docs/ux/decisions/)" },
+        "ux": { "type": "string", "pattern": "^(ADR-[0-9]{3,}|UXD-[1-9][0-9]*)$", "description": "The UX decision this event belongs to: a HELIX ADR (ADR-042), or an older trace's docs/ux decision record (UXD-n)" },
         "goal": { "type": "string" },
         "without": { "type": "string" },
         "simplest": { "type": "string" },

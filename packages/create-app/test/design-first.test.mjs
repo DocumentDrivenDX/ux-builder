@@ -39,6 +39,18 @@ function folder(name, { modality = "responsive-web", sizes = "compact,expanded" 
   return dir;
 }
 
+describe("ADR-042 decision 6: run output stays out of a design folder's repository", () => {
+  // @covers US-150-AC1
+  test("the design folder's .gitignore ignores the assessment runs and the run folder (docs/ux-builder/runs/)", () => {
+    const r = create(tmp, "run-output");
+    assert.equal(r.status, 0, r.stderr);
+    const ignore = readFileSync(join(tmp, "run-output/.gitignore"), "utf8");
+    assert.match(ignore, /^docs\/ux-builder\/assessments\/$/m);
+    assert.match(ignore, /^docs\/ux-builder\/runs\/$/m);
+    assert.match(ignore, /^# Run output stays out of the repository \(ADR-042\)/m);
+  });
+});
+
 describe("US-150: design first, and build the app in place at the end", () => {
   // @covers US-150-AC1
   test("AC1: without --modality it asks nothing and writes a design folder: the guide, HELIX's skill and marker, no app code or theme", () => {
@@ -86,16 +98,18 @@ describe("US-150: design first, and build the app in place at the end", () => {
   test("AC3: the build writes the app in place on the theme and recorded modalities, keeping the design work", () => {
     const dir = folder("rivers", { modality: "responsive-web,hybrid-chat", sizes: "compact,expanded" });
     // The design's own work, and a HELIX document the person wrote, must survive.
-    design(dir, "decision", "add", "--question", "Map first?", "--option", "Map", "--option", "List", "--choice", "Map", "--why", "Fewer steps");
     mkdirSync(join(dir, "docs/helix/00-discover"), { recursive: true });
+    writeFileSync(join(dir, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
+    design(dir, "decision", "add", "--question", "Map first?", "--option", "Map", "--option", "List", "--choice", "Map", "--why", "Fewer steps");
     writeFileSync(join(dir, "docs/helix/00-discover/product-vision.md"), "# Rivers, in the owner's words\n");
     const designed = readFileSync(join(dir, BP), "utf8");
-    const decision = readFileSync(join(dir, "docs/ux-builder/decisions/UXD-1.md"), "utf8");
+    const PROPOSED = "docs/ux-builder/helix-proposals/helix/02-design/adr/ADR-001-map-first.md.patch";
+    const decision = readFileSync(join(dir, PROPOSED), "utf8");
     const r = create(dir, ".", "--theme", "databricks");
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /Built rivers, a responsive-web and hybrid-chat app, in \. on the databricks theme, from the designed blueprint/);
     assert.equal(readFileSync(join(dir, BP), "utf8"), designed, "the designed blueprint is the app's plan");
-    assert.equal(readFileSync(join(dir, "docs/ux-builder/decisions/UXD-1.md"), "utf8"), decision);
+    assert.equal(readFileSync(join(dir, PROPOSED), "utf8"), decision);
     assert.equal(readFileSync(join(dir, "docs/helix/00-discover/product-vision.md"), "utf8"), "# Rivers, in the owner's words\n");
     assert.ok(existsSync(join(dir, "docs/helix/01-frame/user-stories/US-001-open-the-app-and-see-where-to-start.md")), "HELIX's starter documents where none existed");
     assert.ok(existsSync(join(dir, ".claude/skills/ux-builder-design/SKILL.md")) && existsSync(join(dir, ".claude/skills/helix/HELIX-VERSION.json")));

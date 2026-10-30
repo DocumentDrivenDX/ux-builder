@@ -15,15 +15,15 @@ import { readState } from "./state.mjs";
 const ACTIVITY = { baseline: "Baseline", define: "Define", explore: "Explore", experience: "Experience", validate: "Validate" };
 const UNTESTED = new Set(["assumed", "hypothesis", "current-state"]);
 
-/* Jobs by status, from docs/ux/jobs.md, else the design state's job
-   points; and each hypothesis with its confidence (low, or none yet). */
+/* Needs by status, from the PRD's User Needs (ADR-042), else the design
+   state's job points; and each assumed one with its confidence. */
 function jobsSummary(app, s) {
   const table = jobsTable(app);
-  const rows = table ? Object.entries(table).map(([id, j]) => ({ id, status: j.status, confidence: j.confidence || null }))
+  const rows = table ? Object.values(table).map((j) => ({ id: j.job, status: j.status, confidence: j.confidence || null }))
     : s.assumptions.filter((a) => a.section === "jobs" && a.status !== "refuted").map((a) => ({ id: a.id, status: a.status, confidence: null }));
   const byStatus = {};
   for (const r of rows) byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
-  return { from: table ? ux(app, "jobs.md") : "design state", byStatus, hypotheses: rows.filter((r) => r.status === "hypothesis").map(({ id, confidence }) => ({ id, confidence })) };
+  return { from: table ? Object.values(table)[0]?.path ?? "the PRD" : "design state", byStatus, hypotheses: rows.filter((r) => r.status === "hypothesis").map(({ id, confidence }) => ({ id, confidence })) };
 }
 
 export function status(app) {
@@ -56,8 +56,8 @@ export function status(app) {
     runningExperiments: s.experiments.filter((e) => e.status === "running").map((e) => e.id),
     next: s.next,
     jobs: jobsSummary(app, s),
-    // Target users by status, from docs/ux/users.md (GDL-77); null without one.
-    users: (() => { const t = usersTable(app); if (!t) return null; const byStatus = {}; for (const u of Object.values(t)) byStatus[u.status] = (byStatus[u.status] ?? 0) + 1; return { from: ux(app, "users.md"), byStatus }; })(),
+    // Target users by status, from the PRD's User Segments (GDL-77, ADR-042); null without them.
+    users: (() => { const t = usersTable(app); if (!t) return null; const byStatus = {}; for (const u of Object.values(t)) byStatus[u.status] = (byStatus[u.status] ?? 0) + 1; return { from: Object.values(t)[0]?.path ?? "the PRD", byStatus }; })(),
     // The validated prototype is a prototype until core-3 says it goes to production (ADR-037 rule 4).
     prototype: s.prototype ? { branch: s.prototype.branch, status: s.checkpoints.filter((c) => c.id === "core-3").at(-1)?.status === "passed" ? "production" : "validated" } : null,
     documents: uxDocuments(app),

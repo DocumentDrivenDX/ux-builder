@@ -27,8 +27,8 @@
    check, propose, draw and wireframes read the app's blueprint when no file is
    given (FEAT-012 DRF-01, DRW-01, DRW-02; FEAT-015 RPT-09). propose writes
    HELIX proposals as patches, a report and proposals.json, and applies
-   nothing; for HELIX UX types the installed HELIX does not define, it names
-   them and writes drafts under <out>/drafts/ instead: exit 0 when written, 2
+   nothing, among them HELIX's user flows, wireframes and journey maps
+   (ADR-042): exit 0 when written, 2
    with no .helix.yml marker above the file, on bad usage or an unreadable
    file. draw writes Mermaid and SVG, and per screen a state diagram with its
    state table (states-<screen>.md), noting the states a screen does not
@@ -209,10 +209,8 @@ async function main(argv) {
       writeProposals(r, out);
       for (const p of r.proposals) console.log(`patch    ${out}/${p.file}  ${p.path} (${p.section})`);
       for (const d of r.disagreements) console.log(`differs  ${d.path} (${d.section}): HELIX already says something else; no patch, see ${out}/report.md`);
-      if (r.uxTypes.missing.length) console.log(`missing  ${r.uxTypes.missing.join(", ")}: not defined by the installed HELIX; drafted under ${out}/drafts/ instead of patched`);
-      for (const d of r.drafts) console.log(`draft    ${out}/drafts/${d.path}  (${d.type})`);
       for (const p of r.problems) console.log(`note     ${p}`);
-      console.log(`${out}: ${plural(r.proposals.length, "patch", "patches")}, ${plural(r.drafts.length, "draft")}, ${plural(r.disagreements.length, "disagreement")}; nothing applied. Review report.md, then apply the patches you accept.`);
+      console.log(`${out}: ${plural(r.proposals.length, "patch", "patches")}, ${plural(r.disagreements.length, "disagreement")}; nothing applied. Review report.md, then apply the patches you accept.`);
       return 0;
     }
     if (command === "wireframes") {

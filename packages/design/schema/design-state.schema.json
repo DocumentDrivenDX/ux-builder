@@ -354,7 +354,7 @@
     },
     "principles": {
       "type": "array",
-      "description": "Experience principles (FEAT-018 GDL-16): each a rubric note, or a project rule ux-builder-blueprint check applies when it has a rule",
+      "description": "Older states' experience principles. They are HELIX's now (principles.md, ADR-042): principle add proposes them, and the brief notes any still here.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -365,8 +365,7 @@
         ],
         "properties": {
           "id": {
-            "type": "string",
-            "pattern": "^PR-[1-9][0-9]*$"
+            "type": "string"
           },
           "text": {
             "type": "string",
@@ -508,7 +507,20 @@
           },
           "evidence": {
             "type": "string",
-            "pattern": "^EV-[1-9][0-9]*$"
+            "pattern": "^EV-[1-9][0-9]*$",
+            "description": "An older app's evidence record (EV-n)"
+          },
+          "study": {
+            "type": "string",
+            "description": "The study the session belongs to (ADR-042): its research plan's name"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^P[1-9][0-9]*$"
+            },
+            "description": "The session's participants, by pseudonym"
           }
         }
       }
@@ -525,7 +537,8 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^EXP-[1-9][0-9]*$"
+            "minLength": 1,
+            "description": "The experiment's DDx bead (ADR-042); an older app's EXP-n"
           },
           "status": {
             "enum": [
@@ -535,8 +548,8 @@
           },
           "decision": {
             "type": "string",
-            "pattern": "^UXD-[1-9][0-9]*$",
-            "description": "The decision record the experiment tests"
+            "pattern": "^(ADR-[0-9]{3,}|UXD-[1-9][0-9]*)$",
+            "description": "The decision the experiment tests: its ADR (ADR-042), or an older app's UXD record"
           },
           "variant": {
             "type": "string",
@@ -549,6 +562,17 @@
               "not-supported"
             ],
             "description": "Set when it ends: the hypothesis against the result (FEAT-018 GDL-68)"
+          },
+          "metric": {
+            "type": "string",
+            "description": "The success metric"
+          },
+          "guardrails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The guardrail metrics"
           }
         }
       }
@@ -574,7 +598,8 @@
           },
           "insight": {
             "type": "string",
-            "pattern": "^INS-\\d{4}-\\d{2}-\\d{2}$"
+            "pattern": "^(INS-)?\\d{4}-\\d{2}-\\d{2}$",
+            "description": "The insights the diagnosis reads, by date (runs/insights/<date>/); an older app's INS-<date>"
           },
           "observation": {
             "type": "string",

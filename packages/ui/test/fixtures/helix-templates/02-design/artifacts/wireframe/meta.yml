@@ -1,0 +1,175 @@
+# Metadata for Wireframe
+
+artifact:
+  name: Wireframe
+  id: wireframe
+  type: document
+  activity: design
+  level: feature
+  optional: true
+
+voice: artifact-signal
+
+description: |
+  The annotated wireframe for one view of a user flow: its modality (screen,
+  voice or chat), a layout per size class with each element annotated, the
+  states the view can be in and the events that move it between them, and
+  accessibility notes. Annotation depth follows the stated fidelity. It nests
+  under its user flow and takes the flow's number. The flow owns movement
+  between views; the wireframe owns what is in one view and how that view
+  behaves. Use it only where the feature has a user interface.
+
+output:
+  location: docs/helix/02-design/flows/UF-{n}-{feature}/UF-{n}-{nn}-{view}.md
+  format: markdown
+  naming: UF-{feature-number}-{view-number}-{view-name}.md
+  examples:
+    - flows/UF-001-csv-import/UF-001-02-mapping-review.md
+  assets: docs/helix/02-design/flows/UF-{n}-{feature}/assets/UF-{n}-{nn}-{view}-{size-class}.{svg|png}
+
+id_format:
+  pattern: "UF-[0-9]+-[0-9]{2}-[a-z0-9-]+"
+  example: UF-001-02-mapping-review
+  description: |
+    A wireframe takes its user flow's number, a two-digit view number and the
+    view name. The view number is the next unused number in the flow's folder,
+    given once when the wireframe is created and kept when views are added,
+    removed or reordered; it is not the view's row position. There is no separate
+    wireframe prefix. Set ddx.type to wireframe, since the UF prefix alone
+    resolves to the user flow.
+
+reuse_policy: |
+  One wireframe per view, updated in place; raise the fidelity as the design
+  matures. Do not keep parallel low- and high-fidelity copies of one view.
+
+validation:
+  required_sections:
+    - scope_and_fidelity
+    - layouts
+    - states_and_events
+    - accessibility
+    - open_questions
+
+  quality_checks:
+    - check: fidelity_and_modality_stated
+      description: The modality and fidelity are stated, and the annotation depth matches the fidelity (sketch ideas; low layout decisions; mid functionality; high interaction, content and state)
+      severity: blocking
+
+    - check: every_interactive_element_annotated
+      description: Every element a person can act on has an annotation naming what it does and the user-flow transition it triggers
+      severity: blocking
+
+    - check: size_classes_covered
+      description: There is one layout per size class the view supports, and the annotations say what changes between them
+      severity: blocking
+
+    - check: states_considered
+      description: Each of ideal, empty, loading, partial, error, offline, slow, permission-denied and success applies or is excluded with a concrete reason
+      severity: blocking
+
+    - check: every_state_has_exit
+      description: Every state other than a final one has an event that leaves it; no state traps the person
+      severity: blocking
+
+    - check: announcements_defined
+      description: Every state change the person cannot see by focus alone names its screen-reader announcement and politeness
+      severity: blocking
+
+    - check: diagram_matches_tables
+      description: The statechart, the States table and the Events table describe the same states and events
+      severity: blocking
+
+    - check: accessibility_noted
+      description: Focus order, accessible names for icon-only controls, headings and landmarks, and target size are noted (depth by fidelity)
+      severity: warning
+
+    - check: rows_named
+      description: Annotations, states and events are named by what they are, not numbered
+      severity: warning
+
+    - check: no_visual_spec
+      description: Colors, type and spacing reference DESIGN.md tokens rather than defining values
+      severity: warning
+
+  pattern_checks:
+    - pattern: "\\*\\*Modality\\*\\*: (screen|voice|chat)"
+      expected: ">=1"
+      message: State the modality (screen, voice or chat)
+
+    - pattern: "\\*\\*Fidelity\\*\\*: (sketch|low|mid|high)"
+      expected: ">=1"
+      message: State the fidelity (sketch, low, mid or high)
+
+    - pattern: "stateDiagram-v2"
+      expected: ">=1"
+      message: Include a Mermaid stateDiagram-v2 in States and Events
+
+    - pattern: "\\[TBD\\]|\\[TODO\\]|\\[NEEDS CLARIFICATION"
+      expected: 0
+      message: Resolve uncertainty that materially affects the view
+
+variables:
+  - name: view
+    description: The view's name in its user flow's Views table
+    required: true
+
+  - name: fidelity
+    description: sketch | low | mid | high
+    required: true
+
+  - name: modality
+    description: screen | voice | chat
+    required: true
+
+prompts:
+  generation: prompt.md
+  review: |
+    Review this wireframe for:
+    1. Modality and fidelity stated; annotation depth matching the fidelity
+    2. Every interactive element annotated and linked to a user-flow transition
+    3. One layout per supported size class, with differences called out
+    4. Every standard state applying or excluded with a reason
+    5. Every state with an exit and an announcement where needed
+    6. Statechart, States table and Events table in agreement
+    7. Accessibility notes: focus order, names, headings and landmarks, target size
+    8. Tokens referenced, not redefined
+
+template:
+  file: template.md
+  sections:
+    - scope_and_fidelity: "View, flow, modality, fidelity, size classes and pattern."
+    - layouts: "One layout per size class, with each element annotated."
+    - states_and_events: "Which states apply, a statechart, and the events that move between states."
+    - accessibility: "Focus order, accessible names, headings and landmarks, target size."
+    - open_questions: "Layout, content or state decisions still open, and who decides."
+
+example:
+  file: example.md
+
+workflow:
+  creation_order: 3
+  review_cycles: 1-2
+  update_triggers:
+    - The view's actions change in the user flow
+    - The view gains a data source, an async action or a permission
+    - A size class is added or dropped
+    - A usability study finds a problem in this view
+
+relationships:
+  informed_by:
+    - user-flow
+    - design-system
+
+  informs:
+    - technical-design
+    - story-test-plan
+
+tags:
+  - design
+  - ux
+  - wireframe
+  - ui-states
+  - accessibility
+
+version: 1.0.0
+last_updated: 2026-10-28

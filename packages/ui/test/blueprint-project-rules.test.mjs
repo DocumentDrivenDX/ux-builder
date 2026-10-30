@@ -24,7 +24,7 @@ const BP = {
   screens: [s("sign-in", "FormPage", [{ id: "continue", label: "Continue", to: "map", primary: true }]), s("map", "CollectionList", [{ id: "open", label: "Open", to: "modal:preview" }]), s("detail", "RecordDetail")],
   journeys: [{ id: "J-find", story: "US-001", entry: "sign-in", steps: [{ screen: "sign-in", action: "continue", inputs: { required: ["email", "password"] } }, { screen: "map", action: "open" }, { screen: "detail" }] }],
 };
-const NO_ACCOUNT = { id: "PR-1", text: "No mandatory account creation", rule: { kind: "no-step-before", screens: ["sign-in"] } };
+const NO_ACCOUNT = { key: "no-mandatory-account-creation", text: "No mandatory account creation", rule: { kind: "no-step-before", screens: ["sign-in"] } };
 
 describe("project rules", () => {
   // @covers US-122-AC4
@@ -32,24 +32,24 @@ describe("project rules", () => {
     const dir = join(tmp, "app");
     mkdirSync(join(dir, ".ux-builder"), { recursive: true });
     writeFileSync(join(dir, "app.blueprint.json"), JSON.stringify(BP));
-    writeFileSync(join(dir, ".ux-builder/principles.json"), JSON.stringify({ principles: [NO_ACCOUNT, { id: "PR-2", text: "Progressive disclosure" }] }));
+    writeFileSync(join(dir, ".ux-builder/principles.json"), JSON.stringify({ principles: [NO_ACCOUNT, { key: "progressive-disclosure", text: "Progressive disclosure" }] }));
     const r = spawnSync(process.execPath, [CLI, "check", "app.blueprint.json", "--json"], { cwd: dir, encoding: "utf8" });
     const f = JSON.parse(r.stdout).filter((x) => x.rule.startsWith("project."));
     assert.equal(f.length, 1, JSON.stringify(f));
-    assert.equal(f[0].rule, "project.PR-1");
+    assert.equal(f[0].rule, "project.no-mandatory-account-creation");
     assert.equal(f[0].severity, "warning");
     assert.equal(f[0].path, "/journeys/0");
-    assert.match(f[0].message, /Journey J-find starts on sign-in \(FormPage\).*\(principle PR-1: "No mandatory account creation"\)/);
+    assert.match(f[0].message, /Journey J-find starts on sign-in \(FormPage\).*\(principle "No mandatory account creation"\)/);
   });
 
   test("the other rule kinds: max steps, max required inputs, no modal", () => {
     const f = principleFindings(BP, [
-      { id: "PR-3", text: "Short journeys", rule: { kind: "max-steps", max: 2 } },
-      { id: "PR-4", text: "Ask little", rule: { kind: "max-required-inputs", max: 1 } },
-      { id: "PR-5", text: "No modals in finding", rule: { kind: "no-modal-in", journeys: ["J-find"] } },
-      { id: "PR-6", text: "A by-pattern gate", rule: { kind: "no-step-before", patterns: ["FormPage"] } },
+      { text: "Short journeys", rule: { kind: "max-steps", max: 2 } },
+      { text: "Ask little", rule: { kind: "max-required-inputs", max: 1 } },
+      { text: "No modals in finding", rule: { kind: "no-modal-in", journeys: ["J-find"] } },
+      { text: "A by-pattern gate", rule: { kind: "no-step-before", patterns: ["FormPage"] } },
     ]);
-    assert.deepEqual(f.map((x) => x.rule), ["project.PR-3", "project.PR-4", "project.PR-5", "project.PR-6"]);
+    assert.deepEqual(f.map((x) => x.rule), ["project.short-journeys", "project.ask-little", "project.no-modals-in-finding", "project.a-by-pattern-gate"]);
     assert.match(f[1].message, /asks for 2 required inputs, more than 1/);
     assert.match(f[2].message, /opens a modal at map:open/);
   });

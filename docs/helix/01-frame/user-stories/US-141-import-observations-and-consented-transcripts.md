@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-039
@@ -36,17 +38,17 @@ Observations become findings with `source: human` and the assessment's `F-` IDs 
 
 ## Walkthrough
 
-1. The owner fills `observations.csv` and runs `ux-builder-design observe import observations.csv --kit TK-1`.
+1. The owner fills `observations.csv` and runs `ux-builder-design observe import observations.csv --study rivers`.
 2. They add a transcript with `ux-builder-design transcript add s3.vtt --session S3 --consent-confirmed`.
 3. The agent extracts timestamped observations from it.
 4. The guide reports completion rate, median time, error rate and assists per task, and the recurring problems.
 
 ## Acceptance Criteria
 
-- [ ] **US-141-AC1** — Given a filled observation sheet, when `observe import <file> --kit TK-<n>` runs, then each row becomes a finding with `source: human`, a pseudonym, the task, completed, time, errors, assists and a paraphrased remark, with a stable `F-` ID.
+- [ ] **US-141-AC1** — Given a filled observation sheet, when `observe import <file> --study <study>` runs, then each row becomes a finding with `source: human`, a pseudonym, the task, completed, time, errors, assists and a paraphrased remark, with a stable `F-` key, in the study's run folder (`findings.json`, run output).
 - [ ] **US-141-AC2** — Given a sheet whose remarks contain a name, an email and a phone number, when it is imported, then they are masked before anything is written, and participants appear only by pseudonym.
 - [ ] **US-141-AC3** — Given `transcript add` without `--consent-confirmed`, when it runs, then it refuses, says consent must be confirmed for that session, and writes nothing.
-- [ ] **US-141-AC4** — Given a consented transcript, when `transcript add` runs, then it stores only masked, cited excerpts with timestamps and a reference to the source, and the consent confirmation in the design state; an audio or video file is refused.
+- [ ] **US-141-AC4** — Given a consented transcript, when `transcript add --study <study>` runs, then it proposes the transcript as a source of the study and only masked, cited excerpts with timestamps for its *Findings*, and records the consent (with the study and its participants) in the design state; an audio or video file is refused.
 - [ ] **US-141-AC5** — Given five imported sessions for one kit, when `ux-builder-design rubric --json` runs, then it reports per task the completion rate, median time, error rate and assists, and the problems seen in two or more sessions.
 - [ ] **US-141-AC6** — Given findings from the agent and from people in one run, when they are listed, then each is labelled `human` (verified observation) or `agent` (recommendation), and no agent recommendation carries `source: human`.
 
@@ -58,7 +60,7 @@ Observations become findings with `source: human` and the assessment's `F-` IDs 
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-141-AC1 | a filled observation sheet | `observe import <file> --kit TK-<n>` runs | each row becomes a finding with `source: human`, a pseudonym, the task, completed, time, errors, assists and a paraphrased remark, with a stable `F-` ID |
+| AC1 | US-141-AC1 | a filled observation sheet | `observe import <file> --study <study>` runs | each row becomes a finding with `source: human`, a pseudonym, the task, completed, time, errors, assists and a paraphrased remark, with a stable `F-` ID |
 | AC2 | US-141-AC2 | a sheet whose remarks contain a name, an email and a phone number | it is imported | they are masked before anything is written, and participants appear only by pseudonym |
 | AC3 | US-141-AC3 | `transcript add` without `--consent-confirmed` | it runs | it refuses, says consent must be confirmed for that session, and writes nothing |
 | AC4 | US-141-AC4 | a consented transcript | `transcript add` runs | it stores only masked, cited excerpts with timestamps and a reference to the source, and the consent confirmation in the design state; an audio or video file is refused |

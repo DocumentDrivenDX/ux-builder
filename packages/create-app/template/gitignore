@@ -4,7 +4,9 @@ dist
 docs/ux-builder/audit-report/
 test-results
 playwright-report
+# Run output stays out of the repository (ADR-042): assessment runs, studies, insight exports, evaluation results.
 docs/ux-builder/assessments/
+docs/ux-builder/runs/
 
 # The episode trace (.ux-builder/) is committed, but for the open episode's marker.
 __TRACE_IGNORE__

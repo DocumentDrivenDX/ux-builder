@@ -43,7 +43,7 @@ A paced, simulated session (trial tasks-1, 2026-10-27) found that a re-wrapped p
 - [ ] **US-161-AC2** — Given core-2 is passed, then the design is at step 5 (Design the structure), still in Explore, with the modality as the next thing to do.
 - [ ] **US-161-AC3** — Given an approved item that changed, when the agent approves it again without having shown it (review show, or review table of its kind), then the approval is refused and nothing is recorded; the coverage map approved again needs review map first; and each approval event records the person's answer.
 - [ ] **US-161-AC4** — Given a session's events, when `metrics` runs, then testing starts at the testing milestone or at a step 7 the loop does not leave, the approvals before testing are the person's distinct answers, an approval reopened with unchanged words counts against the formatting target, and the prototype time is to the milestone marked when the person first tried it.
-- [ ] **US-161-AC5** — Given a verified claim, when `evidence claim contradict <EV-n> <Cn> --text` runs, then the person's words are written in its Contradicting column and an open question asks which holds; `validate` warns about a contradicted claim no question asks about.
+- [ ] **US-161-AC5** — Given a verified claim, when `evidence claim contradict --study <study> --claim <its words> --text` runs, then the person's words are written in its Contradicting column and an open question asks which holds; `validate` warns about a contradicted claim no question asks about.
 - [ ] **US-161-AC6** — Given a blueprint whose journeys carry stories, when the brief lists a story as confirmed that no journey carries, then `validate` warns about it.
 - [ ] **US-161-AC7** — Given a generated journey skeleton, then its prototype toolbar is folded to one line by default and names journeys by their goal, not their ID.
 - [ ] **US-161-AC8** — Given a screen whose pattern has no sample of its own, then its wireframe and prototype draw its content items as what they are: an input as a field with the primary action, data as three sample entries (ticked where the screen toggles items), feedback as a notice.
@@ -63,7 +63,7 @@ A paced, simulated session (trial tasks-1, 2026-10-27) found that a re-wrapped p
 | AC2 | US-161-AC2 | core-1 passed | checkpoint core-2 | step 5, explore |
 | AC3 | US-161-AC3 | changed approved story | review approve without review show | refused; after show, recorded with the answer |
 | AC4 | US-161-AC4 | events with a step 7 then 5 | metrics | testing not started; distinct answers; format-only counted |
-| AC5 | US-161-AC5 | EV-1 C1 | claim contradict | Contradicting filled; Q-n open; validate quiet |
+| AC5 | US-161-AC5 | a study's claim | claim contradict | Contradicting filled; Q-n open; validate quiet |
 | AC6 | US-161-AC6 | brief lists US-5 confirmed | validate | warning |
 | AC7 | US-161-AC7 | journey skeleton | generate | details folded; goal labels |
 | AC8 | US-161-AC8 | Page screen with data, input, feedback | wireframes | 3 checkboxes, a field and Add, a notice |

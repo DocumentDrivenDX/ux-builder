@@ -1,13 +1,14 @@
 /* ux-builder-design brief (CONTRACT-008 Commands, FEAT-018 GDL-14 to
    GDL-16): the experience brief, docs/ux/brief.md and a page to read,
-   from the HELIX PRD and stories and the design state, every point marked
-   with its status; and .ux-builder/principles.json, the principles a check
-   can express, which ux-builder-blueprint check applies as project rules. */
+   from the HELIX PRD, principles.md's Experience Principles, the stories
+   and the design state, every point marked with its status. */
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { ux, writeInApp } from "./app.mjs";
-import { helixRoot, parseDocument, usersTable } from "./documents.mjs";
+import { helixRoot, jobsTable, parseDocument, usersTable } from "./documents.mjs";
+import { experiencePrinciples, readPrinciplesFile, statePrinciples } from "./principles.mjs";
+import { slug } from "./helix.mjs";
 import { readState } from "./state.mjs";
 
 export const BRIEF_SECTIONS = [
@@ -19,6 +20,16 @@ export const BRIEF_SECTIONS = [
   ["constraints", "Constraints"],
   ["questions", "Open questions"],
 ];
+/* Where each section is compiled from (ADR-042 decision 3: the brief holds no fact of its own). */
+export const BRIEF_SOURCES = {
+  product: "the PRD's title and Summary",
+  users: "the PRD's User Segments",
+  outcome: "the PRD, and the design state's assumptions until it says",
+  jobs: "the PRD's User Needs and the user stories",
+  principles: "principles.md's Experience Principles",
+  constraints: "the PRD's Constraints, and the design state's assumptions",
+  questions: "the design state's open questions",
+};
 
 /* HELIX documents under the marker's root: [{ path, front, body }]. */
 function helixDocs(app) {
@@ -83,15 +94,23 @@ export function briefContent(app) {
     if (a.status === "refuted" || !a.section) continue;
     points[a.section].push({ text: a.text, status: a.status, id: a.id, confirm: a.confirm });
   }
-  for (const p of state.principles ?? []) if (p.status !== "refuted") points.principles.push({ text: p.text, status: p.status, id: p.id, rule: p.rule?.kind });
-  for (const q of state.questions) if (q.status === "open") points.questions.push({ text: `${q.id}: ${q.text}`, status: null });
+  // Experience principles are HELIX's (principles.md, ADR-042); a checkable one names its rule.
+  const rules = new Map((readPrinciplesFile(app).principles ?? []).map((x) => [x.key ?? slug(x.text ?? ""), x.rule?.kind]));
+  for (const p of experiencePrinciples(app)) points.principles.push({ text: p.text, status: p.status, rule: rules.get(slug(p.text)) });
+  for (const q of state.questions) if (q.status === "open") points.questions.push({ text: q.text, status: null });
   const notes = [];
-  // Target users described in users.md are the only source of the section (GDL-77).
+  // The PRD's User Needs lead the primary jobs, before the stories (ADR-042).
+  const needs = jobsTable(app);
+  if (needs) points.jobs.unshift(...Object.values(needs).map((n) => ({ text: n.job, status: n.status, confirm: `a study that supports it, cited in ${n.path}'s User Needs` })));
+  // Target users in the PRD's User Segments are the only source of the section (GDL-77, ADR-042).
   const users = usersTable(app);
-  if (users) {
-    points.users = Object.entries(users).map(([id, u]) => ({ text: `${u.user} (${id}): ${u.context}`, status: u.status, id, confirm: `research evidence about these users (ux-builder-design evidence add), cited in ${ux(app, "users.md")}` }));
-    notes.push(`Target users are from ${ux(app, "users.md")}.`);
+  if (users && Object.keys(users).length) {
+    const path = Object.values(users)[0].path;
+    points.users = Object.values(users).map((u) => ({ text: `${u.user}: ${u.context}`, status: u.status, confirm: `research about these users (a study, ux-builder-design evidence add), cited in ${path}'s User Segments` }));
+    notes.push(`Target users are from ${path}, User Segments.`);
   }
+  const old = statePrinciples(state);
+  if (old.length) notes.push(`${old.length === 1 ? "One experience principle is" : `${old.length} experience principles are`} still in the design state; propose ${old.length === 1 ? "it" : "them"} to principles.md with ux-builder-design principle add.`);
   if (!helix) notes.push("HELIX was not found (no .helix.yml): the brief is built from the design state alone.");
   else if (!prd) notes.push("HELIX has no PRD yet: the brief is built from the stories and the design state.");
   return { sections: BRIEF_SECTIONS.map(([key, heading]) => ({ key, heading, points: points[key] })), helix, prd, users: !!users, notes };
@@ -100,11 +119,11 @@ export function briefContent(app) {
 function markdown(content, name) {
   const lines = [];
   lines.push("---", "ux:", "  id: brief", "  type: experience-brief");
-  const links = [content.prd && "prd", content.users && "users"].filter(Boolean);
+  const links = [content.prd && "prd"].filter(Boolean);
   if (links.length) lines.push("  links:", ...links.flatMap((to) => ["    - kind: informed_by", `      to: ${to}`]));
   lines.push("---", "", `# Experience brief${name ? `: ${name}` : ""}`, "");
   for (const s of content.sections) {
-    lines.push(`## ${s.heading}`, "");
+    lines.push(`## ${s.heading}`, "", `_From ${BRIEF_SOURCES[s.key]}._`, "");
     if (!s.points.length) lines.push(s.key === "questions" ? "- None open." : "- Not yet known.");
     for (const p of s.points) {
       lines.push(`- ${p.text}${p.status ? ` [${LABEL[p.status]}]` : ""}${p.rule ? ` (checked: ${p.rule})` : ""}`);
@@ -131,11 +150,6 @@ ${body}
 `;
 }
 
-/* The checkable principles, as .ux-builder/principles.json. */
-export function principlesFile(state) {
-  return { principles: (state.principles ?? []).filter((p) => p.status !== "refuted").map((p) => ({ id: p.id, text: p.text, ...(p.rule ? { rule: p.rule } : {}) })) };
-}
-
 export function brief(app, { name } = {}) {
   const content = briefContent(app);
   let product = name;
@@ -143,7 +157,17 @@ export function brief(app, { name } = {}) {
   const written = [
     writeInApp(app, ux(app, "brief.md"), markdown(content, product)),
     writeInApp(app, ux(app, "brief.html"), briefHtml(content, product)),
-    writeInApp(app, ".ux-builder/principles.json", JSON.stringify(principlesFile(readState(app)), null, 2) + "\n"),
   ];
   return { written, sections: content.sections, notes: content.notes, helix: content.helix };
+}
+
+/* Whether docs/ux-builder/brief.md still says what its sources say: null when it does or there is none, else a warning. */
+export function briefStale(app) {
+  const path = ux(app, "brief.md");
+  let text;
+  try { text = readFileSync(join(app, path), "utf8"); } catch { return null; }
+  let content;
+  try { content = briefContent(app); } catch { return null; }
+  const body = (t) => t.slice(t.indexOf("\n## ")).trim();
+  return body(markdown(content, "")) === body(text) ? null : { path, message: "the brief no longer says what the PRD, principles.md, the stories and the design state say: regenerate it with ux-builder-design brief (it holds no fact of its own)" };
 }
