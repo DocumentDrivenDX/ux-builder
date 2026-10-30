@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { checkpoint, claimAdd, claimContradict, decisionAdd, evidenceAdd, meaningOf, metrics, metricsText, pendingReviews, readEvents, readState, reviewApprove, reviewMap, reviewShow, reviewTable, stateSet, validate } from "../index.mjs";
+import { checkpoint, claimAdd, claimContradict, decisionAdd, evidenceAdd, meaningOf, metrics, metricsText, pendingReviews, readEvents, readState, reviewApprove, reviewMap, reviewShow, reviewTable, stateSet, validate, currentText } from "../index.mjs";
 import { tempApp } from "./helpers.mjs";
 import { kitApp } from "./kit-fixture.mjs";
 
@@ -118,18 +118,18 @@ describe("US-161: approvals, steps and measures hold up in a real session", () =
   test("AC5: a contradicted claim records the person's words and asks which holds; validate warns when nobody asked", () => {
     const a = kitApp();
     writeFileSync(join(a, "gripes.md"), "Missed the dentist because the date was buried.");
-    evidenceAdd(a, { file: "gripes.md", kind: "feedback" });
-    claimAdd(a, { id: "EV-1", text: "A buried date led to a missed appointment; dates must be visible", source: "gripes.md:1", basis: "observed", confidence: "high", direction: true, verified: true });
-    const r = claimContradict(a, { id: "EV-1", claim: "C1", text: "I don't really use due dates" });
+    evidenceAdd(a, { file: "gripes.md", kind: "feedback", study: "gripes" });
+    claimAdd(a, { study: "gripes", text: "A buried date led to a missed appointment; dates must be visible", source: "gripes.md:1", basis: "observed", confidence: "high", direction: true, verified: true });
+    const r = claimContradict(a, { study: "gripes", claim: "A buried date", text: "I don't really use due dates" });
     assert.equal(r.contradicting, 'the person: "I don\'t really use due dates"');
-    assert.match(readFileSync(join(a, r.path), "utf8"), /\| C1 \| A buried date[^\n]*\| the person: "I don't really use due dates" \|/);
+    assert.match(currentText(a, r.path).text, /\| A buried date[^\n]*\| the person: "I don't really use due dates" \|/);
     const q = readState(a).questions.at(-1);
-    assert.deepEqual([q.status, q.text], ["open", `EV-1 C1 says "A buried date led to a missed appointment; dates must be visible", and the person said "I don't really use due dates". Which holds?`]);
+    assert.deepEqual([q.status, q.text], ["open", `The gripes study says "A buried date led to a missed appointment; dates must be visible", and the person said "I don't really use due dates". Which holds?`]);
     assert.ok(!validate(a).warnings.some((w) => /is contradicted/.test(w.message)));
     // A contradiction written by hand, with no question about it, is flagged.
-    claimAdd(a, { id: "EV-1", text: "Sign-in is unwanted", source: "gripes.md:1", basis: "inferred", confidence: "medium", contradicts: "the person wants Google sign-in" });
-    assert.ok(validate(a).warnings.some((w) => /EV-1 C2 is contradicted \(the person wants Google sign-in\), and no question asks the person which holds/.test(w.message)));
-    assert.throws(() => claimContradict(a, { id: "EV-1", claim: "C1" }), /needs --text/);
+    claimAdd(a, { study: "gripes", text: "Sign-in is unwanted", source: "gripes.md:1", basis: "inferred", confidence: "medium", contradicts: "the person wants Google sign-in" });
+    assert.ok(validate(a).warnings.some((w) => /gripes: "Sign-in is unwanted" is contradicted \(the person wants Google sign-in\), and no question asks the person which holds/.test(w.message)));
+    assert.throws(() => claimContradict(a, { study: "gripes", claim: "A buried date" }), /needs --text/);
   });
 
   // @covers US-161-AC6
@@ -146,7 +146,7 @@ describe("US-161: approvals, steps and measures hold up in a real session", () =
     assert.match(SKILL, /\*\*Only the person approves\.\*\*/);
     assert.match(SKILL, /never with words they said about something else/);
     assert.match(SKILL, /their own edits too/);
-    assert.match(SKILL, /evidence claim contradict <EV-n> <Cn> --text/);
+    assert.match(SKILL, /evidence claim contradict --study <study> --claim "<its words>" --text/);
     assert.match(SKILL, /metrics mark prototype` when the person first tries it/);
     assert.match(SKILL, /re-read the whole story/);
     assert.match(SKILL, /\*\*One command per call\.\*\*/);

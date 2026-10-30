@@ -1,39 +1,43 @@
 /* The UX evaluation report and routing its findings (CONTRACT-008
-   Commands, FEAT-018 GDL-59 to GDL-61; SD-006 Report). report() writes
-   docs/ux/evaluations/UER-<n>.md from the design state, the rubric (its
+   Commands, FEAT-018 GDL-59 to GDL-61; SD-006 Report; ADR-042). report()
+   writes run output, runs/evaluations/<date>/report.md, from the design state, the rubric (its
    predicted column, the latest assessment run's agent-measured metrics, and
    the test kits' human observations), and the findings by journey, each
    labelled a human observation or an agent recommendation. Where an
    observation contradicts a prediction, the assumptions behind it become
-   refuted; with no human evidence nothing is confirmed or refuted.
+   refuted; with no human evidence nothing is confirmed or refuted. What
+   people did is proposed into each study's Findings as claims: how many
+   completed each scenario, and the problems seen in two or more sessions.
    route() writes the findings the person selects at checkpoint core-3 as a
-   proposed patch to HELIX's improvement backlog, and can move a decision
-   record to tested or refuted. */
+   proposed patch to HELIX's improvement backlog, and can propose a
+   decision's ADR Validation. */
 
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { DesignError, bpFile, proposalsDir, ux, writeInApp } from "./app.mjs";
+import { DesignError, bpFile, proposalsDir, runsDir, writeInApp } from "./app.mjs";
 import { decisionStatus } from "./decisions.mjs";
 import { businessRules, helixRoot, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
 import { rubric } from "./rubric.mjs";
 import { humanFindings, kitTranscripts, observedMeasures } from "./sessions.mjs";
 import { readState, writeState } from "./state.mjs";
-import { kits } from "./testkit.mjs";
+import { kits, studyTasks } from "./testkit.mjs";
+import { studyRunDir, upsertClaims } from "./studies.mjs";
 import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
-const docsDir = (app) => ux(app, "evaluations");
+const docsDir = (app) => runsDir(app, "evaluations");
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
 const list = (x) => (Array.isArray(x) ? x : []);
 const cell = (s) => String(s ?? "").replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ");
 const pct = (r) => (r == null ? "–" : `${Math.round(r * 100)}%`);
 const SEVERITY_OF_PRIORITY = { P0: 4, P1: 3, P2: 2, P3: 1 };
 
-function numbers(app) {
+/* The evaluation runs, oldest first: their folder names (<date>, <date>-2, …). */
+function reports(app) {
   const dir = join(app, docsDir(app));
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).map((n) => n.match(/^UER-([1-9][0-9]*)\.md$/)?.[1]).filter(Boolean).map(Number);
+  return readdirSync(dir).filter((n) => /^\d{4}-\d{2}-\d{2}(-\d+)?$/.test(n) && existsSync(join(dir, n, "report.md"))).sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
 }
 
 /* The latest assessment run: { id, dir, metrics, backlog, coverage } or null. */
@@ -51,10 +55,10 @@ function latestRun(app) {
 export function evaluationFindings(app, run = latestRun(app)) {
   // A person's transcript from the same kit is evidence beside their row of the sheet.
   const transcripts = kitTranscripts(app);
-  const quotes = (f) => transcripts.filter((t) => t.kit === f.kit && t.participants.includes(f.participant)).map((t) => t.id);
+  const quotes = (f) => transcripts.filter((t) => t.study === f.kit && t.participants.includes(f.participant)).map((t) => `session ${t.session}`);
   const human = humanFindings(app).filter((f) => f.severity > 0 || f.problem).map((f) => ({
     id: f.id, source: "human", label: "human observation", journey: f.journey, severity: f.severity, title: f.title,
-    evidence: `${f.kit} task ${f.task}, ${f.participant} (${ux(app)}/tests/${f.kit}/findings.json)${quotes(f).length ? `; transcript ${quotes(f).join(", ")}` : ""}`, transcripts: quotes(f), fix: null,
+    evidence: `the ${f.kit} study, task ${f.task}, ${f.participant} (${studyRunDir(app, f.kit)}/findings.json)${quotes(f).length ? `; transcript of ${quotes(f).join(", ")}` : ""}`, transcripts: quotes(f), fix: null,
     detail: `${f.completed ? "completed" : "did not complete"}${f.seconds != null ? ` in ${f.seconds} s` : ""}, ${f.errors} error${f.errors === 1 ? "" : "s"}, ${f.assists} assist${f.assists === 1 ? "" : "s"}${f.remark ? `; "${f.remark}"` : ""}`,
   }));
   const agent = list(run?.backlog?.findings).filter((f) => f.status !== "rejected").map((f) => {
@@ -85,7 +89,7 @@ function agentMeasured(metrics) {
   };
 }
 
-/* ux-builder-design report: write docs/ux/evaluations/UER-<n>.md. */
+/* ux-builder-design report: write runs/evaluations/<date>/report.md, and propose each study's observed claims. */
 export function report(app) {
   let state = null;
   try { state = readState(app); } catch { /* no design state: nothing to update */ }
@@ -98,9 +102,10 @@ export function report(app) {
   const observedAny = humans.length > 0;
   const m = observedAny ? observedMeasures(app) : null;
   const bp = readJson(join(app, alt ? bpFile(app, alt) : bpFile(app))) ?? {};
-  const n = Math.max(0, ...numbers(app)) + 1;
-  const id = `UER-${n}`;
-  const earlier = numbers(app).sort((a, b) => a - b).map((x) => `UER-${x}`);
+  const earlier = reports(app);
+  const date = new Date().toISOString().slice(0, 10);
+  let id = date;
+  for (let k = 2; earlier.includes(id); k++) id = `${date}-${k}`;
   const allKits = kits(app);
   const findings = evaluationFindings(app, run);
 
@@ -111,28 +116,23 @@ export function report(app) {
   if (state && observedAny) {
     for (const a of list(state.assumptions)) {
       const to = contradicted.includes(a.dimension) ? "refuted" : supported.includes(a.dimension) && a.status !== "refuted" ? "confirmed" : null;
-      if (to && a.status !== to) { changed.push({ id: a.id, from: a.status, to, dimension: a.dimension }); a.status = to; a.evidence = [...new Set([...list(a.evidence), id, ...m.kits])]; }
+      if (to && a.status !== to) { changed.push({ id: a.id, from: a.status, to, dimension: a.dimension }); a.status = to; a.evidence = [...new Set([...list(a.evidence), ...m.kits])]; }
     }
     if (changed.length) writeState(app, state);
   }
 
   const journeys = [...new Set([...list(bp.journeys).map((j) => j.id), ...findings.map((f) => f.journey)].filter(Boolean))];
-  const kitTasks = allKits.flatMap((k) => {
-    const file = join(app, ux(app, "tests"), k, "scenarios.md");
-    return existsSync(file) ? readFileSync(file, "utf8").split("\n").map((l) => /^\|\s*(\d+)\s*\|\s*(J-[^|\s]+)\s*\|[^|]*\|\s*([^|]*)\|/.exec(l)).filter(Boolean).map((x) => ({ kit: k, n: Number(x[1]), journey: x[2], criteria: x[3].trim() })) : [];
-  });
+  const kitTasks = allKits.flatMap((k) => studyTasks(app, k).map((t) => ({ kit: k, n: t.n, journey: t.journey, criteria: list(t.criteria).join(", ") })));
   const tested = new Set(humans.map((f) => f.journey));
   const walked = new Set(list(run?.metrics?.journeys).map((j) => j.blueprint ?? j.journey));
   const approach = observedAny && run ? "mixed" : observedAny ? "moderated" : run ? "automated-assessment" : "expert-review";
 
   const L = [];
-  const links = [...earlier.slice(-1).map((to) => ["follows", to]), ...allKits.map((to) => ["informed_by", to])];
-  L.push("---", "ux:", `  id: ${id}`, "  type: usability-evaluation-report", ...(links.length ? ["  links:", ...links.flatMap(([kind, to]) => [`    - kind: ${kind}`, `      to: ${to}`])] : ["  links: []"]), "---", "");
-  L.push(`# ${id}: ${bp.name ?? "app"} evaluation`, "");
+  L.push(`# ${bp.name ?? "App"} evaluation, ${id}`, "", `Run output (ADR-042): not committed. Studies: ${allKits.join(", ") || "none"}.`, "");
   const top = findings.filter((f) => f.severity >= 2).slice(0, 5);
   L.push("## Executive summary", "", `- **Evaluated**: ${journeys.join(", ") || "no journeys"}${alt ? ` (alternative ${alt})` : ""}`, `- **Top findings**: ${top.length ? top.map((f) => `${f.id} (${f.label}, severity ${f.severity})`).join(", ") : "none at severity 2 or above"}`);
   if (contradicted.length) L.push(`- **Contradicted predictions**: ${contradicted.join(", ")}`);
-  if (earlier.length) L.push(`- **Follows**: ${earlier.at(-1)}`);
+  if (earlier.length) L.push(`- **Follows**: the ${earlier.at(-1)} evaluation`);
   L.push("", "## Product and goals", "", `- ${bp.name ?? "The app"}: ${list(bp.tasks).map((t) => `${t.id} ${t.goal}`).join("; ") || "the blueprint's journeys"}`, "");
   L.push("## Method", "", `- **Approach**: ${approach}`, `- **Sources**: ${[observedAny ? `${m.sessions} test session${m.sessions === 1 ? "" : "s"} (${m.kits.join(", ")})` : null, run ? `assessment run ${run.id}` : null, "the rubric's predictions"].filter(Boolean).join("; ")}`,
     `- **Limits**: ${observedAny ? "a small number of sessions shows problems, not their frequency in the whole audience" : "no people were observed; nothing here is a verified human observation"}${run ? "; agent-measured metrics show where a journey asks for more than it needs, not how people will do (agents navigate differently from people)" : ""}`, "");
@@ -193,8 +193,20 @@ export function report(app) {
     ...ruleRows.filter((x) => !x.fs.length).map((x) => `- ${x.id}: no one met this business rule in a test${x.ts.length ? "" : " (no kit task for it)"}`),
   ];
   L.push(...(untested.length ? untested : ["- Everything planned was tested."]), "");
-  const path = writeInApp(app, `${docsDir(app)}/${id}.md`, L.join("\n"));
-  return { id, path, follows: earlier.at(-1) ?? null, approach, contradicted, assumptions: changed, observed: observedAny, findings: findings.map((f) => ({ id: f.id, source: f.source, severity: f.severity })) };
+  const path = writeInApp(app, `${docsDir(app)}/${id}/report.md`, L.join("\n"));
+  // What people did, as claims in each study's Findings (proposed).
+  const claims = m ? allKits.map((k) => {
+    const sessions = m.tasks.filter((t) => t.kit === k);
+    if (!sessions.length) return null;
+    const src = `the ${k} sessions (${studyRunDir(app, k)}/findings.json)`;
+    const conf = (n) => (n >= 5 ? "medium" : "low");
+    const rows = [
+      ...sessions.map((t) => ({ claim: `${pct(t.completionRate)} of ${t.sessions} participants completed ${t.journey}${t.medianSeconds != null ? `, in a median ${t.medianSeconds} s` : ""}`, source: src, basis: `observed in ${t.sessions} session${t.sessions === 1 ? "" : "s"}`, confidence: conf(t.sessions), direction: t.completionRate != null && t.completionRate < 0.8 ? `weakens: ${t.journey} is walkable` : `supports: ${t.journey} is walkable` })),
+      ...m.recurring.filter((p) => p.tasks.some((x) => x.startsWith(`${k}#`))).map((p) => ({ claim: `People ran into: ${p.problem}`, source: src, basis: `observed in ${p.sessions} sessions`, confidence: conf(p.sessions), direction: "weakens: the design as tested" })),
+    ];
+    return rows.length ? upsertClaims(app, k, rows) : null;
+  }).filter(Boolean) : [];
+  return { id, path, claims, follows: earlier.at(-1) ?? null, approach, contradicted, assumptions: changed, observed: observedAny, findings: findings.map((f) => ({ id: f.id, source: f.source, severity: f.severity })) };
 }
 
 const TABLE_HEAD = ["| Rank | Priority | Item | Evidence | Tracker or Follow-Up Target | Why Now | Confidence | Effort | Status |", "|------|----------|------|----------|-----------------------------|---------|------------|--------|--------|"];
@@ -227,11 +239,11 @@ export function route(app, { findings: ids = [], decision, status } = {}) {
   if (decision && !status) throw new DesignError("--decision needs --status tested or refuted");
   const all = evaluationFindings(app);
   const unknown = ids.filter((x) => !all.some((f) => f.id === x));
-  if (unknown.length) throw new DesignError(`no finding ${unknown.join(", ")} in the test kits or the latest assessment run`);
+  if (unknown.length) throw new DesignError(`no finding ${unknown.join(", ")} in the studies or the latest assessment run`);
   const chosen = ids.map((x) => all.find((f) => f.id === x));
-  const uer = numbers(app).sort((a, b) => a - b).map((x) => `UER-${x}`).at(-1) ?? null;
+  const uer = reports(app).at(-1) ?? null;
   const doc = backlogDoc(app);
-  const row = (f, rank) => `| ${rank} | ${PRIORITY(f.severity)} | ${cell(f.title)} | ${cell(f.evidence)} | ${cell(`${f.id}${uer ? ` in ${uer}` : ""}`)} | ${cell(`${f.journey ?? "no journey"}; ${f.label}`)} | ${f.source === "human" ? "high" : "medium"} | unknown | open |`;
+  const row = (f, rank) => `| ${rank} | ${PRIORITY(f.severity)} | ${cell(f.title)} | ${cell(f.evidence)} | ${cell(`${f.id}${uer ? ` in the ${uer} evaluation` : ""}`)} | ${cell(`${f.journey ?? "no journey"}; ${f.label}`)} | ${f.source === "human" ? "high" : "medium"} | unknown | open |`;
   let after;
   if (doc.text) {
     const lines = doc.text.replace(/\n*$/, "").split("\n");
@@ -242,13 +254,13 @@ export function route(app, { findings: ids = [], decision, status } = {}) {
     const ranks = h >= 0 && end > h ? lines.slice(h + 1, end + 1).map((l) => Number(/^\|\s*(\d+)\s*\|/.exec(l)?.[1])).filter(Number.isFinite) : [];
     const rows = fresh.map((f, i) => row(f, (ranks.length ? Math.max(...ranks) : 0) + 1 + i));
     if (end > h && h >= 0) lines.splice(end + 1, 0, ...rows);
-    else lines.push("", `## Backlog Items (routed from ${uer ?? "the UX evaluation"})`, "", ...TABLE_HEAD, ...rows);
+    else lines.push("", `## Backlog Items (routed from ${uer ? `the ${uer} evaluation` : "the UX evaluation"})`, "", ...TABLE_HEAD, ...rows);
     after = lines.join("\n") + "\n";
   } else {
     after = ["---", "ddx:", "  id: improvement-backlog", "  type: improvement-backlog", "  status: draft", "---", "", "# Improvement Backlog", "", "## Backlog Items", "", ...TABLE_HEAD, ...chosen.map((f, i) => row(f, i + 1)), ""].join("\n");
   }
   const patch = writeInApp(app, `${proposalsDir(app)}/backlog/improvement-backlog.patch`, unifiedDiff(doc.path, doc.text, after));
   const out = { findings: ids, target: { path: doc.path, kind: doc.text ? "existing" : "new" }, patch };
-  if (decision) out.decision = decisionStatus(app, { id: decision, status, evidence: uer ?? undefined });
+  if (decision) out.decision = decisionStatus(app, { id: decision, status, evidence: uer ? `the ${uer} evaluation (${docsDir(app)}/${uer}/report.md)` : undefined });
   return out;
 }

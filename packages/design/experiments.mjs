@@ -16,17 +16,19 @@ import { parse as parseYaml, stringify as toYaml } from "yaml";
 import { DesignError, bpFile, proposalsDir, ux, writeInApp } from "./app.mjs";
 import { helixRoot, parseDocument } from "./documents.mjs";
 import { decisionStatus, uiDecisions } from "./decisions.mjs";
-import { addDiagnosisText } from "./insights.mjs";
+import { addDiagnosisText, insightRun } from "./insights.mjs";
 import { readState, writeState } from "./state.mjs";
 
 const list = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]).map(String).map((s) => s.trim()).filter(Boolean);
 const today = () => new Date().toISOString().slice(0, 10);
 const nextId = (xs, prefix) => `${prefix}-${Math.max(0, ...xs.map((x) => Number(String(x.id ?? "").split("-")[1]) || 0)) + 1}`;
 
-/* ux-builder-design diagnose --insight INS-<date> --observation <o> --explanation <e>... --hypothesis <h> --alternative <name>. */
-export function diagnose(app, { insight, observation, explanations, hypothesis, alternative } = {}) {
+/* ux-builder-design diagnose --insight <date> [--journey <id>] --observation <o> --explanation <e>... --hypothesis <h> --alternative <name>.
+   The diagnosis goes in the insights (run output), and, with --journey, into that journey's funnel row in HELIX's metrics dashboard. */
+export function diagnose(app, { insight, journey, observation, explanations, hypothesis, alternative } = {}) {
   explanations = list(explanations);
-  if (!/^INS-\d{4}-\d{2}-\d{2}$/.test(insight ?? "")) throw new DesignError(`--insight names an insights document, such as INS-2026-10-23, not "${insight ?? ""}"`);
+  const { date } = insightRun(app, insight);
+  insight = date;
   if (!observation?.trim()) throw new DesignError("diagnose needs --observation: what the insight shows");
   if (explanations.length < 2) throw new DesignError(`diagnose needs at least two --explanation: what else could explain it (got ${explanations.length})`);
   if (!hypothesis?.trim()) throw new DesignError("diagnose needs --hypothesis: If …, then …, because …");
@@ -37,7 +39,8 @@ export function diagnose(app, { insight, observation, explanations, hypothesis, 
   const d = { id: nextId(state.diagnoses, "D"), insight, observation: observation.trim(), explanations, hypothesis: hypothesis.trim(), alternative: alternative.trim() };
   state.diagnoses.push(d);
   writeState(app, state);
-  const path = addDiagnosisText(app, insight, [`### ${d.id}`, "", `- **Observation**: ${d.observation}`, ...d.explanations.map((e, i) => `- **Explanation ${i + 1}**: ${e}`), `- **Hypothesis**: ${d.hypothesis}`, `- **Alternative**: ${d.alternative} (\`${bpFile(app, d.alternative)}\`)`, ""]);
+  const path = addDiagnosisText(app, insight, [`### ${d.id}`, "", `- **Observation**: ${d.observation}`, ...d.explanations.map((e, i) => `- **Explanation ${i + 1}**: ${e}`), `- **Hypothesis**: ${d.hypothesis}`, `- **Alternative**: ${d.alternative} (\`${bpFile(app, d.alternative)}\`)`, ""],
+    journey ? { journey, diagnosis: `${d.explanations.join("; or ")}. Testing: ${d.alternative} (${d.hypothesis})` } : {});
   return { ...d, path };
 }
 
@@ -115,7 +118,7 @@ export function experimentStart(app, { decision, variant, metric, guardrails, du
   const stopping = `Stop after ${days} days, or sooner if a guardrail gets worse by more than its tolerance.`;
   const description = [
     `Experiment testing ${decision} (${tested.title}): ${variant} against the current design.`, "",
-    `Hypothesis: ${hypothesis}${diag ? ` (from ${diag.id} on ${diag.insight})` : ""}`,
+    `Hypothesis: ${hypothesis}${diag ? ` (from ${diag.id} on the ${diag.insight} insights)` : ""}`,
     `Variant: ${variant} (${bpFile(app, variant)}), behind the app's own feature flag; the rest see the current design.`,
     `Success metric: ${metric}`, `Guardrails: ${guardrails.join(", ") || "none named"}`, `Duration: ${days} days, from ${today()}`, `Stopping rule: ${stopping}`,
   ].join("\n");

@@ -28,7 +28,7 @@ function expApp() {
   decisionAdd(a, { question: "Show the map first?", options: ["Map first", "List first"], choice: "Map first", why: "Fewer steps" });
   return a;
 }
-const DIAG = ["diagnose", "--insight", "INS-2026-10-23", "--observation", "Half of J-find is abandoned on the map", "--explanation", "The map loads slowly on phones", "--explanation", "People expect a list of nearby rivers", "--hypothesis", "If the list comes first, then more people find a river, because they scan names faster than a map", "--alternative", "list-first"];
+const DIAG = ["diagnose", "--insight", "2026-10-23", "--observation", "Half of J-find is abandoned on the map", "--explanation", "The map loads slowly on phones", "--explanation", "People expect a list of nearby rivers", "--hypothesis", "If the list comes first, then more people find a river, because they scan names faster than a map", "--alternative", "list-first"];
 const start = (a, ...extra) => cli(a, ["experiment", "start", "--decision", "ADR-001", "--variant", "list-first", "--metric", "find-completion", "--guardrail", "time-to-river", "--duration", "14", ...extra]);
 
 describe("US-145: run an experiment through its checkpoints", () => {
@@ -37,8 +37,8 @@ describe("US-145: run an experiment through its checkpoints", () => {
     const a = expApp();
     const r = json(a, DIAG);
     assert.equal(r.id, "D-1");
-    assert.deepEqual(readState(a).diagnoses, [{ id: "D-1", insight: "INS-2026-10-23", observation: "Half of J-find is abandoned on the map", explanations: ["The map loads slowly on phones", "People expect a list of nearby rivers"], hypothesis: "If the list comes first, then more people find a river, because they scan names faster than a map", alternative: "list-first" }]);
-    const ins = readFileSync(join(a, "docs/ux-builder/insights/INS-2026-10-23.md"), "utf8");
+    assert.deepEqual(readState(a).diagnoses, [{ id: "D-1", insight: "2026-10-23", observation: "Half of J-find is abandoned on the map", explanations: ["The map loads slowly on phones", "People expect a list of nearby rivers"], hypothesis: "If the list comes first, then more people find a river, because they scan names faster than a map", alternative: "list-first" }]);
+    const ins = readFileSync(join(a, "docs/ux-builder/runs/insights/2026-10-23/insights.md"), "utf8");
     assert.match(ins, /## Diagnosis\n\n### D-1\n\n- \*\*Observation\*\*: Half of J-find is abandoned on the map\n- \*\*Explanation 1\*\*: The map loads slowly on phones\n- \*\*Explanation 2\*\*: People expect a list of nearby rivers\n- \*\*Hypothesis\*\*: If the list comes first/);
     // One explanation is not a diagnosis; an unknown alternative is refused.
     const one = cli(a, DIAG.filter((x, i) => !(DIAG[i - 1] === "--explanation" && x === "The map loads slowly on phones") && !(x === "--explanation" && DIAG[i + 1] === "The map loads slowly on phones")));
@@ -78,7 +78,7 @@ describe("US-145: run an experiment through its checkpoints", () => {
     assert.equal(arg("--labels"), "kind:experiment,area:ui");
     assert.equal(arg("--set"), "decision=ADR-001");
     const d = arg("--description");
-    assert.match(d, /^Hypothesis: If the list comes first, then more people find a river, because they scan names faster than a map \(from D-1 on INS-2026-10-23\)$/m);
+    assert.match(d, /^Hypothesis: If the list comes first, then more people find a river, because they scan names faster than a map \(from D-1 on the 2026-10-23 insights\)$/m);
     assert.match(d, /^Variant: list-first \(docs\/ux-builder\/blueprint\/app\.blueprint\.list-first\.json\)/m);
     assert.match(d, /^Success metric: find-completion\nGuardrails: time-to-river\nDuration: 14 days, from \d{4}-\d{2}-\d{2}\nStopping rule: Stop after 14 days, or sooner if a guardrail gets worse by more than its tolerance\.$/m);
     assert.deepEqual(readState(a).experiments, [{ id: "exp-1", status: "running", decision: "ADR-001", variant: "list-first", metric: "find-completion", guardrails: ["time-to-river"] }]);

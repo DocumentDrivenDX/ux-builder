@@ -297,47 +297,53 @@ needs and constraints), the jobs it holds with an importance for each
 Describe segments, never invented people: no names, ages or biographies.
 The brief's Target users then comes from this file alone.
 
-**Then evidence.** When the person supplies research (interview notes or
-transcripts, analytics exports, support tickets, surveys, observations),
-record each source with `ux-builder-design evidence add <file> --kind
-<kind> --source "<where it is kept>"`. Add to its record only the short
-excerpts your synthesis relies on, with `ux-builder-design evidence excerpt
-add EV-<n> --participant "<who>" --text "<their words>"`: it masks them and
-gives the speaker a pseudonym (P1, P2); the
+**Then evidence.** Research belongs to a **study**: one HELIX research
+plan, `docs/helix/01-frame/research/<study>.md`, named for what it asks
+(`anglers`, `night-planning`). When the person supplies research (interview
+notes or transcripts, analytics exports, support tickets, surveys,
+observations), record each source with `ux-builder-design evidence add
+<file> --kind <kind> --study <study> --source "<where it is kept>"`: it
+proposes a row of the plan's Sources, never the source's text. Add only
+the short excerpts your synthesis relies on, with `ux-builder-design
+evidence excerpt add --study <study> --participant "<who>" --text "<their
+words>"`: it masks them and gives the speaker a pseudonym (P1, P2); the
 owner may list each pseudonym's real name in
 `.ux-builder/participants.local.json` (kept out of git) so `validate` can
-catch one that slips in. Then
-report, each point citing the evidence IDs (EV-<n>) behind it:
+catch one that slips in. Then report, each point citing its study:
 - repeated frustrations;
 - common task sequences;
 - unmet needs;
 - differences between segments;
 - conflicts between what users say and what they do.
 
-**Ground every claim.** Each synthesized claim that matters goes in its
-record's Claims, with where it comes from (a file and line, a screen, a
-quote's time), whether it was observed or inferred, the confidence, what
-contradicts it and what is unknown: `ux-builder-design evidence claim add
-EV-<n> --text "…" --source "…" --basis observed|inferred --confidence
-high|medium|low [--direction] [--contradicts "…"] [--unknown "…"]`. Mark
-`--direction` when the claim would change the design's direction. Before
-you present such a claim, check it against its source yourself (read the
-code, open the screen, find the quote) and record it with `evidence claim
-verify EV-<n> C<n>`; never relay a subagent's summary as fact. A claim you
+**Ground every claim.** Each synthesized claim that matters goes in the
+study's Findings > Claims, HELIX's columns: where it comes from (a session,
+a document, a quote's time), its basis (observed or inferred, and how
+often), the confidence, its direction (what it supports, weakens or
+refutes), what contradicts it and what is unknown: `ux-builder-design
+evidence claim add --study <study> --text "…" --source "…" --basis
+"observed in 4 of 6 sessions" --confidence high|medium|low [--direction
+"refutes: <assumption or decision>"] [--contradicts "…"] [--unknown "…"]`.
+Before you present a claim that weakens or refutes something, check it
+against its source yourself (read the code, open the screen, find the
+quote) and record it with `evidence claim verify --study <study> --claim
+"<its words>"`; never relay a subagent's summary as fact. A claim you
 cannot check is labelled uncertain (`--confidence low`) and said so.
 `validate` warns about any direction-changing claim neither checked nor
-labelled.
+labelled. All of it is proposed: the person applies it with the other
+HELIX proposals.
 
 When what the person says goes against a claim from their own sources
 ("I don't use due dates" against a missed appointment in their notes),
 do not quietly follow either side: record it with `ux-builder-design
-evidence claim contradict <EV-n> <Cn> --text "<what they said>"`, which
-opens a question, and ask them which holds. `validate` warns about a
-contradicted claim nobody asked about, and about a story the brief calls
-confirmed that no journey carries.
+evidence claim contradict --study <study> --claim "<its words>" --text
+"<what they said>"`, which opens a question, and ask them which holds.
+`validate` warns about a contradicted claim nobody asked about, and about
+a story the brief calls confirmed that no journey carries.
 
 Update the jobs and users tables as evidence arrives: rate importance and confidence
-separately; a job is confirmed only with an evidence source. Run
+separately; a job is confirmed only with an evidence source, the study that
+supports it (its name in the Evidence column). Run
 `ux-builder-design validate` after each change.
 
 ## Model tasks
@@ -478,23 +484,27 @@ Inspect before anyone sees it: run the assessment's heuristic pass on the
 prototype (`ux-builder-audit assess heuristics`), and fix what it finds.
 Its task metrics are agent-measured; never present them as how people do.
 
-Then test with people. `ux-builder-design test-kit` writes
-`docs/ux-builder/tests/TK-<n>/`: scenarios as the user's goals (never a screen or
-control name), success criteria, a script, a consent note, a screener and
-`observations.csv`. The person runs the sessions. Afterwards:
+Then test with people, as a study. `ux-builder-design test-kit --study
+<study>` proposes the study's scenarios (the user's goals, never a screen or
+control name), success criteria and screener for its HELIX research plan,
+and writes the session materials as run output in
+`docs/ux-builder/runs/studies/<study>/`: a script, a consent note, the task
+list and `observations.csv`. The person runs the sessions. Afterwards:
 
-- `observe import <sheet> --kit TK-<n>`: each row a finding with
+- `observe import <sheet> --study <study>`: each row a finding with
   `source: human`, by pseudonym, remarks masked. Name a problem in the same
   words in every row it was seen (the `problem` column), so recurring
   problems are counted, and the target user each participant matched in the
   screener (the `user` column, `U-<n>`), so the report breaks results down
   by user.
-- `transcript add <file> --session <id> --kit TK-<n> --consent-confirmed --cite <time>...`:
+- `transcript add <file> --study <study> --session <id> --consent-confirmed --cite <time>...`:
   only after the person confirms that session's consent; you keep only the
   cited lines, masked. Never take a recording.
 - `rubric`: the observed column beside the predicted one, per task
   completion, median time, errors, assists, and the problems seen twice.
-- `report`: `docs/ux-builder/evaluations/UER-<n>.md`. A prediction the people
+- `report`: the evaluation, as run output in
+  `docs/ux-builder/runs/evaluations/<date>/report.md`, and what people did
+  proposed as claims in the study's Findings. A prediction the people
   contradicted is highlighted, and the assumptions behind it (those with a
   `dimension`) become refuted. Say plainly what was not tested.
 
@@ -512,8 +522,10 @@ The app reports journeys only if it chooses to: wrap it in
 When the owner exports the events (JSON Lines), and support or feedback:
 
 - `insights <events.jsonl> [--support <file>] [--feedback <file>]` writes
-  `docs/ux-builder/insights/INS-<date>.md`; the jobs and the rubric cite it.
-- `diagnose --insight INS-<date> --observation … --explanation …
+  the dated insights as run output (`docs/ux-builder/runs/insights/<date>/`)
+  and proposes each journey's funnel for HELIX's metrics dashboard; the
+  rubric cites it.
+- `diagnose --insight <date> --journey <id> --observation … --explanation …
   --explanation … --hypothesis "If …, then …, because …" --alternative <name>`:
   never one explanation; make the alternative first.
 - Ask checkpoint `experiment`, then `experiment start --decision ADR-<nnn>
@@ -577,12 +589,8 @@ showing a finished one):
 |---|---|
 | experience-brief | `docs/ux-builder/brief.md` |
 | baseline | `docs/ux-builder/baseline.md` |
-| research-evidence | `docs/ux-builder/evidence/EV-<n>.md` |
 | jobs | `docs/ux-builder/jobs.md` |
 | users | `docs/ux-builder/users.md` |
-| test-kit | `docs/ux-builder/tests/TK-<n>/kit.md` |
-| usability-evaluation-report | `docs/ux-builder/evaluations/UER-<n>.md` |
-| insights | `docs/ux-builder/insights/INS-<yyyy-mm-dd>.md` |
 
 After writing or changing one, run `ux-builder-design validate` and fix what
 it reports.

@@ -11,7 +11,7 @@ import { describe, test } from "node:test";
 import { ARTIFACTS, documentTypes, exampleFile, parseDocument, validateDocument } from "../index.mjs";
 
 /* The types CONTRACT-008's Documents table names. */
-const CONTRACT = ["experience-brief", "baseline", "research-evidence", "jobs", "users", "test-kit", "usability-evaluation-report", "insights"];
+const CONTRACT = ["experience-brief", "baseline", "jobs", "users"];
 
 describe("the docs/ux types", () => {
   // @covers US-123-AC1
@@ -34,7 +34,7 @@ describe("the docs/ux types", () => {
   test("each type's example passes validate", () => {
     // The examples link each other and the PRD; validate them as one set.
     const examples = CONTRACT.map((type) => ({ type, text: readFileSync(exampleFile(type), "utf8") }));
-    const known = new Set(["prd", "ADR-008", "jobs", "J-1", "J-2", "J-3", "J-4", ...examples.map((e) => String(parseDocument(e.text).front.ux.id))]);
+    const known = new Set(["prd", "ADR-008", "anglers", "jobs", "J-1", "J-2", "J-3", "J-4", ...examples.map((e) => String(parseDocument(e.text).front.ux.id))]);
     for (const { type, text } of examples) {
       assert.deepEqual(validateDocument(text, { known }).filter((p) => p.level !== "note"), [], type);
       assert.equal(parseDocument(text).front.ux.type, type);
@@ -44,7 +44,5 @@ describe("the docs/ux types", () => {
   test("the prompts tell the agent what not to invent", () => {
     const prompt = (t) => readFileSync(join(ARTIFACTS, t, "prompt.md"), "utf8");
     assert.match(prompt("experience-brief"), /Never mark a guess as confirmed/);
-    assert.match(prompt("research-evidence"), /never its raw contents/);
-    assert.match(prompt("usability-evaluation-report"), /never average them/);
   });
 });

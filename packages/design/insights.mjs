@@ -1,18 +1,18 @@
 /* Production insights (CONTRACT-008 Commands, FEAT-018 GDL-63 to GDL-65;
-   ADR-038 rule 4): what people did in production, per journey, from the
-   journey events the app exported (JSON Lines), and the support tickets and
-   feedback the owner exported. It reads only the files it is given and the
-   app's own; it fetches nothing. The result is docs/ux/insights/INS-<date>.md,
-   evidence records for the sources, and the jobs and the rubric citing them. */
+   ADR-038 rule 4, ADR-042): what people did in production, per journey,
+   from the journey events the app exported (JSON Lines), and the support
+   tickets and feedback the owner exported. It reads only the files it is
+   given and the app's own; it fetches nothing. The dated export is run
+   output (runs/insights/<date>/, gitignored); each journey's funnel is
+   proposed into HELIX's metrics dashboard, its Journey Funnels. */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
-import { DesignError, bpFile, ux, writeInApp } from "./app.mjs";
-import { jobsTable, parseDocument } from "./documents.mjs";
-import { writeEvidence } from "./research.mjs";
+import { DesignError, bpFile, runsDir, writeInApp } from "./app.mjs";
+import { cell, documentOfType, proposeChange, requireHelix, sectionOf, setSection, tableUnder } from "./helix.mjs";
 import { maskPersonal } from "./sessions.mjs";
 
-const docsDir = (app) => ux(app, "insights");
+const docsDir = (app) => runsDir(app, "insights");
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
 const list = (x) => (Array.isArray(x) ? x : []);
 const today = () => new Date().toISOString().slice(0, 10);
@@ -74,27 +74,31 @@ function mentions(text, bp) {
   return list(bp.journeys).filter((j) => t.includes(j.id.toLowerCase()) || list(j.steps).some((s) => titles.get(s.screen) && new RegExp(`\\b${titles.get(s.screen).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(t))).map((j) => j.id);
 }
 
-/* The jobs a journey serves: its task's jobs. */
-const jobsOf = (bp, journey) => list(list(bp.tasks).find((t) => t.id === list(bp.journeys).find((j) => j.id === journey)?.task)?.jobs);
+const FUNNEL = ["Journey", "Completion", "Biggest Drop-off", "Diagnosis", "Source"];
+const mostAbandoned = (j) => { const e = Object.entries(j.abandoned).sort((a, b) => b[1] - a[1])[0]; return e ? `step ${e[0]} (${e[1]} left)` : "none"; };
 
-/* Add an evidence source to job rows of docs/ux/jobs.md: { J-n: EV-m }.
-   A hypothesis with evidence becomes confirmed, and low confidence medium. */
-function citeInJobs(app, cites) {
-  const path = ux(app, "jobs.md");
-  if (!existsSync(join(app, path)) || !Object.keys(cites).length) return [];
-  const changed = [];
-  const text = readFileSync(join(app, path), "utf8").split("\n").map((line) => {
-    const cells = line.split("|");
-    const id = cells[1]?.trim();
-    if (!cites[id] || cells.length < 8) return line;
-    const [, , job, importance, evidence, confidence, status] = cells.map((c) => c.trim());
-    const sources = [...new Set([...(evidence.match(/EV-[1-9][0-9]*/g) ?? []), ...cites[id]])];
-    const next = { evidence: sources.join(", "), confidence: confidence === "low" ? "medium" : confidence, status: status === "hypothesis" ? "confirmed" : status };
-    changed.push({ job: id, evidence: sources, confidence: next.confidence, status: next.status });
-    return `| ${id} | ${job} | ${importance} | ${next.evidence} | ${next.confidence} | ${next.status} |`;
+/* HELIX's metrics dashboard: where it is, or a new one in HELIX's shape (v0.20.0). */
+function dashboard(app) {
+  const doc = documentOfType(app, "metrics-dashboard");
+  if (doc) return doc.path;
+  return `${requireHelix(app, "a journey funnel")}/06-iterate/metrics-dashboard.md`;
+}
+const newDashboard = () => ["---", "ddx:", "  id: metrics-dashboard", "  type: metrics-dashboard", "  authoring:", "    home: repo", "---", "", "# Metrics Dashboard", "",
+  ...["Decision", "Summary", "Metrics Table", "Interpretation Rules", "Trend Notes"].flatMap((h) => [`## ${h}`, "", "- To agree with the person.", ""]), "## Follow-Up", "", "- To agree with the person.", ""].join("\n");
+
+/* Set funnel rows by journey: rows [[journey, completion, drop-off, diagnosis, source]]; a row's diagnosis is kept unless given. */
+function proposeFunnels(app, rows) {
+  return proposeChange(app, dashboard(app), (t) => {
+    const base = t ?? newDashboard();
+    const have = tableUnder(base, "Journey Funnels");
+    for (const r of rows) {
+      const i = have.findIndex((h) => h[0] === r[0]);
+      if (i >= 0) have[i] = r.map((c, k) => (k === 3 && c == null ? have[i][3] : c ?? have[i][k]));
+      else have.push(r.map((c) => c ?? "–"));
+    }
+    const body = [`| ${FUNNEL.join(" | ")} |`, `|${FUNNEL.map(() => "---").join("|")}|`, ...have.map((r) => `| ${r.map((c) => cell(c) || "–").join(" | ")} |`)].join("\n");
+    return setSection(base, "Journey Funnels", body, { after: sectionOf(base, "Trend Notes") != null ? "Trend Notes" : null });
   });
-  writeInApp(app, path, text.join("\n"));
-  return changed;
 }
 
 /* ux-builder-design insights <events.jsonl> [--support <file>] [--feedback <file>] [--date YYYY-MM-DD]. */
@@ -104,61 +108,61 @@ export function insights(app, { events: file, support, feedback, date = today() 
   for (const f of [file, support, feedback].filter(Boolean)) if (!existsSync(abs(app, f))) throw new DesignError(`no such file: ${f}`);
   const bp = readJson(join(app, bpFile(app)));
   if (!bp) throw new DesignError(`no ${bpFile(app)}: insights are read per blueprint journey`);
-  const id = `INS-${date}`;
+  const id = date;
+  const dir = `${docsDir(app)}/${id}`;
   const events = jsonLines(abs(app, file));
   const { journeys, unmatched } = journeyStats(events, list(bp.journeys).map((j) => j.id).filter(Boolean));
   const names = readJson(join(app, ".ux-builder/participants.local.json")) ?? {};
 
-  // The sources as evidence records: the events' summary, and the masked entries that mention a journey.
-  const summary = journeys.filter((j) => j.started).map((j) => `${j.journey}: ${j.completed} of ${j.started} completed (${pct(j.completed, j.started)}); ${j.failedSearches} failed searches`);
-  const ev = writeEvidence(app, { file, kind: "analytics", date, source: file, title: `journey events for ${id}`, excerpts: summary });
-  const sources = [{ id: ev.id, kind: "analytics", file }];
+  // The sources, and the masked entries that mention a journey: run output only.
+  const sources = [{ kind: "analytics", file, events: events.length }];
   const linked = [];
   for (const [kind, f] of [["support", support], ["feedback", feedback]]) {
     if (!f) continue;
     const entries = entriesOf(abs(app, f)).map((text) => ({ text: maskPersonal(text, { app, names }), journeys: mentions(text, bp) }));
     const cited = entries.filter((e) => e.journeys.length);
-    const rec = writeEvidence(app, { file: f, kind, date, source: f, title: `${kind} for ${id}`, excerpts: cited.map((e) => `[${e.journeys.join(", ")}] "${e.text.replace(/"/g, "'")}"`) });
-    sources.push({ id: rec.id, kind, file: f, entries: entries.length, linked: cited.length });
-    for (const e of cited) linked.push({ evidence: rec.id, kind, journeys: e.journeys, text: e.text });
+    sources.push({ kind, file: f, entries: entries.length, linked: cited.length });
+    for (const e of cited) linked.push({ kind, journeys: e.journeys, text: e.text });
   }
 
-  // The jobs the observed journeys serve cite the evidence.
-  const cites = {};
-  for (const j of journeys.filter((x) => x.started)) for (const job of jobsOf(bp, j.journey)) (cites[job] ??= []).push(ev.id);
-  for (const l of linked) for (const j of l.journeys) for (const job of jobsOf(bp, j)) (cites[job] ??= []).push(l.evidence);
-  const jobs = jobsTable(app) ? citeInJobs(app, Object.fromEntries(Object.entries(cites).filter(([k]) => jobsTable(app)[k]).map(([k, v]) => [k, [...new Set(v)]]))) : [];
-
-  const mostAbandoned = (j) => { const e = Object.entries(j.abandoned).sort((a, b) => b[1] - a[1])[0]; return e ? `step ${e[0]} (${e[1]})` : "none"; };
-  const L = ["---", "ux:", `  id: ${id}`, "  type: insights", "  links:", ...sources.flatMap((s) => ["    - kind: informed_by", `      to: ${s.id}`]), "---", "", `# ${id}: production insights to ${date}`, ""];
-  L.push("## Sources", "", ...sources.map((s) => `- ${s.id} (${s.kind}): \`${s.file}\`${s.entries != null ? `, ${s.entries} entries, ${s.linked} linked to a journey` : `, ${events.length} events`}; read from the owner's export, nothing fetched`), "");
+  const L = [`# Production insights to ${date}`, "", "Run output (ADR-042): not committed. The funnels are proposed into HELIX's metrics dashboard.", ""];
+  L.push("## Sources", "", ...sources.map((s) => `- ${s.kind}: \`${s.file}\`${s.entries != null ? `, ${s.entries} entries, ${s.linked} linked to a journey` : `, ${s.events} events`}; read from the owner's export, nothing fetched`), "");
   L.push("## Journeys", "", "| Journey | Started | Completed | Completion | Most abandoned step | Failed searches | Errors shown | Feature use | Seconds per step |", "|---|---|---|---|---|---|---|---|---|");
   for (const j of journeys) L.push(`| ${j.journey} | ${j.started} | ${j.completed} | ${pct(j.completed, j.started)} | ${mostAbandoned(j)} | ${j.failedSearches} | ${j.errors} | ${Object.entries(j.features).map(([s, n]) => `${s} ${n}`).join(", ") || "–"} | ${Object.entries(j.secondsPerStep).map(([k, s]) => `${k}: ${s}`).join(", ") || "–"} |`);
   L.push("", "## Unmatched events", "", ...(unmatched.length ? unmatched.map((u) => `- ${u.journey}: ${u.events} event${u.events === 1 ? "" : "s"} name${u.events === 1 ? "s" : ""} a journey the blueprint does not have`) : ["- None."]), "");
-  if (linked.length) L.push("## Support and feedback", "", ...linked.map((l) => `- ${l.evidence} (${l.kind}) [${l.journeys.join(", ")}]: "${l.text}"`), "");
+  if (linked.length) L.push("## Support and feedback", "", ...linked.map((l) => `- ${l.kind} [${l.journeys.join(", ")}]: "${l.text}"`), "");
   L.push("## Diagnosis", "", "- None yet. Record one with `ux-builder-design diagnose --insight " + id + "`: the observation, at least two explanations, the hypothesis and the alternative that tests it.", "");
-  const path = writeInApp(app, `${docsDir(app)}/${id}.md`, L.join("\n"));
-  const data = { id, date, events: events.length, journeys, unmatched, sources, linked, jobs };
-  writeInApp(app, `${docsDir(app)}/${id}.json`, JSON.stringify(data, null, 2) + "\n");
-  return { ...data, path };
+  const path = writeInApp(app, `${dir}/insights.md`, L.join("\n"));
+  const data = { id, date, events: events.length, journeys, unmatched, sources, linked };
+  writeInApp(app, `${dir}/insights.json`, JSON.stringify(data, null, 2) + "\n");
+  const funnels = proposeFunnels(app, journeys.filter((j) => j.started).map((j) => [j.journey, `${pct(j.completed, j.started)} of ${j.started} started`, mostAbandoned(j), null, `production events to ${date} (${dir}/insights.json)`]));
+  return { ...data, path, dashboard: funnels.path, proposal: funnels.id ?? null };
 }
 
 /* The latest insights' data, or null. */
 export function latestInsights(app) {
-  const dir = join(app, docsDir(app));
-  if (!existsSync(dir)) return null;
-  const f = readdirSync(dir).filter((n) => /^INS-\d{4}-\d{2}-\d{2}\.json$/.test(n)).sort().at(-1);
-  return f ? readJson(join(dir, f)) : null;
+  const root = join(app, docsDir(app));
+  if (!existsSync(root)) return null;
+  const d = readdirSync(root).filter((n) => /^\d{4}-\d{2}-\d{2}$/.test(n) && existsSync(join(root, n, "insights.json"))).sort().at(-1);
+  return d ? readJson(join(root, d, "insights.json")) : null;
 }
 
-/* Append a diagnosis to an insights document's Diagnosis section. */
-export function addDiagnosisText(app, insight, lines) {
-  const path = `${docsDir(app)}/${insight}.md`;
-  if (!existsSync(join(app, path))) throw new DesignError(`no insights ${insight} (${path})`);
+/* The insights a diagnose names: a date (or an older INS-<date>), its run folder. */
+export function insightRun(app, insight) {
+  const date = String(insight ?? "").replace(/^INS-/, "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new DesignError(`--insight names the insights by their date, such as 2026-10-23, not "${insight ?? ""}"`);
+  const dir = `${docsDir(app)}/${date}`;
+  if (!existsSync(join(app, dir, "insights.md"))) throw new DesignError(`no insights for ${date} (${dir}/insights.md): run ux-builder-design insights first`);
+  return { date, dir };
+}
+
+/* Append a diagnosis to the insights' Diagnosis (run output), and propose it into the journey's funnel row. */
+export function addDiagnosisText(app, insight, lines, { journey, diagnosis } = {}) {
+  const { dir } = insightRun(app, insight);
+  const path = `${dir}/insights.md`;
   const text = readFileSync(join(app, path), "utf8");
-  const doc = parseDocument(text);
-  if (!doc.front) throw new DesignError(`${path} has no frontmatter`);
   const out = text.replace(/## Diagnosis\n\n- None yet\.[^\n]*\n/, "## Diagnosis\n").replace(/\n*$/, "\n\n") + lines.join("\n").replace(/\n*$/, "\n");
   writeInApp(app, path, out);
+  if (journey && diagnosis) proposeFunnels(app, [[journey, null, null, diagnosis, null]]);
   return path;
 }

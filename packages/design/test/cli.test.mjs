@@ -24,8 +24,10 @@ const BP = { version: 1, kind: "app", name: "rivers", supports: { sizeClasses: [
 function fixture() {
   const app = tempApp({ state: { assumptions: [{ id: "A-1", text: "Location is available", status: "assumed", evidence: [], section: "constraints" }] } });
   writeFileSync(join(app, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(BP));
-  mkdirSync(join(app, "docs/ux-builder/evidence"), { recursive: true });
-  cpSync(design.exampleFile("research-evidence"), join(app, "docs/ux-builder/evidence/EV-1.md"));
+  // HELIX, and a study's research plan (ADR-042).
+  writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
+  mkdirSync(join(app, "docs/helix/01-frame/research"), { recursive: true });
+  writeFileSync(join(app, "docs/helix/01-frame/research/anglers.md"), "---\nddx:\n  id: research-anglers\n  type: research-plan\n---\n\n# Research plan: anglers\n\n## Research Methods\n\n### Sources\n\n| Source | Kind | Date | Where it is kept |\n|---|---|---|---|\n| interview 1 | interview | 2026-10-12 | shared drive |\n");
   return app;
 }
 /* The fixture with its items approved, for commands a pending review would stop (US-148). */
@@ -45,17 +47,17 @@ const COMMANDS = [
   ["explain", ["explain", "blueprint"], () => design.explain({ term: "blueprint" })],
   ["step", ["step", "3"], (app) => design.setStep(app, { to: "3" })],
   ["reviewList", ["review"], (app) => design.reviewList(app)],
-  ["reviewShow", ["review", "show", "evidence:EV-1"], (app) => design.reviewShow(app, { item: "evidence:EV-1" })],
-  ["reviewFeedback", ["review", "feedback", "evidence:EV-1", "--text", "Cite the second quote too"], (app) => design.reviewFeedback(app, { item: "evidence:EV-1", text: "Cite the second quote too" })],
-  ["reviewApprove", ["review", "approve", "evidence:EV-1", "--answer", "Yes"], (app) => design.reviewApprove(app, { item: "evidence:EV-1", answer: "Yes" })],
-  ["reviewRespond", ["review", "respond", "FB-1", "--text", "Cited the second quote"], (app) => design.reviewRespond(app, { id: "FB-1", text: "Cited the second quote" }), (app) => { design.reviewFeedback(app, { item: "evidence:EV-1", text: "Cite the second quote too" }); return app; }],
+  ["reviewShow", ["review", "show", "evidence:anglers"], (app) => design.reviewShow(app, { item: "evidence:anglers" })],
+  ["reviewFeedback", ["review", "feedback", "evidence:anglers", "--text", "Cite the second quote too"], (app) => design.reviewFeedback(app, { item: "evidence:anglers", text: "Cite the second quote too" })],
+  ["reviewApprove", ["review", "approve", "evidence:anglers", "--answer", "Yes"], (app) => design.reviewApprove(app, { item: "evidence:anglers", answer: "Yes" })],
+  ["reviewRespond", ["review", "respond", "FB-1", "--text", "Cited the second quote"], (app) => design.reviewRespond(app, { id: "FB-1", text: "Cited the second quote" }), (app) => { design.reviewFeedback(app, { item: "evidence:anglers", text: "Cite the second quote too" }); return app; }],
   ["modality", ["modality", "--answer", "A web app for phones", "--modality", "responsive-web", "--size-classes", "compact", "--frame", "top-bar"], (app) => design.confirmModality(app, { answer: "A web app for phones", modalities: "responsive-web", sizeClasses: "compact", frame: "top-bar" })],
   ["migrate", ["migrate", "--dry-run"], (app) => design.migrate(app, { dryRun: true })],
   ["mode", ["mode", "change", "--why", "A small change"], (app) => design.setMode(app, { mode: "change", why: "A small change" })],
   ["brief", ["brief", "--name", "Rivers"], (app) => design.brief(app, { name: "Rivers" })],
   ["baseline", ["baseline"], (app) => design.baseline(app)],
   ["validate", ["validate"], (app) => design.validate(app)],
-  ["evidenceAdd", ["evidence", "add", "package.json", "--kind", "survey", "--date", "2026-10-23", "--source", "Survey tool export"], (app) => design.evidenceAdd(app, { file: "package.json", kind: "survey", date: "2026-10-23", source: "Survey tool export" })],
+  ["evidenceAdd", ["evidence", "add", "package.json", "--kind", "survey", "--study", "anglers", "--date", "2026-10-23", "--source", "Survey tool export"], (app) => design.evidenceAdd(app, { file: "package.json", kind: "survey", study: "anglers", date: "2026-10-23", source: "Survey tool export" })],
   ["evidenceList", ["evidence", "list"], (app) => design.evidenceList(app)],
   ["rubric", ["rubric"], (app) => design.rubric(app)],
   ["decisionAdd", ["decision", "add", "--question", "First?", "--option", "Map", "--option", "Search", "--choice", "Map", "--why", "Fewer steps"], (app) => design.decisionAdd(app, { question: "First?", options: ["Map", "Search"], choice: "Map", why: "Fewer steps" }), helixed],

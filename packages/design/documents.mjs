@@ -8,10 +8,10 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
-import { findSecrets } from "@ux-builder/trace";
-import { bpFile, ux } from "./app.mjs";
+import { bpFile, proposalsDir, runsDir, ux } from "./app.mjs";
 import { uiDecisions } from "./decisions.mjs";
 import { proposedDocuments } from "./helix.mjs";
+import { studies, studyChecks, studyClaims } from "./studies.mjs";
 
 export const ARTIFACTS = fileURLToPath(new URL("./artifacts", import.meta.url));
 
@@ -66,43 +66,12 @@ export const PERSONAL_PATTERNS = [
   ["phone number", /(?:\+\d{1,3}[\s.-]?)?(?:\(\d{2,4}\)|\d{2,4})[\s.-]\d{3,4}[\s.-]\d{3,4}\b/],
 ];
 
-/* Real names the owner keeps out of git: .ux-builder/participants.local.json, { "P1": "name" }. */
-function localNames(appDir) {
-  if (!appDir) return {};
-  try { return JSON.parse(readFileSync(join(appDir, ".ux-builder/participants.local.json"), "utf8")) ?? {}; } catch { return {}; }
-}
-
-/* The excerpt lines of a document: [{ line, text }]. */
-function excerptLines(body) {
-  const lines = body.split("\n");
-  const start = lines.findIndex((l) => /^## Excerpts\s*$/i.test(l));
-  if (start < 0) return [];
-  const out = [];
-  for (let i = start + 1; i < lines.length && !lines[i].startsWith("## "); i++) if (lines[i].trim().startsWith("-")) out.push({ line: i + 1, text: lines[i] });
-  return out;
-}
+/* The studies an evidence cell names: comma-separated study names, "none" for none. */
+export const evidenceSources = (cell) => String(cell ?? "").split(",").map((x) => x.trim()).filter((x) => x && !/^(none|–|-)$/i.test(x));
 
 /* Type-specific rules named in meta.yml. Each returns problems, or
    { problems, warnings, notes }. */
 const RULES = {
-  participants(doc, ux) {
-    const p = ux.participants ?? {};
-    if (typeof p !== "object" || Array.isArray(p)) return ["participants maps pseudonyms (P1, P2) to roles"];
-    const bad = Object.keys(p).filter((k) => !/^P[1-9][0-9]*$/.test(k));
-    const used = excerptLines(doc.body).map((e) => e.text.match(/^\s*-\s*(P[0-9]+):/)?.[1]).filter((k) => k && !(k in p));
-    return [...bad.map((k) => `participant "${k}" is not a pseudonym (P1, P2, …)`), ...[...new Set(used)].map((k) => `excerpt by ${k}, who is not listed under participants`)];
-  },
-  masked(doc, ux, { appDir, offset = 0 }) {
-    const out = findSecrets(doc.body, { appDir }).map((h) => `line ${h.line + offset} holds an unmasked ${h.kind}; mask it (ADR-039)`);
-    const names = localNames(appDir);
-    for (const e of excerptLines(doc.body).map((x) => ({ ...x, line: x.line + offset }))) {
-      for (const [what, re] of PERSONAL_PATTERNS) if (re.test(e.text)) out.push(`the excerpt on line ${e.line} holds ${/^[aeiou]/.test(what) ? "an" : "a"} ${what}; mask it (ADR-039)`);
-      // The whole name, or a first or last name on its own (as masking replaces them).
-      const named = (name) => [name.trim(), ...name.trim().split(/\s+/).filter((w) => w.length > 2)].some((w) => new RegExp(`\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(e.text));
-      for (const [p, name] of Object.entries(names)) if (typeof name === "string" && name.trim() && named(name)) out.push(`the excerpt on line ${e.line} names a participant; use the pseudonym ${p} (ADR-039)`);
-    }
-    return out;
-  },
   // Target users (GDL-77): the jobs table's evidence rules, plus their context and the jobs they hold.
   users(doc, front, { known, appDir }) {
     const out = [], notes = [];
@@ -122,12 +91,12 @@ const RULES = {
         if (!m) { out.push(`${id}: "${h}" is not a job and its importance (J-<n> high, medium or low)`); continue; }
         if (known && !known.has(m[1])) out.push(`${id}: holds ${m[1]}, which ${ux(appDir, "jobs.md")} does not have`);
       }
-      const sources = (evidence ?? "").match(/EV-[1-9][0-9]*/g) ?? [];
+      const sources = evidenceSources(evidence);
       if (status === "hypothesis" && sources.length) out.push(`${id}: evidence lists a source, but status is hypothesis; a hypothesis has no evidence (mark it confirmed, or clear evidence)`);
       if (status === "hypothesis") notes.push(`${id} is a hypothesis: ${user}`);
       if (!["high", "medium", "low"].includes(confidence)) out.push(`${id}: confidence is "${confidence ?? ""}"; use high, medium or low`);
-      if (confidence && confidence !== "low" && !sources.length) out.push(`${id}: confidence ${confidence} needs at least one evidence source (EV-<n>)`);
-      for (const src of sources) if (known && !known.has(src)) out.push(`${id}: evidence ${src} does not exist in ${ux(appDir, "evidence")}/`);
+      if (confidence && confidence !== "low" && !sources.length) out.push(`${id}: confidence ${confidence} needs at least one evidence source (a study)`);
+      for (const src of sources) if (known && !known.has(src)) out.push(`${id}: evidence ${src} is not a study (docs/helix/01-frame/research/)`);
       if (!["hypothesis", "confirmed", "current-state"].includes(status)) out.push(`${id}: status is "${status ?? ""}"; use hypothesis or confirmed`);
     }
     if (!rows.length) out.push("the Users table has no rows");
@@ -141,13 +110,13 @@ const RULES = {
       if (seen.has(id)) out.push(`${id} is used by more than one job`);
       seen.add(id);
       if (status === "hypothesis") {
-        if ((evidence ?? "").match(/EV-[1-9][0-9]*/)) out.push(`${id}: evidence lists a source, but status is hypothesis; a hypothesis has no evidence (mark it confirmed, or clear evidence)`);
+        if (evidenceSources(evidence).length) out.push(`${id}: evidence lists a source, but status is hypothesis; a hypothesis has no evidence (mark it confirmed, or clear evidence)`);
         else notes.push(`${id} is a hypothesis: ${job}`);
       }
       for (const [field, v] of [["importance", importance], ["confidence", confidence]]) if (!["high", "medium", "low"].includes(v)) out.push(`${id}: ${field} is "${v ?? ""}"; use high, medium or low`);
-      const sources = (evidence ?? "").match(/EV-[1-9][0-9]*/g) ?? [];
-      if (confidence && confidence !== "low" && !sources.length) out.push(`${id}: confidence ${confidence} needs at least one evidence source (EV-<n>)`);
-      for (const s of sources) if (known && !known.has(s)) out.push(`${id}: evidence ${s} does not exist in ${ux(appDir, "evidence")}/`);
+      const sources = evidenceSources(evidence);
+      if (confidence && confidence !== "low" && !sources.length) out.push(`${id}: confidence ${confidence} needs at least one evidence source (a study)`);
+      for (const s of sources) if (known && !known.has(s)) out.push(`${id}: evidence ${s} is not a study (docs/helix/01-frame/research/)`);
       if (!["hypothesis", "confirmed", "current-state"].includes(status)) out.push(`${id}: status is "${status ?? ""}"; use hypothesis or confirmed`);
       if (!job) out.push(`${id}: the job is empty`);
     }
@@ -225,9 +194,9 @@ export function helixIds(app) {
 /* Every docs/ux document: { path, type, id } (type and id null when the
    frontmatter does not say). */
 export function uxDocuments(app) {
-  // A test kit is its kit.md; scenarios, script, consent and screener are its parts, not documents of their own.
-  const kitParts = new RegExp(`^${ux(app).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/tests/TK-[^/]+/(?!kit\\.md$)[^/]+\\.md$`);
-  return markdown(app, ux(app)).filter((path) => !kitParts.test(path)).map((path) => {
+  // Run output and HELIX proposals under docs/ux-builder/ are not ux-builder documents (ADR-042).
+  const outside = [runsDir(app), proposalsDir(app)].map((d) => `${d}/`);
+  return markdown(app, ux(app)).filter((path) => !outside.some((d) => path.startsWith(d))).map((path) => {
     const ux = parseDocument(readFileSync(join(app, path), "utf8")).front?.ux;
     return { path, type: ux?.type ?? null, id: ux?.id != null ? String(ux.id) : null };
   });
@@ -279,40 +248,13 @@ export function usersTable(app) {
   return out;
 }
 
-/* Evidence claims (GDL-83): each record's ## Claims table, one row per
-   synthesized claim: where it comes from, observed or inferred, the
-   confidence, whether it changes the design's direction, whether the agent
-   checked it against the source itself, what contradicts it and what is
-   unknown. [{ evidence, path, id, claim, source, basis, confidence, direction, verified, contradicting, unknown }]. */
-export const CLAIM_COLUMNS = ["ID", "Claim", "Source", "Basis", "Confidence", "Direction", "Verified", "Contradicting", "Unknown"];
-export function evidenceClaims(app) {
-  const dir = ux(app, "evidence");
-  if (!existsSync(join(app, dir))) return [];
-  return readdirSync(join(app, dir)).filter((f) => /^EV-[1-9][0-9]*\.md$/.test(f)).sort((a, b) => a.localeCompare(b, "en", { numeric: true })).flatMap((f) => {
-    const path = `${dir}/${f}`;
-    return tableRows(parseDocument(readFileSync(join(app, path), "utf8")).body, "Claims").filter((r) => r[0]).map(([id, claim, source, basis, confidence, direction, verified, contradicting, unknown]) => ({
-      evidence: f.replace(/\.md$/, ""), path, id, claim, source: source && source !== "–" ? source : "", basis, confidence, direction: direction === "yes", verified: verified === "yes", contradicting: contradicting && contradicting !== "–" ? contradicting : "", unknown: unknown && unknown !== "–" ? unknown : "",
-    }));
-  });
-}
-/* A claim's problems (it fails validate) and warnings. */
-export function claimChecks(c) {
-  const problems = [], warnings = [];
-  const at = `${c.evidence} ${c.id}`;
-  if (!c.source) problems.push(`${at} has no source: name where it comes from (a file and line, a screen, a quote's time)`);
-  if (!["observed", "inferred"].includes(c.basis)) problems.push(`${at}: basis is observed or inferred, not "${c.basis ?? ""}"`);
-  if (!["high", "medium", "low"].includes(c.confidence)) problems.push(`${at}: confidence is high, medium or low, not "${c.confidence ?? ""}"`);
-  if (c.direction && !c.verified && c.confidence !== "low") warnings.push(`${at} changes the design's direction but was not checked against its source: check it there (evidence claim verify ${c.evidence} ${c.id}) or mark it low confidence; until then it is uncertain`);
-  return { problems, warnings };
-}
-
 /* ux-builder-design validate: every docs/ux document, and what cites the
    jobs (blueprint tasks, decision records). Problems fail it; warnings and
    notes are reported. */
 export function validate(app) {
   const documents = uxDocuments(app);
   // HELIX documents on disk, and those a pending proposal creates (they exist once the person applies them).
-  const known = new Set([...documents.map((d) => d.id).filter(Boolean), ...helixIds(app), ...proposedDocuments(app).map((d) => parseDocument(d.text).front?.ddx?.id).filter(Boolean).map(String)]);
+  const known = new Set([...documents.map((d) => d.id).filter(Boolean), ...helixIds(app), ...studies(app).map((x) => x.name), ...proposedDocuments(app).map((d) => parseDocument(d.text).front?.ddx?.id).filter(Boolean).map(String)]);
   const jobs = jobsTable(app);
   // A jobs table's rows are linkable by their J- IDs, and the users table's by their U- IDs.
   for (const id of Object.keys(jobs ?? {})) known.add(id);
@@ -350,17 +292,14 @@ export function validate(app) {
     if (!user) { problems.push({ path: bpFile(app), message: `${t.id} names ${u}, which ${ux(app, "users.md")} does not have` }); continue; }
     if (user.confidence === "low") warnings.push({ path: bpFile(app), message: `${t.id} serves ${u} ("${user.user}"), whose confidence is low` });
   }
-  for (const c of evidenceClaims(app)) {
-    const r = claimChecks(c);
-    for (const m of r.problems) problems.push({ path: c.path, message: m });
-    for (const m of r.warnings) warnings.push({ path: c.path, message: m });
-  }
+  // Studies (ADR-042): masked excerpts, and claims with a source and a basis.
+  for (const x of studyChecks(app)) (x.level === "warning" ? warnings : problems).push({ path: x.path, message: x.message });
   // Documents that drift from the design (US-161-AC6): a contradicted claim nobody asked the person about,
   // and a story the brief lists as confirmed that no journey carries any more.
   let state = null;
   try { state = JSON.parse(readFileSync(join(app, ".ux-builder/design-state.json"), "utf8")); } catch { /* no design state */ }
   const questions = Array.isArray(state?.questions) ? state.questions : [];
-  for (const c of evidenceClaims(app)) if (c.contradicting && !questions.some((q) => q.text.includes(`${c.evidence} ${c.id}`))) warnings.push({ path: c.path, message: `${c.evidence} ${c.id} is contradicted (${c.contradicting}), and no question asks the person which holds: ux-builder-design evidence claim contradict ${c.evidence} ${c.id} --text "<what they said>"` });
+  for (const c of studyClaims(app)) if (c.contradicting && !questions.some((q) => q.text.includes(`"${c.claim}"`))) warnings.push({ path: c.path, message: `${c.study}: "${c.claim}" is contradicted (${c.contradicting}), and no question asks the person which holds: ux-builder-design evidence claim contradict --study ${c.study} --claim "<its words>" --text "<what they said>"` });
   const carried = new Set((Array.isArray(bp?.journeys) ? bp.journeys : []).map((j) => j?.story).filter(Boolean));
   const briefPath = ux(app, "brief.md");
   if (carried.size && existsSync(join(app, briefPath))) {

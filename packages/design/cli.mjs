@@ -100,25 +100,25 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       propose an experience principle for HELIX's principles.md; a rule a check
       can express ({"kind":"no-step-before","patterns":["SignIn"]}) goes in
       .ux-builder/principles.json for ux-builder-blueprint check.
-  evidence add <file> --kind interview|analytics|support|feedback|survey|observation
+  evidence add <file> --kind interview|analytics|support|feedback|survey|observation --study <name>
                [--date YYYY-MM-DD] [--source <where it is kept>] [--title <t>]
-      record a research source as docs/ux-builder/evidence/EV-<n>.md: where it is kept,
-      never its text; add the masked excerpts the synthesis cites.
+      propose a source for the study's HELIX research plan
+      (docs/helix/01-frame/research/<study>.md, Research Methods > Sources):
+      where it is kept, never its text.
   evidence list
-      each source's ID, kind, date, source and excerpts cited.
-  evidence claim add <EV-n> --text <claim> --source <where> --basis observed|inferred
-               --confidence high|medium|low [--direction] [--verified] [--contradicts <t>] [--unknown <t>]
-      record a synthesized claim in the record's Claims: where it comes from,
-      observed or inferred, the confidence, whether it changes the design's
-      direction and whether the agent checked it against the source itself.
-  evidence claim verify <EV-n> <Cn> [--confidence <c>]
+      each study's sources, claims and excerpts.
+  evidence claim add --study <name> --text <claim> --source <where> --basis observed|inferred[: …]
+               --confidence high|medium|low [--direction "<supports|weakens|refutes>: <what>"] [--verified]
+               [--contradicts <t>] [--unknown <t>]
+      propose a claim for the study's Findings > Claims (HELIX's columns).
+  evidence claim verify --study <name> --claim <its words> [--confidence <c>]
       the agent checked the claim against its source.
-  evidence claim contradict <EV-n> <Cn> --text <what the person said>
+  evidence claim contradict --study <name> --claim <its words> --text <what the person said>
       what the person said goes against the claim: written in its
       Contradicting column and opened as a question for the person.
-  evidence excerpt add <EV-n> --participant <name or Pn> --text <quote> [--at <time>] [--role <role>]
-      add one quote the synthesis cites to the record's Excerpts: masked, by
-      pseudonym (a name gets one, kept in .ux-builder/participants.local.json).
+  evidence excerpt add --study <name> --participant <name or Pn> --text <quote> [--at <time>] [--source <which>]
+      propose one quote the synthesis cites for the study's Findings > Excerpts:
+      masked, by pseudonym (a name gets one, kept in .ux-builder/participants.local.json).
   decision add --question <q> --option <o> --option <o>... --choice <o> --why <text>
                [--assumption <a>]... [--validation <how it will be tested>] [--link <HELIX ID>]...
       propose a HELIX ADR (docs/helix/02-design/adr/ADR-<nnn>-<slug>.md, tagged area:ui)
@@ -132,38 +132,40 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       what a change in plain words reaches (and checkpointRequired when it
       touches something already tested); --apply makes it: the blueprint,
       prototypes and kits regenerated, HELIX only as proposals, a decision.
-  test-kit [--journey <id>]...
-      a usability test kit in docs/ux-builder/tests/TK-<n>/ from the journeys.
-  observe import <file> --kit <TK-n>
+  test-kit --study <name> [--journey <id>]...
+      propose the study's scenarios, success criteria and screener for its
+      research plan's Research Methods; write the facilitator script, consent
+      note, observation sheet and task list to docs/ux-builder/runs/studies/<study>/
+      (run output, gitignored).
+  observe import <file> --study <name>
       import a filled observation sheet (CSV or JSON) as findings with
       source: human, one per participant and task, by pseudonym, remarks
-      masked; into docs/ux-builder/tests/<TK-n>/findings.json.
-  transcript add <file> --session <id> --consent-confirmed [--by <name>] [--kit TK-<n>] [--cite <time>]...
-      record a session transcript's masked, cited excerpts (the lines at the
-      cited timestamps) as docs/ux-builder/evidence/EV-<n>.md, and the consent in the
-      design state. Refuses without --consent-confirmed, and refuses recordings.
-      --kit names the test kit the session ran, so the report shows these
-      quotes beside that person's findings.
+      masked; into the study's run folder, findings.json.
+  transcript add <file> --study <name> --session <id> --consent-confirmed [--by <name>] [--cite <time>]...
+      propose the transcript as a source of the study and its cited lines as
+      masked excerpts in its Findings, and record the consent in the design
+      state. Refuses without --consent-confirmed, and refuses recordings.
   report
-      write the UX evaluation report, docs/ux-builder/evaluations/UER-<n>.md: method,
-      tasks, measures, the rubric (predicted, agent-measured, observed),
-      findings by journey labelled human or agent, recommendations and what
-      was not tested. A contradicted prediction refutes its assumptions.
+      write the UX evaluation, docs/ux-builder/runs/evaluations/<date>/report.md
+      (run output): method, tasks, measures, the rubric (predicted,
+      agent-measured, observed), findings by journey labelled human or agent,
+      recommendations and what was not tested; and propose what people did as
+      claims in each study's Findings. A contradicted prediction refutes its assumptions.
   route <F-id>... [--decision <ADR-nnn> --status tested|refuted]
       the findings the person chose at checkpoint core-3 as a proposed patch
       to HELIX's improvement backlog (docs/ux-builder/helix-proposals/backlog/); with
-      --decision, the decision record's new status.
+      --decision, the decision's proposed ADR Validation.
   insights <events.jsonl> [--support <file>] [--feedback <file>] [--date YYYY-MM-DD]
       production insights from the journey events the app exported: per
       journey, completion, where people abandon, failed searches, errors,
-      feature use and time per step, in docs/ux-builder/insights/INS-<date>.md; the
-      support and feedback entries masked and linked to the journeys they
-      mention. Its sources become evidence the jobs and the rubric cite.
-      Reads only the files it is given; fetches nothing.
-  diagnose --insight INS-<date> --observation <o> --explanation <e> --explanation <e>...
+      feature use and time per step, in docs/ux-builder/runs/insights/<date>/
+      (run output); each journey's funnel proposed into HELIX's metrics
+      dashboard (Journey Funnels). Reads only the files it is given; fetches nothing.
+  diagnose --insight <date> [--journey <id>] --observation <o> --explanation <e> --explanation <e>...
            --hypothesis <h> --alternative <name>
       record what an insight shows, at least two explanations, the
-      hypothesis and the alternative that tests it.
+      hypothesis and the alternative that tests it; with --journey, propose it
+      as that journey's funnel Diagnosis.
   experiment start --decision ADR-<nnn> --variant <alt> --metric <m> [--guardrail <m>]... --duration <days>
       after the person answers checkpoint experiment: a DDx bead with the hypothesis,
       the metrics and the stopping rule; metrics HELIX does not define are
@@ -219,7 +221,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, rule: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, rule: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "string" }, study: { type: "string" }, claim: { type: "string" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -383,43 +385,43 @@ async function main(argv) {
     return 0;
   }
   if (command === "test-kit") {
-    const r = testKit(app, { journeys: values.journey ?? [] });
-    print(r, values.json, [`Wrote ${r.dir}/: ${r.tasks.length} task${r.tasks.length === 1 ? "" : "s"} (${r.tasks.map((t) => t.journey).join(", ")}).`, ...r.warnings.map((w) => `warning: ${w}`)].join("\n"));
+    const r = testKit(app, { study: values.study, journeys: values.journey ?? [] });
+    print(r, values.json, [`Proposed the ${r.study} study's scenarios, success criteria and screener for ${r.path}; wrote ${r.run}/: ${r.tasks.length} task${r.tasks.length === 1 ? "" : "s"} (${r.tasks.map((t) => t.journey).join(", ")}).`, ...r.warnings.map((w) => `warning: ${w}`)].join("\n"));
     return 0;
   }
   if (command === "observe") {
     const [sub, file] = rest;
     if (sub !== "import") throw new DesignError(`unknown observe command "${sub ?? ""}": use import`);
-    const r = observeImport(app, { file, kit: values.kit });
+    const r = observeImport(app, { file, study: values.study });
     print(r, values.json, [`Imported ${r.imported} observation${r.imported === 1 ? "" : "s"} into ${r.path} (${r.sessions.join(", ") || "no sessions"}).`, ...(r.rewritten ? [`Rewrote ${r.rewritten} with pseudonyms; the real names are only in .ux-builder/participants.local.json, kept out of git.`] : []), ...r.skipped.map((x) => `skipped row ${x.row}: ${x.reason}`)].join("\n"));
     return 0;
   }
   if (command === "transcript") {
     const [sub, file] = rest;
     if (sub !== "add") throw new DesignError(`unknown transcript command "${sub ?? ""}": use add`);
-    const r = transcriptAdd(app, { file, session: values.session, consentConfirmed: values["consent-confirmed"], by: values.by, cite: values.cite ?? [], date: values.date, kit: values.kit });
-    print(r, values.json, `Wrote ${r.path}: ${r.excerpts} cited excerpt${r.excerpts === 1 ? "" : "s"} from session ${r.session}, masked; consent recorded.${r.excerpts ? "" : " Cite the lines the synthesis relies on with --cite <time>."}`);
+    const r = transcriptAdd(app, { file, study: values.study, session: values.session, consentConfirmed: values["consent-confirmed"], by: values.by, cite: values.cite ?? [], date: values.date });
+    print(r, values.json, `Proposed for ${r.path}: ${r.excerpts} cited excerpt${r.excerpts === 1 ? "" : "s"} from session ${r.session}, masked; consent recorded.${r.excerpts ? "" : " Cite the lines the synthesis relies on with --cite <time>."}`);
     return 0;
   }
   if (command === "report") {
     const r = report(app);
-    print(r, values.json, [`Wrote ${r.path} (${r.approach}${r.follows ? `, follows ${r.follows}` : ""}).`, r.observed ? null : "No human evidence yet: the observed column says so.", ...r.contradicted.map((d) => `Contradicted: ${d}`), ...r.assumptions.map((a) => `${a.id}: ${a.from} → ${a.to}`)].filter(Boolean).join("\n"));
+    print(r, values.json, [`Wrote ${r.path} (${r.approach}${r.follows ? `, follows the ${r.follows} evaluation` : ""}).`, ...r.claims.map((c) => `Proposed what people did as claims for ${c.path}.`), r.observed ? null : "No human evidence yet: the observed column says so.", ...r.contradicted.map((d) => `Contradicted: ${d}`), ...r.assumptions.map((a) => `${a.id}: ${a.from} → ${a.to}`)].filter(Boolean).join("\n"));
     return 0;
   }
   if (command === "route") {
     const r = route(app, { findings: rest, decision: values.decision, status: values.status });
-    print(r, values.json, [`Wrote ${r.patch}: ${r.findings.join(", ")} for ${r.target.path} (${r.target.kind}). Apply it through HELIX.`, ...(r.decision ? [`${r.decision.id} is ${r.decision.status}.`] : [])].join("\n"));
+    print(r, values.json, [`Wrote ${r.patch}: ${r.findings.join(", ")} for ${r.target.path} (${r.target.kind}). Apply it through HELIX.`, ...(r.decision ? [`Proposed ${r.decision.id}'s Validation: ${r.decision.status}.`] : [])].join("\n"));
     return 0;
   }
   if (command === "insights") {
     const r = insights(app, { events: rest[0], support: values.support, feedback: values.feedback, date: values.date });
     const pct = (j) => (j.started ? `${Math.round((j.completed / j.started) * 100)}%` : "–");
-    print(r, values.json, [`Wrote ${r.path}: ${r.events} events.`, ...r.journeys.map((j) => `  ${j.journey}: ${j.completed} of ${j.started} completed (${pct(j)}), ${j.failedSearches} failed searches`), ...r.unmatched.map((u) => `  unmatched: ${u.journey} (${u.events} event${u.events === 1 ? "" : "s"}; not in the blueprint)`), ...r.jobs.map((j) => `  ${j.job} now cites ${j.evidence.join(", ")} (${j.confidence}, ${j.status})`)].join("\n"));
+    print(r, values.json, [`Wrote ${r.path}: ${r.events} events.`, ...r.journeys.map((j) => `  ${j.journey}: ${j.completed} of ${j.started} completed (${pct(j)}), ${j.failedSearches} failed searches`), ...r.unmatched.map((u) => `  unmatched: ${u.journey} (${u.events} event${u.events === 1 ? "" : "s"}; not in the blueprint)`), `Proposed the journey funnels for ${r.dashboard}.`].join("\n"));
     return 0;
   }
   if (command === "diagnose") {
-    const r = diagnose(app, { insight: values.insight, observation: values.observation, explanations: values.explanation, hypothesis: values.hypothesis, alternative: values.alternative });
-    print(r, values.json, `${r.id} recorded on ${r.insight}: ${r.explanations.length} explanations; tests ${r.alternative}.`);
+    const r = diagnose(app, { insight: values.insight, journey: values.journey?.[0], observation: values.observation, explanations: values.explanation, hypothesis: values.hypothesis, alternative: values.alternative });
+    print(r, values.json, `Diagnosis recorded on the ${r.insight} insights: ${r.explanations.length} explanations; tests ${r.alternative}.`);
     return 0;
   }
   if (command === "experiment") {
@@ -469,39 +471,39 @@ async function main(argv) {
   if (command === "evidence") {
     const [sub, file] = rest;
     if (sub === "add") {
-      const r = evidenceAdd(app, { file, kind: values.kind, date: values.date, source: values.source, title: values.title });
-      print(r, values.json, `Wrote ${r.path} (${r.kind}). Add the excerpts the synthesis cites, masked, by pseudonym.`);
+      const r = evidenceAdd(app, { file, kind: values.kind, study: values.study, date: values.date, source: values.source, title: values.title });
+      print(r, values.json, `Proposed "${r.source}" (${r.kind}) as a source of the ${r.study} study, ${r.path}. Add the excerpts and claims the synthesis cites.`);
       return 0;
     }
     if (sub === "list") {
       const r = evidenceList(app);
-      print(r, values.json, r.evidence.length ? r.evidence.map((e) => `${e.id}  ${e.kind}  ${e.date}  ${e.excerpts} excerpt${e.excerpts === 1 ? "" : "s"}  ${e.source}`).join("\n") : "No evidence yet.");
+      print(r, values.json, r.studies.length ? r.studies.map((x) => `${x.study}${x.proposed ? " (proposed)" : ""}  ${x.sources.length} source${x.sources.length === 1 ? "" : "s"}, ${x.claims} claim${x.claims === 1 ? "" : "s"}, ${x.excerpts} excerpt${x.excerpts === 1 ? "" : "s"}  ${x.path}`).join("\n") : "No studies yet.");
       return 0;
     }
     if (sub === "claim") {
-      const [, op, id, claim] = rest;
+      const [, op] = rest;
       if (op === "add") {
-        const r = claimAdd(app, { id, text: values.text, source: values.source, basis: values.basis, confidence: values.confidence, direction: values.direction, verified: values.verified, contradicts: values.contradicts, unknown: values.unknown });
-        print(r, values.json, [`Added ${r.id} to ${r.path}.`, ...r.warnings.map((w) => `warning: ${w}`)].join("\n"));
+        const r = claimAdd(app, { study: values.study, text: values.text, source: values.source, basis: values.basis, confidence: values.confidence, direction: values.direction, verified: values.verified, contradicts: values.contradicts, unknown: values.unknown });
+        print(r, values.json, [`Proposed the claim for ${r.path}.`, ...r.warnings.map((w) => `warning: ${w}`)].join("\n"));
         return 0;
       }
       if (op === "verify") {
-        const r = claimVerify(app, { id, claim, confidence: values.confidence });
-        print(r, values.json, `${r.evidence} ${r.id} checked against its source (${r.confidence} confidence).`);
+        const r = claimVerify(app, { study: values.study, claim: values.claim, confidence: values.confidence });
+        print(r, values.json, `"${r.claim}" checked against its source (${r.confidence} confidence).`);
         return 0;
       }
       if (op === "contradict") {
-        const r = claimContradict(app, { id, claim, text: values.text });
-        print(r, values.json, `${r.evidence} ${r.id} is contradicted by what the person said; asked as ${r.question.id}: ${r.question.text}`);
+        const r = claimContradict(app, { study: values.study, claim: values.claim, text: values.text });
+        print(r, values.json, `"${r.claim}" is contradicted by what the person said; asked: ${r.question.text}`);
         return 0;
       }
       throw new DesignError(`unknown evidence claim command "${op ?? ""}": use add, verify or contradict`);
     }
     if (sub === "excerpt") {
-      const [, op, id] = rest;
+      const [, op] = rest;
       if (op !== "add") throw new DesignError(`unknown evidence excerpt command "${op ?? ""}": use add`);
-      const r = excerptAdd(app, { id, participant: values.participant, text: values.text, at: values.at, role: values.role });
-      print(r, values.json, `Added to ${r.path}: ${r.excerpt}`);
+      const r = excerptAdd(app, { study: values.study, participant: values.participant, text: values.text, at: values.at, source: values.source });
+      print(r, values.json, `Proposed for ${r.path}: ${r.excerpt}`);
       return 0;
     }
     throw new DesignError(`unknown evidence command "${sub ?? ""}": use add, list, claim add|verify|contradict or excerpt add`);

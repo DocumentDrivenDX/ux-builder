@@ -1,16 +1,18 @@
 /* ux-builder-design test-kit (CONTRACT-008 Commands, FEAT-018 GDL-54,
-   ADR-039): everything needed to test the journeys with real people, in
-   docs/ux/tests/TK-<n>/: the scenarios (each a user's goal, with no screen,
-   pattern or control names), success criteria from the acceptance
-   criteria, a facilitator script, a consent note, a screener and an
-   observation sheet. */
+   ADR-039, ADR-042): everything needed to test the journeys with real
+   people. The scenarios (each a user's goal, with no screen, pattern or
+   control names), success criteria from the acceptance criteria and the
+   screener go in the study's HELIX research plan; the facilitator script,
+   consent note and observation sheet are run output. */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { DesignError, bpFile, ux, writeInApp } from "./app.mjs";
+import { DesignError, bpFile, runsDir, ux, writeInApp } from "./app.mjs";
 import { advance } from "./checkpoints.mjs";
 import { businessRules, helixRoot, parseDocument, usersTable } from "./documents.mjs";
 import { readState, writeState } from "./state.mjs";
+import { cell, sectionOf, setSection } from "./helix.mjs";
+import { proposeStudy, studyName, studyRunDir } from "./studies.mjs";
 
 const list = (x) => (Array.isArray(x) ? x : []);
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
@@ -18,12 +20,6 @@ const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } ca
    user: the target user (U-<n>) the participant matched in the screener. */
 export const OBSERVATION_COLUMNS = ["participant", "task", "completed", "seconds", "errors", "assists", "remark", "problem", "user"];
 const MISSING = "missing: the journey names no acceptance criteria";
-
-function kitNumbers(app) {
-  const dir = join(app, ux(app, "tests"));
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir).map((n) => n.match(/^TK-([1-9][0-9]*)$/)?.[1]).filter(Boolean).map(Number);
-}
 
 /* HELIX stories: { US-n: { title, criteria: { US-n-ACm: text } } }. */
 function stories(app) {
@@ -87,7 +83,6 @@ function targetUsers(app) {
   return [];
 }
 
-const cell = (s) => String(s ?? "").replace(/\|/g, "\\|");
 const csv = (s) => (/[",\n]/.test(String(s)) ? `"${String(s).replace(/"/g, '""')}"` : String(s ?? ""));
 
 /* The kit's tasks: [{ n, journey, goal, criteria: [{ id, text }] }]. */
@@ -119,42 +114,62 @@ export function kitTasks(app, bp, { journeys = [] } = {}) {
   return out;
 }
 
-/* Write a kit: TK-<n> after the last, or rewrite `id`, keeping an observation sheet already filled in. */
-export function testKit(app, { journeys = [], id } = {}) {
+/* ux-builder-design test-kit --study <name> [--journey <id>]...: the study's
+   scenarios, success criteria and screener proposed into its research plan's
+   Research Methods; the facilitator script, the consent note, the
+   observation sheet and the task list written to its run folder (run
+   output, gitignored), keeping an observation sheet already filled in. */
+export function testKit(app, { study, journeys = [] } = {}) {
+  const name = studyName(study);
   const bp = readJson(join(app, bpFile(app)));
   if (!bp) throw new DesignError(`no ${bpFile(app)}: the kit is written from its journeys`);
   const tasks = kitTasks(app, bp, { journeys });
   if (!tasks.length) throw new DesignError("the blueprint has no journeys to test");
-  const kit = id ?? `TK-${Math.max(0, ...kitNumbers(app)) + 1}`;
-  const dir = `${ux(app)}/tests/${kit}`;
+  const run = studyRunDir(app, name);
   const users = targetUsers(app);
-  // Who each task is for, when the tasks name their users (GDL-77).
-  const forWhom = tasks.some((t) => t.users.length);
-  const scenarios = ["# Scenarios", "", "Read each goal to the participant as written. Never name a screen, a button or a menu.", "", `| Task | Journey | Goal given to the participant | Success criteria |${forWhom ? " For |" : ""}`, `|---|---|---|---|${forWhom ? "---|" : ""}`,
-    ...tasks.map((t) => `| ${t.n} | ${t.journey} | You want to ${cell(t.goal)}. Show me how you would do that. | ${t.criteria.map((c) => c.id).join(", ") || MISSING} |${forWhom ? ` ${t.users.join(", ") || "anyone"} |` : ""}`), ""].join("\n");
-  const script = ["# Facilitator script", "", "1. Thank the participant. Say we are testing the design, not them, and ask them to think aloud.", "2. Confirm consent (consent.md) before starting.", ...tasks.map((t, i) => `${i + 3}. Read task ${t.n}: "You want to ${t.goal}." Do not point at the screen or name anything on it.`), `${tasks.length + 3}. If the participant is stuck for two minutes, give one hint and mark an assist.`, `${tasks.length + 4}. After each task, ask: "How sure are you that it worked?"`, `${tasks.length + 5}. Thank them; note anything they said after the tasks.`, ""].join("\n");
-  const consent = ["# Consent", "", "We are testing a design, not you. We take notes during the session; we do not record audio or video unless you agree separately.", "Notes use a pseudonym (P1, P2) and never your name. You can stop at any time, and ask us to delete your notes.", "", "Confirm consent for each session before importing its notes (`ux-builder-design transcript add --consent-confirmed`).", ""].join("\n");
+  const scenario = (t) => `${t.journey}${t.rule ? ` (${t.rule})` : ""}`;
   const lower = (x) => x.charAt(0).toLowerCase() + x.slice(1);
-  const screener = ["# Screener", "",
-    ...(!users.length ? ["The experience brief names no target users yet: write the screener questions from the PRD's personas."]
-      : users[0].id ? [`Recruit people who match one of these target users (${ux(app, "users.md")}). Note the one each participant matches in the observation sheet's user column.`, "",
-        ...users.flatMap((u) => [`## ${u.id}: ${u.user}`, "", `- Does this describe you: ${lower(u.user)}? (yes / no)`, ...(u.context ? [`- Is this how you would use it: ${lower(u.context)}? (yes / no)`] : []), ""])]
-      : ["Recruit people who match one of these target users (from the experience brief):", "", ...users.map((u) => `- Does this describe you: ${lower(u.user)}? (yes / no)`)]),
-    "", "Leave out anyone who works on this product.", ""].join("\n").replace(/\n{3,}/g, "\n\n");
+  const goal = (t) => t.goal.charAt(0).toUpperCase() + t.goal.slice(1).replace(/[.]?$/, ".");
+  // Into the plan: what the study asks of people, in their words (no screen, pattern or control names).
+  const plan = proposeStudy(app, name, (text) => {
+    let t = sectionOf(text, "Research Methods") == null ? setSection(text, "Research Methods", "", { after: "Research Objectives" }) : text;
+    t = setSection(t, "Scenarios", ["| Scenario | Goal |", "|---|---|", ...tasks.map((x) => `| ${cell(scenario(x))} | ${cell(goal(x))} |`)].join("\n"), { level: 3, inside: "Research Methods" });
+    t = setSection(t, "Success Criteria", ["| Scenario | Succeeds When | Acceptance Criteria |", "|---|---|---|", ...tasks.map((x) => `| ${cell(scenario(x))} | ${cell(`The participant can ${lower(x.goal).replace(/[.]$/, "")}, unaided.`)} | ${x.criteria.map((c) => c.id).join(", ") || MISSING} |`)].join("\n"), { level: 3, inside: "Research Methods" });
+    t = setSection(t, "Screener", [
+      `- **Include**: ${users.length ? users.map((u) => lower(u.user)).join("; ") : "people who match the PRD's personas (the brief names no target users yet)"}`,
+      "- **Exclude**: anyone who works on this product",
+      `- **Mix**: ${users.length > 1 ? `at least one of each: ${users.map((u) => u.user).join(", ")}` : "five or more people"}`,
+      ...(users.length ? ["", `Ask each candidate${users[0].id ? "; note the user they match in the observation sheet's user column" : ""}:`, "", ...users.flatMap((u) => [`- Does this describe you: ${lower(u.user)}? (yes / no)`, ...(u.context ? [`- Is this how you would use it: ${lower(u.context)}? (yes / no)`] : [])])] : []),
+    ].join("\n"), { level: 3, inside: "Research Methods" });
+    return t;
+  });
+  // Run output: what the sessions use and leave.
+  const script = ["# Facilitator script", "", "1. Thank the participant. Say we are testing the design, not them, and ask them to think aloud.", "2. Confirm consent (consent.md) before starting.", ...tasks.map((t, i) => `${i + 3}. Read task ${t.n}: "You want to ${t.goal}." Do not point at the screen or name anything on it.`), `${tasks.length + 3}. If the participant is stuck for two minutes, give one hint and mark an assist.`, `${tasks.length + 4}. After each task, ask: "How sure are you that it worked?"`, `${tasks.length + 5}. Thank them; note anything they said after the tasks.`, ""].join("\n");
+  const consent = ["# Consent", "", "We are testing a design, not you. We take notes during the session; we do not record audio or video unless you agree separately.", "Notes use a pseudonym (P1, P2) and never your name. You can stop at any time, and ask us to delete your notes.", "", `Confirm consent for each session before importing its notes (\`ux-builder-design transcript add --study ${name} --consent-confirmed\`).`, ""].join("\n");
   const sheet = [OBSERVATION_COLUMNS.join(","), ...tasks.map((t) => ["", t.n, ...OBSERVATION_COLUMNS.slice(2).map(() => "")].map(csv).join(","))].join("\n") + "\n";
-  const kitMd = ["---", "ux:", `  id: ${kit}`, "  type: test-kit", "---", "", `# ${kit}: ${tasks.map((t) => t.journey).join(", ")}`, "", "## Scenarios", "", "See `scenarios.md`.", "", ...tasks.map((t) => `- Task ${t.n} (${t.journey}): you want to ${t.goal}.`), "", "## Success criteria", "", ...tasks.map((t) => `- Task ${t.n}: ${t.criteria.map((c) => c.id).join(", ") || MISSING}`), "", "## Facilitator script", "", "See `script.md`.", "", "## Consent", "", "See `consent.md`.", "", "## Screener", "", "See `screener.md`.", "", "## Observation sheet", "", `\`observations.csv\`: ${OBSERVATION_COLUMNS.join(", ")}; one row per task and participant.`, ""].join("\n");
   const written = [
-    writeInApp(app, `${dir}/kit.md`, kitMd), writeInApp(app, `${dir}/scenarios.md`, scenarios), writeInApp(app, `${dir}/script.md`, script),
-    writeInApp(app, `${dir}/consent.md`, consent), writeInApp(app, `${dir}/screener.md`, screener),
+    writeInApp(app, `${run}/tasks.json`, JSON.stringify({ study: name, tasks: tasks.map((t) => ({ n: t.n, scenario: scenario(t), journey: t.journey, ...(t.rule ? { rule: t.rule } : {}), goal: t.goal, criteria: t.criteria.map((c) => c.id), users: t.users })) }, null, 2) + "\n"),
+    writeInApp(app, `${run}/script.md`, script), writeInApp(app, `${run}/consent.md`, consent),
   ];
-  const sheetPath = join(app, dir, "observations.csv");
+  const sheetPath = join(app, run, "observations.csv");
   const filled = existsSync(sheetPath) && readFileSync(sheetPath, "utf8").split("\n").slice(1).some((l) => /^[^,]+,/.test(l) && !l.startsWith(","));
-  if (!filled) written.push(writeInApp(app, `${dir}/observations.csv`, sheet));
+  if (!filled) written.push(writeInApp(app, `${run}/observations.csv`, sheet));
   // A test kit means the loop is validating.
   try { const state = readState(app); if (advance(state, "validate")) writeState(app, state); } catch { /* no design state */ }
   const warnings = tasks.filter((t) => !t.criteria.length).map((t) => `${t.journey} names no acceptance criteria: task ${t.n} has no success criteria`);
-  return { id: kit, dir, tasks, written, users, warnings };
+  return { study: name, path: plan.path, proposal: plan.id ?? null, run, tasks, written, users, warnings };
 }
 
-/* The kits in the app. */
-export function kits(app) { return kitNumbers(app).sort((a, b) => a - b).map((n) => `TK-${n}`); }
+/* The studies with a test kit (a task list in their run folder). */
+export function kits(app) {
+  const dir = join(app, runsDir(app, "studies"));
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).filter((n) => existsSync(join(dir, n, "tasks.json"))).sort();
+}
+
+/* A study's kit tasks: [{ n, scenario, journey, goal, criteria }]. */
+export function studyTasks(app, study) {
+  const t = readJson(join(app, studyRunDir(app, study), "tasks.json"));
+  if (!t) throw new DesignError(`the study ${studyName(study)} has no test kit: write one with ux-builder-design test-kit --study ${studyName(study)}`);
+  return t.tasks ?? [];
+}

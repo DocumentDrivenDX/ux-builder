@@ -8,20 +8,21 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { cli } from "./helpers.mjs";
+import { currentText, sectionOf } from "../index.mjs";
 import { KIT_BP, kitApp } from "./kit-fixture.mjs";
 
 const json = (a, args) => { const r = cli(a, [...args, "--json"]); assert.equal(r.status, 0, r.stderr); return JSON.parse(r.stdout); };
 const HEAD = "---\nux:\n  id: users\n  type: users\n---\n\n# Target users\n\n## Users\n\n| ID | User | Context | Needs | Jobs | Evidence | Confidence | Status |\n|---|---|---|---|---|---|---|---|\n";
 const ROWS = [
-  "| U-1 | Weekend anglers new to an area | On a phone at the riverbank, one hand free | Large touch targets | J-1 high, J-2 medium | EV-1 | medium | confirmed |",
+  "| U-1 | Weekend anglers new to an area | On a phone at the riverbank, one hand free | Large touch targets | J-1 high, J-2 medium | anglers | medium | confirmed |",
   "| U-2 | Fishing guides | Plan at a desk for clients | None known | J-1 low, J-2 high | none | low | hypothesis |",
 ];
 const users = (a, rows = ROWS) => writeFileSync(join(a, "docs/ux-builder/users.md"), HEAD + rows.join("\n") + "\n");
-/* The kit app, with an interview (EV-1), a users table and tasks naming their users. */
+/* The kit app, with an interview (the anglers study), a users table and tasks naming their users. */
 function usersApp({ taskUsers = [["U-1"], ["U-1", "U-2"]] } = {}) {
   const a = kitApp();
-  mkdirSync(join(a, "docs/ux-builder/evidence"), { recursive: true });
-  writeFileSync(join(a, "docs/ux-builder/evidence/EV-1.md"), "---\nux:\n  id: EV-1\n  type: research-evidence\n  kind: interview\n  date: 2026-10-12\n  source: \"shared drive\"\n  file: \"i.txt\"\n  participants: {}\n---\n\n# EV-1: interview\n\n## Source\n\n- kept elsewhere\n\n## Excerpts\n\n- None cited yet.\n\n## Synthesis notes\n\n- None yet.\n");
+  mkdirSync(join(a, "docs/helix/01-frame/research"), { recursive: true }); writeFileSync(join(a, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
+  writeFileSync(join(a, "docs/helix/01-frame/research/anglers.md"), "---\nddx:\n  id: research-anglers\n  type: research-plan\n---\n\n# Research plan: anglers\n\n## Research Methods\n\n### Sources\n\n| Source | Kind | Date | Where it is kept |\n|---|---|---|---|\n| interview 1 | interview | 2026-10-12 | shared drive |\n");
   users(a);
   const bp = structuredClone(KIT_BP);
   bp.tasks = bp.tasks.map((t, i) => ({ ...t, users: taskUsers[i] }));
@@ -37,9 +38,9 @@ describe("US-146: describe target users with their context and evidence", () => 
     assert.deepEqual(problems(a).problems, [], JSON.stringify(problems(a).problems));
     assert.ok(problems(a).notes.some((n) => n.message === "U-2 is a hypothesis: Fishing guides"));
     users(a, [
-      "| U-1 | Weekend anglers | | | J-1 | EV-1 | high | confirmed |",
+      "| U-1 | Weekend anglers | | | J-1 | anglers | high | confirmed |",
       "| U-1 | Guides | At a desk | None known | J-2 high | none | medium | confirmed |",
-      "| U-3 | Clubs | Meet weekly | None known | J-1 low | EV-1 | low | hypothesis |",
+      "| U-3 | Clubs | Meet weekly | None known | J-1 low | anglers | low | hypothesis |",
       "| X | Bad | x | x | J-1 low | none | low | maybe |",
     ]);
     const msgs = problems(a).problems.filter((p) => p.path === "docs/ux-builder/users.md").map((p) => p.message);
@@ -48,7 +49,7 @@ describe("US-146: describe target users with their context and evidence", () => 
       'U-1: needs is empty; write "none known" when there are none',
       'U-1: "J-1" is not a job and its importance (J-<n> high, medium or low)',
       "U-1 is used by more than one user",
-      "U-1: confidence medium needs at least one evidence source (EV-<n>)",
+      "U-1: confidence medium needs at least one evidence source (a study)",
       "U-3: evidence lists a source, but status is hypothesis; a hypothesis has no evidence (mark it confirmed, or clear evidence)",
       'user row "X" needs an ID U-<n>',
     ]) assert.ok(msgs.includes(m), `${m}\n in ${msgs.join("\n")}`);
@@ -57,11 +58,11 @@ describe("US-146: describe target users with their context and evidence", () => 
   // @covers US-146-AC2
   test("AC2: a user holding a job jobs.md lacks, or citing missing evidence, exits 1 naming the user and the ID", () => {
     const a = usersApp();
-    users(a, ["| U-1 | Weekend anglers | On a phone | None known | J-9 high | EV-7 | medium | confirmed |"]);
+    users(a, ["| U-1 | Weekend anglers | On a phone | None known | J-9 high | nope | medium | confirmed |"]);
     const r = cli(a, ["validate"]);
     assert.equal(r.status, 1);
     assert.match(r.stdout, /docs\/ux-builder\/users\.md: U-1: holds J-9, which docs\/ux-builder\/jobs\.md does not have/);
-    assert.match(r.stdout, /docs\/ux-builder\/users\.md: U-1: evidence EV-7 does not exist in docs\/ux-builder\/evidence\//);
+    assert.match(r.stdout, /docs\/ux-builder\/users\.md: U-1: evidence nope is not a study \(docs\/helix\/01-frame\/research\/\)/);
   });
 
   // @covers US-146-AC3
@@ -91,27 +92,26 @@ describe("US-146: describe target users with their context and evidence", () => 
   // @covers US-146-AC5
   test("AC5: the screener asks about each target user and their context; scenarios say who each task is for; the sheet has a user column", () => {
     const a = usersApp();
-    const kit = json(a, ["test-kit"]);
-    const screener = readFileSync(join(a, kit.dir, "screener.md"), "utf8");
-    assert.match(screener, /## U-1: Weekend anglers new to an area\n\n- Does this describe you: weekend anglers new to an area\? \(yes \/ no\)\n- Is this how you would use it: on a phone at the riverbank, one hand free\? \(yes \/ no\)/);
-    assert.match(screener, /## U-2: Fishing guides/);
-    assert.match(screener, /Note the one each participant matches in the observation sheet's user column/);
-    const scenarios = readFileSync(join(a, kit.dir, "scenarios.md"), "utf8");
-    assert.match(scenarios, /^\| Task \| Journey \| Goal given to the participant \| Success criteria \| For \|$/m);
-    assert.match(scenarios, /^\| 1 \| J-find \| .* \| U-1 \|$/m);
-    assert.match(scenarios, /^\| 2 \| J-saved \| .* \| U-1, U-2 \|$/m);
-    assert.equal(readFileSync(join(a, kit.dir, "observations.csv"), "utf8").split("\n")[0], "participant,task,completed,seconds,errors,assists,remark,problem,user");
+    const kit = json(a, ["test-kit", "--study", "rivers"]);
+    const screener = sectionOf(currentText(a, kit.path).text, "Screener", 3);
+    assert.match(screener, /- Does this describe you: weekend anglers new to an area\? \(yes \/ no\)\n- Is this how you would use it: on a phone at the riverbank, one hand free\? \(yes \/ no\)/);
+    assert.match(screener, /- Does this describe you: fishing guides\? \(yes \/ no\)/);
+    assert.match(screener, /note the user they match in the observation sheet's user column/);
+    // Who each task is for travels with the session's task list.
+    const tasks = JSON.parse(readFileSync(join(a, kit.run, "tasks.json"), "utf8")).tasks;
+    assert.deepEqual(tasks.map((t) => [t.journey, t.users]), [["J-find", ["U-1"]], ["J-saved", ["U-1", "U-2"]]]);
+    assert.equal(readFileSync(join(a, kit.run, "observations.csv"), "utf8").split("\n")[0], "participant,task,completed,seconds,errors,assists,remark,problem,user");
   });
 
   // @covers US-146-AC6
   test("AC6: the report breaks its measures down by user, and trace follows a user to its jobs, tasks and journeys", () => {
     const a = usersApp();
-    json(a, ["test-kit"]);
+    json(a, ["test-kit", "--study", "rivers"]);
     writeFileSync(join(a, "sheet.csv"), [
       "participant,task,completed,seconds,errors,assists,remark,problem,user",
       "P1,1,yes,60,0,0,,,U-1", "P2,1,no,200,2,1,lost,access unclear,U-1", "P3,1,yes,90,0,0,,,U-2", "P4,1,yes,80,0,0,,,",
     ].join("\n"));
-    const imported = json(a, ["observe", "import", "sheet.csv", "--kit", "TK-1"]);
+    const imported = json(a, ["observe", "import", "sheet.csv", "--study", "rivers"]);
     assert.deepEqual(imported.findings.map((f) => f.user ?? null), ["U-1", "U-1", "U-2", null]);
     const report = readFileSync(join(a, json(a, ["report"]).path), "utf8");
     assert.match(report, /By target user:\n\n\| User \| Attempts \| Completed \| Median time \| With errors \| Assists \|\n\|---\|---\|---\|---\|---\|---\|\n\| U-1 Weekend anglers new to an area \| 2 \(2 sessions\) \| 50% \| 130 s \| 50% \| 1 \|\n\| U-2 Fishing guides \| 1 \(1 sessions\) \| 100% \| 90 s \| 0% \| 0 \|\n\| not recorded \| 1 \(1 sessions\) \| 100% \| 80 s \| 0% \| 0 \|/);

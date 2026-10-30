@@ -13,9 +13,12 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { DesignError, bpFile, ux } from "./app.mjs";
+import { DesignError, bpFile, runsDir, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
 import { uiDecisions } from "./decisions.mjs";
+import { sectionOf } from "./helix.mjs";
+import { studies, studyRunDir } from "./studies.mjs";
+import { kits } from "./testkit.mjs";
 import { logEvent } from "./metrics.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -125,7 +128,8 @@ export function reviewItems(app) {
   // 2 Understand users
   for (const [id, u] of Object.entries(usersTable(app) ?? {})) add(`user:${id}`, 2, u.user, ux(app, "users.md"), readable({ id, user: u.user, context: u.context, needs: u.needs, jobs: u.jobs.map((j) => `${j.job} ${j.importance}`), evidence: u.evidence, confidence: u.confidence, status: u.status }), fields);
   for (const [id, j] of Object.entries(jobsTable(app) ?? {})) add(`job:${id}`, 2, j.job, ux(app, "jobs.md"), readable({ id, job: j.job, importance: j.importance, evidence: j.evidence, confidence: j.confidence, status: j.status }), fields);
-  for (const f of files(app, ux(app, "evidence"), /^EV-\d+\.md$/)) add(`evidence:${f.replace(/\.md$/, "")}`, 2, `Research evidence ${f.replace(/\.md$/, "")}`, `${ux(app)}/evidence/${f}`, read(app, `${ux(app)}/evidence/${f}`));
+  // Studies are HELIX research plans (ADR-042): their sources, excerpts and claims.
+  for (const st of studies(app)) add(`evidence:${st.name}`, 2, `The ${st.name} study`, st.path, st.text);
   // 3 Model tasks: the stories the journeys cite, the tasks, and the business rules they cite
   const us = stories(app);
   for (const id of [...new Set(list(bp.journeys).map((j) => j?.story).filter(Boolean))]) if (us[id]) add(`story:${id}`, 3, parseDocument(us[id].text).body.match(/^# (.+)$/m)?.[1] ?? id, us[id].file, us[id].text);
@@ -139,14 +143,16 @@ export function reviewItems(app) {
   // 5 Design the structure
   for (const s of list(bp.screens).filter((x) => x?.id)) add(`screen:${s.id}`, 5, s.title ?? s.id, bpFile(app), readable(s), fields);
   // 7 Test with people
-  for (const d of files(app, ux(app, "tests"), /^TK-\d+$/)) {
-    const dir = `${ux(app)}/tests/${d}`;
-    if (!statSync(join(app, dir)).isDirectory()) continue;
-    add(`kit:${d}`, 7, `Test kit ${d}`, `${dir}/kit.md`, ["kit.md", "scenarios.md", "script.md", "screener.md", "consent.md"].map((f) => read(app, `${dir}/${f}`)).filter(Boolean).join("\n\n"));
+  // A study's kit: its scenarios, success criteria and screener (in the plan), and the script and consent (run output).
+  for (const k of kits(app)) {
+    const st = studies(app).find((x) => x.name === k);
+    const plan = st ? ["Scenarios", "Success Criteria", "Screener"].map((h) => { const b = sectionOf(st.text, h, 3); return b == null ? null : `### ${h}\n\n${b}`; }).filter(Boolean).join("\n\n") : null;
+    const run = studyRunDir(app, k);
+    add(`kit:${k}`, 7, `The ${k} study's test kit`, st?.path ?? `${run}/tasks.json`, [plan, read(app, `${run}/script.md`), read(app, `${run}/consent.md`)].filter(Boolean).join("\n\n"));
   }
-  for (const f of files(app, ux(app, "evaluations"), /^UER-\d+\.md$/)) add(`report:${f.replace(/\.md$/, "")}`, 7, `UX evaluation report ${f.replace(/\.md$/, "")}`, `${ux(app)}/evaluations/${f}`, read(app, `${ux(app)}/evaluations/${f}`));
+  for (const d of files(app, runsDir(app, "evaluations"), /^\d{4}-\d{2}-\d{2}(-\d+)?$/)) add(`report:${d}`, 7, `UX evaluation, ${d}`, `${runsDir(app, "evaluations")}/${d}/report.md`, read(app, `${runsDir(app, "evaluations")}/${d}/report.md`));
   // 8 Refine and improve
-  for (const f of files(app, ux(app, "insights"), /^INS-[\d-]+\.md$/)) add(`insight:${f.replace(/\.md$/, "")}`, 8, `Production insights ${f.replace(/\.md$/, "")}`, `${ux(app)}/insights/${f}`, read(app, `${ux(app)}/insights/${f}`));
+  for (const d of files(app, runsDir(app, "insights"), /^\d{4}-\d{2}-\d{2}$/)) add(`insight:${d}`, 8, `Production insights to ${d}`, `${runsDir(app, "insights")}/${d}/insights.md`, read(app, `${runsDir(app, "insights")}/${d}/insights.md`));
   // Experiments are DDx beads (ADR-042); the design state names each one.
   for (const e of list(state?.experiments)) add(`experiment:${e.id}`, 8, `Experiment ${e.variant ?? e.id} for ${e.decision ?? "a decision"}`, `DDx bead ${e.id}`, readable(e));
   return items;

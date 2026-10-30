@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { advance, budget, carried, checkpoint, claimAdd, claimVerify, coverageMap, decisionAdd, evidenceAdd, intake, logTurn, mark, metrics, pendingReviews, readState, reviewApprove, reviewFeedback, reviewList, reviewTable, setStep, stateSet, validate, writeState } from "../index.mjs";
+import { advance, budget, carried, checkpoint, claimAdd, claimVerify, coverageMap, decisionAdd, evidenceAdd, intake, logTurn, mark, metrics, pendingReviews, readState, reviewApprove, reviewFeedback, reviewList, reviewTable, setStep, stateSet, validate, writeState, currentText, proposeChange, sectionOf } from "../index.mjs";
 import { cli, tempApp } from "./helpers.mjs";
 import { kitApp } from "./kit-fixture.mjs";
 
@@ -77,11 +77,11 @@ describe("US-153: foundations reviewed deliberately, what is built from them as 
   test("AC1: review lists foundations and built items apart; records need no approval and hold no checkpoint", () => {
     const a = app();
     writeFileSync(join(a, "notes.txt"), "interview notes");
-    evidenceAdd(a, { file: "notes.txt", kind: "interview" });
+    evidenceAdd(a, { file: "notes.txt", kind: "interview", study: "anglers" });
     const r = reviewList(a);
     assert.deepEqual(r.foundations, ["brief", "user:U-1", "user:U-2", "job:J-1", "job:J-2", "story:US-001", "story:US-002", "decision:ADR-001"]);
     assert.deepEqual(r.derived, ["task:T-1", "task:T-2", "journey:J-find", "journey:J-saved", "screen:map", "screen:detail", "screen:saved"]);
-    assert.deepEqual(r.records, ["evidence:EV-1"]);
+    assert.deepEqual(r.records, ["evidence:anglers"]);
     assert.match(r.next, /^Show the brief table \(ux-builder-design review table brief\), every row in full/);
     const text = cli(a, ["review"]).stdout;
     assert.match(text, /Foundations, a table per kind:\n {2}step 1 {2}brief[\s\S]*Built from them, as the coverage map:\n {2}step 3 {2}task:T-1/);
@@ -199,32 +199,33 @@ describe("US-154: the intake asked together, the budget shown, and the guide's o
 });
 
 describe("US-155: every claim that shapes the design names its source", () => {
-  const withEvidence = () => { const a = app(); writeFileSync(join(a, "notes.txt"), "notes"); evidenceAdd(a, { file: "notes.txt", kind: "observation" }); return a; };
+  const withEvidence = () => { const a = app(); writeFileSync(join(a, "notes.txt"), "notes"); evidenceAdd(a, { file: "notes.txt", kind: "observation", study: "anglers" }); return a; };
 
   // @covers US-155-AC1
-  test("AC1: a claim is recorded with its source, basis and confidence in the record's Claims, before the synthesis notes; one without is refused", () => {
+  test("AC1: a claim is proposed with its source, basis and confidence in the study's Findings > Claims, HELIX's columns; one without is refused", () => {
     const a = withEvidence();
-    assert.equal(cli(a, ["evidence", "claim", "add", "EV-1", "--text", "Ranking is by distance", "--basis", "observed", "--confidence", "high"]).status, 2);
-    assert.match(cli(a, ["evidence", "claim", "add", "EV-1", "--text", "Ranking is by distance", "--source", "src/rank.js:12", "--basis", "seen", "--confidence", "high"]).stderr, /basis is observed or inferred/);
-    const r = json(a, ["evidence", "claim", "add", "EV-1", "--text", "Ranking is by distance | then rating", "--source", "src/rank.js:12", "--basis", "observed", "--confidence", "high", "--contradicts", "the help page says rating"]);
-    assert.equal(r.id, "C1");
-    const doc = readFileSync(join(a, "docs/ux-builder/evidence/EV-1.md"), "utf8");
-    assert.match(doc, /## Claims\n\n\| ID \| Claim \| Source \| Basis \| Confidence \| Direction \| Verified \| Contradicting \| Unknown \|\n\|---\|---\|---\|---\|---\|---\|---\|---\|---\|\n\| C1 \| Ranking is by distance \/ then rating \| src\/rank\.js:12 \| observed \| high \| no \| no \| the help page says rating \| – \|\n\n## Synthesis notes/);
-    assert.equal(validate(a).valid, true);
+    const C = ["evidence", "claim", "add", "--study", "anglers"];
+    assert.equal(cli(a, [...C, "--text", "Ranking is by distance", "--basis", "observed", "--confidence", "high"]).status, 2);
+    assert.match(cli(a, [...C, "--text", "Ranking is by distance", "--source", "src/rank.js:12", "--basis", "seen", "--confidence", "high"]).stderr, /the basis starts with observed or inferred/);
+    const r = json(a, [...C, "--text", "Ranking is by distance | then rating", "--source", "src/rank.js:12", "--basis", "observed in the code", "--confidence", "high", "--contradicts", "the help page says rating"]);
+    assert.equal(r.claim, "Ranking is by distance | then rating");
+    const claims = sectionOf(currentText(a, r.path).text, "Claims", 3);
+    assert.equal(claims, "| Claim | Source | Basis | Confidence | Direction | Verified | Contradicting | Unknown |\n|---|---|---|---|---|---|---|---|\n| Ranking is by distance \\| then rating | src/rank.js:12 | observed in the code | high | – | no | the help page says rating | – |");
+    assert.equal(validate(a).valid, true, JSON.stringify(validate(a).problems));
   });
 
   // @covers US-155-AC2
   test("AC2: a direction-changing claim not checked against its source is a warning until it is verified or marked low confidence; a row with no source fails validate", () => {
     const a = withEvidence();
-    const r = claimAdd(a, { id: "EV-1", text: "Assigners are notified on every change", source: "subagent summary of src/notify", basis: "inferred", confidence: "medium", direction: true });
-    assert.match(r.warnings[0], /EV-1 C1 changes the design's direction but was not checked against its source/);
-    assert.match(validate(a).warnings.map((w) => w.message).join("\n"), /EV-1 C1 changes the design's direction/);
-    claimVerify(a, { id: "EV-1", claim: "C1", confidence: "high" });
-    assert.equal(validate(a).warnings.filter((w) => /C1/.test(w.message)).length, 0);
-    claimAdd(a, { id: "EV-1", text: "Most users are on phones", source: "P2 remark", basis: "inferred", confidence: "low", direction: true });
-    assert.equal(validate(a).warnings.filter((w) => /C2/.test(w.message)).length, 0, "low confidence is labelled uncertain");
-    edit(a, "docs/ux-builder/evidence/EV-1.md", (t) => t.replace(/(\| C2 \| Most users are on phones \| )P2 remark/, "$1–"));
-    assert.match(validate(a).problems.map((p) => p.message).join("\n"), /EV-1 C2 has no source/);
+    const r = claimAdd(a, { study: "anglers", text: "Assigners are notified on every change", source: "subagent summary of src/notify", basis: "inferred", confidence: "medium", direction: "refutes: notify on assignment only" });
+    assert.match(r.warnings[0], /anglers: "Assigners are notified on every change" changes the design's direction but was not checked against its source/);
+    assert.match(validate(a).warnings.map((w) => w.message).join("\n"), /"Assigners are notified on every change" changes the design's direction/);
+    claimVerify(a, { study: "anglers", claim: "Assigners are notified", confidence: "high" });
+    assert.equal(validate(a).warnings.filter((w) => /Assigners/.test(w.message)).length, 0);
+    claimAdd(a, { study: "anglers", text: "Most users are on phones", source: "P2 remark", basis: "inferred", confidence: "low", direction: "weakens: desktop first" });
+    assert.equal(validate(a).warnings.filter((w) => /phones/.test(w.message)).length, 0, "low confidence is labelled uncertain");
+    proposeChange(a, r.path, (t) => t.replace("| Most users are on phones | P2 remark |", "| Most users are on phones | – |"));
+    assert.match(validate(a).problems.map((p) => p.message).join("\n"), /anglers: "Most users are on phones" has no source/);
     assert.match(SKILL, /never relay a\s+subagent's summary as fact/);
   });
 });
@@ -255,12 +256,12 @@ describe("US-160: advance does the safe work and stops at the one decision the p
     reviewApprove(a, { kind: "story", answer: "Yes" });
     edit(a, STORY, (t) => t.replace("status: draft", "status: approved"));
     writeFileSync(join(a, "notes.txt"), "notes");
-    evidenceAdd(a, { file: "notes.txt", kind: "observation" });
-    claimAdd(a, { id: "EV-1", text: "Anglers search by river name", source: "agent summary", basis: "inferred", confidence: "medium", direction: true });
+    evidenceAdd(a, { file: "notes.txt", kind: "observation", study: "anglers" });
+    claimAdd(a, { study: "anglers", text: "Anglers search by river name", source: "agent summary", basis: "inferred", confidence: "medium", direction: true });
     const before = readFileSync(join(a, ".ux-builder/design-state.json"), "utf8");
     const r = cli(a, ["advance", "--until-decision"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /^Step 1 of 8: Define intent\.\nDone: kept 1 approval through a formatting or metadata change: story:US-001\.\nDone: worked out the coverage map: 2 jobs, 0 exceptions\.\nChecked: \d+ design documents: no problems, \d+ warnings\.\nBefore asking, the agent must:\n {2}check 1 direction-changing claim against its source before showing it: EV-1 C1/);
+    assert.match(r.stdout, /^Step 1 of 8: Define intent\.\nDone: kept 1 approval through a formatting or metadata change: story:US-001\.\nDone: worked out the coverage map: 2 jobs, 0 exceptions\.\nChecked: \d+ design documents: no problems, \d+ warnings\.\nBefore asking, the agent must:\n {2}check 1 direction-changing claim against its source before showing it: "Anglers search by river name" \(anglers\)/);
     assert.match(r.stdout, /Decision for the person: approve the user table \(2 items\)\n {2}Show: ux-builder-design review table user, every row in full\n {2}Recommended: .+\n {2}Record: .+\n {2}After: the next foundation table \(job\)\nAbout \d+ decisions left/);
     assert.equal(readFileSync(join(a, ".ux-builder/design-state.json"), "utf8"), before, "no approval recorded");
     assert.equal(cli(a, ["advance"]).status, 2);

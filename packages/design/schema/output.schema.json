@@ -154,31 +154,30 @@
     "evidenceAdd": {
       "type": "object",
       "required": [
-        "id",
+        "study",
         "path",
+        "source",
         "kind",
         "date",
-        "source",
         "file"
       ]
     },
     "evidenceList": {
       "type": "object",
       "required": [
-        "evidence"
+        "studies"
       ],
       "properties": {
-        "evidence": {
+        "studies": {
           "type": "array",
           "items": {
             "type": "object",
             "required": [
-              "id",
-              "kind",
-              "date",
-              "source",
-              "excerpts",
-              "path"
+              "study",
+              "path",
+              "sources",
+              "claims",
+              "excerpts"
             ]
           }
         }
@@ -187,7 +186,7 @@
     "excerptAdd": {
       "type": "object",
       "required": [
-        "id",
+        "study",
         "path",
         "participant",
         "excerpt"
@@ -327,7 +326,8 @@
         "events",
         "journeys",
         "unmatched",
-        "path"
+        "path",
+        "dashboard"
       ]
     },
     "migrate": {
@@ -381,7 +381,7 @@
     "observeImport": {
       "type": "object",
       "required": [
-        "kit",
+        "study",
         "path",
         "imported",
         "findings",
@@ -437,6 +437,7 @@
       "required": [
         "id",
         "path",
+        "claims",
         "follows",
         "approach",
         "contradicted",
@@ -752,8 +753,9 @@
     "testKit": {
       "type": "object",
       "required": [
-        "id",
-        "dir",
+        "study",
+        "path",
+        "run",
         "tasks",
         "written",
         "users"

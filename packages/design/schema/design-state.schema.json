@@ -507,7 +507,20 @@
           },
           "evidence": {
             "type": "string",
-            "pattern": "^EV-[1-9][0-9]*$"
+            "pattern": "^EV-[1-9][0-9]*$",
+            "description": "An older app's evidence record (EV-n)"
+          },
+          "study": {
+            "type": "string",
+            "description": "The study the session belongs to (ADR-042): its research plan's name"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^P[1-9][0-9]*$"
+            },
+            "description": "The session's participants, by pseudonym"
           }
         }
       }
@@ -585,7 +598,8 @@
           },
           "insight": {
             "type": "string",
-            "pattern": "^INS-\\d{4}-\\d{2}-\\d{2}$"
+            "pattern": "^(INS-)?\\d{4}-\\d{2}-\\d{2}$",
+            "description": "The insights the diagnosis reads, by date (runs/insights/<date>/); an older app's INS-<date>"
           },
           "observation": {
             "type": "string",

@@ -32,5 +32,6 @@ export { currentText, documentOfType, helixDocuments, nextNumber, proposeChange,
 export { brief, BRIEF_SECTIONS, briefContent, briefHtml } from "./brief.mjs";
 export { experiencePrinciples, principleAdd, PRINCIPLES_FILE, readPrinciplesFile } from "./principles.mjs";
 export { claimAdd, claimContradict, claimVerify, EVIDENCE_KINDS, evidenceAdd, evidenceList, unverifiedClaims, writeEvidence } from "./research.mjs";
-export { ARTIFACTS, businessRules, CLAIM_COLUMNS, claimChecks, evidenceClaims, documentTypes, jobsTable, RULE_ANSWERS, ruleCitations, usersTable, PERSONAL_PATTERNS, exampleFile, helixIds, helixRoot, parseDocument, pathFor, templateFile, uxDocuments, validate, validateDocument } from "./documents.mjs";
+export { addExcerpts, addSource, CLAIM_COLUMNS, claimChecks, excerptsOf, maskProblems, proposeStudy, sourcesOf, studies, studyChecks, studyClaims, studyName, studyOf, studyPath, studyRunDir } from "./studies.mjs";
+export { ARTIFACTS, businessRules, evidenceSources, documentTypes, jobsTable, RULE_ANSWERS, ruleCitations, usersTable, PERSONAL_PATTERNS, exampleFile, helixIds, helixRoot, parseDocument, pathFor, templateFile, uxDocuments, validate, validateDocument } from "./documents.mjs";
 export { ADOPT_SDK, init, installSkill, MCP_SERVER, SKILL_DIR, writeMcpConfig } from "./init.mjs";

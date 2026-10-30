@@ -5,7 +5,7 @@ The evidence-linked jobs table: each job's importance, evidence and confidence, 
 One row per job, with a stable J-<n> ID. Rate importance and confidence
 separately: importance is how much the job matters to the outcome; confidence
 is how sure the evidence makes you. Confidence above low needs at least one
-evidence source (EV-<n>). A job you proposed without evidence is low
+evidence source (the study that supports it, by name). A job you proposed without evidence is low
 confidence and its status is hypothesis.
 
 Use `template.md`; `example.md` shows a finished one. `ux-builder-design validate` checks it.

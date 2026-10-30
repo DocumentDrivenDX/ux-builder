@@ -14,7 +14,8 @@ import { DesignError, bpFile, proposalsDir, protoDir, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable, uxDocuments } from "./documents.mjs";
 import { uiDecisions } from "./decisions.mjs";
 import { readState } from "./state.mjs";
-import { kits, testKit } from "./testkit.mjs";
+import { kits, studyTasks, testKit } from "./testkit.mjs";
+import { studyRunDir } from "./studies.mjs";
 import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const list = (x) => (Array.isArray(x) ? x : []);
@@ -77,10 +78,10 @@ export function buildGraph(app) {
   }
   // Test-kit tasks, by journey; findings, by journey.
   for (const kit of kits(app)) {
-    const text = existsSync(join(app, `${ux(app)}/tests/${kit}/scenarios.md`)) ? readFileSync(join(app, `${ux(app)}/tests/${kit}/scenarios.md`), "utf8") : "";
-    for (const [, n, journey] of text.matchAll(/^\| (\d+) \| (J-[^ |]+) \|/gm)) { const id = `${kit}#${n}`; node(id, "test-kit task", `${kit} task ${n}`, `${ux(app)}/tests/${kit}/scenarios.md`); edge(journey, id); }
-    const findings = readJson(join(app, `${ux(app)}/tests/${kit}/findings.json`))?.findings ?? [];
-    for (const f of findings) { node(f.id, "finding", f.title ?? f.remark ?? f.id, `${ux(app)}/tests/${kit}/findings.json`); edge(`${kit}#${f.task}`, f.id); }
+    const run = studyRunDir(app, kit);
+    for (const t of studyTasks(app, kit)) { const id = `${kit}#${t.n}`; node(id, "test-kit task", `the ${kit} study, task ${t.n}`, `${run}/tasks.json`); if (nodes.has(t.journey)) edge(t.journey, id); }
+    const findings = readJson(join(app, `${run}/findings.json`))?.findings ?? [];
+    for (const f of findings) { node(f.id, "finding", f.title ?? f.remark ?? f.id, `${run}/findings.json`); edge(`${kit}#${f.task}`, f.id); }
   }
   const assessments = reportsOf(app).assessments;
   const runs = existsSync(join(app, assessments)) ? readdirSync(join(app, assessments)).filter((n) => /^R-/.test(n)).sort() : [];
@@ -119,7 +120,7 @@ function resolveId(nodes, id) {
 export function trace(app, { id } = {}) {
   const { nodes, edges } = buildGraph(app);
   const at = resolveId(nodes, id ?? "");
-  if (!at) throw new DesignError(`no ${id ?? "ID"} in the app: use a J-, T-, journey, screen, ADR-, TK-n#task or F- ID`);
+  if (!at) throw new DesignError(`no ${id ?? "ID"} in the app: use a J-, T-, journey, screen, ADR-, <study>#task or F- ID`);
   const { id: _, ...self } = nodes.get(at);
   return { item: { id: at, ...self }, upstream: view(nodes, reach(edges, [at], false)), downstream: view(nodes, reach(edges, [at], true)) };
 }
@@ -192,7 +193,7 @@ export async function applyImpact(app, { change, set } = {}) {
     await writePrototype(next, { root: join(app, protos), dir, question: reached.change, theme });
     regenerated.push(`${protos}/${dir}/`);
   }
-  for (const kit of kits(app)) { testKit(app, { id: kit }); regenerated.push(`${ux(app)}/tests/${kit}/`); }
+  for (const kit of kits(app)) { testKit(app, { study: kit }); regenerated.push(`${studyRunDir(app, kit)}/`); }
   // HELIX changes only as proposals the person applies.
   let proposals = null;
   if (helixRoot(app)) {

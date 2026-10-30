@@ -42,8 +42,8 @@ function app({ tested = false } = {}) {
   put(a, "docs/ux-builder/prototypes/current/activity.compact.html", "<html></html>");
   put(a, "docs/ux-builder/prototypes/current/map.compact.html", "<html></html>");
   putUiAdr(a, { question: "Ask for an activity first?", choice: "Show activity first", why: "Narrows rivers on activity.", status: tested ? "tested" : "not tested" });
-  testKit(a);
-  put(a, "docs/ux-builder/tests/TK-1/findings.json", JSON.stringify({ findings: [{ id: "F-01", task: 1, title: "Picking an activity first slows people down", source: "human" }] }));
+  testKit(a, { study: "rivers" });
+  put(a, "docs/ux-builder/runs/studies/rivers/findings.json", JSON.stringify({ findings: [{ id: "F-01", task: 1, title: "Picking an activity first slows people down", source: "human" }] }));
   return a;
 }
 const ids = (xs) => xs.map((x) => x.id);
@@ -54,12 +54,12 @@ describe("US-137: trace and impact", () => {
     const a = app();
     let r = JSON.parse(cli(a, ["trace", "J-find", "--json"]).stdout);
     assert.deepEqual(ids(r.upstream).sort(), ["J-1", "T-1", "US-001"]);
-    for (const x of ["screen:activity", "screen:map", "screen:detail", "pattern:FormPage", "page:docs/ux-builder/prototypes/current/activity.compact.html", "TK-1#1", "F-01", "WF-001"]) assert.ok(ids(r.downstream).includes(x), x);
+    for (const x of ["screen:activity", "screen:map", "screen:detail", "pattern:FormPage", "page:docs/ux-builder/prototypes/current/activity.compact.html", "rivers#1", "F-01", "WF-001"]) assert.ok(ids(r.downstream).includes(x), x);
     assert.equal(r.upstream.find((x) => x.id === "J-1").file, "docs/ux-builder/jobs.md");
-    assert.equal(r.downstream.find((x) => x.id === "F-01").file, "docs/ux-builder/tests/TK-1/findings.json");
+    assert.equal(r.downstream.find((x) => x.id === "F-01").file, "docs/ux-builder/runs/studies/rivers/findings.json");
     // From a finding back to the job, and from a screen by its bare ID.
     r = JSON.parse(cli(a, ["trace", "F-01", "--json"]).stdout);
-    assert.deepEqual(ids(r.upstream).sort(), ["J-1", "J-find", "T-1", "TK-1#1", "US-001"]);
+    assert.deepEqual(ids(r.upstream).sort(), ["J-1", "J-find", "T-1", "US-001", "rivers#1"]);
     r = JSON.parse(cli(a, ["trace", "activity", "--json"]).stdout);
     assert.equal(r.item.id, "screen:activity");
     assert.equal(cli(a, ["trace", "nothing-here"]).status, 2);
@@ -73,7 +73,7 @@ describe("US-137: trace and impact", () => {
     const r = JSON.parse(cli(a, ["impact", "Remove the activity selection before exploring rivers", "--json"]).stdout);
     // The activity screen, and the journey whose step decides the activity; "rivers" names the domain, not an item.
     assert.deepEqual(ids(r.matched).sort(), ["J-find", "screen:activity"]);
-    for (const x of ["T-1", "J-1", "J-find", "US-001", "pattern:FormPage", "page:docs/ux-builder/prototypes/current/activity.compact.html", "TK-1#1", "F-01", "WF-001"]) assert.ok(ids(r.affected).includes(x), `${x} in ${ids(r.affected).join(", ")}`);
+    for (const x of ["T-1", "J-1", "J-find", "US-001", "pattern:FormPage", "page:docs/ux-builder/prototypes/current/activity.compact.html", "rivers#1", "F-01", "WF-001"]) assert.ok(ids(r.affected).includes(x), `${x} in ${ids(r.affected).join(", ")}`);
     assert.ok(!ids(r.affected).includes("J-saved"), "a journey the change does not reach is left out");
     assert.deepEqual(snapshot(), before);
   });
@@ -92,7 +92,7 @@ describe("US-137: trace and impact", () => {
     const out = JSON.parse(r.stdout);
     assert.equal(out.applied, true);
     assert.deepEqual(JSON.parse(readFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8")).screens.map((s) => s.id), ["map", "detail", "saved"]);
-    assert.ok(out.regenerated.includes("docs/ux-builder/prototypes/current/") && out.regenerated.includes("docs/ux-builder/tests/TK-1/"));
+    assert.ok(out.regenerated.includes("docs/ux-builder/prototypes/current/") && out.regenerated.includes("docs/ux-builder/runs/studies/rivers/"));
     assert.ok(existsSync(join(a, "docs/ux-builder/prototypes/current/map.compact.html")));
     assert.ok(!readdirSync(join(a, "docs/ux-builder/prototypes/current")).some((f) => f.startsWith("activity.")), "the removed screen's pages are gone");
     assert.ok(existsSync(join(a, "docs/ux-builder/helix-proposals")), "HELIX changes are proposals");
@@ -130,7 +130,8 @@ describe("US-137: trace and impact", () => {
   // @covers US-137-AC5
   test("AC5: a change that breaks a journey: the check fails, nothing is regenerated, and the edit is left to fix", () => {
     const a = app();
-    const kitBefore = readFileSync(join(a, "docs/ux-builder/tests/TK-1/scenarios.md"), "utf8");
+    const kitBefore = readFileSync(join(a, "docs/ux-builder/runs/studies/rivers/tasks.json"), "utf8");
+    assert.ok(existsSync(join(a, "docs/ux-builder/helix-proposals/helix/01-frame/research/rivers.md.patch")));
     const next = structuredClone(BP);
     next.screens[1].actions = [{ id: "open", label: "Open", to: "nowhere" }];
     writeFileSync(join(a, "next.json"), JSON.stringify(next));
@@ -138,8 +139,8 @@ describe("US-137: trace and impact", () => {
     assert.equal(r.status, 1);
     assert.match(r.stdout, /The blueprint check fails \(1 error\); nothing was regenerated\. Fix the blueprint:\n {2}flow\.target-exists/);
     assert.equal(JSON.parse(readFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8")).screens[1].actions[0].to, "nowhere", "the edit is there to fix");
-    assert.equal(readFileSync(join(a, "docs/ux-builder/tests/TK-1/scenarios.md"), "utf8"), kitBefore);
-    assert.equal(existsSync(join(a, "docs/ux-builder/helix-proposals")), false);
+    assert.equal(readFileSync(join(a, "docs/ux-builder/runs/studies/rivers/tasks.json"), "utf8"), kitBefore);
+    assert.deepEqual(readdirSync(join(a, "docs/ux-builder/helix-proposals/helix/01-frame/research")), ["rivers.md.patch"], "no proposal beyond the study's own");
   });
 });
 

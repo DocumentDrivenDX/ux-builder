@@ -13,6 +13,8 @@ export const ux = (app, sub) => (sub ? `${layout(app).docs}/${sub}` : layout(app
 export const bpFile = (app, name) => alternativeFile(layout(app), name);
 export const protoDir = (app) => layout(app).prototypes;
 export const proposalsDir = (app) => layout(app).proposals;
+/* Run output, gitignored (ADR-042 decision 6): runs/studies/<study>/, runs/insights/. */
+export const runsDir = (app, sub) => (sub ? `${layout(app).runs}/${sub}` : layout(app).runs);
 
 /* The nearest folder at or above start with .ux-builder/ or a blueprint
    (docs/ux-builder/blueprint/app.blueprint.json, or the old layout's

@@ -467,7 +467,7 @@ export function createServer(s = sdk(), bp = blueprint, ux = assess, hx = storyR
       server.registerTool("design_trace", {
         title: "Trace an item",
         description: "Everything linked to a job, task, journey, screen, decision, kit task or finding, upstream and downstream, each with its file; as `ux-builder-design trace <id> --json` returns it.",
-        inputSchema: { id: z.string().describe("A J-, T-, journey, screen, ADR-, TK-n#task or F- ID") },
+        inputSchema: { id: z.string().describe("A J-, T-, journey, screen, ADR-, <study>#task or F- ID") },
       }, async ({ id }) => run(() => design.trace(at(), { id })));
     }
   }

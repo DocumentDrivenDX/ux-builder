@@ -9,6 +9,7 @@ import { ux } from "./app.mjs";
 import { helixRoot, jobsTable, parseDocument, usersTable } from "./documents.mjs";
 import { modalityStatus } from "./modality.mjs";
 import { pendingReviews, reviewItems, TIERS } from "./review.mjs";
+import { studies } from "./studies.mjs";
 import { readState } from "./state.mjs";
 
 export const MINUTES_PER_DECISION = 3;
@@ -44,8 +45,8 @@ function knownFrom(app, q) {
   if (q.id === "users" && Object.keys(usersTable(app) ?? {}).length) return ux(app, "users.md");
   if (q.id === "jobs" && Object.keys(jobsTable(app) ?? {}).length) return ux(app, "jobs.md");
   if (q.id === "sources") {
-    const ev = existsSync(join(app, ux(app, "evidence"))) && readdirSync(join(app, ux(app, "evidence"))).some((f) => /^EV-\d+\.md$/.test(f));
-    if (ev) return ux(app, "evidence/");
+    const st = studies(app);
+    if (st.length) return st[0].path.replace(/[^/]+$/, "");
     if (existsSync(join(app, "src"))) return "src/";
   }
   return null;

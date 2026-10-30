@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-036
@@ -33,7 +35,7 @@ Until now target users were one-line points in the brief, and the PRD's personas
 ## Walkthrough
 
 1. The agent proposes two target users as hypotheses: weekend anglers new to an area (on a phone at the riverbank) and fishing guides (know the water; plan for clients).
-2. An interview confirms the first; its row cites EV-1 and becomes medium confidence.
+2. An interview confirms the first; its row cites the study it belongs to and becomes medium confidence.
 3. The brief's Target users now shows both, each with its context and status.
 4. Task T-1 serves U-1; T-2 serves U-1 and U-2.
 5. The test kit's screener asks about each user, and each scenario says who it is for; the facilitator notes each participant's user on the sheet.
@@ -45,7 +47,7 @@ Until now target users were one-line points in the brief, and the PRD's personas
 - [ ] **US-146-AC2** — Given a user row citing a job `jobs.md` lacks, or an evidence source that does not exist, when `validate` runs, then it exits 1 naming the user and the missing ID.
 - [ ] **US-146-AC3** — Given `users.md`, when `ux-builder-design brief` runs, then the brief's Target users lists each user with its context and status, from `users.md` alone (not the PRD's personas or separate user points).
 - [ ] **US-146-AC4** — Given a task whose `users` cites a user `users.md` lacks, when `validate` runs, then it exits 1 naming the task and the ID; a task citing a low-confidence user gets a warning.
-- [ ] **US-146-AC5** — Given tasks that name their users, when `test-kit` runs, then the screener asks about each target user with its context, `scenarios.md` says who each task is for, and `observations.csv` has a `user` column.
+- [ ] **US-146-AC5** — Given tasks that name their users, when `test-kit` runs, then the plan's *Screener* asks about each target user with its context, the run's task list says who each task is for, and `observations.csv` has a `user` column.
 - [ ] **US-146-AC6** — Given imported observations whose rows name a user, when `report` runs, then its measures are broken down by user; and `trace U-<n>` lists the user's jobs, tasks and journeys.
 
 ## Edge Cases

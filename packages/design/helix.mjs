@@ -156,7 +156,8 @@ export function setSection(text, heading, body, { level = 2, after = null, insid
 export function tableUnder(text, heading, level = 2) {
   const body = sectionOf(text, heading, level);
   if (body == null) return [];
-  const rows = body.split("\n").filter((l) => l.trim().startsWith("|")).map((l) => l.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim()));
+  // Cells split on a pipe, not an escaped one (\|), which is the cell's own.
+  const rows = body.split("\n").filter((l) => l.trim().startsWith("|")).map((l) => l.trim().replace(/^\|/, "").replace(/(?<!\\)\|$/, "").split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|")));
   return rows.slice(2).filter((r) => r.some(Boolean) && !r.every((c) => /^\[.*\]$/.test(c) || c === ""));
 }
 

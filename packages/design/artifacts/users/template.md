@@ -10,4 +10,4 @@ ux:
 
 | ID | User | Context | Needs | Jobs | Evidence | Confidence | Status |
 |---|---|---|---|---|---|---|---|
-| U-1 | [who, as a segment] | [where, on what, with what expertise] | [accessibility needs and constraints, or none known] | [J-<n> high, J-<n> low] | [EV-<n>, or none] | [high, medium, low] | [hypothesis, confirmed] |
+| U-1 | [who, as a segment] | [where, on what, with what expertise] | [accessibility needs and constraints, or none known] | [J-<n> high, J-<n> low] | [the study's name, or none] | [high, medium, low] | [hypothesis, confirmed] |

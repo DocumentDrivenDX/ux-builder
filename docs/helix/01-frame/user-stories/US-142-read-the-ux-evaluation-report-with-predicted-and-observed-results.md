@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-036
@@ -30,7 +32,7 @@ ddx:
 
 ## Context
 
-`ux-builder-design report` writes `docs/ux-builder/evaluations/UER-<n>.md` from the usability-evaluation-report template proposed to HELIX (CONTRACT-008). In stage 2 it becomes HELIX's type.
+`ux-builder-design report` writes `docs/ux-builder/runs/evaluations/<date>/report.md` (run output) from the usability-evaluation-report template proposed to HELIX (CONTRACT-008). In stage 2 it becomes HELIX's type.
 
 ## Walkthrough
 
@@ -41,11 +43,11 @@ ddx:
 
 ## Acceptance Criteria
 
-- [ ] **US-142-AC1** — Given a design state with a chosen alternative, rubric predictions and imported observations, when `ux-builder-design report` runs, then it writes `docs/ux-builder/evaluations/UER-<n>.md` with method, tasks, findings by journey with evidence and severity, proposed corrections, the rubric with predicted and observed columns, and what was not tested.
+- [ ] **US-142-AC1** — Given a design state with a chosen alternative, rubric predictions and imported observations, when `ux-builder-design report` runs, then it writes `docs/ux-builder/runs/evaluations/<date>/report.md` (run output, ADR-042) with method, tasks, findings by journey with evidence and severity, proposed corrections, the rubric with predicted and observed columns, and what was not tested.
 - [ ] **US-142-AC2** — Given a rubric dimension whose observation contradicts its prediction, when the report is written, then the dimension is highlighted, and the assumptions behind the prediction move to `refuted` in the design state.
 - [ ] **US-142-AC3** — Given no human observations, when the report is written, then the observed column says no human evidence exists, and nothing is marked refuted or confirmed.
 - [ ] **US-142-AC4** — Given findings the person selects at checkpoint core-3, when they are routed, then each is written as a `propose` patch to the HELIX improvement backlog, and the decision record moves to `tested` or `refuted` with `decision status`.
-- [ ] **US-142-AC5** — Given a written report, when `ux-builder-design validate` runs, then it checks the report against the template's required sections and frontmatter links.
+- [ ] **US-142-AC5** — Given observed sessions, when `ux-builder-design report` runs, then it proposes what people did as claims in each study's *Findings* (completion per scenario and problems seen in two or more sessions), each with its source and basis, updating the same claims when run again; the report itself is run output, not a document `validate` checks.
 
 ## Edge Cases
 
@@ -55,7 +57,7 @@ ddx:
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-142-AC1 | a design state with a chosen alternative, rubric predictions and imported observations | `ux-builder-design report` runs | it writes `docs/ux-builder/evaluations/UER-<n>.md` with method, tasks, findings by journey with evidence and severity, proposed corrections, the rubric with predicted and observed columns, and what was not tested |
+| AC1 | US-142-AC1 | a design state with a chosen alternative, rubric predictions and imported observations | `ux-builder-design report` runs | it writes `docs/ux-builder/runs/evaluations/<date>/report.md` (run output) with method, tasks, findings by journey with evidence and severity, proposed corrections, the rubric with predicted and observed columns, and what was not tested |
 | AC2 | US-142-AC2 | a rubric dimension whose observation contradicts its prediction | the report is written | the dimension is highlighted, and the assumptions behind the prediction move to `refuted` in the design state |
 | AC3 | US-142-AC3 | no human observations | the report is written | the observed column says no human evidence exists, and nothing is marked refuted or confirmed |
 | AC4 | US-142-AC4 | findings the person selects at checkpoint core-3 | they are routed | each is written as a `propose` patch to the HELIX improvement backlog, and the decision record moves to `tested` or `refuted` with `decision status` |
