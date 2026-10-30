@@ -3,7 +3,8 @@
    umf-visual remains the full validator; this is what the renderer must be sure of before it draws. */
 
 import Ajv2020 from "ajv/dist/2020.js";
-import schema from "../../schema/umf-visual.schema.json" with { type: "json" };
+import schema10 from "../../schema/umf-visual-1.0.0.schema.json" with { type: "json" };
+import schema11 from "../../schema/umf-visual-1.1.0.schema.json" with { type: "json" };
 
 export const FORMS = {
   flow: ["network", "pipeline", "zoned", "lanes"],
@@ -32,21 +33,27 @@ const KEYS = ["groups", "nodes", "edges", "sequence", "structure", "state", "tim
 const WALKTHROUGH = new Set(["flow", "sequence", "state", "timeline"]);
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
-const structure = ajv.compile(schema);
+/* Each pinned version, newest last. A document is read with the newest pinned version not newer
+   than its own; a later minor version's additions are then unknown content (VISUAL_INCOMPLETE). */
+const VERSIONS = [["1.0.0", schema10], ["1.1.0", schema11]].map(([version, schema]) => ({ version, schema, structure: ajv.compile(schema) }));
+const newer = (a, b) => a.localeCompare(b, undefined, { numeric: true }) > 0;
+export const READS = VERSIONS.map((x) => x.version);
+/* A cardinality's bounds, as a multiplicity states them (max undefined: unbounded). */
+export const BOUNDS = { "zero-or-one": [0, 1], "exactly-one": [1, 1], "zero-or-many": [0, undefined], "one-or-many": [1, undefined] };
 
 const fail = (code, message, diagnostics) => Object.assign(new Error(message), { code, diagnostics });
 
 /* Content the schema does not name, as JSON Pointers: retained by umf-visual, not drawn (CONTRACT-083 VISUAL_UNKNOWN). */
-function unknown(node, sch, path, out) {
+function unknown(node, sch, path, out, schema) {
   if (sch.$ref) sch = schema.$defs[sch.$ref.split("/").at(-1)];
   if (sch.oneOf) { sch = sch.oneOf.find((c) => c.properties?.kind?.const === node?.kind); if (!sch) return; }
   if (sch.type === "object" && node && typeof node === "object" && !Array.isArray(node)) {
     for (const [key, child] of Object.entries(node)) {
-      if (sch.properties && Object.hasOwn(sch.properties, key)) unknown(child, sch.properties[key], `${path}/${key}`, out);
+      if (sch.properties && Object.hasOwn(sch.properties, key)) unknown(child, sch.properties[key], `${path}/${key}`, out, schema);
       else out.push(`${path}/${key}`);
     }
   }
-  if (sch.type === "array" && Array.isArray(node) && typeof sch.items === "object") node.forEach((c, i) => unknown(c, sch.items, `${path}/${i}`, out));
+  if (sch.type === "array" && Array.isArray(node) && typeof sch.items === "object") node.forEach((c, i) => unknown(c, sch.items, `${path}/${i}`, out, schema));
 }
 
 /**
@@ -55,7 +62,8 @@ function unknown(node, sch, path, out) {
  */
 export function admit(document, { allowIncomplete = false } = {}) {
   const version = document?.vocabularies?.["umf.visual"]?.version;
-  if (typeof version !== "string" || version.split(".")[0] !== "1") throw fail("VISUAL_VERSION", `Expected umf.visual 1.x, found ${version ?? "none"}`, []);
+  if (typeof version !== "string" || !/^1\.\d+\.\d+$/.test(version)) throw fail("VISUAL_VERSION", `Expected umf.visual 1.x, found ${version ?? "none"}`, []);
+  const { schema, structure } = VERSIONS.filter((x) => !newer(x.version, version)).at(-1);
   const v = document.extensions?.["umf.visual"];
   if (!structure(v)) throw fail("VISUAL_INVALID", "The visual does not match the umf.visual schema", structure.errors.map((e) => ({ code: "EXTENSION_STRUCTURE", path: e.instancePath, message: e.message })));
   const diagnostics = [];
@@ -90,11 +98,20 @@ export function admit(document, { allowIncomplete = false } = {}) {
   (v.edges ?? []).forEach((e, i) => { resolve(e.from, ["node"], `/edges/${i}/from`); resolve(e.to, ["node"], `/edges/${i}/to`); });
   (v.steps ?? []).forEach((step, i) => step.focus.forEach((id, j) => resolve(id, [], `/steps/${i}/focus/${j}`)));
   (s?.messages ?? []).forEach((msg, i) => { resolve(msg.from, ["participant"], `/sequence/messages/${i}/from`); resolve(msg.to, ["participant"], `/sequence/messages/${i}/to`); resolve(msg.group, ["group"], `/sequence/messages/${i}/group`); });
-  const fields = new Map((st?.entities ?? []).map((e) => [e.node, new Set(e.fields.map((f) => f.name))]));
+  // An entity's fields by displayed name and by stable id (1.1.0): an end may name either, or both for one field.
+  const fields = new Map((st?.entities ?? []).map((e) => [e.node, { names: new Map(e.fields.map((f) => [f.name, f])), ids: new Map(e.fields.filter((f) => f.id !== undefined).map((f) => [f.id, f])) }]));
   (st?.entities ?? []).forEach((e, i) => resolve(e.node, ["node"], `/structure/entities/${i}/node`));
   (st?.references ?? []).forEach((r, i) => ["from", "to"].forEach((end) => {
-    resolve(r[end].node, ["node"], `/structure/references/${i}/${end}/node`);
-    if (r[end].field !== undefined && !fields.get(r[end].node)?.has(r[end].field)) add("VISUAL_REFERENCE", `/structure/references/${i}/${end}/field`, `${r[end].node} declares no field ${r[end].field}`);
+    const at = `/structure/references/${i}/${end}`, own = fields.get(r[end].node);
+    resolve(r[end].node, ["node"], `${at}/node`);
+    const byName = r[end].field === undefined ? undefined : own?.names.get(r[end].field), byId = r[end].fieldId === undefined ? undefined : own?.ids.get(r[end].fieldId);
+    if (r[end].field !== undefined && !byName) add("VISUAL_REFERENCE", `${at}/field`, `${r[end].node} declares no field ${r[end].field}`);
+    if (r[end].fieldId !== undefined && !byId) add("VISUAL_REFERENCE", `${at}/fieldId`, `${r[end].node} declares no field id ${r[end].fieldId}`);
+    if (byName && byId && byName !== byId) add("VISUAL_REFERENCE", at, "field and fieldId name different fields");
+    // An exact multiplicity (1.1.0) is drawn as given, so its bounds must agree with any cardinality.
+    const mult = r[`${end}Multiplicity`], card = r[`${end}Cardinality`];
+    if (mult?.max !== undefined && mult.max < mult.min) add("VISUAL_VALUE", `${at}Multiplicity/max`, "The upper bound is below the lower bound");
+    else if (mult && card && (BOUNDS[card][0] !== mult.min || BOUNDS[card][1] !== mult.max)) add("VISUAL_VALUE", `${at}Cardinality`, `${card} contradicts the multiplicity`);
   }));
   if (sm) {
     resolve(sm.initial, ["node"], "/state/initial");
@@ -118,7 +135,7 @@ export function admit(document, { allowIncomplete = false } = {}) {
   }
   if (diagnostics.length) throw fail("VISUAL_INVALID", `The visual has ${diagnostics.length} problem${diagnostics.length > 1 ? "s" : ""}`, diagnostics);
   const extra = [];
-  unknown(v, schema, "", extra);
+  unknown(v, schema, "", extra, schema);
   if (extra.length && !allowIncomplete) throw fail("VISUAL_INCOMPLETE", "The visual has content this renderer does not read", extra.map((path) => ({ code: "VISUAL_UNKNOWN", path, message: "Unknown visual content" })));
   if (!SUPPORTED.has(`${v.kind}/${v.form}`)) throw fail("VISUAL_UNSUPPORTED", `${v.kind}/${v.form} is not drawn by @ux-builder/visuals 0.1`, []);
   return { visual: v, unknown: extra };

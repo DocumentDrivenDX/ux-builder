@@ -3,6 +3,7 @@
    SVG stays authoritative; Mermaid's layout is approximate. */
 
 import { TOKENS } from "../grammar.mjs";
+import { endMark, fieldIndex } from "../layout/structure.mjs";
 import { comparisonTable, markdownTable, metricTable, stackRows, timelineRows } from "../tables.mjs";
 
 /* Mermaid ids: letters, digits and underscores, never a keyword, one per document id ("_" is "__", "-" is "_h"). */
@@ -117,6 +118,9 @@ function state(v) {
 
 const LEFT = { "exactly-one": "||", "zero-or-one": "|o", "zero-or-many": "}o", "one-or-many": "}|" };
 const RIGHT = { "exactly-one": "||", "zero-or-one": "o|", "zero-or-many": "o{", "one-or-many": "|{" };
+/* Mermaid's erDiagram has only the four crow's-foot markers. An exact multiplicity none of them
+   states gets the nearest one, and its own notation in the relationship label, so it is not lost. */
+const nearest = ({ min, max }) => `${min === 0 ? "zero" : max === 1 && min === 1 ? "exactly" : "one"}-or-${max === 1 ? "one" : "many"}`.replace("exactly-or-one", "exactly-one");
 
 function entities(v) {
   const out = ["erDiagram"];
@@ -132,7 +136,14 @@ function entities(v) {
     }
     out.push("  }");
   }
-  for (const r of v.structure.references ?? []) out.push(`  ${ename(r.from.node)} ${LEFT[r.fromCardinality] ?? "||"}--${RIGHT[r.toCardinality] ?? "o{"} ${ename(r.to.node)} : ${quote(r.label ?? r.to.field ?? "references")}`);
+  for (const r of v.structure.references ?? []) {
+    const from = endMark(r.fromCardinality, r.fromMultiplicity), to = endMark(r.toCardinality, r.toMultiplicity);
+    const kind = (mark, mult, fallback) => mark.kind ?? (mark.count ? nearest(mult) : fallback);
+    const field = (fields.get(r.to.node) ?? [])[fieldIndex(fields.get(r.to.node), r.to)]?.name;
+    const counts = [from.count && `from ${from.count}`, to.count && `to ${to.count}`].filter(Boolean).join(", ");
+    const label = `${r.label ?? field ?? "references"}${counts ? ` (${counts})` : ""}`;
+    out.push(`  ${ename(r.from.node)} ${LEFT[kind(from, r.fromMultiplicity, "exactly-one")]}--${RIGHT[kind(to, r.toMultiplicity, "zero-or-many")]} ${ename(r.to.node)} : ${quote(label)}`);
+  }
   return out;
 }
 

@@ -14,7 +14,10 @@ const sha256 = (text) => createHash("sha256").update(text).digest("hex");
 
 test("@covers US-163-AC3 the pinned umf schema and fixtures match the digests they were pinned with", () => {
   const pinned = JSON.parse(readFileSync(join(HERE, "schema/PINNED.json"), "utf8"));
-  assert.equal(sha256(readFileSync(join(HERE, "schema/umf-visual.schema.json"), "utf8")), pinned.schema.sha256, "schema/umf-visual.schema.json was edited by hand; run scripts/pin-umf.mjs");
+  for (const version of pinned.versions) {
+    const file = `schema/umf-visual-${version}.schema.json`;
+    assert.equal(sha256(readFileSync(join(HERE, file), "utf8")), pinned.schemas[version].sha256, `${file} was edited by hand; run scripts/pin-umf-visual.mjs`);
+  }
   for (const [path, digest] of Object.entries(pinned.fixtures)) {
     const local = join(HERE, "test/fixtures/umf", path.replace("fixtures/visual/", ""));
     assert.equal(sha256(readFileSync(local, "utf8")), digest, path);

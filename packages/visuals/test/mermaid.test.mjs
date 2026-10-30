@@ -48,3 +48,12 @@ test("@covers US-165-AC2 quotes, brackets, colons and line breaks in labels are 
   seq.extensions["umf.visual"].sequence.messages[0].label = "opens praxis: then; signs in #1";
   assert.equal(await parses((await render(seq, { theme: "praxis", output: "mermaid" })).content), "ok");
 });
+
+test("@covers US-169-AC2 an exact multiplicity's Mermaid takes the nearest crow's foot, keeps the count in its label, and parses", async () => {
+  const doc = fixture("beacon-schema-tickets"), s = doc.extensions["umf.visual"].structure, r = s.references[0];
+  doc.vocabularies["umf.visual"].version = "1.1.0";
+  delete r.toCardinality; r.toMultiplicity = { min: 2, max: 5, text: "2..5" };
+  const { content } = await render(doc, { theme: "praxis", output: "mermaid" });
+  assert.match(content, /\|\{ tickets : "customer_id \(to 2\.\.5\)"/);
+  assert.equal(await parses(content), "ok");
+});

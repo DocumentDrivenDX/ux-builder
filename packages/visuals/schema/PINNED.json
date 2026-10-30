@@ -1,11 +1,20 @@
 {
   "repository": "https://github.com/DocumentDrivenDX/umf-visual",
-  "commit": "10fdb00af3820f72a7704e7a23b949995c450424",
+  "commit": "31cbca1e6f576fef8497edd54c9adc8119beb780",
   "vocabulary": "umf.visual",
-  "version": "1.0.0",
-  "schema": {
-    "path": "spec/extensions/visual/schema.json",
-    "sha256": "659ec61d834d4a410f06405fb4197e152f954d280b9265f71be32e992b038ec8"
+  "versions": [
+    "1.0.0",
+    "1.1.0"
+  ],
+  "schemas": {
+    "1.0.0": {
+      "path": "spec/extensions/visual/1.0.0/schema.json",
+      "sha256": "659ec61d834d4a410f06405fb4197e152f954d280b9265f71be32e992b038ec8"
+    },
+    "1.1.0": {
+      "path": "spec/extensions/visual/schema.json",
+      "sha256": "a4e8117bc1398c150f13aedd3df3cbfefa63b60e37eac5e742352984d8977a76"
+    }
   },
   "fixtures": {
     "fixtures/visual/forms/helix-authoring-state.json": "695db96052209c59f803c88eea456f30bf750ccdc9e44f8e944a5057d0ca24c8",

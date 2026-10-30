@@ -24,6 +24,8 @@ ddx:
       to: US-167
     - kind: informs
       to: US-168
+    - kind: informs
+      to: US-169
 ---
 
 # Feature Specification: FEAT-019 — Visuals renderer
@@ -92,6 +94,9 @@ a drawing that clips text, runs an edge through a box or falls below contrast fa
 - VIS-03: Draw each role, status and edge kind with shape or line style as well as colour.
 - VIS-04: Measure text with the theme's fonts (ADR-042), so boxes fit their text.
 - VIS-05: Write deterministic, accessible SVG with stable ids and step membership.
+- VIS-06: Read each pinned `umf.visual` version by the version a document declares (1.0.0 and
+  1.1.0 today), and draw what a later version adds (exact multiplicities, stable field ids)
+  without changing its meaning: a count no crow's foot states is written, never widened.
 
 #### Checking
 
@@ -155,6 +160,7 @@ exception awaiting counsel).
 - US-166 — See every visual kind in every theme
 - US-167 — Draw the rest of the kinds in any theme (M4)
 - US-168 — Draw a visual inside an app, lint- and audit-clean (M4)
+- US-169 — Draw umf.visual 1.1 as well as 1.0
 
 ## Edge Cases and Error Handling
 
