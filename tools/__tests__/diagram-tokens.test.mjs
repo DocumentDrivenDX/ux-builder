@@ -43,9 +43,9 @@ describe("US-112 diagram tokens", () => {
   // @covers US-112-AC1
   test("AC1: every theme and preview pair sets all 28 in every appearance, and every theme's CSS declares them", () => {
     const all = everything();
-    // New themes expand this matrix; coverage follows the live catalogue.
-    assert.ok(src.themes.size > 0 && src.brands.size > 0 && src.designSystems.size > 0, "non-empty theme and preview catalogue");
-    assert.ok(all.length > 0, "diagram coverage must not be vacuous");
+    // Every theme in each of its appearances, and every brand × design-system preview pair.
+    const expected = [...src.themes.values()].reduce((n, t) => n + themeAppearances(src, t).length, 0) + combinations(src).length;
+    assert.ok(all.length >= 61 && all.length === expected, `${all.length} combinations, expected ${expected}`);
     assert.equal(new Set(all.map(([where]) => where)).size, all.length, "each theme/preview appearance is checked once");
     for (const [where, tokens] of all) for (const n of NAMES) assert.ok(tokens[n], `${where}: --${n} is not set`);
     for (const t of src.themes.keys()) {

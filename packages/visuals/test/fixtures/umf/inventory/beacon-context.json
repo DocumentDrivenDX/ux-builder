@@ -1,0 +1,202 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-context",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-context",
+      "kind": "flow",
+      "form": "network",
+      "title": "Beacon and its neighbours",
+      "question": "Who and what does Beacon talk to?",
+      "takeaway": "Beacon sits between the support team and the helpdesk, and asks the platform's model gateway for every draft.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/architecture-model.toml",
+        "view": "context",
+        "digest": "sha256:5506076ecd96344bd6b203c4d2a36ed983a7d9c37883c0e4dc65f9a59f689910"
+      },
+      "nodes": [
+        {
+          "id": "customer",
+          "label": "Customer",
+          "role": "actor",
+          "status": "built"
+        },
+        {
+          "id": "agent",
+          "label": "Support agent",
+          "role": "actor",
+          "status": "built"
+        },
+        {
+          "id": "admin",
+          "label": "Workspace admin",
+          "detail": "sets policies and rules",
+          "role": "actor",
+          "status": "built"
+        },
+        {
+          "id": "idp",
+          "label": "Identity provider",
+          "detail": "single sign-on",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "proxy",
+          "label": "Sign-in proxy",
+          "detail": "checks identity, forwards the agent's token",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "beacon",
+          "label": "Beacon",
+          "detail": "drafts replies for agents to review",
+          "role": "own",
+          "status": "built"
+        },
+        {
+          "id": "helpdesk",
+          "label": "Helpdesk",
+          "detail": "where tickets live",
+          "role": "external",
+          "status": "built"
+        },
+        {
+          "id": "kb",
+          "label": "Knowledge base",
+          "detail": "published help articles",
+          "role": "external",
+          "status": "built"
+        },
+        {
+          "id": "gateway",
+          "label": "Model gateway",
+          "detail": "rate limits, usage, model choice",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "models",
+          "label": "Language models",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "telemetry",
+          "label": "Telemetry collector",
+          "detail": "traces and audit spans",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "secrets",
+          "label": "Secret vault",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "ci",
+          "label": "CI runner",
+          "role": "external",
+          "status": "built"
+        }
+      ],
+      "edges": [
+        {
+          "id": "customer--helpdesk",
+          "from": "customer",
+          "to": "helpdesk",
+          "label": "writes in"
+        },
+        {
+          "id": "agent--proxy",
+          "from": "agent",
+          "to": "proxy",
+          "label": "opens a ticket",
+          "why": "nothing reaches Beacon without a signed-in agent"
+        },
+        {
+          "id": "admin--proxy",
+          "from": "admin",
+          "to": "proxy",
+          "label": "sets policies"
+        },
+        {
+          "id": "proxy--idp",
+          "from": "proxy",
+          "to": "idp",
+          "label": "signs in"
+        },
+        {
+          "id": "agent--beacon",
+          "from": "agent",
+          "to": "beacon",
+          "label": "reviews and sends drafts"
+        },
+        {
+          "id": "admin--beacon",
+          "from": "admin",
+          "to": "beacon",
+          "label": "sets policies"
+        },
+        {
+          "id": "beacon--idp",
+          "from": "beacon",
+          "to": "idp",
+          "label": "signs agents in"
+        },
+        {
+          "id": "beacon--helpdesk",
+          "from": "beacon",
+          "to": "helpdesk",
+          "label": "reads tickets, posts replies"
+        },
+        {
+          "id": "beacon--kb",
+          "from": "beacon",
+          "to": "kb",
+          "label": "searches articles"
+        },
+        {
+          "id": "beacon--gateway",
+          "from": "beacon",
+          "to": "gateway",
+          "label": "asks for drafts"
+        },
+        {
+          "id": "gateway--models",
+          "from": "gateway",
+          "to": "models",
+          "label": "routes to a model",
+          "why": "the gateway, not Beacon, chooses and meters the model"
+        },
+        {
+          "id": "beacon--telemetry",
+          "from": "beacon",
+          "to": "telemetry",
+          "label": "sends traces"
+        },
+        {
+          "id": "beacon--secrets",
+          "from": "beacon",
+          "to": "secrets",
+          "label": "reads keys"
+        },
+        {
+          "id": "ci--beacon",
+          "from": "ci",
+          "to": "beacon",
+          "label": "deploys"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

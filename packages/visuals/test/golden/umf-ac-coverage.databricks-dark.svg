@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 106" width="512" height="106" role="img" aria-labelledby="umf-ac-coverage-title" aria-describedby="umf-ac-coverage-desc" class="uxb-visual uxb-visual--metric-meter" data-visual="umf-ac-coverage" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="umf-ac-coverage-title">Acceptance criteria satisfied</title>
+<desc id="umf-ac-coverage-desc">How far is umf from every acceptance criterion satisfied?</desc>
+<rect x="0" y="0" width="512" height="106" style="fill:#09090B"/>
+<g id="umf-ac-coverage--satisfied-now" class="uxb-meter">
+<text x="16" y="38" style="fill:#FFFFFF;font-size:28px;font-weight:600">180</text>
+<text x="72.66" y="38" style="fill:#FAFAFA;font-size:13px;font-weight:400">of 837 criteria</text>
+<rect x="16" y="56" width="480" height="16" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1px"/>
+<rect x="16" y="56" width="103.23" height="16" rx="8" style="fill:#1685DF;stroke:#1685DF;stroke-width:0.01px"/>
+<text x="16" y="94" style="fill:#FAFAFA;font-size:12px;font-weight:400">180 criteria of 837 (22%)</text>
+</g>
+</svg>
