@@ -46,6 +46,7 @@ Define runs through HELIX's grill and frame activities. `ux-builder-design brief
 - [ ] **US-122-AC4** — Given a brief principle "no mandatory account creation" and a blueprint whose J-find starts at a sign-in screen, when `ux-builder-blueprint check` runs, then it reports a finding from the project rule naming the principle by its words.
 - [ ] **US-122-AC5** — Given the installed skill, when its text is read, then it says to run Define through HELIX's `frame` (the PRD and principles.md) and `grill`, to carry an undecided interaction model to Explore as an open question, and to regenerate the brief when its sources change.
 - [ ] **US-122-AC6** — Given `principle add --text <principle> [--rule <json>]`, when it runs, then it proposes the principle under principles.md's *Experience Principles* (creating principles.md when HELIX has none), keeps a rule a check can express in `.ux-builder/principles.json` keyed by its words, and `state set principles[+]` is refused naming `principle add`.
+- [ ] **US-122-AC7** — Given HELIX documents, when `brief` runs, then the brief is compiled from them (ADR-042 decision 3): each section names its source, the PRD's *User Needs* lead its primary jobs, a change in HELIX shows once it is regenerated, and `validate` warns while the brief no longer says what its sources say.
 
 ## Edge Cases
 

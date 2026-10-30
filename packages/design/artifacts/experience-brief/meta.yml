@@ -1,13 +1,13 @@
-# Experience brief: a docs/ux type of the guided design loop (FEAT-018, CONTRACT-008).
-# Stage 1 home; mapped into HELIX in stage 2.
+# Experience brief: ux-builder's one document of its own (FEAT-018, CONTRACT-008, ADR-042 decision 3).
+# Compiled from HELIX; it holds no fact of its own.
 
 type: experience-brief
 name: Experience brief
 description: |
   What the app is for, for whom, and how its experience should feel,
-  with every point marked confirmed, assumed or hypothesis. A living
-  document, regenerated whenever the PRD, the stories or the design
-  state change.
+  with every point marked confirmed, assumed or hypothesis. Compiled
+  from the PRD, principles.md, the stories and the design state, each
+  section naming its source, and regenerated whenever they change.
 id:
   prefix: brief
   pattern: "^brief$"

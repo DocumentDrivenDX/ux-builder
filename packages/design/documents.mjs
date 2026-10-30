@@ -12,6 +12,7 @@ import { bpFile, proposalsDir, runsDir, ux } from "./app.mjs";
 import { proposedDocuments } from "./helix.mjs";
 import { studies, studyChecks, studyClaims } from "./studies.mjs";
 import { keyOf, needsTable, peopleChecks, segmentsTable, taskModel } from "./people.mjs";
+import { briefStale } from "./brief.mjs";
 
 export const ARTIFACTS = fileURLToPath(new URL("./artifacts", import.meta.url));
 
@@ -238,6 +239,8 @@ export function validate(app) {
   if (carried.size && existsSync(join(app, briefPath))) {
     for (const m of readFileSync(join(app, briefPath), "utf8").matchAll(/^\s*-\s*(US-\d+)\b[^\n]*\[confirmed\]/gm)) if (!carried.has(m[1])) warnings.push({ path: briefPath, message: `the brief lists ${m[1]} as confirmed, but no journey in the blueprint carries it: drop it from the brief, or mark it deferred` });
   }
+  const stale = briefStale(app);
+  if (stale) warnings.push(stale);
   for (const c of cites) {
     const job = jobs?.[c.job];
     if (!job) { problems.push({ path: c.path, message: `${c.item} cites the need ${c.name}, which the PRD's User Needs does not have` }); continue; }

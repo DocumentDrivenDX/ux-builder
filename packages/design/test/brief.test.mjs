@@ -49,7 +49,7 @@ describe("brief", () => {
     assert.match(text, /- US-001: Find a river near me \[confirmed\]/);
     assert.match(text, /- No mandatory account creation \[confirmed\] \(checked: no-step-before\)\n- Progressive disclosure \[assumed\]/);
     assert.match(text, /- Mobile web application \[confirmed\]\n- Limited development resources \[confirmed\]\n- Location is available on most phones \[assumed\]/);
-    assert.match(text, /## Open questions\n\n- Search first or map first\?/);
+    assert.match(text, /## Open questions\n\n_From the design state's open questions\._\n\n- Search first or map first\?/);
     assert.doesNotMatch(text, /rate rivers/, "a refuted point is left out");
     assert.equal(validate(app).valid, true, JSON.stringify(validate(app).problems));
     // The page the person reads.
@@ -80,7 +80,7 @@ describe("brief", () => {
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /HELIX was not found \(no \.helix\.yml\): the brief is built from the design state alone\./);
     const text = readFileSync(join(app, "docs/ux-builder/brief.md"), "utf8");
-    assert.match(text, /## Product\n\n- Not yet known\./);
+    assert.match(text, /## Product\n\n_From [^\n]*_\n\n- Not yet known\./);
     assert.match(text, /People choose rivers by place \[confirmed\]/);
     assert.doesNotMatch(text, /links:/, "no PRD to link");
     assert.ok(existsSync(join(app, "docs/ux-builder/brief.html")));
@@ -107,6 +107,25 @@ describe("brief", () => {
     // A principle still in an older design state is noted in the brief.
     const old = tempApp({ state: { principles: [{ id: "PR-1", text: "Be brief", status: "assumed" }] } });
     assert.match(cli(old, ["brief"]).stdout, /One experience principle is still in the design state; propose it to principles\.md with ux-builder-design principle add\./);
+  });
+
+  // @covers US-122-AC7
+  test("the brief is compiled: each section names its HELIX source, the PRD's needs lead its jobs, a change in HELIX shows once it is regenerated, and validate warns until then", () => {
+    const app = helixApp();
+    put(app, "docs/helix/01-frame/prd.md", readFileSync(join(app, "docs/helix/01-frame/prd.md"), "utf8") + "\n### User Needs\n\n| Need | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|\n| Find a river near home | high | none | low | assumed |\n");
+    cli(app, ["brief"]);
+    let text = readFileSync(join(app, "docs/ux-builder/brief.md"), "utf8");
+    assert.match(text, /## Target users\n\n_From the PRD's User Segments\._/);
+    assert.match(text, /## Primary jobs\n\n_From the PRD's User Needs and the user stories\._\n\n- Find a river near home \[hypothesis\]\n  Confirm by: a study that supports it[^\n]*\n- US-001: Find a river near me \[confirmed\]/);
+    assert.match(text, /## Experience principles\n\n_From principles\.md's Experience Principles\._/);
+    assert.equal(validate(app).warnings.filter((w) => w.path === "docs/ux-builder/brief.md").length, 0, "up to date");
+    // HELIX changes; the brief says so until it is regenerated.
+    put(app, "docs/helix/01-frame/prd.md", readFileSync(join(app, "docs/helix/01-frame/prd.md"), "utf8").replace("Find a river near home", "Find a river near work"));
+    assert.match(validate(app).warnings.find((w) => w.path === "docs/ux-builder/brief.md")?.message ?? "", /the brief no longer says what the PRD, principles\.md, the stories and the design state say: regenerate it with ux-builder-design brief/);
+    cli(app, ["brief"]);
+    text = readFileSync(join(app, "docs/ux-builder/brief.md"), "utf8");
+    assert.match(text, /- Find a river near work \[hypothesis\]/);
+    assert.equal(validate(app).warnings.filter((w) => w.path === "docs/ux-builder/brief.md").length, 0);
   });
 });
 
