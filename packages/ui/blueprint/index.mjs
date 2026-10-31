@@ -135,6 +135,12 @@ const typeOf = (v) => Array.isArray(v) ? "array" : v === null ? "null" : Number.
 /* The subset of JSON Schema 2020-12 the blueprint schema uses. */
 function validate(schema, value, path, out, root = schema) {
   if (schema.$ref) return validate(root.$defs[schema.$ref.replace("#/$defs/", "")], value, path, out, root);
+  // One of several forms (a standard state, or a state of the screen's own): the value fits one of them.
+  if (schema.anyOf) {
+    const tries = schema.anyOf.map((alt) => { const o = []; validate(alt, value, path, o, root); return o; });
+    if (tries.some((o) => !o.length)) return out;
+    return out.push([path, tries.map((o) => o[0]?.[1]).filter(Boolean).join(", or ")]);
+  }
   const t = typeOf(value);
   if ("const" in schema && value !== schema.const) return out.push([path, `must be ${JSON.stringify(schema.const)}`]);
   if (schema.enum && !schema.enum.includes(value)) return out.push([path, `must be one of ${schema.enum.map((e) => JSON.stringify(e)).join(", ")}`]);
@@ -218,6 +224,13 @@ export function checkBlueprint(bp, { helix } = {}) {
   }
   const schemaErrors = [];
   validate(blueprintSchema, bp, [], schemaErrors);
+  // A journey step's state of the screen's own must be one the screen declares.
+  const statesOf = new Map((Array.isArray(bp?.screens) ? bp.screens : []).filter((s) => s?.id).map((s) => [s.id, Array.isArray(s.states) ? s.states : []]));
+  (Array.isArray(bp?.journeys) ? bp.journeys : []).forEach((j, ji) => {
+    const ownState = (st, at) => { if (typeof st?.state === "string" && !["ideal", "empty", "loading", "error", "partial"].includes(st.state) && !(statesOf.get(st.screen) ?? []).includes(st.state)) schemaErrors.push([at, `is "${st.state}", which ${st.screen ?? "the screen"} does not declare in its states`]); };
+    (Array.isArray(j?.steps) ? j.steps : []).forEach((st, k) => ownState(st, ["journeys", ji, "steps", k, "state"]));
+    (Array.isArray(j?.alternates) ? j.alternates : []).forEach((a, ai) => (Array.isArray(a?.steps) ? a.steps : []).forEach((st, k) => ownState(st, ["journeys", ji, "alternates", ai, "steps", k, "state"])));
+  });
   // A modal's missing title or dismiss is reported by its own rule.
   const own = (path, msg) => path.includes("modals") && /^needs "(title|dismiss)"$/.test(msg);
   schemaErrors.splice(0, Infinity, ...schemaErrors.filter(([path, msg]) => !own(path, msg)));

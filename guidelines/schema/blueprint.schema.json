@@ -580,10 +580,19 @@
           "minLength": 1
         },
         "state": {
-          "enum": [
-            "empty",
-            "loading",
-            "error"
+          "anyOf": [
+            {
+              "enum": [
+                "empty",
+                "loading",
+                "error"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$",
+              "description": "A state of the screen's own (screens[].states with its stateNotices entry)"
+            }
           ]
         },
         "expect": {

@@ -52,6 +52,11 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     assert.ok(rules(bp).some((r) => /^error blueprint\.valid \/screens\/2\/states/.test(r)), "a custom state with nothing saying what it shows");
     bp.screens[2].stateNotices = { "already-used": { tone: "error", title: "Already used at 11:42 PM", text: "Do not let in on this pass." } };
     assert.deepEqual(rules(bp).filter((r) => /^error/.test(r)), []);
+    // A journey's step may name it (session 3 found the step schema still allowed only the four), and a
+    // badly named state is refused.
+    bp.journeys = [{ id: "J-door", story: "US-6", entry: "door", steps: [{ screen: "door", action: "letin" }], alternates: [{ from: 0, steps: [{ screen: "door", state: "already-used" }], reason: "Already used" }] }];
+    assert.deepEqual(rules(bp).filter((r) => /^error .*journeys/.test(r)), []);
+    assert.ok(rules({ ...bp, screens: bp.screens.map((x) => (x.id === "door" ? { ...x, states: [...x.states, "Bad State"] } : x)) }).some((r) => /^error blueprint\.valid \/screens\/2\/states\/\d/.test(r)));
     const page = (await wireframes(bp)).find((p) => p.file === "door.already-used.compact.html");
     assert.ok(page, "a page for the state");
     assert.match(page.html, /Already used at 11:42 PM/);
