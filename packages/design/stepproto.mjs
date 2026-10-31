@@ -41,7 +41,7 @@ function assume(state, about, text) {
 
 /* The blueprint the step prototype is drawn from: the app's, with the
    defaults the person has not chosen filled in, and the assumptions made. */
-function withDefaults(app, bp, state) {
+export function withDefaults(app, bp, state) {
   const m = modalityStatus(app);
   const made = [];
   const supports = { ...(bp.supports ?? {}) };

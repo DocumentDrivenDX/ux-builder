@@ -61,6 +61,8 @@ export function status(app) {
     // The validated prototype is a prototype until core-3 says it goes to production (ADR-037 rule 4).
     prototype: s.prototype ? { branch: s.prototype.branch, status: s.checkpoints.filter((c) => c.id === "core-3").at(-1)?.status === "passed" ? "production" : "validated" } : null,
     documents: uxDocuments(app),
+    // The person asked the agent to finish (US-164): the rest was drafted, and is assumed.
+    finished: s.finished ? { at: s.finished.at, step: s.finished.step, summary: s.finished.summary } : null,
   };
   result.text = summary(result);
   return result;
@@ -76,6 +78,7 @@ export function summary(r) {
   // Only the latest answer at a checkpoint stands: a decline after a pass, or a pass after a decline.
   const latest = new Map(r.checkpoints.map((c) => [c.id, c.status]));
   lines.push(`${r.progress.text} (${ACTIVITY[r.activity]}, in ${r.mode === "change" ? "change mode" : "the full loop"}${r.startedFrom === "existing" ? ", in an existing app" : r.startedFrom === "design" && !r.app?.built ? ", in a design folder" : ""}).`);
+  if (r.finished) lines.push(`Finished by the agent at the person's request at step ${r.finished.step}: everything after it is assumed until confirmed; what was assumed and what to check first are in ${r.finished.summary}.`);
   if (r.app && !r.app.built) lines.push(`No app yet: this folder holds the design. ${BUILD_NEEDS(r.app.modalityRecorded)}`);
   else if (r.app?.built) lines.push(`The app was built here on the ${r.app.theme} theme (${r.app.modalities.join(", ")}).`);
   if (r.frame?.chosen) lines.push(`App frame: ${r.frame.chosen}.`);

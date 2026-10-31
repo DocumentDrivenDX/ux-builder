@@ -984,6 +984,62 @@
           "type": "string"
         }
       }
+    },
+    "finish": {
+      "description": "finish (US-164)",
+      "type": "object",
+      "required": [
+        "step",
+        "answer",
+        "written",
+        "applied",
+        "skipped",
+        "notDone",
+        "summary",
+        "assumed",
+        "next"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "answer": {
+          "type": "string"
+        },
+        "written": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "applied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skipped": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notDone": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary": {
+          "type": "string"
+        },
+        "assumed": {
+          "type": "integer"
+        },
+        "next": {
+          "type": "string"
+        }
+      }
     }
   }
 }
