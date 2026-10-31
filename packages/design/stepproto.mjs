@@ -7,6 +7,7 @@
    finds, checks again (or records that nothing needed fixing), and only
    then shows the prototype and asks the step's decision. */
 
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { checkBlueprint, score } from "@ux-builder/ui/blueprint";
@@ -92,7 +93,10 @@ export async function stepPrototype(app, { write = writePrototype, now = new Dat
   const name = STEPS[n - 1].name;
   const w = await write(drawn, { root: join(app, protoDir(app)), dir, question: `Step ${n} of ${STEPS.length}, ${name}: what we have so far`, theme, appearance });
   const rel = `${protoDir(app)}/${dir}`;
-  state.stepPrototypes = { ...(state.stepPrototypes ?? {}), [n]: { dir: rel, at: now, theme, appearance, pages: list(w.files), assumptions: made, rounds: [] } };
+  // Drawn again within the step (after a fix), it keeps its rounds, accepted findings and audited pages.
+  const was = state.stepPrototypes?.[n];
+  const keep = was && !was.stale ? { rounds: was.rounds, ...(was.accepted ? { accepted: was.accepted } : {}), ...(was.audited ? { audited: was.audited } : {}) } : { rounds: [] };
+  state.stepPrototypes = { ...(state.stepPrototypes ?? {}), [n]: { dir: rel, at: now, theme, appearance, pages: list(w.files), assumptions: made, ...keep } };
   writeState(app, state);
   logEvent(app, "step-prototype", { step: n, dir: rel }, now);
   const assumptions = state.assumptions.filter((a) => made.includes(a.id)).map((a) => ({ id: a.id, text: a.text }));
@@ -139,23 +143,63 @@ export async function auditPrototype({ dir, pages, theme, appearance, blueprint,
     served = await serveFolder(dir);
     const report = await audit({ urls: pages.map((p) => served.url + p), themes: [theme], appearances: [appearance], blueprint, out, ignore: [".proto-bar"] });
     const findings = list(report.findings);
-    return { ran: true, pagesAudited: pages.length, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings: findings.slice(0, 50).map((f) => ({ severity: f.severity, rule: f.rule?.id ?? f.rule ?? f.check, page: f.url?.replace(served.url, ""), message: f.message })) };
+    return { ran: true, pagesAudited: pages.length, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings: findings.map((f) => ({ severity: f.severity, rule: f.rule?.id ?? f.rule ?? f.check, page: f.url?.replace(served.url, ""), message: f.message })) };
   } catch (e) {
     return { ran: false, pagesAudited: 0, reason: e.message };
   } finally { await served?.stop(); }
 }
 
-/* ux-builder-design prototype --step --check [--nothing-to-fix]. */
-export async function stepCheck(app, { nothingToFix = false, audit = auditPrototype, now } = {}) {
+/* The pages a round audits: each screen's ideal state at every size, and
+   its other states at one size (the first the prototype has, compact when
+   it is there). Session 2 audited every state at every size: 3 minutes a
+   round, two thirds of the session. */
+export function auditPages(pages) {
+  const parts = (f) => f.replace(/\.html$/, "").split(".");
+  const sizes = [...new Set(pages.map((f) => parts(f).at(-1)))];
+  const one = sizes.includes("compact") ? "compact" : sizes[0];
+  return pages.filter((f) => parts(f).length === 2 || parts(f).at(-1) === one);
+}
+
+const hashOf = (t) => createHash("sha256").update(t).digest("hex").slice(0, 12);
+const findingId = (...key) => `C-${hashOf(key.join("|")).slice(0, 6)}`;
+/* The findings of a round, each with a stable ID: the same finding has the same ID in every round. */
+const findingsOf = (entry) => [
+  ...list(entry.heuristics).map((h) => ({ id: findingId("heuristic", h.heuristic, h.screen ?? h.journey ?? h.path ?? "", h.finding), kind: h.heuristic, text: h.finding })),
+  ...list(entry.audit?.findings).filter((f) => f.severity !== "info").map((f) => ({ id: findingId("audit", f.rule ?? "", f.page ?? "", f.message ?? ""), kind: `audit ${f.rule}`, text: `${f.page}: ${f.message}`, page: f.page })),
+];
+/* The latest checked round's findings that are neither gone nor accepted: [] when the step can be shown. */
+export function openFindings(sp) {
+  const last = [...list(sp?.rounds)].reverse().find((r) => !r.nothingToFix);
+  if (!last) return null;
+  return list(last.findings).filter((f) => !sp.accepted?.[f.id]);
+}
+
+/* ux-builder-design prototype --step --check [--accept <id>... --reason <why>]. */
+export async function stepCheck(app, { nothingToFix = false, accept = [], reason, audit = auditPrototype, now } = {}) {
   const started = Date.now();
   const state = readState(app);
   const n = progress(state).step;
   const sp = state.stepPrototypes?.[n];
   if (!sp || sp.stale) throw new DesignError(`step ${n} has no ${sp?.stale ? "current " : ""}prototype to check: draw it first (ux-builder-design prototype --step)`);
+  // Accepting findings: each one of the latest round, with the reason the person or agent gives.
+  if (accept.length) {
+    const open = openFindings(sp);
+    if (open == null) throw new DesignError("--accept follows a check: run ux-builder-design prototype --step --check first");
+    if (!reason?.trim()) throw new DesignError("--accept needs --reason: why each finding stays (for example, \"opened from a scan, by design\")");
+    const known = new Set(list(sp.rounds.findLast((r) => !r.nothingToFix)?.findings).map((f) => f.id));
+    const unknown = accept.filter((id) => !known.has(id));
+    if (unknown.length) throw new DesignError(`not a finding of the latest round: ${unknown.join(", ")}; it has ${[...known].join(", ") || "none"}`);
+    sp.accepted = { ...(sp.accepted ?? {}), ...Object.fromEntries(accept.map((id) => [id, { reason: reason.trim(), at: now ?? new Date().toISOString() }])) };
+    writeState(app, state);
+    const left = openFindings(sp);
+    return { step: n, round: sp.rounds.length, accepted: accept, open: left, ready: !left.length, next: nextOf(sp, left) };
+  }
   const round = sp.rounds.length + 1;
   let entry;
   if (nothingToFix) {
-    if (!sp.rounds.length) throw new DesignError("--nothing-to-fix follows a check: run ux-builder-design prototype --step --check first");
+    const open = openFindings(sp);
+    if (open == null) throw new DesignError("--nothing-to-fix follows a check: run ux-builder-design prototype --step --check first");
+    if (open.length) throw new DesignError(`the latest round has ${open.length} finding${open.length === 1 ? "" : "s"} neither fixed nor accepted: ${open.map((f) => `${f.id} (${f.kind}: ${f.text})`).join("; ")}. Fix each and check again, or accept it with a reason (--accept <id> --reason "<why>").`);
     entry = { round, at: now ?? new Date().toISOString(), nothingToFix: true };
   } else {
     // The blueprint as the prototype was drawn: the defaults the person has not chosen filled in.
@@ -163,26 +207,38 @@ export async function stepCheck(app, { nothingToFix = false, audit = auditProtot
     const abs = join(app, sp.dir);
     const pages = list(sp.pages);
     const html = Object.fromEntries(pages.map((f) => { try { return [f, readFileSync(join(abs, f), "utf8")]; } catch { return [f, ""]; } }));
-    const a = await audit({ dir: abs, pages, theme: sp.theme ?? "plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(abs, `audit-${round}`) });
+    // Only the pages whose content changed since they were last audited; the others keep their findings.
+    const subset = auditPages(pages);
+    const hashes = Object.fromEntries(subset.map((f) => [f, hashOf(html[f])]));
+    const changed = subset.filter((f) => sp.audited?.[f] !== hashes[f]);
+    const previous = list(sp.rounds.findLast((r) => r.audit?.ran)?.audit?.findings);
+    const a = changed.length ? await audit({ dir: abs, pages: changed, theme: sp.theme ?? "plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(abs, `audit-${round}`) }) : { ran: true, pagesAudited: 0, errors: 0, warnings: 0, findings: [] };
+    const carried = previous.filter((f) => subset.includes(f.page) && !changed.includes(f.page));
+    const findings = [...list(a.findings), ...carried];
+    const merged = { ...a, findings, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length };
+    if (a.ran) sp.audited = { ...(sp.audited ?? {}), ...Object.fromEntries(changed.map((f) => [f, hashes[f]])) };
     // Stamped when the check ends, with how long it took: the audit is most of a step's time (session 2).
-    entry = { round, at: now ?? new Date().toISOString(), seconds: Math.round((Date.now() - started) / 1000), pagesAudited: a.pagesAudited ?? 0, audit: a, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? "requested" : null };
+    entry = { round, at: now ?? new Date().toISOString(), seconds: Math.round((Date.now() - started) / 1000), pagesAudited: a.pagesAudited ?? 0, pagesUnchanged: subset.length - changed.length, audit: merged, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? "requested" : null };
+    entry.findings = findingsOf(entry);
     writeFileSync(join(abs, `check-${round}.json`), JSON.stringify({ step: n, ...entry }, null, 2) + "\n");
   }
   sp.rounds.push(entry);
   writeState(app, state);
   logEvent(app, "step-check", { step: n, round, ...(entry.seconds != null ? { seconds: entry.seconds } : {}) }, entry.at);
-  const fixable = (entry.audit?.errors ?? 0) + (entry.audit?.warnings ?? 0) + list(entry.heuristics).length;
-  return { step: n, round, ...entry, ready: round >= 2,
-    next: round >= 2 ? `Show the prototype (${sp.dir}/index.html) with what was found, fixed and left, then ask: continue, revise, or shall I finish the rest? (ux-builder-design step decide <choice> --answer "<their words>")`
-      : fixable ? "Fix what you can in the blueprint, draw it again (prototype --step) and check once more (--check); or, when nothing needs fixing, --check --nothing-to-fix."
-      : "Nothing found: record it (ux-builder-design prototype --step --check --nothing-to-fix), then show the prototype." };
+  const open = openFindings(sp) ?? [];
+  return { step: n, round, ...entry, open, ready: !open.length, next: nextOf(sp, open) };
 }
 
+const nextOf = (sp, open) => (open.length
+  ? `${open.length} finding${open.length === 1 ? "" : "s"} to fix or accept: fix what you can in the blueprint, draw it again (prototype --step) and check again (--check), only the changed pages are audited; accept the rest with a reason (--check --accept <id> --reason "<why>").`
+  : `Show the prototype (${sp.dir}/index.html) with what was found, fixed and accepted, then ask: continue, revise, or shall I finish the rest? (ux-builder-design step decide <choice> --answer "<their words>")`);
+
 export function stepCheckText(r) {
+  if (r.accepted) return `Step ${r.step}: accepted ${r.accepted.join(", ")}. ${r.open.length ? `${r.open.length} still open.` : "Nothing open."}\n${r.next}`;
   if (r.nothingToFix) return `Step ${r.step}, round ${r.round}: nothing to fix recorded.\n${r.next}`;
   const a = r.audit ?? {};
-  return [`Step ${r.step}, check round ${r.round}: ${r.pagesAudited} page${r.pagesAudited === 1 ? "" : "s"} audited${a.ran ? `, ${a.errors} error${a.errors === 1 ? "" : "s"} and ${a.warnings} warning${a.warnings === 1 ? "" : "s"}` : ` (the audit did not run: ${a.reason})`}; ${r.heuristics.length} heuristic finding${r.heuristics.length === 1 ? "" : "s"}.`,
-    ...r.heuristics.map((h) => `  ${h.heuristic}: ${h.finding}`),
+  return [`Step ${r.step}, check round ${r.round}: ${r.pagesAudited} page${r.pagesAudited === 1 ? "" : "s"} audited${r.pagesUnchanged ? ` (${r.pagesUnchanged} unchanged, their findings kept)` : ""}${a.ran ? `, ${a.errors} error${a.errors === 1 ? "" : "s"} and ${a.warnings} warning${a.warnings === 1 ? "" : "s"}` : ` (the audit did not run: ${a.reason})`}; ${r.heuristics.length} heuristic finding${r.heuristics.length === 1 ? "" : "s"}.`,
+    ...list(r.findings).map((f) => `  ${f.id} ${r.open.some((o) => o.id === f.id) ? "open    " : "accepted"} ${f.kind}: ${f.text}`),
     ...(r.journeyWalk ? ["From step 5 the journeys are walked too: run ux-builder-audit assess on the prototype and fix what it finds."] : []),
     r.next].join("\n");
 }
@@ -200,9 +256,10 @@ export function stepDecide(app, { choice, answer, sameTurn = false, now = new Da
   if (state.mode === "change") throw new DesignError("change mode has no step prototypes: use ux-builder-design step next");
   const n = progress(state).step;
   const sp = state.stepPrototypes?.[n];
+  const open = sp && !sp.stale ? openFindings(sp) : null;
   const missing = !sp || sp.stale ? `a prototype of step ${n} (ux-builder-design prototype --step)`
-    : !sp.rounds.length ? "its check (ux-builder-design prototype --step --check)"
-    : sp.rounds.length < 2 ? "a second check after fixing what the first found, or --check --nothing-to-fix"
+    : open == null ? "its check (ux-builder-design prototype --step --check)"
+    : open.length ? `each finding of its check fixed (gone on the next check) or accepted with a reason: ${open.map((f) => `${f.id} (${f.kind})`).join(", ")}`
     : null;
   if (missing) throw new DesignError(`step ${n} cannot be decided yet: it needs ${missing}, and the person must have seen it. Nothing was recorded.`);
   let answered = null;

@@ -35,12 +35,14 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   step next|<n>
       move to the next (or the given) step; next refuses while items of the
       current step await review. In the full loop, step decide ends a step.
-  prototype --step [--check [--nothing-to-fix]]
+  prototype --step [--check [--accept <finding> --reason <why>] [--nothing-to-fix]]
       draw the current step's prototype in docs/ux-builder/prototypes/step-<n>/,
       assuming the modality, sizes, frame, theme and appearance not yet
       chosen (each recorded); --check audits every page and runs the
-      heuristics (from step 5, the journey walk too); --nothing-to-fix
-      records that a check needed no fix.
+      heuristics (from step 5, the journey walk too): each screen's ideal
+      state at every size, its other states at one size, only pages changed
+      since their last audit; each finding is then fixed or accepted with a
+      reason (--accept <id> --reason); --nothing-to-fix records a clean round.
   explain [<term>] [--step <n>]
       what a term means and why it is valuable; --step: the terms a step
       introduces; with neither, every term.
@@ -271,7 +273,7 @@ async function main(argv) {
   }
   if (command === "prototype") {
     if (values.step !== "current" || rest.length) throw new DesignError("prototype takes --step: ux-builder-design prototype --step [--check [--nothing-to-fix]] (exploratory prototypes of alternatives: ux-builder-blueprint prototype --explore)");
-    if (values.check || values["nothing-to-fix"]) { const r = await stepCheck(app, { nothingToFix: values["nothing-to-fix"] }); print(r, values.json, stepCheckText(r)); return 0; }
+    if (values.check || values["nothing-to-fix"] || values.accept?.length) { const r = await stepCheck(app, { nothingToFix: values["nothing-to-fix"], accept: values.accept ?? [], reason: values.reason }); print(r, values.json, stepCheckText(r)); return 0; }
     const r = await stepPrototype(app);
     print(r, values.json, stepPrototypeText(r));
     return 0;

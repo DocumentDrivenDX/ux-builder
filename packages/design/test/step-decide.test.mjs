@@ -26,20 +26,22 @@ function app({ step = 1, passed = [] } = {}) {
   writeState(a, s);
   return a;
 }
-const checked = async (a) => { await stepPrototype(a); await stepCheck(a, { audit: clean }); await stepCheck(a, { nothingToFix: true }); };
+const settle = async (a, r) => { if (r.open.length) await stepCheck(a, { accept: r.open.map((f) => f.id), reason: "the test fixture's own gaps" }); };
+const checked = async (a) => { await stepPrototype(a); await settle(a, await stepCheck(a, { audit: clean })); };
 
 describe("US-163: every step ends with the person's decision", () => {
   // @covers US-163-AC4
-  test("AC4: decide is refused without a prototype, without its check, and without a second round", async () => {
+  test("AC4: decide is refused without a prototype, without its check, and while a finding is neither fixed nor accepted", async () => {
     const a = app();
     assert.throws(() => stepDecide(a, { choice: "continue", answer: "Looks good" }), /needs a prototype of step 1.*Nothing was recorded/s);
     await stepPrototype(a);
     assert.throws(() => stepDecide(a, { choice: "continue", answer: "Looks good" }), /needs its check/);
-    await stepCheck(a, { audit: clean });
-    assert.throws(() => stepDecide(a, { choice: "continue", answer: "Looks good" }), /needs a second check/);
+    const c = await stepCheck(a, { audit: clean });
+    assert.ok(c.open.length, "the fixture has gaps");
+    assert.throws(() => stepDecide(a, { choice: "continue", answer: "Looks good" }), /needs each finding of its check fixed \(gone on the next check\) or accepted with a reason: C-/);
     const r = cli(a, ["step", "decide", "continue", "--answer", "Looks good"]);
     assert.equal(r.status, 2);
-    await stepCheck(a, { nothingToFix: true });
+    await settle(a, c);
     assert.equal(stepDecide(a, { choice: "continue", answer: "Looks good" }).choice, "continue");
     assert.throws(() => stepDecide(a, { choice: "maybe", answer: "Hm" }), /continue, revise, finish/);
   });
@@ -107,8 +109,8 @@ describe("US-163: the step commands' --json fits CONTRACT-008's output schema", 
     const a = app();
     const run = (args) => { const r = cli(a, [...args, "--json"]); assert.equal(r.status, 0, r.stderr); return JSON.parse(r.stdout); };
     valid("stepPrototype", run(["prototype", "--step"]));
-    await stepCheck(a, { audit: clean });
-    valid("stepCheck", run(["prototype", "--step", "--check", "--nothing-to-fix"]));
+    const c = await stepCheck(a, { audit: clean });
+    valid("stepCheck", run(["prototype", "--step", "--check", ...c.open.flatMap((f) => ["--accept", f.id]), "--reason", "the fixture's own gaps"]));
     valid("stepDecide", run(["step", "decide", "continue", "--answer", "Go on"]));
     valid("overview", run(["overview"]));
   });

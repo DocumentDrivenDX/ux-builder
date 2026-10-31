@@ -698,6 +698,14 @@
           "decision": {
             "type": "object",
             "description": "The person's decision on it: { choice, answer, at }"
+          },
+          "accepted": {
+            "type": "object",
+            "description": "Findings accepted with a reason: { [finding ID]: { reason, at } }"
+          },
+          "audited": {
+            "type": "object",
+            "description": "Each audited page's content hash, so a redraw re-audits only changed pages"
           }
         }
       }

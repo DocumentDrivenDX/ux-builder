@@ -84,24 +84,41 @@ describe("US-163: a prototype ends every step", () => {
   });
 
   // @covers US-163-AC3
-  test("AC3: --check audits every page, runs the heuristics, writes check-1.json and records the round; the journey walk from step 5", async () => {
+  test("AC3: --check audits each screen's ideal state at every size and its other states at one, writes check-1.json and records the round; the journey walk from step 5", async () => {
+    const { auditPages } = await import("../index.mjs");
     const a = app();
     const p = await stepPrototype(a);
     const calls = [];
     const r = await stepCheck(a, { audit: stub(calls) });
-    assert.equal(calls.length, 1);
-    assert.equal(calls[0].pages.length, readState(a).stepPrototypes["1"].pages.length);
-    assert.ok(calls[0].pages.length >= 9 * 4, "every screen, state and size class");
+    const all = readState(a).stepPrototypes["1"].pages;
+    assert.deepEqual(calls[0].pages, auditPages(all));
+    assert.ok(calls[0].pages.length < all.length / 2, `${calls[0].pages.length} of ${all.length}`);
+    assert.ok(calls[0].pages.includes("map.large.html") && calls[0].pages.includes("map.error.compact.html") && !calls[0].pages.includes("map.error.large.html"));
     assert.equal(r.round, 1);
     assert.equal(r.pagesAudited, calls[0].pages.length);
     assert.equal(r.journeyWalk, null);
     assert.ok(r.heuristics.some((h) => h.heuristic === "information-hierarchy"), "screens with no content order are found");
+    assert.ok(r.findings.every((f) => /^C-[0-9a-f]{6}$/.test(f.id)), "each finding has an ID");
     const written = JSON.parse(readFileSync(join(a, p.dir, "check-1.json"), "utf8"));
     assert.equal(written.pagesAudited, r.pagesAudited);
-    assert.equal(readState(a).stepPrototypes["1"].rounds.length, 1);
     assert.equal(r.ready, false);
-    const again = await stepCheck(a, { nothingToFix: true });
-    assert.equal(again.ready, true);
+    // Drawn again with nothing changed, the next round audits no page and keeps the findings and their IDs.
+    await stepPrototype(a);
+    const again = await stepCheck(a, { audit: stub(calls) });
+    assert.equal(calls.length, 1, "no page changed, no audit");
+    assert.equal(again.round, 2, "the rounds are kept across a redraw");
+    assert.deepEqual(again.findings.map((f) => f.id).sort(), r.findings.map((f) => f.id).sort());
+    // A finding fixed is gone; the rest are accepted one by one, with a reason.
+    const bp = JSON.parse(readFileSync(join(a, BP), "utf8"));
+    bp.screens[0].content = [{ label: "Rivers nearby", kind: "data" }];
+    writeFileSync(join(a, BP), JSON.stringify(bp, null, 2));
+    await stepPrototype(a);
+    const fixed = await stepCheck(a, { audit: stub(calls) });
+    assert.ok(calls.at(-1).pages.every((f) => f.startsWith("map.")), "only the changed screen's pages are audited");
+    assert.ok(fixed.findings.length < again.findings.length);
+    await assert.rejects(stepCheck(a, { accept: [fixed.open[0].id] }), /needs --reason/);
+    const ok = await stepCheck(a, { accept: fixed.open.map((f) => f.id), reason: "the fixture's own gaps" });
+    assert.equal(ok.ready, true);
     // From step 5 the journeys are walked too.
     const s = readState(a);
     s.step = 5;

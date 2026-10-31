@@ -78,9 +78,12 @@ When a step's work is done and its foundations approved:
 2. **Check it before they see it.** Run `ux-builder-design prototype
    --step --check`: the UI audit on every page and the heuristics (content
    order, navigation, the blueprint's warnings); from step 5 also walk the
-   journeys (`ux-builder-audit assess`). Fix what you can in the
-   blueprint, draw it again and check once more; if the first round found
-   nothing to fix, run `prototype --step --check --nothing-to-fix`.
+   journeys (`ux-builder-audit assess`). Each finding has an ID. Fix what
+   you can in the blueprint, draw it again and check again (only the pages
+   that changed are audited, and the rounds carry over). Accept what stays,
+   one finding at a time, with the reason (`prototype --step --check
+   --accept <id> --reason "opened from a scan, by design"`). `step decide`
+   waits until every finding is fixed or accepted.
 3. **Show it.** Open its `index.html` for the person. Say in plain words
    what it shows, what the check found, what you fixed and what is left,
    and which assumptions it rests on. Ask the questions this step still

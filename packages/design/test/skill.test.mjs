@@ -182,7 +182,7 @@ describe("every step ends with a prototype, in the skill, the overview and the g
   test("AC6: each names the step prototype and the three choices; the skill reports status in four lines without engineering terms and never hands the person a dependency", async () => {
     const { explain, overview, overviewText } = await import("../index.mjs");
     const loop = section("Every step ends with a prototype");
-    for (const c of ["prototype --step", "--check", "--nothing-to-fix", "step decide continue|revise|finish", "ux-builder-design finish"]) assert.ok(loop.includes(c), c);
+    for (const c of ["prototype --step", "--check", "--accept <id>", "step decide continue|revise|finish", "ux-builder-design finish"]) assert.ok(loop.includes(c), c);
     assert.match(loop, /Continue to the next step, revise this one, or\s+shall I finish the rest for you\?/);
     assert.match(loop, /Set the appearance from the product first/);
     const talk = section("Talking to the person");

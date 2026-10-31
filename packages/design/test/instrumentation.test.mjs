@@ -82,8 +82,8 @@ describe("VIP List session 2: the guide's measures", () => {
   test("continuing a step sets the next action to the next step's work", async () => {
     const a = app();
     await stepPrototype(a);
-    await stepCheck(a, { audit: async () => ({ ran: true, pagesAudited: 1, errors: 0, warnings: 0, findings: [] }) });
-    await stepCheck(a, { nothingToFix: true });
+    const c = await stepCheck(a, { audit: async () => ({ ran: true, pagesAudited: 1, errors: 0, warnings: 0, findings: [] }) });
+    await stepCheck(a, { accept: c.open.map((f) => f.id), reason: "the fixture's own gaps" });
     stepDecide(a, { choice: "continue", answer: "Go on" });
     assert.match(readState(a).next, /^Step 2 of 8, Understand users/);
   });

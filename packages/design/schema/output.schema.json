@@ -895,13 +895,13 @@
       }
     },
     "stepCheck": {
-      "description": "prototype --step --check [--nothing-to-fix] (US-163)",
+      "description": "prototype --step --check [--accept <id> --reason] [--nothing-to-fix] (US-163)",
       "type": "object",
       "required": [
         "step",
         "round",
-        "at",
         "ready",
+        "open",
         "next"
       ],
       "properties": {
@@ -947,6 +947,40 @@
         },
         "next": {
           "type": "string"
+        },
+        "seconds": {
+          "type": "integer"
+        },
+        "pagesUnchanged": {
+          "type": "integer"
+        },
+        "accepted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "text"
+            ]
+          }
+        },
+        "open": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "text"
+            ]
+          }
         }
       }
     },
