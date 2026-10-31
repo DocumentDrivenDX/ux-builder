@@ -1077,6 +1077,46 @@
           "type": "string"
         }
       }
+    },
+    "scope": {
+      "description": "scope (session 2)",
+      "type": "object",
+      "required": [
+        "stories",
+        "criteria",
+        "destinations",
+        "screens",
+        "required",
+        "optional",
+        "rules",
+        "text"
+      ],
+      "properties": {
+        "stories": {
+          "type": "array"
+        },
+        "criteria": {
+          "type": "integer"
+        },
+        "destinations": {
+          "type": "array"
+        },
+        "screens": {
+          "type": "integer"
+        },
+        "required": {
+          "type": "array"
+        },
+        "optional": {
+          "type": "array"
+        },
+        "rules": {
+          "type": "array"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
     }
   }
 }

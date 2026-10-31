@@ -196,3 +196,12 @@ describe("every step ends with a prototype, in the skill, the overview and the g
     assert.match(explain({ term: "finish for me" }).terms[0].means, /stop being guided/);
   });
 });
+
+describe("the person's time in the skill (session 2)", () => {
+  test("steps 1 to 3 are the person's, with the scope to cut; steps 4 to 6 one batch of defaults", () => {
+    const s = section("Where the person's time goes");
+    assert.match(s, /\*\*Steps 1 to 3: the person's\.\*\*/);
+    assert.match(s, /`ux-builder-design scope`/);
+    assert.match(s, /\*\*Steps 4 to 6: one batch of defaults\.\*\*[\s\S]*I'll go with these\s+unless you object/);
+  });
+});

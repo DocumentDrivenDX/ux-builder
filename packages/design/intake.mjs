@@ -28,6 +28,10 @@ export const INTAKE = [
   { id: "outcome", ask: "What should people accomplish with it, and how will you know it worked?", section: "Primary outcome" },
   { id: "jobs", ask: "What are the main things they come to it to do?", section: "Primary jobs" },
   { id: "constraints", ask: "What must it do or avoid: platforms, rules it must follow, deadlines?", section: "Constraints" },
+  // Facts only the person knows (VIP List session 2: no agent designing alone guessed one of them).
+  { id: "use", ask: "How often does each kind of person come back to it, and on what device (a phone, a laptop, both)?", section: null },
+  { id: "gives", ask: "What must each person give for it to work, and what should they never have to give (an account, a friend's details, a document)?", section: null },
+  { id: "rules", ask: "What are its rules: who may do what, what happens to other people when something changes (a list closes, a booking is cancelled), what is kept and for how long, and what happens when there is no signal or a check fails?", section: null },
   { id: "sources", ask: "What exists already that we should read first: research, analytics, support tickets, an existing app or its code, a competitor?", section: null },
 ];
 
@@ -49,6 +53,8 @@ function knownFrom(app, q) {
   if (prd && ["product", "outcome", "constraints"].includes(q.id)) return prd;
   if (q.id === "users" && Object.keys(usersTable(app) ?? {}).length) return ux(app, "users.md");
   if (q.id === "jobs" && Object.keys(jobsTable(app) ?? {}).length) return ux(app, "jobs.md");
+  // The rules are known once HELIX defines them (**BR-<n>**).
+  if (q.id === "rules" && prd && /^\*\*BR-\d+\*\*/m.test(readFileSync(join(app, prd), "utf8"))) return prd;
   if (q.id === "sources") {
     const ev = existsSync(join(app, ux(app, "evidence"))) && readdirSync(join(app, ux(app, "evidence"))).some((f) => /^EV-\d+\.md$/.test(f));
     if (ev) return ux(app, "evidence/");

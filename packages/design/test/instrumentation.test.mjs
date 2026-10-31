@@ -95,3 +95,20 @@ describe("VIP List session 2: the guide's measures", () => {
     assert.match(r.stderr, /two was not given with --accepted\. Nothing was written/);
   });
 });
+
+describe("VIP List session 2: the scope, as one list for the person to cut", () => {
+  test("scope lists the stories with their criteria, the screens and destinations, and what people must and may give", async () => {
+    const { scope } = await import("../index.mjs");
+    const a = app();
+    const bp = JSON.parse(readFileSync(join(a, BP), "utf8"));
+    bp.screens.push({ id: "claim", title: "Claim a spot", pattern: "FormPage", content: ["Mobile number", "Name on the list", "Email (optional)", "Promotional texts (opt-in)"].map((label) => ({ label, kind: "data" })) });
+    writeFileSync(join(a, BP), JSON.stringify(bp, null, 2));
+    const r = scope(a);
+    assert.deepEqual(r.stories.map((s) => [s.id, s.criteria]), [["US-001", 2], ["US-002", 0]]);
+    assert.equal(r.criteria, 2);
+    assert.deepEqual(r.required.map((i) => i.label), ["Mobile number", "Name on the list"]);
+    assert.deepEqual(r.optional.map((i) => i.label), ["Email (optional)", "Promotional texts (opt-in)"]);
+    assert.match(r.text, /2 stories with 2 acceptance criteria, 4 screens, 2 destinations \(Find, Saved\), 2 required inputs/);
+    assert.match(r.text, /which of these can wait for a later release, and which input can people be spared\?/);
+  });
+});

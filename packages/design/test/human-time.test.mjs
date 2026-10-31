@@ -152,14 +152,20 @@ describe("US-154: the intake asked together, the budget shown, and the guide's o
   test("AC1: intake asks what the sources do not answer, together, and lists what to confirm from them", () => {
     const empty = tempApp();
     const r = intake(empty);
-    assert.deepEqual(r.ask, ["product", "users", "outcome", "jobs", "constraints", "sources"]);
+    assert.deepEqual(r.ask, ["product", "users", "outcome", "jobs", "constraints", "use", "gives", "rules", "sources"]);
+    // Amended 2026-10-31 (session 2): the facts only the person knows, and the business rules, are asked at intake.
+    assert.match(r.text, /How often does each kind of person come back to it, and on what device/);
+    assert.match(r.text, /What are its rules: who may do what, what happens to other people when something changes/);
     assert.match(r.text, /^Ask together, in one message; a narrative answer is fine, and a part they skip becomes an assumption:\n {2}1\. What is the product/);
     const a = app();
     mkdirSync(join(a, "docs/helix/01-frame"), { recursive: true });
     writeFileSync(join(a, "docs/helix/01-frame/prd.md"), "# PRD\n");
     const k = intake(a);
     assert.deepEqual(k.confirm, [{ id: "product", from: "docs/ux-builder/brief.md" }, { id: "users", from: "docs/ux-builder/brief.md" }, { id: "outcome", from: "docs/ux-builder/brief.md" }, { id: "jobs", from: "docs/ux-builder/jobs.md" }, { id: "constraints", from: "docs/helix/01-frame/prd.md" }]);
-    assert.deepEqual(k.ask, ["sources"]);
+    assert.deepEqual(k.ask, ["use", "gives", "rules", "sources"]);
+    // Rules HELIX already defines are confirmed, not asked.
+    writeFileSync(join(a, "docs/helix/01-frame/prd.md"), "# PRD\n\n## Business Rules\n\n**BR-1** — Only public stretches can be saved.\n");
+    assert.deepEqual(intake(a).ask, ["use", "gives", "sources"]);
     assert.match(cli(a, ["intake"]).stdout, /Read first, then confirm in one line each:\n {2}product: from docs\/ux-builder\/brief\.md/);
     assert.match(SKILL, /\*\*Ask the intake together\.\*\*/);
   });

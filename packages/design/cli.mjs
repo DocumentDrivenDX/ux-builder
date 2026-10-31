@@ -6,7 +6,7 @@
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { advance, carried, finish, finishText, logEvent, stepDecide, stepDecideText, stepCheck, stepCheckText, stepPrototype, stepPrototypeText, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, finish, scope, finishText, logEvent, stepDecide, stepDecideText, stepCheck, stepCheckText, stepPrototype, stepPrototypeText, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -27,6 +27,10 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
       end the step with the person's decision on its checked prototype:
       continue to the next step (answering the core checkpoint that closes
       this one), revise this step, or finish (then run finish).
+  scope
+      everything the design asks for, as one list for the person to cut:
+      stories and their criteria, screens, destinations, and what people
+      must and may give.
   finish --answer <their words>
       the person stops being guided: write every downstream artifact from
       the agent's draft (the brief, wireframes, a step prototype and its
@@ -276,6 +280,11 @@ async function main(argv) {
     if (values.check || values["nothing-to-fix"] || values.accept?.length) { const r = await stepCheck(app, { nothingToFix: values["nothing-to-fix"], accept: values.accept ?? [], reason: values.reason }); print(r, values.json, stepCheckText(r)); return 0; }
     const r = await stepPrototype(app);
     print(r, values.json, stepPrototypeText(r));
+    return 0;
+  }
+  if (command === "scope") {
+    const r = scope(app);
+    print(r, values.json, r.text);
     return 0;
   }
   if (command === "finish") {

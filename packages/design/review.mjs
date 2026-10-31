@@ -93,7 +93,7 @@ function readable(obj) {
 }
 
 /* The HELIX user stories by ID: { US-n: { file, text } }. */
-function stories(app) {
+export function stories(app) {
   const root = helixRoot(app);
   const out = {};
   const walk = (dir) => {

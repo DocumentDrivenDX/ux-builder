@@ -105,6 +105,28 @@ When a step's work is done and its foundations approved:
    prototype and `finish-summary.md`, what to check first before anything
    else.
 
+## Where the person's time goes
+
+The person is irreplaceable in steps 1 to 3 and much less after them
+(VIP List session 2: no agent designing alone guessed a fact the person
+gave in those steps, and every agent matched the person's choices in
+steps 4 to 6).
+
+- **Steps 1 to 3: the person's.** Ask the intake's questions about how
+  often people come back and on what device, what each person must and
+  must not give, and the business rules, before drafting. Before step 3
+  ends, run `ux-builder-design scope` and show it: every story with its
+  criteria, the screens, the destinations, and what people must and may
+  give. Ask what can wait and which input people can be spared, and cut
+  it.
+- **Steps 4 to 6: one batch of defaults.** Recommend the alternative, the
+  modality and frame, and the theme together, as "I'll go with these
+  unless you object", numbered one line each, then show the prototype once
+  at the end of the batch. Ask about one of them on its own only when it
+  is a real choice the person cares about.
+- **Steps 7 and 8: evidence.** The person chooses which findings to fix
+  and whether to release; the changes come from people and data.
+
 ## Talking to the person
 
 - **Status in four lines.** Whenever you report where work stands, use
