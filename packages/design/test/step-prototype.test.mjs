@@ -168,3 +168,32 @@ describe("VIP List session 2: the prototype's defaults stay out of review, and t
     assert.equal((readFileSync(join(a, "docs/ux-builder/brief.md"), "utf8").match(/discover rivers/g) ?? []).length, 1);
   });
 });
+
+describe("VIP List session 2: once the app is built, the step prototype is the app", () => {
+  test("prototype --step builds the app and records its routes; the check audits them, served as an app", async () => {
+    const { mkdirSync } = await import("node:fs");
+    const a = app();
+    mkdirSync(join(a, "src"), { recursive: true });
+    writeFileSync(join(a, "src/App.jsx"), 'const ROUTES = {\n  "/": TonightScreen,\n  "/door": DoorScreen,\n};\n');
+    mkdirSync(join(a, "dist/assets"), { recursive: true });
+    writeFileSync(join(a, "dist/index.html"), "<!doctype html><div id=root></div>");
+    writeFileSync(join(a, "dist/assets/index-abc.js"), "");
+    const s = readState(a);
+    s.step = 6;
+    s.app = { builtAt: "2026-10-31T12:00:00.000Z", theme: "plain", modalities: ["responsive-web"] };
+    s.appearance = { value: "dark", reason: "a nightlife app" };
+    writeState(a, s);
+    let built = 0;
+    const r = await stepPrototype(a, { build: async () => { built++; return { ok: true }; } });
+    assert.equal(built, 1);
+    assert.deepEqual([r.app, r.dir, r.pages, r.appearance], [true, "dist", 2, "dark"]);
+    const calls = [];
+    const c = await stepCheck(a, { audit: stub(calls) });
+    assert.deepEqual(calls[0].pages, ["/", "/door"]);
+    assert.equal(calls[0].spa, true);
+    assert.ok(existsSync(join(a, "docs/ux-builder/prototypes/step-6/check-1.json")));
+    assert.equal(c.round, 1);
+    // A failed build is refused, with nothing recorded.
+    await assert.rejects(stepPrototype(a, { build: async () => ({ ok: false, log: "error TS" }) }), /the app did not build/);
+  });
+});

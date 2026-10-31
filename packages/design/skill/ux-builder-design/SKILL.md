@@ -74,7 +74,12 @@ When a step's work is done and its foundations approved:
    appearance. **Set the appearance from the product first**: a nightlife
    or cinema app is dark (`state set appearance '{"value":"dark","reason":"a
    guest list used in dark venues"}'`); otherwise leave it light. None of
-   these is a question yet; step 5 confirms the modality and frame.
+   these is a question yet; step 5 confirms the modality and frame. The
+   prototype draws each screen with its own content (give every screen its
+   `content`, highest priority first), so the person sees their product,
+   not placeholders. Once the app is built (step 6 on), `prototype --step`
+   builds the app and the check audits its routes: the step prototype *is*
+   the app, one prototype that grows.
 2. **Check it before they see it.** Run `ux-builder-design prototype
    --step --check`: the UI audit on every page and the heuristics (content
    order, navigation, the blueprint's warnings); from step 5 also walk the

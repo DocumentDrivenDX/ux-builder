@@ -68,3 +68,25 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     assert.deepEqual(rules(bp).filter((r) => /nav\.audience/.test(r)), [], "without users, nothing to judge");
   });
 });
+
+describe("VIP List session 2: the prototype shows the design's own content, not placeholders", () => {
+  test("a form draws a field for each content label, by what it asks; a list draws its labels' sample values", async () => {
+    const bp = base();
+    bp.screens.push({ id: "claim", title: "Claim a spot", pattern: "FormPage", states: st, entry: "link", content: ["Mobile number", "Date of birth", "Spots (1 or 2)", "Email (optional)", "Promotional texts (opt-in)"].map((label) => ({ label, kind: "data" })), actions: [{ id: "submit", label: "Get my pass", to: "passes", primary: true }] });
+    bp.screens[0].content = ["Event", "Venue", "City", "Time", "Spots left"].map((label) => ({ label, kind: "data" }));
+    const pages = await wireframes(bp);
+    const claim = pages.find((p) => p.file === "claim.compact.html").html;
+    assert.doesNotMatch(claim, /Field 1|Field 2/);
+    assert.match(claim, /type="tel"/);
+    assert.match(claim, /placeholder="MM\/DD\/YYYY"/);
+    assert.match(claim, /type="radio"[\s\S]*type="radio"/, "1 or 2 as a choice");
+    assert.match(claim, /type="email"/);
+    assert.match(claim, /type="checkbox"/);
+    assert.match(claim, /Get my pass/);
+    const tonight = pages.find((p) => p.file === "tonight.expanded.html").html;
+    assert.doesNotMatch(tonight, /Item 1|A\. Person/);
+    assert.match(tonight, />Event 1</);
+    assert.match(tonight, />Austin</);
+    assert.match(tonight, />14 left</);
+  });
+});

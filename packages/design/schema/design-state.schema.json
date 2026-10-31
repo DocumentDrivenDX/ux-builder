@@ -706,6 +706,13 @@
           "audited": {
             "type": "object",
             "description": "Each audited page's content hash, so a redraw re-audits only changed pages"
+          },
+          "kind": {
+            "enum": [
+              "pages",
+              "app"
+            ],
+            "description": "app once the app is built: the step prototype is the app, its routes the pages checked"
           }
         }
       }

@@ -8,12 +8,13 @@
    then shows the prototype and asks the step's decision. */
 
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { checkBlueprint, score } from "@ux-builder/ui/blueprint";
 import { writePrototype } from "@ux-builder/ui/blueprint/prototype";
 import { informationHierarchy, pageText } from "@ux-builder/audit/assess/heuristics.mjs";
-import { bpFile, DesignError, protoDir } from "./app.mjs";
+import { bpFile, DesignError, protoDir, writeInApp } from "./app.mjs";
 import { checkpoint } from "./checkpoints.mjs";
 import { logEvent, personTurn, readEvents } from "./metrics.mjs";
 import { modalityStatus, recommendedFrame } from "./modality.mjs";
@@ -68,8 +69,22 @@ export function withDefaults(app, bp, state) {
   return { bp: { ...bp, supports }, made };
 }
 
-/* ux-builder-design prototype --step: draw the current step's prototype. */
-export async function stepPrototype(app, { write = writePrototype, now = new Date().toISOString() } = {}) {
+/* The built app's routes, from its App.jsx route table. */
+export function appRoutes(app) {
+  try { return [...readFileSync(join(app, "src/App.jsx"), "utf8").matchAll(/^\s+"(\/[^"]*)":/gm)].map((m) => m[1]); } catch { return []; }
+}
+/* Build the app (npm run build) and say whether dist/index.html came out. */
+export async function buildApp(app) {
+  const r = spawnSync("npm", ["run", "build"], { cwd: app, encoding: "utf8", shell: process.platform === "win32" });
+  return { ok: r.status === 0 && existsSync(join(app, "dist/index.html")), log: `${r.stdout ?? ""}${r.stderr ?? ""}`.trim().split("\n").slice(-5).join("\n") };
+}
+const bundleHash = (app) => { try { return hashOf(readdirSync(join(app, "dist/assets")).sort().join("|")); } catch { return null; } };
+
+/* ux-builder-design prototype --step: draw the current step's prototype; once
+   the app is built (step 6 on), the step prototype is the app itself. */
+export async function stepPrototype(app, { write = writePrototype, build = buildApp, now = new Date().toISOString() } = {}) {
+  const st0 = readState(app);
+  if (st0.app?.builtAt && existsSync(join(app, "src/App.jsx"))) return appPrototype(app, st0, { build, now });
   const state = readState(app);
   if (state.mode === "change") throw new DesignError("step prototypes belong to the full loop; change mode shows the change's impact instead (ux-builder-design impact)");
   const where = progress(state);
@@ -110,6 +125,23 @@ export function stepPrototypeText(r) {
     r.next].join("\n");
 }
 
+/* The step prototype once the app is built: the app, built, with its routes as the pages to check
+   (VIP List session 2: from step 6 the person used the app while the guide checked a drawing). */
+async function appPrototype(app, state, { build, now }) {
+  const n = progress(state).step;
+  const b = await build(app);
+  if (!b.ok) { const e = new DesignError(`the app did not build, so there is no prototype to show: fix it and draw again.\n${b.log ?? ""}`); e.code = 1; throw e; }
+  const routes = appRoutes(app);
+  const was = state.stepPrototypes?.[n];
+  const keep = was && !was.stale && was.kind === "app" ? { rounds: was.rounds, ...(was.accepted ? { accepted: was.accepted } : {}), ...(was.audited ? { audited: was.audited } : {}) } : { rounds: [] };
+  const appearance = state.appearance?.value ?? "light";
+  state.stepPrototypes = { ...(state.stepPrototypes ?? {}), [n]: { dir: "dist", kind: "app", at: now, theme: state.app.theme, appearance, pages: routes, assumptions: [], ...keep } };
+  writeState(app, state);
+  logEvent(app, "step-prototype", { step: n, dir: "dist", app: true }, now);
+  return { step: n, name: STEPS[n - 1].name, dir: "dist", entry: "dist/index.html", pages: routes.length, theme: state.app.theme, appearance, assumptions: [], app: true,
+    next: "Check it before showing it: ux-builder-design prototype --step --check (the app's routes are audited)" };
+}
+
 /* The deterministic heuristics of a step prototype: each screen's content
    in its priority order, each journey in no more moves than its shortest
    path, and the blueprint's own warnings (error paths among them). */
@@ -136,12 +168,12 @@ export function heuristics(bp, pageHtml) {
 /* The default audit: serve the prototype's folder on a free local port
    and run the UI audit on every page. { ran, pagesAudited, errors,
    warnings, findings } or { ran: false, reason }. */
-export async function auditPrototype({ dir, pages, theme, appearance, blueprint, out }) {
+export async function auditPrototype({ dir, pages, theme, appearance, blueprint, out, spa = false }) {
   let served = null;
   try {
     const { audit, serveFolder } = await import("@ux-builder/audit");
-    served = await serveFolder(dir);
-    const report = await audit({ urls: pages.map((p) => served.url + p), themes: [theme], appearances: [appearance], blueprint, out, ignore: [".proto-bar"] });
+    served = await serveFolder(dir, { spa });
+    const report = await audit({ urls: pages.map((p) => served.url + p.replace(/^\//, "")), themes: [theme], appearances: [appearance], blueprint, out, ignore: [".proto-bar"] });
     const findings = list(report.findings);
     return { ran: true, pagesAudited: pages.length, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings: findings.map((f) => ({ severity: f.severity, rule: f.rule?.id ?? f.rule ?? f.check, page: f.url?.replace(served.url, ""), message: f.message })) };
   } catch (e) {
@@ -208,11 +240,13 @@ export async function stepCheck(app, { nothingToFix = false, accept = [], reason
     const pages = list(sp.pages);
     const html = Object.fromEntries(pages.map((f) => { try { return [f, readFileSync(join(abs, f), "utf8")]; } catch { return [f, ""]; } }));
     // Only the pages whose content changed since they were last audited; the others keep their findings.
-    const subset = auditPages(pages);
-    const hashes = Object.fromEntries(subset.map((f) => [f, hashOf(html[f])]));
+    const isApp = sp.kind === "app";
+    const subset = isApp ? pages : auditPages(pages);
+    const bundle = isApp ? bundleHash(app) : null;
+    const hashes = Object.fromEntries(subset.map((f) => [f, isApp ? bundle ?? hashOf(f) : hashOf(html[f])]));
     const changed = subset.filter((f) => sp.audited?.[f] !== hashes[f]);
     const previous = list(sp.rounds.findLast((r) => r.audit?.ran)?.audit?.findings);
-    const a = changed.length ? await audit({ dir: abs, pages: changed, theme: sp.theme ?? "plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(abs, `audit-${round}`) }) : { ran: true, pagesAudited: 0, errors: 0, warnings: 0, findings: [] };
+    const a = changed.length ? await audit({ dir: abs, pages: changed, theme: sp.theme ?? "plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(isApp ? join(app, "docs/ux-builder/prototypes", `step-${n}`) : abs, `audit-${round}`), spa: isApp }) : { ran: true, pagesAudited: 0, errors: 0, warnings: 0, findings: [] };
     const carried = previous.filter((f) => subset.includes(f.page) && !changed.includes(f.page));
     const findings = [...list(a.findings), ...carried];
     const merged = { ...a, findings, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length };
@@ -220,7 +254,7 @@ export async function stepCheck(app, { nothingToFix = false, accept = [], reason
     // Stamped when the check ends, with how long it took: the audit is most of a step's time (session 2).
     entry = { round, at: now ?? new Date().toISOString(), seconds: Math.round((Date.now() - started) / 1000), pagesAudited: a.pagesAudited ?? 0, pagesUnchanged: subset.length - changed.length, audit: merged, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? "requested" : null };
     entry.findings = findingsOf(entry);
-    writeFileSync(join(abs, `check-${round}.json`), JSON.stringify({ step: n, ...entry }, null, 2) + "\n");
+    writeInApp(app, `${isApp ? `${protoDir(app)}/step-${n}` : sp.dir}/check-${round}.json`, JSON.stringify({ step: n, ...entry }, null, 2) + "\n");
   }
   sp.rounds.push(entry);
   writeState(app, state);

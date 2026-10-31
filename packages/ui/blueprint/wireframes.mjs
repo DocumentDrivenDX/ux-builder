@@ -23,6 +23,7 @@
    once into assets/. PNGs need playwright (or @playwright/test) and its
    Chromium; without them the HTML is still written and the caller is told. */
 
+import { fieldFor, sampleValue } from "./samples.mjs";
 import { copyFileSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
@@ -59,6 +60,16 @@ function placeholder(name, s, { h, ui, P }) {
   const text = (t) => h("p", null, t);
   const fields = (n = 3) => Array.from({ length: n }, (_, i) => h(ui.TextField, { key: i, label: `Field ${i + 1}`, name: `field${i + 1}` }));
   const tiles = [1, 2, 3].map((i) => h(P.StatTile, { key: i, label: `Figure ${i}`, value: `${i * 12}` }));
+  // The screen's own content, when it has some: its labels as columns and fields, with sample values.
+  const labels = (Array.isArray(s.content) ? s.content : []).map((c) => (typeof c === "string" ? c : c?.label)).filter(Boolean);
+  const keyOf = (l, k) => `c${k}`;
+  const own = labels.length ? {
+    CollectionList: { title, actions: act, columns: labels.slice(0, 5).map((l, k) => ({ key: keyOf(l, k), label: l, ...(k === 0 ? { priority: true } : {}) })), rows: [0, 1, 2, 3, 4].map((i) => ({ id: `r${i + 1}`, ...Object.fromEntries(labels.slice(0, 5).map((l, k) => [keyOf(l, k), sampleValue(l, i)])) })), caption: title, search: "", onSearchChange: noop },
+    RecordDetail: { title, actions: act, fields: labels.map((l) => ({ label: l, value: sampleValue(l, 0) })) },
+    DescriptionList: { items: labels.map((l) => ({ label: l, value: sampleValue(l, 0) })) },
+    WorkQueue: { title, items: [0, 1, 2].map((i) => ({ id: `i${i}`, title: sampleValue(labels[0], i), content: text(labels.slice(1).map((l) => `${l}: ${sampleValue(l, i)}`).join(" · ")) })), index: 0, onIndexChange: noop, onApprove: noop, onReject: noop },
+  }[name] : null;
+  if (own) return own;
   const props = {
     CollectionList: { title, actions: act, columns: [{ key: "name", label: "Name", priority: true }, { key: "owner", label: "Owner", priority: true }, { key: "status", label: "Status" }, { key: "updated", label: "Updated" }], rows, caption: title, search: "", onSearchChange: noop },
     RecordDetail: { title, actions: act, fields: [{ label: "Owner", value: "A. Person" }, { label: "Status", value: "Open" }, { label: "Updated", value: "2 days ago" }], children: text("Placeholder detail.") },
@@ -149,7 +160,17 @@ function screenElement(s, lib) {
     // form comes from useFormState, so the page is drawn inside a component that calls it.
     const Form = () => {
       const form = P.useFormState({ initial: {} });
-      return h(P[s.pattern], { title: s.title ?? s.id, form, onCancel: noop, open: true, onClose: noop }, h(P.FormSection, { title: "Details" }, [1, 2, 3].map((i) => h(lib.ui.TextField, { key: i, label: `Field ${i}`, ...form.field(`field${i}`) }))));
+      // The screen's own content as its fields, each by what its label asks for; three placeholders without content.
+      const labels = (Array.isArray(s.content) ? s.content : []).map((c) => (typeof c === "string" ? c : c?.label)).filter(Boolean);
+      const primary = (Array.isArray(s.actions) ? s.actions.find((a) => a?.primary)?.label : null) ?? undefined;
+      const ui = lib.ui;
+      const control = (l, k) => {
+        const f = fieldFor(l);
+        if (f.kind === "checkbox") return h(ui.Checkbox, { key: k, label: f.label });
+        if (f.kind === "radio") return h(ui.RadioGroup, { key: k, label: f.label, name: `f${k}`, defaultValue: f.options[0], options: f.options.map((o) => ({ value: o, label: o })) });
+        return h(ui.TextField, { key: k, label: f.label, type: f.kind === "date-text" ? "text" : f.kind, ...(f.kind === "date-text" ? { placeholder: "MM/DD/YYYY", inputMode: "numeric" } : {}), ...(f.required ? { required: true } : {}), ...form.field(`f${k}`) });
+      };
+      return h(P[s.pattern], { title: s.title ?? s.id, form, onCancel: noop, open: true, onClose: noop, ...(primary ? { submitLabel: primary } : {}) }, labels.length ? labels.map(control) : h(P.FormSection, { title: "Details" }, [1, 2, 3].map((i) => h(lib.ui.TextField, { key: i, label: `Field ${i}`, ...form.field(`field${i}`) }))));
     };
     return h(Form);
   }

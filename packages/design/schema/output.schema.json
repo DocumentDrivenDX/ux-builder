@@ -891,6 +891,9 @@
         },
         "next": {
           "type": "string"
+        },
+        "app": {
+          "type": "boolean"
         }
       }
     },
