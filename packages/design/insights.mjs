@@ -79,7 +79,7 @@ const jobsOf = (bp, journey) => list(list(bp.tasks).find((t) => t.id === list(bp
 
 /* Add an evidence source to job rows of docs/ux/jobs.md: { J-n: EV-m }.
    A hypothesis with evidence becomes confirmed, and low confidence medium. */
-function citeInJobs(app, cites) {
+function citeInJobs(app, cites, { simulated = false } = {}) {
   const path = ux(app, "jobs.md");
   if (!existsSync(join(app, path)) || !Object.keys(cites).length) return [];
   const changed = [];
@@ -89,7 +89,8 @@ function citeInJobs(app, cites) {
     if (!cites[id] || cells.length < 8) return line;
     const [, , job, importance, evidence, confidence, status] = cells.map((c) => c.trim());
     const sources = [...new Set([...(evidence.match(/EV-[1-9][0-9]*/g) ?? []), ...cites[id]])];
-    const next = { evidence: sources.join(", "), confidence: confidence === "low" ? "medium" : confidence, status: status === "hypothesis" ? "confirmed" : status };
+    // Simulated or pilot data is cited but never raises confidence or confirms a job.
+    const next = simulated ? { evidence: sources.join(", "), confidence, status } : { evidence: sources.join(", "), confidence: confidence === "low" ? "medium" : confidence, status: status === "hypothesis" ? "confirmed" : status };
     changed.push({ job: id, evidence: sources, confidence: next.confidence, status: next.status });
     return `| ${id} | ${job} | ${importance} | ${next.evidence} | ${next.confidence} | ${next.status} |`;
   });
@@ -98,7 +99,7 @@ function citeInJobs(app, cites) {
 }
 
 /* ux-builder-design insights <events.jsonl> [--support <file>] [--feedback <file>] [--date YYYY-MM-DD]. */
-export function insights(app, { events: file, support, feedback, date = today() } = {}) {
+export function insights(app, { events: file, support, feedback, date = today(), simulated = false } = {}) {
   if (!file) throw new DesignError("insights needs the exported journey events: insights <events.jsonl>");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new DesignError(`--date is YYYY-MM-DD, not "${date}"`);
   for (const f of [file, support, feedback].filter(Boolean)) if (!existsSync(abs(app, f))) throw new DesignError(`no such file: ${f}`);
@@ -111,14 +112,14 @@ export function insights(app, { events: file, support, feedback, date = today() 
 
   // The sources as evidence records: the events' summary, and the masked entries that mention a journey.
   const summary = journeys.filter((j) => j.started).map((j) => `${j.journey}: ${j.completed} of ${j.started} completed (${pct(j.completed, j.started)}); ${j.failedSearches} failed searches`);
-  const ev = writeEvidence(app, { file, kind: "analytics", date, source: file, title: `journey events for ${id}`, excerpts: summary });
+  const ev = writeEvidence(app, { file, kind: "analytics", date, source: file, title: `${simulated ? "SIMULATED " : ""}journey events for ${id}`, excerpts: summary });
   const sources = [{ id: ev.id, kind: "analytics", file }];
   const linked = [];
   for (const [kind, f] of [["support", support], ["feedback", feedback]]) {
     if (!f) continue;
     const entries = entriesOf(abs(app, f)).map((text) => ({ text: maskPersonal(text, { app, names }), journeys: mentions(text, bp) }));
     const cited = entries.filter((e) => e.journeys.length);
-    const rec = writeEvidence(app, { file: f, kind, date, source: f, title: `${kind} for ${id}`, excerpts: cited.map((e) => `[${e.journeys.join(", ")}] "${e.text.replace(/"/g, "'")}"`) });
+    const rec = writeEvidence(app, { file: f, kind, date, source: f, title: `${simulated ? "SIMULATED " : ""}${kind} for ${id}`, excerpts: cited.map((e) => `[${e.journeys.join(", ")}] "${e.text.replace(/"/g, "'")}"`) });
     sources.push({ id: rec.id, kind, file: f, entries: entries.length, linked: cited.length });
     for (const e of cited) linked.push({ evidence: rec.id, kind, journeys: e.journeys, text: e.text });
   }
@@ -127,7 +128,7 @@ export function insights(app, { events: file, support, feedback, date = today() 
   const cites = {};
   for (const j of journeys.filter((x) => x.started)) for (const job of jobsOf(bp, j.journey)) (cites[job] ??= []).push(ev.id);
   for (const l of linked) for (const j of l.journeys) for (const job of jobsOf(bp, j)) (cites[job] ??= []).push(l.evidence);
-  const jobs = jobsTable(app) ? citeInJobs(app, Object.fromEntries(Object.entries(cites).filter(([k]) => jobsTable(app)[k]).map(([k, v]) => [k, [...new Set(v)]]))) : [];
+  const jobs = jobsTable(app) ? citeInJobs(app, Object.fromEntries(Object.entries(cites).filter(([k]) => jobsTable(app)[k]).map(([k, v]) => [k, [...new Set(v)]])), { simulated }) : [];
 
   const mostAbandoned = (j) => { const e = Object.entries(j.abandoned).sort((a, b) => b[1] - a[1])[0]; return e ? `step ${e[0]} (${e[1]})` : "none"; };
   const L = ["---", "ux:", `  id: ${id}`, "  type: insights", "  links:", ...sources.flatMap((s) => ["    - kind: informed_by", `      to: ${s.id}`]), "---", "", `# ${id}: production insights to ${date}`, ""];

@@ -145,7 +145,8 @@ export async function auditPrototype({ dir, pages, theme, appearance, blueprint,
 }
 
 /* ux-builder-design prototype --step --check [--nothing-to-fix]. */
-export async function stepCheck(app, { nothingToFix = false, audit = auditPrototype, now = new Date().toISOString() } = {}) {
+export async function stepCheck(app, { nothingToFix = false, audit = auditPrototype, now } = {}) {
+  const started = Date.now();
   const state = readState(app);
   const n = progress(state).step;
   const sp = state.stepPrototypes?.[n];
@@ -154,7 +155,7 @@ export async function stepCheck(app, { nothingToFix = false, audit = auditProtot
   let entry;
   if (nothingToFix) {
     if (!sp.rounds.length) throw new DesignError("--nothing-to-fix follows a check: run ux-builder-design prototype --step --check first");
-    entry = { round, at: now, nothingToFix: true };
+    entry = { round, at: now ?? new Date().toISOString(), nothingToFix: true };
   } else {
     // The blueprint as the prototype was drawn: the defaults the person has not chosen filled in.
     const { bp } = withDefaults(app, JSON.parse(readFileSync(join(app, bpFile(app)), "utf8")), structuredClone(state));
@@ -162,12 +163,13 @@ export async function stepCheck(app, { nothingToFix = false, audit = auditProtot
     const pages = list(sp.pages);
     const html = Object.fromEntries(pages.map((f) => { try { return [f, readFileSync(join(abs, f), "utf8")]; } catch { return [f, ""]; } }));
     const a = await audit({ dir: abs, pages, theme: sp.theme ?? "plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(abs, `audit-${round}`) });
-    entry = { round, at: now, pagesAudited: a.pagesAudited ?? 0, audit: a, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? "requested" : null };
+    // Stamped when the check ends, with how long it took: the audit is most of a step's time (session 2).
+    entry = { round, at: now ?? new Date().toISOString(), seconds: Math.round((Date.now() - started) / 1000), pagesAudited: a.pagesAudited ?? 0, audit: a, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? "requested" : null };
     writeFileSync(join(abs, `check-${round}.json`), JSON.stringify({ step: n, ...entry }, null, 2) + "\n");
   }
   sp.rounds.push(entry);
   writeState(app, state);
-  logEvent(app, "step-check", { step: n, round }, now);
+  logEvent(app, "step-check", { step: n, round, ...(entry.seconds != null ? { seconds: entry.seconds } : {}) }, entry.at);
   const fixable = (entry.audit?.errors ?? 0) + (entry.audit?.warnings ?? 0) + list(entry.heuristics).length;
   return { step: n, round, ...entry, ready: round >= 2,
     next: round >= 2 ? `Show the prototype (${sp.dir}/index.html) with what was found, fixed and left, then ask: continue, revise, or shall I finish the rest? (ux-builder-design step decide <choice> --answer "<their words>")`
@@ -219,16 +221,19 @@ export function stepDecide(app, { choice, answer, sameTurn = false, now = new Da
   if (firstTry) logEvent(app, "milestone", { name: "prototype", step: n }, now);
   const entry = state.stepPrototypes[n];
   entry.decision = { choice, answer: answer.trim(), at: now, turn };
-  if (choice === "revise") entry.stale = true;
+  if (choice === "revise") { entry.stale = true; state.next = `Revise step ${n} with the person, then draw and check its prototype again.`; }
+  if (choice === "finish") state.next = "Draft what the remaining steps would produce, then run ux-builder-design finish.";
   let moved = false;
   if (choice === "continue" && n < STEPS.length) {
     // To the next step exactly: a checkpoint that already moved the loop is not moved past again.
     state.step = n + 1;
     state.activity = STEPS[n].activity;
+    state.next = `Step ${n + 1} of ${STEPS.length}, ${STEPS[n].name}: do its work with the person, then draw and check its prototype (ux-builder-design prototype --step) and ask continue, revise or finish.`;
     moved = true;
   }
   writeState(app, state);
-  if (moved) logEvent(app, "step", { step: state.step, mode: state.mode }, now);
+  const logged = readEvents(app).filter((e) => e.type === "step").at(-1);
+  if (moved && !(logged?.step === state.step && logged.at === now)) logEvent(app, "step", { step: state.step, mode: state.mode }, now);
   const where = progress(state);
   return { step: n, choice, answer: answer.trim(), ...(answered ? { checkpoint: answered } : {}), now: where.text,
     next: choice === "continue" ? (n < STEPS.length ? `${where.text}. Tell the person what it will ask of them.` : "The last step is done.")

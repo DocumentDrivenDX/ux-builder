@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { DesignError, bpFile, ux, writeInApp } from "./app.mjs";
 import { advance } from "./checkpoints.mjs";
 import { businessRules, helixRoot, parseDocument, usersTable } from "./documents.mjs";
+import { logEvent, readEvents } from "./metrics.mjs";
 import { readState, writeState } from "./state.mjs";
 
 const list = (x) => (Array.isArray(x) ? x : []);
@@ -153,6 +154,8 @@ export function testKit(app, { journeys = [], id } = {}) {
   // A test kit means the loop is validating.
   try { const state = readState(app); if (advance(state, "validate")) writeState(app, state); } catch { /* no design state */ }
   const warnings = tasks.filter((t) => !t.criteria.length).map((t) => `${t.journey} names no acceptance criteria: task ${t.n} has no success criteria`);
+  // Testing starts when the first kit is written: the approvals-before-testing target counts up to here.
+  if (!readEvents(app).some((e) => e.type === "milestone" && e.name === "testing")) logEvent(app, "milestone", { name: "testing", kit });
   return { id: kit, dir, tasks, written, users, warnings };
 }
 

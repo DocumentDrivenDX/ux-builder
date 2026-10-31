@@ -90,7 +90,7 @@ export const findingIdFor = (kit, participant, task) => `F-${createHash("sha256"
 const severityOf = (o) => (!o.completed ? 3 : o.assists || o.errors ? 2 : o.problem ? 1 : 0);
 
 /* ux-builder-design observe import <file> --kit <TK-n>. */
-export function observeImport(app, { file, kit } = {}) {
+export function observeImport(app, { file, kit, simulated = false } = {}) {
   if (!file) throw new DesignError("observe import needs the sheet: observe import <file> --kit TK-<n>");
   if (!/^TK-[1-9][0-9]*$/.test(kit ?? "")) throw new DesignError(`--kit names the test kit, such as TK-1, not "${kit ?? ""}"`);
   const path = abs(app, file);
@@ -118,7 +118,7 @@ export function observeImport(app, { file, kit } = {}) {
     if (!participant) { skipped.push({ row: i + 1, task, reason: "no participant" }); continue; }
     const names = { ...people.names(), ...Object.fromEntries(sheetNames.map((n) => [people.of(n), n])) };
     const o = {
-      id: findingIdFor(kit, participant, task), source: "human", kit, participant, task, journey: t.journey,
+      id: findingIdFor(kit, participant, task), source: "human", ...(simulated ? { simulated: true } : {}), kit, participant, task, journey: t.journey,
       completed: yes(r.completed), seconds: num(r.seconds ?? r.time), errors: num(r.errors) ?? 0, assists: num(r.assists) ?? 0,
       remark: maskPersonal(r.remark ?? "", { app, names }),
       ...(String(r.problem ?? "").trim() ? { problem: maskPersonal(r.problem, { app, names }).trim() } : {}),

@@ -122,7 +122,7 @@ export function experimentStart(app, { decision, variant, metric, guardrails, du
 
 /* ux-builder-design experiment end <EXP-n> --result <file>. The result file:
    { metric, control, variant, guardrails: [{ metric, control, variant, better: lower|higher, tolerance? }] }. */
-export function experimentEnd(app, { id, result } = {}) {
+export function experimentEnd(app, { id, result, simulated = false } = {}) {
   if (!/^EXP-[1-9][0-9]*$/.test(id ?? "")) throw new DesignError(`experiment end needs an experiment ID such as EXP-1, not "${id ?? ""}"`);
   const state = readState(app);
   const exp = state.experiments.find((e) => e.id === id);
@@ -148,7 +148,7 @@ export function experimentEnd(app, { id, result } = {}) {
   const improved = r.variant > r.control;
   const supported = improved && guardrails.every((g) => g.held);
   const verdict = supported ? "supported" : improved ? "not supported: a guardrail got worse" : "not supported: the success metric did not improve";
-  const lines = [`- **${metric}**: control ${r.control}, variant ${r.variant} (${improved ? "improved" : "did not improve"})`, ...guardrails.map((g) => `- **Guardrail ${g.metric}**: control ${g.control}, variant ${g.variant} (${g.held ? `held${g.tolerance != null ? `, within the tolerance ${g.tolerance}` : ""}` : `got worse${g.tolerance != null ? ` by more than the tolerance ${g.tolerance}` : ""}; ${g.better} is better`})`), `- **Hypothesis**: ${verdict}`, `- **Result file**: \`${result}\``];
+  const lines = [`- **${metric}**: control ${r.control}, variant ${r.variant} (${improved ? "improved" : "did not improve"})`, ...guardrails.map((g) => `- **Guardrail ${g.metric}**: control ${g.control}, variant ${g.variant} (${g.held ? `held${g.tolerance != null ? `, within the tolerance ${g.tolerance}` : ""}` : `got worse${g.tolerance != null ? ` by more than the tolerance ${g.tolerance}` : ""}; ${g.better} is better`})`), `- **Hypothesis**: ${verdict}${simulated ? " (on SIMULATED data: not evidence from real people)" : ""}`, `- **Result file**: \`${result}\``];
   const next = text.replace(/status: running/, "status: ended").replace(/## Result\n\n[\s\S]*?(?=\n## Decision)/, `## Result\n\n${lines.join("\n")}\n`);
   writeInApp(app, path, next);
   exp.status = "ended";
@@ -156,5 +156,5 @@ export function experimentEnd(app, { id, result } = {}) {
   const ask = `Ask checkpoint release: "${supported ? `Release ${exp.variant ?? "the variant"} to everyone?` : `Keep the current design, or try another alternative?`}" Then: ux-builder-design state checkpoint release --answer "<their words>".`;
   state.next = ask;
   writeState(app, state);
-  return { id, path, status: "ended", metric, control: r.control, variant: r.variant, improved, guardrails, hypothesis: verdict, supported, next: ask };
+  return { id, path, status: "ended", ...(simulated ? { simulated: true } : {}), metric, control: r.control, variant: r.variant, improved, guardrails, hypothesis: verdict, supported, next: ask };
 }

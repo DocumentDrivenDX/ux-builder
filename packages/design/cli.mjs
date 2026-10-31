@@ -231,7 +231,7 @@ async function main(argv) {
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, "same-turn": { type: "boolean" }, check: { type: "boolean" }, "nothing-to-fix": { type: "boolean" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, "same-turn": { type: "boolean" }, simulated: { type: "boolean" }, check: { type: "boolean" }, "nothing-to-fix": { type: "boolean" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -359,6 +359,8 @@ async function main(argv) {
     if (sub === "apply") {
       const accepted = (values.accepted ?? []).flatMap((a) => a.split(",")).map((a) => a.trim()).filter(Boolean);
       if (!accepted.length) throw new DesignError("proposals apply needs --accepted <ids>: the proposals the person accepted");
+      // An ID after another without its own --accepted was dropped silently before: name it instead.
+      if (rest.length > 1) throw new DesignError(`proposals apply takes each ID with --accepted (or comma-separated): ${rest.slice(1).join(", ")} ${rest.length > 2 ? "were" : "was"} not given with --accepted. Nothing was written.`);
       const r = proposalsApply(app, { accepted, dryRun: values["dry-run"] });
       print(r, values.json, r.text);
       return 0;
@@ -423,7 +425,7 @@ async function main(argv) {
   if (command === "observe") {
     const [sub, file] = rest;
     if (sub !== "import") throw new DesignError(`unknown observe command "${sub ?? ""}": use import`);
-    const r = observeImport(app, { file, kit: values.kit });
+    const r = observeImport(app, { file, kit: values.kit, simulated: values.simulated });
     print(r, values.json, [`Imported ${r.imported} observation${r.imported === 1 ? "" : "s"} into ${r.path} (${r.sessions.join(", ") || "no sessions"}).`, ...(r.rewritten ? [`Rewrote ${r.rewritten} with pseudonyms; the real names are only in .ux-builder/participants.local.json, kept out of git.`] : []), ...r.skipped.map((x) => `skipped row ${x.row}: ${x.reason}`)].join("\n"));
     return 0;
   }
@@ -445,7 +447,7 @@ async function main(argv) {
     return 0;
   }
   if (command === "insights") {
-    const r = insights(app, { events: rest[0], support: values.support, feedback: values.feedback, date: values.date });
+    const r = insights(app, { events: rest[0], support: values.support, feedback: values.feedback, date: values.date, simulated: values.simulated });
     const pct = (j) => (j.started ? `${Math.round((j.completed / j.started) * 100)}%` : "–");
     print(r, values.json, [`Wrote ${r.path}: ${r.events} events.`, ...r.journeys.map((j) => `  ${j.journey}: ${j.completed} of ${j.started} completed (${pct(j)}), ${j.failedSearches} failed searches`), ...r.unmatched.map((u) => `  unmatched: ${u.journey} (${u.events} event${u.events === 1 ? "" : "s"}; not in the blueprint)`), ...r.jobs.map((j) => `  ${j.job} now cites ${j.evidence.join(", ")} (${j.confidence}, ${j.status})`)].join("\n"));
     return 0;
@@ -463,7 +465,7 @@ async function main(argv) {
       return 0;
     }
     if (sub === "end") {
-      const r = experimentEnd(app, { id, result: values.result });
+      const r = experimentEnd(app, { id, result: values.result, simulated: values.simulated });
       print(r, values.json, [`${r.id} ended: ${r.metric} ${r.control} → ${r.variant}; hypothesis ${r.hypothesis}.`, r.next].join("\n"));
       return 0;
     }

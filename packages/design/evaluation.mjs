@@ -53,7 +53,7 @@ export function evaluationFindings(app, run = latestRun(app)) {
   const transcripts = kitTranscripts(app);
   const quotes = (f) => transcripts.filter((t) => t.kit === f.kit && t.participants.includes(f.participant)).map((t) => t.id);
   const human = humanFindings(app).filter((f) => f.severity > 0 || f.problem).map((f) => ({
-    id: f.id, source: "human", label: "human observation", journey: f.journey, severity: f.severity, title: f.title,
+    id: f.id, source: "human", label: f.simulated ? "simulated session, not a person" : "human observation", ...(f.simulated ? { simulated: true } : {}), journey: f.journey, severity: f.severity, title: f.title,
     evidence: `${f.kit} task ${f.task}, ${f.participant} (${ux(app)}/tests/${f.kit}/findings.json)${quotes(f).length ? `; transcript ${quotes(f).join(", ")}` : ""}`, transcripts: quotes(f), fix: null,
     detail: `${f.completed ? "completed" : "did not complete"}${f.seconds != null ? ` in ${f.seconds} s` : ""}, ${f.errors} error${f.errors === 1 ? "" : "s"}, ${f.assists} assist${f.assists === 1 ? "" : "s"}${f.remark ? `; "${f.remark}"` : ""}`,
   }));
