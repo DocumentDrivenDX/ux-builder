@@ -116,6 +116,15 @@ describe("US-159: the app built from a design opens on its journeys", () => {
     assert.match(runtime, /<StatePanel kind=\{state\} onRetry=\{\(\) => to\("loading"\)\}/, "error retries into loading, which settles: the recovery");
     assert.match(runtime, /setTimeout\(\(\) => setOwn\("ideal"\), SETTLE\)/);
     assert.match(runtime, /<Notice key=\{r\.id\} tone="warning" title=\{r\.before/);
+    // The rule notes are the designer's: shown with ?rules (the toolbar's button), never by default (VIP List session 3).
+    assert.match(runtime, /\{params\.has\("rules"\) && screen\.rules\.map\(/);
+    assert.match(runtime, /\{params\.has\("rules"\) \? "Hide" : "Show"\} the business rules/);
+    // A state whose notice is an error holds back the main action (no "Let in" on a pass already used).
+    assert.match(runtime, /const halted = screen\.notices\?\.\[state\]\?\.tone === "error";/);
+    assert.match(runtime, /content && !blocked && !halted && primary\.length/);
+    // A form's main action follows its fields; other screens keep it in the header.
+    assert.match(runtime, /<PageHeader title=\{screen\.title\} description=\{screen\.purpose\} actions=\{form \? undefined : main\} \/>/);
+    assert.match(runtime, /\{body\}\n\s*\{form && main && <Cluster>\{main\}<\/Cluster>\}/);
     assert.match(runtime, /tone="error" role="alert" title=\{r\.blocked/);
     assert.match(runtime, /if \(!\(import\.meta\.env\?\.DEV \|\| params\.has\("prototype"\)\)\) return null;/, "the toolbar in npm run dev, or with ?prototype");
     assert.match(runtime, /<Button variant="secondary" onClick=\{resetSampleData\}>Reset prototype data<\/Button>/);
@@ -209,6 +218,23 @@ describe("US-156: the build installs no starter document the design already has"
     assert.deepEqual(o.helix.skipped.map((s) => s.id), ["FEAT-001", "US-001", "STP-001"]);
     assert.match(o.helix.skipped[0].why, /the design already has a feature-specification document \(FEAT-007/);
     assert.doesNotMatch(read(other, "docs/helix/02-design/DESIGN.md"), /to: FEAT-001/, "no link to a starter document that was not written");
+  });
+
+  // @covers US-165-AC6
+  test("the app is built in the design's appearance; a design with none keeps system", async () => {
+    const dark = folder("dark-look", (d) => {
+      const f = join(d, ".ux-builder/design-state.json");
+      writeFileSync(f, JSON.stringify({ ...JSON.parse(readFileSync(f, "utf8")), appearance: { value: "dark", reason: "a guest list used in dark venues" } }, null, 2));
+    });
+    const r = await buildInPlace(dark, { theme: "plain" });
+    assert.equal(r.appearance, "dark");
+    // The audit visits every designed screen, not only the home page.
+    const audit = JSON.parse(read(dark, "package.json")).scripts.audit;
+    for (const sc of r.prototype.screens) assert.ok(audit.includes(`http://127.0.0.1:4173${sc.path} `) || audit.endsWith(`http://127.0.0.1:4173${sc.path}`), `${sc.path}: ${audit}`);
+    assert.match(read(dark, "src/main.jsx"), /<ThemeProvider theme="plain" appearance="dark"/);
+    const plain = folder("plain-look", () => {});
+    assert.equal((await buildInPlace(plain, { theme: "plain" })).appearance, "system");
+    assert.match(read(plain, "src/main.jsx"), /appearance="system"/);
   });
 });
 

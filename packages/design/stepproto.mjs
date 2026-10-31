@@ -193,6 +193,9 @@ export function auditPages(pages) {
 }
 
 const hashOf = (t) => createHash("sha256").update(t).digest("hex").slice(0, 12);
+// A page as audited: the banner naming the step is left out, so a page the next step did not change is not
+// audited again (VIP List session 3 audited the same 65 pages at steps 3 and 4, 1:26 each).
+const pageHash = (html) => hashOf(String(html).replace(/<p class="proto-banner"[^>]*>[\s\S]*?<\/p>/, ""));
 const findingId = (...key) => `C-${hashOf(key.join("|")).slice(0, 6)}`;
 /* The findings of a round, each with a stable ID: the same finding has the same ID in every round. */
 const findingsOf = (entry) => [
@@ -243,14 +246,17 @@ export async function stepCheck(app, { nothingToFix = false, accept = [], reason
     const isApp = sp.kind === "app";
     const subset = isApp ? pages : auditPages(pages);
     const bundle = isApp ? bundleHash(app) : null;
-    const hashes = Object.fromEntries(subset.map((f) => [f, isApp ? bundle ?? hashOf(f) : hashOf(html[f])]));
-    const changed = subset.filter((f) => sp.audited?.[f] !== hashes[f]);
-    const previous = list(sp.rounds.findLast((r) => r.audit?.ran)?.audit?.findings);
+    const hashes = Object.fromEntries(subset.map((f) => [f, isApp ? bundle ?? hashOf(f) : pageHash(html[f])]));
+    // A step's first check starts from the latest earlier step drawn the same way: its audited pages and their findings.
+    const prior = isApp || sp.audited ? null : Object.entries(state.stepPrototypes ?? {}).filter(([k, v]) => Number(k) < n && v.kind !== "app" && v.audited && v.theme === sp.theme && v.appearance === sp.appearance).sort(([x], [y]) => x - y).at(-1)?.[1];
+    const audited = sp.audited ?? prior?.audited;
+    const changed = subset.filter((f) => audited?.[f] !== hashes[f]);
+    const previous = list((sp.audited ? sp : prior ?? sp).rounds?.findLast((r) => r.audit?.ran)?.audit?.findings);
     const a = changed.length ? await audit({ dir: abs, pages: changed, theme: sp.theme ?? "plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(isApp ? join(app, "docs/ux-builder/prototypes", `step-${n}`) : abs, `audit-${round}`), spa: isApp }) : { ran: true, pagesAudited: 0, errors: 0, warnings: 0, findings: [] };
     const carried = previous.filter((f) => subset.includes(f.page) && !changed.includes(f.page));
     const findings = [...list(a.findings), ...carried];
     const merged = { ...a, findings, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length };
-    if (a.ran) sp.audited = { ...(sp.audited ?? {}), ...Object.fromEntries(changed.map((f) => [f, hashes[f]])) };
+    if (a.ran) sp.audited = { ...Object.fromEntries(subset.filter((f) => audited?.[f]).map((f) => [f, audited[f]])), ...Object.fromEntries(changed.map((f) => [f, hashes[f]])) };
     // Stamped when the check ends, with how long it took: the audit is most of a step's time (session 2).
     entry = { round, at: now ?? new Date().toISOString(), seconds: Math.round((Date.now() - started) / 1000), pagesAudited: a.pagesAudited ?? 0, pagesUnchanged: subset.length - changed.length, audit: merged, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? "requested" : null };
     entry.findings = findingsOf(entry);

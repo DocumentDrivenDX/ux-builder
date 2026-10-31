@@ -113,7 +113,8 @@ without HELIX, and the output says why.
   US-001's criteria (`npm run test:e2e`).
 
 - `src/main.jsx`: every theme's CSS and fonts, `@ux-builder/ui/ui.css` and
-  `patterns.css`, imported once; `ThemeProvider` (`appearance="system"`) and
+  `patterns.css`, imported once; `ThemeProvider` (`appearance="system"`, or
+  the design's own light or dark when built from a design folder) and
   `ToastProvider`.
 - `src/App.jsx`: the shell for the modalities, with `src/Home.jsx` and
   `src/Assistant.jsx` as they need, built from SDK components and role tokens

@@ -188,9 +188,12 @@ async function main(argv) {
     const missing = targets.filter((t) => !t.theme);
     if (missing.length) { console.error(`No theme shows the design system ${missing.map((t) => t.ds).join(", ")}.`); return 2; }
     const written = [];
-    for (const t of targets) written.push(await writePrototype(bp, { root: L.prototypes, dir: t.dir, question, theme: t.theme }));
+    // In the design's own appearance, as its step prototypes are (VIP List session 3 compared light alternatives
+    // after three dark step prototypes).
+    const appearance = d?.state?.appearance?.value ?? "light";
+    for (const t of targets) written.push(await writePrototype(bp, { root: L.prototypes, dir: t.dir, question, theme: t.theme, appearance }));
     if (values.json) console.log(JSON.stringify({ question, prototypes: written }, null, 2));
-    else for (const w of written) console.log(`${w.dir}/: ${w.pages} pages (${w.theme}); open ${w.dir}/index.html. A prototype, never app code.`);
+    else for (const w of written) console.log(`${w.dir}/: ${w.pages} pages (${w.theme}, ${w.appearance}); open ${w.dir}/index.html. A prototype, never app code.`);
     return 0;
   }
 

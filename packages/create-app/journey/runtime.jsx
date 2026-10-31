@@ -3,7 +3,9 @@
    sample data (in localStorage, else in memory) and the prototype toolbar.
    The screens in src/screens/ render their content inside ScreenFrame; what
    they show comes from ./blueprint.js. ?state=<name> forces a state on any
-   screen; ?prototype shows the toolbar outside `npm run dev`. */
+   screen; ?prototype shows the toolbar outside `npm run dev`; ?rules shows
+   each screen's business-rule notes, which the person would otherwise read
+   as part of their app (VIP List session 3: "BR-6" boxes on the door page). */
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Button, Card, Dialog, Notice, Select, Sheet, Skeleton, TextField, useToast } from "@ux-builder/ui";
 import { Cluster, Page, PageHeader, Stack, StatePanel } from "@ux-builder/ui/patterns";
@@ -22,9 +24,11 @@ export function useRoute() {
 }
 
 /* Go to a path, keeping ?prototype; state forces a state there. */
-export function navigate(path, { state, replace = false } = {}) {
+export function navigate(path, { state, replace = false, rules } = {}) {
   const now = new URLSearchParams(window.location.search), next = new URLSearchParams();
   if (now.has("prototype")) next.set("prototype", now.get("prototype"));
+  // The rule notes stay shown from screen to screen until hidden.
+  if (rules ?? now.has("rules")) next.set("rules", "");
   if (state) next.set("state", state);
   const q = next.toString();
   window.history[replace ? "replaceState" : "pushState"](null, "", `${path}${q ? `?${q}` : ""}`);
@@ -76,6 +80,8 @@ export function useFields(id) {
 const PANELS = ["empty", "no-results", "forbidden", "error", "partial"];
 const SETTLE = 400;
 
+const FORMS = new Set(["FormPage", "Wizard", "SettingsPage", "QuickEdit", "ReviewConfirm"]);
+
 /* A screen: its title and purpose, its business-rule warnings, then its
    content in the state it is in, its actions and its dialogs. */
 export function ScreenFrame({ screen, children }) {
@@ -103,6 +109,8 @@ export function ScreenFrame({ screen, children }) {
   const button = (a, variant = a.primary ? "primary" : "secondary") => <Button key={a.id} variant={variant} data-action={a.id} onClick={() => act(a)}>{a.label}</Button>;
   const primary = screen.actions.filter((a) => a.primary), others = screen.actions.filter((a) => !a.primary);
   const blocked = state === "blocked";
+  // A state whose notice is an error (a pass already used) holds back the screen's main action, as error does.
+  const halted = screen.notices?.[state]?.tone === "error";
 
   let body;
   if (state === "loading") body = <div aria-busy="true"><Skeleton lines={2} /><Skeleton lines={6} /></div>;
@@ -116,13 +124,17 @@ export function ScreenFrame({ screen, children }) {
   else body = <><Notice tone="success" role="status" title={`${screen.title}: ${state}`} />{children}</>;
   // In loading, empty, error and the like, the screen's own actions wait; back stays (states.mjs).
   const content = state !== "loading" && state !== "not-found" && !PANELS.filter((p) => p !== "partial").includes(state);
+  // A form's main action follows its fields, where people look for it once they have filled them (VIP List session 3).
+  const form = FORMS.has(screen.pattern);
+  const main = content && !blocked && !halted && primary.length ? primary.map((a) => button(a)) : undefined;
 
   return (
     <Page data-piq-screen={screen.id} data-state={state}>
-      <PageHeader title={screen.title} description={screen.purpose} actions={content && !blocked && primary.length ? primary.map((a) => button(a)) : undefined} />
+      <PageHeader title={screen.title} description={screen.purpose} actions={form ? undefined : main} />
       <Stack>
-        {screen.rules.map((r) => <Notice key={r.id} tone="warning" title={r.before ?? `Business rule ${r.id}`} data-rule={r.id}>{r.trigger ? `${r.id}, when ${r.trigger.charAt(0).toLowerCase()}${r.trigger.slice(1)}.` : `${r.id}: how the user meets it is not designed yet (businessRules in the blueprint).`}</Notice>)}
+        {params.has("rules") && screen.rules.map((r) => <Notice key={r.id} tone="warning" title={r.before ?? `Business rule ${r.id}`} data-rule={r.id}>{r.trigger ? `${r.id}, when ${r.trigger.charAt(0).toLowerCase()}${r.trigger.slice(1)}.` : `${r.id}: how the user meets it is not designed yet (businessRules in the blueprint).`}</Notice>)}
         {body}
+        {form && main && <Cluster>{main}</Cluster>}
         {others.some((a) => content || a.go?.kind === "back") && <Cluster>{others.filter((a) => content || a.go?.kind === "back").map((a) => button(a))}</Cluster>}
       </Stack>
       {screen.modals.map((m) => <Modal key={m.id} screen={screen} modal={m} open={open === m.id} onClose={() => setOpen(null)} act={act} />)}
@@ -165,6 +177,7 @@ export function PrototypeToolbar() {
           <Cluster>
             {screen && <Select label="Screen state" value={params.get("state") ?? ""} onChange={(e) => navigate(path, { state: e.target.value || undefined, replace: true })} options={[{ value: "", label: "As it opens" }, ...screen.states.map((s) => ({ value: s, label: s }))]} />}
             <Button variant="secondary" onClick={resetSampleData}>Reset prototype data</Button>
+            {screen?.rules.length > 0 && <Button variant="secondary" aria-pressed={params.has("rules")} onClick={() => navigate(path, { state: params.get("state") ?? undefined, rules: !params.has("rules"), replace: true })}>{params.has("rules") ? "Hide" : "Show"} the business rules</Button>}
           </Cluster>
           {JOURNEYS.map((j) => (
             <Cluster key={j.id} as="nav" gap={1} aria-label={`Journey: ${j.goal || j.id}`}>

@@ -125,7 +125,13 @@ describe("US-163: a prototype ends every step", () => {
     s.step = 5;
     writeState(a, s);
     await stepPrototype(a);
-    assert.equal((await stepCheck(a, { audit: stub() })).journeyWalk, "requested");
+    // A later step starts from the pages an earlier step audited: only its banner changed, so none is audited again.
+    const later = [];
+    const five = await stepCheck(a, { audit: stub(later) });
+    assert.equal(five.journeyWalk, "requested");
+    assert.equal(later.length, 0, "the pages step 1 audited are not audited again");
+    assert.equal(five.pagesUnchanged, calls[0].pages.length);
+    assert.deepEqual(five.findings.filter((f) => f.kind !== "heuristic" && f.source !== "heuristic").length, fixed.findings.filter((f) => f.kind !== "heuristic" && f.source !== "heuristic").length, "their findings carried");
   });
 
   // @covers US-163-AC3

@@ -7,6 +7,7 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { checkBlueprint } from "../blueprint/index.mjs";
+import { score } from "../blueprint/explore.mjs";
 import { wireframes } from "../blueprint/wireframes.mjs";
 
 const st = ["empty", "loading", "error"];
@@ -74,6 +75,15 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     bp.screens.forEach((s) => delete s.users);
     bp.destinations.push({ id: "door", label: "Door", screen: "door" });
     assert.deepEqual(rules(bp).filter((r) => /nav\.audience/.test(r)), [], "without users, nothing to judge");
+  });
+});
+
+describe("VIP List session 3: a journey that comes back where it started", () => {
+  // @covers US-165-AC5
+  test("its shortest path goes there and back, not nowhere", () => {
+    const bp = base();
+    bp.journeys = [{ id: "J-round", story: "US-1", entry: "tonight", steps: [{ screen: "tonight", action: "open" }, { screen: "passes", action: "back" }, { screen: "tonight" }] }];
+    assert.equal(score(bp)[0].shortestPath, 2);
   });
 });
 

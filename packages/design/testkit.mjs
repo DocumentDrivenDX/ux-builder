@@ -67,9 +67,16 @@ const secondPerson = (text) => PERSON.reduce((t, [re, to]) => t.replace(re, to),
 
 /* A goal in the user's words: the interface words taken out. */
 export function goalText(goal, bp) {
-  let text = String(goal);
+  const words = interfaceWords(bp);
   // The word goes with the preposition and article that lead to it: "on the River map".
-  for (const w of interfaceWords(bp)) text = text.replace(new RegExp(`(?:\\b(?:on|in|from|at|with|using|via|through)\\s+)?(?:\\b(?:the|a|an)\\s+)?\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), "");
+  const strip = (t) => words.reduce((x, w) => x.replace(new RegExp(`(?:\\b(?:on|in|from|at|with|using|via|through)\\s+)?(?:\\b(?:the|a|an)\\s+)?\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), ""), t);
+  let text = strip(String(goal));
+  // A screen named for what the user does ("Post an event") is the goal's own verb: taken out, the goal is left
+  // without one ("so guests can claim", VIP List sessions 1 to 3), so it stays and only the rest is stripped.
+  if (!text.trim() || /^\s*(?:so|to|and|or|for|that|with|because|then|,)\b/i.test(text)) {
+    const lead = words.find((w) => String(goal).toLowerCase().startsWith(w.toLowerCase()));
+    if (lead) text = `${String(goal).slice(0, lead.length)} ${strip(String(goal).slice(lead.length))}`;
+  }
   text = secondPerson(text).replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").trim();
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
