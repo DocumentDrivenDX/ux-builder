@@ -6,7 +6,7 @@
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { advance, carried, logEvent, stepCheck, stepCheckText, stepPrototype, stepPrototypeText, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, logEvent, stepDecide, stepDecideText, stepCheck, stepCheckText, stepPrototype, stepPrototypeText, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -23,9 +23,13 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   overview
       the process in eight steps: what you do in each, what comes out, the
       terms it introduces and the checkpoint that closes it.
+  step decide continue|revise|finish --answer <their words> [--same-turn]
+      end the step with the person's decision on its checked prototype:
+      continue to the next step (answering the core checkpoint that closes
+      this one), revise this step, or finish (then run finish).
   step next|<n>
       move to the next (or the given) step; next refuses while items of the
-      current step await review.
+      current step await review. In the full loop, step decide ends a step.
   prototype --step [--check [--nothing-to-fix]]
       draw the current step's prototype in docs/ux-builder/prototypes/step-<n>/,
       assuming the modality, sizes, frame, theme and appearance not yet
@@ -265,6 +269,11 @@ async function main(argv) {
     if (values.check || values["nothing-to-fix"]) { const r = await stepCheck(app, { nothingToFix: values["nothing-to-fix"] }); print(r, values.json, stepCheckText(r)); return 0; }
     const r = await stepPrototype(app);
     print(r, values.json, stepPrototypeText(r));
+    return 0;
+  }
+  if (command === "step" && rest[0] === "decide") {
+    const r = stepDecide(app, { choice: rest[1], answer: values.answer, sameTurn: values["same-turn"] });
+    print(r, values.json, stepDecideText(r));
     return 0;
   }
   if (command === "step") {

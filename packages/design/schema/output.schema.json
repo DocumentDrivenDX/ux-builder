@@ -417,6 +417,9 @@
         },
         "review": {
           "type": "string"
+        },
+        "stepEnd": {
+          "type": "string"
         }
       }
     },
@@ -834,6 +837,151 @@
               "message"
             ]
           }
+        }
+      }
+    },
+    "stepPrototype": {
+      "description": "prototype --step (US-163)",
+      "type": "object",
+      "required": [
+        "step",
+        "name",
+        "dir",
+        "entry",
+        "pages",
+        "theme",
+        "appearance",
+        "assumptions",
+        "next"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "dir": {
+          "type": "string"
+        },
+        "entry": {
+          "type": "string"
+        },
+        "pages": {
+          "type": "integer"
+        },
+        "theme": {
+          "type": "string"
+        },
+        "appearance": {
+          "enum": [
+            "light",
+            "dark"
+          ]
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "next": {
+          "type": "string"
+        }
+      }
+    },
+    "stepCheck": {
+      "description": "prototype --step --check [--nothing-to-fix] (US-163)",
+      "type": "object",
+      "required": [
+        "step",
+        "round",
+        "at",
+        "ready",
+        "next"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "round": {
+          "type": "integer"
+        },
+        "at": {
+          "type": "string"
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "nothingToFix": {
+          "type": "boolean"
+        },
+        "pagesAudited": {
+          "type": "integer"
+        },
+        "audit": {
+          "type": "object",
+          "required": [
+            "ran"
+          ]
+        },
+        "heuristics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "heuristic",
+              "finding"
+            ]
+          }
+        },
+        "journeyWalk": {
+          "enum": [
+            "requested",
+            null
+          ]
+        },
+        "next": {
+          "type": "string"
+        }
+      }
+    },
+    "stepDecide": {
+      "description": "step decide (US-163)",
+      "type": "object",
+      "required": [
+        "step",
+        "choice",
+        "answer",
+        "now",
+        "next"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "choice": {
+          "enum": [
+            "continue",
+            "revise",
+            "finish"
+          ]
+        },
+        "answer": {
+          "type": "string"
+        },
+        "checkpoint": {
+          "type": "string"
+        },
+        "now": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string"
         }
       }
     }

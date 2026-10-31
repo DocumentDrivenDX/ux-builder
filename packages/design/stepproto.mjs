@@ -13,9 +13,10 @@ import { checkBlueprint, score } from "@ux-builder/ui/blueprint";
 import { writePrototype } from "@ux-builder/ui/blueprint/prototype";
 import { informationHierarchy, pageText } from "@ux-builder/audit/assess/heuristics.mjs";
 import { bpFile, DesignError, protoDir } from "./app.mjs";
-import { logEvent } from "./metrics.mjs";
+import { checkpoint } from "./checkpoints.mjs";
+import { logEvent, personTurn, readEvents } from "./metrics.mjs";
 import { modalityStatus, recommendedFrame } from "./modality.mjs";
-import { progress, STEPS } from "./process.mjs";
+import { CLOSES, progress, STEPS } from "./process.mjs";
 import { readState, writeState } from "./state.mjs";
 
 const list = (x) => (Array.isArray(x) ? x : []);
@@ -182,3 +183,57 @@ export function stepCheckText(r) {
     ...(r.journeyWalk ? ["From step 5 the journeys are walked too: run ux-builder-audit assess on the prototype and fix what it finds."] : []),
     r.next].join("\n");
 }
+
+export const CHOICES = ["continue", "revise", "finish"];
+/* The core checkpoint a step closes, if any: core-1 at step 3, core-2 at 4, core-3 at 7. */
+const closedBy = (n) => ["core-1", "core-2", "core-3"].find((id) => Math.max(...CLOSES[id]) === n) ?? null;
+
+/* ux-builder-design step decide continue|revise|finish --answer <their words>:
+   the person's decision on the step's checked prototype (US-163-AC4, AC5). */
+export function stepDecide(app, { choice, answer, sameTurn = false, now = new Date().toISOString() } = {}) {
+  if (!CHOICES.includes(choice)) throw new DesignError(`step decide takes ${CHOICES.join(", ")}, not "${choice ?? ""}"`);
+  if (!answer?.trim()) throw new DesignError("step decide needs --answer: the person's decision, in their words");
+  let state = readState(app);
+  if (state.mode === "change") throw new DesignError("change mode has no step prototypes: use ux-builder-design step next");
+  const n = progress(state).step;
+  const sp = state.stepPrototypes?.[n];
+  const missing = !sp || sp.stale ? `a prototype of step ${n} (ux-builder-design prototype --step)`
+    : !sp.rounds.length ? "its check (ux-builder-design prototype --step --check)"
+    : sp.rounds.length < 2 ? "a second check after fixing what the first found, or --check --nothing-to-fix"
+    : null;
+  if (missing) throw new DesignError(`step ${n} cannot be decided yet: it needs ${missing}, and the person must have seen it. Nothing was recorded.`);
+  let answered = null;
+  const firstTry = !readEvents(app).some((e) => e.type === "milestone" && e.name === "prototype");
+  if (choice === "continue") {
+    // The checkpoint that closes this step is answered by the same decision; its refusals stand,
+    // and then nothing is recorded. It records the person's turn.
+    const id = closedBy(n);
+    if (id && !state.checkpoints.some((c) => c.id === id && ["passed", "skipped"].includes(c.status))) {
+      checkpoint(app, { id, answer, sameTurn, now });
+      answered = id;
+    }
+    state = readState(app);
+  }
+  const turn = answered ? readEvents(app).filter((e) => e.type === "turn").at(-1)?.turn : personTurn(app, { kind: "decision", answer, sameTurn, at: now });
+  // The first decision on a shown step prototype is when the person first tried a prototype.
+  if (firstTry) logEvent(app, "milestone", { name: "prototype", step: n }, now);
+  const entry = state.stepPrototypes[n];
+  entry.decision = { choice, answer: answer.trim(), at: now, turn };
+  if (choice === "revise") entry.stale = true;
+  let moved = false;
+  if (choice === "continue" && n < STEPS.length) {
+    // To the next step exactly: a checkpoint that already moved the loop is not moved past again.
+    state.step = n + 1;
+    state.activity = STEPS[n].activity;
+    moved = true;
+  }
+  writeState(app, state);
+  if (moved) logEvent(app, "step", { step: state.step, mode: state.mode }, now);
+  const where = progress(state);
+  return { step: n, choice, answer: answer.trim(), ...(answered ? { checkpoint: answered } : {}), now: where.text,
+    next: choice === "continue" ? (n < STEPS.length ? `${where.text}. Tell the person what it will ask of them.` : "The last step is done.")
+      : choice === "revise" ? `Step ${n} stays: rework it with the person, then draw and check a new prototype (prototype --step, --check).`
+      : "Draft what the remaining steps would produce, then run: ux-builder-design finish --answer \"<their words>\"" };
+}
+
+export const stepDecideText = (r) => `${r.choice === "continue" ? `Continuing${r.checkpoint ? ` (checkpoint ${r.checkpoint} answered)` : ""}` : r.choice === "revise" ? "Revising" : "Finishing"}: recorded. ${r.next}`;
