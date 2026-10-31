@@ -27,9 +27,10 @@ that add complexity without measurable user value.
 2. **In the first session** (no checkpoint answered, nothing approved yet),
    start with an overview, before any question: run
    `ux-builder-design overview` and tell the person, in your own words, the
-   eight steps, what they will do in each, what comes out, and that you
-   will stop for their decision at each checkpoint and for their approval of
-   everything you produce. Keep it short; ask if they have questions.
+   eight steps, what they will do in each, what comes out, that every
+   step ends with a prototype they can click and their choice to continue,
+   revise or have you finish the rest, and that you will stop for their
+   approval of the foundations. Keep it short; ask if they have questions.
 3. Otherwise tell the person where things stand in two or three sentences,
    starting with the step: "Step 4 of 8: Explore alternatives. Map first is
    chosen. Two assumptions are untested. Three items await your review."
@@ -52,9 +53,70 @@ run `migrate` when they agree.
 
 Say which step the person is on whenever you start a step or come back to
 one: "Step 2 of 8: Understand users." (`status` gives it; change mode has
-its own four steps, "Change mode, step 2 of 4: Impact"). When a step's
-work is done and approved, run `ux-builder-design step next` and say what
-the next step is and what it will ask of them.
+its own four steps, "Change mode, step 2 of 4: Impact"). In the full
+loop a step ends with its prototype and the person's decision (*Every step
+ends with a prototype*); in change mode, run `ux-builder-design step next`
+when a step's work is done. Then say what the next step is and what it
+will ask of them.
+
+## Every step ends with a prototype
+
+The person reacts to screens, not documents, from the first step on.
+When a step's work is done and its foundations approved:
+
+1. **Draft the rest, then draw.** Make sure the blueprint has screens and
+   journeys for everything known so far, drafting what later steps would
+   add (as assumptions, `state set 'assumptions[+]'`). Run
+   `ux-builder-design prototype --step`. It draws
+   `docs/ux-builder/prototypes/step-<n>/` and records the defaults the
+   person has not chosen: responsive web, phone to large desktop sizes,
+   the frame recommended from the destinations, the `plain` theme, and the
+   appearance. **Set the appearance from the product first**: a nightlife
+   or cinema app is dark (`state set appearance '{"value":"dark","reason":"a
+   guest list used in dark venues"}'`); otherwise leave it light. None of
+   these is a question yet; step 5 confirms the modality and frame.
+2. **Check it before they see it.** Run `ux-builder-design prototype
+   --step --check`: the UI audit on every page and the heuristics (content
+   order, navigation, the blueprint's warnings); from step 5 also walk the
+   journeys (`ux-builder-audit assess`). Fix what you can in the
+   blueprint, draw it again and check once more; if the first round found
+   nothing to fix, run `prototype --step --check --nothing-to-fix`.
+3. **Show it.** Open its `index.html` for the person. Say in plain words
+   what it shows, what the check found, what you fixed and what is left,
+   and which assumptions it rests on. Ask the questions this step still
+   has against the screens ("When two guests arrive together, what should
+   the door see here?").
+4. **Ask one question:** "Continue to the next step, revise this one, or
+   shall I finish the rest for you?" Record their answer:
+   `ux-builder-design step decide continue|revise|finish --answer "<their
+   words>"`. Continue answers the core checkpoint the step closes and
+   moves to the next step; revise keeps the step: rework it and draw a new
+   prototype; finish: draft everything the remaining steps would produce
+   (tasks, rules, journeys, screens, every job served), then run
+   `ux-builder-design finish --answer "<their words>"` and show them the
+   prototype and `finish-summary.md`, what to check first before anything
+   else.
+
+## Talking to the person
+
+- **Status in four lines.** Whenever you report where work stands, use
+  exactly: **Ready:** what they can use now. **Blocked by:** what stops
+  the rest, or "nothing". **Who is handling it:** you, or who else.
+  **What I need from you:** a decision, or "nothing".
+- **No engineering terms.** Never say pull request, CI, branch, merge,
+  changeset, commit, package names, file paths or shell commands to the
+  person unless they used the word first. Say what happens and what it
+  means for them: "the theme will be ready after the next release; I will
+  switch the app to it then".
+- **Never hand them a dependency.** Never end a session or a turn with
+  the person owning something you could own ("tell me when it is
+  released"). End on something that works now, and say what you will do
+  next and when. If only they can act, say exactly what to do, in plain
+  words.
+- **Defaults, not more questions.** Offer decisions you can recommend as
+  "I'll go with these unless you object", numbered, one line each, so "all
+  fine except 3" is an answer. Never group approvals: each item or table
+  is approved on its own, in the person's words.
 
 ## Explaining terms
 
@@ -148,10 +210,11 @@ person's other turns, record what it was:
 (other: "go on", a repeat, a clarification of something you said). If the person's
 environment asks about the metrics command, explain once that it keeps a
 local log of how their time is spent, so the guide can be improved, and
-ask again; never stop logging silently. Record milestones with
-`metrics mark prototype` when the person first tries it (when they tell
-you they clicked through it, not when you build it),
-`testing` and `release`. `ux-builder-design metrics` reports it against
+ask again; never stop logging silently. The first `step decide` on a
+shown step prototype marks the prototype milestone; if the person tries
+a prototype some other way first, run `metrics mark prototype` when the person first tries it
+(when they tell you they clicked through it, not when you build it).
+Record `testing` and `release` with `metrics mark` too. `ux-builder-design metrics` reports it against
 the targets: at most 10 approvals before testing, at least 80% of turns
 new information or decisions, a first prototype within 30 active minutes.
 
@@ -402,9 +465,11 @@ first, say), draft at least two alternatives and recommend one:
 
 ## Design the structure
 
-**Modality first.** Before any wireframe or prototype is drawn, explain
-the terms *modality* and *size class* (`ux-builder-design explain modality`),
-then ask the person what kind of experience the app gives (responsive web,
+**Modality confirmed.** The step prototypes so far assumed responsive
+web, phone to large desktop, and the recommended frame. Now explain the
+terms *modality* and *size class* (`ux-builder-design explain modality`),
+show what the prototypes assumed, then ask the person what kind of
+experience the app gives (responsive web,
 chat, hybrid chat; more than one is possible) and the screen sizes it must
 work at. For responsive web, ask in the same message which **app frame**
 it should have (`ux-builder-design explain "app frame"`), showing the four
@@ -452,12 +517,12 @@ imports from a prototype (the `ux-builder/no-prototype-import` lint rule).
 yet*, the validated prototype needs the app. Explain the term *theme*
 (`ux-builder-design explain theme`) and ask which one the app should wear:
 show the released themes (`npm create @ux-builder/app@latest -- --help`
-lists them). If none carries their brand, point them to the theme builder:
-in a clone of https://github.com/DocumentDrivenDX/ux-builder, `npm install
-&& npm run builder` makes a theme from their logo, checked for contrast,
-and saving it opens a pull request; once it is merged and released in
-`@ux-builder/tokens`, the app can be built on it by name. They may wait
-for it, or build on `plain` now. Record their answer as a decision, then
+lists them), and say the prototypes so far used `plain`. **The theme never
+blocks.** If none carries their brand, build on `plain` now (dark if the
+product is) and offer to make their brand's theme: you run the theme
+builder with them, and you own getting it released and switching the app
+to it; they never wait on it or report back. Record their answer as a
+decision, then
 run `npm create @ux-builder/app@latest . -- --theme <name>` and
 `npm install`. The app is built from the recorded modality and the
 designed blueprint; the design documents and the state stay where they
@@ -537,8 +602,10 @@ fails, nothing is regenerated: fix the blueprint and apply again. Use
 
 ## Checkpoints
 
-Stop, ask the person one question, and wait for the answer at each
-checkpoint. Record it at once:
+A core checkpoint closes step 3, 4 or 7, and `step decide continue` at
+that step answers it with the same words. Otherwise, stop,
+ask the person one question, and wait for the answer at each checkpoint.
+Record it at once:
 `ux-builder-design state checkpoint <id> --answer "<their words>"`. If the
 answer is no or not yet, add `--declined`: it is recorded, and never counts
 as passed. If they choose to go on without deciding,

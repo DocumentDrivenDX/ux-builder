@@ -176,3 +176,23 @@ describe("the guided conversation in the skill (US-148)", () => {
     assert.match(section("Explaining terms"), /say what it means and why it is valuable/);
   });
 });
+
+describe("every step ends with a prototype, in the skill, the overview and the glossary (US-163)", () => {
+  // @covers US-163-AC6
+  test("AC6: each names the step prototype and the three choices; the skill reports status in four lines without engineering terms and never hands the person a dependency", async () => {
+    const { explain, overview, overviewText } = await import("../index.mjs");
+    const loop = section("Every step ends with a prototype");
+    for (const c of ["prototype --step", "--check", "--nothing-to-fix", "step decide continue|revise|finish", "ux-builder-design finish"]) assert.ok(loop.includes(c), c);
+    assert.match(loop, /Continue to the next step, revise this one, or\s+shall I finish the rest for you\?/);
+    assert.match(loop, /Set the appearance from the product first/);
+    const talk = section("Talking to the person");
+    for (const l of ["**Ready:**", "**Blocked by:**", "**Who is handling it:**", "**What I need from you:**"]) assert.ok(talk.includes(l), l);
+    assert.match(talk, /Never say pull request, CI, branch/);
+    assert.match(talk, /Never hand them a dependency/);
+    assert.match(talk, /Never group approvals/);
+    assert.match(SKILL, /\*\*The theme never\nblocks\.\*\*/);
+    assert.match(overviewText(overview()), /Every step ends with a prototype you can click.*continue to the next step, revise this one, or have the agent finish the rest/s);
+    assert.match(explain({ term: "step prototype" }).terms[0].means, /end of every step/);
+    assert.match(explain({ term: "finish for me" }).terms[0].means, /stop being guided/);
+  });
+});

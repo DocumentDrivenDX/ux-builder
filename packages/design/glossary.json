@@ -164,6 +164,18 @@
       "why": "It shows structure and priorities quickly, before effort goes into visual detail."
     },
     {
+      "term": "step prototype",
+      "step": 1,
+      "means": "A clickable prototype drawn at the end of every step from what you have confirmed so far, with the agent's assumptions for the rest; checked for accessibility and usability before you see it.",
+      "why": "You react to screens from the first step instead of documents, and decide at each step whether to go on, revise it, or have the agent finish."
+    },
+    {
+      "term": "finish for me",
+      "step": 1,
+      "means": "Your choice at the end of any step to stop being guided: the agent drafts everything the remaining steps would produce, writes every design and HELIX document from it marked as assumed, and lists what it guessed and what to check first.",
+      "why": "Stopping early still gives you a complete, consistent design, and you know exactly which parts are confirmed and which are guesses."
+    },
+    {
       "term": "exploratory prototype",
       "step": 6,
       "means": "A disposable, clickable set of pages generated from a blueprint to answer one design question; never app code.",
