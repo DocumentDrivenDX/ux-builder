@@ -305,3 +305,23 @@ describe("propose's pieces", () => {
     assert.equal(unifiedDiff("n.md", null, "a\nb\n"), "diff --git a/n.md b/n.md\nnew file mode 100644\n--- /dev/null\n+++ b/n.md\n@@ -0,0 +1,2 @@\n+a\n+b\n");
   });
 });
+
+describe("HELIX 0.20's flow locations (finish wrote UJM-{n}-… and one UF-{n}-{nn}-{view}.md for every view)", () => {
+  test("every placeholder in a location is filled: no braces in any path, and one wireframe per view", () => {
+    const a = app();
+    const refs = join(a.dir, ".claude/skills/helix/references/activities");
+    a.write(".claude/skills/helix/references/activities/02-design/artifacts/wireframe/meta.yml", "artifact:\n  id: wireframe\noutput:\n  location: docs/helix/02-design/flows/UF-{n}-{feature}/UF-{n}-{nn}-{view}.md\n");
+    a.write(".claude/skills/helix/references/activities/02-design/artifacts/wireframe/template.md", "# [Wireframe title]\n\n## Layout\n\n[Layout]\n");
+    a.write(".claude/skills/helix/references/activities/01-frame/artifacts/user-journey-map/meta.yml", "artifact:\n  id: user-journey-map\noutput:\n  location: docs/helix/01-frame/journey-maps/UJM-{n}-{name}.md\n");
+    a.write(".claude/skills/helix/references/activities/01-frame/artifacts/user-journey-map/template.md", "# [Journey map title]\n\n## Stages\n\n[Stages]\n");
+    assert.ok(readdirSync(refs).length);
+    const r = propose(JSON.parse(readFileSync(a.blueprint, "utf8")), { blueprintFile: a.blueprint });
+    const paths = [...r.proposals.map((p) => p.path), ...r.drafts.map((d) => d.path)];
+    assert.deepEqual(paths.filter((p) => /[{}]/.test(p)), [], "no placeholder left in a path");
+    const wireframes = paths.filter((p) => /\/flows\/UF-/.test(p) && !/UF-\d+\.md$/.test(p));
+    assert.ok(wireframes.length >= 2, paths.join("\n"));
+    assert.equal(new Set(wireframes).size, wireframes.length, "each view its own file");
+    assert.ok(wireframes.every((p) => /\/UF-\d+-[a-z0-9-]+\/UF-\d+-\d{2}-[a-z0-9-]+\.md$/.test(p)), wireframes.join("\n"));
+    assert.ok(paths.some((p) => /journey-maps\/UJM-\d+-[a-z0-9-]+\.md$/.test(p)), paths.join("\n"));
+  });
+});

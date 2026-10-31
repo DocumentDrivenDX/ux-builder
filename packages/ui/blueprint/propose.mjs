@@ -209,8 +209,18 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
 
   // Documents changed in memory, by path, so two sections of one document compose.
   const texts = new Map();
+  // Every placeholder HELIX's locations use: {id} and {n} the number, {nn} the view's number in its flow,
+  // {feature} the flow's feature, {name}, {screen} and {view} the document's own slug. A location with one
+  // left unfilled is not written (HELIX 0.20's flows wrote every wireframe to one literal path).
   const locate = (type, location, vars) => {
-    const rel = location.replace(/^docs\/helix\//, "").replace(/\{id\}/g, vars.number ?? "").replace(/\{(name|screen)\}/g, vars.slug ?? "");
+    const rel = location.replace(/^docs\/helix\//, "")
+      .replace(/\{(id|number)\}/g, vars.number ?? "")
+      .replace(/\{n\}/g, vars.flow ?? vars.number ?? "")
+      .replace(/\{nn\}/g, vars.index != null ? String(vars.index).padStart(2, "0") : "")
+      .replace(/\{feature\}/g, vars.feature ?? vars.slug ?? "")
+      .replace(/\{(name|screen|view)\}/g, vars.slug ?? "");
+    const left = rel.match(/\{[a-z-]+\}/g);
+    if (left || /(^|\/|-)-|--|-\.md$/.test(rel)) { result.problems.push(`HELIX's location for the ${type} type (${location}) has ${left ? `${left.join(", ")} unfilled` : "an empty part"}; ${vars.id ?? type} not proposed.`); return null; }
     return join(flowRoot, rel);
   };
 
@@ -223,6 +233,7 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
     else {
       if (!info.location) { result.problems.push(`HELIX has no output location for the ${type} type; ${kind} not proposed.`); return; }
       path = locate(type, info.location, create);
+      if (!path) return;
       isNew = !texts.has(path);
       if (!info.template) result.problems.push(`HELIX has no template for the ${type} type (${info.base}/template.md): ${posix(relative(root, path))} is drafted from the blueprint alone.`);
       before = texts.get(path) ?? draft(info.template, { ...create, type, intro: intro ?? `> Drafted by \`ux-builder-blueprint propose\` from the blueprint${info.proposed ? ` and ux-builder's proposed ${type} template (docs/proposals/helix-ux-artifact-types)` : version ? ` and HELIX ${version}'s template` : ""}. A person reviews and applies it.` });
@@ -384,19 +395,22 @@ function uxTypes({ bp, docs, refs, screens, journeys, stories, feature, result, 
   for (const id of screens.keys()) if (!numbers.get(id)) numbers.set(id, pad(next(taken)));
 
   const allStories = [...new Set([...screens.values()].flatMap(({ s }) => (Array.isArray(s.stories) ? s.stories : [])).concat(journeys.map((j) => j.story)).filter((x) => typeof x === "string"))];
+  const flowNo = sfId.slice(3), feat = featDoc ? slugOf(featDoc.rel) : slug(bp.name ?? "app");
+  let view = 0;
   for (const [id, screen] of screens) {
     const n = numbers.get(id), m = models.get(id);
+    view++;
     const isd = `ISD-${n}`, wf = `WF-${n}`;
     const own = Array.isArray(screen.s.stories) ? screen.s.stories.filter((x) => typeof x === "string") : [];
     const storiesLine = own.length ? own.map((x) => `[[${x}]]`).join(", ") : "none";
     const isdDoc = subject("interaction-state-diagram", id);
     apply({ id: `${isdDoc?.id ?? isd}-states`, kind: "state-diagram", type: "interaction-state-diagram", doc: isdDoc, info: info["interaction-state-diagram"],
-      create: { id: isd, number: n, slug: slug(id), title: `${isd}: ${m.title} States`, refs: { "SF-XXX": sfId, "WF-XXX": wf, "US-XXX": own[0] },
+      create: { id: isd, number: n, flow: flowNo, feature: feat, index: view, slug: slug(id), title: `${isd}: ${m.title} States`, refs: { "SF-XXX": sfId, "WF-XXX": wf, "US-XXX": own[0] },
         fields: { Subject: `\`${id}\` in [[${sfId}]] | **Wireframe**: [[${wf}]] | **Stories**: ${storiesLine}` } },
       parts: chain(stateDiagramSections(m, { screen, wf, sf: sfId })) });
     const wfDoc = subject("wireframe", id);
     apply({ id: `${wfDoc?.id ?? wf}-wireframe`, kind: "wireframe", type: "wireframe", doc: wfDoc, info: info.wireframe,
-      create: { id: wf, number: n, slug: slug(id), title: `${wf}: ${m.title}`, refs: { "SF-XXX": sfId, "ISD-XXX": isd, "US-XXX": own[0] },
+      create: { id: wf, number: n, flow: flowNo, feature: feat, index: view, slug: slug(id), title: `${wf}: ${m.title}`, refs: { "SF-XXX": sfId, "ISD-XXX": isd, "US-XXX": own[0] },
         fields: { "Screen flow node": `[[${sfId}]] \`${id}\` | **Stories**: ${storiesLine} | **State diagram**: [[${isd}]]` } },
       parts: chain(wireframeSections(m, { bp, screen, id: wf, isd })) });
   }
