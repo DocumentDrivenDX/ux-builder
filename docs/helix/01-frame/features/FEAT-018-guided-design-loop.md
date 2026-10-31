@@ -538,6 +538,9 @@ GDL-79. **A guided conversation the person can follow and control**
   "Step 3 of 8: Model tasks". Change mode has its own four steps
   (challenge, impact, decide, apply); an existing app's baseline comes
   before step 1. `status` leads with it, and `step next` moves on.
+  *[Amended 2026-10-31 — GDL-84, ADR-042]* Each step ends with a step
+  prototype and the person's decision (`step decide`): continue, revise
+  or finish.
 - **Terms explained.** The first time a term comes up (blueprint, user
   story, acceptance criterion, job to be done, target user, task, journey,
   business rule, alternative, prototype, checkpoint, rubric and the
@@ -577,6 +580,9 @@ the screen, a top bar with no menu, navigation across the top, or a side
 menu. The agent shows the four and recommends one from the destinations;
 the choice is recorded in the blueprint, and wireframes, prototypes, the
 built app and the audit follow it.
+*[Amended 2026-10-31 — GDL-84, ADR-042]* Step prototypes do not wait
+for the modality: until step 5 records it, they assume responsive web and
+the recommended frame, as assumptions the person confirms at step 5.
 
 GDL-81. **Design first, the app last** *(added 2026-10-24, from the
 operator)*. A person starts the guide before there is an app:
@@ -590,6 +596,9 @@ one from their brand when no released theme fits, and builds the app in
 the same folder (`npm create @ux-builder/app . -- --theme <name>`) from
 the recorded modality and the designed blueprint, keeping every design
 document. Giving `--modality` still makes the app at once, as before.
+*[Amended 2026-10-31 — GDL-84, ADR-042]* The theme never blocks: until
+the person chooses one, everything is built on `plain`, and a brand theme
+not yet released is swapped in by the agent when it is.
 *[Amended 2026-10-25 — alignment]* "Ready" means: `core-2` has passed (the approach is chosen) and
 the modality is recorded; the guide builds the app then, before step 6's
 validated prototype (GDL-44), which needs it. The starter itself checks
@@ -677,6 +686,31 @@ and approve.
   about, the brief may not call a dropped story confirmed, the prototype
   toolbar is folded and a screen without a sample of its own is drawn from
   its content.
+
+GDL-84. **A prototype ends every step** *(added 2026-10-31, from the
+operator, after VIP List session 1: about 148 active minutes and 12
+approvals before the first prototype; ADR-042, US-163)*. At the end of each
+of the eight steps the agent generates a step prototype
+(`ux-builder-design prototype --step`) in `docs/ux-builder/prototypes/step-<n>/`
+from what the person has confirmed and its own assumptions for every later
+step, each recorded. Until the person chooses, it assumes responsive web,
+the compact, medium and expanded size classes, the frame recommended from
+the destinations, and the `plain` theme in the appearance the agent infers
+from the product; none of these is a gate. Before the person sees it, the
+agent runs one round of checks (`prototype --step --check`: the UI audit
+over every page and the deterministic heuristics, and from step 5 the
+journey walk), fixes what it can and checks again, then shows it with what
+was found, fixed and left. The person then decides (`step decide`):
+continue to the next step, revise this one, or finish.
+
+GDL-85. **Finish for me** *(added 2026-10-31, from the operator; ADR-042,
+US-164)*. When the person chooses to finish, the agent drafts what the
+remaining steps would produce and `ux-builder-design finish` writes every
+downstream ux-builder and HELIX artifact: the brief, wireframes, a step
+prototype, a test kit and the HELIX documents. HELIX documents are applied
+directly, each marked assumed, on this path alone. A summary says what was
+confirmed, what was assumed, what to check first and what was not done;
+the checkpoints the finish passes are recorded as skipped, never passed.
 
 ##### Tasks (stage 3)
 
