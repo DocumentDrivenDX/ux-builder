@@ -198,6 +198,7 @@ describe("every step ends with a prototype, in the skill, the overview and the g
 });
 
 describe("the person's time in the skill (session 2)", () => {
+  // @covers US-165-AC7
   test("steps 1 to 3 are the person's, with the scope to cut; steps 4 to 6 one batch of defaults", () => {
     const s = section("Where the person's time goes");
     assert.match(s, /\*\*Steps 1 to 3: the person's\.\*\*/);

@@ -307,6 +307,7 @@ describe("propose's pieces", () => {
 });
 
 describe("HELIX 0.20's flow locations (finish wrote UJM-{n}-… and one UF-{n}-{nn}-{view}.md for every view)", () => {
+  // @covers US-165-AC1
   test("every placeholder in a location is filled: no braces in any path, and one wireframe per view", () => {
     const a = app();
     const refs = join(a.dir, ".claude/skills/helix/references/activities");

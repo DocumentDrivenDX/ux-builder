@@ -712,6 +712,23 @@ directly, each marked assumed, on this path alone. A summary says what was
 confirmed, what was assumed, what to check first and what was not done;
 the checkpoints the finish passes are recorded as skipped, never passed.
 
+GDL-86. **The person where only they can help** *(added 2026-10-31, from
+the operator, after VIP List session 2 and its what-if test; ADR-043,
+US-165)*. The intake asks for the facts only the person knows (how often
+people come back and on what device, what each person must and must not
+give) and the business rules; `scope` lists the design's stories,
+criteria, screens, destinations and inputs for the person to cut; steps 4
+to 6 run as one batch of defaults. The blueprint says who each screen is
+for (`users`, with the rule `nav.audience`), how it is entered from
+outside (`entry`), its own frame, and states of its own with what they
+show (`stateNotices`). Step prototypes draw each screen's own content, and
+from the app's build the step prototype is the app. A check round audits
+ideal states at every size and other states at one, only pages that
+changed, and each finding is fixed or accepted with a reason. The
+prototype's defaults stay out of the person's review. The guide's measures
+time the checks, count step 1, start testing with the kit and mark
+simulated data.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each

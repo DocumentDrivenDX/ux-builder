@@ -84,6 +84,7 @@ describe("US-163: a prototype ends every step", () => {
   });
 
   // @covers US-163-AC3
+  // @covers US-165-AC4
   test("AC3: --check audits each screen's ideal state at every size and its other states at one, writes check-1.json and records the round; the journey walk from step 5", async () => {
     const { auditPages } = await import("../index.mjs");
     const a = app();
@@ -143,6 +144,7 @@ describe("US-163: a prototype ends every step", () => {
 });
 
 describe("VIP List session 2: the prototype's defaults stay out of review, and the brief does not read its PRD back", () => {
+  // @covers US-165-AC3
   test("drawing a step prototype changes neither the approved brief nor the map's exceptions", async () => {
     const { brief, coverageMap, pendingReviews, reviewApprove } = await import("../index.mjs");
     const a = app();
@@ -156,6 +158,7 @@ describe("VIP List session 2: the prototype's defaults stay out of review, and t
     assert.ok(readState(a).assumptions.filter((x) => x.about).every((x) => !x.section));
   });
 
+  // @covers US-165-AC3
   test("a PRD line that repeats the design state does not come back into the brief", async () => {
     const { brief, pendingReviews, reviewApprove, stateSet } = await import("../index.mjs");
     const a = app();
@@ -170,6 +173,7 @@ describe("VIP List session 2: the prototype's defaults stay out of review, and t
 });
 
 describe("VIP List session 2: once the app is built, the step prototype is the app", () => {
+  // @covers US-165-AC6
   test("prototype --step builds the app and records its routes; the check audits them, served as an app", async () => {
     const { mkdirSync } = await import("node:fs");
     const a = app();

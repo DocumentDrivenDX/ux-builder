@@ -25,6 +25,7 @@ function app() {
 const slow = async ({ pages }) => { await new Promise((r) => setTimeout(r, 1100)); return { ran: true, pagesAudited: pages.length, errors: 0, warnings: 0, findings: [] }; };
 
 describe("VIP List session 2: the guide's measures", () => {
+  // @covers US-165-AC2
   test("a check is stamped when it ends, with the seconds it took", async () => {
     const a = app();
     await stepPrototype(a);
@@ -58,6 +59,7 @@ describe("VIP List session 2: the guide's measures", () => {
     assert.equal(readEvents(a).filter((e) => e.type === "milestone" && e.name === "testing").length, 1, "once");
   });
 
+  // @covers US-165-AC2
   test("simulated sessions, evidence and results are marked, and never confirm a job", () => {
     const a = app();
     approveAll(a);
@@ -97,6 +99,7 @@ describe("VIP List session 2: the guide's measures", () => {
 });
 
 describe("VIP List session 2: the scope, as one list for the person to cut", () => {
+  // @covers US-165-AC7
   test("scope lists the stories with their criteria, the screens and destinations, and what people must and may give", async () => {
     const { scope } = await import("../index.mjs");
     const a = app();

@@ -23,6 +23,7 @@ const base = () => ({
 const rules = (bp) => checkBlueprint(bp).map((f) => `${f.severity} ${f.rule} ${f.path}`);
 
 describe("VIP List session 2: the blueprint says what the person meant", () => {
+  // @covers US-165-AC5
   test("a screen entered from outside is not unreachable, and neither is what it leads to", () => {
     const bp = base();
     assert.ok(rules(bp).some((r) => /flow\.reachable \/screens\/2/.test(r)), "without entry, the door is unreachable");
@@ -43,6 +44,7 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     assert.match(tonight.html, /My passes/, "the guest screens keep theirs");
   });
 
+  // @covers US-165-AC5
   test("a state of the screen's own is drawn as its notice, and refused without one", async () => {
     const bp = base();
     bp.screens[2].entry = "scan";
@@ -56,6 +58,7 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     assert.match(page.html, /Do not let in on this pass\./);
   });
 
+  // @covers US-165-AC5
   test("nav.audience: a tab for other users warns; reached by its own link, it does not", () => {
     const bp = base();
     bp.screens[2].entry = "link";
@@ -70,6 +73,7 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
 });
 
 describe("VIP List session 2: the prototype shows the design's own content, not placeholders", () => {
+  // @covers US-165-AC6
   test("a form draws a field for each content label, by what it asks; a list draws its labels' sample values", async () => {
     const bp = base();
     bp.screens.push({ id: "claim", title: "Claim a spot", pattern: "FormPage", states: st, entry: "link", content: ["Mobile number", "Date of birth", "Spots (1 or 2)", "Email (optional)", "Promotional texts (opt-in)"].map((label) => ({ label, kind: "data" })), actions: [{ id: "submit", label: "Get my pass", to: "passes", primary: true }] });

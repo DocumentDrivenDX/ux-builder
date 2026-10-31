@@ -149,6 +149,7 @@ describe("US-153: foundations reviewed deliberately, what is built from them as 
 
 describe("US-154: the intake asked together, the budget shown, and the guide's own time measured", () => {
   // @covers US-154-AC1
+  // @covers US-165-AC7
   test("AC1: intake asks what the sources do not answer, together, and lists what to confirm from them", () => {
     const empty = tempApp();
     const r = intake(empty);

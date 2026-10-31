@@ -207,6 +207,7 @@ export const NOTES = {
   "@ux-builder/ui ./blueprint/paths": "Where an app's design work lives: the docs/ux-builder/ layout and the old one, layoutOf, alternativeFile and the write fence (FEAT-018)",
   "@ux-builder/ui ./blueprint/prototype": "Exploratory prototypes of a blueprint: writePrototype, prototypePages, archivePrototype and themeFor (FEAT-018)",
   "@ux-builder/ui ./blueprint/wireframes": "Wireframes of a blueprint, every screen in every state at its size classes, light or dark: wireframes and writeWireframes (FEAT-018)",
+  "@ux-builder/ui ./blueprint/samples": "Sample values and form fields from a screen's content labels, so wireframes and prototypes show the design's own content: sampleValue and fieldFor (FEAT-018)",
   "@ux-builder/ui ./blueprint/propose": "HELIX proposals drafted from a blueprint as patches: propose and writeProposals",
   "@ux-builder/ui ./catalogue.json": "The machine-readable catalogue: widgets, patterns, tokens, icons, rules and recipes",
   "@ux-builder/ui ./AGENTS.md": "Guidance for AI coding agents, generated from the catalogue",
