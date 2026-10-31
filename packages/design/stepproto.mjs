@@ -1,0 +1,184 @@
+/* A prototype ends every step (FEAT-018 GDL-84; US-163; ADR-042): the
+   step prototype, drawn from the blueprint as it stands, with the defaults
+   the person has not chosen yet (modality, size classes, frame, theme,
+   appearance) recorded as assumptions instead of refused; and its check
+   round: the UI audit over every page and the deterministic heuristics,
+   the journey walk requested from step 5. The agent fixes what a round
+   finds, checks again (or records that nothing needed fixing), and only
+   then shows the prototype and asks the step's decision. */
+
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { checkBlueprint, score } from "@ux-builder/ui/blueprint";
+import { writePrototype } from "@ux-builder/ui/blueprint/prototype";
+import { informationHierarchy, pageText } from "@ux-builder/audit/assess/heuristics.mjs";
+import { bpFile, DesignError, protoDir } from "./app.mjs";
+import { logEvent } from "./metrics.mjs";
+import { modalityStatus, recommendedFrame } from "./modality.mjs";
+import { progress, STEPS } from "./process.mjs";
+import { readState, writeState } from "./state.mjs";
+
+const list = (x) => (Array.isArray(x) ? x : []);
+/* Responsive web's size classes (FEAT-014's matrix asks for large too). */
+export const DEFAULT_SIZE_CLASSES = ["compact", "medium", "expanded", "large"];
+/* From this step the check also asks for the journey walk in a browser (ADR-042 rule 3). */
+export const WALK_FROM = 5;
+
+/* Add or update the agent's assumption about one default; one the person
+   confirmed or refuted is left as it is. Returns its ID. */
+function assume(state, about, text) {
+  const all = list(state.assumptions);
+  const had = all.find((a) => a.about === about);
+  if (had) {
+    if (had.status === "assumed") had.text = text;
+    return had.id;
+  }
+  const id = `A-${Math.max(0, ...all.map((a) => Number(/^A-(\d+)$/.exec(a.id)?.[1] ?? 0))) + 1}`;
+  state.assumptions = [...all, { id, text, status: "assumed", evidence: [], section: "constraints", about }];
+  return id;
+}
+
+/* The blueprint the step prototype is drawn from: the app's, with the
+   defaults the person has not chosen filled in, and the assumptions made. */
+function withDefaults(app, bp, state) {
+  const m = modalityStatus(app);
+  const made = [];
+  const supports = { ...(bp.supports ?? {}) };
+  if (!list(supports.inputs).length) {
+    supports.inputs = ["coarse", "fine"];
+    made.push(assume(state, "inputs", "People use touch and a mouse or keyboard: assumed until step 5."));
+  }
+  if (m.confirmed) return { bp: { ...bp, supports }, made };
+  if (!list(supports.modalities).length) {
+    supports.modalities = ["responsive-web"];
+    made.push(assume(state, "modality", "The app is a responsive web app: assumed for the step prototypes until the person chooses at step 5 (Design the structure)."));
+  }
+  if (!list(supports.sizeClasses).length) {
+    supports.sizeClasses = DEFAULT_SIZE_CLASSES;
+    made.push(assume(state, "size-classes", `It must work on phones, tablets, laptops and large desktops (${DEFAULT_SIZE_CLASSES.join(", ")}): assumed until step 5.`));
+  }
+  if (supports.modalities.includes("responsive-web") && !supports.frame) {
+    const r = recommendedFrame(bp);
+    supports.frame = r.frame;
+    made.push(assume(state, "frame", `The app frame is ${r.frame} (${r.why}): assumed until step 5.`));
+  }
+  return { bp: { ...bp, supports }, made };
+}
+
+/* ux-builder-design prototype --step: draw the current step's prototype. */
+export async function stepPrototype(app, { write = writePrototype, now = new Date().toISOString() } = {}) {
+  const state = readState(app);
+  if (state.mode === "change") throw new DesignError("step prototypes belong to the full loop; change mode shows the change's impact instead (ux-builder-design impact)");
+  const where = progress(state);
+  if (where.step < 1) throw new DesignError("the baseline comes before step 1: start step 1 (ux-builder-design step 1) before its prototype");
+  const n = where.step;
+  let bp;
+  try { bp = JSON.parse(readFileSync(join(app, bpFile(app)), "utf8")); } catch (e) { throw new DesignError(`${bpFile(app)}: ${e.message}`); }
+  // Checked as it will be drawn: a blueprint with no supports yet is not wrong before step 5.
+  const { bp: drawn, made } = withDefaults(app, bp, state);
+  const errors = checkBlueprint(drawn).filter((f) => f.severity === "error");
+  if (errors.length) {
+    const e = new DesignError(`${bpFile(app)} has ${errors.length} error${errors.length === 1 ? "" : "s"}: fix ${errors.length === 1 ? "it" : "them"} before the step prototype. Nothing was written.\n${errors.map((f) => `  ${f.rule} ${f.path || "/"}: ${f.message}`).join("\n")}`, errors);
+    e.code = 1;
+    throw e;
+  }
+  const theme = state.app?.theme ?? "plain";
+  if (!state.app?.theme) made.push(assume(state, "theme", "Prototypes use the plain theme until the person chooses one; a brand theme not yet released never blocks: the agent swaps it in when it is."));
+  const appearance = state.appearance?.value ?? "light";
+  made.push(assume(state, "appearance", state.appearance ? `Prototypes are ${appearance}: ${state.appearance.reason}` : "Prototypes are light: nothing about the product suggests dark rooms or night use."));
+  const dir = `step-${n}`;
+  const name = STEPS[n - 1].name;
+  const w = await write(drawn, { root: join(app, protoDir(app)), dir, question: `Step ${n} of ${STEPS.length}, ${name}: what we have so far`, theme, appearance });
+  const rel = `${protoDir(app)}/${dir}`;
+  state.stepPrototypes = { ...(state.stepPrototypes ?? {}), [n]: { dir: rel, at: now, theme, appearance, pages: list(w.files), assumptions: made, rounds: [] } };
+  writeState(app, state);
+  logEvent(app, "step-prototype", { step: n, dir: rel }, now);
+  const assumptions = state.assumptions.filter((a) => made.includes(a.id)).map((a) => ({ id: a.id, text: a.text }));
+  return { step: n, name, dir: rel, entry: w.entry ? `${rel}/${w.entry}` : `${rel}/index.html`, pages: list(w.files).length, theme, appearance, assumptions,
+    next: `Check it before showing it: ux-builder-design prototype --step --check` };
+}
+
+export function stepPrototypeText(r) {
+  return [`Step ${r.step} prototype: ${r.pages} pages in ${r.dir}/ (${r.theme}, ${r.appearance}).`,
+    ...(r.assumptions.length ? ["Drawn on these assumptions:", ...r.assumptions.map((a) => `  ${a.id} ${a.text}`)] : []),
+    r.next].join("\n");
+}
+
+/* The deterministic heuristics of a step prototype: each screen's content
+   in its priority order, each journey in no more moves than its shortest
+   path, and the blueprint's own warnings (error paths among them). */
+export function heuristics(bp, pageHtml) {
+  const out = [];
+  const ideal = new Map(Object.entries(pageHtml).filter(([f]) => /^[^.]+\.[a-z-]+\.html$/.test(f)).map(([f, html]) => [f.split(".")[0], html]));
+  for (const s of list(bp.screens).filter((x) => x?.id)) {
+    if (!list(s.content).length) { out.push({ heuristic: "information-hierarchy", screen: s.id, finding: `${s.title ?? s.id} has no content order: say what it shows, highest priority first (screens[].content)` }); continue; }
+    const html = ideal.get(s.id);
+    if (!html) continue;
+    const r = informationHierarchy(s.content, pageText(html));
+    if (!r.ok || r.missing.length) out.push({ heuristic: "information-hierarchy", screen: s.id, finding: r.missing.length ? `${s.title ?? s.id} does not show ${r.missing.join(", ")}` : `${s.title ?? s.id} shows its content out of priority order` });
+  }
+  for (const j of score(bp)) {
+    const steps = list(list(bp.journeys).find((x) => x.id === j.journey)?.steps);
+    const moves = steps.slice(1).filter((s, k) => s.screen !== steps[k].screen).length;
+    if (j.shortestPath != null && moves > j.shortestPath) out.push({ heuristic: "navigation-complexity", journey: j.journey, finding: `${j.journey} takes ${moves} moves where ${j.shortestPath} would do` });
+  }
+  for (const f of checkBlueprint(bp).filter((x) => x.severity === "warning")) out.push({ heuristic: /error|exception|recover/.test(`${f.rule} ${f.message}`) ? "error-handling" : "blueprint", rule: f.rule, path: f.path, finding: f.message });
+  return out;
+}
+
+
+/* The default audit: serve the prototype's folder on a free local port
+   and run the UI audit on every page. { ran, pagesAudited, errors,
+   warnings, findings } or { ran: false, reason }. */
+export async function auditPrototype({ dir, pages, theme, appearance, blueprint, out }) {
+  let served = null;
+  try {
+    const { audit, serveFolder } = await import("@ux-builder/audit");
+    served = await serveFolder(dir);
+    const report = await audit({ urls: pages.map((p) => served.url + p), themes: [theme], appearances: [appearance], blueprint, out, ignore: [".proto-bar"] });
+    const findings = list(report.findings);
+    return { ran: true, pagesAudited: pages.length, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length, findings: findings.slice(0, 50).map((f) => ({ severity: f.severity, rule: f.rule?.id ?? f.rule ?? f.check, page: f.url?.replace(served.url, ""), message: f.message })) };
+  } catch (e) {
+    return { ran: false, pagesAudited: 0, reason: e.message };
+  } finally { await served?.stop(); }
+}
+
+/* ux-builder-design prototype --step --check [--nothing-to-fix]. */
+export async function stepCheck(app, { nothingToFix = false, audit = auditPrototype, now = new Date().toISOString() } = {}) {
+  const state = readState(app);
+  const n = progress(state).step;
+  const sp = state.stepPrototypes?.[n];
+  if (!sp || sp.stale) throw new DesignError(`step ${n} has no ${sp?.stale ? "current " : ""}prototype to check: draw it first (ux-builder-design prototype --step)`);
+  const round = sp.rounds.length + 1;
+  let entry;
+  if (nothingToFix) {
+    if (!sp.rounds.length) throw new DesignError("--nothing-to-fix follows a check: run ux-builder-design prototype --step --check first");
+    entry = { round, at: now, nothingToFix: true };
+  } else {
+    // The blueprint as the prototype was drawn: the defaults the person has not chosen filled in.
+    const { bp } = withDefaults(app, JSON.parse(readFileSync(join(app, bpFile(app)), "utf8")), structuredClone(state));
+    const abs = join(app, sp.dir);
+    const pages = list(sp.pages);
+    const html = Object.fromEntries(pages.map((f) => { try { return [f, readFileSync(join(abs, f), "utf8")]; } catch { return [f, ""]; } }));
+    const a = await audit({ dir: abs, pages, theme: sp.theme ?? "plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(abs, `audit-${round}`) });
+    entry = { round, at: now, pagesAudited: a.pagesAudited ?? 0, audit: a, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? "requested" : null };
+    writeFileSync(join(abs, `check-${round}.json`), JSON.stringify({ step: n, ...entry }, null, 2) + "\n");
+  }
+  sp.rounds.push(entry);
+  writeState(app, state);
+  logEvent(app, "step-check", { step: n, round }, now);
+  const fixable = (entry.audit?.errors ?? 0) + (entry.audit?.warnings ?? 0) + list(entry.heuristics).length;
+  return { step: n, round, ...entry, ready: round >= 2,
+    next: round >= 2 ? `Show the prototype (${sp.dir}/index.html) with what was found, fixed and left, then ask: continue, revise, or shall I finish the rest? (ux-builder-design step decide <choice> --answer "<their words>")`
+      : fixable ? "Fix what you can in the blueprint, draw it again (prototype --step) and check once more (--check); or, when nothing needs fixing, --check --nothing-to-fix."
+      : "Nothing found: record it (ux-builder-design prototype --step --check --nothing-to-fix), then show the prototype." };
+}
+
+export function stepCheckText(r) {
+  if (r.nothingToFix) return `Step ${r.step}, round ${r.round}: nothing to fix recorded.\n${r.next}`;
+  const a = r.audit ?? {};
+  return [`Step ${r.step}, check round ${r.round}: ${r.pagesAudited} page${r.pagesAudited === 1 ? "" : "s"} audited${a.ran ? `, ${a.errors} error${a.errors === 1 ? "" : "s"} and ${a.warnings} warning${a.warnings === 1 ? "" : "s"}` : ` (the audit did not run: ${a.reason})`}; ${r.heuristics.length} heuristic finding${r.heuristics.length === 1 ? "" : "s"}.`,
+    ...r.heuristics.map((h) => `  ${h.heuristic}: ${h.finding}`),
+    ...(r.journeyWalk ? ["From step 5 the journeys are walked too: run ux-builder-audit assess on the prototype and fix what it finds."] : []),
+    r.next].join("\n");
+}

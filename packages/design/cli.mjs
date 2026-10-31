@@ -6,7 +6,7 @@
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { advance, carried, logEvent, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, logEvent, stepCheck, stepCheckText, stepPrototype, stepPrototypeText, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, baseline, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -26,6 +26,12 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   step next|<n>
       move to the next (or the given) step; next refuses while items of the
       current step await review.
+  prototype --step [--check [--nothing-to-fix]]
+      draw the current step's prototype in docs/ux-builder/prototypes/step-<n>/,
+      assuming the modality, sizes, frame, theme and appearance not yet
+      chosen (each recorded); --check audits every page and runs the
+      heuristics (from step 5, the journey walk too); --nothing-to-fix
+      records that a check needed no fix.
   explain [<term>] [--step <n>]
       what a term means and why it is valuable; --step: the terms a step
       introduces; with neither, every term.
@@ -211,10 +217,12 @@ function parseJson(text, what) {
 }
 
 async function main(argv) {
+  // `prototype --step` takes no value; --step <n> is explain's.
+  if (argv[0] === "prototype") argv = argv.map((a) => (a === "--step" ? "--step=current" : a));
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, "same-turn": { type: "boolean" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, kit: { type: "string" }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "boolean" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, "same-turn": { type: "boolean" }, check: { type: "boolean" }, "nothing-to-fix": { type: "boolean" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -250,6 +258,13 @@ async function main(argv) {
   if (command === "explain") {
     const r = explain({ term: rest.join(" ") || undefined, step: values.step });
     print(r, values.json, explainText(r));
+    return 0;
+  }
+  if (command === "prototype") {
+    if (values.step !== "current" || rest.length) throw new DesignError("prototype takes --step: ux-builder-design prototype --step [--check [--nothing-to-fix]] (exploratory prototypes of alternatives: ux-builder-blueprint prototype --explore)");
+    if (values.check || values["nothing-to-fix"]) { const r = await stepCheck(app, { nothingToFix: values["nothing-to-fix"] }); print(r, values.json, stepCheckText(r)); return 0; }
+    const r = await stepPrototype(app);
+    print(r, values.json, stepPrototypeText(r));
     return 0;
   }
   if (command === "step") {
@@ -518,7 +533,7 @@ main(process.argv.slice(2)).then((code) => { process.exitCode = code; }, (e) => 
   if (e instanceof DesignError || e?.code === "ERR_PARSE_ARGS_UNKNOWN_OPTION") {
     process.stderr.write(`ux-builder-design: ${e.message}\n`);
     for (const d of e.details ?? []) process.stderr.write(`  ${d.path}: ${d.message}\n`);
-    process.exitCode = 2;
+    process.exitCode = typeof e.code === "number" ? e.code : 2;
   } else {
     process.stderr.write(`ux-builder-design: ${e.stack ?? e}\n`);
     process.exitCode = 1;

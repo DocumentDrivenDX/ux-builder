@@ -694,7 +694,7 @@ of the eight steps the agent generates a step prototype
 (`ux-builder-design prototype --step`) in `docs/ux-builder/prototypes/step-<n>/`
 from what the person has confirmed and its own assumptions for every later
 step, each recorded. Until the person chooses, it assumes responsive web,
-the compact, medium and expanded size classes, the frame recommended from
+the compact, medium, expanded and large size classes, the frame recommended from
 the destinations, and the `plain` theme in the appearance the agent infers
 from the product; none of these is a gate. Before the person sees it, the
 agent runs one round of checks (`prototype --step --check`: the UI audit

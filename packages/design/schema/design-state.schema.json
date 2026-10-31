@@ -286,6 +286,11 @@
             "type": "string",
             "minLength": 1,
             "description": "The rubric dimension whose prediction rests on it (FEAT-018 GDL-60): the evaluation report confirms or refutes it from what people did"
+          },
+          "about": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What a default the agent assumed stands in for (modality, size-classes, frame, theme, appearance), so a later step prototype updates it rather than adding another (US-163)"
           }
         }
       }
@@ -631,6 +636,114 @@
           "minLength": 1
         },
         "alternative": {
+          "type": "string"
+        }
+      }
+    },
+    "stepPrototypes": {
+      "description": "Each step's prototype and its check rounds (FEAT-018 GDL-84; US-163), by step number",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[1-8]$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dir",
+          "at",
+          "assumptions",
+          "rounds"
+        ],
+        "properties": {
+          "dir": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "string"
+          },
+          "appearance": {
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The A-<n> assumptions it was drawn on"
+          },
+          "rounds": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Each --check: { round, at, pagesAudited, audit, heuristics, journeyWalk } or { round, at, nothingToFix: true }"
+          },
+          "stale": {
+            "type": "boolean",
+            "description": "The person chose to revise the step: the next prototype starts again"
+          },
+          "decision": {
+            "type": "object",
+            "description": "The person's decision on it: { choice, answer, at }"
+          }
+        }
+      }
+    },
+    "appearance": {
+      "description": "The appearance prototypes use until a theme is chosen, set by the agent from the product (US-163)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "reason"
+      ],
+      "properties": {
+        "value": {
+          "enum": [
+            "light",
+            "dark"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "finished": {
+      "description": "The person asked the agent to finish the design (FEAT-018 GDL-85; US-164)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "at",
+        "step",
+        "answer"
+      ],
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "step": {
+          "type": "integer"
+        },
+        "answer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
           "type": "string"
         }
       }

@@ -12,6 +12,7 @@ export { BUILD_NEEDS, status, summary } from "./status.mjs";
 export { checkpoint, CHECKPOINTS, FIRST_STEP, setMode } from "./checkpoints.mjs";
 export { CHANGE_STEPS, CLOSES, explain, explainText, GLOSSARY, overview, overviewText, progress, setStep, STEPS } from "./process.mjs";
 export { confirmModality, modalityStatus, SIZE_CLASSES } from "./modality.mjs";
+export { auditPrototype, DEFAULT_SIZE_CLASSES, heuristics, stepCheck, stepCheckText, stepPrototype, stepPrototypeText, WALK_FROM } from "./stepproto.mjs";
 export { migrate, migrationPlan, rewritePaths } from "./migrate.mjs";
 export { carried, coverageMap, diffText, lineDiff, mapText, meaningOf, pendingReviews, reviewApprove, reviewFeedback, reviewItems, reviewList, reviewMap, reviewRespond, reviewShow, reviewTable, tierOf, TIERS } from "./review.mjs";
 export { logEvent, logTurn, mark, METRICS_FILE, metrics, metricsText, MILESTONES, readEvents, TARGETS, TURN_KINDS } from "./metrics.mjs";

@@ -106,13 +106,19 @@ describe("US-011", () => {
 
   // @covers US-011-AC7
   test("AC7: an appearance the theme lacks falls back to its own, with a warning", () => {
+    // Every shipped theme has both appearances (plain gained dark, ADR-042), so a light-only
+    // theme, as the theme builder can make, is a fixture here. The provider shows what
+    // resolveAppearance gives, and warns whenever that differs from what was asked.
+    const lightOnly = new Map([["acme-light", { name: "acme-light", default: "light", appearances: ["light"] }]]);
+    assert.equal(resolveAppearance("acme-light", "dark", null, lightOnly), "light");
+    assert.equal(resolveAppearance("acme-light", "system", "dark", lightOnly), "light");
     const warned = [];
     const orig = console.warn;
     console.warn = (m) => warned.push(m);
     try {
       const el = render(h(ThemeProvider, { theme: "plain", appearance: "dark" }, h(Probe))).firstChild;
-      assert.equal(el.getAttribute("data-appearance"), "light");
-      assert.ok(warned.some((m) => /theme "plain" has no dark appearance; using light/.test(m)), warned.join("\n"));
+      assert.equal(el.getAttribute("data-appearance"), "dark", "plain has a dark appearance");
+      assert.ok(!warned.some((m) => /has no dark appearance/.test(m)), "and no warning for it");
     } finally { console.warn = orig; }
   });
 
@@ -138,7 +144,7 @@ describe("US-011", () => {
   test("resolveAppearance: the asked-for appearance if the theme has it, else its default", () => {
     assert.equal(resolveAppearance("praxis", "light", "dark"), "light");
     assert.equal(resolveAppearance("praxis", "system", "light"), "light");
-    assert.equal(resolveAppearance("plain", "system", "dark"), "light");
+    assert.equal(resolveAppearance("plain", "system", "dark"), "dark");
     assert.equal(resolveAppearance("unknown-theme", "dark"), "dark");
   });
 });

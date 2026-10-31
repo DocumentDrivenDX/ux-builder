@@ -63,6 +63,7 @@
       "brand": "plain",
       "designSystem": null,
       "appearances": [
+        "dark",
         "light"
       ],
       "default": "light",
@@ -1792,7 +1793,7 @@
     {
       "name": "resolveAppearance",
       "type": "function",
-      "purpose": "The appearance a theme will actually show: the one asked for if the theme has it, else the theme's own default.",
+      "purpose": "The appearance a theme will actually show: the one asked for if the theme has it, else the theme's own default. `themes` defaults to the shipped ones; a light-only brand theme from the theme builder is one case.",
       "props": [
         {
           "name": "theme",
@@ -1805,6 +1806,10 @@
         {
           "name": "system",
           "default": "systemAppearance()"
+        },
+        {
+          "name": "themes",
+          "default": "THEMES"
         }
       ],
       "source": "src/ThemeProvider.jsx"

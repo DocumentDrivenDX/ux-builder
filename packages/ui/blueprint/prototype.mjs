@@ -69,8 +69,8 @@ function wiring(bp, page) {
 }
 
 /* The prototype's pages: [{ file, html, screen, state, sizeClass }]. */
-export async function prototypePages(bp, { question, theme = "plain" } = {}) {
-  const pages = await wireframes(bp, { theme });
+export async function prototypePages(bp, { question, theme = "plain", appearance = "light" } = {}) {
+  const pages = await wireframes(bp, { theme, appearance });
   const sizes = [...new Set(pages.map((p) => p.sizeClass))];
   const statesOf = (screen) => [...new Set(pages.filter((p) => p.screen === screen).map((p) => p.state))];
   return pages.map((p) => ({
@@ -83,8 +83,8 @@ export async function prototypePages(bp, { question, theme = "plain" } = {}) {
 }
 
 /* Write prototype/<dir>/: the pages, their assets and an index that opens the entry screen. */
-export async function writePrototype(bp, { root = "prototype", dir, question, theme = "plain" }) {
-  const pages = await prototypePages(bp, { question, theme });
+export async function writePrototype(bp, { root = "prototype", dir, question, theme = "plain", appearance = "light" }) {
+  const pages = await prototypePages(bp, { question, theme, appearance });
   const out = join(root, dir);
   rmSync(out, { recursive: true, force: true });
   mkdirSync(join(out, "assets"), { recursive: true });
@@ -93,7 +93,7 @@ export async function writePrototype(bp, { root = "prototype", dir, question, th
   const entry = list(bp.destinations)[0]?.screen ?? list(bp.screens)[0]?.id;
   const first = pages.find((p) => p.screen === entry && p.state === "ideal") ?? pages[0];
   writeFileSync(join(out, "index.html"), `<!doctype html>\n<meta charset="utf-8">\n<title>Prototype</title>\n<meta http-equiv="refresh" content="0; url=${esc(first?.file ?? "")}">\n<p><a href="${esc(first?.file ?? "")}">Open the prototype</a></p>\n`);
-  return { dir: out, pages: pages.length, entry: first?.file ?? null, theme };
+  return { dir: out, pages: pages.length, files: pages.map((p) => p.file), entry: first?.file ?? null, theme, appearance };
 }
 
 /* Move prototype/<name>/ under prototype/.archive/ once its question is answered. */

@@ -44,7 +44,7 @@ three-way decision.
 
 ## Acceptance Criteria
 
-- [ ] **US-163-AC1** — Given a design with no modality recorded, when `ux-builder-design prototype --step` runs, then it writes `docs/ux-builder/prototypes/step-<n>/` with an `index.html`, using responsive web, the compact, medium and expanded size classes and the frame recommended from the destinations, records each as an assumption, and records the step prototype in the state; with a modality recorded, it uses that.
+- [ ] **US-163-AC1** — Given a design with no modality recorded, when `ux-builder-design prototype --step` runs, then it writes `docs/ux-builder/prototypes/step-<n>/` with an `index.html`, using responsive web, the compact, medium, expanded and large size classes and the frame recommended from the destinations, records each as an assumption, and records the step prototype in the state; with a modality recorded, it uses that.
 - [ ] **US-163-AC2** — Given no theme chosen, then the step prototype uses `plain`, in the appearance the state records (light by default, dark when the agent set it), and records the appearance as an assumption with its reason.
 - [ ] **US-163-AC3** — Given a step prototype, when `prototype --step --check` runs, then every page of it is audited and checked against the deterministic heuristics, the result is written to `check-<round>.json` with the pages audited, the round is recorded, and from step 5 the journey walk is requested.
 - [ ] **US-163-AC4** — Given the current step, when `step decide` runs without a step prototype whose first check is followed by a second check or `--nothing-to-fix`, then it exits 2 naming what is missing.

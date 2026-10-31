@@ -45,8 +45,8 @@ click arrives at step 6; wireframes and prototypes wait for the modality
    what the person has confirmed, plus the agent's assumptions for every
    later step, each recorded as an assumption.
 2. **Defaults instead of gates.** Until the person chooses, the step
-   prototype assumes responsive web, the compact, medium and expanded size
-   classes, and the frame ADR-041 recommends from the destinations. It uses
+   prototype assumes responsive web, the compact, medium, expanded and large
+   size classes, and the frame ADR-041 recommends from the destinations. It uses
    the `plain` theme, light or dark as the agent infers from the product
    (dark for a nightlife app). Each default is an assumption. Step 5 still
    asks the modality, and the build still asks the theme, as confirmations.
