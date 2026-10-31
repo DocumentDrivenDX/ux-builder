@@ -31,6 +31,18 @@ function checkArchitecture(bp, { add, on }) {
   if (guided && on("screen.purpose")) {
     for (const { s, i } of screens) if (!s.purpose) add("screen.purpose", ["screens", i], `${s.title ?? s.id} has no purpose.`, `Add "purpose": what ${s.title ?? s.id} is for, in a sentence; then order its "content" by it.`);
   }
+  // nav.audience: a destination whose screen is for other users than the first destination's (session 2:
+  // agents finishing alone put the promoters' screens in the guest app's tabs). Reached from a link, it needs no tab.
+  if (on("nav.audience")) {
+    const usersOf = new Map(screens.map(({ s }) => [s.id, list(s.users)]));
+    const dests = list(bp?.destinations).map((d, i) => ({ d, i })).filter(({ d }) => usersOf.get(d?.screen)?.length);
+    const first = dests[0] && new Set(usersOf.get(dests[0].d.screen));
+    for (const { d, i } of dests.slice(1)) {
+      const theirs = usersOf.get(d.screen);
+      if (theirs.some((u) => first.has(u))) continue;
+      add("nav.audience", ["destinations", i], `The destination "${d.label ?? d.id}" leads to a screen for ${theirs.join(", ")}, but "${dests[0].d.label ?? dests[0].d.id}" is for ${[...first].join(", ")}: a tab for other users in their app.`, `If ${theirs.join(", ")} come in by their own link, drop the destination and give ${d.screen} "entry": "link"; if one app serves both, say so in each screen's "users".`);
+    }
+  }
   if (!on("consistency.same-kind")) return;
   // For each kind: which tasks reach it, on which screen and pattern.
   const byId = new Map(screens.map(({ s }) => [s.id, s]));

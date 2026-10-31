@@ -446,3 +446,13 @@ check that names no rule.
 - [x] Every field has a type and a rule.
 - [x] Exit codes and ordering are defined.
 - [x] Licence values and the quotation limit are normative.
+
+### Amendment: entry points, a frame per screen, states of a screen's own, and who a screen is for *(2026-10-31, FEAT-018, VIP List session 2)*
+
+| Field | Shape | Meaning |
+|---|---|---|
+| `screens[].entry` | `link`, `scan` or `message` | The screen is entered from outside the app; `flow.reachable` starts from it and does not call it unreachable |
+| `screens[].frame` | `screen`, `top-bar`, `top-nav`, `side-nav` | This screen's frame in place of `supports.frame`; wireframes, prototypes and the generated app draw it so |
+| `screens[].states` | adds IDs of the screen's own (`^[a-z][a-z0-9-]*$`) | A state such as `already-used`; one with no `stateNotices` entry is a `blueprint.valid` error |
+| `screens[].stateNotices` | `{ [state]: { tone?, title, text? } }` | What a state shows: a notice over the screen, in wireframes, prototypes and the generated app |
+| `screens[].users` | `U-<n>` IDs | The target users the screen is for; `nav.audience` (a warning) names a destination whose screen is for users the first destination's is not |

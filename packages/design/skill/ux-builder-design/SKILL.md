@@ -443,6 +443,15 @@ A rule the user only meets as an error is a design problem; `validate`
 fails a cited rule without the four answers, and the test kit gives each
 rule a task set in its trigger.
 
+**Who each part is for.** Ask the person who uses each part of the app
+and how they get to it, and record it: each screen's `users` (`U-<n>`),
+and `entry` (`link`, `scan`, `message`) for a screen reached from outside
+the app, such as a door page opened from a scanned pass or a promoter's
+own link. Never give such a screen a tab in another user's app;
+`nav.audience` warns when one does. A screen that needs no navigation gets
+`"frame": "screen"`. A state of a screen's own, such as "already used",
+is declared in `states` with what it shows in `stateNotices`.
+
 Name each journey's task (`"task": "T-<n>"`) and run
 `ux-builder-blueprint check`.
 

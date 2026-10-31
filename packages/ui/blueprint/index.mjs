@@ -43,6 +43,8 @@ export const CHECKS = [
   "journey.task-exists", "task.realized",
   // The experience architecture (FEAT-018 GDL-32, GDL-34; tasks.mjs).
   "screen.purpose", "consistency.same-kind",
+  // Who each part of the app is for (session 2; tasks.mjs).
+  "nav.audience",
 ];
 const STATES = ["empty", "loading", "error"];
 
@@ -289,6 +291,9 @@ export function checkBlueprint(bp, { helix } = {}) {
       const near = nearestPattern(s.pattern);
       add("pattern.exists", [...at, "pattern"], `"${s.pattern}" is not a pattern in @ux-builder/ui ${catalogue.packages["@ux-builder/ui"]}.`, `Did you mean "${near}"? See list_patterns.`);
     }
+    // A state of the screen's own says what it shows (stateNotices), or it is refused as before.
+    const unsaid = (Array.isArray(s.states) ? s.states : []).filter((x) => typeof x === "string" && !["empty", "loading", "error", "partial"].includes(x) && !s.stateNotices?.[x]);
+    if (unsaid.length) add("blueprint.valid", [...at, "states"], `"${s.title ?? s.id}" declares ${unsaid.map((x) => JSON.stringify(x)).join(", ")}, a state of its own with nothing saying what it shows.`, `Add "stateNotices": { ${JSON.stringify(unsaid[0])}: { "tone": "error", "title": "…", "text": "…" } }, or use empty, loading, error or partial.`);
     // In a view every screen declares its states (view.states, VEW-01), whatever
     // its pattern; screen.states covers the data patterns elsewhere.
     const statesRule = bp.kind === "view" && on("view.states") ? "view.states"

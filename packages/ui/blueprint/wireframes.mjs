@@ -112,6 +112,12 @@ const STATUS_PROP = new Set(["CollectionList", "RecordDetail", "ReportViewer", "
    does around it. */
 function stateElement(s, state, lib) {
   const { h, ui, P } = lib;
+  // A state with a notice of its own (stateNotices): the screen as it is, under that notice.
+  const notice = s.stateNotices?.[state];
+  if (notice) {
+    const el = screenElement(s, lib);
+    return { el: h("div", null, h(ui.Notice, { tone: notice.tone ?? "info", title: notice.title, role: notice.tone === "error" ? "alert" : "status" }, notice.text ?? null), el), by: "notice" };
+  }
   const own = STATUSES.get(s.pattern) ?? [];
   const props = placeholder(s.pattern, s, lib);
   // In error and partial, Try again is the region's primary action (states.mjs: error offers the retry
@@ -210,7 +216,8 @@ export async function wireframes(bp, { theme = THEME, appearance = "light" } = {
         const marked = state === "ideal" ? content : `<div data-state="${esc(state)}" data-drawn-by="${known ? by : "box"}">${content}</div>`;
         // A view is drawn without a shell; the host provides it. Otherwise the frame the person chose
         // (supports.frame, US-162): just the screen, a top bar, or navigation across the top or at the side.
-        const frame = bp.supports?.frame ?? (nav.length ? "side-nav" : "screen");
+        // A screen may have its own frame (a door page opened from a scan: just the screen).
+        const frame = s.frame ?? bp.supports?.frame ?? (nav.length ? "side-nav" : "screen");
         markup = bp.kind === "view" || frame === "screen" ? `<main>${marked}</main>` : render(h(P.AppShell, { nav: frame === "top-bar" ? [] : nav, frame, current: dests.find((d) => d.screen === s.id)?.id ?? null, brand: h("strong", null, bp.name ?? "App") }, h("div", { dangerouslySetInnerHTML: { __html: marked } })));
       } catch (e) {
         known = false;

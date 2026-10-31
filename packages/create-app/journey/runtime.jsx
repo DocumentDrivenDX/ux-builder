@@ -111,6 +111,8 @@ export function ScreenFrame({ screen, children }) {
   else if (state === "not-found") body = <StatePanel kind="empty" title="This record no longer exists"><p>It may have been deleted or moved.</p></StatePanel>;
   else if (blocked) body = <>{screen.rules.map((r) => <Notice key={r.id} tone="error" role="alert" title={r.blocked ?? `${r.id} blocks this`}>{r.recover ?? "How the user recovers is not designed yet (businessRules in the blueprint)."}</Notice>)}{children}</>;
   else if (state === "ideal") body = children;
+  // A state with a notice of its own (stateNotices): that notice, over the screen.
+  else if (screen.notices?.[state]) { const n = screen.notices[state]; body = <><Notice tone={n.tone ?? "info"} role={n.tone === "error" ? "alert" : "status"} title={n.title}>{n.text}</Notice>{children}</>; }
   else body = <><Notice tone="success" role="status" title={`${screen.title}: ${state}`} />{children}</>;
   // In loading, empty, error and the like, the screen's own actions wait; back stays (states.mjs).
   const content = state !== "loading" && state !== "not-found" && !PANELS.filter((p) => p !== "partial").includes(state);

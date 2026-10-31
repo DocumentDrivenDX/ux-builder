@@ -232,3 +232,27 @@ describe("US-162: the app is built in the frame the person chose", () => {
     assert.doesNotMatch(app(null), /frame=/, "side navigation, AppShell's default");
   });
 });
+
+describe("VIP List session 2: a screen's own frame and the notices of its own states", () => {
+  test("the generated App draws a screen with frame screen alone, and the screen data carries its notices", () => {
+    const dir = mkdtempSync(join(tmp, "own-frame-"));
+    const bp = {
+      version: 1, kind: "app", name: "VIP List", supports: { modalities: ["responsive-web"], sizeClasses: ["compact"], inputs: ["coarse"], frame: "top-nav" },
+      destinations: [{ id: "tonight", label: "Tonight", screen: "tonight" }, { id: "passes", label: "My passes", screen: "passes" }],
+      screens: [
+        { id: "tonight", title: "Tonight", pattern: "CollectionList", actions: [{ id: "go", label: "My passes", to: "passes", primary: true }] },
+        { id: "passes", title: "My passes", pattern: "CollectionList", actions: [{ id: "back", label: "Tonight", to: "tonight" }] },
+        { id: "door", title: "Door check", pattern: "RecordDetail", entry: "scan", frame: "screen", states: ["already-used"], stateNotices: { "already-used": { tone: "error", title: "Already used at 11:42 PM" } }, actions: [{ id: "letin", label: "Let in", to: "back", primary: true }] },
+      ],
+      journeys: [{ id: "J-door", entry: "door", steps: [{ screen: "door", action: "letin" }] }, { id: "J-find", entry: "tonight", steps: [{ screen: "tonight", action: "go" }, { screen: "passes" }] }],
+    };
+    put(dir, BP, JSON.stringify(bp, null, 2));
+    generateJourneyApp(dir);
+    const app = readFileSync(join(dir, "src/App.jsx"), "utf8");
+    assert.match(app, /const own = screenAt\(path\)\?\.frame;\n {2}if \(own === "screen"\) return <><PrototypeToolbar \/><Screen key=\{path\} \/><\/>;/);
+    const data = readFileSync(join(dir, "src/journey/blueprint.js"), "utf8");
+    assert.match(data, /"frame": "screen"/);
+    assert.match(data, /"already-used": \{\s*"tone": "error",\s*"title": "Already used at 11:42 PM"/);
+    assert.match(readFileSync(join(dir, "src/journey/runtime.jsx"), "utf8"), /screen\.notices\?\.\[state\]/);
+  });
+});
