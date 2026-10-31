@@ -124,3 +124,30 @@ describe("US-163: a prototype ends every step", () => {
     assert.ok(found.some((h) => h.screen === "map" && /out of priority order/.test(h.finding)));
   });
 });
+
+describe("VIP List session 2: the prototype's defaults stay out of review, and the brief does not read its PRD back", () => {
+  test("drawing a step prototype changes neither the approved brief nor the map's exceptions", async () => {
+    const { brief, coverageMap, pendingReviews, reviewApprove } = await import("../index.mjs");
+    const a = app();
+    brief(a, { name: "Rivers" });
+    reviewApprove(a, { kind: "brief", answer: "Yes" });
+    const before = coverageMap(a).exceptions.map((e) => e.id);
+    await stepPrototype(a);
+    brief(a, { name: "Rivers" });
+    assert.ok(!pendingReviews(a).some((p) => p.id === "brief"), "the brief keeps its approval");
+    assert.deepEqual(coverageMap(a).exceptions.map((e) => e.id), before, "no exception for a default");
+    assert.ok(readState(a).assumptions.filter((x) => x.about).every((x) => !x.section));
+  });
+
+  test("a PRD line that repeats the design state does not come back into the brief", async () => {
+    const { brief, pendingReviews, reviewApprove, stateSet } = await import("../index.mjs");
+    const a = app();
+    stateSet(a, { path: "assumptions[+]", value: { text: "River Path helps people discover rivers and the places to reach them", section: "product", status: "confirmed" } });
+    brief(a, { name: "Rivers" });
+    reviewApprove(a, { kind: "brief", answer: "Yes" });
+    writeFileSync(join(a, "docs/helix/01-frame/prd.md"), "---\nddx:\n  id: prd\n  type: prd\n---\n\n# Product Requirements Document — River Path\n\n## Summary\n\nRiver Path helps people discover rivers and the places to reach them.\n");
+    brief(a, { name: "Rivers" });
+    assert.ok(!pendingReviews(a).some((p) => p.id === "brief"), "the PRD's repeat of the product line does not reopen it");
+    assert.equal((readFileSync(join(a, "docs/ux-builder/brief.md"), "utf8").match(/discover rivers/g) ?? []).length, 1);
+  });
+});

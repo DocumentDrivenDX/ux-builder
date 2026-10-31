@@ -242,7 +242,8 @@ export function coverageMap(app) {
   const rules = businessRules(app).rules;
   for (const id of [...new Set(ruleCitations(bp).map((c) => c.rule))]) if (!rules[id]) ex(`undefined:${id}`, `rule:${id}`, `${id} is cited, but no HELIX document defines it`);
   const seen = new Set(list(state?.reviews).filter((r) => r.item === "map").flatMap((r) => list(r.assumptions)));
-  for (const a of list(state?.assumptions)) if (["assumed", "hypothesis"].includes(a.status) && !seen.has(a.id)) ex(`assumption:${a.id}`, null, `new assumption ${a.id}: ${a.text}`);
+  // The step prototype's own defaults (an assumption with an "about") are confirmed at step 5, not on the map.
+  for (const a of list(state?.assumptions)) if (["assumed", "hypothesis"].includes(a.status) && !a.about && !seen.has(a.id)) ex(`assumption:${a.id}`, null, `new assumption ${a.id}: ${a.text}`);
   const derived = pendingReviews(app).filter((i) => i.tier === "derived");
   return { rows, exceptions, pending: derived.map((i) => i.id), changed: derived.filter((i) => i.changed).map(({ id, diff }) => ({ id, ...(diff ? { diff } : {}) })) };
 }

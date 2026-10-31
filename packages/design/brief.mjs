@@ -71,6 +71,7 @@ function fromHelix(docs) {
   return { points, prd: !!prd };
 }
 
+const STOP = new Set(["the", "and", "for", "with", "from", "that", "this", "their", "they", "are", "its", "into", "not", "but", "can", "has", "have", "who", "when", "what", "will", "would", "one", "all", "any", "our", "your"]);
 const LABEL = { confirmed: "confirmed", assumed: "assumed", hypothesis: "hypothesis", "current-state": "current state, assumed" };
 
 /* The brief's content: { sections: [{ key, heading, points }], helix, notes }. */
@@ -84,6 +85,13 @@ export function briefContent(app) {
     points[a.section].push({ text: a.text, status: a.status, id: a.id, confirm: a.confirm });
   }
   for (const p of state.principles ?? []) if (p.status !== "refuted") points.principles.push({ text: p.text, status: p.status, id: p.id, rule: p.rule?.kind });
+  // The PRD is drafted from the brief: a PRD line that repeats what the design state already says (most of
+  // its words in one of the state's points or principles) is not read back in (VIP List session 2: it
+  // duplicated the product line and a principle, and reopened the brief).
+  const words = (t) => new Set(String(t).toLowerCase().replace(/[^\p{L}\p{N} ]+/gu, " ").split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w)));
+  const stated = Object.values(points).flat().filter((p) => p.from !== "prd" && !/^US-/.test(p.from ?? "")).map((p) => words(p.text));
+  const repeats = (t) => { const w = words(t); return w.size > 0 && stated.some((o) => [...w].filter((x) => o.has(x)).length / w.size >= 0.7); };
+  for (const k of Object.keys(points)) points[k] = points[k].filter((p) => p.from !== "prd" || !repeats(p.text.replace(/^[^:]{1,40}: /, "")));
   for (const q of state.questions) if (q.status === "open") points.questions.push({ text: `${q.id}: ${q.text}`, status: null });
   const notes = [];
   // Target users described in users.md are the only source of the section (GDL-77).

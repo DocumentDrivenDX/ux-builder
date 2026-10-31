@@ -35,7 +35,8 @@ function assume(state, about, text) {
     return had.id;
   }
   const id = `A-${Math.max(0, ...all.map((a) => Number(/^A-(\d+)$/.exec(a.id)?.[1] ?? 0))) + 1}`;
-  state.assumptions = [...all, { id, text, status: "assumed", evidence: [], section: "constraints", about }];
+  // No brief section: a prototype's default is not part of the intended experience, and step 5 confirms it.
+  state.assumptions = [...all, { id, text, status: "assumed", evidence: [], about }];
   return id;
 }
 
