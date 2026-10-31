@@ -70,7 +70,7 @@ describe("CSS selectors (CONTRACT-003)", () => {
   test("a theme's default appearance is [data-theme] alone; its other appearance adds data-appearance (ADR-018)", () => {
     assert.match(themeCss(src, "praxis-carbon"), /^\[data-theme="praxis-carbon"\] \{/);
     assert.match(themeCss(src, "praxis-carbon"), /^\[data-theme="praxis-carbon"\]\[data-appearance="light"\] \{/m);
-    assert.doesNotMatch(themeCss(src, "plain"), /data-appearance/, "a light-only theme has one block");
+    assert.match(themeCss(src, "plain"), /^\[data-theme="plain"\]\[data-appearance="dark"\] \{/m, "plain's dark appearance (ADR-042) adds data-appearance");
     assert.doesNotMatch(brandCss(src, "praxis"), /data-theme/, "preview blocks are not selected by data-theme");
   });
 

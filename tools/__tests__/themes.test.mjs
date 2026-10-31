@@ -15,15 +15,18 @@ const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const src = load(join(ROOT, "tokens"), join(ROOT, "brand"));
 
 // A copy of tokens/ and brand/ with one file written or edited, then loaded.
-function loadWith(file, make) {
+function loadWith(file, make, ...more) {
   const d = mkdtempSync(join(tmpdir(), "themes-"));
   try {
     cpSync(join(ROOT, "tokens"), join(d, "tokens"), { recursive: true });
     cpSync(join(ROOT, "brand"), join(d, "brand"), { recursive: true });
-    const p = join(d, "tokens", file);
-    let current = null;
-    try { current = JSON.parse(readFileSync(p, "utf8")); } catch { /* a new file */ }
-    writeFileSync(p, JSON.stringify(make(current)));
+    // More [file, make] pairs edit further files the same way.
+    for (const [f, m] of [[file, make], ...more]) {
+      const p = join(d, "tokens", f);
+      let current = null;
+      try { current = JSON.parse(readFileSync(p, "utf8")); } catch { /* a new file */ }
+      writeFileSync(p, JSON.stringify(m(current)));
+    }
     return load(join(d, "tokens"), join(d, "brand"));
   } finally { rmSync(d, { recursive: true, force: true }); }
 }
@@ -84,7 +87,8 @@ describe("adding a theme", () => {
   });
 
   test("a default appearance the brand lacks fails the build", () => {
-    assert.throws(() => loadWith("themes/plain.theme.json", (t) => ({ ...t, default: "dark" })),
+    const lightOnly = ["brands/plain.brand.json", (b) => ({ ...b, appearances: { light: b.appearances.light } })];
+    assert.throws(() => loadWith("themes/plain.theme.json", (t) => ({ ...t, default: "dark" }), lightOnly),
       (e) => e instanceof ComposeError && /has no dark appearance/.test(e.message));
   });
 });
