@@ -161,13 +161,19 @@ async function main(argv) {
     const src = alternativeFile(L, values.alternative);
     let bp;
     try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
+    const d = await designState(src);
+    // The chosen alternative became the app's blueprint, which has moved on since: draw that, never the stale copy
+    // (VIP List session 1 prototyped an out-of-date alternative file and had to rebuild it).
+    if (values.alternative && d?.state?.alternatives?.some((a) => a.name === values.alternative && a.status === "chosen") && existsSync(L.blueprint) && readFileSync(L.blueprint, "utf8") !== readFileSync(src, "utf8")) {
+      bp = JSON.parse(readFileSync(L.blueprint, "utf8"));
+      console.error(`note    ${values.alternative} is the chosen alternative, and ${L.blueprint} has changed since it was chosen: the prototype is drawn from ${L.blueprint}.`);
+    }
     const errors = checkBlueprint(bp).filter((f) => f.severity === "error");
     if (errors.length) {
       for (const f of errors) console.error(`error   ${f.rule}  ${f.path || "/"}\n        ${f.message}`);
       console.error(`${src} has ${errors.length} error${errors.length === 1 ? "" : "s"}: fix them before prototyping. Nothing was written.`);
       return 1;
     }
-    const d = await designState(src);
     // In a guided app, the person says which modalities and screen sizes come first (FEAT-018 GDL-80).
     if (d && !d.design.modalityStatus(d.app).confirmed) { console.error(MODALITY_FIRST); return 1; }
     const question = values.question ?? d?.state?.questions?.find((q) => q.status === "open")?.text ?? `What is it like to use ${name}?`;
