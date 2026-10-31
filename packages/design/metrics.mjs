@@ -76,6 +76,18 @@ function active(events, from, to) {
   return Math.round(ms / 60000);
 }
 
+/* The estimate given for a step, and how long the step has taken since:
+   { estimate, minutes, over } or null. The first status of a step records
+   its estimate (estimate events), so estimate and actual can be compared. */
+export function estimateFor(app, step, minutes) {
+  const ev = readEvents(app);
+  let given = ev.find((e) => e.type === "estimate" && e.step === step);
+  if (!given && minutes != null) { logEvent(app, "estimate", { step, minutes }); return { estimate: minutes, minutes: 0, over: false }; }
+  if (!given) return null;
+  const since = active(ev, Date.parse(given.at), Date.now());
+  return { estimate: given.minutes, minutes: since, over: since > given.minutes };
+}
+
 /* ux-builder-design metrics: the summary. `carried` is the approvals that
    held through a formatting or metadata change (review.carried). */
 export function metrics(app, { carried = [] } = {}) {

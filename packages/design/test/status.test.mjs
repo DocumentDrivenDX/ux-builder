@@ -30,7 +30,7 @@ describe("status", () => {
     assert.equal(r.status, 0, r.stderr);
     assert.equal(r.stdout, [
       "Step 4 of 8: Explore alternatives (Explore, in the full loop).",
-      "About 3 decisions left before the first prototype, roughly 9 minutes of your time: the choice of approach (core-2), the coverage map, the modality, screen sizes and app frame.",
+      "About 1 decision before the step 4 prototype, roughly 13 minutes: 3 of your time and 10 of the agent's drafting and checking. Decisions: your decision on the step 4 prototype, which also answers core-2.",
       "map-first is chosen.",
       "2 assumptions are untested.",
       "Open question: Should people sign in to save rivers?",
@@ -62,7 +62,7 @@ describe("status", () => {
     const app = tempApp();
     const r = cli(app, ["status"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /^Step 1 of 8: Define intent \(Define, in the full loop\)\.\nAbout 8 decisions left before the first prototype, roughly 24 minutes of your time: the brief, the target users table, the jobs table, the stories table, checkpoint core-1, the choice of approach \(core-2\), the coverage map, the modality, screen sizes and app frame\.\nNo alternative is chosen yet\.\nNo untested assumptions\.\nNo open questions\.\nNext \(not set; the activity.s first step\): Interview the person about what users must accomplish, then draft the brief and ask core-1\.\n$/);
+    assert.match(r.stdout, /^Step 1 of 8: Define intent \(Define, in the full loop\)\.\nAbout 2 decisions before the step 1 prototype, roughly 16 minutes: 6 of your time and 10 of the agent's drafting and checking\. Decisions: the brief, your decision on the step 1 prototype\.\nNo alternative is chosen yet\.\nNo untested assumptions\.\nNo open questions\.\nNext \(not set; the activity.s first step\): Interview the person about what users must accomplish, then draft the brief and ask core-1\.\n$/);
   });
 
   test("status finds the app from a folder below it", () => {

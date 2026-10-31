@@ -9,6 +9,7 @@ import { modalityStatus } from "./modality.mjs";
 import { progress } from "./process.mjs";
 import { migrationPlan } from "./migrate.mjs";
 import { budget, budgetText } from "./intake.mjs";
+import { estimateFor } from "./metrics.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState } from "./state.mjs";
 
@@ -41,6 +42,8 @@ export function status(app) {
     awaitingReview: pending.map((p) => p.id),
     // The decisions left before the first prototype (GDL-83).
     budget: budget(app),
+    // The estimate given for this step and how long it has taken (VIP List session 1: said 24, took 148).
+    estimate: null,
     activity: s.activity,
     mode: s.mode,
     startedFrom: s.startedFrom,
@@ -64,6 +67,7 @@ export function status(app) {
     // The person asked the agent to finish (US-164): the rest was drafted, and is assumed.
     finished: s.finished ? { at: s.finished.at, step: s.finished.step, summary: s.finished.summary } : null,
   };
+  if (result.budget) result.estimate = estimateFor(app, result.budget.step, result.budget.minutes);
   result.text = summary(result);
   return result;
 }
@@ -87,6 +91,7 @@ export function summary(r) {
   else if (r.toMigrate?.length) lines.push(`Still at the app's top: ${r.toMigrate.join(", ")}; run ux-builder-design migrate to move ${r.toMigrate.length === 1 ? "it" : "them"} under docs/ux-builder/.`);
   if (r.awaitingReview.length) lines.push(`Awaiting your review: ${r.awaitingReview.length} item${r.awaitingReview.length === 1 ? "" : "s"} (${r.awaitingReview.slice(0, 5).join(", ")}${r.awaitingReview.length > 5 ? ", …" : ""}).`);
   if (r.budget?.count) lines.push(budgetText(r.budget));
+  if (r.estimate?.over) lines.push(`This step was estimated at ${r.estimate.estimate} minutes and has taken ${r.estimate.minutes}: tell the person, with how far the prototype is now.`);
   lines.push(r.chosen ? `${r.chosen} is chosen.` : "No alternative is chosen yet.");
   lines.push(r.untestedAssumptions ? `${plural(r.untestedAssumptions, "assumption is", "assumptions are")} untested.` : "No untested assumptions.");
   if (r.openQuestions.length) lines.push(`Open ${r.openQuestions.length === 1 ? "question" : "questions"}: ${r.openQuestions.join("; ")}`);

@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { advance, budget, carried, checkpoint, claimAdd, claimVerify, coverageMap, decisionAdd, evidenceAdd, intake, logTurn, mark, metrics, pendingReviews, readState, reviewApprove, reviewFeedback, reviewList, reviewTable, setStep, stateSet, validate, writeState } from "../index.mjs";
+import { advance, budget, carried, checkpoint, status, claimAdd, claimVerify, coverageMap, decisionAdd, evidenceAdd, intake, logTurn, mark, metrics, pendingReviews, readState, reviewApprove, reviewFeedback, reviewList, reviewTable, setStep, stateSet, validate, writeState } from "../index.mjs";
 import { cli, tempApp } from "./helpers.mjs";
 import { kitApp } from "./kit-fixture.mjs";
 
@@ -166,13 +166,28 @@ describe("US-154: the intake asked together, the budget shown, and the guide's o
 
   // @covers US-154-AC2
   test("AC2: the budget counts the decisions left before the first prototype, and falls as they are made", () => {
+    // Amended 2026-10-31 (ADR-042): every step ends with a prototype, so the budget counts this step's
+    // decisions before its prototype, and the agent's drafting and checking as well as the person's time.
     const a = app();
+    writeState(a, { ...readState(a), step: 2 });
     const before = budget(a);
-    assert.deepEqual(before.decisions, ["the brief", "the target users table", "the jobs table", "the stories table", "the decisions table", "checkpoint core-1", "the choice of approach (core-2)", "the coverage map", "the modality, screen sizes and app frame"]);
-    assert.equal(before.minutes, 27);
-    approveFoundations(a);
-    assert.equal(budget(a).count, 4);
-    assert.match(cli(a, ["status"]).stdout, /About 4 decisions left before the first prototype, roughly 12 minutes of your time: checkpoint core-1/);
+    assert.deepEqual(before.decisions, ["the target users table", "the jobs table", "your decision on the step 2 prototype"]);
+    assert.deepEqual([before.perDecision, before.agentMinutes, before.minutes, before.basis], [3, 10, 19, "default"]);
+    for (const k of ["user", "job"]) reviewApprove(a, { kind: k, answer: "Yes" });
+    assert.equal(budget(a).count, 1);
+    assert.match(cli(a, ["status"]).stdout, /About 1 decision before the step 2 prototype, roughly 13 minutes: 3 of your time and 10 of the agent's drafting and checking\. Decisions: your decision on the step 2 prototype\./);
+  });
+
+  test("the budget learns this design's pace, and status says when a step runs over its estimate", () => {
+    const a = app();
+    const t0 = Date.parse("2026-10-31T09:00:00.000Z"), at = (min) => new Date(t0 + min * 60000).toISOString();
+    for (let k = 0; k < 6; k++) logTurn(a, { kind: "decision", at: at(k * 6) });
+    const b = budget(a);
+    assert.equal(b.basis, "recorded");
+    assert.equal(b.perDecision, 6, "six minutes between decisions, as recorded");
+    const s = status(a);
+    assert.equal(s.estimate.estimate, b.minutes, "the first status records the estimate");
+    assert.ok(!s.estimate.over);
   });
 
   // @covers US-154-AC3
@@ -261,7 +276,7 @@ describe("US-160: advance does the safe work and stops at the one decision the p
     const r = cli(a, ["advance", "--until-decision"]);
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /^Step 1 of 8: Define intent\.\nDone: kept 1 approval through a formatting or metadata change: story:US-001\.\nDone: worked out the coverage map: 2 jobs, 0 exceptions\.\nChecked: \d+ design documents: no problems, \d+ warnings\.\nBefore asking, the agent must:\n {2}check 1 direction-changing claim against its source before showing it: EV-1 C1/);
-    assert.match(r.stdout, /Decision for the person: approve the user table \(2 items\)\n {2}Show: ux-builder-design review table user, every row in full\n {2}Recommended: .+\n {2}Record: .+\n {2}After: the next foundation table \(job\)\nAbout \d+ decisions left/);
+    assert.match(r.stdout, /Decision for the person: approve the user table \(2 items\)\n {2}Show: ux-builder-design review table user, every row in full\n {2}Recommended: .+\n {2}Record: .+\n {2}After: the next foundation table \(job\)\nAbout \d+ decisions? before the step/);
     assert.equal(readFileSync(join(a, ".ux-builder/design-state.json"), "utf8"), before, "no approval recorded");
     assert.equal(cli(a, ["advance"]).status, 2);
     assert.match(SKILL, /`ux-builder-design advance --until-decision`/);

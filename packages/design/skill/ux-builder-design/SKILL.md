@@ -335,8 +335,11 @@ stories, research the person points to, an existing app's code. Then run
 confirm in a line each) and the questions still open, which do not depend
 on one another. Ask those together, in one message; a narrative answer is
 fine, and a part they skip becomes an assumption to test. Tell them the
-budget `intake` and `status` give ("About 9 decisions and 25 minutes
-before the first prototype"). Follow up only where the answer would change
+budget `intake` and `status` give ("About 2 decisions before the step 1
+prototype, roughly 16 minutes: 6 of your time and 10 of mine"). It counts
+your own drafting and checking, and learns this design's pace as it goes.
+When `status` says a step has run over its estimate, tell the person at
+once, with how far the prototype is now. Follow up only where the answer would change
 the design. Then go on as a structured interview through HELIX's `grill`,
 drafting or updating the PRD and stories as it goes (through proposals the
 person accepts). Ask "What are the three most important things people
