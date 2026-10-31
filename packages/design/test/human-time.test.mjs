@@ -267,3 +267,41 @@ describe("US-160: advance does the safe work and stops at the one decision the p
     assert.match(SKILL, /`ux-builder-design advance --until-decision`/);
   });
 });
+
+describe("VIP List session 1: the whole session is measured, even when no turn is logged by hand", () => {
+  test("commands that take the person's words record their turns; a declined `metrics turn` leaves them counted", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "Approve users" });
+    checkpoint(a, { id: "experiment", answer: "Not yet", declined: true });
+    const r = metrics(a);
+    assert.equal(r.turns, 3);
+    assert.deepEqual([r.byKind.approval, r.byKind.decision], [2, 1]);
+  });
+
+  test("an approval logged by hand right after the command recorded it is not counted twice", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Yes" });
+    assert.ok(logTurn(a, { kind: "approval" }).merged);
+    assert.equal(metrics(a).turns, 1);
+    logTurn(a, { kind: "question" });
+    assert.equal(metrics(a).turns, 2);
+  });
+
+  test("approvals are counted per turn: one message approving two kinds is one, the same words in two messages are two", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "And the users", sameTurn: true });
+    assert.equal(metrics(a).personApprovals, 1);
+    reviewApprove(a, { kind: "job", answer: "Approve brief" });
+    assert.equal(metrics(a).personApprovals, 2);
+  });
+
+  test("active time starts at the first command of the session, not the first approval", () => {
+    const a = app();
+    json(a, ["overview"]);
+    const first = JSON.parse(readFileSync(join(a, ".ux-builder/metrics.jsonl"), "utf8").split("\n")[0]);
+    assert.equal(first.type, "command");
+    assert.equal(first.command, "overview");
+  });
+});

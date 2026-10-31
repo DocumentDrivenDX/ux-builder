@@ -32,9 +32,31 @@ export function readEvents(app) {
   return readFileSync(file, "utf8").split("\n").filter(Boolean).flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } }).sort((a, b) => a.at.localeCompare(b.at));
 }
 
-/* ux-builder-design metrics turn --kind <kind> [--note]. */
+/* A turn the person took, recorded by the command that takes their words
+   (--answer), so a declined `metrics turn` cannot leave the log empty.
+   `sameTurn`: these words came in the same message as the last recorded
+   ones, so no new turn is counted. Returns the turn's ID. */
+export function personTurn(app, { kind, answer, sameTurn = false, at } = {}) {
+  const turns = readEvents(app).filter((e) => e.type === "turn");
+  const last = turns.at(-1);
+  if (sameTurn && last?.turn) return last.turn;
+  const turn = `t${turns.length + 1}`;
+  logEvent(app, "turn", { kind, turn, implicit: true, ...(answer ? { answer: answer.trim() } : {}) }, at);
+  return turn;
+}
+
+/* ux-builder-design metrics turn --kind <kind> [--note]. A turn the
+   command that took the person's words already recorded (an approval, a
+   decision, an answer in the last 5 minutes, with no turn logged after it)
+   is not counted twice. */
 export function logTurn(app, { kind, note, at } = {}) {
   if (!TURN_KINDS.includes(kind)) throw new DesignError(`--kind is one of ${TURN_KINDS.join(", ")}, not "${kind ?? ""}"`);
+  const last = readEvents(app).filter((e) => e.type === "turn").at(-1);
+  const now = Date.parse(at ?? new Date().toISOString());
+  if (last?.implicit && !last.confirmed && ["answer", "decision", "approval"].includes(kind) && now - Date.parse(last.at) <= 5 * 60 * 1000) {
+    logEvent(app, "turn-confirmed", { turn: last.turn, kind }, at);
+    return { type: "turn", kind, merged: last.turn };
+  }
   logEvent(app, "turn", { kind, ...(note ? { note } : {}) }, at);
   return { type: "turn", kind };
 }
@@ -57,7 +79,9 @@ function active(events, from, to) {
 /* ux-builder-design metrics: the summary. `carried` is the approvals that
    held through a formatting or metadata change (review.carried). */
 export function metrics(app, { carried = [] } = {}) {
-  const ev = readEvents(app);
+  const all = readEvents(app);
+  const confirmed = new Set(all.filter((e) => e.type === "turn-confirmed").map((e) => e.turn));
+  const ev = all.map((e) => (e.type === "turn" && confirmed.has(e.turn) ? { ...e, confirmed: true } : e));
   const start = ev.length ? Date.parse(ev[0].at) : null;
   const turns = ev.filter((e) => e.type === "turn");
   const byKind = Object.fromEntries(TURN_KINDS.map((k) => [k, turns.filter((t) => t.kind === k).length]));
@@ -68,8 +92,10 @@ export function metrics(app, { carried = [] } = {}) {
   for (const e of ev.filter((x) => x.type === "step")) stayed = e.step >= 7 ? stayed ?? e.at : null;
   const testingAt = ev.find((e) => e.type === "milestone" && e.name === "testing")?.at ?? stayed;
   const approvals = ev.filter((e) => e.type === "approval");
-  // The person's approvals: the distinct answers approvals were recorded with; one answer approving several items is one approval.
-  const answers = (xs) => new Set(xs.map((a, k) => a.answer ?? `#${k}`)).size;
+  // The person's approvals: one per turn of theirs that approved anything (several items or
+  // kinds in one message are one approval; the same words in two messages are two). Approvals
+  // logged before turns were recorded fall back to their distinct answers.
+  const answers = (xs) => new Set(xs.map((a, k) => a.turn ?? a.answer ?? `#${k}`)).size;
   const before = answers(approvals.filter((a) => !testingAt || a.at < testingAt));
   const reopened = approvals.flatMap((a) => a.reopened ?? []);
   const formatOnly = approvals.flatMap((a) => a.formatOnly ?? []);

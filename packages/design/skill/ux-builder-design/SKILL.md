@@ -140,10 +140,15 @@ the person must make next, with what to show, a recommendation, the
 command that records it and what follows. Do the work it lists for you
 first, then ask that one question.
 
-**Measure the person's time.** After each of the person's turns, record
-what it was: `ux-builder-design metrics turn --kind
-answer|decision|approval|correction|question|other` (other: "go on", a
-repeat, a clarification of something you said). Record milestones with
+**Measure the person's time.** Commands that take the person's words
+(`--answer`) record their turn themselves; when one message holds several
+answers, give the second and later ones `--same-turn`. After each of the
+person's other turns, record what it was:
+`ux-builder-design metrics turn --kind answer|decision|approval|correction|question|other`
+(other: "go on", a repeat, a clarification of something you said). If the person's
+environment asks about the metrics command, explain once that it keeps a
+local log of how their time is spent, so the guide can be improved, and
+ask again; never stop logging silently. Record milestones with
 `metrics mark prototype` when the person first tries it (when they tell
 you they clicked through it, not when you build it),
 `testing` and `release`. `ux-builder-design metrics` reports it against

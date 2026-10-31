@@ -7,7 +7,7 @@
 import { recordDecision } from "@ux-builder/trace";
 import { DesignError } from "./app.mjs";
 import { CLOSES, firstOf, STEPS } from "./process.mjs";
-import { logEvent } from "./metrics.mjs";
+import { logEvent, personTurn } from "./metrics.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -47,7 +47,7 @@ function traceCheckpoint(app, id, { answer, skip, declined, reason }) {
   }
 }
 
-export function checkpoint(app, { id, answer, skip = false, declined = false, reason, now = new Date().toISOString() } = {}) {
+export function checkpoint(app, { id, answer, skip = false, declined = false, reason, sameTurn = false, now = new Date().toISOString() } = {}) {
   if (!Object.hasOwn(CHECKPOINTS, id)) throw new DesignError(`"${id ?? ""}" is not a checkpoint; use one of ${Object.keys(CHECKPOINTS).join(", ")}`);
   if (skip && answer) throw new DesignError("give --answer or --skip, not both");
   if (skip && declined) throw new DesignError("--declined goes with --answer: the person said no or not yet");
@@ -65,6 +65,7 @@ export function checkpoint(app, { id, answer, skip = false, declined = false, re
   // A passed core checkpoint moves the loop on, and a next action that waited on it gives way.
   const moved = entry.status === "passed" && MOVES.includes(id) && moveOn(state, id);
   writeState(app, state);
+  personTurn(app, { kind: "decision", answer: answer ?? reason, sameTurn, at: now });
   logEvent(app, "checkpoint", { id, status: entry.status }, now);
   if (moved) logEvent(app, "step", { step: state.step, mode: state.mode }, now);
   const event = traceCheckpoint(app, id, { answer, skip, declined, reason });

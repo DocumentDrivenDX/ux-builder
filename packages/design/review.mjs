@@ -15,7 +15,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { dirname, join } from "node:path";
 import { DesignError, bpFile, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable } from "./documents.mjs";
-import { logEvent } from "./metrics.mjs";
+import { logEvent, personTurn } from "./metrics.mjs";
 import { readState, writeState } from "./state.mjs";
 
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
@@ -318,9 +318,9 @@ export function reviewRespond(app, { id, text } = {}) {
 const record = (i, answer, now, via) => ({ item: i.id, hash: i.hash, raw: i.raw, snapshot: i.meaning, answer, at: now, ...(via ? { via } : {}) });
 
 /* ux-builder-design review approve <item>... | --kind <foundation kind> | map, --answer <their words>. */
-export function reviewApprove(app, { item, items, kind, answer, accept = [], now = today() } = {}) {
+export function reviewApprove(app, { item, items, kind, answer, accept = [], sameTurn = false, now = today() } = {}) {
   const ids = [...list(items), ...(item ? [item] : [])];
-  if (ids.includes("map")) return approveMap(app, { answer, accept, now });
+  if (ids.includes("map")) return approveMap(app, { answer, accept, sameTurn, now });
   if (!answer?.trim()) throw new DesignError(`review approve needs --answer: the person's approval${ids.length ? ` of ${ids.join(", ")}` : kind ? ` of the ${kind} table` : ""}, in their words`);
   let targets;
   if (kind) {
@@ -345,7 +345,8 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], now
   const reopened = targets.filter((i) => before.has(i.id));
   // A reopening whose words did not change was caused by formatting alone (GDL-83 target).
   const formatOnly = reopened.filter((i) => before.get(i.id).snapshot != null && wordsOf(before.get(i.id).snapshot) === wordsOf(i.meaning)).map((i) => i.id);
-  logEvent(app, "approval", { items: [...ids2], via: kind ? "table" : "item", answer: answer.trim(), reopened: reopened.map((i) => i.id), ...(formatOnly.length ? { formatOnly } : {}) }, now);
+  const turn = personTurn(app, { kind: "approval", answer, sameTurn, at: now });
+  logEvent(app, "approval", { items: [...ids2], via: kind ? "table" : "item", answer: answer.trim(), turn, reopened: reopened.map((i) => i.id), ...(formatOnly.length ? { formatOnly } : {}) }, now);
   const left = pendingReviews(app);
   return { item: targets[0].id, items: [...ids2], approved: true, remaining: left.length, next: left[0]?.id ?? null };
 }
@@ -353,7 +354,7 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], now
 /* Approving the coverage map approves every built item awaiting review;
    it is refused while an exception is neither resolved nor accepted by
    the person (--accept <exception>). */
-function approveMap(app, { answer, accept, now }) {
+function approveMap(app, { answer, accept, sameTurn, now }) {
   if (!answer?.trim()) throw new DesignError("review approve map needs --answer: the person's approval of the coverage map, in their words");
   const m = coverageMap(app);
   // The map approved again needs the map as it is now shown to the person first (US-161-AC3).
@@ -371,7 +372,8 @@ function approveMap(app, { answer, accept, now }) {
   state.reviews = [...list(state.reviews).filter((r) => !ids.has(r.item) && r.item !== "map"), ...targets.map((i) => record(i, answer.trim(), now, "map")),
     { item: "map", hash: hashOf(JSON.stringify(m.rows)), answer: answer.trim(), at: now, accepted: accept, assumptions: list(state.assumptions).map((a) => a.id) }];
   writeState(app, state);
-  logEvent(app, "approval", { items: ["map"], via: "map", answer: answer.trim(), covers: [...ids], accepted: accept }, now);
+  const turn = personTurn(app, { kind: "approval", answer, sameTurn, at: now });
+  logEvent(app, "approval", { items: ["map"], via: "map", answer: answer.trim(), turn, covers: [...ids], accepted: accept }, now);
   const left = pendingReviews(app);
   return { item: "map", items: [...ids], accepted: accept, approved: true, remaining: left.length, next: left[0]?.id ?? null };
 }
