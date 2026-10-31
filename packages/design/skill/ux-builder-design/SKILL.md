@@ -530,11 +530,12 @@ yet*, the validated prototype needs the app. Explain the term *theme*
 show the released themes (`npm create @ux-builder/app@latest -- --help`
 lists them), and say the prototypes so far used `plain`. **The theme never
 blocks.** If none carries their brand, build on `plain` now (dark if the
-product is) and offer to make their brand's theme: you run the theme
-builder with them, and you own getting it released and switching the app
-to it; they never wait on it or report back. Record their answer as a
-decision, then
-run `npm create @ux-builder/app@latest . -- --theme <name>` and
+product is) and offer to make their brand's theme: you run the
+theme builder with them (in a clone of
+https://github.com/DocumentDrivenDX/ux-builder,
+`npm install && npm run builder`), and you own getting it released and switching the app to it;
+they never wait on it or report back. Record their answer as a decision,
+then run `npm create @ux-builder/app@latest . -- --theme <name>` and
 `npm install`. The app is built from the recorded modality and the
 designed blueprint; the design documents and the state stay where they
 are. If it refuses, it says why (the modality not recorded, an error in
