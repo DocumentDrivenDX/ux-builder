@@ -172,7 +172,22 @@ const approvals = (state) => new Map(list(state?.reviews).filter((r) => r.item !
    approval recorded before meanings were kept compares the whole content,
    and one kept under an earlier form of meaningOf compares its snapshot
    in the current form. */
-const holds = (r, i) => !!r && (r.hash === i.hash || r.hash === i.raw || (r.snapshot != null && meaningOf(r.snapshot, i) === i.meaning));
+const plainHolds = (r, i) => !!r && (r.hash === i.hash || r.hash === i.raw || (r.snapshot != null && meaningOf(r.snapshot, i) === i.meaning));
+/* The brief's sections built from items the person approves on their own
+   (VIP List session 1: the brief was asked about again each time). */
+const DERIVED = { "Target users": "user:", "Primary jobs": "story:" };
+function withoutApprovedSources(meaning, ctx) {
+  let out = meaning;
+  for (const [heading, prefix] of Object.entries(DERIVED)) {
+    const sources = ctx.items.filter((x) => x.id.startsWith(prefix));
+    if (!sources.length || !sources.every((x) => plainHolds(ctx.approved.get(x.id), x))) continue;
+    out = out.replace(new RegExp(`(^|\\n)## ${heading}\\n[\\s\\S]*?(?=\\n## |$)`), `$1## ${heading}`);
+  }
+  return out;
+}
+/* An approval holds as above; the brief's also holds when it changed only
+   in sections whose sources the person has approved since (carried). */
+const holds = (r, i, ctx) => plainHolds(r, i) || (!!ctx && i.id === "brief" && r?.snapshot != null && withoutApprovedSources(meaningOf(r.snapshot, i), ctx) === withoutApprovedSources(i.meaning, ctx));
 
 
 /* The items not approved in their current form, with their open feedback
@@ -182,7 +197,8 @@ export function pendingReviews(app, { steps, records = false } = {}) {
   let state;
   try { state = readState(app); } catch { return []; }
   const approved = approvals(state);
-  return reviewItems(app).filter((i) => (!steps || steps.includes(i.step)) && (records || i.tier !== "record") && !holds(approved.get(i.id), i))
+  const items = reviewItems(app), ctx = { items, approved };
+  return items.filter((i) => (!steps || steps.includes(i.step)) && (records || i.tier !== "record") && !holds(approved.get(i.id), i, ctx))
     .map(({ content, meaning, ...i }) => {
       const was = approved.get(i.id);
       return { ...i, changed: !!was, ...(was?.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id && f.status === "open").map((f) => f.id) };
@@ -194,7 +210,8 @@ export function carried(app) {
   let state;
   try { state = readState(app); } catch { return []; }
   const approved = approvals(state);
-  return reviewItems(app).filter((i) => { const r = approved.get(i.id); return r?.raw && r.hash === i.hash && r.raw !== i.raw; }).map((i) => i.id);
+  const items = reviewItems(app), ctx = { items, approved };
+  return items.filter((i) => { const r = approved.get(i.id); return (r?.raw && r.hash === i.hash && r.raw !== i.raw) || (r && !plainHolds(r, i) && holds(r, i, ctx)); }).map((i) => i.id);
 }
 
 /* The coverage map (GDL-83): each job, the tasks that serve it, their
@@ -258,9 +275,10 @@ export function reviewTable(app, { kind, shown = true } = {}) {
   let state = null;
   try { state = readState(app); } catch { /* no design state */ }
   const approved = approvals(state);
-  const items = reviewItems(app).filter((i) => kindOf(i.id) === kind).map((i) => {
+  const all = reviewItems(app), ctx = { items: all, approved };
+  const items = all.filter((i) => kindOf(i.id) === kind).map((i) => {
     const was = approved.get(i.id);
-    return { id: i.id, title: i.title, file: i.file, content: i.content, status: holds(was, i) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), i.meaning)) } : {}) };
+    return { id: i.id, title: i.title, file: i.file, content: i.content, status: holds(was, i, ctx) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i, ctx) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), i.meaning)) } : {}) };
   });
   if (shown) markShown(app, Object.fromEntries(reviewItems(app).filter((i) => kindOf(i.id) === kind).map((i) => [i.id, i.hash])));
   return { kind, items, pending: items.filter((i) => i.status !== "approved").map((i) => i.id) };
@@ -283,10 +301,11 @@ function find(app, id) {
 export function reviewShow(app, { item } = {}) {
   const i = find(app, item);
   const state = readState(app);
-  const was = approvals(state).get(i.id);
+  const approved = approvals(state), ctx = { items: reviewItems(app), approved };
+  const was = approved.get(i.id);
   const { meaning, ...rest } = i;
   markShown(app, { [i.id]: i.hash });
-  return { ...rest, status: holds(was, i) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id) };
+  return { ...rest, status: holds(was, i, ctx) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i, ctx) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id) };
 }
 
 /* ux-builder-design review feedback <item> --text <their words>. */
@@ -332,6 +351,14 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], sam
     targets = ids.map((id) => find(app, id));
   }
   const state = readState(app);
+  // The brief is approved once the questions raised since it was drafted are in it (VIP List session 1:
+  // it was approved with four new questions open, and asked about again when they were answered).
+  const brief = targets.find((i) => i.id === "brief");
+  if (brief) {
+    const listed = (brief.content.split(/^## Open questions\s*$/m)[1] ?? "").split(/^## /m)[0];
+    const unlisted = list(state.questions).filter((q) => q.status === "open" && q.id && !listed.includes(q.id));
+    if (unlisted.length) throw new DesignError(`the brief was drafted before ${unlisted.length === 1 ? "this question was" : "these questions were"} raised: ${unlisted.map((q) => `${q.id} ("${q.text}")`).join(", ")}. Settle ${unlisted.length === 1 ? "it" : "them"} with the person, or regenerate the brief (ux-builder-design brief) so ${unlisted.length === 1 ? "it shows" : "they show"} as open, show it again, then ask for the approval. Nothing was recorded.`);
+  }
   const open = list(state.feedback).filter((f) => targets.some((i) => i.id === f.item) && f.status === "open");
   if (open.length) throw new DesignError(`${[...new Set(open.map((f) => f.item))].join(", ")} ${open.length === 1 ? "has" : "have"} feedback not yet addressed: ${open.map((f) => `${f.id} ("${f.text}")`).join(", ")}. Address it, record how (review respond <FB-n> --text "…"), show the item again, then ask for approval.`);
   const before = approvals(state);

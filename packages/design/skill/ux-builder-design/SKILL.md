@@ -176,7 +176,15 @@ send the person to a file instead.
    need no approval. Show what they found and ask for the decision it leads
    to: which findings to fix, which experiment to run.
 
-Never ask the person to approve the same content twice. An approval holds
+Never ask the person to approve the same content twice. **Settle, apply,
+then approve.** Settle the questions the brief raises before asking for
+its approval (`review approve` refuses the brief while a question raised
+since it was drafted is open: regenerate it so the question shows). When
+one message both approves an item and changes it ("yes, but keep the date
+of birth 45 days"), record the change as feedback, apply it, respond, show
+the result, and only then record the approval. The brief keeps its
+approval when only its target users or jobs changed because the person
+approved those. An approval holds
 through changes to frontmatter, metadata and formatting; only a change to
 an item's meaning brings it back, and then show **only what changed**: the
 diff `review table`, `review map` and `review show` give. Checkpoints and

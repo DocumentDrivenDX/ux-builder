@@ -305,3 +305,30 @@ describe("VIP List session 1: the whole session is measured, even when no turn i
     assert.equal(first.command, "overview");
   });
 });
+
+describe("VIP List session 1: each approval is asked for once", () => {
+  test("the brief is not approved while a question raised after it was drafted is open; regenerated, it is", () => {
+    const a = app();
+    stateSet(a, { path: "questions[+]", value: { text: "Can two guests share one pass?" } });
+    assert.throws(() => reviewApprove(a, { kind: "brief", answer: "Approve brief" }), /drafted before this question was raised: Q-1 .*Nothing was recorded/s);
+    cli(a, ["brief"]);
+    assert.equal(reviewApprove(a, { kind: "brief", answer: "Approve brief" }).approved, true);
+  });
+
+  test("the brief keeps its approval when it changes only because target users the person has approved changed", () => {
+    const a = app();
+    cli(a, ["brief"]);
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "Approve users" });
+    edit(a, "docs/ux-builder/users.md", (t) => t.replace("On a phone at the river", "On a phone at the river, about three times a month"));
+    reviewTable(a, { kind: "user" });
+    reviewApprove(a, { kind: "user", answer: "Yes, three times a month" });
+    cli(a, ["brief"]);
+    assert.ok(!ids(a).includes("brief"), "the brief's change came from approved users");
+    assert.ok(carried(a).includes("brief"));
+    // A change of its own still reopens it.
+    stateSet(a, { path: "assumptions[+]", value: { text: "Anglers fish at dawn", section: "outcome" } });
+    cli(a, ["brief"]);
+    assert.ok(ids(a).includes("brief"));
+  });
+});
