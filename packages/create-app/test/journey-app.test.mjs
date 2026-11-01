@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, test } from "node:test";
@@ -280,5 +280,55 @@ describe("VIP List session 2: a screen's own frame and the notices of its own st
     assert.match(data, /"frame": "screen"/);
     assert.match(data, /"already-used": \{\s*"tone": "error",\s*"title": "Already used at 11:42 PM"/);
     assert.match(readFileSync(join(dir, "src/journey/runtime.jsx"), "utf8"), /screen\.notices\?\.\[state\]/);
+  });
+});
+
+/* Built and opened in a browser: every screen renders with no page error (VIP List session 3: a change to
+   the runtime crashed every page while the source-matching tests passed), and a state of a screen's own
+   shows the values it changes. Uses this repository's packages; skipped where vite or Chromium is missing. */
+describe("US-159: the generated app renders", () => {
+  // @covers US-159-AC1
+  // @covers US-166-AC6
+  test("each designed screen opens with no page error; ?state= of a screen's own shows its notice and changed values", { timeout: 180_000 }, async (t) => {
+    const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
+    const vite = join(ROOT, "node_modules/.bin/vite");
+    let chromium;
+    try { ({ chromium } = await import("playwright")); } catch { return t.skip("no playwright"); }
+    if (!existsSync(vite)) return t.skip("no vite");
+    const dir = folder("renders", (d) => {
+      const bp = JSON.parse(read(d, BP));
+      const detail = bp.screens.find((s) => s.id === "detail");
+      detail.states = [...detail.states, "closed"];
+      detail.stateNotices = { closed: { tone: "error", title: "Closed for the season", text: "Fishing opens again in April.", values: { Access: "Closed until April" } } };
+      writeFileSync(join(d, BP), JSON.stringify(bp, null, 2) + "\n");
+    });
+    await buildInPlace(dir, { theme: "plain" });
+    rmSync(join(dir, "node_modules"), { recursive: true, force: true });
+    symlinkSync(join(ROOT, "node_modules"), join(dir, "node_modules"));
+    writeFileSync(join(dir, "vite.config.js"), 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\nexport default defineConfig({ plugins: [react()], resolve: { dedupe: ["react", "react-dom"] }, logLevel: "error" });\n');
+    const b = spawnSync(vite, ["build"], { cwd: dir, encoding: "utf8" });
+    assert.equal(b.status, 0, `${b.stdout}\n${b.stderr}`);
+    const { serveFolder } = await import("@ux-builder/audit");
+    const served = await serveFolder(join(dir, "dist"), { spa: true });
+    let browser;
+    try { browser = await chromium.launch(); } catch { await served.stop(); return t.skip("no Chromium"); }
+    try {
+      const { SCREENS } = await data(dir);
+      for (const s of SCREENS) {
+        const page = await browser.newPage();
+        const errors = [];
+        page.on("pageerror", (e) => errors.push(e.message));
+        await page.goto(served.url + s.path.replace(/^\//, ""));
+        await page.locator(`[data-piq-screen="${s.id}"]`).first().waitFor({ timeout: 5000 });
+        assert.deepEqual(errors, [], `${s.id}: ${errors.join("; ")}`);
+        await page.close();
+      }
+      const page = await browser.newPage();
+      await page.goto(`${served.url}${SCREENS.find((s) => s.id === "detail").path.replace(/^\//, "")}?state=closed`);
+      await page.getByText("Closed for the season").waitFor({ timeout: 5000 });
+      const text = await page.locator("[data-piq-screen]").first().innerText();
+      assert.match(text, /Closed until April/);
+      assert.doesNotMatch(text, /Save river/, "the main action is held back in an error state");
+    } finally { await browser.close(); await served.stop(); }
   });
 });

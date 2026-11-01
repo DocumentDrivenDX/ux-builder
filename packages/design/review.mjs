@@ -162,6 +162,18 @@ function markShown(app, entries) {
     writeFileSync(p, JSON.stringify({ ...shownOf(app), ...entries }, null, 2) + "\n");
   } catch { /* showing never fails for want of the record */ }
 }
+/* The steps 4 to 6 batch (US-166): what the person's one answer settles,
+   the derived items changed by the alternative they chose (seen as its
+   clickable prototype) and the decisions the batch made, marked shown and
+   approved with that answer in the same turn. */
+export function approveBatch(app, { decisions = [], answer, now = today() } = {}) {
+  const pending = pendingReviews(app).filter((p) => p.tier === "derived" || decisions.includes(p.id));
+  if (!pending.length) return [];
+  const items = reviewItems(app);
+  markShown(app, Object.fromEntries(pending.map((p) => [p.id, items.find((i) => i.id === p.id)?.hash])));
+  reviewApprove(app, { items: pending.map((p) => p.id), answer, sameTurn: true, now });
+  return pending.map((p) => p.id);
+}
 const mapHash = (m) => hashOf(JSON.stringify({ rows: m.rows, exceptions: m.exceptions.map((e) => e.id), pending: m.pending, changed: m.changed.map((c) => c.id) }));
 /* The words of a text, without punctuation or case: equal words, only formatting changed. */
 const wordsOf = (t) => String(t ?? "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();

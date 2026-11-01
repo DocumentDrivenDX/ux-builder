@@ -63,7 +63,12 @@ export function resetSampleData() {
 
 /* A screen's (or a dialog's, "screen:dialog") sample data: { content, fields }. */
 export function useSample(id) {
-  return useSyncExternalStore(onSample, read, read)[id] ?? { content: [], fields: {} };
+  const sample = useSyncExternalStore(onSample, read, read)[id] ?? { content: [], fields: {} };
+  // In a state of the screen's own, the values it changes replace the samples ("Pass status: Already used").
+  const { params } = useRoute();
+  const values = SCREENS.find((s) => s.id === id)?.notices?.[params.get("state")]?.values;
+  if (!values) return sample;
+  return { ...sample, content: sample.content.map((c) => (c?.items ? { ...c, items: c.items.map((it) => (Object.hasOwn(values, it.label) ? { ...it, value: values[it.label] } : it)) } : c)) };
 }
 
 /* field(name): a TextField's name, value and onChange, kept in the sample data. */

@@ -24852,6 +24852,10 @@
                       "type": "string",
                       "minLength": 1,
                       "description": "For example data, action, help, status"
+                    },
+                    "compact": {
+                      "type": "boolean",
+                      "description": "In a list, shown on a phone (the compact size class). Without any marked, a list shows its first three on a phone (VIP List session 3)"
                     }
                   }
                 }
@@ -24891,6 +24895,13 @@
                     },
                     "text": {
                       "type": "string"
+                    },
+                    "values": {
+                      "type": "object",
+                      "description": "The content values this state changes, by content label: the screen shows them in this state instead of its samples (VIP List session 3: 'Already used' with 'Pass status: Valid tonight' under it)",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
                     }
                   }
                 }

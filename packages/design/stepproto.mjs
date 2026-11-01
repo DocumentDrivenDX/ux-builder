@@ -3,7 +3,7 @@
    the person has not chosen yet (modality, size classes, frame, theme,
    appearance) recorded as assumptions instead of refused; and its check
    round: the UI audit over every page and the deterministic heuristics,
-   the journey walk requested from step 5. The agent fixes what a round
+   and from step 5 the journey walk (US-166). The agent fixes what a round
    finds, checks again (or records that nothing needed fixing), and only
    then shows the prototype and asks the step's decision. */
 
@@ -24,7 +24,7 @@ import { readState, writeState } from "./state.mjs";
 const list = (x) => (Array.isArray(x) ? x : []);
 /* Responsive web's size classes (FEAT-014's matrix asks for large too). */
 export const DEFAULT_SIZE_CLASSES = ["compact", "medium", "expanded", "large"];
-/* From this step the check also asks for the journey walk in a browser (ADR-042 rule 3). */
+/* From this step the check also walks the journeys in a browser (ADR-042 rule 3; US-166). */
 export const WALK_FROM = 5;
 
 /* Add or update the agent's assumption about one default; one the person
@@ -181,6 +181,31 @@ export async function auditPrototype({ dir, pages, theme, appearance, blueprint,
   } finally { await served?.stop(); }
 }
 
+/* The journey walk of a step prototype, from step 5 (US-166): each journey
+   clicked through the drawn pages (at compact) or the built app's routes. */
+export async function walkPrototype({ dir, bp, isApp = false, paths = {} }) {
+  let served = null;
+  try {
+    const { serveFolder, walkJourneys } = await import("@ux-builder/audit");
+    served = await serveFolder(dir, { spa: isApp });
+    const screens = new Map(list(bp.screens).map((x) => [x.id, x]));
+    const size = list(bp.supports?.sizeClasses)[0] ?? "compact";
+    const journeys = list(bp.journeys).filter((j) => list(j.steps).length).map((j) => ({ id: j.id, steps: j.steps.map((st) => { const a = list(screens.get(st.screen)?.actions).find((x) => x.id === st.action); return { screen: st.screen, ...(a ? { label: a.label, to: a.to } : {}) }; }) }));
+    const url = (id) => served.url + (isApp ? (paths[id] ?? `/${id}`).replace(/^\//, "") : `${id}.${size}.html`);
+    return { ran: true, journeys: await walkJourneys({ journeys, url }) };
+  } catch (e) {
+    return { ran: false, reason: e.message.split("\n")[0] };
+  } finally { await served?.stop(); }
+}
+
+/* The built app's screen paths, from its generated src/journey/blueprint.js. */
+function appPaths(app) {
+  try {
+    const t = readFileSync(join(app, "src/journey/blueprint.js"), "utf8");
+    return Object.fromEntries([...t.matchAll(/"id":\s*"([^"]+)",\s*"path":\s*"([^"]+)"/g)].map((m) => [m[1], m[2]]));
+  } catch { return {}; }
+}
+
 /* The pages a round audits: each screen's ideal state at every size, and
    its other states at one size (the first the prototype has, compact when
    it is there). Session 2 audited every state at every size: 3 minutes a
@@ -201,6 +226,7 @@ const findingId = (...key) => `C-${hashOf(key.join("|")).slice(0, 6)}`;
 const findingsOf = (entry) => [
   ...list(entry.heuristics).map((h) => ({ id: findingId("heuristic", h.heuristic, h.screen ?? h.journey ?? h.path ?? "", h.finding), kind: h.heuristic, text: h.finding })),
   ...list(entry.audit?.findings).filter((f) => f.severity !== "info").map((f) => ({ id: findingId("audit", f.rule ?? "", f.page ?? "", f.message ?? ""), kind: `audit ${f.rule}`, text: `${f.page}: ${f.message}`, page: f.page })),
+  ...list(entry.journeyWalk?.journeys).filter((j) => !j.walked).map((j) => ({ id: findingId("walk", j.journey, j.stopped?.why ?? ""), kind: "journey-walk", text: `${j.journey} stopped at step ${j.stopped?.step}: ${j.stopped?.why}` })),
 ];
 /* The latest checked round's findings that are neither gone nor accepted: [] when the step can be shown. */
 export function openFindings(sp) {
@@ -210,7 +236,7 @@ export function openFindings(sp) {
 }
 
 /* ux-builder-design prototype --step --check [--accept <id>... --reason <why>]. */
-export async function stepCheck(app, { nothingToFix = false, accept = [], reason, audit = auditPrototype, now } = {}) {
+export async function stepCheck(app, { nothingToFix = false, accept = [], reason, audit = auditPrototype, walk = walkPrototype, now } = {}) {
   const started = Date.now();
   const state = readState(app);
   const n = progress(state).step;
@@ -248,7 +274,8 @@ export async function stepCheck(app, { nothingToFix = false, accept = [], reason
     const bundle = isApp ? bundleHash(app) : null;
     const hashes = Object.fromEntries(subset.map((f) => [f, isApp ? bundle ?? hashOf(f) : pageHash(html[f])]));
     // A step's first check starts from the latest earlier step drawn the same way: its audited pages and their findings.
-    const prior = isApp || sp.audited ? null : Object.entries(state.stepPrototypes ?? {}).filter(([k, v]) => Number(k) < n && v.kind !== "app" && v.audited && v.theme === sp.theme && v.appearance === sp.appearance).sort(([x], [y]) => x - y).at(-1)?.[1];
+    // The app too: an unchanged bundle is not audited again (VIP List session 3's step 8, 12 s for nothing).
+    const prior = sp.audited ? null : Object.entries(state.stepPrototypes ?? {}).filter(([k, v]) => Number(k) < n && (v.kind ?? "pages") === (sp.kind ?? "pages") && v.audited && v.theme === sp.theme && v.appearance === sp.appearance).sort(([x], [y]) => x - y).at(-1)?.[1];
     const audited = sp.audited ?? prior?.audited;
     const changed = subset.filter((f) => audited?.[f] !== hashes[f]);
     const previous = list((sp.audited ? sp : prior ?? sp).rounds?.findLast((r) => r.audit?.ran)?.audit?.findings);
@@ -258,7 +285,7 @@ export async function stepCheck(app, { nothingToFix = false, accept = [], reason
     const merged = { ...a, findings, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length };
     if (a.ran) sp.audited = { ...Object.fromEntries(subset.filter((f) => audited?.[f]).map((f) => [f, audited[f]])), ...Object.fromEntries(changed.map((f) => [f, hashes[f]])) };
     // Stamped when the check ends, with how long it took: the audit is most of a step's time (session 2).
-    entry = { round, at: now ?? new Date().toISOString(), seconds: Math.round((Date.now() - started) / 1000), pagesAudited: a.pagesAudited ?? 0, pagesUnchanged: subset.length - changed.length, audit: merged, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? "requested" : null };
+    entry = { round, at: now ?? new Date().toISOString(), seconds: Math.round((Date.now() - started) / 1000), pagesAudited: a.pagesAudited ?? 0, pagesUnchanged: subset.length - changed.length, audit: merged, heuristics: heuristics(bp, html), journeyWalk: n >= WALK_FROM ? await walk({ dir: abs, bp, isApp, paths: isApp ? appPaths(app) : {} }) : null };
     entry.findings = findingsOf(entry);
     writeInApp(app, `${isApp ? `${protoDir(app)}/step-${n}` : sp.dir}/check-${round}.json`, JSON.stringify({ step: n, ...entry }, null, 2) + "\n");
   }
@@ -279,7 +306,7 @@ export function stepCheckText(r) {
   const a = r.audit ?? {};
   return [`Step ${r.step}, check round ${r.round}: ${r.pagesAudited} page${r.pagesAudited === 1 ? "" : "s"} audited${r.pagesUnchanged ? ` (${r.pagesUnchanged} unchanged, their findings kept)` : ""}${a.ran ? `, ${a.errors} error${a.errors === 1 ? "" : "s"} and ${a.warnings} warning${a.warnings === 1 ? "" : "s"}` : ` (the audit did not run: ${a.reason})`}; ${r.heuristics.length} heuristic finding${r.heuristics.length === 1 ? "" : "s"}.`,
     ...list(r.findings).map((f) => `  ${f.id} ${r.open.some((o) => o.id === f.id) ? "open    " : "accepted"} ${f.kind}: ${f.text}`),
-    ...(r.journeyWalk ? ["From step 5 the journeys are walked too: run ux-builder-audit assess on the prototype and fix what it finds."] : []),
+    ...(r.journeyWalk ? [r.journeyWalk.ran ? `Journeys walked: ${list(r.journeyWalk.journeys).filter((j) => j.walked).length} of ${list(r.journeyWalk.journeys).length} end to end.` : `The journey walk did not run: ${r.journeyWalk.reason}.`] : []),
     r.next].join("\n");
 }
 

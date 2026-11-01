@@ -1117,6 +1117,65 @@
           "type": "string"
         }
       }
+    },
+    "stepBatch": {
+      "description": "step batch (US-166)",
+      "type": "object",
+      "required": [
+        "steps",
+        "alternative",
+        "decisions",
+        "approved",
+        "modalities",
+        "theme",
+        "turn",
+        "now",
+        "next"
+      ],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "alternative": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approved": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "modalities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "theme": {
+          "type": "string"
+        },
+        "turn": {
+          "type": "string"
+        },
+        "now": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string"
+        }
+      }
     }
   }
 }

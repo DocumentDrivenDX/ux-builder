@@ -28,6 +28,7 @@
     "cli.mjs",
     "collect.js",
     "serve.mjs",
+    "walk.mjs",
     "report.mjs",
     "reports.mjs",
     "doctor.mjs",

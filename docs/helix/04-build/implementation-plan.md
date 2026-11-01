@@ -135,6 +135,7 @@ removes its criteria from `tools/coverage-exceptions.json`.
 | B-039 | The app frame is the person's choice (US-162): AppShell's frames, `supports.frame`, wireframes, the built App, `modality --frame`, audit verdicts | ADR-041; CONTRACT-004, CONTRACT-005, CONTRACT-008 amendments; STP-162 | B-038 | ui, design, create-app, audit tests | Built 2026-10-27 |
 | B-040 | A prototype ends every step (US-163) and finish for me (US-164): `prototype --step [--check]`, `step decide`, `finish`, the skill | ADR-042; CONTRACT-008 amendment; STP-163, STP-164 | B-039 | design tests | Built 2026-10-31 |
 | B-041 | The person where only they can help (US-165): intake facts, scope, users and entry, frame per screen, own states, content-drawn prototypes, the app as prototype, cheap rounds, findings one by one, defaults out of review, honest measures, HELIX 0.20 locations | ADR-043; CONTRACT-005, CONTRACT-008 amendments; STP-165 | B-040 | design, ui, create-app, audit tests | Built 2026-10-31 |
+| B-042 | One answer, checks that walk, evidence that reads right (US-166): `step batch`, the journey walk in the step check, the drawn pages' other actions, findings by problem, `data-graphic` in the lint, state `values`, phone lists, the bar in dark, the app check across steps, the generated app rendered in a test | CONTRACT-005, CONTRACT-008 amendments; STP-166 | B-041 | design, ui, create-app, audit tests | Built 2026-10-31 |
 
 Tracked as DDx beads labelled `feat:FEAT-018`, one per slice, under one
 epic per phase.

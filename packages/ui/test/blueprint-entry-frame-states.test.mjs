@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { checkBlueprint } from "../blueprint/index.mjs";
 import { score } from "../blueprint/explore.mjs";
+import { prototypePages } from "../blueprint/prototype.mjs";
 import { wireframes } from "../blueprint/wireframes.mjs";
 
 const st = ["empty", "loading", "error"];
@@ -58,8 +59,14 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     bp.journeys = [{ id: "J-door", story: "US-6", entry: "door", steps: [{ screen: "door", action: "letin" }], alternates: [{ from: 0, steps: [{ screen: "door", state: "already-used" }], reason: "Already used" }] }];
     assert.deepEqual(rules(bp).filter((r) => /^error .*journeys/.test(r)), []);
     assert.ok(rules({ ...bp, screens: bp.screens.map((x) => (x.id === "door" ? { ...x, states: [...x.states, "Bad State"] } : x)) }).some((r) => /^error blueprint\.valid \/screens\/2\/states\/\d/.test(r)));
+    // @covers US-166-AC6
+    // The values the state changes replace the samples (VIP List session 3: "Valid tonight" under "Already used").
+    bp.screens[2].content = [{ label: "Guest", kind: "data" }, { label: "Pass status", kind: "data" }];
+    bp.screens[2].stateNotices["already-used"].values = { "Pass status": "Already used" };
+    assert.deepEqual(rules(bp).filter((r) => /^error/.test(r)), []);
     const page = (await wireframes(bp)).find((p) => p.file === "door.already-used.compact.html");
     assert.ok(page, "a page for the state");
+    assert.match(page.html, />Already used</);
     assert.match(page.html, /Already used at 11:42 PM/);
     assert.match(page.html, /Do not let in on this pass\./);
   });
@@ -75,6 +82,25 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     bp.screens.forEach((s) => delete s.users);
     bp.destinations.push({ id: "door", label: "Door", screen: "door" });
     assert.deepEqual(rules(bp).filter((r) => /nav\.audience/.test(r)), [], "without users, nothing to judge");
+  });
+});
+
+describe("VIP List session 3: a screen's other actions are on the page", () => {
+  // @covers US-166-AC3
+  test("the ideal state draws each action that is not the primary one, under the screen, so a journey can be walked on the page", async () => {
+    const bp = base();
+    const tonight = (await wireframes(bp)).find((p) => p.file === "tonight.compact.html").html;
+    assert.match(tonight, /<button[^>]*>Open my passes<\/button>/);
+    const door = (await wireframes(bp)).find((p) => p.file === "door.compact.html").html;
+    assert.equal((door.match(/>Let in</g) ?? []).length <= 1, true, "the primary action is not drawn twice");
+  });
+});
+
+describe("VIP List sessions 2 and 3: the prototype bar is readable in dark", () => {
+  // @covers US-166-AC6
+  test("its links take the theme's strong text colour, underlined, not the browser's blue", async () => {
+    const pages = await prototypePages(base(), { appearance: "dark" });
+    assert.match(pages.find((p) => p.file === "tonight.compact.html").html, /\.proto-bar a \{ color: var\(--piq-color-text-strong, var\(--piq-color-text\)\); text-decoration: underline;/);
   });
 });
 
@@ -107,5 +133,13 @@ describe("VIP List session 2: the prototype shows the design's own content, not 
     assert.match(tonight, />Event 1</);
     assert.match(tonight, />Austin</);
     assert.match(tonight, />14 left</);
+    // @covers US-166-AC6
+    // On a phone a list shows its first three items, or those marked compact (VIP List session 3).
+    const fields = (html) => [...html.matchAll(/class="piq-collection__(?:primary|field)">(?:<span[^>]*>[^<]*<\/span>)?([^<]*)</g)].slice(0, 5).map((m) => m[1]);
+    assert.deepEqual(fields(pages.find((p) => p.file === "tonight.compact.html").html).slice(0, 3), ["Event 1", "Venue 1", "Austin"]);
+    bp.screens[0].content = bp.screens[0].content.map((c) => ({ ...c, ...(["Event", "Time", "Spots left"].includes(c.label) ? { compact: true } : {}) }));
+    assert.deepEqual(rules(bp).filter((r) => /^error/.test(r)), []);
+    const marked = (await wireframes(bp)).find((p) => p.file === "tonight.compact.html").html;
+    assert.deepEqual(fields(marked).slice(0, 3), ["Event 1", "10:00 PM", "14 left"]);
   });
 });

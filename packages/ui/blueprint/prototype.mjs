@@ -43,6 +43,7 @@ function bar(bp, page, { question, statesOf, sizes }) {
     return `<a href="${esc(fileOf(a.to, "ideal", page.sizeClass))}" data-action="${esc(a.id)}">${label}</a>`;
   };
   return `<header class="proto-bar" style="position:sticky;top:0;z-index:10;padding:var(--piq-space-2) var(--piq-space-4);background:var(--piq-color-surface);border-block-end:2px dashed var(--piq-color-border);color:var(--piq-color-text);font:var(--piq-font-body, inherit)">
+<style>.proto-bar a { color: var(--piq-color-text-strong, var(--piq-color-text)); text-decoration: underline; text-underline-offset: 2px; }</style>
 <p class="proto-banner" role="note"><strong>Prototype</strong>, not the app: ${esc(question)}</p>
 <nav aria-label="States"><span>State:</span> ${statesOf(page.screen).map(state).join(" · ")}</nav>
 <nav aria-label="Size classes"><span>Size:</span> ${sizes.map(size).join(" · ")}</nav>

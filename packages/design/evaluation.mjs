@@ -55,8 +55,22 @@ export function evaluationFindings(app, run = latestRun(app)) {
   const human = humanFindings(app).filter((f) => f.severity > 0 || f.problem).map((f) => ({
     id: f.id, source: "human", label: f.simulated ? "simulated session, not a person" : "human observation", ...(f.simulated ? { simulated: true } : {}), journey: f.journey, severity: f.severity, title: f.title,
     evidence: `${f.kit} task ${f.task}, ${f.participant} (${ux(app)}/tests/${f.kit}/findings.json)${quotes(f).length ? `; transcript ${quotes(f).join(", ")}` : ""}`, transcripts: quotes(f), fix: null,
+    problem: f.problem ? f.problem.trim().toLowerCase() : null,
     detail: `${f.completed ? "completed" : "did not complete"}${f.seconds != null ? ` in ${f.seconds} s` : ""}, ${f.errors} error${f.errors === 1 ? "" : "s"}, ${f.assists} assist${f.assists === 1 ? "" : "s"}${f.remark ? `; "${f.remark}"` : ""}`,
   }));
+  // Observations of the same problem, in one kit, are one finding citing each session (VIP List session 3:
+  // two guests looking below the form for its button were two findings, routed apart).
+  const groups = new Map();
+  for (const f of human) {
+    const problem = f.problem;
+    const key = problem ? `${f.evidence.split(" task ")[0]}|${problem}` : f.id;
+    groups.set(key, [...(groups.get(key) ?? []), f]);
+  }
+  const merged = [...groups.values()].map((fs) => {
+    if (fs.length === 1) return fs[0];
+    const [first, ...rest] = [...fs].sort((a, b) => b.severity - a.severity || (a.id < b.id ? -1 : 1));
+    return { ...first, also: rest.map((f) => f.id).sort(), sessions: fs.length, severity: Math.max(...fs.map((f) => f.severity)), evidence: fs.map((f) => f.evidence).join("; "), transcripts: fs.flatMap((f) => f.transcripts), detail: `${fs.length} sessions: ${fs.map((f) => f.detail).join(" / ")}` };
+  });
   const agent = list(run?.backlog?.findings).filter((f) => f.status !== "rejected").map((f) => {
     // A finding from the assessment is an agent recommendation unless it says a person found it.
     const source = f.source ?? "agent";
@@ -66,7 +80,7 @@ export function evaluationFindings(app, run = latestRun(app)) {
       evidence: list(f.evidence_refs).length ? list(f.evidence_refs).map((r) => `${run.dir}/${r}`).join(", ") : `none (${f.uncertainty ?? "uncertain"})`, fix: f.recommendation ?? null, detail: null,
     };
   });
-  return [...human, ...agent].sort((a, b) => String(a.journey).localeCompare(String(b.journey)) || b.severity - a.severity || (a.id < b.id ? -1 : 1));
+  return [...merged, ...agent].sort((a, b) => String(a.journey).localeCompare(String(b.journey)) || b.severity - a.severity || (a.id < b.id ? -1 : 1));
 }
 
 /* What the agent measured, per rubric dimension, from the run's metrics.json. */
@@ -226,9 +240,11 @@ export function route(app, { findings: ids = [], decision, status } = {}) {
   if (!ids.length) throw new DesignError("route needs the findings the person selected at checkpoint core-3: route F-<id>...");
   if (decision && !status) throw new DesignError("--decision needs --status tested or refuted");
   const all = evaluationFindings(app);
-  const unknown = ids.filter((x) => !all.some((f) => f.id === x));
+  const of = (x) => all.find((f) => f.id === x || list(f.also).includes(x));
+  const unknown = ids.filter((x) => !of(x));
   if (unknown.length) throw new DesignError(`no finding ${unknown.join(", ")} in the test kits or the latest assessment run`);
-  const chosen = ids.map((x) => all.find((f) => f.id === x));
+  // An ID merged into another finding routes that finding, once.
+  const chosen = [...new Set(ids.map(of))];
   const uer = numbers(app).sort((a, b) => a - b).map((x) => `UER-${x}`).at(-1) ?? null;
   const doc = backlogDoc(app);
   const row = (f, rank) => `| ${rank} | ${PRIORITY(f.severity)} | ${cell(f.title)} | ${cell(f.evidence)} | ${cell(`${f.id}${uer ? ` in ${uer}` : ""}`)} | ${cell(`${f.journey ?? "no journey"}; ${f.label}`)} | ${f.source === "human" ? "high" : "medium"} | unknown | open |`;

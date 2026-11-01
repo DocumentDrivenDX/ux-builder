@@ -713,6 +713,10 @@
               "app"
             ],
             "description": "app once the app is built: the step prototype is the app, its routes the pages checked"
+          },
+          "batch": {
+            "type": "boolean",
+            "description": "Decided in the steps 4 to 6 batch with one answer, with no prototype of its own: the batch's prototype is step 6's (US-166)"
           }
         }
       }

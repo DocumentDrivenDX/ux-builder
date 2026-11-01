@@ -23,7 +23,7 @@
    once into assets/. PNGs need playwright (or @playwright/test) and its
    Chromium; without them the HTML is still written and the caller is told. */
 
-import { fieldFor, sampleValue } from "./samples.mjs";
+import { fieldFor, sampleValue as sampleOf } from "./samples.mjs";
 import { copyFileSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
@@ -63,8 +63,13 @@ function placeholder(name, s, { h, ui, P }) {
   // The screen's own content, when it has some: its labels as columns and fields, with sample values.
   const labels = (Array.isArray(s.content) ? s.content : []).map((c) => (typeof c === "string" ? c : c?.label)).filter(Boolean);
   const keyOf = (l, k) => `c${k}`;
+  const sampleValue = (l, i) => s.values?.[l] ?? sampleOf(l, i);
+  // On a phone a list shows the items marked compact, else its first three (the person in VIP List session 3
+  // could not see venue, time or spots left with the first alone).
+  const items = (Array.isArray(s.content) ? s.content : []).filter((c) => (typeof c === "string" ? c : c?.label));
+  const marked = items.some((c) => c?.compact) ? new Set(items.map((c, k) => (c?.compact ? k : -1)).filter((k) => k >= 0)) : new Set([0, 1, 2]);
   const own = labels.length ? {
-    CollectionList: { title, actions: act, columns: labels.slice(0, 5).map((l, k) => ({ key: keyOf(l, k), label: l, ...(k === 0 ? { priority: true } : {}) })), rows: [0, 1, 2, 3, 4].map((i) => ({ id: `r${i + 1}`, ...Object.fromEntries(labels.slice(0, 5).map((l, k) => [keyOf(l, k), sampleValue(l, i)])) })), caption: title, search: "", onSearchChange: noop },
+    CollectionList: { title, actions: act, columns: labels.slice(0, 5).map((l, k) => ({ key: keyOf(l, k), label: l, ...(marked.has(k) ? { priority: true } : {}) })), rows: [0, 1, 2, 3, 4].map((i) => ({ id: `r${i + 1}`, ...Object.fromEntries(labels.slice(0, 5).map((l, k) => [keyOf(l, k), sampleValue(l, i)])) })), caption: title, search: "", onSearchChange: noop },
     RecordDetail: { title, actions: act, fields: labels.map((l) => ({ label: l, value: sampleValue(l, 0) })) },
     DescriptionList: { items: labels.map((l) => ({ label: l, value: sampleValue(l, 0) })) },
     WorkQueue: { title, items: [0, 1, 2].map((i) => ({ id: `i${i}`, title: sampleValue(labels[0], i), content: text(labels.slice(1).map((l) => `${l}: ${sampleValue(l, i)}`).join(" · ")) })), index: 0, onIndexChange: noop, onApprove: noop, onReject: noop },
@@ -126,7 +131,8 @@ function stateElement(s, state, lib) {
   // A state with a notice of its own (stateNotices): the screen as it is, under that notice.
   const notice = s.stateNotices?.[state];
   if (notice) {
-    const el = screenElement(s, lib);
+    // The values this state changes replace the samples (US-166-AC6).
+    const el = screenElement(notice.values ? { ...s, values: notice.values } : s, lib);
     return { el: h("div", null, h(ui.Notice, { tone: notice.tone ?? "info", title: notice.title, role: notice.tone === "error" ? "alert" : "status" }, notice.text ?? null), el), by: "notice" };
   }
   const own = STATUSES.get(s.pattern) ?? [];
@@ -226,7 +232,13 @@ export async function wireframes(bp, { theme = THEME, appearance = "light" } = {
       try {
         let el = null;
         if (PATTERNS.has(s.pattern) && typeof P[s.pattern] === "function") {
-          if (state === "ideal") el = screenElement(s, lib);
+          if (state === "ideal") {
+            // The screen's other actions, under it, as the built app draws them: a journey that takes one
+            // ("See who's coming") can be walked on the page, not only from the prototype's bar (US-166).
+            const others = (Array.isArray(s.actions) ? s.actions : []).filter((a) => a?.label && !a.primary);
+            const own = screenElement(s, lib);
+            el = own && others.length ? h("div", null, own, h(P.Cluster, null, others.map((a, k) => h(lib.ui.Button, { key: k, variant: "secondary" }, a.label)))) : own;
+          }
           else ({ el, by } = stateElement(s, state, lib));
         }
         known = !!el;

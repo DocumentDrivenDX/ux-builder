@@ -729,6 +729,19 @@ prototype's defaults stay out of the person's review. The guide's measures
 time the checks, count step 1, start testing with the kit and mark
 simulated data.
 
+GDL-87. **One answer, checks that walk, evidence that reads right**
+*(added 2026-10-31, after VIP List session 3; US-166)*. `step batch`
+records the person's one answer to steps 4 to 6: the alternative chosen
+and a decision for it and for the theme approved with that answer, the
+modality, core-2, steps 4 and 5 decided; the app built on the theme is the
+batch's one prototype. From step 5 the step check walks every journey in a
+browser, clicking the page's own actions, and a journey that stops is a
+finding. A report merges participants who hit the same problem into one
+finding. A scannable data graphic is marked `data-graphic` and keeps its
+black and white. A state of a screen's own may say which `values` it
+changes; a list on a phone shows its first three items or those marked
+`compact`.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each

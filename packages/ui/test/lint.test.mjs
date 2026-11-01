@@ -146,6 +146,16 @@ describe("US-022 lint", () => {
     assert.equal(r.length, 1);
     assert.match(r[0].text, /hand-drawn <svg>.*<Icon>.*registerIcons/);
   });
+
+  // @covers US-166-AC5
+  test("a data graphic marked data-graphic (a QR code) draws its own <svg> in black and white; an unmarked one, or another colour, is still reported", async () => {
+    const qr = 'export const QR = () => <div data-graphic="qr" style={{ background: "#fff", color: "#000" }}><svg viewBox="0 0 2 2"><rect width="1" height="1" style={{ fill: "black" }} /></svg></div>;';
+    assert.deepEqual(lint(qr, { "ux-builder/no-inline-svg": "error", "ux-builder/no-hard-coded-values": "error" }), []);
+    const red = 'export const QR = () => <div data-graphic="qr" style={{ color: "#c00" }}><svg data-graphic="qr" /></div>;';
+    assert.deepEqual(lint(red, { "ux-builder/no-inline-svg": "error", "ux-builder/no-hard-coded-values": "error" }).map((x) => x.text.split(":")[0]), ["Hard-coded colour #c00"]);
+    assert.equal(lint('export const A = () => <svg viewBox="0 0 16 16" />;', { "ux-builder/no-inline-svg": "error" }).length, 1, "an unmarked <svg> is an icon");
+    assert.deepEqual(await css(".qr[data-graphic] { background: #fff; color: #000; }\n.qr { background: #fff; }"), [{ line: 2, column: 19, text: (await css(".qr { background: #fff; }"))[0].text }]);
+  });
 });
 
 /* ux-builder/ai-neutral-voice (US-081, FEAT-011 AIV-01, ADR-028 decision 6). */

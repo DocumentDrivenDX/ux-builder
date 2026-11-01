@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { confirmModality, heuristics, readState, stepCheck, stepPrototype, writeState } from "../index.mjs";
+import { confirmModality, heuristics, readState, stepCheck, stepCheckText, stepPrototype, writeState } from "../index.mjs";
 import { cli } from "./helpers.mjs";
 import { KIT_BP, kitApp } from "./kit-fixture.mjs";
 
@@ -127,11 +127,18 @@ describe("US-163: a prototype ends every step", () => {
     await stepPrototype(a);
     // A later step starts from the pages an earlier step audited: only its banner changed, so none is audited again.
     const later = [];
-    const five = await stepCheck(a, { audit: stub(later) });
-    assert.equal(five.journeyWalk, "requested");
+    // From step 5 the journeys are walked (US-166): a journey that stops is a finding.
+    const walks = [];
+    const walk = async (args) => { walks.push(args); return { ran: true, journeys: [{ journey: "J-find", walked: true, steps: 2, reached: 2 }, { journey: "J-saved", walked: false, steps: 2, reached: 1, stopped: { step: 1, screen: "saved", why: 'no "Open river details" to click on saved' } }] }; };
+    const five = await stepCheck(a, { audit: stub(later), walk });
+    assert.equal(walks.length, 1);
+    assert.equal(walks[0].isApp, false);
+    assert.deepEqual(walks[0].bp.journeys.map((j) => j.id), ["J-find", "J-saved"]);
+    assert.ok(five.findings.some((f) => f.kind === "journey-walk" && /J-saved stopped at step 1: no "Open river details"/.test(f.text)));
+    assert.match(stepCheckText(five), /Journeys walked: 1 of 2 end to end\./);
     assert.equal(later.length, 0, "the pages step 1 audited are not audited again");
     assert.equal(five.pagesUnchanged, calls[0].pages.length);
-    assert.deepEqual(five.findings.filter((f) => f.kind !== "heuristic" && f.source !== "heuristic").length, fixed.findings.filter((f) => f.kind !== "heuristic" && f.source !== "heuristic").length, "their findings carried");
+    assert.deepEqual(five.findings.filter((f) => f.kind.startsWith("audit")).length, fixed.findings.filter((f) => f.kind.startsWith("audit")).length, "their findings carried");
   });
 
   // @covers US-163-AC3
@@ -198,11 +205,21 @@ describe("VIP List session 2: once the app is built, the step prototype is the a
     assert.equal(built, 1);
     assert.deepEqual([r.app, r.dir, r.pages, r.appearance], [true, "dist", 2, "dark"]);
     const calls = [];
-    const c = await stepCheck(a, { audit: stub(calls) });
+    const c = await stepCheck(a, { audit: stub(calls), walk: async () => ({ ran: true, journeys: [] }) });
     assert.deepEqual(calls[0].pages, ["/", "/door"]);
     assert.equal(calls[0].spa, true);
     assert.ok(existsSync(join(a, "docs/ux-builder/prototypes/step-6/check-1.json")));
     assert.equal(c.round, 1);
+    // The next step's first check of the same bundle audits no route, and keeps the findings (VIP List session 3).
+    const s7 = readState(a);
+    s7.step = 7;
+    writeState(a, s7);
+    await stepPrototype(a, { build: async () => ({ ok: true }) });
+    const later = [];
+    const seven = await stepCheck(a, { audit: stub(later), walk: async () => ({ ran: true, journeys: [] }) });
+    assert.equal(later.length, 0, "an unchanged app is not audited again");
+    assert.equal(seven.pagesUnchanged, 2);
+    assert.ok(seven.findings.some((f) => f.kind === "audit contrast"));
     // A failed build is refused, with nothing recorded.
     await assert.rejects(stepPrototype(a, { build: async () => ({ ok: false, log: "error TS" }) }), /the app did not build/);
   });

@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { decisionAdd, findingIdFor, readState, testKit, validate } from "../index.mjs";
+import { decisionAdd, evaluationFindings, findingIdFor, readState, testKit, validate } from "../index.mjs";
 import { cli } from "./helpers.mjs";
 import { kitApp, SHEET } from "./kit-fixture.mjs";
 
@@ -53,7 +53,15 @@ describe("US-142: read the UX evaluation report with predicted and observed resu
     assert.match(section(t, "Measures"), /- access points unclear \(3 sessions;/);
     assert.match(section(t, "Rubric"), /^\| Dimension \| Predicted \| Agent-measured \| Observed \|$/m);
     assert.match(section(t, "Rubric"), /\| Task efficiency \| .* \(computed\) \| 2 moves over the shortest paths; 1 backtracks \| median 95 s a task \|/);
-    assert.match(section(t, "Findings by journey"), new RegExp(`### J-find\\n\\n- \\*\\*${findingIdFor("TK-1", "P2", 1)}\\*\\* \\(human observation\\) Severity 3: access points unclear \\(did not complete in 240 s, 2 errors, 1 assist; "Could not tell which access point was public"\\)\\. Evidence: TK-1 task 1, P2 \\(docs/ux-builder/tests/TK-1/findings\\.json\\); transcript EV-1\\.`));
+    assert.match(section(t, "Findings by journey"), new RegExp(`### J-find\\n\\n- \\*\\*${findingIdFor("TK-1", "P2", 1)}\\*\\* \\(human observation\\) Severity 3: access points unclear \\(3 sessions: did not complete in 240 s, 2 errors, 1 assist; "Could not tell which access point was public" / [^)]*\\)\\. Evidence: TK-1 task 1, P2 \\(docs/ux-builder/tests/TK-1/findings\\.json\\); transcript EV-1; TK-1 task 1, P3 [^\\n]*TK-1 task 1, P5 `));
+    // Amended 2026-10-31 (VIP List session 3): the same problem in one kit is one finding, citing each session.
+    // @covers US-166-AC4
+    const merged = evaluationFindings(a).find((f) => f.id === findingIdFor("TK-1", "P2", 1));
+    assert.deepEqual(merged.also, [findingIdFor("TK-1", "P5", 1), findingIdFor("TK-1", "P3", 1)].sort());
+    const routed = cli(a, ["route", merged.id, merged.also[0]]);
+    assert.equal(routed.status, 0, routed.stderr);
+    const patch = readFileSync(join(a, "docs/ux-builder/helix-proposals/backlog/improvement-backlog.patch"), "utf8");
+    assert.equal(patch.split(`| ${merged.id} in UER-1 |`).length - 1, 1, "routed once");
     assert.match(section(t, "Recommendations"), /^1\. Correct: access points unclear \(F-[0-9a-f]{8}, human observation\)\. Route it at checkpoint core-3: `ux-builder-design route F-[0-9a-f]{8}`\./m);
     assert.match(section(t, "Not tested"), /- Consistency: no human observation/);
     assert.match(section(t, "State coverage"), /\| J-find \| assessed \| not tested \| not tested \|/);

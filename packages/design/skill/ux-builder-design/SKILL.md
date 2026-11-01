@@ -82,8 +82,9 @@ When a step's work is done and its foundations approved:
    the app, one prototype that grows.
 2. **Check it before they see it.** Run `ux-builder-design prototype
    --step --check`: the UI audit on every page and the heuristics (content
-   order, navigation, the blueprint's warnings); from step 5 also walk the
-   journeys (`ux-builder-audit assess`). Each finding has an ID. Fix what
+   order, navigation, the blueprint's warnings); from step 5 it also walks
+   every journey in a browser, and a journey that stops is a finding. Each
+   finding has an ID. Fix what
    you can in the blueprint, draw it again and check again (only the pages
    that changed are audited, and the rounds carry over). Accept what stays,
    one finding at a time, with the reason (`prototype --step --check
@@ -121,9 +122,12 @@ steps 4 to 6).
   it.
 - **Steps 4 to 6: one batch of defaults.** Recommend the alternative, the
   modality and frame, and the theme together, as "I'll go with these
-  unless you object", numbered one line each, then show the prototype once
-  at the end of the batch. Ask about one of them on its own only when it
-  is a real choice the person cares about.
+  unless you object", numbered one line each. Record their one answer
+  with `ux-builder-design step batch --answer "<their words>" --alternative
+  <name> --modality <list> --size-classes <list> --frame <frame> --theme
+  <name>`, build the app on the theme, and show it as the batch's one
+  prototype (step 6's). Ask about one of them on its own only when it is a
+  real choice the person cares about; then do that step on its own.
 - **Steps 7 and 8: evidence.** The person chooses which findings to fix
   and whether to release; the changes come from people and data.
 
