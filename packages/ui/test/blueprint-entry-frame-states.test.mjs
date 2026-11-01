@@ -9,6 +9,7 @@ import { describe, test } from "node:test";
 import { checkBlueprint } from "../blueprint/index.mjs";
 import { score } from "../blueprint/explore.mjs";
 import { prototypePages } from "../blueprint/prototype.mjs";
+import { sampleValue } from "../blueprint/samples.mjs";
 import { wireframes } from "../blueprint/wireframes.mjs";
 
 const st = ["empty", "loading", "error"];
@@ -158,5 +159,13 @@ describe("VIP List sessions 3 and 4: a person's details are asked before they ar
     assert.deepEqual(asked(), [], "asked on the claim form");
     bp.screens[1].content = ["Event name", "Venue"].map((label) => ({ label, kind: "data" }));
     assert.deepEqual(asked(), [], "an event's name is not a person's");
+  });
+});
+
+describe("VIP List sessions 4 and 5: a count says what it counts", () => {
+  // @covers US-166-AC6
+  test("a list shows counts with what they count, as a phone hides the column labels; a form's choices and a left count keep theirs", () => {
+    assert.deepEqual([sampleValue("Claimed", 0), sampleValue("Came", 1), sampleValue("Spots", 0), sampleValue("Spots", 1)], ["2 claimed", "1 came", "2 spots", "1 spot"]);
+    assert.deepEqual([sampleValue("Spots (1 or 2)", 0), sampleValue("Spots left", 0), sampleValue("Number of spots", 0)], ["2", "14 left", "2"]);
   });
 });

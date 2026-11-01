@@ -23,6 +23,8 @@ const RULES = [
   // A count says what it counts, as a list on a phone shows it without its column's label (VIP List session 4:
   // "what are the 2 and 1?"); a form's "Number of spots" keeps the bare number.
   [/^(claimed|came|going|attended|checked in|sold|guests)$/i, (i, label) => `${[2, 1, 48, 31, 12][i]} ${label.toLowerCase()}`],
+  // A count of spots or seats says so too (session 5: "2" beside each guest on Who's coming).
+  [/^(spots|seats|tickets|places)$/i, (i, label) => { const n = [2, 1, 2, 1, 2][i]; return `${n} ${n === 1 ? label.toLowerCase().replace(/s$/, "") : label.toLowerCase()}`; }],
   [/count|number of|claimed|came|total|spots|seats|quantity|qty/i, (i) => String([2, 1, 48, 31, 12][i])],
   [/status|state\b/i, (i) => STATUSES[i]],
   [/\bqr\b|barcode|code\b/i, (i) => `QR ${["7Q4K", "2M8P", "9X1C", "4H6T", "5R3B"][i]}`],
