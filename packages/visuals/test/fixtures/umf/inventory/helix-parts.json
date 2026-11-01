@@ -1,0 +1,93 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:helix-parts",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "helix-parts",
+      "kind": "structure",
+      "form": "stack",
+      "title": "The parts",
+      "question": "Which part does a change belong in?",
+      "audience": "developer",
+      "source": {
+        "path": "helix:docs/guide/developer/index.md",
+        "view": "The parts",
+        "digest": "sha256:ebe885e3093fa1e0ab8319320d67586ec8d51b3420df36c4d5beecc6b36b9bc3"
+      },
+      "nodes": [
+        {
+          "id": "routing-skill",
+          "label": "Routing skill",
+          "detail": "skills/helix/SKILL.md",
+          "layer": "portable"
+        },
+        {
+          "id": "mode-contracts",
+          "label": "Mode contracts",
+          "detail": "workflows/modes/",
+          "layer": "portable"
+        },
+        {
+          "id": "artifact-catalog",
+          "label": "Artifact catalog",
+          "detail": "workflows/activities/",
+          "layer": "portable"
+        },
+        {
+          "id": "instance-schema",
+          "label": "Instance schema",
+          "detail": "workflows/artifact-schema.md",
+          "layer": "portable"
+        },
+        {
+          "id": "methodology-spec",
+          "label": "Methodology spec",
+          "detail": "workflows/",
+          "layer": "portable"
+        },
+        {
+          "id": "documentor",
+          "label": "documentor",
+          "detail": "tools/documentor/",
+          "layer": "support"
+        },
+        {
+          "id": "dogfood-artifacts",
+          "label": "Dogfood artifacts",
+          "detail": "docs/helix/",
+          "layer": "support"
+        },
+        {
+          "id": "per-runtime-packaging",
+          "label": "Per-runtime packaging",
+          "detail": "docs/install/",
+          "layer": "support"
+        },
+        {
+          "id": "microsite",
+          "label": "Microsite",
+          "detail": "docs/website/content/",
+          "layer": "support"
+        }
+      ],
+      "structure": {
+        "layers": [
+          {
+            "id": "portable",
+            "label": "Portable content every runtime receives"
+          },
+          {
+            "id": "support",
+            "label": "Support, packaging and publishing"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

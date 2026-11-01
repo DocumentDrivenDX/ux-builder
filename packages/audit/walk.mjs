@@ -1,4 +1,4 @@
-/* The journey walk (FEAT-018 GDL-87; US-166): each journey walked through a
+/* The journey walk (FEAT-018 GDL-87; US-173): each journey walked through a
    served prototype as a person would, by clicking each step's action by its
    label, and checking that the next step's screen is reached (the page's
    data-piq-screen). It needs no manifest and works on a step prototype's

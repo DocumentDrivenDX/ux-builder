@@ -100,7 +100,7 @@ const USAGE = `Usage: ux-builder-audit assess <subcommand> [options]
   report <run-dir> [--self-contained]
       Write report.html, report.md and evidence.json, by journey, state and step,
       each finding with its rule (or heuristic), evidence, severity 0 to 4 and fix;
-      report.md is a HELIX usability-evaluation-report. --self-contained embeds
+      report.md is a ux-builder usability assessment report. --self-contained embeds
       the screenshots.
   compare <earlier-run-dir> <later-run-dir>
       Classify findings: new, persistent, resolved, regressed, not rechecked;

@@ -1,4 +1,4 @@
-/* Steps 4 to 6 as one batch: the person's one answer, one record (US-166;
+/* Steps 4 to 6 as one batch: the person's one answer, one record (US-173;
    FEAT-018 GDL-87; VIP List session 3).
 
      npm test --workspace @ux-builder/design */
@@ -29,8 +29,8 @@ function atStep4() {
 }
 const ARGS = { answer: "Go with those three.", alternative: "near", modalities: ["responsive-web"], sizeClasses: ["compact", "large"], frame: "top-nav", theme: "plain" };
 
-describe("US-166: steps 4 to 6 as one batch", () => {
-  // @covers US-166-AC1
+describe("US-173: steps 4 to 6 as one batch", () => {
+  // @covers US-173-AC1
   test("one answer chooses the alternative, approves its decisions, records the modality and core-2, and moves to step 6", () => {
     const a = atStep4();
     const turnsBefore = readEvents(a).filter((e) => e.type === "turn").length;
@@ -39,7 +39,7 @@ describe("US-166: steps 4 to 6 as one batch", () => {
     assert.equal(s.step, 6);
     assert.deepEqual(s.alternatives.map((x) => [x.name, x.status]), [["list", "rejected"], ["near", "chosen"]]);
     assert.equal(JSON.parse(readFileSync(join(a, BP), "utf8")).screens[0].title, "Rivers near you", "the blueprint is the chosen alternative");
-    assert.deepEqual(r.decisions, ["UXD-1", "UXD-2"]);
+    assert.deepEqual(r.decisions, ["ADR-001", "ADR-002"]);
     assert.equal(s.questions[0].status, "answered");
     assert.deepEqual(s.modality.modalities, ["responsive-web"]);
     assert.equal(s.modality.frame, "top-nav");
@@ -49,12 +49,12 @@ describe("US-166: steps 4 to 6 as one batch", () => {
     assert.match(s.next, /Build the app on plain .* step 6 prototype/);
     // One person turn, however many records.
     assert.equal(readEvents(a).filter((e) => e.type === "turn").length, turnsBefore + 1);
-    // @covers US-167-AC5
+    // @covers US-174-AC5
     // Every event of the batch is a moment, not a bare date (session 4: a date read as midnight, 13 "active" minutes).
     assert.ok(readEvents(a).every((e) => /T\d\d:\d\d/.test(e.at)), readEvents(a).map((e) => e.at).join(" "));
   });
 
-  // @covers US-166-AC2
+  // @covers US-173-AC2
   test("refused away from step 4, without the theme, the frame, or a choice between alternatives; nothing is recorded", () => {
     const a = atStep4();
     const before = readFileSync(join(a, ".ux-builder/design-state.json"), "utf8");
@@ -72,7 +72,7 @@ describe("US-166: steps 4 to 6 as one batch", () => {
     const a = atStep4();
     const r = cli(a, ["step", "batch", "--answer", "Go with those", "--alternative", "list", "--modality", "responsive-web", "--size-classes", "compact,large", "--frame", "top-nav", "--theme", "plain"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /Steps 4 and 5 recorded with one answer: list chosen, UXD-1 and UXD-2 approved/);
+    assert.match(r.stdout, /Steps 4 and 5 recorded with one answer: list chosen, ADR-001 and ADR-002 approved/);
     assert.deepEqual(readState(a).modality.sizeClasses, ["compact", "large"]);
   });
 });

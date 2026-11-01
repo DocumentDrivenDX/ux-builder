@@ -1,0 +1,121 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:umf-ac-trend",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "kind": "metric",
+      "audience": "executive",
+      "source": {
+        "path": "umf:docs/helix/03-test/acceptance-criteria-ledger.json",
+        "digest": "sha256:5dc577fd1bce10c6da71052da019e17b351b01b2e5ea53fa59d00a3524f1ec23"
+      },
+      "id": "umf-ac-trend",
+      "form": "line",
+      "title": "Acceptance criteria over time",
+      "question": "How have satisfied and untested criteria changed?",
+      "metric": {
+        "unit": "criteria",
+        "good": "up",
+        "format": {
+          "kind": "number",
+          "decimals": 0
+        },
+        "axis": {
+          "kind": "time"
+        },
+        "series": [
+          {
+            "id": "satisfied-trend",
+            "label": "Satisfied",
+            "points": [
+              {
+                "at": "2026-10-02",
+                "value": 55
+              },
+              {
+                "at": "2026-10-07",
+                "value": 63
+              },
+              {
+                "at": "2026-10-08",
+                "value": 74
+              },
+              {
+                "at": "2026-10-09",
+                "value": 117
+              },
+              {
+                "at": "2026-10-10",
+                "value": 117
+              },
+              {
+                "at": "2026-10-11",
+                "value": 117
+              },
+              {
+                "at": "2026-10-17",
+                "value": 163
+              },
+              {
+                "at": "2026-10-18",
+                "value": 168
+              },
+              {
+                "at": "2026-10-23",
+                "value": 180
+              }
+            ]
+          },
+          {
+            "id": "untested",
+            "label": "Untested",
+            "points": [
+              {
+                "at": "2026-10-02",
+                "value": 155
+              },
+              {
+                "at": "2026-10-07",
+                "value": 155
+              },
+              {
+                "at": "2026-10-08",
+                "value": 288
+              },
+              {
+                "at": "2026-10-09",
+                "value": 288
+              },
+              {
+                "at": "2026-10-10",
+                "value": 316
+              },
+              {
+                "at": "2026-10-11",
+                "value": 316
+              },
+              {
+                "at": "2026-10-17",
+                "value": 387
+              },
+              {
+                "at": "2026-10-18",
+                "value": 405
+              },
+              {
+                "at": "2026-10-23",
+                "value": 407
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

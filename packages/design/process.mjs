@@ -47,7 +47,7 @@ export function overview() {
     change: CHANGE_STEPS,
     stepEnd: "Every step ends with a prototype you can click: what we have so far, with the agent's assumptions for the rest, checked for accessibility and usability before you see it. Then you choose: continue to the next step, revise this one, or have the agent finish the rest for you, with everything it guessed listed.",
     review: "After each step, the agent shows you what it produced and moves on only when you approve it. The foundations (the brief, target users, jobs, stories, business rules and decisions) come a table per kind, every row in full, for your feedback and approval. What is built from them comes as one coverage map: you look at its exceptions and what changed, not each item again. Records (evidence, reports, insights) need no approval: you decide what to do about what they found. An approval holds until the meaning changes, and then you see only the change.",
-    ids: "Along the way you will see short IDs: U-1 is a target user, J-1 a job to be done, J-find a journey, T-1 a task, BR-1 a business rule, US-1 a user story and UXD-1 a decision. The agent says what each is the first time; `ux-builder-design explain ids` lists them all.",
+    ids: "Everything is named by what it says: a user, a need, a task, a journey or a screen by its name. The only IDs you will see are HELIX's own: FEAT-1 a feature, US-1 a user story and US-1-AC2 one of its acceptance criteria, BR-1 a business rule, ADR-008 a decision, UF-4 a user flow and UF-4-01-list one of its views; and P1 for a test participant. `ux-builder-design explain ids` lists them.",
   };
 }
 

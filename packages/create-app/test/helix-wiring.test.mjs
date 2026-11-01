@@ -5,6 +5,7 @@
      npm test --workspace @ux-builder/create-app */
 
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 import { tmpdir } from "node:os";
@@ -65,6 +66,20 @@ describe("US-151-AC4: a new app keeps its assessment and audit report beside the
     assert.match(ignore, /^docs\/ux-builder\/audit-report\/$/m);
     assert.match(ignore, /^docs\/ux-builder\/assessments\/$/m);
     assert.match(readFileSync(join(app.dir, ".github/workflows/ci.yml"), "utf8"), /^ {10}path: docs\/ux-builder\/audit-report$/m);
+  });
+});
+
+describe("ADR-042 decision 6: run output stays out of the new app's repository", () => {
+  // @covers US-151-AC4
+  test("the app's .gitignore ignores the assessment runs and the run folder (docs/ux-builder/runs/), and git agrees", () => {
+    const ignore = readFileSync(join(app.dir, ".gitignore"), "utf8");
+    assert.match(ignore, /^docs\/ux-builder\/assessments\/$/m);
+    assert.match(ignore, /^docs\/ux-builder\/runs\/$/m);
+    assert.match(ignore, /^# Run output stays out of the repository \(ADR-042\)/m);
+    spawnSync("git", ["init", "-q"], { cwd: app.dir });
+    const ignored = (p) => spawnSync("git", ["check-ignore", "-q", p], { cwd: app.dir }).status === 0;
+    for (const p of ["docs/ux-builder/assessments/R-20261028T080000Z/run.json", "docs/ux-builder/runs/studies/onboarding/findings.md", "docs/ux-builder/runs/insights/2026-10-28/funnels.json"]) assert.equal(ignored(p), true, p);
+    assert.equal(ignored("docs/ux-builder/blueprint/app.blueprint.json"), false, "the blueprint is committed");
   });
 });
 

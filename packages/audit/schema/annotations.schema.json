@@ -21,7 +21,7 @@
     },
     "journey": {
       "type": "string",
-      "pattern": "^J-"
+      "pattern": "^(J-)?[a-z]"
     },
     "viewport": {
       "type": "object",

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 208" width="1160" height="208" role="img" aria-labelledby="visuals-before-after-title" aria-describedby="visuals-before-after-desc" class="uxb-visual uxb-visual--comparison-before-after" data-visual="visuals-before-after" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="visuals-before-after-title">Visuals before and after</title>
+<desc id="visuals-before-after-desc">What changes when every visual is a umf.visual document?</desc>
+<rect x="0" y="0" width="1160" height="208" style="fill:#18181B"/>
+<g id="visuals-before-after--before-after" class="uxb-before-after">
+<rect x="0" y="0" width="564" height="40" style="fill:#27272A"/>
+<text x="12" y="26" style="fill:#FFFFFF;font-size:13px;font-weight:600">Today</text>
+<path d="M0 40 L564 40" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<text x="12" y="63" style="fill:#FFFFFF;font-size:12px;font-weight:600">Where colors come from</text>
+<text x="252" y="63" style="fill:#FAFAFA;font-size:12px;font-weight:400">Four places</text>
+<path d="M0 76 L564 76" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<text x="12" y="99" style="fill:#FFFFFF;font-size:12px;font-weight:600">What draws the visuals</text>
+<text x="252" y="99" style="fill:#FAFAFA;font-size:12px;font-weight:400">Mermaid, deploy.py, HTML plates, Eraser and hand</text>
+<text x="252" y="115" style="fill:#FAFAFA;font-size:12px;font-weight:400">SVG</text>
+<path d="M0 128 L564 128" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<text x="12" y="151" style="fill:#FFFFFF;font-size:12px;font-weight:600">A theme switch restyles every visual</text>
+<path d="M252 142 L262 152 M262 142 L252 152" style="fill:none;stroke:#FFFFFF;stroke-width:2px"/>
+<text x="270" y="151" style="fill:#FAFAFA;font-size:12px;font-weight:400">No</text>
+<path d="M0 168 L564 168" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<text x="12" y="191" style="fill:#FFFFFF;font-size:12px;font-weight:600">Checked against the source</text>
+<circle cx="257" cy="187" r="5.5" style="fill:none;stroke:#FFFFFF;stroke-width:1.5px"/>
+<path d="M257 181.5 A5.5 5.5 0 0 0 257 192.5 Z" style="fill:#FFFFFF"/>
+<text x="270" y="191" style="fill:#FAFAFA;font-size:12px;font-weight:400">Partly</text>
+<path d="M0 208 L564 208" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<rect x="596" y="0" width="564" height="40" style="fill:#27272A"/>
+<text x="608" y="26" style="fill:#FFFFFF;font-size:13px;font-weight:600">With umf.visual</text>
+<path d="M596 40 L1160 40" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<text x="608" y="63" style="fill:#FFFFFF;font-size:12px;font-weight:600">Where colors come from</text>
+<text x="848" y="63" style="fill:#FAFAFA;font-size:12px;font-weight:400">The theme's tokens</text>
+<rect x="596" y="44" width="4" height="28" style="fill:#1685DF;stroke:#1685DF;stroke-width:0.01px"/>
+<text x="1148" y="63" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">changed</text>
+<path d="M596 76 L1160 76" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<text x="608" y="99" style="fill:#FFFFFF;font-size:12px;font-weight:600">What draws the visuals</text>
+<text x="848" y="99" style="fill:#FAFAFA;font-size:12px;font-weight:400">@ux-builder/visuals</text>
+<rect x="596" y="80" width="4" height="44" style="fill:#1685DF;stroke:#1685DF;stroke-width:0.01px"/>
+<text x="1148" y="99" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">changed</text>
+<path d="M596 128 L1160 128" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<text x="608" y="151" style="fill:#FFFFFF;font-size:12px;font-weight:600">A theme switch restyles every visual</text>
+<path d="M848 147 L852 151 L859 142" style="fill:none;stroke:#FFFFFF;stroke-width:2px"/>
+<text x="866" y="151" style="fill:#FAFAFA;font-size:12px;font-weight:400">Yes</text>
+<rect x="596" y="132" width="4" height="32" style="fill:#1685DF;stroke:#1685DF;stroke-width:0.01px"/>
+<text x="1148" y="151" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">changed</text>
+<path d="M596 168 L1160 168" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+<text x="608" y="191" style="fill:#FFFFFF;font-size:12px;font-weight:600">Checked against the source</text>
+<path d="M848 187 L852 191 L859 182" style="fill:none;stroke:#FFFFFF;stroke-width:2px"/>
+<text x="866" y="191" style="fill:#FAFAFA;font-size:12px;font-weight:400">Yes</text>
+<rect x="596" y="172" width="4" height="32" style="fill:#1685DF;stroke:#1685DF;stroke-width:0.01px"/>
+<text x="1148" y="191" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">changed</text>
+<path d="M596 208 L1160 208" style="fill:none;stroke:#9F9FA9;stroke-width:1px"/>
+</g>
+</svg>

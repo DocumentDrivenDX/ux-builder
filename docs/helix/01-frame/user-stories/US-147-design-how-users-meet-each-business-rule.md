@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-036
@@ -42,7 +44,7 @@ Business rules ("orders over $500 need a manager's approval", "only public stret
 
 - [ ] **US-147-AC1** — Given HELIX documents defining `**BR-<n>**` rules, when a blueprint task or journey step cites a rule HELIX does not define, then `ux-builder-design validate` exits 1 naming the item and the rule.
 - [ ] **US-147-AC2** — Given a task citing a rule, when the blueprint's `businessRules` has no entry for it, or the entry lacks its trigger, how the user learns before acting, what they see when blocked, or how they recover, then `validate` exits 1 naming the rule and each missing answer.
-- [ ] **US-147-AC3** — Given tasks citing rules with their trigger, when `test-kit` runs, then the kit has a task per cited rule whose goal is the task's goal in the rule's trigger situation, with no interface words, and whose success criterion is the rule's ID.
+- [ ] **US-147-AC3** — Given tasks citing rules with their trigger, when `test-kit` runs, then the study has a scenario per cited rule whose goal is the task's goal in the rule's trigger situation, with no interface words, and whose success criterion is the rule's ID.
 - [ ] **US-147-AC4** — Given imported observations for a kit with rule tasks, when `report` runs, then a Business rules section lists each cited rule with its kit tasks' completion and the problems seen, and a cited rule no kit tested is listed under Not tested.
 - [ ] **US-147-AC5** — Given a rule cited by a task and a step, when `trace BR-<n>` runs, then it lists the HELIX document defining it and the tasks, journeys and screens it applies to; and `impact` of a change naming the rule reaches them.
 - [ ] **US-147-AC6** — Given the skill, when the agent models tasks, then it tells the agent to cite each business rule by ID and ask the person the four questions for it.

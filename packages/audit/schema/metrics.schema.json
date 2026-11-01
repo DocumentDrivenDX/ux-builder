@@ -16,7 +16,7 @@
         "type": "object",
         "required": ["journey", "label", "completed", "interactions", "moves", "shortestPath", "extraInteractions", "pathTaken", "backtracks", "failedActions", "informationNotFound", "interfaceErrors", "timePerStep"],
         "properties": {
-          "journey": { "type": "string", "pattern": "^J-" },
+          "journey": { "type": "string", "pattern": "^(J-)?[a-z]" },
           "blueprint": { "type": "string" },
           "label": { "const": "agent-measured" },
           "completed": { "type": "boolean" },

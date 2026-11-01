@@ -1,0 +1,124 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:documentor-pipeline",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "documentor-pipeline",
+      "kind": "sequence",
+      "form": "lifelines",
+      "title": "documentor check",
+      "question": "What happens in documentor check?",
+      "source": {
+        "path": "helix:tools/documentor/docs/guide/developer/walkthrough.md",
+        "view": "Sequence",
+        "digest": "sha256:c56f18a68ed719c9c1936ab87b491b95e7266726ab05e48bac84a6126f0a6e31"
+      },
+      "sequence": {
+        "participants": [
+          {
+            "id": "ci",
+            "label": "CI job"
+          },
+          {
+            "id": "cli",
+            "label": "cli.main / guide_main"
+          },
+          {
+            "id": "lib",
+            "label": "lib.plan"
+          },
+          {
+            "id": "assess",
+            "label": "cli.assess"
+          },
+          {
+            "id": "check",
+            "label": "check.run_check"
+          },
+          {
+            "id": "views",
+            "label": "cli.views"
+          }
+        ],
+        "messages": [
+          {
+            "id": "m1",
+            "from": "ci",
+            "to": "cli",
+            "label": "documentor check --root .",
+            "kind": "call"
+          },
+          {
+            "id": "m2",
+            "from": "cli",
+            "to": "lib",
+            "label": "config_of(root), publish.schema == SCHEMA, audiences, plan(config, root)",
+            "kind": "call"
+          },
+          {
+            "id": "m3",
+            "from": "lib",
+            "to": "cli",
+            "label": "list of PagePlan",
+            "kind": "return"
+          },
+          {
+            "id": "m4",
+            "from": "cli",
+            "to": "assess",
+            "label": "state of each page",
+            "kind": "call"
+          },
+          {
+            "id": "m5",
+            "from": "assess",
+            "to": "check",
+            "label": "parse_page, check_generated or check_sources",
+            "kind": "call"
+          },
+          {
+            "id": "m6",
+            "from": "cli",
+            "to": "views",
+            "label": "views(root, config, write=False)",
+            "kind": "call"
+          },
+          {
+            "id": "m7",
+            "from": "cli",
+            "to": "cli",
+            "label": "report(root, pages, view_state), with gap_lines",
+            "kind": "call"
+          },
+          {
+            "id": "m8",
+            "from": "cli",
+            "to": "check",
+            "label": "run_check([out], root, False)",
+            "kind": "call"
+          },
+          {
+            "id": "m9",
+            "from": "check",
+            "to": "cli",
+            "label": "Findings (blocking, warnings)",
+            "kind": "return"
+          },
+          {
+            "id": "m10",
+            "from": "cli",
+            "to": "ci",
+            "label": "exit 0 or 1",
+            "kind": "return"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

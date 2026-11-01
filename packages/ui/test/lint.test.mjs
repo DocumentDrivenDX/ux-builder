@@ -147,7 +147,7 @@ describe("US-022 lint", () => {
     assert.match(r[0].text, /hand-drawn <svg>.*<Icon>.*registerIcons/);
   });
 
-  // @covers US-166-AC5
+  // @covers US-173-AC5
   test("a data graphic marked data-graphic (a QR code) draws its own <svg> in black and white; an unmarked one, or another colour, is still reported", async () => {
     const qr = 'export const QR = () => <div data-graphic="qr" style={{ background: "#fff", color: "#000" }}><svg viewBox="0 0 2 2"><rect width="1" height="1" style={{ fill: "black" }} /></svg></div>;';
     assert.deepEqual(lint(qr, { "ux-builder/no-inline-svg": "error", "ux-builder/no-hard-coded-values": "error" }), []);
@@ -155,6 +155,18 @@ describe("US-022 lint", () => {
     assert.deepEqual(lint(red, { "ux-builder/no-inline-svg": "error", "ux-builder/no-hard-coded-values": "error" }).map((x) => x.text.split(":")[0]), ["Hard-coded colour #c00"]);
     assert.equal(lint('export const A = () => <svg viewBox="0 0 16 16" />;', { "ux-builder/no-inline-svg": "error" }).length, 1, "an unmarked <svg> is an icon");
     assert.deepEqual(await css(".qr[data-graphic] { background: #fff; color: #000; }\n.qr { background: #fff; }"), [{ line: 2, column: 19, text: (await css(".qr { background: #fff; }"))[0].text }]);
+  });
+
+  // @covers US-168-AC3
+  test("US-168-AC3: <Visual> from @ux-builder/visuals is not reported; a diagram hand-drawn as <svg> is, and is pointed at <Visual>", () => {
+    const code = [
+      'import { Visual } from "@ux-builder/visuals/react";',
+      "export const A = ({ doc }) => <Visual doc={doc} />;",
+      'export const B = () => <svg viewBox="0 0 400 200"><rect x="10" y="10" width="120" height="40" /><path d="M130 30 L250 30" /></svg>;',
+    ].join("\n");
+    const r = lint(code, { "ux-builder/no-inline-svg": "error" });
+    assert.deepEqual(r.map((x) => x.line), [3], "only the hand-drawn diagram");
+    assert.match(r[0].text, /for a diagram or chart, use <Visual> from @ux-builder\/visuals\/react/);
   });
 });
 

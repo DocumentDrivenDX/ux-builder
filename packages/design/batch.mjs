@@ -1,4 +1,4 @@
-/* Steps 4 to 6 as one batch (FEAT-018 GDL-87; US-166): the agent
+/* Steps 4 to 6 as one batch (FEAT-018 GDL-87; US-173): the agent
    recommends the alternative, the modality and frame, and the theme
    together ("I'll go with these unless you object"), and the person's one
    answer is recorded once: the alternative chosen, a decision for it and

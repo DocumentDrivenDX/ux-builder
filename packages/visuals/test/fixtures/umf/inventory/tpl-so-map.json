@@ -1,0 +1,119 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:tpl-so-map",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "tpl-so-map",
+      "kind": "flow",
+      "form": "lanes",
+      "title": "System map",
+      "question": "How does a request move between the team, the runtime and HELIX?",
+      "source": {
+        "path": "helix:workflows/activities/02-design/artifacts/solution-overview/example.md",
+        "view": "System map",
+        "digest": "sha256:88d89ce44e5e77f273d1d352915ace98f143e2723de31932b8ab18dd37eeeb9b"
+      },
+      "groups": [
+        {
+          "id": "lane-people",
+          "label": "People",
+          "role": "lane"
+        },
+        {
+          "id": "lane-agent-host",
+          "label": "Agent host",
+          "role": "lane"
+        },
+        {
+          "id": "lane-helix",
+          "label": "HELIX",
+          "role": "lane"
+        },
+        {
+          "id": "lane-your-repository",
+          "label": "Your repository",
+          "role": "lane"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "team",
+          "label": "Software team",
+          "group": "lane-people"
+        },
+        {
+          "id": "runtime",
+          "label": "Agent runtime",
+          "group": "lane-agent-host"
+        },
+        {
+          "id": "skill",
+          "label": "HELIX routing skill",
+          "group": "lane-helix"
+        },
+        {
+          "id": "marker",
+          "label": "Project .helix.yml",
+          "group": "lane-your-repository"
+        },
+        {
+          "id": "catalog",
+          "label": "Templates, prompts, metadata, mode contracts",
+          "group": "lane-helix"
+        },
+        {
+          "id": "docs",
+          "label": "Project artifact instances",
+          "group": "lane-your-repository"
+        }
+      ],
+      "edges": [
+        {
+          "id": "team--runtime",
+          "from": "team",
+          "to": "runtime",
+          "label": "asks through"
+        },
+        {
+          "id": "runtime--skill",
+          "from": "runtime",
+          "to": "skill",
+          "label": "loads"
+        },
+        {
+          "id": "marker--skill",
+          "from": "marker",
+          "to": "skill",
+          "label": "bounds scope for"
+        },
+        {
+          "id": "catalog--skill",
+          "from": "catalog",
+          "to": "skill",
+          "label": "guides"
+        },
+        {
+          "id": "skill--docs",
+          "from": "skill",
+          "to": "docs",
+          "label": "authors and reconciles"
+        },
+        {
+          "id": "docs--runtime",
+          "from": "docs",
+          "to": "runtime",
+          "label": "govern authorized execution by"
+        }
+      ],
+      "omissions": [
+        "Lanes are the layers HELIX's architecture model gives the same parts."
+      ]
+    }
+  },
+  "modules": []
+}

@@ -96,6 +96,33 @@ describe("US-158: one page for every report, and a doctor for the versions", () 
   });
 
   // @covers US-158-AC1
+  test("AC1 (ADR-042 decision 6): every run is listed by path and linked, assessment runs and each folder under docs/ux-builder/runs/, and nothing in them is copied in", () => {
+    const a = app("run-folder");
+    const SECRET = "Participant P3 said the onboarding copy was confusing";
+    const study = join(a, "docs/ux-builder/runs/studies/onboarding");
+    mkdirSync(join(study, "sessions"), { recursive: true });
+    writeFileSync(join(study, "findings.md"), `# Findings\n\n${SECRET}\n`);
+    writeFileSync(join(study, "sessions/P3.txt"), SECRET);
+    json(join(a, "docs/ux-builder/runs/insights/2026-10-28/funnels.json"), { note: SECRET });
+    // An assessment run still in progress, with no run.json yet.
+    mkdirSync(join(a, "docs/ux-builder/assessments/R-20261028T080000Z"), { recursive: true });
+    const { html, reports } = landingPage(a);
+    assert.deepEqual(reports.assessments.map((r) => r.path), ["docs/ux-builder/assessments/R-20261028T080000Z/", "docs/ux-builder/assessments/R-20261026T120000Z/", "docs/ux-builder/assessments/R-20261020T090000Z/"]);
+    assert.deepEqual(reports.runs.map((r) => [r.kind, r.path, r.link]), [
+      ["insights", "docs/ux-builder/runs/insights/2026-10-28/", "runs/insights/2026-10-28/"],
+      ["studies", "docs/ux-builder/runs/studies/onboarding/", "runs/studies/onboarding/"],
+    ]);
+    for (const r of reports.runs) assert.match(r.date, /^\d{4}-\d{2}-\d{2}T/, `${r.path} has its modified date`);
+    assert.match(html, /<code>docs\/ux-builder\/runs\/studies\/onboarding\/<\/code>/);
+    assert.match(html, /<a href="runs\/studies\/onboarding\/">open<\/a>/);
+    assert.match(html, /<code class="meta">docs\/ux-builder\/assessments\/R-20261026T120000Z\/<\/code>/);
+    assert.match(html, /<code class="meta">docs\/ux-builder\/assessments\/R-20261028T080000Z\/<\/code>/);
+    assert.doesNotMatch(html, /Participant P3|onboarding copy|findings\.md|P3\.txt|funnels\.json/, "no run file's name or content is inlined");
+    // An app with no run folder says where runs go.
+    assert.match(landingPage(app("no-runs")).html, /No other runs yet in <code>docs\/ux-builder\/runs\/<\/code>/);
+  });
+
+  // @covers US-158-AC1
   test("AC1: the UI audit records the @ux-builder versions that wrote it", async () => {
     const apps = await modalityApps();
     try {

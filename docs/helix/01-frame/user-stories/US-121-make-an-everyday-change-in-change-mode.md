@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-036
@@ -43,7 +45,7 @@ Change mode runs the challenge questions, `impact`, the complexity delta and a r
 - [ ] **US-121-AC1** — Given an app, when `ux-builder-design mode change` then `mode full` run, then the state's `mode` follows each, and `status` shows it.
 - [ ] **US-121-AC2** — Given an app in change mode and a change to a screen whose decision is `tested`, when `impact "<change>" --json` runs, then it lists the affected items and sets `checkpointRequired` to `significant-change`.
 - [ ] **US-121-AC3** — Given the same change to a screen with no tested decision, when `impact --json` runs, then `checkpointRequired` is absent.
-- [ ] **US-121-AC4** — Given the installed skill, when its text is read, then it says when to use the full loop and when change mode, lists change mode's four steps, and tells the agent to say which mode it is in and that the person can switch.
+- [ ] **US-121-AC4** — Given the installed skill, when its text is read, then it says when to use the full loop and when change mode, lists change mode's four steps, and tells the agent to say which mode it is in and that the person can switch; and that a requirement change goes through HELIX's `evolve` first, and drift between HELIX documents through HELIX's `validate` and `align` (ADR-042 decision 4).
 
 ## Edge Cases
 

@@ -11,6 +11,7 @@ import { metrics } from "./metrics.mjs";
 import { modalityStatus } from "./modality.mjs";
 import { progress } from "./process.mjs";
 import { pendingReviews, reviewItems, TIERS } from "./review.mjs";
+import { studies } from "./studies.mjs";
 import { readState } from "./state.mjs";
 
 export const MINUTES_PER_DECISION = 3;
@@ -53,13 +54,13 @@ function knownFrom(app, q) {
   const root = helixRoot(app);
   const prd = root && ["01-frame/prd.md", "prd.md"].map((f) => `${root.replace(/\/$/, "")}/${f}`).find((f) => existsSync(join(app, f)));
   if (prd && ["product", "outcome", "constraints"].includes(q.id)) return prd;
-  if (q.id === "users" && Object.keys(usersTable(app) ?? {}).length) return ux(app, "users.md");
-  if (q.id === "jobs" && Object.keys(jobsTable(app) ?? {}).length) return ux(app, "jobs.md");
+  if (q.id === "users" && Object.keys(usersTable(app) ?? {}).length) return Object.values(usersTable(app))[0].path;
+  if (q.id === "jobs" && Object.keys(jobsTable(app) ?? {}).length) return Object.values(jobsTable(app))[0].path;
   // The rules are known once HELIX defines them (**BR-<n>**).
   if (q.id === "rules" && prd && /^\*\*BR-\d+\*\*/m.test(readFileSync(join(app, prd), "utf8"))) return prd;
   if (q.id === "sources") {
-    const ev = existsSync(join(app, ux(app, "evidence"))) && readdirSync(join(app, ux(app, "evidence"))).some((f) => /^EV-\d+\.md$/.test(f));
-    if (ev) return ux(app, "evidence/");
+    const st = studies(app);
+    if (st.length) return st[0].path.replace(/[^/]+$/, "");
     if (existsSync(join(app, "src"))) return "src/";
   }
   return null;
@@ -77,7 +78,7 @@ export function intake(app) {
   return { questions, ask: ask.map((q) => q.id), confirm: confirm.map((q) => ({ id: q.id, from: q.known })), budget: budget(app), text };
 }
 
-/* The decisions left before the next step prototype (ADR-042: every step
+/* The decisions left before the next step prototype (ADR-043: every step
    ends with one): a table per foundation kind of this step still to
    approve (the brief at step 1, users and jobs at 2, stories at 3 always
    come), the coverage map when built items of this step wait, the modality

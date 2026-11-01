@@ -1,0 +1,94 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-ticket-lifecycle",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-ticket-lifecycle",
+      "kind": "state",
+      "form": "lifecycle",
+      "title": "A ticket's phases",
+      "question": "What states can a ticket be in?",
+      "audience": "developer",
+      "takeaway": "A ticket is picked up, answered and closed; a customer's reply sends it back to the agent.",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/beacon/ticket_state.py",
+        "view": "Phase",
+        "digest": "sha256:9447e4c82588b667b7394bb0acb79607774dabed977bfe8e751ad6ca94603775"
+      },
+      "nodes": [
+        {
+          "id": "new",
+          "label": "New"
+        },
+        {
+          "id": "assigned",
+          "label": "Assigned to an agent"
+        },
+        {
+          "id": "answered",
+          "label": "Answered"
+        },
+        {
+          "id": "closed",
+          "label": "Closed"
+        }
+      ],
+      "state": {
+        "initial": "new",
+        "final": [
+          "closed"
+        ],
+        "transitions": [
+          {
+            "id": "t1",
+            "from": "new",
+            "to": "assigned",
+            "event": "an agent picks it up",
+            "path": "main"
+          },
+          {
+            "id": "t2",
+            "from": "assigned",
+            "to": "answered",
+            "event": "the agent sends a reply",
+            "path": "main"
+          },
+          {
+            "id": "t3",
+            "from": "answered",
+            "to": "closed",
+            "event": "close",
+            "path": "main"
+          },
+          {
+            "id": "t4",
+            "from": "assigned",
+            "to": "assigned",
+            "event": "reassign",
+            "path": "alternate"
+          },
+          {
+            "id": "t5",
+            "from": "new",
+            "to": "closed",
+            "event": "close as spam",
+            "path": "alternate"
+          },
+          {
+            "id": "t6",
+            "from": "answered",
+            "to": "assigned",
+            "event": "the customer writes back",
+            "path": "alternate"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

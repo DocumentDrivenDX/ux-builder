@@ -106,7 +106,7 @@ describe("US-011", () => {
 
   // @covers US-011-AC7
   test("AC7: an appearance the theme lacks falls back to its own, with a warning", () => {
-    // Every shipped theme has both appearances (plain gained dark, ADR-042), so a light-only
+    // Every shipped theme has both appearances (plain gained dark, ADR-043), so a light-only
     // theme, as the theme builder can make, is a fixture here. The provider shows what
     // resolveAppearance gives, and warns whenever that differs from what was asked.
     const lightOnly = new Map([["acme-light", { name: "acme-light", default: "light", appearances: ["light"] }]]);

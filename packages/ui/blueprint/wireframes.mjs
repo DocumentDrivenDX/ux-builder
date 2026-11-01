@@ -131,7 +131,7 @@ function stateElement(s, state, lib) {
   // A state with a notice of its own (stateNotices): the screen as it is, under that notice.
   const notice = s.stateNotices?.[state];
   if (notice) {
-    // The values this state changes replace the samples (US-166-AC6).
+    // The values this state changes replace the samples (US-173-AC6).
     // An error notice holds back the main action, as the built app does (no "Let in" on a pass already used).
     const shown = { ...s, ...(notice.values ? { values: notice.values } : {}), ...(notice.tone === "error" ? { actions: (Array.isArray(s.actions) ? s.actions : []).filter((a) => !a?.primary) } : {}) };
     const el = screenElement(shown, lib);
@@ -236,7 +236,7 @@ export async function wireframes(bp, { theme = THEME, appearance = "light" } = {
         if (PATTERNS.has(s.pattern) && typeof P[s.pattern] === "function") {
           if (state === "ideal") {
             // The screen's other actions, under it, as the built app draws them: a journey that takes one
-            // ("See who's coming") can be walked on the page, not only from the prototype's bar (US-166).
+            // ("See who's coming") can be walked on the page, not only from the prototype's bar (US-173).
             const others = (Array.isArray(s.actions) ? s.actions : []).filter((a) => a?.label && !a.primary);
             const own = screenElement(s, lib);
             el = own && others.length ? h("div", null, own, h(P.Cluster, null, others.map((a, k) => h(lib.ui.Button, { key: k, variant: "secondary" }, a.label)))) : own;

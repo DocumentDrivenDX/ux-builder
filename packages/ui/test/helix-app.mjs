@@ -1,6 +1,7 @@
 /* A HELIX-governed app in a temporary directory, for the blueprint's
    propose, draw and wireframes tests (FEAT-012): the .helix.yml marker,
-   HELIX v0.18.0's templates installed as an app has them, a feature with
+   HELIX's templates installed as an app has them (the starter's set, with
+   v0.20.0's user-flow, wireframe, user-journey-map and DESIGN.md), a feature with
    two stories (one walkthrough still the template's, one already written),
    its solution design without a screen flow, the starter's DESIGN.md, and
    the review blueprint. No architecture and no story test plans yet. */
@@ -35,7 +36,7 @@ export function makeApp({ marker = true } = {}) {
   const refs = join(dir, ".claude/skills/helix/references");
   cpSync(join(PKG, "activities"), join(refs, "activities"), { recursive: true });
   cpSync(MINE, join(refs, "activities"), { recursive: true, filter: (p) => !p.endsWith("README.md") });
-  write(dir, ".claude/skills/helix/HELIX-VERSION.json", JSON.stringify({ version: "0.18.0" }) + "\n");
+  write(dir, ".claude/skills/helix/HELIX-VERSION.json", JSON.stringify({ version: "0.20.0" }) + "\n");
   write(dir, "docs/helix/01-frame/features/FEAT-012-time-review.md", "---\nddx:\n  id: FEAT-012\n  type: feature-specification\n  status: draft\n---\n\n# Feature Specification: FEAT-012 — Time review\n\nReview time entries.\n");
   write(dir, "docs/helix/01-frame/user-stories/US-012-review-entries.md", story("US-012", "Review entries", ["Given an entry, when it is approved, then the queue moves on.", "Given the last entry, when it is approved, then the queue is empty."]));
   write(dir, "docs/helix/01-frame/user-stories/US-013-add-an-entry.md", story("US-013", "Add an entry", ["Given the list, when an entry is saved, then it is listed."], "1. The user opens Entries and presses Import.\n2. The user uploads a file; the entries are listed."));

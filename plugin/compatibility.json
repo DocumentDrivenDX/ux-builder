@@ -1,0 +1,7 @@
+{
+  "@ux-builder/design": "1.0.0",
+  "@ux-builder/ui": "0.15.0",
+  "@ux-builder/audit": "0.8.0",
+  "@ux-builder/trace": "0.3.0",
+  "@ux-builder/tokens": "1.8.0"
+}

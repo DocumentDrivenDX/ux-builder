@@ -1,4 +1,4 @@
-/* The journey walk (US-166): each journey clicked through a served
+/* The journey walk (US-173): each journey clicked through a served
    prototype, by its actions' labels, never through the prototype's bar.
 
      npm test --workspace @ux-builder/audit */
@@ -21,8 +21,8 @@ page("events", `<h1>My events</h1><ul><li><a href="post.compact.html">Velvet Fri
 page("post", `<h1>Post an event</h1>`);
 page("guests", `<h1>Who's coming</h1>`);
 
-describe("US-166: the journey walk", () => {
-  // @covers US-166-AC3
+describe("US-173: the journey walk", () => {
+  // @covers US-173-AC3
   test("walks a journey by its labels, and says where one stops and why; the bar's own links are never clicked", async () => {
     const served = await serveFolder(dir);
     try {
@@ -39,7 +39,7 @@ describe("US-166: the journey walk", () => {
     } finally { await served.stop(); }
   });
 
-  // @covers US-167-AC2
+  // @covers US-174-AC2
   test("a list's first row is tried too, and a row that leads elsewhere than the journey is reported; the journey still walks", async () => {
     const served = await serveFolder(dir);
     try {

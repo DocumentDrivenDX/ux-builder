@@ -220,7 +220,7 @@ describe("US-156: the build installs no starter document the design already has"
     assert.doesNotMatch(read(other, "docs/helix/02-design/DESIGN.md"), /to: FEAT-001/, "no link to a starter document that was not written");
   });
 
-  // @covers US-165-AC6
+  // @covers US-172-AC6
   test("the app is built in the design's appearance; a design with none keeps system", async () => {
     const dark = folder("dark-look", (d) => {
       const f = join(d, ".ux-builder/design-state.json");
@@ -288,7 +288,7 @@ describe("VIP List session 2: a screen's own frame and the notices of its own st
    shows the values it changes. Uses this repository's packages; skipped where vite or Chromium is missing. */
 describe("US-159: the generated app renders", () => {
   // @covers US-159-AC1
-  // @covers US-166-AC6
+  // @covers US-173-AC6
   test("each designed screen opens with no page error; ?state= of a screen's own shows its notice and changed values", { timeout: 180_000 }, async (t) => {
     const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
     const vite = join(ROOT, "node_modules/.bin/vite");
@@ -323,7 +323,7 @@ describe("US-159: the generated app renders", () => {
         assert.deepEqual(errors, [], `${s.id}: ${errors.join("; ")}`);
         await page.close();
       }
-      // @covers US-167-AC4
+      // @covers US-174-AC4
       // The header shows the app's name, not the plain theme's title beside it ("Plain rivers").
       const home = await browser.newPage();
       await home.goto(served.url);

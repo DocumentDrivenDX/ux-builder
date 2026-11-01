@@ -1,0 +1,169 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-stack",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-stack",
+      "kind": "structure",
+      "form": "stack",
+      "title": "Where each piece sits",
+      "question": "Where does each piece sit?",
+      "takeaway": "Beacon's own code is one band between the front door and the platform.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/architecture-model.toml",
+        "view": "stack",
+        "digest": "sha256:5506076ecd96344bd6b203c4d2a36ed983a7d9c37883c0e4dc65f9a59f689910"
+      },
+      "nodes": [
+        {
+          "id": "agent",
+          "label": "Support agent",
+          "role": "actor",
+          "status": "built",
+          "layer": "layer-people"
+        },
+        {
+          "id": "admin",
+          "label": "Workspace admin",
+          "detail": "sets policies and rules",
+          "role": "actor",
+          "status": "built",
+          "layer": "layer-people"
+        },
+        {
+          "id": "idp",
+          "label": "Identity provider",
+          "detail": "single sign-on",
+          "role": "platform",
+          "status": "built",
+          "layer": "layer-front-door"
+        },
+        {
+          "id": "proxy",
+          "label": "Sign-in proxy",
+          "detail": "checks identity, forwards the agent's token",
+          "role": "platform",
+          "status": "built",
+          "layer": "layer-front-door"
+        },
+        {
+          "id": "web",
+          "label": "Web app",
+          "detail": "the agent's inbox and draft editor",
+          "role": "own",
+          "status": "built",
+          "layer": "layer-beacon"
+        },
+        {
+          "id": "api",
+          "label": "Beacon API",
+          "detail": "every request runs as the agent",
+          "role": "own",
+          "status": "built",
+          "layer": "layer-beacon"
+        },
+        {
+          "id": "drafter",
+          "label": "Reply drafter",
+          "detail": "builds the prompt from the ticket and its history",
+          "role": "own",
+          "status": "built",
+          "layer": "layer-beacon"
+        },
+        {
+          "id": "worker",
+          "label": "Job worker",
+          "detail": "imports, re-indexing, nightly digests",
+          "role": "own",
+          "status": "built",
+          "layer": "layer-beacon"
+        },
+        {
+          "id": "rules",
+          "label": "Policy rules",
+          "detail": "a fixed allow-list until the rules engine lands",
+          "role": "own",
+          "status": "placeholder",
+          "layer": "layer-beacon"
+        },
+        {
+          "id": "db",
+          "label": "Beacon database",
+          "detail": "tickets, drafts, reviews",
+          "role": "store",
+          "status": "built",
+          "layer": "layer-beacon-data"
+        },
+        {
+          "id": "queue",
+          "label": "Job queue",
+          "role": "store",
+          "status": "built",
+          "layer": "layer-beacon-data"
+        },
+        {
+          "id": "files",
+          "label": "Attachment store",
+          "detail": "object storage",
+          "role": "store",
+          "status": "unknown",
+          "layer": "layer-beacon-data"
+        },
+        {
+          "id": "gateway",
+          "label": "Model gateway",
+          "detail": "rate limits, usage, model choice",
+          "role": "platform",
+          "status": "built",
+          "layer": "layer-platform"
+        },
+        {
+          "id": "models",
+          "label": "Language models",
+          "role": "platform",
+          "status": "built",
+          "layer": "layer-platform"
+        },
+        {
+          "id": "telemetry",
+          "label": "Telemetry collector",
+          "detail": "traces and audit spans",
+          "role": "platform",
+          "status": "built",
+          "layer": "layer-platform"
+        }
+      ],
+      "structure": {
+        "layers": [
+          {
+            "id": "layer-people",
+            "label": "People"
+          },
+          {
+            "id": "layer-front-door",
+            "label": "Front door"
+          },
+          {
+            "id": "layer-beacon",
+            "label": "Beacon"
+          },
+          {
+            "id": "layer-beacon-data",
+            "label": "Beacon data"
+          },
+          {
+            "id": "layer-platform",
+            "label": "Platform"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

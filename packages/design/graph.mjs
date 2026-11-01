@@ -12,8 +12,11 @@ import { checkBlueprint, complexityDelta } from "@ux-builder/ui/blueprint";
 import { recordDecision } from "@ux-builder/trace";
 import { DesignError, bpFile, proposalsDir, protoDir, ux } from "./app.mjs";
 import { businessRules, helixRoot, jobsTable, parseDocument, ruleCitations, usersTable, uxDocuments } from "./documents.mjs";
+import { uiDecisions } from "./decisions.mjs";
+import { keyOf } from "./people.mjs";
 import { readState } from "./state.mjs";
-import { kits, testKit } from "./testkit.mjs";
+import { kits, studyTasks, testKit } from "./testkit.mjs";
+import { studyRunDir } from "./studies.mjs";
 import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const list = (x) => (Array.isArray(x) ? x : []);
@@ -38,10 +41,10 @@ export function buildGraph(app) {
   const bp = readJson(join(app, bpFile(app))) ?? {};
   const BP = bpFile(app);
 
-  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) node(id, "job", j.job, ux(app, "jobs.md"));
-  // Target users (GDL-77): a user holds jobs, and tasks serve users.
-  for (const [id, u] of Object.entries(usersTable(app) ?? {})) { node(id, "user", u.user, ux(app, "users.md")); for (const h of u.jobs) edge(id, h.job); }
-  for (const t of list(bp.tasks).filter((x) => x?.id)) { node(t.id, "task", t.goal, BP); for (const j of list(t.jobs)) edge(j, t.id); for (const u of list(t.users)) edge(u, t.id); }
+  // The PRD's needs and users (ADR-042), by key: a user holds needs, and tasks serve users.
+  for (const [id, j] of Object.entries(jobsTable(app) ?? {})) node(id, "job", j.job, j.path);
+  for (const [id, u] of Object.entries(usersTable(app) ?? {})) { node(id, "user", u.user, u.path); for (const h of u.jobs) edge(id, h.job); }
+  for (const t of list(bp.tasks).filter((x) => x?.id)) { node(t.id, "task", t.goal, BP); for (const j of list(t.needs ?? t.jobs)) edge(keyOf(j), t.id); for (const u of list(t.users)) edge(keyOf(u), t.id); }
   // Business rules (GDL-78), defined in HELIX: a rule applies to the tasks and journey steps that cite it.
   const rules = businessRules(app).rules;
   for (const c of ruleCitations(bp)) {
@@ -76,10 +79,10 @@ export function buildGraph(app) {
   }
   // Test-kit tasks, by journey; findings, by journey.
   for (const kit of kits(app)) {
-    const text = existsSync(join(app, `${ux(app)}/tests/${kit}/scenarios.md`)) ? readFileSync(join(app, `${ux(app)}/tests/${kit}/scenarios.md`), "utf8") : "";
-    for (const [, n, journey] of text.matchAll(/^\| (\d+) \| (J-[^ |]+) \|/gm)) { const id = `${kit}#${n}`; node(id, "test-kit task", `${kit} task ${n}`, `${ux(app)}/tests/${kit}/scenarios.md`); edge(journey, id); }
-    const findings = readJson(join(app, `${ux(app)}/tests/${kit}/findings.json`))?.findings ?? [];
-    for (const f of findings) { node(f.id, "finding", f.title ?? f.remark ?? f.id, `${ux(app)}/tests/${kit}/findings.json`); edge(`${kit}#${f.task}`, f.id); }
+    const run = studyRunDir(app, kit);
+    for (const t of studyTasks(app, kit)) { const id = `${kit}#${t.n}`; node(id, "test-kit task", `the ${kit} study, task ${t.n}`, `${run}/tasks.json`); if (nodes.has(t.journey)) edge(t.journey, id); }
+    const findings = readJson(join(app, `${run}/findings.json`))?.findings ?? [];
+    for (const f of findings) { node(f.id, "finding", f.title ?? f.remark ?? f.id, `${run}/findings.json`); edge(`${kit}#${f.task}`, f.id); }
   }
   const assessments = reportsOf(app).assessments;
   const runs = existsSync(join(app, assessments)) ? readdirSync(join(app, assessments)).filter((n) => /^R-/.test(n)).sort() : [];
@@ -87,12 +90,11 @@ export function buildGraph(app) {
     if (f.id && f.journey_id && nodes.has(f.journey_id)) { node(f.id, "finding", f.title ?? f.id, `${assessments}/${runs.at(-1)}/backlog.json`); edge(f.journey_id, f.id); }
   }
   // Decision records, linked to what they name.
-  for (const d of uxDocuments(app).filter((x) => x.type === "ux-decision")) {
-    const doc = parseDocument(readFileSync(join(app, d.path), "utf8"));
-    node(d.id, "decision", doc.body.match(/^# UXD-\d+: (.+)$/m)?.[1] ?? d.id, d.path);
-    nodes.get(d.id).status = doc.front?.ux?.status;
-    const named = new Set([...list(doc.front?.ux?.links).map((l) => String(l.to)), ...(doc.body.match(/\b(?:J|T)-[A-Za-z0-9-]+\b/g) ?? [])]);
-    for (const s of list(bp.screens).filter((x) => x?.id)) if (new RegExp(`\\b${s.id}\\b`).test(doc.body)) named.add(`screen:${s.id}`);
+  for (const d of uiDecisions(app)) {
+    node(d.id, "decision", d.title, d.path);
+    nodes.get(d.id).status = d.status;
+    const named = new Set([...d.links, ...(d.text.match(/\b(?:J|T)-[A-Za-z0-9-]+\b/g) ?? [])]);
+    for (const s of list(bp.screens).filter((x) => x?.id)) if (new RegExp(`\\b${s.id}\\b`).test(d.text)) named.add(`screen:${s.id}`);
     for (const id of named) if (nodes.has(id) && id !== d.id) edge(d.id, id);
   }
   return { nodes, edges, bp };
@@ -119,7 +121,7 @@ function resolveId(nodes, id) {
 export function trace(app, { id } = {}) {
   const { nodes, edges } = buildGraph(app);
   const at = resolveId(nodes, id ?? "");
-  if (!at) throw new DesignError(`no ${id ?? "ID"} in the app: use a J-, T-, journey, screen, UXD-, TK-n#task or F- ID`);
+  if (!at) throw new DesignError(`no ${id ?? "ID"} in the app: use a J-, T-, journey, screen, ADR-, <study>#task or F- ID`);
   const { id: _, ...self } = nodes.get(at);
   return { item: { id: at, ...self }, upstream: view(nodes, reach(edges, [at], false)), downstream: view(nodes, reach(edges, [at], true)) };
 }
@@ -192,7 +194,7 @@ export async function applyImpact(app, { change, set } = {}) {
     await writePrototype(next, { root: join(app, protos), dir, question: reached.change, theme });
     regenerated.push(`${protos}/${dir}/`);
   }
-  for (const kit of kits(app)) { testKit(app, { id: kit }); regenerated.push(`${ux(app)}/tests/${kit}/`); }
+  for (const kit of kits(app)) { testKit(app, { study: kit }); regenerated.push(`${studyRunDir(app, kit)}/`); }
   // HELIX changes only as proposals the person applies.
   let proposals = null;
   if (helixRoot(app)) {

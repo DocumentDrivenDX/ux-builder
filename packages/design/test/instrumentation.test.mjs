@@ -25,7 +25,7 @@ function app() {
 const slow = async ({ pages }) => { await new Promise((r) => setTimeout(r, 1100)); return { ran: true, pagesAudited: pages.length, errors: 0, warnings: 0, findings: [] }; };
 
 describe("VIP List session 2: the guide's measures", () => {
-  // @covers US-165-AC2
+  // @covers US-172-AC2
   test("a check is stamped when it ends, with the seconds it took", async () => {
     const a = app();
     await stepPrototype(a);
@@ -50,32 +50,35 @@ describe("VIP List session 2: the guide's measures", () => {
     assert.equal(by[0].minutes, 8);
   });
 
-  test("testing starts when the first kit is written", () => {
+  test("testing starts when the first study is written", () => {
     const a = app();
     approveAll(a);
-    testKit(a);
+    testKit(a, { study: "rivers" });
     assert.equal(readEvents(a).filter((e) => e.type === "milestone" && e.name === "testing").length, 1);
-    testKit(a);
+    testKit(a, { study: "rivers" });
     assert.equal(readEvents(a).filter((e) => e.type === "milestone" && e.name === "testing").length, 1, "once");
   });
 
-  // @covers US-165-AC2
+  // @covers US-172-AC2
   test("simulated sessions, evidence and results are marked, and never confirm a job", () => {
     const a = app();
     approveAll(a);
-    testKit(a);
+    testKit(a, { study: "rivers" });
     writeFileSync(join(a, "sheet.csv"), typeof SHEET === "string" ? SHEET : SHEET.join("\n"));
-    observeImport(a, { file: "sheet.csv", kit: "TK-1", simulated: true });
+    observeImport(a, { file: "sheet.csv", study: "rivers", simulated: true });
     const f = evaluationFindings(a).filter((x) => x.source === "human");
     assert.ok(f.length && f.every((x) => x.simulated && x.label === "simulated session, not a person"));
     const events = [{ type: "journey-start", journey: "J-find", session: "s", at: "2026-10-31T10:00:00Z" }, { type: "complete", journey: "J-find", session: "s", at: "2026-10-31T10:01:00Z" }];
     writeFileSync(join(a, "events.jsonl"), events.map((e) => JSON.stringify(e)).join("\n"));
     const r = cli(a, ["insights", "events.jsonl", "--simulated", "--json"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.match(readFileSync(join(a, "docs/ux-builder/jobs.md"), "utf8"), /\| J-1 \| Find a river \| high \| EV-\d+ \| low \| hypothesis \|/, "cited, not confirmed");
+    // Amended 2026-11-01 (ADR-042): insights are run output; simulated ones say so and confirm nothing.
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.simulated, true);
+    assert.match(readFileSync(join(a, out.path), "utf8"), /SIMULATED data: not evidence from real people/);
   });
 
-  // @covers US-167-AC5
+  // @covers US-174-AC5
   test("an event logged with a bare date gets the moment it was logged; times out of order do not stretch a span", () => {
     const a = app();
     const t = (m) => new Date(Date.parse("2026-10-31T10:00:00Z") + m * 60000).toISOString();
@@ -115,7 +118,7 @@ describe("VIP List session 2: the guide's measures", () => {
 });
 
 describe("VIP List session 2: the scope, as one list for the person to cut", () => {
-  // @covers US-165-AC7
+  // @covers US-172-AC7
   test("scope lists the stories with their criteria, the screens and destinations, and what people must and may give", async () => {
     const { scope } = await import("../index.mjs");
     const a = app();

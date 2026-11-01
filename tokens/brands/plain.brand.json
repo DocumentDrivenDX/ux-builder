@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/brand.schema.json",
-  "$description": "A second theme proves the tokens are actually load-bearing rather than\ndecorative. Same structure, different voice.\nThe dark appearance (added 2026-10-31, ADR-042) lets guided prototypes show a product meant for dark rooms before any brand theme exists: the same grays and blue, inverted.",
+  "$description": "A second theme proves the tokens are actually load-bearing rather than\ndecorative. Same structure, different voice.\nThe dark appearance (added 2026-10-31, ADR-043) lets guided prototypes show a product meant for dark rooms before any brand theme exists: the same grays and blue, inverted.",
   "name": "plain",
   "title": "Plain",
   "appearances": {

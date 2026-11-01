@@ -11,15 +11,15 @@
    then the state it was walked in, then step, then each finding with its
    rule's ID and full statement (or its heuristic and source), evidence,
    severity on Nielsen's 0 to 4 scale and fix; a finding at no step is under
-   its state's "General". report.md is a HELIX usability-evaluation-report
-   (ddx: frontmatter), drafted from the installed HELIX's template when it
-   defines that type. compare() classifies findings
+   its state's "General". report.md is a ux-builder usability assessment
+   report (ux-builder: frontmatter), run output rather than a HELIX
+   document (ADR-042); its fixes reach HELIX through assess propose.
+   compare() classifies findings
    across two runs of one scope; gate() is the CI exit. */
 
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { HEURISTICS } from "./heuristics.mjs";
-import { loadTypes } from "./helix.mjs";
 import { metricsLines } from "./metrics.mjs";
 import { catalogueRules, ruleOf, SEVERITY_WORDS, severityOf } from "./rules.mjs";
 import { refreshLandingPage } from "../reports.mjs";
@@ -123,25 +123,14 @@ export function byJourney(r) {
   });
 }
 
-/* The installed HELIX's usability-evaluation-report type, if it defines one
-   (RPT-08; ADR-033): its location and template. */
-export function helixType(run) {
-  const path = run?.helix?.catalog?.path;
-  if (!path || !existsSync(path)) return null;
-  try { return loadTypes({ path }).find((t) => t.id === "usability-evaluation-report") ?? null; } catch { return null; }
-}
-
-/* The report, as Markdown with ddx: frontmatter; the HTML wraps the same
-   sections. Drafted from the HELIX type's template when there is one: its
-   sections in its order, each filled from the run where one of ours fits,
-   the rest of ours after them. */
+/* The report, as Markdown with ux-builder: frontmatter; the HTML wraps the
+   same sections. */
 function markdown(dir, r) {
   const run = r.run ?? {}, findings = r.backlog?.findings ?? [];
   const rules = catalogueRules(dir, run);
   const heur = findings.filter((f) => f.finding_type === "heuristic"), obligations = findings.filter((f) => f.finding_type !== "heuristic");
   const stagesOff = (run.stages ?? []).filter((s) => s.status !== "completed");
   const journeys = byJourney(r);
-  const type = helixType(run);
   const S = []; // { key, title, lines }
   const sec = (key, title, lines) => S.push({ key, title, lines });
 
@@ -152,7 +141,7 @@ function markdown(dir, r) {
   summary.push(`- Coverage: ${cov.filter((e) => e.status === "assessed").length} of ${cov.length} journey × state pairs assessed; ${cov.filter((e) => e.status === "blocked").length} blocked, ${cov.filter((e) => e.status === "not-assessed").length} not assessed, ${cov.filter((e) => e.status === "not-applicable").length} not applicable.`);
   if (r.baseline) summary.push(`- Baseline: ${r.baseline.tests.map((t) => `${t.id} ${t.status}`).join(", ") || "no tests declared"}; audit ${r.baseline.audit ? `${r.baseline.audit.findings.usability} usability and ${r.baseline.audit.findings.sdkAdoption} SDK-adoption findings` : "not run"}.`);
   summary.push(`- Inputs: HELIX flow \`${run.helix?.flow ?? "?"}\` (root \`${run.helix?.root ?? "?"}\`, catalogue ${run.helix?.catalog?.source ?? "?"}${run.helix?.catalog?.version ? ` ${run.helix.catalog.version}` : ""}); app commit \`${run.app?.commit?.slice(0, 10) ?? "?"}\`${run.app?.dirty ? " (with uncommitted changes)" : ""}; @ux-builder/ui ${run.versions?.ui ?? "not installed"}, audit ${run.versions?.audit ?? "?"}${run.agent ? `; agent ${run.agent.name}${run.agent.model ? ` (${run.agent.model})` : ""}` : ""}.`);
-  summary.push(type ? `- HELIX artifact: a ${type.id}, drafted from the installed HELIX's template${type.template ? ` (\`${type.template.split(sep).slice(-4).join("/")}\`)` : ""}; its place in the flow is \`${type.dir}${type.naming ?? ""}\` (propose it with \`assess propose\`).` : "- HELIX artifact: a usability-evaluation-report (ddx: frontmatter); the installed HELIX defines no such type yet, so it stays in the run package until it is proposed to the flow.");
+  summary.push("- Kept as: a ux-builder usability assessment report, run output listed on reports.html rather than a HELIX document; propose a finding's fix to HELIX with `assess propose`.");
   if (r.video) summary.push(`- Walkthrough videos: ${r.video.videos.length} recorded${r.video.notRecorded.length ? `, ${r.video.notRecorded.length} not recorded` : ""}; [watch them in the player](video/index.html)${r.video.videos.some((v) => v.files.mp4) ? ", or share the MP4s in `video/`" : ""}.`);
   if (stagesOff.length) summary.push(`- Stages that did not complete (reported apart from findings): ${stagesOff.map((s) => `${s.stage} ${s.status}${s.reason ? ` — ${s.reason}` : ""}`).join("; ")}.`);
   sec("summary", "Summary", summary);
@@ -256,29 +245,12 @@ function markdown(dir, r) {
     sec("baseline", "Baseline", L);
   }
 
-  // ddx: frontmatter (RPT-08): the type, and the journeys and stories it reports on.
+  // ux-builder: frontmatter (RPT-08): the type, and the journeys and stories it reports on.
   const stories = [...new Set([...journeys.map((j) => j.story), ...findings.flatMap((f) => (f.source_refs ?? []).map((x) => /^US-\d+/.exec(x)?.[0]))].filter(Boolean))].sort();
-  const front = ["---", "ddx:", `  id: UER-${run.id ?? "run"}`, "  type: usability-evaluation-report", "  status: draft", ...(stories.length ? ["  links:", ...stories.flatMap((s) => ["    - kind: informed_by", `      to: ${s}`])] : []), ...(journeys.length ? ["  journeys:", ...journeys.map((j) => `    - ${j.id}`)] : []), "---", ""];
+  const front = ["---", "ux-builder:", `  id: ${run.id ?? "run"}`, "  type: usability-assessment-report", "  status: draft", ...(stories.length ? ["  stories:", ...stories.map((s) => `    - ${s}`)] : []), ...(journeys.length ? ["  journeys:", ...journeys.map((j) => `    - ${j.id}`)] : []), "---", ""];
   const head = [`# UX assessment: ${run.config?.scope?.app ?? "app"} — ${run.id}`, "", `${CAVEAT} This report says what was checked, what was seen, what remains uncertain, why each change matters and how to verify it.`, ""];
   const body = (s) => [`## ${s.title}`, "", ...s.lines, ""];
-  let text;
-  if (type?.template) {
-    // The template's sections, in its order: ours where one fits, its own guidance otherwise.
-    const FIT = [["summary", /summary|overview/i], ["checked", /scope|method|checked|coverage|plan/i], ["findings", /finding|issue|problem|result/i], ["recommendations", /recommend/i], ["users", /user|participant|validation|research/i], ["proposals", /change|action|next/i]];
-    const tpl = readFileSync(type.template, "utf8").replace(/^---\n[\s\S]*?\n---\n\n?/, "");
-    const parts = tpl.split(/^(?=## )/m);
-    const used = new Set();
-    const out = [];
-    for (const p of parts.slice(1)) {
-      const title = /^## (.+)$/m.exec(p)[1].trim();
-      const fit = FIT.find(([k, re]) => re.test(title) && !used.has(k) && S.some((s) => s.key === k));
-      if (fit) { used.add(fit[0]); const s = S.find((x) => x.key === fit[0]); out.push(`## ${title}`, "", ...s.lines, ""); }
-      else out.push(p.trimEnd(), "");
-    }
-    for (const s of S) if (!used.has(s.key)) out.push(...body(s));
-    text = [...front, ...head, ...out].join("\n");
-  } else text = [...front, ...head, ...S.flatMap(body)].join("\n");
-  return text;
+  return [...front, ...head, ...S.flatMap(body)].join("\n");
 }
 
 const md2html = (md, dir, selfContained) => {

@@ -1,4 +1,4 @@
-/* Finish for me (FEAT-018 GDL-85; US-164; ADR-042 rule 5): when the
+/* Finish for me (FEAT-018 GDL-85; US-171; ADR-043 rule 5): when the
    person stops being guided, the agent drafts what the remaining steps
    would produce, and this writes every downstream artifact from it: the
    brief, wireframes, a step prototype with its check, a test kit and the
@@ -72,8 +72,9 @@ export async function finish(app, { answer, audit, write, wireframes = drawWiref
   const { bp: drawn } = withDefaults(app, bp, structuredClone(readState(app)));
   const wDir = layout(app).wireframes;
   await Promise.resolve().then(() => wireframes(drawn, join(app, wDir))).then(() => written.push(`${wDir}/`), (e) => notDone.push(`the wireframes: ${e.message.split("\n")[0]}`));
-  const kit = attempt("the test kit", () => testKit(app));
-  if (kit) written.push(kit.dir ?? kit.kit ?? "the test kit");
+  // The test kit is a usability study's (ADR-042): its plan proposed into HELIX, its materials run output.
+  const kit = attempt("the test kit", () => testKit(app, { study: "usability" }));
+  if (kit) written.push(kit.run ?? kit.path ?? "the test kit");
 
   // HELIX: propose from the blueprint, then apply every pending proposal, each document marked assumed.
   const applied = [];

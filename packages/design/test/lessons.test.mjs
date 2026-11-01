@@ -16,19 +16,14 @@ const ASSESS_SKILL = readFileSync(new URL("../../audit/skill/ux-builder-assess/S
 
 describe("US-151: IDs explained, HELIX read as it is, a choice of audit, the reports beside the design", () => {
   // @covers US-151-AC1
-  test("AC1: explain names what an ID is and where it lives; explain ids lists every kind; the overview and the skill teach them", () => {
+  test("AC1: explain names what a HELIX ID is and where it lives; explain ids lists only HELIX's IDs and pseudonyms; the overview and the skill say to show names", () => {
     const cases = {
-      "U-1": [/^U-1: Target user\. Where: docs\/ux-builder\/users\.md\./, "target user"],
-      "J-1": [/^J-1: Job to be done \(a number\)\. Where: docs\/ux-builder\/jobs\.md\./, "job to be done"],
-      "J-find": [/^J-find: Journey \(a name\)\. Where: the blueprint/, "journey"],
-      "T-2": [/^T-2: Task\. Where: the blueprint's task model\./, "task"],
       "BR-1": [/^BR-1: Business rule\. Where: defined once in HELIX/, "business rule"],
       "US-3": [/^US-3: User story\./, "user story"],
       "US-3-AC2": [/^US-3-AC2: Acceptance criterion\./, "acceptance criterion"],
-      "UXD-1": [/^UXD-1: Interaction decision\. Where: docs\/ux-builder\/decisions\/\./, null],
-      "EV-2": [/^EV-2: Research evidence\./, null],
-      "TK-1": [/^TK-1: Usability test kit\./, null],
-      "F-1a2b3c4d": [/^F-1a2b3c4d: Finding from a test or the assessment\./, null],
+      "ADR-008": [/^ADR-008: Decision, a HELIX ADR/, null],
+      "UF-4": [/^UF-4: User flow, one per feature\./, null],
+      "UF-4-01-list": [/^UF-4-01-list: Wireframe of one view in a user flow\./, null],
       P1: [/^P1: Test participant, by pseudonym\./, null],
     };
     for (const [id, [line, term]] of Object.entries(cases)) {
@@ -36,13 +31,14 @@ describe("US-151: IDs explained, HELIX read as it is, a choice of audit, the rep
       assert.match(explainText(r), line, id);
       assert.deepEqual(r.terms.map((t) => t.term), term ? [term] : [], id);
     }
-    // From the command line too, and every kind at once.
+    // From the command line too, and every kind at once: HELIX's own and pseudonyms, nothing of ux-builder's (ADR-042 decision 5).
     const a = tempApp();
     assert.match(cli(a, ["explain", "BR-4"]).stdout, /^BR-4: Business rule\./);
     const all = explain({ term: "ids" }).ids.map((x) => x.id);
-    for (const k of ["U-<n>", "J-<n>", "J-<name>", "T-<n>", "BR-<n>", "US-<n>", "UXD-<n>", "EV-<n>", "TK-<n>", "FB-<n>"]) assert.ok(all.includes(k), k);
-    assert.match(overviewText(overview()), /short IDs: U-1 is a target user, J-1 a job to be done, J-find a journey, T-1 a task, BR-1 a business rule[\s\S]*explain ids/);
-    assert.match(SKILL, /\*\*Never show a bare ID\.\*\*[\s\S]*"the target\s+user U-1, weekend anglers"[\s\S]*`ux-builder-design explain <ID>`[\s\S]*`explain ids`/);
+    assert.deepEqual(all, ["US-<n>-AC<m>", "US-<n>", "FEAT-<n>", "BR-<n>", "ADR-<nnn>", "UF-<n>", "UF-<n>-<nn>-<view>", "UJM-<n>", "P<n>"]);
+    assert.equal(cli(a, ["explain", "U-1"]).status, 2, "U- is not an ID the person sees");
+    assert.match(overviewText(overview()), /Everything is named by what it says[\s\S]*The only IDs you will see are HELIX's own[\s\S]*explain ids/);
+    assert.match(SKILL, /\*\*Show names, not IDs\.\*\*[\s\S]*"weekend anglers"[\s\S]*`ux-builder-design explain <ID>`[\s\S]*`explain ids`/);
   });
 
   // @covers US-151-AC2

@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: CONTRACT-008
@@ -30,12 +32,12 @@ In the first guided session the agent relayed a subagent's summary of an existin
 
 ## Walkthrough
 
-1. The agent records a claim in EV-1's Claims: its source, observed or inferred, the confidence, that it changes direction.
+1. The agent records a claim in the study's Findings > Claims: its source, observed or inferred, the confidence, that it changes direction.
 2. `validate` warns it was not checked; the agent reads the code, records `claim verify`, and the warning goes.
 
 ## Acceptance Criteria
 
-- [ ] **US-155-AC1** — Given an evidence record, when `evidence claim add` runs with a source, a basis (observed or inferred) and a confidence, then it adds a row to the record's Claims table before the synthesis notes, with what contradicts it and what is unknown; without a source, a basis or a confidence it is refused.
+- [ ] **US-155-AC1** — Given a study, when `evidence claim add --study <study>` runs with a source, a basis (starting observed or inferred) and a confidence, then it proposes a row of the study's *Findings* > *Claims* in HELIX's columns, with its direction, what contradicts it and what is unknown; without a source, a basis or a confidence it is refused.
 - [ ] **US-155-AC2** — Given a direction-changing claim neither checked against its source nor marked low confidence, when `validate` runs, then it warns naming the claim, until `evidence claim verify` records the check or the claim is low confidence; a claims row with no source fails `validate`; and the skill tells the agent never to relay a subagent's summary as fact.
 
 ## Edge Cases

@@ -27,7 +27,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^J-"
+            "pattern": "^(J-)?[a-z]"
           },
           "criteria": {
             "type": "array",

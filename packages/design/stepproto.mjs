@@ -1,9 +1,9 @@
-/* A prototype ends every step (FEAT-018 GDL-84; US-163; ADR-042): the
+/* A prototype ends every step (FEAT-018 GDL-84; US-170; ADR-043): the
    step prototype, drawn from the blueprint as it stands, with the defaults
    the person has not chosen yet (modality, size classes, frame, theme,
    appearance) recorded as assumptions instead of refused; and its check
    round: the UI audit over every page and the deterministic heuristics,
-   and from step 5 the journey walk (US-166). The agent fixes what a round
+   and from step 5 the journey walk (US-173). The agent fixes what a round
    finds, checks again (or records that nothing needed fixing), and only
    then shows the prototype and asks the step's decision. */
 
@@ -24,7 +24,7 @@ import { readState, writeState } from "./state.mjs";
 const list = (x) => (Array.isArray(x) ? x : []);
 /* Responsive web's size classes (FEAT-014's matrix asks for large too). */
 export const DEFAULT_SIZE_CLASSES = ["compact", "medium", "expanded", "large"];
-/* From this step the check also walks the journeys in a browser (ADR-042 rule 3; US-166). */
+/* From this step the check also walks the journeys in a browser (ADR-043 rule 3; US-173). */
 export const WALK_FROM = 5;
 
 /* Add or update the agent's assumption about one default; one the person
@@ -181,7 +181,7 @@ export async function auditPrototype({ dir, pages, theme, appearance, blueprint,
   } finally { await served?.stop(); }
 }
 
-/* The journey walk of a step prototype, from step 5 (US-166): each journey
+/* The journey walk of a step prototype, from step 5 (US-173): each journey
    clicked through the drawn pages (at compact) or the built app's routes. */
 export async function walkPrototype({ dir, bp, isApp = false, paths = {} }) {
   let served = null;
@@ -318,7 +318,7 @@ export const CHOICES = ["continue", "revise", "finish"];
 const closedBy = (n) => ["core-1", "core-2", "core-3"].find((id) => Math.max(...CLOSES[id]) === n) ?? null;
 
 /* ux-builder-design step decide continue|revise|finish --answer <their words>:
-   the person's decision on the step's checked prototype (US-163-AC4, AC5). */
+   the person's decision on the step's checked prototype (US-170-AC4, AC5). */
 export function stepDecide(app, { choice, answer, sameTurn = false, now = new Date().toISOString() } = {}) {
   if (!CHOICES.includes(choice)) throw new DesignError(`step decide takes ${CHOICES.join(", ")}, not "${choice ?? ""}"`);
   if (!answer?.trim()) throw new DesignError("step decide needs --answer: the person's decision, in their words");

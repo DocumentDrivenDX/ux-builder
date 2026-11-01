@@ -46,7 +46,7 @@ journeys* and FEAT-012; the criteria name them so tests can cite them.
 
 - [ ] **US-089-AC1** — Given a blueprint journey for a story, when `propose` runs, then it writes a patch for that story's *Walkthrough* with one numbered step per journey step, and applies nothing.
 - [ ] **US-089-AC2** — Given a blueprint with actions, when `propose` runs, then it writes a patch adding a Mermaid flowchart of the flow to the governing solution design, and a sequence diagram of the primary journey to architecture's *Data Flow*.
-- [ ] **US-089-AC3** — Given destinations by size class, when `propose` runs, then it writes a patch for `DESIGN.md`'s navigation table.
+- [ ] **US-089-AC3** — Given destinations by size class, when `propose` runs, then it writes a patch for `DESIGN.md`'s navigation table, and one for its *Modalities, Size Classes and App Frame* from the blueprint's modalities, size classes and frame.
 - [ ] **US-089-AC4** — Given journey steps and alternates, when `propose` runs, then it writes a patch of story test plan scenarios, one per step and alternate, citing the criteria.
 - [ ] **US-089-AC5** — Given a HELIX section that already differs from the blueprint, when `propose` runs, then no patch touches that section and the disagreement is reported with both texts.
 - [ ] **US-089-AC6** — Given the same blueprint and HELIX documents, when `propose` runs twice, then the patches are identical.

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 732 240" width="732" height="240" role="img" aria-labelledby="umf-ac-status-title" aria-describedby="umf-ac-status-desc" class="uxb-visual uxb-visual--metric-bar" data-visual="umf-ac-status" style="font-family:ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="umf-ac-status-title">Acceptance criteria by status</title>
+<desc id="umf-ac-status-desc">Where do umf's acceptance criteria stand?</desc>
+<rect x="0" y="0" width="732" height="240" style="fill:#F0EEE6"/>
+<g id="umf-ac-status--chart" class="uxb-chart">
+<path d="M143.02816 16 L143.02816 196" style="fill:none;stroke:#706C62;stroke-width:0.75px"/>
+<text x="143.03" y="212" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">0</text>
+<path d="M245.622528 16 L245.622528 196" style="fill:none;stroke:#706C62;stroke-width:0.75px"/>
+<text x="245.62" y="212" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">100</text>
+<path d="M348.216896 16 L348.216896 196" style="fill:none;stroke:#706C62;stroke-width:0.75px"/>
+<text x="348.22" y="212" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">200</text>
+<path d="M450.81126399999994 16 L450.81126399999994 196" style="fill:none;stroke:#706C62;stroke-width:0.75px"/>
+<text x="450.81" y="212" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">300</text>
+<path d="M553.405632 16 L553.405632 196" style="fill:none;stroke:#706C62;stroke-width:0.75px"/>
+<text x="553.41" y="212" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">400</text>
+<path d="M656 16 L656 196" style="fill:none;stroke:#706C62;stroke-width:0.75px"/>
+<text x="656" y="212" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">500</text>
+<text x="133.03" y="38" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Satisfied</text>
+<rect x="143.03" y="24" width="184.67" height="20" rx="3" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<text x="333.7" y="38" style="fill:#141413;font-size:12px;font-weight:600">180</text>
+<text x="133.03" y="74" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Untested</text>
+<rect x="143.03" y="60" width="417.56" height="20" rx="3" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<text x="566.59" y="74" style="fill:#141413;font-size:12px;font-weight:600">407</text>
+<text x="133.03" y="110" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Uncited Coverage</text>
+<rect x="143.03" y="96" width="239.04" height="20" rx="3" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<text x="388.07" y="110" style="fill:#141413;font-size:12px;font-weight:600">233</text>
+<text x="133.03" y="146" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Asserted Unbacked</text>
+<text x="149.03" y="146" style="fill:#141413;font-size:12px;font-weight:600">0</text>
+<text x="133.03" y="182" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Reviewed Exception</text>
+<rect x="143.03" y="168" width="17.44" height="20" rx="3" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<text x="166.47" y="182" style="fill:#141413;font-size:12px;font-weight:600">17</text>
+<text x="656" y="230" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">criteria</text>
+</g>
+</svg>

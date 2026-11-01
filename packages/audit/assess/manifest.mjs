@@ -143,7 +143,7 @@ export function validate(m) {
   }
   for (const [i, j] of (d.journeys ?? []).entries()) {
     if (j?.priority && !PRIORITIES.includes(j.priority) && !PLACEHOLDER.test(j.priority)) add(["journeys", i, "priority"], `must be one of ${PRIORITIES.join(", ")}`);
-    if (j?.id && !/^J-[a-z0-9][a-z0-9-]*$/.test(j.id) && !PLACEHOLDER.test(j.id)) add(["journeys", i, "id"], "must look like J-<kebab-case>");
+    if (j?.id && !/^(J-)?[a-z][a-z0-9-]*$/.test(j.id) && !PLACEHOLDER.test(j.id)) add(["journeys", i, "id"], "must be a kebab-case name, such as capture (an older J-capture still passes)");
   }
   const base = d.run?.baseUrl && !PLACEHOLDER.test(d.run.baseUrl) ? d.run.baseUrl : null;
   const origins = (d.run?.origins?.length ? d.run.origins : base ? [base] : []).map((u) => origin(u)).filter(Boolean);

@@ -26,7 +26,7 @@ const base = () => ({
 const rules = (bp) => checkBlueprint(bp).map((f) => `${f.severity} ${f.rule} ${f.path}`);
 
 describe("VIP List session 2: the blueprint says what the person meant", () => {
-  // @covers US-165-AC5
+  // @covers US-172-AC5
   test("a screen entered from outside is not unreachable, and neither is what it leads to", () => {
     const bp = base();
     assert.ok(rules(bp).some((r) => /flow\.reachable \/screens\/2/.test(r)), "without entry, the door is unreachable");
@@ -47,7 +47,7 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     assert.match(tonight.html, /My passes/, "the guest screens keep theirs");
   });
 
-  // @covers US-165-AC5
+  // @covers US-172-AC5
   test("a state of the screen's own is drawn as its notice, and refused without one", async () => {
     const bp = base();
     bp.screens[2].entry = "scan";
@@ -60,7 +60,7 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     bp.journeys = [{ id: "J-door", story: "US-6", entry: "door", steps: [{ screen: "door", action: "letin" }], alternates: [{ from: 0, steps: [{ screen: "door", state: "already-used" }], reason: "Already used" }] }];
     assert.deepEqual(rules(bp).filter((r) => /^error .*journeys/.test(r)), []);
     assert.ok(rules({ ...bp, screens: bp.screens.map((x) => (x.id === "door" ? { ...x, states: [...x.states, "Bad State"] } : x)) }).some((r) => /^error blueprint\.valid \/screens\/2\/states\/\d/.test(r)));
-    // @covers US-166-AC6
+    // @covers US-173-AC6
     // The values the state changes replace the samples (VIP List session 3: "Valid tonight" under "Already used").
     bp.screens[2].content = [{ label: "Guest", kind: "data" }, { label: "Pass status", kind: "data" }];
     bp.screens[2].stateNotices["already-used"].values = { "Pass status": "Already used" };
@@ -73,7 +73,7 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     assert.match(page.html, /Do not let in on this pass\./);
   });
 
-  // @covers US-165-AC5
+  // @covers US-172-AC5
   test("nav.audience: a tab for other users warns; reached by its own link, it does not", () => {
     const bp = base();
     bp.screens[2].entry = "link";
@@ -88,7 +88,7 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
 });
 
 describe("VIP List session 3: a screen's other actions are on the page", () => {
-  // @covers US-166-AC3
+  // @covers US-173-AC3
   test("the ideal state draws each action that is not the primary one, under the screen, so a journey can be walked on the page", async () => {
     const bp = base();
     const tonight = (await wireframes(bp)).find((p) => p.file === "tonight.compact.html").html;
@@ -99,7 +99,7 @@ describe("VIP List session 3: a screen's other actions are on the page", () => {
 });
 
 describe("VIP List sessions 2 and 3: the prototype bar is readable in dark", () => {
-  // @covers US-166-AC6
+  // @covers US-173-AC6
   test("its links take the theme's strong text colour, underlined, not the browser's blue", async () => {
     const pages = await prototypePages(base(), { appearance: "dark" });
     assert.match(pages.find((p) => p.file === "tonight.compact.html").html, /\.proto-bar a \{ color: var\(--piq-color-text-strong, var\(--piq-color-text\)\); text-decoration: underline;/);
@@ -107,7 +107,7 @@ describe("VIP List sessions 2 and 3: the prototype bar is readable in dark", () 
 });
 
 describe("VIP List session 3: a journey that comes back where it started", () => {
-  // @covers US-165-AC5
+  // @covers US-172-AC5
   test("its shortest path goes there and back, not nowhere", () => {
     const bp = base();
     bp.journeys = [{ id: "J-round", story: "US-1", entry: "tonight", steps: [{ screen: "tonight", action: "open" }, { screen: "passes", action: "back" }, { screen: "tonight" }] }];
@@ -116,7 +116,7 @@ describe("VIP List session 3: a journey that comes back where it started", () =>
 });
 
 describe("VIP List session 2: the prototype shows the design's own content, not placeholders", () => {
-  // @covers US-165-AC6
+  // @covers US-172-AC6
   test("a form draws a field for each content label, by what it asks; a list draws its labels' sample values", async () => {
     const bp = base();
     bp.screens.push({ id: "claim", title: "Claim a spot", pattern: "FormPage", states: st, entry: "link", content: ["Mobile number", "Date of birth", "Spots (1 or 2)", "Email (optional)", "Promotional texts (opt-in)"].map((label) => ({ label, kind: "data" })), actions: [{ id: "submit", label: "Get my pass", to: "passes", primary: true }] });
@@ -135,7 +135,7 @@ describe("VIP List session 2: the prototype shows the design's own content, not 
     assert.match(tonight, />Event 1</);
     assert.match(tonight, />Austin</);
     assert.match(tonight, />14 left</);
-    // @covers US-166-AC6
+    // @covers US-173-AC6
     // On a phone a list shows its first three items, or those marked compact (VIP List session 3).
     const fields = (html) => [...html.matchAll(/class="piq-collection__(?:primary|field)">(?:<span[^>]*>[^<]*<\/span>)?([^<]*)</g)].slice(0, 5).map((m) => m[1]);
     assert.deepEqual(fields(pages.find((p) => p.file === "tonight.compact.html").html).slice(0, 3), ["Event 1", "Venue 1", "Austin"]);
@@ -147,7 +147,7 @@ describe("VIP List session 2: the prototype shows the design's own content, not 
 });
 
 describe("VIP List sessions 3 and 4: a person's details are asked before they are shown", () => {
-  // @covers US-167-AC1
+  // @covers US-174-AC1
   test("screen.details-asked warns about a name shown on the pass and at the door that no form asks for; asked, it does not", () => {
     const bp = base();
     bp.screens.push({ id: "claim", title: "Claim a spot", pattern: "FormPage", states: st, entry: "link", content: ["Mobile number", "Date of birth"].map((label) => ({ label, kind: "data" })), actions: [{ id: "submit", label: "Get my pass", to: "passes", primary: true }] });
@@ -163,7 +163,7 @@ describe("VIP List sessions 3 and 4: a person's details are asked before they ar
 });
 
 describe("VIP List sessions 4 and 5: a count says what it counts", () => {
-  // @covers US-166-AC6
+  // @covers US-173-AC6
   test("a list shows counts with what they count, as a phone hides the column labels; a form's choices and a left count keep theirs", () => {
     assert.deepEqual([sampleValue("Claimed", 0), sampleValue("Came", 1), sampleValue("Spots", 0), sampleValue("Spots", 1)], ["2 claimed", "1 came", "2 spots", "1 spot"]);
     assert.deepEqual([sampleValue("Spots (1 or 2)", 0), sampleValue("Spots left", 0), sampleValue("Number of spots", 0)], ["2", "14 left", "2"]);

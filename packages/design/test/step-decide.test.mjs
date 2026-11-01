@@ -1,6 +1,6 @@
 /* Every step ends with the person's decision on its checked prototype:
-   continue, revise or finish (US-163-AC4, AC5, AC7; FEAT-018 GDL-84;
-   ADR-042). The audit runner is stubbed: no browser.
+   continue, revise or finish (US-170-AC4, AC5, AC7; FEAT-018 GDL-84;
+   ADR-043). The audit runner is stubbed: no browser.
 
      npm test --workspace @ux-builder/design */
 
@@ -29,8 +29,8 @@ function app({ step = 1, passed = [] } = {}) {
 const settle = async (a, r) => { if (r.open.length) await stepCheck(a, { accept: r.open.map((f) => f.id), reason: "the test fixture's own gaps" }); };
 const checked = async (a) => { await stepPrototype(a); await settle(a, await stepCheck(a, { audit: clean })); };
 
-describe("US-163: every step ends with the person's decision", () => {
-  // @covers US-163-AC4
+describe("US-170: every step ends with the person's decision", () => {
+  // @covers US-170-AC4
   test("AC4: decide is refused without a prototype, without its check, and while a finding is neither fixed nor accepted", async () => {
     const a = app();
     assert.throws(() => stepDecide(a, { choice: "continue", answer: "Looks good" }), /needs a prototype of step 1.*Nothing was recorded/s);
@@ -46,7 +46,7 @@ describe("US-163: every step ends with the person's decision", () => {
     assert.throws(() => stepDecide(a, { choice: "maybe", answer: "Hm" }), /continue, revise, finish/);
   });
 
-  // @covers US-163-AC5
+  // @covers US-170-AC5
   test("AC5: continue moves to the next step; at step 4 it answers core-2 and lands on step 5, not 6", async () => {
     const a = app();
     await checked(a);
@@ -67,7 +67,7 @@ describe("US-163: every step ends with the person's decision", () => {
     assert.equal(s.checkpoints.find((c) => c.id === "core-2").answer, "Map first, go on");
   });
 
-  // @covers US-163-AC5
+  // @covers US-170-AC5
   test("AC5: revise keeps the step and marks its prototype stale; finish names the finish command", async () => {
     const a = app({ step: 2, passed: [] });
     await checked(a);
@@ -83,7 +83,7 @@ describe("US-163: every step ends with the person's decision", () => {
     assert.equal(readState(a).step, 2);
   });
 
-  // @covers US-163-AC7
+  // @covers US-170-AC7
   test("AC7: the decision is a decision turn, and the first one marks the prototype milestone", async () => {
     const a = app();
     await checked(a);
@@ -98,7 +98,7 @@ describe("US-163: every step ends with the person's decision", () => {
   });
 });
 
-describe("US-163: the step commands' --json fits CONTRACT-008's output schema", () => {
+describe("US-170: the step commands' --json fits CONTRACT-008's output schema", () => {
   test("prototype --step, --check, --nothing-to-fix and step decide", async () => {
     const { default: Ajv2020 } = await import("ajv/dist/2020.js");
     const { readFileSync } = await import("node:fs");

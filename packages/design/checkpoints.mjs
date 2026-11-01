@@ -27,7 +27,7 @@ const ORDER = ["baseline", "define", "explore", "experience", "validate"];
 const MOVES = ["core-1", "core-2"];
 const STRUCTURE = "Ask which modalities and screen sizes the app is for (ux-builder-design modality), then check each screen's purpose and the order of what it shows";
 export const FIRST_STEP = {
-  baseline: "Go through the baseline (baseline.md, beside the brief) with the person and ask what to improve",
+  baseline: "Go through what HELIX's backfill drafted from the app (the PRD and stories, as proposals) and the blueprint drawn from its screens with the person, and ask what to improve",
   define: "Interview the person about what users must accomplish, then draft the brief and ask core-1",
   explore: "Draft at least two alternatives for the open questions, compare them and ask core-2",
   experience: "Prototype the chosen design for the person to try; then build the validated prototype",

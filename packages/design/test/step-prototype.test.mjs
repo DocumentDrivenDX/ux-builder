@@ -1,6 +1,6 @@
 /* A prototype ends every step: drawing it with the defaults not yet chosen
-   recorded as assumptions, and its check round (US-163-AC1 to AC3;
-   FEAT-018 GDL-84; ADR-042). The audit runner is stubbed: no browser.
+   recorded as assumptions, and its check round (US-170-AC1 to AC3;
+   FEAT-018 GDL-84; ADR-043). The audit runner is stubbed: no browser.
 
      npm test --workspace @ux-builder/design */
 
@@ -25,8 +25,8 @@ function app() {
 const stub = (calls = []) => async (args) => { calls.push(args); return { ran: true, pagesAudited: args.pages.length, errors: 1, warnings: 0, findings: [{ severity: "error", rule: "contrast", page: args.pages[0], message: "low contrast" }] }; };
 const about = (a, key) => readState(a).assumptions.find((x) => x.about === key);
 
-describe("US-163: a prototype ends every step", () => {
-  // @covers US-163-AC1
+describe("US-170: a prototype ends every step", () => {
+  // @covers US-170-AC1
   test("AC1: with no modality recorded, the step prototype assumes responsive web, four size classes and the recommended frame, and records them", async () => {
     const a = app();
     const r = await stepPrototype(a);
@@ -56,7 +56,7 @@ describe("US-163: a prototype ends every step", () => {
     assert.ok(about(b, "theme"));
   });
 
-  // @covers US-163-AC1
+  // @covers US-170-AC1
   test("AC1: a blueprint with errors is refused, exit 1, and nothing is written", () => {
     const a = app();
     const bp = JSON.parse(readFileSync(join(a, BP), "utf8"));
@@ -67,7 +67,7 @@ describe("US-163: a prototype ends every step", () => {
     assert.ok(!existsSync(join(a, "docs/ux-builder/prototypes/step-1")));
   });
 
-  // @covers US-163-AC2
+  // @covers US-170-AC2
   test("AC2: with no theme chosen it is plain, light by default, dark when the agent set it, the appearance recorded with its reason", async () => {
     const a = app();
     await stepPrototype(a);
@@ -83,8 +83,8 @@ describe("US-163: a prototype ends every step", () => {
     assert.match(about(a, "appearance").text, /dark: a nightlife guest list/);
   });
 
-  // @covers US-163-AC3
-  // @covers US-165-AC4
+  // @covers US-170-AC3
+  // @covers US-172-AC4
   test("AC3: --check audits each screen's ideal state at every size and its other states at one, writes check-1.json and records the round; the journey walk from step 5", async () => {
     const { auditPages } = await import("../index.mjs");
     const a = app();
@@ -127,7 +127,7 @@ describe("US-163: a prototype ends every step", () => {
     await stepPrototype(a);
     // A later step starts from the pages an earlier step audited: only its banner changed, so none is audited again.
     const later = [];
-    // From step 5 the journeys are walked (US-166): a journey that stops is a finding.
+    // From step 5 the journeys are walked (US-173): a journey that stops is a finding.
     const walks = [];
     const walk = async (args) => { walks.push(args); return { ran: true, journeys: [{ journey: "J-find", walked: true, steps: 2, reached: 2, rows: [{ step: 1, screen: "map", leadsTo: "saved", expected: "detail" }] }, { journey: "J-saved", walked: false, steps: 2, reached: 1, stopped: { step: 1, screen: "saved", why: 'no "Open river details" to click on saved' } }] }; };
     const five = await stepCheck(a, { audit: stub(later), walk });
@@ -136,7 +136,7 @@ describe("US-163: a prototype ends every step", () => {
     assert.deepEqual(walks[0].bp.journeys.map((j) => j.id), ["J-find", "J-saved"]);
     assert.ok(five.findings.some((f) => f.kind === "journey-walk" && /J-saved stopped at step 1: no "Open river details"/.test(f.text)));
     assert.match(stepCheckText(five), /Journeys walked: 1 of 2 end to end\./);
-    // @covers US-167-AC2
+    // @covers US-174-AC2
     assert.ok(five.findings.some((f) => f.kind === "journey-walk" && f.text === "J-find: on map a row opens saved, while the journey goes on to detail"));
     assert.equal(walks[0].bp.journeys.length, 2);
     assert.equal(later.length, 0, "the pages step 1 audited are not audited again");
@@ -144,7 +144,7 @@ describe("US-163: a prototype ends every step", () => {
     assert.deepEqual(five.findings.filter((f) => f.kind.startsWith("audit")).length, fixed.findings.filter((f) => f.kind.startsWith("audit")).length, "their findings carried");
   });
 
-  // @covers US-163-AC3
+  // @covers US-170-AC3
   test("AC3: --nothing-to-fix before a check, or a check before a prototype, is refused", async () => {
     const a = app();
     await assert.rejects(stepCheck(a, { audit: stub() }), /no prototype to check/);
@@ -160,7 +160,7 @@ describe("US-163: a prototype ends every step", () => {
 });
 
 describe("VIP List session 2: the prototype's defaults stay out of review, and the brief does not read its PRD back", () => {
-  // @covers US-165-AC3
+  // @covers US-172-AC3
   test("drawing a step prototype changes neither the approved brief nor the map's exceptions", async () => {
     const { brief, coverageMap, pendingReviews, reviewApprove } = await import("../index.mjs");
     const a = app();
@@ -174,14 +174,16 @@ describe("VIP List session 2: the prototype's defaults stay out of review, and t
     assert.ok(readState(a).assumptions.filter((x) => x.about).every((x) => !x.section));
   });
 
-  // @covers US-165-AC3
+  // @covers US-172-AC3
   test("a PRD line that repeats the design state does not come back into the brief", async () => {
     const { brief, pendingReviews, reviewApprove, stateSet } = await import("../index.mjs");
     const a = app();
     stateSet(a, { path: "assumptions[+]", value: { text: "River Path helps people discover rivers and the places to reach them", section: "product", status: "confirmed" } });
     brief(a, { name: "Rivers" });
     reviewApprove(a, { kind: "brief", answer: "Yes" });
-    writeFileSync(join(a, "docs/helix/01-frame/prd.md"), "---\nddx:\n  id: prd\n  type: prd\n---\n\n# Product Requirements Document — River Path\n\n## Summary\n\nRiver Path helps people discover rivers and the places to reach them.\n");
+    // The PRD keeps its User Needs (ADR-042: they lead the brief's jobs); only its summary is new.
+    const prd = join(a, "docs/helix/01-frame/prd.md");
+    writeFileSync(prd, readFileSync(prd, "utf8").replace("## Users and Scope", "## Summary\n\nRiver Path helps people discover rivers and the places to reach them.\n\n## Users and Scope"));
     brief(a, { name: "Rivers" });
     assert.ok(!pendingReviews(a).some((p) => p.id === "brief"), "the PRD's repeat of the product line does not reopen it");
     assert.equal((readFileSync(join(a, "docs/ux-builder/brief.md"), "utf8").match(/discover rivers/g) ?? []).length, 1);
@@ -189,7 +191,7 @@ describe("VIP List session 2: the prototype's defaults stay out of review, and t
 });
 
 describe("VIP List session 2: once the app is built, the step prototype is the app", () => {
-  // @covers US-165-AC6
+  // @covers US-172-AC6
   test("prototype --step builds the app and records its routes; the check audits them, served as an app", async () => {
     const { mkdirSync } = await import("node:fs");
     const a = app();

@@ -29,7 +29,7 @@ describe("US-162: the app frame is the person's choice, asked with the modality"
     assert.equal(readFileSync(join(a, BP), "utf8"), before, "nothing written");
     assert.match(cli(a, ["modality", "--answer", "x", "--modality", "responsive-web", "--frame", "drawer"]).stderr, /unknown frame "drawer"; use screen, top-bar, top-nav, side-nav/);
     assert.match(cli(a, ["modality", "--answer", "x", "--modality", "chat", "--frame", "screen"]).stderr, /--frame is for responsive-web; chat is drawn as a conversation/);
-    // Amended 2026-10-31 (ADR-042): the budget counts the modality at step 5, where it is asked.
+    // Amended 2026-10-31 (ADR-043): the budget counts the modality at step 5, where it is asked.
     assert.ok(!budget(a).decisions.includes("the modality, screen sizes and app frame"), "not before step 5: prototypes assume it");
     writeState(a, { ...readState(a), step: 5 });
     assert.ok(budget(a).decisions.includes("the modality, screen sizes and app frame"));

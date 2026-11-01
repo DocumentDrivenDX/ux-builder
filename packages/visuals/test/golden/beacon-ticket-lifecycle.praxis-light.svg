@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1127 238" width="1127" height="238" role="img" aria-labelledby="beacon-ticket-lifecycle-title" aria-describedby="beacon-ticket-lifecycle-desc" class="uxb-visual uxb-visual--state-lifecycle" data-visual="beacon-ticket-lifecycle" style="font-family:ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="beacon-ticket-lifecycle-title">A ticket's phases</title>
+<desc id="beacon-ticket-lifecycle-desc">A ticket is picked up, answered and closed; a customer's reply sends it back to the agent.</desc>
+<rect x="0" y="0" width="1127" height="238" style="fill:#F0EEE6"/>
+<g id="beacon-ticket-lifecycle--t1" class="uxb-transition" data-kind="action">
+<path d="M176 107 L356 107" style="fill:none;stroke:#3D3D3A;stroke-width:2px"/>
+<path d="M356 110.78 L365 107 L356 103.22 Z" style="fill:#3D3D3A;stroke:#3D3D3A;stroke-width:2px"/>
+<rect x="208" y="98" width="125" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="270.5" y="111.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">an agent picks it up</text>
+</g>
+<g id="beacon-ticket-lifecycle--t2" class="uxb-transition" data-kind="action">
+<path d="M541 107 L744 107" style="fill:none;stroke:#3D3D3A;stroke-width:2px"/>
+<path d="M744 110.78 L753 107 L744 103.22 Z" style="fill:#3D3D3A;stroke:#3D3D3A;stroke-width:2px"/>
+<rect x="573" y="98" width="148" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="647" y="111.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">the agent sends a reply</text>
+</g>
+<g id="beacon-ticket-lifecycle--t3" class="uxb-transition" data-kind="action">
+<path d="M852 107 L950 107" style="fill:none;stroke:#3D3D3A;stroke-width:2px"/>
+<path d="M950 110.78 L959 107 L950 103.22 Z" style="fill:#3D3D3A;stroke:#3D3D3A;stroke-width:2px"/>
+<rect x="884" y="98" width="43" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="905.5" y="111.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">close</text>
+</g>
+<g id="beacon-ticket-lifecycle--t5" class="uxb-transition" data-kind="control">
+<path d="M113.6 126 L113.6 161 Q113.6 169 121.6 169 L1013.4 169 Q1021.4 169 1021.4 161 L1021.4 135" style="fill:none;stroke:#6B675E;stroke-width:1.5px;stroke-dasharray:6 4"/>
+<path d="M1025.18 135 L1021.4 126 L1017.62 135 Z" style="fill:#6B675E;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="248" y="160" width="95" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="295.5" y="173.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">close as spam</text>
+</g>
+<g id="beacon-ticket-lifecycle--t6" class="uxb-transition" data-kind="control">
+<path d="M802.5 126 L802.5 191 Q802.5 199 794.5 199 L461 199 Q453 199 453 191 L453 135" style="fill:none;stroke:#6B675E;stroke-width:1.5px;stroke-dasharray:6 4"/>
+<path d="M456.78 135 L453 126 L449.22 135 Z" style="fill:#6B675E;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="548" y="190" width="160" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="628" y="203.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">the customer writes back</text>
+</g>
+<g id="beacon-ticket-lifecycle--t4" class="uxb-transition" data-kind="control">
+<path d="M426.6 88 L426.6 66 Q426.6 58 434.6 58 L471.4 58 Q479.4 58 479.4 66 L479.4 79" style="fill:none;stroke:#6B675E;stroke-width:1.5px;stroke-dasharray:6 4"/>
+<path d="M475.62 79 L479.4 88 L483.18 79 Z" style="fill:#6B675E;stroke:#6B675E;stroke-width:1.5px"/>
+<rect x="423" y="49" width="60" height="18" rx="4" style="fill:#F0EEE6"/>
+<text x="453" y="62.2" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">reassign</text>
+</g>
+<g id="beacon-ticket-lifecycle--new" class="uxb-state">
+<rect x="80" y="88" width="96" height="38" rx="19" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="94" y="112" style="fill:#141413;font-size:14px;font-weight:600">New</text>
+</g>
+<g id="beacon-ticket-lifecycle--assigned" class="uxb-state">
+<rect x="365" y="88" width="176" height="38" rx="19" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="379" y="112" style="fill:#141413;font-size:14px;font-weight:600">Assigned to an agent</text>
+</g>
+<g id="beacon-ticket-lifecycle--answered" class="uxb-state">
+<rect x="753" y="88" width="99" height="38" rx="19" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<text x="767" y="112" style="fill:#141413;font-size:14px;font-weight:600">Answered</text>
+</g>
+<g id="beacon-ticket-lifecycle--closed" class="uxb-state">
+<rect x="959" y="88" width="96" height="38" rx="19" style="fill:#FFFFFF;stroke:#706C62;stroke-width:1.5px"/>
+<rect x="962" y="91" width="90" height="32" rx="16" style="fill:none;stroke:#706C62;stroke-width:1.5px"/>
+<text x="973" y="112" style="fill:#141413;font-size:14px;font-weight:600">Closed</text>
+</g>
+<g class="uxb-initial">
+<circle cx="46" cy="107" r="7" style="fill:#141413"/>
+<path d="M53 107 L71 107" style="fill:none;stroke:#141413;stroke-width:1.5px"/>
+<path d="M71 103.2 L80 107 L71 110.8 Z" style="fill:#141413;stroke:#141413;stroke-width:1.5px"/>
+</g>
+</svg>

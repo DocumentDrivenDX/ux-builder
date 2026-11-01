@@ -101,7 +101,7 @@ The slices below cover FEAT-009 and FEAT-010 only.
 
 ### FEAT-018: the guided design loop *[Added 2026-10-23]*
 
-Governing artifacts: FEAT-018; ADR-036 to ADR-043; CONTRACT-008 (and its
+Governing artifacts: FEAT-018; ADR-036 to ADR-044; CONTRACT-008 (and its
 amendments to CONTRACT-004 to CONTRACT-007); SD-006; US-114 to US-145;
 STP-114 to STP-145. Shared constraints for these slices: every command and
 test runs under the network guard (ADR-036 rule 3); the CLI is complete
@@ -133,10 +133,10 @@ removes its criteria from `tools/coverage-exceptions.json`.
 | B-037 | The person's time goes to decisions (GDL-83): approvals by meaning, three-tier review and the coverage map, intake and budget, metrics, grounded claims, `advance` (US-152 to US-155, US-160); proposals applied (US-156); modality by outcome (US-157); one report page and `doctor` (US-158); a working prototype generated at the build (US-159) | ADR-040; SD-006 The person's time; CONTRACT-008, CONTRACT-004, CONTRACT-006 amendments; STP-152 to STP-160 | B-036 | design, audit, create-app tests; site e2e | Built 2026-10-27 |
 | B-038 | The trial's findings (US-161): approvals, steps and measures that hold up in a real session | CONTRACT-008 amendments; STP-161 | B-037 | design, create-app, ui tests | Built 2026-10-27 |
 | B-039 | The app frame is the person's choice (US-162): AppShell's frames, `supports.frame`, wireframes, the built App, `modality --frame`, audit verdicts | ADR-041; CONTRACT-004, CONTRACT-005, CONTRACT-008 amendments; STP-162 | B-038 | ui, design, create-app, audit tests | Built 2026-10-27 |
-| B-040 | A prototype ends every step (US-163) and finish for me (US-164): `prototype --step [--check]`, `step decide`, `finish`, the skill | ADR-042; CONTRACT-008 amendment; STP-163, STP-164 | B-039 | design tests | Built 2026-10-31 |
-| B-041 | The person where only they can help (US-165): intake facts, scope, users and entry, frame per screen, own states, content-drawn prototypes, the app as prototype, cheap rounds, findings one by one, defaults out of review, honest measures, HELIX 0.20 locations | ADR-043; CONTRACT-005, CONTRACT-008 amendments; STP-165 | B-040 | design, ui, create-app, audit tests | Built 2026-10-31 |
-| B-042 | One answer, checks that walk, evidence that reads right (US-166): `step batch`, the journey walk in the step check, the drawn pages' other actions, findings by problem, `data-graphic` in the lint, state `values`, phone lists, the bar in dark, the app check across steps, the generated app rendered in a test | CONTRACT-005, CONTRACT-008 amendments; STP-166 | B-041 | design, ui, create-app, audit tests | Built 2026-10-31 |
-| B-043 | Ask what the others see, walk the rows, measure honestly (US-167): the intake's `sees` question, `screen.details-asked`, list rows in the journey walk, status naming `step batch`, the logo's `fallback` in built apps, timed events only | CONTRACT-005, CONTRACT-008 amendments; STP-167 | B-042 | design, ui, create-app, audit tests | Built 2026-11-01 |
+| B-040 | A prototype ends every step (US-170) and finish for me (US-171): `prototype --step [--check]`, `step decide`, `finish`, the skill | ADR-043; CONTRACT-008 amendment; STP-170, STP-171 | B-039 | design tests | Built 2026-10-31 |
+| B-041 | The person where only they can help (US-172): intake facts, scope, users and entry, frame per screen, own states, content-drawn prototypes, the app as prototype, cheap rounds, findings one by one, defaults out of review, honest measures, HELIX 0.20 locations | ADR-044; CONTRACT-005, CONTRACT-008 amendments; STP-172 | B-040 | design, ui, create-app, audit tests | Built 2026-10-31 |
+| B-042 | One answer, checks that walk, evidence that reads right (US-173): `step batch`, the journey walk in the step check, the drawn pages' other actions, findings by problem, `data-graphic` in the lint, state `values`, phone lists, the bar in dark, the app check across steps, the generated app rendered in a test | CONTRACT-005, CONTRACT-008 amendments; STP-173 | B-041 | design, ui, create-app, audit tests | Built 2026-10-31 |
+| B-043 | Ask what the others see, walk the rows, measure honestly (US-174): the intake's `sees` question, `screen.details-asked`, list rows in the journey walk, status naming `step batch`, the logo's `fallback` in built apps, timed events only | CONTRACT-005, CONTRACT-008 amendments; STP-174 | B-042 | design, ui, create-app, audit tests | Built 2026-11-01 |
 
 Tracked as DDx beads labelled `feat:FEAT-018`, one per slice, under one
 epic per phase.

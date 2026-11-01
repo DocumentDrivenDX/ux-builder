@@ -20,12 +20,6 @@ const DISMISS = RULES.find((r) => r.id === "modal.dismiss");
 const made = [];
 after(() => { for (const p of made) p.remove(); });
 
-// The installed HELIX defines usability-evaluation-report, with a template of its own.
-const HELIX_TYPE = {
-  "workflows/activities/05-iterate/artifacts/usability-evaluation-report/meta.yml": "artifact:\n  name: usability-evaluation-report\n  id: usability-evaluation-report\n  type: document\n  activity: iterate\ndescription: x\noutput:\n  location: docs/helix/05-iterate/usability/\n  format: markdown\n  naming: UER-{id}.md\n",
-  "workflows/activities/05-iterate/artifacts/usability-evaluation-report/template.md": "---\nddx:\n  id: UER-XXX\n  type: usability-evaluation-report\n---\n\n# Usability evaluation report: [title]\n\n## Executive summary\n\n[What was found, in a paragraph.]\n\n## Method and scope\n\n[Who walked what, how.]\n\n## Findings\n\n[By journey and step.]\n\n## Sign-off\n\n[Who accepted the report, and when.]\n",
-};
-
 /* A walked run: J-review in success (two steps, the first with two
    findings, one of them a heuristic) and empty (one finding at no step). */
 function walked(files = {}) {
@@ -98,24 +92,14 @@ describe("US-102: read the assessment report by journey", () => {
   });
 
   // @covers US-102-AC3
-  test("AC3: report.md is a usability-evaluation-report with ddx: frontmatter linking its journeys and stories; with the type installed, drafted from its template", () => {
+  test("AC3: report.md is a ux-builder usability assessment report with ux-builder: frontmatter naming its journeys and stories, run output rather than a HELIX document", () => {
     const { p } = walked();
     p.cli("report", p.dir);
     const md = readFileSync(join(p.dir, "report.md"), "utf8");
-    assert.match(md, /^---\nddx:\n  id: UER-R-20261021T090000Z\n  type: usability-evaluation-report\n  status: draft\n  links:\n    - kind: informed_by\n      to: US-001\n    - kind: informed_by\n      to: US-002\n  journeys:\n    - J-review\n    - J-undo\n---\n/);
-    assert.match(md, /HELIX artifact: a usability-evaluation-report \(ddx: frontmatter\); the installed HELIX defines no such type yet/);
-    assert.doesNotMatch(readFileSync(join(p.dir, "report.html"), "utf8"), /<p>---<\/p>|<p>ddx:<\/p>|  type: usability/, "the frontmatter is not shown in the HTML");
-
-    const t = walked(HELIX_TYPE).p;
-    assert.equal(t.cli("report", t.dir).status, 0);
-    const drafted = readFileSync(join(t.dir, "report.md"), "utf8");
-    assert.match(drafted, /^---\nddx:\n  id: UER-R-20261021T090000Z\n  type: usability-evaluation-report\n/);
-    const heads = [...drafted.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
-    assert.deepEqual(heads.slice(0, 4), ["Executive summary", "Method and scope", "Findings", "Sign-off"], "the template's sections, in its order");
-    assert.match(drafted, /## Executive summary\n\n- Findings: 3/, "filled from the run");
-    assert.match(drafted, /## Findings\n\n### J-review/);
-    assert.match(drafted, /## Sign-off\n\n\[Who accepted the report, and when\.\]/, "the template's own guidance where nothing fits");
-    assert.match(drafted, /drafted from the installed HELIX's template .*; its place in the flow is `05-iterate\/usability\/UER-\{id\}\.md`/);
+    assert.match(md, /^---\nux-builder:\n  id: R-20261021T090000Z\n  type: usability-assessment-report\n  status: draft\n  stories:\n    - US-001\n    - US-002\n  journeys:\n    - J-review\n    - J-undo\n---\n/);
+    assert.doesNotMatch(md, /^ddx:|usability-evaluation-report/m, "it claims no HELIX type");
+    assert.match(md, /Kept as: a ux-builder usability assessment report, run output listed on reports\.html rather than a HELIX document/);
+    assert.doesNotMatch(readFileSync(join(p.dir, "report.html"), "utf8"), /<p>---<\/p>|<p>ux-builder:<\/p>|  type: usability/, "the frontmatter is not shown in the HTML");
   });
 
   // @covers US-102-AC4
