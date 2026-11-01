@@ -1,5 +1,11 @@
 # @ux-builder/tokens
 
+## 1.9.0
+
+### Minor Changes
+
+- 569c525: The `plain` theme has a dark appearance (ADR-043), so a guided prototype for a product used in dark rooms can show dark before any brand theme exists. It inverts plain's grays and blue and clears 4.5:1 in every pairing.
+
 ## 1.8.0
 
 ### Minor Changes

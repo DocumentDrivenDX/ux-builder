@@ -1,5 +1,24 @@
 # @ux-builder/mcp
 
+## 0.7.6
+
+### Patch Changes
+
+- Updated dependencies [cae0267]
+- Updated dependencies [01510d3]
+- Updated dependencies [3eadaa1]
+- Updated dependencies [718f5be]
+- Updated dependencies [b691719]
+- Updated dependencies [0199ed8]
+- Updated dependencies [d339f87]
+- Updated dependencies [ff74560]
+- Updated dependencies [569c525]
+- Updated dependencies [d406dd0]
+- Updated dependencies [99979dc]
+- Updated dependencies [8fcc754]
+  - @ux-builder/ui@0.16.0
+  - @ux-builder/tokens@1.9.0
+
 ## 0.7.5
 
 ### Patch Changes

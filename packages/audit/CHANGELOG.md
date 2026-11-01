@@ -1,5 +1,31 @@
 # @ux-builder/audit
 
+## 0.9.0
+
+### Minor Changes
+
+- 0199ed8: One prototype that grows (VIP List session 2, where the step prototype showed "Item 1" and "Field 1" and stopped changing after step 3). Wireframes and step prototypes draw each screen with its own content: list columns and rows, detail fields and form fields from its content labels, with product-neutral sample values (names, phones, dates, times, cities, counts) and form controls by what each label asks for. Once the app is built, `ux-builder-design prototype --step` builds it and the check audits its routes, so from step 6 the prototype the person uses is the one checked. The audit's `serveFolder` serves an app's routes (`spa`).
+- d406dd0: A prototype ends every guided step (US-170, ADR-043). `ux-builder-design prototype --step` draws the current step's prototype in `docs/ux-builder/prototypes/step-<n>/`, assuming the modality, size classes, input types, frame, theme (`plain`) and appearance the person has not chosen yet and recording each as an assumption, instead of refusing. `--check` serves the prototype locally, runs the UI audit on every page (its own toolbar left out) and the deterministic heuristics, and writes `check-<round>.json`; from step 5 it asks for the journey walk too. Wireframes and exploratory prototypes take an appearance; the audit exports `serveFolder`; `resolveAppearance` takes the themes to resolve against.
+- 99979dc: After VIP List session 4 (US-174): the intake asks what each person needs to see about the others, and the blueprint rule `content.asked` warns about a person's name, phone, email, birth date or address shown but asked for nowhere. The journey walk also taps a list's first row. Status at step 4 names `step batch`, and the theme never blocks. `Logo` takes `fallback="none"`, and an app built from a design shows its own name in its header without the theme's title. Events are logged with their time of day, and a bare date never moves a measured span (the batch logged one, and session 4 read 13 minutes to its first prototype for 3).
+- 8fcc754: What VIP List sessions 3 and 4 needed (US-173). `ux-builder-design step batch` records the person's one answer to steps 4 to 6. From step 5 the step check walks every journey in a browser (`walkJourneys` in `@ux-builder/audit`), and a step's first check reuses an earlier step's audited pages or the same app bundle. A report merges participants with the same problem into one finding. The lint lets a QR code or barcode marked `data-graphic` keep its own `<svg>` and black and white. In the blueprint, `stateNotices` take the `values` a state changes, and content items may be marked `compact` for phone lists (the first three otherwise); an error notice holds back the screen's main action. Drawn prototypes show each screen's other actions, a readable bar in dark, and counts that say what they count. An app built from a design takes the design's appearance and audits every designed screen; its business-rule notes show only from the prototype controls, and a form's main action follows its fields. A journey that ends where it started is no longer scored as "0 moves would do", alternatives are drawn in the design's appearance, and test-kit goals keep their verb.
+
+### Patch Changes
+
+- Updated dependencies [cae0267]
+- Updated dependencies [01510d3]
+- Updated dependencies [3eadaa1]
+- Updated dependencies [718f5be]
+- Updated dependencies [b691719]
+- Updated dependencies [0199ed8]
+- Updated dependencies [d339f87]
+- Updated dependencies [ff74560]
+- Updated dependencies [569c525]
+- Updated dependencies [d406dd0]
+- Updated dependencies [99979dc]
+- Updated dependencies [8fcc754]
+  - @ux-builder/ui@0.16.0
+  - @ux-builder/tokens@1.9.0
+
 ## 0.8.0
 
 ### Minor Changes
