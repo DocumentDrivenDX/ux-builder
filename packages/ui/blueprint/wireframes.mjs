@@ -132,7 +132,9 @@ function stateElement(s, state, lib) {
   const notice = s.stateNotices?.[state];
   if (notice) {
     // The values this state changes replace the samples (US-166-AC6).
-    const el = screenElement(notice.values ? { ...s, values: notice.values } : s, lib);
+    // An error notice holds back the main action, as the built app does (no "Let in" on a pass already used).
+    const shown = { ...s, ...(notice.values ? { values: notice.values } : {}), ...(notice.tone === "error" ? { actions: (Array.isArray(s.actions) ? s.actions : []).filter((a) => !a?.primary) } : {}) };
+    const el = screenElement(shown, lib);
     return { el: h("div", null, h(ui.Notice, { tone: notice.tone ?? "info", title: notice.title, role: notice.tone === "error" ? "alert" : "status" }, notice.text ?? null), el), by: "notice" };
   }
   const own = STATUSES.get(s.pattern) ?? [];

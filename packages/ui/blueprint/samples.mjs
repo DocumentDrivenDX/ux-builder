@@ -20,6 +20,9 @@ const RULES = [
   [/distance/i, (i) => `${[0.4, 1.2, 2, 3.5, 5][i]} mi`],
   [/price|cost|amount|total \$|fee/i, (i) => `$${[12, 25, 40, 8, 60][i]}.00`],
   [/\bleft\b|remaining|available/i, (i) => ["14 left", "3 left", "Full", "22 left", "9 left"][i]],
+  // A count says what it counts, as a list on a phone shows it without its column's label (VIP List session 4:
+  // "what are the 2 and 1?"); a form's "Number of spots" keeps the bare number.
+  [/^(claimed|came|going|attended|checked in|sold|guests)$/i, (i, label) => `${[2, 1, 48, 31, 12][i]} ${label.toLowerCase()}`],
   [/count|number of|claimed|came|total|spots|seats|quantity|qty/i, (i) => String([2, 1, 48, 31, 12][i])],
   [/status|state\b/i, (i) => STATUSES[i]],
   [/\bqr\b|barcode|code\b/i, (i) => `QR ${["7Q4K", "2M8P", "9X1C", "4H6T", "5R3B"][i]}`],
@@ -30,7 +33,7 @@ const RULES = [
 /* A sample value for a content label, row i (0 to 4). */
 export function sampleValue(label, i = 0) {
   const r = RULES.find(([re]) => re.test(label));
-  return r ? r[1](i % 5) : `${String(label).replace(/\s*\([^)]*\)\s*$/, "")} ${(i % 5) + 1}`;
+  return r ? r[1](i % 5, String(label).trim()) : `${String(label).replace(/\s*\([^)]*\)\s*$/, "")} ${(i % 5) + 1}`;
 }
 
 /* A form field for a content label: { kind: text|email|tel|number|date|checkbox|radio, label, required, options? }. */

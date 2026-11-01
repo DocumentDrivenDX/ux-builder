@@ -67,6 +67,7 @@ describe("VIP List session 2: the blueprint says what the person meant", () => {
     const page = (await wireframes(bp)).find((p) => p.file === "door.already-used.compact.html");
     assert.ok(page, "a page for the state");
     assert.match(page.html, />Already used</);
+    assert.doesNotMatch(page.html, />Let in</, "an error notice holds back the main action");
     assert.match(page.html, /Already used at 11:42 PM/);
     assert.match(page.html, /Do not let in on this pass\./);
   });
