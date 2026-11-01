@@ -34,6 +34,8 @@
     "./blueprint": "./blueprint/index.mjs",
     "./blueprint/modalities": "./blueprint/modalities.mjs",
     "./blueprint/prototype": "./blueprint/prototype.mjs",
+    "./blueprint/wireframes": "./blueprint/wireframes.mjs",
+    "./blueprint/samples": "./blueprint/samples.mjs",
     "./blueprint/propose": "./blueprint/propose.mjs",
     "./blueprint/paths": "./blueprint/paths.mjs",
     "./blueprint/model": "./blueprint/model.mjs",

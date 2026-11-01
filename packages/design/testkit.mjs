@@ -10,6 +10,7 @@ import { join } from "node:path";
 import { DesignError, bpFile, runsDir, ux, writeInApp } from "./app.mjs";
 import { advance } from "./checkpoints.mjs";
 import { businessRules, helixRoot, parseDocument, usersTable } from "./documents.mjs";
+import { logEvent, readEvents } from "./metrics.mjs";
 import { readState, writeState } from "./state.mjs";
 import { cell, sectionOf, setSection } from "./helix.mjs";
 import { proposeStudy, studyName, studyRunDir } from "./studies.mjs";
@@ -62,9 +63,16 @@ const secondPerson = (text) => PERSON.reduce((t, [re, to]) => t.replace(re, to),
 
 /* A goal in the user's words: the interface words taken out. */
 export function goalText(goal, bp) {
-  let text = String(goal);
+  const words = interfaceWords(bp);
   // The word goes with the preposition and article that lead to it: "on the River map".
-  for (const w of interfaceWords(bp)) text = text.replace(new RegExp(`(?:\\b(?:on|in|from|at|with|using|via|through)\\s+)?(?:\\b(?:the|a|an)\\s+)?\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), "");
+  const strip = (t) => words.reduce((x, w) => x.replace(new RegExp(`(?:\\b(?:on|in|from|at|with|using|via|through)\\s+)?(?:\\b(?:the|a|an)\\s+)?\\b${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"), ""), t);
+  let text = strip(String(goal));
+  // A screen named for what the user does ("Post an event") is the goal's own verb: taken out, the goal is left
+  // without one ("so guests can claim", VIP List sessions 1 to 3), so it stays and only the rest is stripped.
+  if (!text.trim() || /^\s*(?:so|to|and|or|for|that|with|because|then|,)\b/i.test(text)) {
+    const lead = words.find((w) => String(goal).toLowerCase().startsWith(w.toLowerCase()));
+    if (lead) text = `${String(goal).slice(0, lead.length)} ${strip(String(goal).slice(lead.length))}`;
+  }
   text = secondPerson(text).replace(/\s{2,}/g, " ").replace(/\s+([,.;:])/g, "$1").trim();
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
@@ -157,6 +165,8 @@ export function testKit(app, { study, journeys = [] } = {}) {
   // A test kit means the loop is validating.
   try { const state = readState(app); if (advance(state, "validate")) writeState(app, state); } catch { /* no design state */ }
   const warnings = tasks.filter((t) => !t.criteria.length).map((t) => `${t.journey} names no acceptance criteria: task ${t.n} has no success criteria`);
+  // Testing starts when the first study is written: the approvals-before-testing target counts up to here.
+  if (!readEvents(app).some((e) => e.type === "milestone" && e.name === "testing")) logEvent(app, "milestone", { name: "testing", study: name });
   return { study: name, path: plan.path, proposal: plan.id ?? null, run, tasks, written, users, warnings };
 }
 

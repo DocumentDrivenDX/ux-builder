@@ -63,6 +63,7 @@
       "brand": "plain",
       "designSystem": null,
       "appearances": [
+        "dark",
         "light"
       ],
       "default": "light",
@@ -927,7 +928,7 @@
     {
       "name": "Logo",
       "type": "component",
-      "purpose": "The active theme's logo, or its mark (variant=\"mark\"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour.",
+      "purpose": "The active theme's logo, or its mark (variant=\"mark\"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour, or nothing with fallback=\"none\" (an app with its own name beside it: VIP List's header read \"Plain VIP List\").",
       "props": [
         {
           "name": "variant",
@@ -940,6 +941,10 @@
         {
           "name": "label",
           "default": null
+        },
+        {
+          "name": "fallback",
+          "default": "\"text\""
         },
         {
           "name": "className",
@@ -1792,7 +1797,7 @@
     {
       "name": "resolveAppearance",
       "type": "function",
-      "purpose": "The appearance a theme will actually show: the one asked for if the theme has it, else the theme's own default.",
+      "purpose": "The appearance a theme will actually show: the one asked for if the theme has it, else the theme's own default. `themes` defaults to the shipped ones; a light-only brand theme from the theme builder is one case.",
       "props": [
         {
           "name": "theme",
@@ -1805,6 +1810,10 @@
         {
           "name": "system",
           "default": "systemAppearance()"
+        },
+        {
+          "name": "themes",
+          "default": "THEMES"
         }
       ],
       "source": "src/ThemeProvider.jsx"
@@ -23438,7 +23447,7 @@
       {
         "id": "flow.reachable",
         "title": "Every screen can be reached",
-        "statement": "Every screen is reached from a destination (or, in a view, its first screen) through actions, at every size class the app supports; leaving by external counts as a way on.",
+        "statement": "Every screen is reached from a destination (or, in a view, its first screen) through actions, at every size class the app supports, unless it is entered from outside the app (entry: a link, a scanned code, a message); leaving by external counts as a way on.",
         "rationale": "A screen no one can reach is dead code at best, and at worst the only place a task can be done.",
         "checks": [
           {
@@ -23457,6 +23466,48 @@
           {
             "title": "ux-builder FEAT-012: screen flows and user journeys in the blueprint",
             "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-012-screen-flows-and-user-journeys-in-the-blueprint.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "nav.audience",
+        "title": "A tab serves the app's own users",
+        "statement": "Every destination leads to screens for the same people the app's first destination serves; screens for other users (staff, promoters, administrators) are reached from their own link, not from a tab in this app.",
+        "rationale": "A tab for someone else is clutter to everyone who sees it, and a way into screens they should not use; in VIP List session 2, every agent that designed without the person put the promoters' screens in the guest app's tabs.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "nav.audience"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder FEAT-018: the guided design loop",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "screen.details-asked",
+        "title": "A person's details are asked before they are shown",
+        "statement": "A name, phone number, email, birth date or address shown about a person on a screen is asked for on a form or in a journey step's inputs.",
+        "rationale": "A detail nobody asked for is either invented or a missing question; in VIP List sessions 3 and 4 the pass and the door showed the guest's name while the claim asked only for a mobile and a birth date, and only testing found it.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "screen.details-asked"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder FEAT-018: the guided design loop",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
             "licence": "own",
             "wording": "paraphrased"
           }
@@ -24762,11 +24813,20 @@
                 "type": "array",
                 "uniqueItems": true,
                 "items": {
-                  "enum": [
-                    "empty",
-                    "loading",
-                    "error",
-                    "partial"
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "empty",
+                        "loading",
+                        "error",
+                        "partial"
+                      ]
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z0-9-]*$",
+                      "description": "A state of the screen's own, such as already-used; its stateNotices entry says what it shows"
+                    }
                   ]
                 }
               },
@@ -24817,6 +24877,10 @@
                       "type": "string",
                       "minLength": 1,
                       "description": "For example data, action, help, status"
+                    },
+                    "compact": {
+                      "type": "boolean",
+                      "description": "In a list, shown on a phone (the compact size class). Without any marked, a list shows its first three on a phone (VIP List session 3)"
                     }
                   }
                 }
@@ -24828,6 +24892,69 @@
                   "minLength": 1
                 },
                 "description": "The kinds of interaction the screen handles, such as choose-location (FEAT-018 GDL-34)"
+              },
+              "stateNotices": {
+                "type": "object",
+                "description": "What a state shows, by state (a state of the screen's own, or empty, error and partial): a notice with its tone, title and text (VIP List session 2: a door page's 'Already used at <time>').",
+                "propertyNames": {
+                  "pattern": "^[a-z][a-z0-9-]*$"
+                },
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "title"
+                  ],
+                  "properties": {
+                    "tone": {
+                      "enum": [
+                        "info",
+                        "success",
+                        "warning",
+                        "error"
+                      ]
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "values": {
+                      "type": "object",
+                      "description": "The content values this state changes, by content label: the screen shows them in this state instead of its samples (VIP List session 3: 'Already used' with 'Pass status: Valid tonight' under it)",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "entry": {
+                "enum": [
+                  "link",
+                  "scan",
+                  "message"
+                ],
+                "description": "Reached from outside the app (a link, a scanned code, a message), not from a destination: the check does not call it unreachable"
+              },
+              "frame": {
+                "enum": [
+                  "screen",
+                  "top-bar",
+                  "top-nav",
+                  "side-nav"
+                ],
+                "description": "This screen's frame, in place of supports.frame (a door page opened from a scan: screen)"
+              },
+              "users": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "The PRD's User Segments the screen is for, by name (ADR-042), or an older blueprint's U-<n>; check warns when a destination mixes in screens for other users"
               }
             }
           }
@@ -25094,10 +25221,19 @@
               "minLength": 1
             },
             "state": {
-              "enum": [
-                "empty",
-                "loading",
-                "error"
+              "anyOf": [
+                {
+                  "enum": [
+                    "empty",
+                    "loading",
+                    "error"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]*$",
+                  "description": "A state of the screen's own (screens[].states with its stateNotices entry)"
+                }
               ]
             },
             "expect": {

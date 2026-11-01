@@ -540,6 +540,9 @@ GDL-79. **A guided conversation the person can follow and control**
   "Step 3 of 8: Model tasks". Change mode has its own four steps
   (challenge, impact, decide, apply); an existing app's baseline comes
   before step 1. `status` leads with it, and `step next` moves on.
+  *[Amended 2026-10-31 — GDL-84, ADR-043]* Each step ends with a step
+  prototype and the person's decision (`step decide`): continue, revise
+  or finish.
 - **Terms explained.** The first time a term comes up (blueprint, user
   story, acceptance criterion, job to be done, target user, task, journey,
   business rule, alternative, prototype, checkpoint, rubric and the
@@ -579,6 +582,9 @@ the screen, a top bar with no menu, navigation across the top, or a side
 menu. The agent shows the four and recommends one from the destinations;
 the choice is recorded in the blueprint, and wireframes, prototypes, the
 built app and the audit follow it.
+*[Amended 2026-10-31 — GDL-84, ADR-043]* Step prototypes do not wait
+for the modality: until step 5 records it, they assume responsive web and
+the recommended frame, as assumptions the person confirms at step 5.
 
 GDL-81. **Design first, the app last** *(added 2026-10-24, from the
 operator)*. A person starts the guide before there is an app:
@@ -592,6 +598,9 @@ one from their brand when no released theme fits, and builds the app in
 the same folder (`npm create @ux-builder/app . -- --theme <name>`) from
 the recorded modality and the designed blueprint, keeping every design
 document. Giving `--modality` still makes the app at once, as before.
+*[Amended 2026-10-31 — GDL-84, ADR-043]* The theme never blocks: until
+the person chooses one, everything is built on `plain`, and a brand theme
+not yet released is swapped in by the agent when it is.
 *[Amended 2026-10-25 — alignment]* "Ready" means: `core-2` has passed (the approach is chosen) and
 the modality is recorded; the guide builds the app then, before step 6's
 validated prototype (GDL-44), which needs it. The starter itself checks
@@ -679,6 +688,71 @@ and approve.
   about, the brief may not call a dropped story confirmed, the prototype
   toolbar is folded and a screen without a sample of its own is drawn from
   its content.
+
+GDL-84. **A prototype ends every step** *(added 2026-10-31, from the
+operator, after VIP List session 1: about 148 active minutes and 12
+approvals before the first prototype; ADR-043, US-170)*. At the end of each
+of the eight steps the agent generates a step prototype
+(`ux-builder-design prototype --step`) in `docs/ux-builder/prototypes/step-<n>/`
+from what the person has confirmed and its own assumptions for every later
+step, each recorded. Until the person chooses, it assumes responsive web,
+the compact, medium, expanded and large size classes, the frame recommended from
+the destinations, and the `plain` theme in the appearance the agent infers
+from the product; none of these is a gate. Before the person sees it, the
+agent runs one round of checks (`prototype --step --check`: the UI audit
+over every page and the deterministic heuristics, and from step 5 the
+journey walk), fixes what it can and checks again, then shows it with what
+was found, fixed and left. The person then decides (`step decide`):
+continue to the next step, revise this one, or finish.
+
+GDL-85. **Finish for me** *(added 2026-10-31, from the operator; ADR-043,
+US-171)*. When the person chooses to finish, the agent drafts what the
+remaining steps would produce and `ux-builder-design finish` writes every
+downstream ux-builder and HELIX artifact: the brief, wireframes, a step
+prototype, a test kit and the HELIX documents. HELIX documents are applied
+directly, each marked assumed, on this path alone. A summary says what was
+confirmed, what was assumed, what to check first and what was not done;
+the checkpoints the finish passes are recorded as skipped, never passed.
+
+GDL-86. **The person where only they can help** *(added 2026-10-31, from
+the operator, after VIP List session 2 and its what-if test; ADR-044,
+US-172)*. The intake asks for the facts only the person knows (how often
+people come back and on what device, what each person must and must not
+give) and the business rules; `scope` lists the design's stories,
+criteria, screens, destinations and inputs for the person to cut; steps 4
+to 6 run as one batch of defaults. The blueprint says who each screen is
+for (`users`, with the rule `nav.audience`), how it is entered from
+outside (`entry`), its own frame, and states of its own with what they
+show (`stateNotices`). Step prototypes draw each screen's own content, and
+from the app's build the step prototype is the app. A check round audits
+ideal states at every size and other states at one, only pages that
+changed, and each finding is fixed or accepted with a reason. The
+prototype's defaults stay out of the person's review. The guide's measures
+time the checks, count step 1, start testing with the kit and mark
+simulated data.
+
+GDL-87. **One answer, checks that walk, evidence that reads right**
+*(added 2026-10-31, after VIP List session 3; US-173)*. `step batch`
+records the person's one answer to steps 4 to 6: the alternative chosen
+and a decision for it and for the theme approved with that answer, the
+modality, core-2, steps 4 and 5 decided; the app built on the theme is the
+batch's one prototype. From step 5 the step check walks every journey in a
+browser, clicking the page's own actions, and a journey that stops is a
+finding. A report merges participants who hit the same problem into one
+finding. A scannable data graphic is marked `data-graphic` and keeps its
+black and white. A state of a screen's own may say which `values` it
+changes; a list on a phone shows its first three items or those marked
+`compact`.
+
+GDL-88. **Ask what the others see, walk the rows, measure honestly**
+*(added 2026-11-01, after VIP List session 4; US-174)*. The intake asks
+what each person needs to see about the others, and where it comes from;
+the blueprint rule `screen.details-asked` warns about a person's name, phone,
+email, birth date or address shown on a screen and asked for nowhere.
+The journey walk also taps a list's first row. Status at step 4 names
+`step batch`; the theme never blocks. An app built from a design shows its
+own name in its header, without the theme's title. The guide's events
+carry a time of day, and an event without one never moves a measured span.
 
 ##### Tasks (stage 3)
 

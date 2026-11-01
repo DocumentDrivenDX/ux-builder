@@ -22,9 +22,10 @@ that add complexity without measurable user value.
 2. **In the first session** (no checkpoint answered, nothing approved yet),
    start with an overview, before any question: run
    `ux-builder-design overview` and tell the person, in your own words, the
-   eight steps, what they will do in each, what comes out, and that you
-   will stop for their decision at each checkpoint and for their approval of
-   everything you produce. Keep it short; ask if they have questions.
+   eight steps, what they will do in each, what comes out, that every
+   step ends with a prototype they can click and their choice to continue,
+   revise or have you finish the rest, and that you will stop for their
+   approval of the foundations. Keep it short; ask if they have questions.
 3. Otherwise tell the person where things stand in two or three sentences,
    starting with the step: "Step 4 of 8: Explore alternatives. Map first is
    chosen. Two assumptions are untested. Three items await your review."
@@ -50,9 +51,105 @@ reports and insights to run output; then show the person the proposals.
 
 Say which step the person is on whenever you start a step or come back to
 one: "Step 2 of 8: Understand users." (`status` gives it; change mode has
-its own four steps, "Change mode, step 2 of 4: Impact"). When a step's
-work is done and approved, run `ux-builder-design step next` and say what
-the next step is and what it will ask of them.
+its own four steps, "Change mode, step 2 of 4: Impact"). In the full
+loop a step ends with its prototype and the person's decision (*Every step
+ends with a prototype*); in change mode, run `ux-builder-design step next`
+when a step's work is done. Then say what the next step is and what it
+will ask of them.
+
+## Every step ends with a prototype
+
+The person reacts to screens, not documents, from the first step on.
+When a step's work is done and its foundations approved:
+
+1. **Draft the rest, then draw.** Make sure the blueprint has screens and
+   journeys for everything known so far, drafting what later steps would
+   add (as assumptions, `state set 'assumptions[+]'`). Run
+   `ux-builder-design prototype --step`. It draws
+   `docs/ux-builder/prototypes/step-<n>/` and records the defaults the
+   person has not chosen: responsive web, phone to large desktop sizes,
+   the frame recommended from the destinations, the `plain` theme, and the
+   appearance. **Set the appearance from the product first**: a nightlife
+   or cinema app is dark (`state set appearance '{"value":"dark","reason":"a
+   guest list used in dark venues"}'`); otherwise leave it light. None of
+   these is a question yet; step 5 confirms the modality and frame. The
+   prototype draws each screen with its own content (give every screen its
+   `content`, highest priority first), so the person sees their product,
+   not placeholders. Once the app is built (step 6 on), `prototype --step`
+   builds the app and the check audits its routes: the step prototype *is*
+   the app, one prototype that grows.
+2. **Check it before they see it.** Run `ux-builder-design prototype
+   --step --check`: the UI audit on every page and the heuristics (content
+   order, navigation, the blueprint's warnings); from step 5 it also walks
+   every journey in a browser, and a journey that stops is a finding. Each
+   finding has an ID. Fix what
+   you can in the blueprint, draw it again and check again (only the pages
+   that changed are audited, and the rounds carry over). Accept what stays,
+   one finding at a time, with the reason (`prototype --step --check
+   --accept <id> --reason "opened from a scan, by design"`). `step decide`
+   waits until every finding is fixed or accepted.
+3. **Show it.** Open its `index.html` for the person. Say in plain words
+   what it shows, what the check found, what you fixed and what is left,
+   and which assumptions it rests on. Ask the questions this step still
+   has against the screens ("When two guests arrive together, what should
+   the door see here?").
+4. **Ask one question:** "Continue to the next step, revise this one, or
+   shall I finish the rest for you?" Record their answer:
+   `ux-builder-design step decide continue|revise|finish --answer "<their
+   words>"`. Continue answers the core checkpoint the step closes and
+   moves to the next step; revise keeps the step: rework it and draw a new
+   prototype; finish: draft everything the remaining steps would produce
+   (tasks, rules, journeys, screens, every job served), then run
+   `ux-builder-design finish --answer "<their words>"` and show them the
+   prototype and `finish-summary.md`, what to check first before anything
+   else.
+
+## Where the person's time goes
+
+The person is irreplaceable in steps 1 to 3 and much less after them
+(VIP List session 2: no agent designing alone guessed a fact the person
+gave in those steps, and every agent matched the person's choices in
+steps 4 to 6).
+
+- **Steps 1 to 3: the person's.** Ask the intake's questions about how
+  often people come back and on what device, what each person must and
+  must not give, what each needs to see about the others (and where it
+  comes from), and the business rules, before drafting. Before step 3
+  ends, run `ux-builder-design scope` and show it: every story with its
+  criteria, the screens, the destinations, and what people must and may
+  give. Ask what can wait and which input people can be spared, and cut
+  it.
+- **Steps 4 to 6: one batch of defaults.** Recommend the alternative, the
+  modality and frame, and the theme together, as "I'll go with these
+  unless you object", numbered one line each. Record their one answer
+  with `ux-builder-design step batch --answer "<their words>" --alternative
+  <name> --modality <list> --size-classes <list> --frame <frame> --theme
+  <name>`, build the app on the theme, and show it as the batch's one
+  prototype (step 6's). Ask about one of them on its own only when it is a
+  real choice the person cares about; then do that step on its own.
+- **Steps 7 and 8: evidence.** The person chooses which findings to fix
+  and whether to release; the changes come from people and data.
+
+## Talking to the person
+
+- **Status in four lines.** Whenever you report where work stands, use
+  exactly: **Ready:** what they can use now. **Blocked by:** what stops
+  the rest, or "nothing". **Who is handling it:** you, or who else.
+  **What I need from you:** a decision, or "nothing".
+- **No engineering terms.** Never say pull request, CI, branch, merge,
+  changeset, commit, package names, file paths or shell commands to the
+  person unless they used the word first. Say what happens and what it
+  means for them: "the theme will be ready after the next release; I will
+  switch the app to it then".
+- **Never hand them a dependency.** Never end a session or a turn with
+  the person owning something you could own ("tell me when it is
+  released"). End on something that works now, and say what you will do
+  next and when. If only they can act, say exactly what to do, in plain
+  words.
+- **Defaults, not more questions.** Offer decisions you can recommend as
+  "I'll go with these unless you object", numbered, one line each, so "all
+  fine except 3" is an answer. Never group approvals: each item or table
+  is approved on its own, in the person's words.
 
 ## Explaining terms
 
@@ -110,7 +207,15 @@ send the person to a file instead.
    need no approval. Show what they found and ask for the decision it leads
    to: which findings to fix, which experiment to run.
 
-Never ask the person to approve the same content twice. An approval holds
+Never ask the person to approve the same content twice. **Settle, apply,
+then approve.** Settle the questions the brief raises before asking for
+its approval (`review approve` refuses the brief while a question raised
+since it was drafted is open: regenerate it so the question shows). When
+one message both approves an item and changes it ("yes, but keep the date
+of birth 45 days"), record the change as feedback, apply it, respond, show
+the result, and only then record the approval. The brief keeps its
+approval when only its target users or jobs changed because the person
+approved those. An approval holds
 through changes to frontmatter, metadata and formatting; only a change to
 an item's meaning brings it back, and then show **only what changed**: the
 diff `review table`, `review map` and `review show` give. Checkpoints and
@@ -136,13 +241,19 @@ the person must make next, with what to show, a recommendation, the
 command that records it and what follows. Do the work it lists for you
 first, then ask that one question.
 
-**Measure the person's time.** After each of the person's turns, record
-what it was: `ux-builder-design metrics turn --kind
-answer|decision|approval|correction|question|other` (other: "go on", a
-repeat, a clarification of something you said). Record milestones with
-`metrics mark prototype` when the person first tries it (when they tell
-you they clicked through it, not when you build it),
-`testing` and `release`. `ux-builder-design metrics` reports it against
+**Measure the person's time.** Commands that take the person's words
+(`--answer`) record their turn themselves; when one message holds several
+answers, give the second and later ones `--same-turn`. After each of the
+person's other turns, record what it was:
+`ux-builder-design metrics turn --kind answer|decision|approval|correction|question|other`
+(other: "go on", a repeat, a clarification of something you said). If the person's
+environment asks about the metrics command, explain once that it keeps a
+local log of how their time is spent, so the guide can be improved, and
+ask again; never stop logging silently. The first `step decide` on a
+shown step prototype marks the prototype milestone; if the person tries
+a prototype some other way first, run `metrics mark prototype` when the person first tries it
+(when they tell you they clicked through it, not when you build it).
+Record `testing` and `release` with `metrics mark` too. `ux-builder-design metrics` reports it against
 the targets: at most 10 approvals before testing, at least 80% of turns
 new information or decisions, a first prototype within 30 active minutes.
 
@@ -255,8 +366,11 @@ stories, research the person points to, an existing app's code. Then run
 confirm in a line each) and the questions still open, which do not depend
 on one another. Ask those together, in one message; a narrative answer is
 fine, and a part they skip becomes an assumption to test. Tell them the
-budget `intake` and `status` give ("About 9 decisions and 25 minutes
-before the first prototype"). Follow up only where the answer would change
+budget `intake` and `status` give ("About 2 decisions before the step 1
+prototype, roughly 16 minutes: 6 of your time and 10 of mine"). It counts
+your own drafting and checking, and learns this design's pace as it goes.
+When `status` says a step has run over its estimate, tell the person at
+once, with how far the prototype is now. Follow up only where the answer would change
 the design. Then run HELIX's `frame` to write the PRD and principles.md,
 and go on as a structured interview through HELIX's `grill` for what the
 sources cannot answer, drafting or updating the PRD and stories as it goes
@@ -371,6 +485,16 @@ A rule the user only meets as an error is a design problem; `validate`
 fails a cited rule without the four answers, and the test kit gives each
 rule a task set in its trigger.
 
+**Who each part is for.** Ask the person who uses each part of the app
+and how they get to it, and record it: each screen's `users` (the PRD's
+User Segments, by name), and `entry` (`link`, `scan`, `message`) for a
+screen reached from outside the app, such as a door page opened from a
+scanned pass or a promoter's own link. Never give such a screen a tab in
+another user's app; `nav.audience` warns when one does. A screen that
+needs no navigation gets `"frame": "screen"`. A state of a screen's own,
+such as "already used", is declared in `states` with what it shows in
+`stateNotices`.
+
 Name each journey's task by its key (`"task": "<key>"`) and run
 `ux-builder-blueprint check`.
 
@@ -410,9 +534,11 @@ first, say), draft at least two alternatives and recommend one:
 
 ## Design the structure
 
-**Modality first.** Before any wireframe or prototype is drawn, explain
-the terms *modality* and *size class* (`ux-builder-design explain modality`),
-then ask the person what kind of experience the app gives (responsive web,
+**Modality confirmed.** The step prototypes so far assumed responsive
+web, phone to large desktop, and the recommended frame. Now explain the
+terms *modality* and *size class* (`ux-builder-design explain modality`),
+show what the prototypes assumed, then ask the person what kind of
+experience the app gives (responsive web,
 chat, hybrid chat; more than one is possible) and the screen sizes it must
 work at. For responsive web, ask in the same message which **app frame**
 it should have (`ux-builder-design explain "app frame"`), showing the four
@@ -460,13 +586,14 @@ imports from a prototype (the `ux-builder/no-prototype-import` lint rule).
 yet*, the validated prototype needs the app. Explain the term *theme*
 (`ux-builder-design explain theme`) and ask which one the app should wear:
 show the released themes (`npm create @ux-builder/app@latest -- --help`
-lists them). If none carries their brand, point them to the theme builder:
-in a clone of https://github.com/DocumentDrivenDX/ux-builder, `npm install
-&& npm run builder` makes a theme from their logo, checked for contrast,
-and saving it opens a pull request; once it is merged and released in
-`@ux-builder/tokens`, the app can be built on it by name. They may wait
-for it, or build on `plain` now. Record their answer as a decision, then
-run `npm create @ux-builder/app@latest . -- --theme <name>` and
+lists them), and say the prototypes so far used `plain`. **The theme never
+blocks.** If none carries their brand, build on `plain` now (dark if the
+product is) and offer to make their brand's theme: you run the
+theme builder with them (in a clone of
+https://github.com/DocumentDrivenDX/ux-builder,
+`npm install && npm run builder`), and you own getting it released and switching the app to it;
+they never wait on it or report back. Record their answer as a decision,
+then run `npm create @ux-builder/app@latest . -- --theme <name>` and
 `npm install`. The app is built from the recorded modality and the
 designed blueprint; the design documents and the state stay where they
 are. If it refuses, it says why (the modality not recorded, an error in
@@ -558,8 +685,10 @@ fails, nothing is regenerated: fix the blueprint and apply again. Use
 
 ## Checkpoints
 
-Stop, ask the person one question, and wait for the answer at each
-checkpoint. Record it at once:
+A core checkpoint closes step 3, 4 or 7, and `step decide continue` at
+that step answers it with the same words. Otherwise, stop,
+ask the person one question, and wait for the answer at each checkpoint.
+Record it at once:
 `ux-builder-design state checkpoint <id> --answer "<their words>"`. If the
 answer is no or not yet, add `--declined`: it is recorded, and never counts
 as passed. If they choose to go on without deciding,

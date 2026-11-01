@@ -102,7 +102,7 @@ function proposeFunnels(app, rows) {
 }
 
 /* ux-builder-design insights <events.jsonl> [--support <file>] [--feedback <file>] [--date YYYY-MM-DD]. */
-export function insights(app, { events: file, support, feedback, date = today() } = {}) {
+export function insights(app, { events: file, support, feedback, date = today(), simulated = false } = {}) {
   if (!file) throw new DesignError("insights needs the exported journey events: insights <events.jsonl>");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new DesignError(`--date is YYYY-MM-DD, not "${date}"`);
   for (const f of [file, support, feedback].filter(Boolean)) if (!existsSync(abs(app, f))) throw new DesignError(`no such file: ${f}`);
@@ -125,7 +125,7 @@ export function insights(app, { events: file, support, feedback, date = today() 
     for (const e of cited) linked.push({ kind, journeys: e.journeys, text: e.text });
   }
 
-  const L = [`# Production insights to ${date}`, "", "Run output (ADR-042): not committed. The funnels are proposed into HELIX's metrics dashboard.", ""];
+  const L = [`# Production insights to ${date}`, "", "Run output (ADR-042): not committed. The funnels are proposed into HELIX's metrics dashboard.", ...(simulated ? ["", "SIMULATED data: not evidence from real people. Nothing is proposed as confirmed from it."] : []), ""];
   L.push("## Sources", "", ...sources.map((s) => `- ${s.kind}: \`${s.file}\`${s.entries != null ? `, ${s.entries} entries, ${s.linked} linked to a journey` : `, ${s.events} events`}; read from the owner's export, nothing fetched`), "");
   L.push("## Journeys", "", "| Journey | Started | Completed | Completion | Most abandoned step | Failed searches | Errors shown | Feature use | Seconds per step |", "|---|---|---|---|---|---|---|---|---|");
   for (const j of journeys) L.push(`| ${j.journey} | ${j.started} | ${j.completed} | ${pct(j.completed, j.started)} | ${mostAbandoned(j)} | ${j.failedSearches} | ${j.errors} | ${Object.entries(j.features).map(([s, n]) => `${s} ${n}`).join(", ") || "–"} | ${Object.entries(j.secondsPerStep).map(([k, s]) => `${k}: ${s}`).join(", ") || "–"} |`);
@@ -133,7 +133,7 @@ export function insights(app, { events: file, support, feedback, date = today() 
   if (linked.length) L.push("## Support and feedback", "", ...linked.map((l) => `- ${l.kind} [${l.journeys.join(", ")}]: "${l.text}"`), "");
   L.push("## Diagnosis", "", "- None yet. Record one with `ux-builder-design diagnose --insight " + id + "`: the observation, at least two explanations, the hypothesis and the alternative that tests it.", "");
   const path = writeInApp(app, `${dir}/insights.md`, L.join("\n"));
-  const data = { id, date, events: events.length, journeys, unmatched, sources, linked };
+  const data = { id, date, ...(simulated ? { simulated: true } : {}), events: events.length, journeys, unmatched, sources, linked };
   writeInApp(app, `${dir}/insights.json`, JSON.stringify(data, null, 2) + "\n");
   const funnels = proposeFunnels(app, journeys.filter((j) => j.started).map((j) => [j.journey, `${pct(j.completed, j.started)} of ${j.started} started`, mostAbandoned(j), null, `production events to ${date} (${dir}/insights.json)`]));
   return { ...data, path, dashboard: funnels.path, proposal: funnels.id ?? null };

@@ -204,6 +204,13 @@ test.describe("A theme's page", () => {
   });
 
   test("a theme with one appearance offers only it and Auto; an unknown theme says so", async ({ page }) => {
+    // Every shipped theme has both appearances (plain gained dark, ADR-043), so a light-only theme, as the
+    // builder can make, is plain served without its dark one.
+    await page.route("**/api/theme?name=plain", async (route) => {
+      const json = await (await route.fetch()).json();
+      delete json.appearances.dark;
+      await route.fulfill({ json: { ...json, default: "light" } });
+    });
     await page.goto("/?theme=plain");
     const sw = page.getByRole("radiogroup", { name: "Theme appearance" });
     await expect(sw.getByRole("radio", { name: "Dark" })).toBeDisabled();

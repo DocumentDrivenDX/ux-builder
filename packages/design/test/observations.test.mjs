@@ -137,7 +137,8 @@ describe("US-141: import observations and consented transcripts", () => {
     writeFileSync(join(run, "backlog.json"), JSON.stringify({ schema: "backlog", version: 1, findings: [agent] }));
     const fs = evaluationFindings(a);
     assert.equal(fs.find((f) => f.id === "F-agent01").label, "agent recommendation");
-    assert.ok(fs.filter((f) => f.source === "human").length >= 5);
+    // The same problem in several sessions is one finding citing each (VIP List session 3).
+    assert.ok(fs.filter((f) => f.source === "human").reduce((n, f) => n + 1 + (f.also?.length ?? 0), 0) >= 5);
     for (const f of fs) assert.equal(f.label, f.source === "human" ? "human observation" : "agent recommendation", f.id);
     const text = readFileSync(join(a, json(a, ["report"]).path), "utf8");
     assert.match(text, /- \*\*F-agent01\*\* \(agent recommendation\) Severity 3: Access point not on the map/);

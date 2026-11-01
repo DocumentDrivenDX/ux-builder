@@ -22,16 +22,22 @@ const ASK = /Ask the person first which modalities \(responsive-web, chat, hybri
 
 describe("US-149-AC4: modality before any wireframe or prototype", () => {
   // @covers US-149-AC4
-  test("wireframes and prototype --explore exit 1 until the modality is recorded, draw after, and ask again when the supports change", () => {
+  test("wireframes exit 1 until the modality is recorded (prototype --explore draws on the defaults, ADR-043), draw after, and ask again when the supports change", () => {
     const dir = mkdtempSync(join(tmp, "app-"));
     writeFileSync(join(dir, "package.json"), JSON.stringify({ name: "rivers", private: true }));
     assert.equal(run(DESIGN, dir, "init").status, 0);
     assert.equal(run(CLI, dir, "alternative", "new", "list-first").status, 0);
     const explore = () => run(CLI, dir, "prototype", "--explore", "--alternative", "list-first", "--question", "List first?");
+    // Amended 2026-10-31 (ADR-043, session 2): alternatives can be clicked at step 4, drawn on the step prototypes' defaults.
     let r = explore();
-    assert.equal(r.status, 1);
-    assert.match(r.stderr, ASK);
-    assert.ok(!existsSync(join(dir, "docs/ux-builder/prototypes")), "no prototype drawn");
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stderr, /the modality is not chosen yet: drawn as a web app/);
+    assert.ok(existsSync(join(dir, "docs/ux-builder/prototypes/list-first/index.html")));
+    // In the design's appearance, as its step prototypes are (VIP List session 3).
+    assert.equal(run(DESIGN, dir, "state", "set", "appearance", JSON.stringify({ value: "dark", reason: "used in dark venues" })).status, 0);
+    r = explore();
+    assert.match(r.stdout, /\(plain, dark\)/);
+    assert.match(readFileSync(join(dir, "docs/ux-builder/prototypes/list-first/index.html"), "utf8") + readdirSync(join(dir, "docs/ux-builder/prototypes/list-first")).filter((f) => f.endsWith(".html")).map((f) => readFileSync(join(dir, "docs/ux-builder/prototypes/list-first", f), "utf8")).join(""), /data-appearance="dark"/);
     r = run(CLI, dir, "wireframes");
     assert.equal(r.status, 1);
     assert.match(r.stderr, ASK);

@@ -183,11 +183,20 @@
             "type": "array",
             "uniqueItems": true,
             "items": {
-              "enum": [
-                "empty",
-                "loading",
-                "error",
-                "partial"
+              "anyOf": [
+                {
+                  "enum": [
+                    "empty",
+                    "loading",
+                    "error",
+                    "partial"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]*$",
+                  "description": "A state of the screen's own, such as already-used; its stateNotices entry says what it shows"
+                }
               ]
             }
           },
@@ -238,6 +247,10 @@
                   "type": "string",
                   "minLength": 1,
                   "description": "For example data, action, help, status"
+                },
+                "compact": {
+                  "type": "boolean",
+                  "description": "In a list, shown on a phone (the compact size class). Without any marked, a list shows its first three on a phone (VIP List session 3)"
                 }
               }
             }
@@ -249,6 +262,69 @@
               "minLength": 1
             },
             "description": "The kinds of interaction the screen handles, such as choose-location (FEAT-018 GDL-34)"
+          },
+          "stateNotices": {
+            "type": "object",
+            "description": "What a state shows, by state (a state of the screen's own, or empty, error and partial): a notice with its tone, title and text (VIP List session 2: a door page's 'Already used at <time>').",
+            "propertyNames": {
+              "pattern": "^[a-z][a-z0-9-]*$"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title"
+              ],
+              "properties": {
+                "tone": {
+                  "enum": [
+                    "info",
+                    "success",
+                    "warning",
+                    "error"
+                  ]
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "text": {
+                  "type": "string"
+                },
+                "values": {
+                  "type": "object",
+                  "description": "The content values this state changes, by content label: the screen shows them in this state instead of its samples (VIP List session 3: 'Already used' with 'Pass status: Valid tonight' under it)",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "entry": {
+            "enum": [
+              "link",
+              "scan",
+              "message"
+            ],
+            "description": "Reached from outside the app (a link, a scanned code, a message), not from a destination: the check does not call it unreachable"
+          },
+          "frame": {
+            "enum": [
+              "screen",
+              "top-bar",
+              "top-nav",
+              "side-nav"
+            ],
+            "description": "This screen's frame, in place of supports.frame (a door page opened from a scan: screen)"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "The PRD's User Segments the screen is for, by name (ADR-042), or an older blueprint's U-<n>; check warns when a destination mixes in screens for other users"
           }
         }
       }
@@ -515,10 +591,19 @@
           "minLength": 1
         },
         "state": {
-          "enum": [
-            "empty",
-            "loading",
-            "error"
+          "anyOf": [
+            {
+              "enum": [
+                "empty",
+                "loading",
+                "error"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$",
+              "description": "A state of the screen's own (screens[].states with its stateNotices entry)"
+            }
           ]
         },
         "expect": {

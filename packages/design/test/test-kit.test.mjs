@@ -49,6 +49,10 @@ describe("US-140: get a usability test kit from the journeys", () => {
     const bp = { screens: [{ id: "river", title: "River", pattern: "RecordDetail", actions: [{ id: "back", label: "Back" }] }, { id: "saved", title: "Saved", pattern: "CollectionList" }] };
     assert.equal(goalText("Go back to a river I saved", bp), "go back to a river you saved");
     assert.equal(goalText("Find a river with public access near me", bp), "find a river with public access near you");
+    // A screen named for what the user does keeps the goal's verb (VIP List sessions 1 to 3: "You want to so guests can claim").
+    const post = { screens: [{ id: "post", title: "Post an event", pattern: "FormPage" }, { id: "guests", title: "Guest list", pattern: "CollectionList" }] };
+    assert.equal(goalText("Post an event so guests can claim", post), "post an event so guests can claim");
+    assert.equal(goalText("Post an event and check the Guest list", post), "post an event and check");
   });
 
   // @covers US-140-AC3

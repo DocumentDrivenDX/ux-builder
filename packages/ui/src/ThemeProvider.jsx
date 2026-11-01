@@ -44,10 +44,11 @@ function systemAppearance() {
 }
 
 /* The appearance a theme will actually show: the one asked for if the theme
-   has it, else the theme's own default. */
-export function resolveAppearance(theme, preference, system = systemAppearance()) {
+   has it, else the theme's own default. `themes` defaults to the shipped
+   ones; a light-only brand theme from the theme builder is one case. */
+export function resolveAppearance(theme, preference, system = systemAppearance(), themes = THEMES) {
   const wanted = preference === "system" ? system : preference;
-  const known = THEMES.get(theme);
+  const known = themes.get(theme);
   if (!known) return wanted ?? null;
   if (wanted && known.appearances.includes(wanted)) return wanted;
   return known.default;

@@ -11,6 +11,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { FRAMES, frameFor, FUTURE_MODALITIES, MODALITIES } from "@ux-builder/ui/blueprint/modalities";
 import { bpFile, DesignError, writeInApp } from "./app.mjs";
+import { personTurn } from "./metrics.mjs";
 import { readState, writeState } from "./state.mjs";
 
 export const SIZE_CLASSES = ["compact", "medium", "expanded", "large", "extra-large"];
@@ -36,7 +37,7 @@ export function modalityStatus(app) {
 }
 
 /* ux-builder-design modality --answer <their words> --modality <list> --size-classes <list> --frame <frame>. */
-export function confirmModality(app, { answer, modalities, sizeClasses, frame } = {}) {
+export function confirmModality(app, { answer, modalities, sizeClasses, frame, sameTurn = false } = {}) {
   const ms = list(modalities), ss = list(sizeClasses);
   if (!answer?.trim()) throw new DesignError("modality needs --answer: the person's answer, in their words");
   if (!ms.length) throw new DesignError(`modality needs --modality: one or more of ${Object.keys(MODALITIES).join(", ")}`);
@@ -60,5 +61,6 @@ export function confirmModality(app, { answer, modalities, sizeClasses, frame } 
   const state = readState(app);
   state.modality = { modalities: ms, sizeClasses: bp.supports.sizeClasses ?? [], ...(web ? { frame } : {}), answer: answer.trim(), at: new Date().toISOString() };
   writeState(app, state);
+  personTurn(app, { kind: "answer", answer, sameTurn });
   return { file, ...state.modality };
 }

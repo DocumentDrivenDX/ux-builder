@@ -121,6 +121,16 @@ export async function buildInPlace(dir, { theme, modalities: given, blueprint, n
     r = { ...made, dir: target };
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 
+  // In the design's appearance, as its step prototypes were (VIP List session 3 built a dark design as "system").
+  let appearance = null;
+  try { appearance = JSON.parse(readFileSync(join(target, ".ux-builder/design-state.json"), "utf8")).appearance?.value ?? null; } catch {}
+  const main = join(target, "src/main.jsx");
+  if ((appearance === "light" || appearance === "dark") && existsSync(main)) writeFileSync(main, readFileSync(main, "utf8").replace('appearance="system"', `appearance="${appearance}"`));
+  r.appearance = appearance ?? "system";
+  // The app's own name in its header, and the theme's logo only when the theme has artwork (no "Plain" beside it).
+  const brand = join(target, "src/ThemeSwitch.jsx");
+  if (existsSync(brand)) writeFileSync(brand, readFileSync(brand, "utf8").replace('<Logo size="sm" />', '<Logo size="sm" fallback="none" />'));
+
   // The journey skeleton (US-159): the designed screens and journeys, in place of the empty Home.
   r.prototype = generateJourneyApp(target, { modalities });
   if (r.prototype.generated) {
@@ -131,6 +141,9 @@ export async function buildInPlace(dir, { theme, modalities: given, blueprint, n
     const pkgFile = join(target, "package.json");
     const own = JSON.parse(readFileSync(pkgFile, "utf8"));
     own.scripts = { ...own.scripts, prototype: `npx @ux-builder/create-app@${OWN.version} --prototype .` };
+    // The audit visits every designed screen, not only the home page (VIP List sessions 2 and 3).
+    const paths = [...new Set(r.prototype.screens.map((sc) => sc.path).filter(Boolean))];
+    if (own.scripts.audit && paths.length) own.scripts.audit = own.scripts.audit.replace(/ http:\/\/127\.0\.0\.1:4173\/\S*$/, ` ${paths.map((p) => `http://127.0.0.1:4173${p}`).join(" ")}`);
     writeFileSync(pkgFile, JSON.stringify(own, null, 2) + "\n");
   }
 

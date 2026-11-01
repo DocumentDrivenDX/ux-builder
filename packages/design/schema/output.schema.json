@@ -420,6 +420,9 @@
         },
         "review": {
           "type": "string"
+        },
+        "stepEnd": {
+          "type": "string"
         }
       }
     },
@@ -839,6 +842,343 @@
               "message"
             ]
           }
+        }
+      }
+    },
+    "stepPrototype": {
+      "description": "prototype --step (US-170)",
+      "type": "object",
+      "required": [
+        "step",
+        "name",
+        "dir",
+        "entry",
+        "pages",
+        "theme",
+        "appearance",
+        "assumptions",
+        "next"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "dir": {
+          "type": "string"
+        },
+        "entry": {
+          "type": "string"
+        },
+        "pages": {
+          "type": "integer"
+        },
+        "theme": {
+          "type": "string"
+        },
+        "appearance": {
+          "enum": [
+            "light",
+            "dark"
+          ]
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "next": {
+          "type": "string"
+        },
+        "app": {
+          "type": "boolean"
+        }
+      }
+    },
+    "stepCheck": {
+      "description": "prototype --step --check [--accept <id> --reason] [--nothing-to-fix] (US-170)",
+      "type": "object",
+      "required": [
+        "step",
+        "round",
+        "ready",
+        "open",
+        "next"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "round": {
+          "type": "integer"
+        },
+        "at": {
+          "type": "string"
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "nothingToFix": {
+          "type": "boolean"
+        },
+        "pagesAudited": {
+          "type": "integer"
+        },
+        "audit": {
+          "type": "object",
+          "required": [
+            "ran"
+          ]
+        },
+        "heuristics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "heuristic",
+              "finding"
+            ]
+          }
+        },
+        "journeyWalk": {
+          "enum": [
+            "requested",
+            null
+          ]
+        },
+        "next": {
+          "type": "string"
+        },
+        "seconds": {
+          "type": "integer"
+        },
+        "pagesUnchanged": {
+          "type": "integer"
+        },
+        "accepted": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "text"
+            ]
+          }
+        },
+        "open": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "text"
+            ]
+          }
+        }
+      }
+    },
+    "stepDecide": {
+      "description": "step decide (US-170)",
+      "type": "object",
+      "required": [
+        "step",
+        "choice",
+        "answer",
+        "now",
+        "next"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "choice": {
+          "enum": [
+            "continue",
+            "revise",
+            "finish"
+          ]
+        },
+        "answer": {
+          "type": "string"
+        },
+        "checkpoint": {
+          "type": "string"
+        },
+        "now": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string"
+        }
+      }
+    },
+    "finish": {
+      "description": "finish (US-171)",
+      "type": "object",
+      "required": [
+        "step",
+        "answer",
+        "written",
+        "applied",
+        "skipped",
+        "notDone",
+        "summary",
+        "assumed",
+        "next"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer"
+        },
+        "answer": {
+          "type": "string"
+        },
+        "written": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "applied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "skipped": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notDone": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary": {
+          "type": "string"
+        },
+        "assumed": {
+          "type": "integer"
+        },
+        "next": {
+          "type": "string"
+        }
+      }
+    },
+    "scope": {
+      "description": "scope (session 2)",
+      "type": "object",
+      "required": [
+        "stories",
+        "criteria",
+        "destinations",
+        "screens",
+        "required",
+        "optional",
+        "rules",
+        "text"
+      ],
+      "properties": {
+        "stories": {
+          "type": "array"
+        },
+        "criteria": {
+          "type": "integer"
+        },
+        "destinations": {
+          "type": "array"
+        },
+        "screens": {
+          "type": "integer"
+        },
+        "required": {
+          "type": "array"
+        },
+        "optional": {
+          "type": "array"
+        },
+        "rules": {
+          "type": "array"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "stepBatch": {
+      "description": "step batch (US-173)",
+      "type": "object",
+      "required": [
+        "steps",
+        "alternative",
+        "decisions",
+        "approved",
+        "modalities",
+        "theme",
+        "turn",
+        "now",
+        "next"
+      ],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "alternative": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approved": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "modalities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "theme": {
+          "type": "string"
+        },
+        "turn": {
+          "type": "string"
+        },
+        "now": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string"
         }
       }
     }

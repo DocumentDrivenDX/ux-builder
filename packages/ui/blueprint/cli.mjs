@@ -161,24 +161,39 @@ async function main(argv) {
     const src = alternativeFile(L, values.alternative);
     let bp;
     try { bp = JSON.parse(readFileSync(src, "utf8")); } catch (e) { console.error(`${src}: ${e.message}`); return 2; }
+    const d = await designState(src);
+    // The chosen alternative became the app's blueprint, which has moved on since: draw that, never the stale copy
+    // (VIP List session 1 prototyped an out-of-date alternative file and had to rebuild it).
+    if (values.alternative && d?.state?.alternatives?.some((a) => a.name === values.alternative && a.status === "chosen") && existsSync(L.blueprint) && readFileSync(L.blueprint, "utf8") !== readFileSync(src, "utf8")) {
+      bp = JSON.parse(readFileSync(L.blueprint, "utf8"));
+      console.error(`note    ${values.alternative} is the chosen alternative, and ${L.blueprint} has changed since it was chosen: the prototype is drawn from ${L.blueprint}.`);
+    }
+    // In a guided app, the person says which modalities and screen sizes come first (FEAT-018 GDL-80).
+    // Before the person chooses the modality (step 5), alternatives are drawn on the step prototypes'
+    // defaults, so they can be clicked at step 4 (VIP List session 2 compared them on a table only).
+    if (d && !d.design.modalityStatus(d.app).confirmed) {
+      if (!d.design.withDefaults) { console.error(MODALITY_FIRST); return 1; }
+      bp = d.design.withDefaults(d.app, bp, structuredClone(d.state)).bp;
+      console.error("note    the modality is not chosen yet: drawn as a web app, phone to large desktop, in the recommended frame, as the step prototypes are.");
+    }
     const errors = checkBlueprint(bp).filter((f) => f.severity === "error");
     if (errors.length) {
       for (const f of errors) console.error(`error   ${f.rule}  ${f.path || "/"}\n        ${f.message}`);
       console.error(`${src} has ${errors.length} error${errors.length === 1 ? "" : "s"}: fix them before prototyping. Nothing was written.`);
       return 1;
     }
-    const d = await designState(src);
-    // In a guided app, the person says which modalities and screen sizes come first (FEAT-018 GDL-80).
-    if (d && !d.design.modalityStatus(d.app).confirmed) { console.error(MODALITY_FIRST); return 1; }
     const question = values.question ?? d?.state?.questions?.find((q) => q.status === "open")?.text ?? `What is it like to use ${name}?`;
     const systems = values["design-system"] ?? [];
     const targets = systems.length ? systems.map((ds) => ({ dir: `${name}-${ds}`, theme: themeFor(ds), ds })) : [{ dir: name, theme: "plain" }];
     const missing = targets.filter((t) => !t.theme);
     if (missing.length) { console.error(`No theme shows the design system ${missing.map((t) => t.ds).join(", ")}.`); return 2; }
     const written = [];
-    for (const t of targets) written.push(await writePrototype(bp, { root: L.prototypes, dir: t.dir, question, theme: t.theme }));
+    // In the design's own appearance, as its step prototypes are (VIP List session 3 compared light alternatives
+    // after three dark step prototypes).
+    const appearance = d?.state?.appearance?.value ?? "light";
+    for (const t of targets) written.push(await writePrototype(bp, { root: L.prototypes, dir: t.dir, question, theme: t.theme, appearance }));
     if (values.json) console.log(JSON.stringify({ question, prototypes: written }, null, 2));
-    else for (const w of written) console.log(`${w.dir}/: ${w.pages} pages (${w.theme}); open ${w.dir}/index.html. A prototype, never app code.`);
+    else for (const w of written) console.log(`${w.dir}/: ${w.pages} pages (${w.theme}, ${w.appearance}); open ${w.dir}/index.html. A prototype, never app code.`);
     return 0;
   }
 

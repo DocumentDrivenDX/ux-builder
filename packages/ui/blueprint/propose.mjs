@@ -214,8 +214,13 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
 
   // Documents changed in memory, by path, so two sections of one document compose.
   const texts = new Map();
+  // Every placeholder HELIX's locations use: {id} and {n} the number, {nn} the view's number in its flow,
+  // {view} the view, {name}, {screen} and {feature} the document's folder slug. A location with one left
+  // unfilled is not written (HELIX 0.20's flows wrote every wireframe to one literal path).
   const locate = (type, location, vars) => {
     const rel = location.replace(/^docs\/helix\//, "").replace(/\{(id|n)\}/g, vars.number ?? "").replace(/\{(name|screen|feature)\}/g, vars.slug ?? "").replace(/\{nn\}/g, vars.nn ?? "").replace(/\{view\}/g, vars.view ?? "");
+    const left = rel.match(/\{[a-z-]+\}/g);
+    if (left || /(^|\/|-)-|--|-\.md$/.test(rel)) { result.problems.push(`HELIX's location for the ${type} type (${location}) has ${left ? `${left.join(", ")} unfilled` : "an empty part"}; ${vars.id ?? type} not proposed.`); return null; }
     return join(flowRoot, rel);
   };
 
@@ -227,6 +232,7 @@ export function propose(bp, { blueprintFile = "app.blueprint.json" } = {}) {
     else {
       if (!info.location) { result.problems.push(`HELIX has no output location for the ${type} type; ${kind} not proposed.`); return; }
       path = locate(type, info.location, create);
+      if (!path) return;
       isNew = !texts.has(path);
       if (!info.template) result.problems.push(`HELIX has no template for the ${type} type (${info.base}/template.md): ${posix(relative(root, path))} is drafted from the blueprint alone.`);
       before = texts.get(path) ?? draft(info.template, { ...create, type, intro: intro ?? `> Drafted by \`ux-builder-blueprint propose\` from the blueprint${info.template && version ? ` and HELIX ${version}'s template` : ""}. A person reviews and applies it.` });

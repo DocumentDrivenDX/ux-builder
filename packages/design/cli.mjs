@@ -3,9 +3,10 @@
    deterministic work, for the agent (through its shell) and for a person.
    Exit codes: 0 done; 1 a check failed; 2 bad input or a refusal. */
 
-import { resolve } from "node:path";
+import { existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, principleAdd, needAdd, segmentAdd, taskAdd, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION } from "./index.mjs";
+import { advance, carried, claimAdd, claimContradict, claimVerify, intake, logTurn, mapText, mark, metrics, metricsText, proposalsApply, proposalsPreview, reviewMap, reviewTable, confirmModality, migrate, bpFile, layout, ux, explain, explainText, overview, overviewText, pendingReviews, reviewApprove, reviewFeedback, reviewList, reviewRespond, reviewShow, setStep, excerptAdd, insights, diagnose, experimentStart, experimentEnd, observeImport, transcriptAdd, report, route, applyImpact, brief, checkpoint, impact, summaryOf, testKit, trace, ready, readyText, rubric, rubricText, decisionAdd, decisionStatus, principleAdd, needAdd, segmentAdd, taskAdd, evidenceAdd, evidenceList, DesignError, findApp, init, setMode, stateGet, stateSet, status, validate, VERSION, stepBatch, stepBatchText, finish, scope, finishText, logEvent, stepDecide, stepDecideText, stepCheck, stepCheckText, stepPrototype, stepPrototypeText } from "./index.mjs";
 
 const HELP = `ux-builder-design ${VERSION}: the guided design loop (FEAT-018, CONTRACT-008)
 
@@ -22,9 +23,36 @@ Usage: ux-builder-design <command> [options] [--app <dir>] [--json]
   overview
       the process in eight steps: what you do in each, what comes out, the
       terms it introduces and the checkpoint that closes it.
+  step batch --answer <their words> [--alternative <name>] --modality <list> [--size-classes <list>] [--frame <frame>] --theme <name>
+      steps 4 to 6 as one batch: the person's one answer to the recommended
+      alternative, modality and frame, and theme chooses the alternative,
+      records and approves a decision for it and the theme, records the
+      modality, answers core-2 and decides steps 4 and 5; then build the app
+      on the theme and show it as step 6's prototype.
+  step decide continue|revise|finish --answer <their words> [--same-turn]
+      end the step with the person's decision on its checked prototype:
+      continue to the next step (answering the core checkpoint that closes
+      this one), revise this step, or finish (then run finish).
+  scope
+      everything the design asks for, as one list for the person to cut:
+      stories and their criteria, screens, destinations, and what people
+      must and may give.
+  finish --answer <their words>
+      the person stops being guided: write every downstream artifact from
+      the agent's draft (the brief, wireframes, a step prototype and its
+      check, a test kit, HELIX documents applied and marked assumed), skip
+      the core checkpoints not answered, and write finish-summary.md.
   step next|<n>
       move to the next (or the given) step; next refuses while items of the
-      current step await review.
+      current step await review. In the full loop, step decide ends a step.
+  prototype --step [--check [--accept <finding> --reason <why>] [--nothing-to-fix]]
+      draw the current step's prototype in docs/ux-builder/prototypes/step-<n>/,
+      assuming the modality, sizes, frame, theme and appearance not yet
+      chosen (each recorded); --check audits every page and runs the
+      heuristics (from step 5, the journey walk too): each screen's ideal
+      state at every size, its other states at one size, only pages changed
+      since their last audit; each finding is then fixed or accepted with a
+      reason (--accept <id> --reason); --nothing-to-fix records a clean round.
   explain [<term>] [--step <n>]
       what a term means and why it is valuable; --step: the terms a step
       introduces; with neither, every term.
@@ -227,10 +255,12 @@ function parseJson(text, what) {
 }
 
 async function main(argv) {
+  // `prototype --step` takes no value; --step <n> is explain's.
+  if (argv[0] === "prototype") argv = argv.map((a) => (a === "--step" ? "--step=current" : a));
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
-    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, rule: { type: "string" }, user: { type: "string", multiple: true }, need: { type: "string", multiple: true }, importance: { type: "string" }, context: { type: "string" }, goal: { type: "string" }, feature: { type: "string" }, task: { type: "string" }, "business-rule": { type: "string", multiple: true }, "realized-by": { type: "string", multiple: true }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "string" }, study: { type: "string" }, claim: { type: "string" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, help: { type: "boolean", short: "h" } },
+    options: { app: { type: "string" }, json: { type: "boolean" }, mcp: { type: "boolean" }, answer: { type: "string" }, skip: { type: "boolean" }, declined: { type: "boolean" }, reason: { type: "string" }, why: { type: "string" }, name: { type: "string" }, kind: { type: "string" }, date: { type: "string" }, source: { type: "string" }, title: { type: "string" }, question: { type: "string" }, option: { type: "string", multiple: true }, choice: { type: "string" }, assumption: { type: "string", multiple: true }, validation: { type: "string" }, link: { type: "string", multiple: true }, evidence: { type: "string" }, alternative: { type: "string" }, for: { type: "string" }, apply: { type: "boolean" }, set: { type: "string" }, journey: { type: "string", multiple: true }, session: { type: "string" }, "consent-confirmed": { type: "boolean" }, by: { type: "string" }, cite: { type: "string", multiple: true }, decision: { type: "string" }, status: { type: "string" }, support: { type: "string" }, feedback: { type: "string" }, insight: { type: "string" }, observation: { type: "string" }, explanation: { type: "string", multiple: true }, hypothesis: { type: "string" }, variant: { type: "string" }, metric: { type: "string" }, guardrail: { type: "string", multiple: true }, duration: { type: "string" }, result: { type: "string" }, participant: { type: "string" }, text: { type: "string" }, rule: { type: "string" }, user: { type: "string", multiple: true }, need: { type: "string", multiple: true }, importance: { type: "string" }, context: { type: "string" }, goal: { type: "string" }, feature: { type: "string" }, task: { type: "string" }, "business-rule": { type: "string", multiple: true }, "realized-by": { type: "string", multiple: true }, step: { type: "string" }, modality: { type: "string" }, "size-classes": { type: "string" }, frame: { type: "string" }, "dry-run": { type: "boolean" }, at: { type: "string" }, role: { type: "string" }, accept: { type: "string", multiple: true }, accepted: { type: "string", multiple: true }, "until-decision": { type: "boolean" }, basis: { type: "string" }, confidence: { type: "string" }, direction: { type: "string" }, study: { type: "string" }, claim: { type: "string" }, verified: { type: "boolean" }, contradicts: { type: "string" }, unknown: { type: "string" }, kit: { type: "string" }, theme: { type: "string" }, "same-turn": { type: "boolean" }, simulated: { type: "boolean" }, check: { type: "boolean" }, "nothing-to-fix": { type: "boolean" }, help: { type: "boolean", short: "h" } },
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) { process.stdout.write(HELP); return 0; }
@@ -243,9 +273,13 @@ async function main(argv) {
   }
 
   const app = values.app ? findApp(values.app) : findApp();
+  // Every command the agent runs marks the session as active, from the first (the overview, the intake), so active time
+  // covers the whole session; a preview that promises to change nothing (--dry-run, impact without --apply) leaves no mark.
+  const preview = values["dry-run"] || (command === "impact" && !values.apply) || (command === "metrics" && !rest.length);
+  if (!preview && existsSync(join(app, ".ux-builder"))) logEvent(app, "command", { command: [command, rest[0]].filter(Boolean).join(" ") });
 
   if (command === "modality") {
-    const r = confirmModality(app, { answer: values.answer, modalities: values.modality, sizeClasses: values["size-classes"], frame: values.frame });
+    const r = confirmModality(app, { answer: values.answer, modalities: values.modality, sizeClasses: values["size-classes"], frame: values.frame, sameTurn: values["same-turn"] });
     print(r, values.json, `Recorded: ${r.modalities.join(", ")}${r.sizeClasses.length ? ` at ${r.sizeClasses.join(", ")}` : ""}${r.frame ? `, in the ${r.frame} frame` : ""}, in ${r.file}. Wireframes and prototypes can be drawn now.`);
     return 0;
   }
@@ -262,6 +296,34 @@ async function main(argv) {
   if (command === "explain") {
     const r = explain({ term: rest.join(" ") || undefined, step: values.step });
     print(r, values.json, explainText(r));
+    return 0;
+  }
+  if (command === "prototype") {
+    if (values.step !== "current" || rest.length) throw new DesignError("prototype takes --step: ux-builder-design prototype --step [--check [--nothing-to-fix]] (exploratory prototypes of alternatives: ux-builder-blueprint prototype --explore)");
+    if (values.check || values["nothing-to-fix"] || values.accept?.length) { const r = await stepCheck(app, { nothingToFix: values["nothing-to-fix"], accept: values.accept ?? [], reason: values.reason }); print(r, values.json, stepCheckText(r)); return 0; }
+    const r = await stepPrototype(app);
+    print(r, values.json, stepPrototypeText(r));
+    return 0;
+  }
+  if (command === "scope") {
+    const r = scope(app);
+    print(r, values.json, r.text);
+    return 0;
+  }
+  if (command === "finish") {
+    const r = await finish(app, { answer: values.answer });
+    print(r, values.json, finishText(r));
+    return 0;
+  }
+  if (command === "step" && rest[0] === "batch") {
+    const split = (v) => (typeof v === "string" ? v.split(",").map((x) => x.trim()).filter(Boolean) : v);
+    const r = stepBatch(app, { answer: values.answer, alternative: values.alternative, reason: values.reason, modalities: split(values.modality), sizeClasses: split(values["size-classes"]), frame: values.frame, theme: values.theme });
+    print(r, values.json, stepBatchText(r));
+    return 0;
+  }
+  if (command === "step" && rest[0] === "decide") {
+    const r = stepDecide(app, { choice: rest[1], answer: values.answer, sameTurn: values["same-turn"] });
+    print(r, values.json, stepDecideText(r));
     return 0;
   }
   if (command === "step") {
@@ -305,7 +367,7 @@ async function main(argv) {
       return 0;
     }
     if (sub === "approve") {
-      const r = reviewApprove(app, { items: targets, kind: values.kind, answer: values.answer, accept: values.accept ?? [] });
+      const r = reviewApprove(app, { items: targets, kind: values.kind, answer: values.answer, accept: values.accept ?? [], sameTurn: values["same-turn"] });
       print(r, values.json, `${r.item === "map" ? `The coverage map approved: ${r.items.length} built item${r.items.length === 1 ? "" : "s"}${r.accepted.length ? `; accepted ${r.accepted.join(", ")}` : ""}` : `${r.items.join(", ")} approved`}. ${r.remaining ? `${r.remaining} item${r.remaining === 1 ? "" : "s"} left; next: ${r.next}.` : "Nothing else awaits review."}`);
       return 0;
     }
@@ -337,6 +399,8 @@ async function main(argv) {
     if (sub === "apply") {
       const accepted = (values.accepted ?? []).flatMap((a) => a.split(",")).map((a) => a.trim()).filter(Boolean);
       if (!accepted.length) throw new DesignError("proposals apply needs --accepted <ids>: the proposals the person accepted");
+      // An ID after another without its own --accepted was dropped silently before: name it instead.
+      if (rest.length > 1) throw new DesignError(`proposals apply takes each ID with --accepted (or comma-separated): ${rest.slice(1).join(", ")} ${rest.length > 2 ? "were" : "was"} not given with --accepted. Nothing was written.`);
       const r = proposalsApply(app, { accepted, dryRun: values["dry-run"] });
       print(r, values.json, r.text);
       return 0;
@@ -362,7 +426,7 @@ async function main(argv) {
       return 0;
     }
     if (sub === "checkpoint") {
-      const r = checkpoint(app, { id: path, answer: values.answer, skip: values.skip, declined: values.declined, reason: values.reason });
+      const r = checkpoint(app, { id: path, answer: values.answer, skip: values.skip, declined: values.declined, reason: values.reason, sameTurn: values["same-turn"] });
       print(r, values.json, `Checkpoint ${r.checkpoint.id} ${r.checkpoint.status}${r.trace ? ` (trace ${r.trace.episode})` : ""}.${r.moved ? `\nNow ${r.activity}${r.step ? `, step ${r.step}` : ""}. Next: ${r.next}` : ""}`);
       return 0;
     }
@@ -398,7 +462,7 @@ async function main(argv) {
   if (command === "observe") {
     const [sub, file] = rest;
     if (sub !== "import") throw new DesignError(`unknown observe command "${sub ?? ""}": use import`);
-    const r = observeImport(app, { file, study: values.study });
+    const r = observeImport(app, { file, study: values.study, simulated: values.simulated });
     print(r, values.json, [`Imported ${r.imported} observation${r.imported === 1 ? "" : "s"} into ${r.path} (${r.sessions.join(", ") || "no sessions"}).`, ...(r.rewritten ? [`Rewrote ${r.rewritten} with pseudonyms; the real names are only in .ux-builder/participants.local.json, kept out of git.`] : []), ...r.skipped.map((x) => `skipped row ${x.row}: ${x.reason}`)].join("\n"));
     return 0;
   }
@@ -420,7 +484,7 @@ async function main(argv) {
     return 0;
   }
   if (command === "insights") {
-    const r = insights(app, { events: rest[0], support: values.support, feedback: values.feedback, date: values.date });
+    const r = insights(app, { events: rest[0], support: values.support, feedback: values.feedback, date: values.date, simulated: values.simulated });
     const pct = (j) => (j.started ? `${Math.round((j.completed / j.started) * 100)}%` : "–");
     print(r, values.json, [`Wrote ${r.path}: ${r.events} events.`, ...r.journeys.map((j) => `  ${j.journey}: ${j.completed} of ${j.started} completed (${pct(j)}), ${j.failedSearches} failed searches`), ...r.unmatched.map((u) => `  unmatched: ${u.journey} (${u.events} event${u.events === 1 ? "" : "s"}; not in the blueprint)`), `Proposed the journey funnels for ${r.dashboard}.`].join("\n"));
     return 0;
@@ -438,7 +502,7 @@ async function main(argv) {
       return 0;
     }
     if (sub === "end") {
-      const r = experimentEnd(app, { id, result: values.result });
+      const r = experimentEnd(app, { id, result: values.result, simulated: values.simulated });
       print(r, values.json, [`${r.id} ended and closed: ${r.metric} ${r.control} → ${r.variant}; hypothesis ${r.hypothesis}.`, ...(r.decision ? [`Proposed ${r.decision.id}'s Validation: ${r.decision.status}.`] : []), r.next].join("\n"));
       return 0;
     }
@@ -548,7 +612,7 @@ main(process.argv.slice(2)).then((code) => { process.exitCode = code; }, (e) => 
   if (e instanceof DesignError || e?.code === "ERR_PARSE_ARGS_UNKNOWN_OPTION") {
     process.stderr.write(`ux-builder-design: ${e.message}\n`);
     for (const d of e.details ?? []) process.stderr.write(`  ${d.path}: ${d.message}\n`);
-    process.exitCode = 2;
+    process.exitCode = typeof e.code === "number" ? e.code : 2;
   } else {
     process.stderr.write(`ux-builder-design: ${e.stack ?? e}\n`);
     process.exitCode = 1;

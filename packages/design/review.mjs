@@ -20,7 +20,7 @@ import { keyOf, taskModel } from "./people.mjs";
 import { cell, documentOfType, helixDocuments, proposeChange, proposedDocuments, sectionOf, setSection } from "./helix.mjs";
 import { studies, studyRunDir } from "./studies.mjs";
 import { kits } from "./testkit.mjs";
-import { logEvent } from "./metrics.mjs";
+import { logEvent, personTurn } from "./metrics.mjs";
 import { readState, writeState } from "./state.mjs";
 
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
@@ -98,7 +98,7 @@ function readable(obj) {
 }
 
 /* The HELIX user stories by ID: { US-n: { file, text } }. */
-function stories(app) {
+export function stories(app) {
   const root = helixRoot(app);
   const out = {};
   const walk = (dir) => {
@@ -172,6 +172,18 @@ function markShown(app, entries) {
     writeFileSync(p, JSON.stringify({ ...shownOf(app), ...entries }, null, 2) + "\n");
   } catch { /* showing never fails for want of the record */ }
 }
+/* The steps 4 to 6 batch (US-173): what the person's one answer settles,
+   the derived items changed by the alternative they chose (seen as its
+   clickable prototype) and the decisions the batch made, marked shown and
+   approved with that answer in the same turn. */
+export function approveBatch(app, { decisions = [], answer, now = today() } = {}) {
+  const pending = pendingReviews(app).filter((p) => p.tier === "derived" || decisions.includes(p.id));
+  if (!pending.length) return [];
+  const items = reviewItems(app);
+  markShown(app, Object.fromEntries(pending.map((p) => [p.id, items.find((i) => i.id === p.id)?.hash])));
+  reviewApprove(app, { items: pending.map((p) => p.id), answer, sameTurn: true, now });
+  return pending.map((p) => p.id);
+}
 const mapHash = (m) => hashOf(JSON.stringify({ rows: m.rows, exceptions: m.exceptions.map((e) => e.id), pending: m.pending, changed: m.changed.map((c) => c.id) }));
 /* The words of a text, without punctuation or case: equal words, only formatting changed. */
 const wordsOf = (t) => String(t ?? "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
@@ -182,7 +194,22 @@ const approvals = (state) => new Map(list(state?.reviews).filter((r) => r.item !
    approval recorded before meanings were kept compares the whole content,
    and one kept under an earlier form of meaningOf compares its snapshot
    in the current form. */
-const holds = (r, i) => !!r && (r.hash === i.hash || r.hash === i.raw || (r.snapshot != null && meaningOf(r.snapshot, i) === i.meaning));
+const plainHolds = (r, i) => !!r && (r.hash === i.hash || r.hash === i.raw || (r.snapshot != null && meaningOf(r.snapshot, i) === i.meaning));
+/* The brief's sections built from items the person approves on their own
+   (VIP List session 1: the brief was asked about again each time). */
+const DERIVED = { "Target users": "user:", "Primary jobs": "story:" };
+function withoutApprovedSources(meaning, ctx) {
+  let out = meaning;
+  for (const [heading, prefix] of Object.entries(DERIVED)) {
+    const sources = ctx.items.filter((x) => x.id.startsWith(prefix));
+    if (!sources.length || !sources.every((x) => plainHolds(ctx.approved.get(x.id), x))) continue;
+    out = out.replace(new RegExp(`(^|\\n)## ${heading}\\n[\\s\\S]*?(?=\\n## |$)`), `$1## ${heading}`);
+  }
+  return out;
+}
+/* An approval holds as above; the brief's also holds when it changed only
+   in sections whose sources the person has approved since (carried). */
+const holds = (r, i, ctx) => plainHolds(r, i) || (!!ctx && i.id === "brief" && r?.snapshot != null && withoutApprovedSources(meaningOf(r.snapshot, i), ctx) === withoutApprovedSources(i.meaning, ctx));
 
 
 /* The items not approved in their current form, with their open feedback
@@ -192,7 +219,8 @@ export function pendingReviews(app, { steps, records = false } = {}) {
   let state;
   try { state = readState(app); } catch { return []; }
   const approved = approvals(state);
-  return reviewItems(app).filter((i) => (!steps || steps.includes(i.step)) && (records || i.tier !== "record") && !holds(approved.get(i.id), i))
+  const items = reviewItems(app), ctx = { items, approved };
+  return items.filter((i) => (!steps || steps.includes(i.step)) && (records || i.tier !== "record") && !holds(approved.get(i.id), i, ctx))
     .map(({ content, meaning, ...i }) => {
       const was = approved.get(i.id);
       return { ...i, changed: !!was, ...(was?.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id && f.status === "open").map((f) => f.id) };
@@ -204,7 +232,8 @@ export function carried(app) {
   let state;
   try { state = readState(app); } catch { return []; }
   const approved = approvals(state);
-  return reviewItems(app).filter((i) => { const r = approved.get(i.id); return r?.raw && r.hash === i.hash && r.raw !== i.raw; }).map((i) => i.id);
+  const items = reviewItems(app), ctx = { items, approved };
+  return items.filter((i) => { const r = approved.get(i.id); return (r?.raw && r.hash === i.hash && r.raw !== i.raw) || (r && !plainHolds(r, i) && holds(r, i, ctx)); }).map((i) => i.id);
 }
 
 /* The coverage map (GDL-83): each job, the tasks that serve it, their
@@ -235,7 +264,8 @@ export function coverageMap(app) {
   const rules = businessRules(app).rules;
   for (const id of [...new Set(ruleCitations(bp).map((c) => c.rule))]) if (!rules[id]) ex(`undefined:${id}`, `rule:${id}`, `${id} is cited, but no HELIX document defines it`);
   const seen = new Set(list(state?.reviews).filter((r) => r.item === "map").flatMap((r) => list(r.assumptions)));
-  for (const a of list(state?.assumptions)) if (["assumed", "hypothesis"].includes(a.status) && !seen.has(a.id)) ex(`assumption:${a.id}`, null, `new assumption: ${a.text}`);
+  // The step prototype's own defaults (an assumption with an "about") are confirmed at step 5, not on the map.
+  for (const a of list(state?.assumptions)) if (["assumed", "hypothesis"].includes(a.status) && !a.about && !seen.has(a.id)) ex(`assumption:${a.id}`, null, `new assumption: ${a.text}`);
   const derived = pendingReviews(app).filter((i) => i.tier === "derived");
   return { rows, exceptions, pending: derived.map((i) => i.id), changed: derived.filter((i) => i.changed).map(({ id, diff }) => ({ id, ...(diff ? { diff } : {}) })) };
 }
@@ -268,9 +298,10 @@ export function reviewTable(app, { kind, shown = true } = {}) {
   let state = null;
   try { state = readState(app); } catch { /* no design state */ }
   const approved = approvals(state);
-  const items = reviewItems(app).filter((i) => kindOf(i.id) === kind).map((i) => {
+  const all = reviewItems(app), ctx = { items: all, approved };
+  const items = all.filter((i) => kindOf(i.id) === kind).map((i) => {
     const was = approved.get(i.id);
-    return { id: i.id, title: i.title, file: i.file, content: i.content, status: holds(was, i) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), i.meaning)) } : {}) };
+    return { id: i.id, title: i.title, file: i.file, content: i.content, status: holds(was, i, ctx) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i, ctx) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), i.meaning)) } : {}) };
   });
   if (shown) markShown(app, Object.fromEntries(reviewItems(app).filter((i) => kindOf(i.id) === kind).map((i) => [i.id, i.hash])));
   return { kind, items, pending: items.filter((i) => i.status !== "approved").map((i) => i.id) };
@@ -293,10 +324,11 @@ function find(app, id) {
 export function reviewShow(app, { item } = {}) {
   const i = find(app, item);
   const state = readState(app);
-  const was = approvals(state).get(i.id);
+  const approved = approvals(state), ctx = { items: reviewItems(app), approved };
+  const was = approved.get(i.id);
   const { meaning, ...rest } = i;
   markShown(app, { [i.id]: i.hash });
-  return { ...rest, status: holds(was, i) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id) };
+  return { ...rest, status: holds(was, i, ctx) ? "approved" : was ? "changed since approved" : "awaiting review", ...(was && !holds(was, i, ctx) && was.snapshot != null ? { diff: diffText(lineDiff(meaningOf(was.snapshot, i), meaning)) } : {}), feedback: list(state.feedback).filter((f) => f.item === i.id) };
 }
 
 /* ux-builder-design review feedback <item> --text <their words>. */
@@ -328,9 +360,9 @@ export function reviewRespond(app, { id, text } = {}) {
 const record = (i, answer, now, via) => ({ item: i.id, hash: i.hash, raw: i.raw, snapshot: i.meaning, answer, at: now, ...(via ? { via } : {}) });
 
 /* ux-builder-design review approve <item>... | --kind <foundation kind> | map, --answer <their words>. */
-export function reviewApprove(app, { item, items, kind, answer, accept = [], now = today() } = {}) {
+export function reviewApprove(app, { item, items, kind, answer, accept = [], sameTurn = false, now = today() } = {}) {
   const ids = [...list(items), ...(item ? [item] : [])];
-  if (ids.includes("map")) return approveMap(app, { answer, accept, now });
+  if (ids.includes("map")) return approveMap(app, { answer, accept, sameTurn, now });
   if (!answer?.trim()) throw new DesignError(`review approve needs --answer: the person's approval${ids.length ? ` of ${ids.join(", ")}` : kind ? ` of the ${kind} table` : ""}, in their words`);
   let targets;
   if (kind) {
@@ -342,6 +374,14 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], now
     targets = ids.map((id) => find(app, id));
   }
   const state = readState(app);
+  // The brief is approved once the questions raised since it was drafted are in it (VIP List session 1:
+  // it was approved with four new questions open, and asked about again when they were answered).
+  const brief = targets.find((i) => i.id === "brief");
+  if (brief) {
+    const listed = (brief.content.split(/^## Open questions\s*$/m)[1] ?? "").split(/^## /m)[0];
+    const unlisted = list(state.questions).filter((q) => q.status === "open" && q.text && !listed.includes(q.text.trim()));
+    if (unlisted.length) throw new DesignError(`the brief was drafted before ${unlisted.length === 1 ? "this question was" : "these questions were"} raised: ${unlisted.map((q) => `${q.id} ("${q.text}")`).join(", ")}. Settle ${unlisted.length === 1 ? "it" : "them"} with the person, or regenerate the brief (ux-builder-design brief) so ${unlisted.length === 1 ? "it shows" : "they show"} as open, show it again, then ask for the approval. Nothing was recorded.`);
+  }
   const open = list(state.feedback).filter((f) => targets.some((i) => i.id === f.item) && f.status === "open");
   if (open.length) throw new DesignError(`${[...new Set(open.map((f) => f.item))].join(", ")} ${open.length === 1 ? "has" : "have"} feedback not yet addressed: ${open.map((f) => `${f.id} ("${f.text}")`).join(", ")}. Address it, record how (review respond <FB-n> --text "…"), show the item again, then ask for approval.`);
   const before = approvals(state);
@@ -355,7 +395,8 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], now
   const reopened = targets.filter((i) => before.has(i.id));
   // A reopening whose words did not change was caused by formatting alone (GDL-83 target).
   const formatOnly = reopened.filter((i) => before.get(i.id).snapshot != null && wordsOf(before.get(i.id).snapshot) === wordsOf(i.meaning)).map((i) => i.id);
-  logEvent(app, "approval", { items: [...ids2], via: kind ? "table" : "item", answer: answer.trim(), reopened: reopened.map((i) => i.id), ...(formatOnly.length ? { formatOnly } : {}) }, now);
+  const turn = personTurn(app, { kind: "approval", answer, sameTurn, at: now });
+  logEvent(app, "approval", { items: [...ids2], via: kind ? "table" : "item", answer: answer.trim(), turn, reopened: reopened.map((i) => i.id), ...(formatOnly.length ? { formatOnly } : {}) }, now);
   const left = pendingReviews(app);
   return { item: targets[0].id, items: [...ids2], approved: true, remaining: left.length, next: left[0]?.id ?? null };
 }
@@ -363,7 +404,7 @@ export function reviewApprove(app, { item, items, kind, answer, accept = [], now
 /* Approving the coverage map approves every built item awaiting review;
    it is refused while an exception is neither resolved nor accepted by
    the person (--accept <exception>). */
-function approveMap(app, { answer, accept, now }) {
+function approveMap(app, { answer, accept, sameTurn, now }) {
   if (!answer?.trim()) throw new DesignError("review approve map needs --answer: the person's approval of the coverage map, in their words");
   const m = coverageMap(app);
   // The map approved again needs the map as it is now shown to the person first (US-161-AC3).
@@ -381,7 +422,8 @@ function approveMap(app, { answer, accept, now }) {
   state.reviews = [...list(state.reviews).filter((r) => !ids.has(r.item) && r.item !== "map"), ...targets.map((i) => record(i, answer.trim(), now, "map")),
     { item: "map", hash: hashOf(JSON.stringify(m.rows)), answer: answer.trim(), at: now, accepted: accept, assumptions: list(state.assumptions).map((a) => a.id) }];
   writeState(app, state);
-  logEvent(app, "approval", { items: ["map"], via: "map", answer: answer.trim(), covers: [...ids], accepted: accept }, now);
+  const turn = personTurn(app, { kind: "approval", answer, sameTurn, at: now });
+  logEvent(app, "approval", { items: ["map"], via: "map", answer: answer.trim(), turn, covers: [...ids], accepted: accept }, now);
   const left = pendingReviews(app);
   return { item: "map", items: [...ids], accepted: accept, approved: true, traceability: proposeTraceability(app, m), remaining: left.length, next: left[0]?.id ?? null };
 }

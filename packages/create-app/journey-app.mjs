@@ -114,7 +114,7 @@ export function journeyModel(bp, { modalities } = {}) {
     const states = [...(models.get(s.id)?.states ?? ["ideal"]), ...(rules.length ? ["blocked"] : [])];
     const modals = [...screens.get(s.id).modals.values()].map((m) => ({ id: m.id, title: m.title || m.id, kind: m.kind === "sheet" ? "sheet" : "dialog", dismiss: DISMISS[m.dismiss] ?? "Close", fields: fieldsAt.get(`${s.id}:${m.id}`) ?? [], actions: list(m.actions).map((a) => actionOf(a, { screen: s.id, modal: m.id })) }));
     const content = list(s.content).filter((c) => typeof c.label === "string" && c.label.trim()).map((c) => ({ label: c.label, ...(c.kind ? { kind: c.kind } : {}) }));
-    return { id: s.id, path: pathOf(s.id), title: s.title ?? s.id, purpose: s.purpose ?? null, pattern: s.pattern ?? null, component: null, file: null, content: content.length ? content : [{ label: s.title ?? s.id, kind: LISTS.has(s.pattern) ? "list" : "details" }], fields: fieldsAt.get(s.id) ?? [], actions, rules, states, modals };
+    return { id: s.id, path: pathOf(s.id), title: s.title ?? s.id, purpose: s.purpose ?? null, pattern: s.pattern ?? null, ...(s.frame ? { frame: s.frame } : {}), ...(s.stateNotices ? { notices: s.stateNotices } : {}), component: null, file: null, content: content.length ? content : [{ label: s.title ?? s.id, kind: LISTS.has(s.pattern) ? "list" : "details" }], fields: fieldsAt.get(s.id) ?? [], actions, rules, states, modals };
   });
   const names = new Set();
   for (const s of S) { let n = `${pascal(s.id)}Screen`; for (let i = 2; names.has(n); i++) n = `${pascal(s.id)}${i}Screen`; names.add(n); s.component = n; s.file = `src/screens/${n}.jsx`; }
@@ -251,7 +251,11 @@ function currentOf(path) {
 export function App() {
   const { path } = useRoute();
   const Screen = ROUTES[path] ?? NotFound;
-  return (
+${m.screens.some((s) => s.frame) ? `  // A screen with a frame of its own (screens[].frame): just the screen, or a top bar with no navigation.
+  const own = screenAt(path)?.frame;
+  if (own === "screen") return <><PrototypeToolbar /><Screen key={path} /></>;
+  if (own === "top-bar" || own === "top-nav" || own === "side-nav") return <AppShell nav={own === "top-bar" ? [] : NAV} current={currentOf(path)} onNavigate={(item) => navigate(item.href)} frame={own} brand={<Brand />}><PrototypeToolbar /><Screen key={path} /></AppShell>;
+` : ""}  return (
     <AppShell nav={NAV} current={currentOf(path)} onNavigate={(item) => navigate(item.href)}${m.frame ? ` frame=${JSON.stringify(m.frame)}` : ""} brand={<Brand />} actions={<ThemeSwitch />}>
       <PrototypeToolbar />
       <Screen key={path} />

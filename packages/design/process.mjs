@@ -14,7 +14,7 @@ export const STEPS = [
   { n: 3, name: "Model tasks", activity: "define", you: "Confirm the tasks people must accomplish, the business rules they meet, and which simplifications to accept.", produces: "Tasks and business rules in the blueprint", terms: ["blueprint", "task", "business rule"], checkpoint: "core-1" },
   { n: 4, name: "Explore alternatives", activity: "explore", you: "Compare two or more ways to do the same tasks, side by side, and choose one.", produces: "Alternative blueprints, a comparison, the rubric, a decision record", terms: ["journey", "alternative", "rubric", "decision record"], checkpoint: "core-2" },
   { n: 5, name: "Design the structure", activity: "explore", you: "Say which kinds of experience and screen sizes the app is for; then check each screen's purpose and the order of what it shows.", produces: "The modalities and screen sizes you choose; screens with their purpose and content; wireframes", terms: ["modality", "size class", "screen", "pattern", "wireframe"] },
-  { n: 6, name: "Prototype", activity: "experience", you: "Click through the prototype and say what to change; choose the app's theme if it has none yet; then the chosen design is built in the app.", produces: "Exploratory prototypes; the validated prototype", terms: ["exploratory prototype", "theme", "validated prototype"] },
+  { n: 6, name: "Prototype", activity: "experience", you: "Click through the prototype and say what to change; the app is built on the plain theme unless you choose one, and a brand theme can be swapped in later; then the chosen design is built in the app.", produces: "Exploratory prototypes; the validated prototype", terms: ["exploratory prototype", "theme", "validated prototype"] },
   { n: 7, name: "Test with people", activity: "validate", you: "Run or watch sessions with real users; decide which findings to fix.", produces: "A test kit, findings, the UX evaluation report", terms: ["UI audit", "usability assessment", "test kit", "finding", "evaluation report"], checkpoint: "core-3" },
   { n: 8, name: "Refine and improve", activity: "validate", you: "Look at how people use the app; decide what to try next and whether to release it.", produces: "Production insights, diagnoses, experiments", terms: ["journey event", "insight", "experiment"], checkpoint: "experiment, release" },
 ];
@@ -45,6 +45,7 @@ export function overview() {
   return {
     steps: STEPS.map(({ n, name, activity, you, produces, terms, checkpoint }) => ({ n, name, activity, you, produces, terms, ...(checkpoint ? { checkpoint } : {}) })),
     change: CHANGE_STEPS,
+    stepEnd: "Every step ends with a prototype you can click: what we have so far, with the agent's assumptions for the rest, checked for accessibility and usability before you see it. Then you choose: continue to the next step, revise this one, or have the agent finish the rest for you, with everything it guessed listed.",
     review: "After each step, the agent shows you what it produced and moves on only when you approve it. The foundations (the brief, target users, jobs, stories, business rules and decisions) come a table per kind, every row in full, for your feedback and approval. What is built from them comes as one coverage map: you look at its exceptions and what changed, not each item again. Records (evidence, reports, insights) need no approval: you decide what to do about what they found. An approval holds until the meaning changes, and then you see only the change.",
     ids: "Everything is named by what it says: a user, a need, a task, a journey or a screen by its name. The only IDs you will see are HELIX's own: FEAT-1 a feature, US-1 a user story and US-1-AC2 one of its acceptance criteria, BR-1 a business rule, ADR-008 a decision, UF-4 a user flow and UF-4-01-list one of its views; and P1 for a test participant. `ux-builder-design explain ids` lists them.",
   };
@@ -57,7 +58,7 @@ export function overviewText(o) {
     if (s.checkpoint) L.push(`  Then checkpoint ${s.checkpoint}: you decide whether to go on.`);
     L.push("");
   }
-  L.push(o.review, "", o.ids, "", `Change mode, for an everyday change to what exists: ${o.change.map((s) => `${s.n} ${s.name}`).join(", ")}.`);
+  L.push(o.stepEnd, "", o.review, "", o.ids, "", `Change mode, for an everyday change to what exists: ${o.change.map((s) => `${s.n} ${s.name}`).join(", ")}.`);
   return L.join("\n");
 }
 

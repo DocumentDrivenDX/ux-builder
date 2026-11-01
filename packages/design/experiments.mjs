@@ -136,7 +136,7 @@ export function experimentStart(app, { decision, variant, metric, guardrails, du
    { metric, control, variant, guardrails: [{ metric, control, variant, better: lower|higher, tolerance? }] }.
    Closes the bead with the result, and proposes the decision's Validation:
    refuted when the variant beat it, tested when it held. */
-export function experimentEnd(app, { id, result } = {}) {
+export function experimentEnd(app, { id, result, simulated = false } = {}) {
   const state = readState(app);
   const exp = state.experiments.find((e) => e.id === id);
   if (!exp) throw new DesignError(`no experiment ${id ?? ""} in the design state (running: ${state.experiments.filter((e) => e.status === "running").map((e) => e.id).join(", ") || "none"})`);
@@ -159,7 +159,7 @@ export function experimentEnd(app, { id, result } = {}) {
   const improved = r.variant > r.control;
   const supported = improved && guardrails.every((g) => g.held);
   const verdict = supported ? "supported" : improved ? "not supported: a guardrail got worse" : "not supported: the success metric did not improve";
-  const lines = [`- ${metric}: control ${r.control}, variant ${r.variant} (${improved ? "improved" : "did not improve"})`, ...guardrails.map((g) => `- Guardrail ${g.metric}: control ${g.control}, variant ${g.variant} (${g.held ? `held${g.tolerance != null ? `, within the tolerance ${g.tolerance}` : ""}` : `got worse${g.tolerance != null ? ` by more than the tolerance ${g.tolerance}` : ""}; ${g.better} is better`})`), `- Hypothesis: ${verdict}`, `- Result file: ${result}`];
+  const lines = [`- ${metric}: control ${r.control}, variant ${r.variant} (${improved ? "improved" : "did not improve"})`, ...guardrails.map((g) => `- Guardrail ${g.metric}: control ${g.control}, variant ${g.variant} (${g.held ? `held${g.tolerance != null ? `, within the tolerance ${g.tolerance}` : ""}` : `got worse${g.tolerance != null ? ` by more than the tolerance ${g.tolerance}` : ""}; ${g.better} is better`})`), `- Hypothesis: ${verdict}${simulated ? " (on SIMULATED data: not evidence from real people)" : ""}`, `- Result file: ${result}`];
   ddx(app, ["update", id, "--notes", `Result ${today()}:\n${lines.join("\n")}`]);
   ddx(app, ["close", id]);
   // The variant beat the decision: refuted. It did not: the decision held.
@@ -169,5 +169,5 @@ export function experimentEnd(app, { id, result } = {}) {
   const ask = `Ask checkpoint release: "${supported ? `Release ${exp.variant ?? "the variant"} to everyone?` : `Keep the current design, or try another alternative?`}" Then: ux-builder-design state checkpoint release --answer "<their words>".`;
   state.next = ask;
   writeState(app, state);
-  return { id, status: "ended", metric, control: r.control, variant: r.variant, improved, guardrails, hypothesis: verdict, supported, result: lines, decision, next: ask };
+  return { id, status: "ended", ...(simulated ? { simulated: true } : {}), metric, control: r.control, variant: r.variant, improved, guardrails, hypothesis: verdict, supported, result: lines, decision, next: ask };
 }

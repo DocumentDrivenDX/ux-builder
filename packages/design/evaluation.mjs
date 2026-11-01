@@ -58,10 +58,25 @@ export function evaluationFindings(app, run = latestRun(app)) {
   const transcripts = kitTranscripts(app);
   const quotes = (f) => transcripts.filter((t) => t.study === f.kit && t.participants.includes(f.participant)).map((t) => `session ${t.session}`);
   const human = humanFindings(app).filter((f) => f.severity > 0 || f.problem).map((f) => ({
-    id: f.id, source: "human", label: "human observation", journey: f.journey, severity: f.severity, title: f.title,
+    id: f.id, source: "human", label: f.simulated ? "simulated session, not a person" : "human observation", ...(f.simulated ? { simulated: true } : {}), journey: f.journey, severity: f.severity, title: f.title,
     evidence: `the ${f.kit} study, task ${f.task}, ${f.participant} (${studyRunDir(app, f.kit)}/findings.json)${quotes(f).length ? `; transcript of ${quotes(f).join(", ")}` : ""}`, transcripts: quotes(f), fix: null,
+    problem: f.problem ? f.problem.trim().toLowerCase() : null,
     detail: `${f.completed ? "completed" : "did not complete"}${f.seconds != null ? ` in ${f.seconds} s` : ""}, ${f.errors} error${f.errors === 1 ? "" : "s"}, ${f.assists} assist${f.assists === 1 ? "" : "s"}${f.remark ? `; "${f.remark}"` : ""}`,
   }));
+  // Observations of the same problem, in one kit, are one finding citing each session (VIP List session 3:
+  // two guests looking below the form for its button were two findings, routed apart).
+  const groups = new Map();
+  for (const f of human) {
+    const problem = f.problem;
+    const key = problem ? `${f.evidence.split(" task ")[0]}|${problem}` : f.id;
+    groups.set(key, [...(groups.get(key) ?? []), f]);
+  }
+  const merged = [...groups.values()].map((fs) => {
+    if (fs.length === 1) return fs[0];
+    // The most severe leads; among equals, the session first recorded.
+    const [first, ...rest] = [...fs].sort((a, b) => b.severity - a.severity);
+    return { ...first, also: rest.map((f) => f.id).sort(), sessions: fs.length, severity: Math.max(...fs.map((f) => f.severity)), evidence: fs.map((f) => f.evidence).join("; "), transcripts: fs.flatMap((f) => f.transcripts), detail: `${fs.length} sessions: ${fs.map((f) => f.detail).join(" / ")}` };
+  });
   const agent = list(run?.backlog?.findings).filter((f) => f.status !== "rejected").map((f) => {
     // A finding from the assessment is an agent recommendation unless it says a person found it.
     const source = f.source ?? "agent";
@@ -71,7 +86,7 @@ export function evaluationFindings(app, run = latestRun(app)) {
       evidence: list(f.evidence_refs).length ? list(f.evidence_refs).map((r) => `${run.dir}/${r}`).join(", ") : `none (${f.uncertainty ?? "uncertain"})`, fix: f.recommendation ?? null, detail: null,
     };
   });
-  return [...human, ...agent].sort((a, b) => String(a.journey).localeCompare(String(b.journey)) || b.severity - a.severity || (a.id < b.id ? -1 : 1));
+  return [...merged, ...agent].sort((a, b) => String(a.journey).localeCompare(String(b.journey)) || b.severity - a.severity || (a.id < b.id ? -1 : 1));
 }
 
 /* What the agent measured, per rubric dimension, from the run's metrics.json. */
@@ -239,9 +254,11 @@ export function route(app, { findings: ids = [], decision, status } = {}) {
   if (!ids.length) throw new DesignError("route needs the findings the person selected at checkpoint core-3: route F-<id>...");
   if (decision && !status) throw new DesignError("--decision needs --status tested or refuted");
   const all = evaluationFindings(app);
-  const unknown = ids.filter((x) => !all.some((f) => f.id === x));
+  const of = (x) => all.find((f) => f.id === x || list(f.also).includes(x));
+  const unknown = ids.filter((x) => !of(x));
   if (unknown.length) throw new DesignError(`no finding ${unknown.join(", ")} in the studies or the latest assessment run`);
-  const chosen = ids.map((x) => all.find((f) => f.id === x));
+  // An ID merged into another finding routes that finding, once.
+  const chosen = [...new Set(ids.map(of))];
   const uer = reports(app).at(-1) ?? null;
   const doc = backlogDoc(app);
   const row = (f, rank) => `| ${rank} | ${PRIORITY(f.severity)} | ${cell(f.title)} | ${cell(f.evidence)} | ${cell(`${f.id}${uer ? ` in the ${uer} evaluation` : ""}`)} | ${cell(`${f.journey ?? "no journey"}; ${f.label}`)} | ${f.source === "human" ? "high" : "medium"} | unknown | open |`;

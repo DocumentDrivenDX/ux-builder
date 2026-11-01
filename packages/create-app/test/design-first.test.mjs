@@ -87,11 +87,13 @@ describe("US-150: design first, and build the app in place at the end", () => {
     let s = status(dir);
     assert.deepEqual(s.app, { built: false, modalityRecorded: false });
     assert.match(s.text, /Step 1 of 8: Define intent \(Define, in the full loop, in a design folder\)\./);
-    assert.match(s.text, /No app yet: this folder holds the design\. To build the app here when the design is ready: record the person's answer on modality \(ux-builder-design modality\), then ask them for the theme \(a released one, or one they make from their brand in the theme builder\), then run npm create @ux-builder\/app@latest \. -- --theme <name>\./);
+    // Amended 2026-11-01 (VIP List sessions 3 and 4): the batch records the theme, which never blocks.
+    // @covers US-174-AC3
+    assert.match(s.text, /No app yet: this folder holds the design\. To build the app here: at step 4, recommend the alternative, the modality and frame, and the theme together \(plain until a brand theme is released; it never blocks\), record the person's one answer with ux-builder-design step batch, then run npm create @ux-builder\/app@latest \. -- --theme <name>\./);
     design(dir, "modality", "--answer", "chat", "--modality", "chat", "--size-classes", "compact");
     s = status(dir);
     assert.equal(s.app.modalityRecorded, true);
-    assert.match(s.text, /To build the app here when the design is ready: ask them for the theme/);
+    assert.match(s.text, /To build the app here: npm create @ux-builder\/app@latest \. -- --theme <name>, on the theme the person accepted \(plain until their brand theme is released; it never blocks\)\./);
   });
 
   // @covers US-150-AC3

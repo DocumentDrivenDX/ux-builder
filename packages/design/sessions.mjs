@@ -84,7 +84,7 @@ export const findingIdFor = (study, participant, task) => `F-${createHash("sha25
 const severityOf = (o) => (!o.completed ? 3 : o.assists || o.errors ? 2 : o.problem ? 1 : 0);
 
 /* ux-builder-design observe import <file> --study <name>: the findings go in the study's run folder. */
-export function observeImport(app, { file, study } = {}) {
+export function observeImport(app, { file, study, simulated = false } = {}) {
   if (!file) throw new DesignError("observe import needs the sheet: observe import <file> --study <name>");
   const kit = studyName(study);
   const path = abs(app, file);
@@ -112,7 +112,7 @@ export function observeImport(app, { file, study } = {}) {
     if (!participant) { skipped.push({ row: i + 1, task, reason: "no participant" }); continue; }
     const names = { ...people.names(), ...Object.fromEntries(sheetNames.map((n) => [people.of(n), n])) };
     const o = {
-      id: findingIdFor(kit, participant, task), source: "human", study: kit, participant, task, journey: t.journey,
+      id: findingIdFor(kit, participant, task), source: "human", ...(simulated ? { simulated: true } : {}), study: kit, participant, task, journey: t.journey,
       completed: yes(r.completed), seconds: num(r.seconds ?? r.time), errors: num(r.errors) ?? 0, assists: num(r.assists) ?? 0,
       remark: maskPersonal(r.remark ?? "", { app, names }),
       ...(String(r.problem ?? "").trim() ? { problem: maskPersonal(r.problem, { app, names }).trim() } : {}),

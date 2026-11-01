@@ -147,3 +147,26 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     assert.equal(readState(a).modality.answer, "Chat on phones and laptops");
   });
 });
+
+describe("VIP List session 1: a chosen alternative is prototyped as the app's blueprint now", () => {
+  test("after the choice, prototype --explore of that alternative draws the app's changed blueprint, not the stale copy", () => {
+    const a = bare();
+    json(a, ["init"]);
+    const start = { ...BP, tasks: [{ ...BP.tasks[0], success: ["US-1-AC1"] }], journeys: [{ ...BP.journeys[0], story: "US-1" }] };
+    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(start, null, 2));
+    assert.equal(blueprint(a, ["alternative", "new", "list-first"]).status, 0);
+    assert.equal(blueprint(a, ["alternative", "choose", "list-first", "--reason", "Fewer steps"]).status, 0);
+    json(a, ["modality", "--answer", "Phones", "--modality", "responsive-web", "--size-classes", "compact", "--frame", "screen"]);
+    // The app's blueprint moves on after the choice: a new screen.
+    const bp = JSON.parse(readFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
+    bp.screens.push({ id: "saved", title: "Saved", pattern: "CollectionList", states: st });
+    bp.journeys[0].steps.push({ screen: "saved" });
+    bp.screens[0].actions = [{ id: "save", label: "Saved", to: "saved" }];
+    bp.journeys[0].steps[0].action = "save";
+    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(bp, null, 2));
+    const r = blueprint(a, ["prototype", "--explore", "--alternative", "list-first", "--question", "Saved?"]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stderr, /list-first is the chosen alternative, and .*app\.blueprint\.json has changed since it was chosen/);
+    assert.ok(existsSync(join(a, "docs/ux-builder/prototypes/list-first/saved.compact.html")), "the new screen is drawn");
+  });
+});

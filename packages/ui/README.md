@@ -204,8 +204,12 @@ Design, Chakra, Carbon React, Fluent UI, Mantine, Bootstrap, Blueprint,
 PrimeReact, Radix Themes), icon sets (lucide-react, react-icons, Heroicons,
 Phosphor, Tabler, Font Awesome) and loader libraries, naming the SDK's
 counterpart. `ux-builder/no-inline-svg` reports `<svg>` written in JSX: use
-`<Icon>`, `@ux-builder/ui/icons` or `registerIcons`. Lint reads source; for
-what only the running app shows, run `@ux-builder/audit`.
+`<Icon>`, `@ux-builder/ui/icons` or `registerIcons`. A data graphic that
+scanners read (a QR code, a barcode) is not an icon and must stay black on
+white in every theme: mark it `data-graphic` (`<div data-graphic="qr">`, or
+`[data-graphic]` in a CSS selector), and inside it both rules accept its own
+`<svg>` and black and white as its colours, nothing else. Lint reads source;
+for what only the running app shows, run `@ux-builder/audit`.
 
 `ux-builder/ai-neutral-voice` (a warning, US-081) checks the copy around AI
 features in JSX text and string attributes. "I think", "I feel", "I

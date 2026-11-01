@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { advance, budget, carried, checkpoint, claimAdd, claimVerify, coverageMap, decisionAdd, evidenceAdd, intake, logTurn, mark, metrics, pendingReviews, readState, reviewApprove, reviewFeedback, reviewList, reviewTable, setStep, stateSet, validate, writeState, currentText, proposeChange, sectionOf } from "../index.mjs";
+import { advance, budget, carried, checkpoint, claimAdd, claimVerify, coverageMap, decisionAdd, evidenceAdd, intake, logTurn, mark, metrics, pendingReviews, readState, reviewApprove, reviewFeedback, reviewList, reviewTable, setStep, stateSet, validate, writeState, currentText, proposeChange, sectionOf, status } from "../index.mjs";
 import { cli, tempApp } from "./helpers.mjs";
 import { kitApp, withUsers } from "./kit-fixture.mjs";
 
@@ -157,29 +157,54 @@ describe("US-153: foundations reviewed deliberately, what is built from them as 
 
 describe("US-154: the intake asked together, the budget shown, and the guide's own time measured", () => {
   // @covers US-154-AC1
+  // @covers US-172-AC7
   test("AC1: intake asks what the sources do not answer, together, and lists what to confirm from them", () => {
     const empty = tempApp();
     const r = intake(empty);
-    assert.deepEqual(r.ask, ["product", "users", "outcome", "jobs", "constraints", "sources"]);
+    assert.deepEqual(r.ask, ["product", "users", "outcome", "jobs", "constraints", "use", "gives", "sees", "rules", "sources"]);
+    // Amended 2026-10-31 (session 2): the facts only the person knows, and the business rules, are asked at intake.
+    assert.match(r.text, /How often does each kind of person come back to it, and on what device/);
+    // Amended 2026-11-01 (sessions 3 and 4): what each person sees about the others, and where it comes from.
+    // @covers US-174-AC1
+    assert.match(r.text, /What does each person need to see about the others/);
+    assert.match(r.text, /What are its rules: who may do what, what happens to other people when something changes/);
     assert.match(r.text, /^Ask together, in one message; a narrative answer is fine, and a part they skip becomes an assumption:\n {2}1\. What is the product/);
     const a = app();
     // The kit's PRD holds the needs; the brief answers product, users and outcome.
     const k = intake(a);
     assert.deepEqual(k.confirm, [{ id: "product", from: "docs/ux-builder/brief.md" }, { id: "users", from: "docs/ux-builder/brief.md" }, { id: "outcome", from: "docs/ux-builder/brief.md" }, { id: "jobs", from: "docs/helix/01-frame/prd.md" }, { id: "constraints", from: "docs/helix/01-frame/prd.md" }]);
-    assert.deepEqual(k.ask, ["sources"]);
+    assert.deepEqual(k.ask, ["use", "gives", "sees", "rules", "sources"]);
+    // Rules HELIX already defines are confirmed, not asked.
+    edit(a, "docs/helix/01-frame/prd.md", (t) => `${t}\n## Business Rules\n\n**BR-1** — Only public stretches can be saved.\n`);
+    assert.deepEqual(intake(a).ask, ["use", "gives", "sees", "sources"]);
     assert.match(cli(a, ["intake"]).stdout, /Read first, then confirm in one line each:\n {2}product: from docs\/ux-builder\/brief\.md/);
     assert.match(SKILL, /\*\*Ask the intake together\.\*\*/);
   });
 
   // @covers US-154-AC2
   test("AC2: the budget counts the decisions left before the first prototype, and falls as they are made", () => {
+    // Amended 2026-10-31 (ADR-043): every step ends with a prototype, so the budget counts this step's
+    // decisions before its prototype, and the agent's drafting and checking as well as the person's time.
     const a = app();
+    writeState(a, { ...readState(a), step: 2 });
     const before = budget(a);
-    assert.deepEqual(before.decisions, ["the brief", "the target users table", "the jobs table", "the stories table", "the decisions table", "checkpoint core-1", "the choice of approach (core-2)", "the coverage map", "the modality, screen sizes and app frame"]);
-    assert.equal(before.minutes, 27);
-    approveFoundations(a);
-    assert.equal(budget(a).count, 4);
-    assert.match(cli(a, ["status"]).stdout, /About 4 decisions left before the first prototype, roughly 12 minutes of your time: checkpoint core-1/);
+    assert.deepEqual(before.decisions, ["the target users table", "the jobs table", "your decision on the step 2 prototype"]);
+    assert.deepEqual([before.perDecision, before.agentMinutes, before.minutes, before.basis], [3, 10, 19, "default"]);
+    for (const k of ["user", "job"]) reviewApprove(a, { kind: k, answer: "Yes" });
+    assert.equal(budget(a).count, 1);
+    assert.match(cli(a, ["status"]).stdout, /About 1 decision before the step 2 prototype, roughly 13 minutes: 3 of your time and 10 of the agent's drafting and checking\. Decisions: your decision on the step 2 prototype\./);
+  });
+
+  test("the budget learns this design's pace, and status says when a step runs over its estimate", () => {
+    const a = app();
+    const t0 = Date.parse("2026-10-31T09:00:00.000Z"), at = (min) => new Date(t0 + min * 60000).toISOString();
+    for (let k = 0; k < 6; k++) logTurn(a, { kind: "decision", at: at(k * 6) });
+    const b = budget(a);
+    assert.equal(b.basis, "recorded");
+    assert.equal(b.perDecision, 6, "six minutes between decisions, as recorded");
+    const s = status(a);
+    assert.equal(s.estimate.estimate, b.minutes, "the first status records the estimate");
+    assert.ok(!s.estimate.over);
   });
 
   // @covers US-154-AC3
@@ -269,9 +294,74 @@ describe("US-160: advance does the safe work and stops at the one decision the p
     const r = cli(a, ["advance", "--until-decision"]);
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /^Step 1 of 8: Define intent\.\nDone: kept 1 approval through a formatting or metadata change: story:US-001\.\nDone: worked out the coverage map: 2 jobs, 0 exceptions\.\nChecked: \d+ design documents?: no problems, \d+ warnings\.\nBefore asking, the agent must:\n {2}check 1 direction-changing claim against its source before showing it: "Anglers search by river name" \(anglers\)/);
-    assert.match(r.stdout, /Decision for the person: approve the user table \(2 items\)\n {2}Show: ux-builder-design review table user, every row in full\n {2}Recommended: .+\n {2}Record: .+\n {2}After: the next foundation table \(job\)\nAbout \d+ decisions left/);
+    assert.match(r.stdout, /Decision for the person: approve the user table \(2 items\)\n {2}Show: ux-builder-design review table user, every row in full\n {2}Recommended: .+\n {2}Record: .+\n {2}After: the next foundation table \(job\)\nAbout \d+ decisions? (?:left|before the step)/);
     assert.equal(readFileSync(join(a, ".ux-builder/design-state.json"), "utf8"), before, "no approval recorded");
     assert.equal(cli(a, ["advance"]).status, 2);
     assert.match(SKILL, /`ux-builder-design advance --until-decision`/);
+  });
+});
+
+describe("VIP List session 1: the whole session is measured, even when no turn is logged by hand", () => {
+  test("commands that take the person's words record their turns; a declined `metrics turn` leaves them counted", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "Approve users" });
+    checkpoint(a, { id: "experiment", answer: "Not yet", declined: true });
+    const r = metrics(a);
+    assert.equal(r.turns, 3);
+    assert.deepEqual([r.byKind.approval, r.byKind.decision], [2, 1]);
+  });
+
+  test("an approval logged by hand right after the command recorded it is not counted twice", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Yes" });
+    assert.ok(logTurn(a, { kind: "approval" }).merged);
+    assert.equal(metrics(a).turns, 1);
+    logTurn(a, { kind: "question" });
+    assert.equal(metrics(a).turns, 2);
+  });
+
+  test("approvals are counted per turn: one message approving two kinds is one, the same words in two messages are two", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "And the users", sameTurn: true });
+    assert.equal(metrics(a).personApprovals, 1);
+    reviewApprove(a, { kind: "job", answer: "Approve brief" });
+    assert.equal(metrics(a).personApprovals, 2);
+  });
+
+  test("active time starts at the first command of the session, not the first approval", () => {
+    const a = app();
+    json(a, ["overview"]);
+    const first = JSON.parse(readFileSync(join(a, ".ux-builder/metrics.jsonl"), "utf8").split("\n")[0]);
+    assert.equal(first.type, "command");
+    assert.equal(first.command, "overview");
+  });
+});
+
+describe("VIP List session 1: each approval is asked for once", () => {
+  test("the brief is not approved while a question raised after it was drafted is open; regenerated, it is", () => {
+    const a = app();
+    stateSet(a, { path: "questions[+]", value: { text: "Can two guests share one pass?" } });
+    assert.throws(() => reviewApprove(a, { kind: "brief", answer: "Approve brief" }), /drafted before this question was raised: Q-1 .*Nothing was recorded/s);
+    cli(a, ["brief"]);
+    assert.equal(reviewApprove(a, { kind: "brief", answer: "Approve brief" }).approved, true);
+  });
+
+  test("the brief keeps its approval when it changes only because target users the person has approved changed", () => {
+    const a = app();
+    cli(a, ["brief"]);
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "Approve users" });
+    edit(a, "docs/helix/01-frame/prd.md", (t) => t.replace("On a phone at the river", "On a phone at the river, about three times a month"));
+    reviewTable(a, { kind: "user" });
+    reviewApprove(a, { kind: "user", answer: "Yes, three times a month" });
+    cli(a, ["brief"]);
+    assert.ok(!ids(a).includes("brief"), "the brief's change came from approved users");
+    assert.ok(carried(a).includes("brief"));
+    // A change of its own still reopens it.
+    stateSet(a, { path: "assumptions[+]", value: { text: "Anglers fish at dawn", section: "outcome" } });
+    cli(a, ["brief"]);
+    assert.ok(ids(a).includes("brief"));
   });
 });
