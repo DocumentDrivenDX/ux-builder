@@ -127,6 +127,9 @@ export async function buildInPlace(dir, { theme, modalities: given, blueprint, n
   const main = join(target, "src/main.jsx");
   if ((appearance === "light" || appearance === "dark") && existsSync(main)) writeFileSync(main, readFileSync(main, "utf8").replace('appearance="system"', `appearance="${appearance}"`));
   r.appearance = appearance ?? "system";
+  // The app's own name in its header, and the theme's logo only when the theme has artwork (no "Plain" beside it).
+  const brand = join(target, "src/ThemeSwitch.jsx");
+  if (existsSync(brand)) writeFileSync(brand, readFileSync(brand, "utf8").replace('<Logo size="sm" />', '<Logo size="sm" fallback="none" />'));
 
   // The journey skeleton (US-159): the designed screens and journeys, in place of the empty Home.
   r.prototype = generateJourneyApp(target, { modalities });

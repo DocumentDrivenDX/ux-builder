@@ -54,7 +54,7 @@ export function stepBatch(app, { answer, alternative, reason, modalities, sizeCl
   }
   made.push(decisionAdd(app, { question: "Which theme is the app built on?", options: [theme.trim(), "wait for a brand theme"], choice: theme.trim(), why: `${words} A brand theme is swapped in when it is released; nothing waits on it.` }).id);
   // Approved with the batch answer: the decisions it made and the alternatives it settled.
-  const approved = approveBatch(app, { decisions: made.map((id) => `decision:${id}`), answer: words, now: now.slice(0, 10) });
+  const approved = approveBatch(app, { decisions: made.map((id) => `decision:${id}`), answer: words, now });
   confirmModality(app, { answer: words, modalities, sizeClasses, frame, sameTurn: true });
   const passed = list(readState(app).checkpoints).some((c) => c.id === "core-2" && ["passed", "skipped"].includes(c.status));
   if (!passed) checkpoint(app, { id: "core-2", answer: words, sameTurn: true, now });

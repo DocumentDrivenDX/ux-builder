@@ -6,7 +6,7 @@
      npm test --workspace @ux-builder/design */
 
 import assert from "node:assert/strict";
-import { readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
 import { evaluationFindings, logEvent, metrics, metricsText, observeImport, readEvents, readState, stepCheck, stepDecide, stepPrototype, testKit, writeState } from "../index.mjs";
@@ -73,6 +73,22 @@ describe("VIP List session 2: the guide's measures", () => {
     const r = cli(a, ["insights", "events.jsonl", "--simulated", "--json"]);
     assert.equal(r.status, 0, r.stderr);
     assert.match(readFileSync(join(a, "docs/ux-builder/jobs.md"), "utf8"), /\| J-1 \| Find a river \| high \| EV-\d+ \| low \| hypothesis \|/, "cited, not confirmed");
+  });
+
+  // @covers US-167-AC5
+  test("an event logged with a bare date gets the moment it was logged; times out of order do not stretch a span", () => {
+    const a = app();
+    const t = (m) => new Date(Date.parse("2026-10-31T10:00:00Z") + m * 60000).toISOString();
+    logEvent(a, "command", { command: "overview" }, t(0));
+    logEvent(a, "approval", { items: [] }, "2026-10-31");
+    assert.match(readEvents(a).at(-1).at, /T\d\d:\d\d/);
+    // A log written before the fix, with a bare date in it, does not start the session at midnight.
+    const b = app();
+    logEvent(b, "command", { command: "overview" }, t(0));
+    logEvent(b, "milestone", { name: "prototype" }, t(3));
+    appendFileSync(join(b, ".ux-builder/metrics.jsonl"), JSON.stringify({ type: "approval", at: "2026-10-31", items: [] }) + "\n");
+    assert.equal(metrics(b).minutesToPrototype, 3);
+    assert.equal(metrics(b).activeMinutes, 3);
   });
 
   test("the share of meaningful turns prints as a percent", () => {

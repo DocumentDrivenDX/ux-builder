@@ -456,4 +456,5 @@ check that names no rule.
 | `screens[].states` | adds IDs of the screen's own (`^[a-z][a-z0-9-]*$`) | A state such as `already-used`; one with no `stateNotices` entry is a `blueprint.valid` error |
 | `screens[].stateNotices` | `{ [state]: { tone?, title, text?, values? } }` | What a state shows: a notice over the screen, in wireframes, prototypes and the generated app; `values` (`{ [content label]: text }`, US-166) the content it changes, shown in place of the samples. In the generated app an `error` notice holds back the screen's main action |
 | `screens[].content[].compact` | boolean | In a list, shown on a phone (compact); with none marked, a list shows its first three items there (US-166) |
+| rule `screen.details-asked` (warning) | — | A person's name, phone number, email, birth date or address shown on a screen that no form, dialog field or journey step input asks for (US-167) |
 | `screens[].users` | `U-<n>` IDs | The target users the screen is for; `nav.audience` (a warning) names a destination whose screen is for users the first destination's is not |

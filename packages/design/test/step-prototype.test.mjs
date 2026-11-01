@@ -129,13 +129,16 @@ describe("US-163: a prototype ends every step", () => {
     const later = [];
     // From step 5 the journeys are walked (US-166): a journey that stops is a finding.
     const walks = [];
-    const walk = async (args) => { walks.push(args); return { ran: true, journeys: [{ journey: "J-find", walked: true, steps: 2, reached: 2 }, { journey: "J-saved", walked: false, steps: 2, reached: 1, stopped: { step: 1, screen: "saved", why: 'no "Open river details" to click on saved' } }] }; };
+    const walk = async (args) => { walks.push(args); return { ran: true, journeys: [{ journey: "J-find", walked: true, steps: 2, reached: 2, rows: [{ step: 1, screen: "map", leadsTo: "saved", expected: "detail" }] }, { journey: "J-saved", walked: false, steps: 2, reached: 1, stopped: { step: 1, screen: "saved", why: 'no "Open river details" to click on saved' } }] }; };
     const five = await stepCheck(a, { audit: stub(later), walk });
     assert.equal(walks.length, 1);
     assert.equal(walks[0].isApp, false);
     assert.deepEqual(walks[0].bp.journeys.map((j) => j.id), ["J-find", "J-saved"]);
     assert.ok(five.findings.some((f) => f.kind === "journey-walk" && /J-saved stopped at step 1: no "Open river details"/.test(f.text)));
     assert.match(stepCheckText(five), /Journeys walked: 1 of 2 end to end\./);
+    // @covers US-167-AC2
+    assert.ok(five.findings.some((f) => f.kind === "journey-walk" && f.text === "J-find: on map a row opens saved, while the journey goes on to detail"));
+    assert.equal(walks[0].bp.journeys.length, 2);
     assert.equal(later.length, 0, "the pages step 1 audited are not audited again");
     assert.equal(five.pagesUnchanged, calls[0].pages.length);
     assert.deepEqual(five.findings.filter((f) => f.kind.startsWith("audit")).length, fixed.findings.filter((f) => f.kind.startsWith("audit")).length, "their findings carried");

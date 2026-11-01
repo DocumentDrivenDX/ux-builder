@@ -2561,6 +2561,27 @@
       ]
     },
     {
+      "id": "screen.details-asked",
+      "title": "A person's details are asked before they are shown",
+      "statement": "A name, phone number, email, birth date or address shown about a person on a screen is asked for on a form or in a journey step's inputs.",
+      "rationale": "A detail nobody asked for is either invented or a missing question; in VIP List sessions 3 and 4 the pass and the door showed the guest's name while the claim asked only for a mobile and a birth date, and only testing found it.",
+      "checks": [
+        {
+          "kind": "blueprint",
+          "id": "screen.details-asked"
+        }
+      ],
+      "severity": "warning",
+      "sources": [
+        {
+          "title": "ux-builder FEAT-018: the guided design loop",
+          "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+          "licence": "own",
+          "wording": "paraphrased"
+        }
+      ]
+    },
+    {
       "id": "flow.no-dead-end",
       "title": "No screen or modal is a dead end",
       "statement": "A screen or modal that declares actions offers a way on or back: another screen, back, external, or a modal's dismiss.",

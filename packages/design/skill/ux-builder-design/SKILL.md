@@ -115,7 +115,8 @@ steps 4 to 6).
 
 - **Steps 1 to 3: the person's.** Ask the intake's questions about how
   often people come back and on what device, what each person must and
-  must not give, and the business rules, before drafting. Before step 3
+  must not give, what each needs to see about the others (and where it
+  comes from), and the business rules, before drafting. Before step 3
   ends, run `ux-builder-design scope` and show it: every story with its
   criteria, the screens, the destinations, and what people must and may
   give. Ask what can wait and which input people can be spared, and cut

@@ -17,6 +17,9 @@ page("list", `<h1>List</h1><a href="detail.compact.html">Open</a>`);
 page("detail", `<h1>Detail</h1><button onclick="location.href='done.compact.html'">Save</button>`);
 page("done", `<h1>Done</h1>`);
 page("stuck", `<h1>Stuck</h1>`);
+page("events", `<h1>My events</h1><ul><li><a href="post.compact.html">Velvet Fridays</a></li></ul><button onclick="location.href='guests.compact.html'">See who's coming</button>`);
+page("post", `<h1>Post an event</h1>`);
+page("guests", `<h1>Who's coming</h1>`);
 
 describe("US-166: the journey walk", () => {
   // @covers US-166-AC3
@@ -33,6 +36,19 @@ describe("US-166: the journey walk", () => {
       assert.deepEqual(r[0], { journey: "J-ok", walked: true, steps: 3, reached: 3 });
       assert.equal(r[1].walked, false);
       assert.deepEqual(r[1].stopped, { step: 1, screen: "stuck", why: 'no "Save" to click on stuck' });
+    } finally { await served.stop(); }
+  });
+
+  // @covers US-167-AC2
+  test("a list's first row is tried too, and a row that leads elsewhere than the journey is reported; the journey still walks", async () => {
+    const served = await serveFolder(dir);
+    try {
+      const [r] = await walkJourneys({
+        url: (id) => `${served.url}${id}.compact.html`,
+        journeys: [{ id: "J-close", steps: [{ screen: "events", label: "See who's coming", to: "guests", row: true }, { screen: "guests" }] }],
+      });
+      assert.equal(r.walked, true);
+      assert.deepEqual(r.rows, [{ step: 1, screen: "events", leadsTo: "post", expected: "guests" }]);
     } finally { await served.stop(); }
   });
 });

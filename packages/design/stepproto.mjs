@@ -190,13 +190,15 @@ export async function walkPrototype({ dir, bp, isApp = false, paths = {} }) {
     served = await serveFolder(dir, { spa: isApp });
     const screens = new Map(list(bp.screens).map((x) => [x.id, x]));
     const size = list(bp.supports?.sizeClasses)[0] ?? "compact";
-    const journeys = list(bp.journeys).filter((j) => list(j.steps).length).map((j) => ({ id: j.id, steps: j.steps.map((st) => { const a = list(screens.get(st.screen)?.actions).find((x) => x.id === st.action); return { screen: st.screen, ...(a ? { label: a.label, to: a.to } : {}) }; }) }));
+    const journeys = list(bp.journeys).filter((j) => list(j.steps).length).map((j) => ({ id: j.id, steps: j.steps.map((st) => { const a = list(screens.get(st.screen)?.actions).find((x) => x.id === st.action); return { screen: st.screen, ...(a ? { label: a.label, to: a.to } : {}), ...(a && LISTS.has(screens.get(st.screen)?.pattern) && screens.has(a.to) ? { row: true } : {}) }; }) }));
     const url = (id) => served.url + (isApp ? (paths[id] ?? `/${id}`).replace(/^\//, "") : `${id}.${size}.html`);
     return { ran: true, journeys: await walkJourneys({ journeys, url }) };
   } catch (e) {
     return { ran: false, reason: e.message.split("\n")[0] };
   } finally { await served?.stop(); }
 }
+
+const LISTS = new Set(["CollectionList", "WorkQueue", "ListDetail", "AuditLog", "EditableGrid", "Board", "TaskList"]);
 
 /* The built app's screen paths, from its generated src/journey/blueprint.js. */
 function appPaths(app) {
@@ -227,6 +229,7 @@ const findingsOf = (entry) => [
   ...list(entry.heuristics).map((h) => ({ id: findingId("heuristic", h.heuristic, h.screen ?? h.journey ?? h.path ?? "", h.finding), kind: h.heuristic, text: h.finding })),
   ...list(entry.audit?.findings).filter((f) => f.severity !== "info").map((f) => ({ id: findingId("audit", f.rule ?? "", f.page ?? "", f.message ?? ""), kind: `audit ${f.rule}`, text: `${f.page}: ${f.message}`, page: f.page })),
   ...list(entry.journeyWalk?.journeys).filter((j) => !j.walked).map((j) => ({ id: findingId("walk", j.journey, j.stopped?.why ?? ""), kind: "journey-walk", text: `${j.journey} stopped at step ${j.stopped?.step}: ${j.stopped?.why}` })),
+  ...list(entry.journeyWalk?.journeys).flatMap((j) => list(j.rows).map((r) => ({ id: findingId("walk-row", j.journey, r.screen, r.leadsTo), kind: "journey-walk", text: `${j.journey}: on ${r.screen} a row opens ${r.leadsTo}, while the journey goes on to ${r.expected}` }))),
 ];
 /* The latest checked round's findings that are neither gone nor accepted: [] when the step can be shown. */
 export function openFindings(sp) {

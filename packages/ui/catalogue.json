@@ -928,7 +928,7 @@
     {
       "name": "Logo",
       "type": "component",
-      "purpose": "The active theme's logo, or its mark (variant=\"mark\"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour.",
+      "purpose": "The active theme's logo, or its mark (variant=\"mark\"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour, or nothing with fallback=\"none\" (an app with its own name beside it: VIP List's header read \"Plain VIP List\").",
       "props": [
         {
           "name": "variant",
@@ -941,6 +941,10 @@
         {
           "name": "label",
           "default": null
+        },
+        {
+          "name": "fallback",
+          "default": "\"text\""
         },
         {
           "name": "className",
@@ -23476,6 +23480,27 @@
           {
             "kind": "blueprint",
             "id": "nav.audience"
+          }
+        ],
+        "severity": "warning",
+        "sources": [
+          {
+            "title": "ux-builder FEAT-018: the guided design loop",
+            "url": "https://github.com/DocumentDrivenDX/ux-builder/blob/main/docs/helix/01-frame/features/FEAT-018-guided-design-loop.md",
+            "licence": "own",
+            "wording": "paraphrased"
+          }
+        ]
+      },
+      {
+        "id": "screen.details-asked",
+        "title": "A person's details are asked before they are shown",
+        "statement": "A name, phone number, email, birth date or address shown about a person on a screen is asked for on a form or in a journey step's inputs.",
+        "rationale": "A detail nobody asked for is either invented or a missing question; in VIP List sessions 3 and 4 the pass and the door showed the guest's name while the claim asked only for a mobile and a birth date, and only testing found it.",
+        "checks": [
+          {
+            "kind": "blueprint",
+            "id": "screen.details-asked"
           }
         ],
         "severity": "warning",

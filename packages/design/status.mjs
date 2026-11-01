@@ -73,7 +73,11 @@ export function status(app) {
 }
 
 /* What building the app in a design folder needs, in order (GDL-81). */
-export const BUILD_NEEDS = (modalityRecorded) => `To build the app here when the design is ready: ${modalityRecorded ? "" : "record the person's answer on modality (ux-builder-design modality), then "}ask them for the theme (a released one, or one they make from their brand in the theme builder), then run npm create @ux-builder/app@latest . -- --theme <name>.`;
+/* The theme never blocks: plain until a brand theme is released (VIP List sessions 3 and 4 were still told to
+   ask for it first, and not told of step batch). */
+export const BUILD_NEEDS = (modalityRecorded) => modalityRecorded
+  ? "To build the app here: npm create @ux-builder/app@latest . -- --theme <name>, on the theme the person accepted (plain until their brand theme is released; it never blocks)."
+  : "To build the app here: at step 4, recommend the alternative, the modality and frame, and the theme together (plain until a brand theme is released; it never blocks), record the person's one answer with ux-builder-design step batch, then run npm create @ux-builder/app@latest . -- --theme <name>.";
 
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 

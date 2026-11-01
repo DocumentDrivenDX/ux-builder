@@ -144,3 +144,19 @@ describe("VIP List session 2: the prototype shows the design's own content, not 
     assert.deepEqual(fields(marked).slice(0, 3), ["Event 1", "10:00 PM", "14 left"]);
   });
 });
+
+describe("VIP List sessions 3 and 4: a person's details are asked before they are shown", () => {
+  // @covers US-167-AC1
+  test("screen.details-asked warns about a name shown on the pass and at the door that no form asks for; asked, it does not", () => {
+    const bp = base();
+    bp.screens.push({ id: "claim", title: "Claim a spot", pattern: "FormPage", states: st, entry: "link", content: ["Mobile number", "Date of birth"].map((label) => ({ label, kind: "data" })), actions: [{ id: "submit", label: "Get my pass", to: "passes", primary: true }] });
+    bp.screens[2].content = ["Guest", "Spots", "Pass status"].map((label) => ({ label, kind: "data" }));
+    bp.screens[1].content = ["Event", "Name"].map((label) => ({ label, kind: "data" }));
+    const asked = () => rules(bp).filter((r) => /screen\.details-asked/.test(r));
+    assert.deepEqual(asked(), ["warning screen.details-asked /screens/1/content/1", "warning screen.details-asked /screens/2/content/0"]);
+    bp.screens[3].content.splice(1, 0, { label: "Name on the list", kind: "data" });
+    assert.deepEqual(asked(), [], "asked on the claim form");
+    bp.screens[1].content = ["Event name", "Venue"].map((label) => ({ label, kind: "data" }));
+    assert.deepEqual(asked(), [], "an event's name is not a person's");
+  });
+});

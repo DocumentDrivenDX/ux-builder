@@ -49,6 +49,9 @@ describe("US-166: steps 4 to 6 as one batch", () => {
     assert.match(s.next, /Build the app on plain .* step 6 prototype/);
     // One person turn, however many records.
     assert.equal(readEvents(a).filter((e) => e.type === "turn").length, turnsBefore + 1);
+    // @covers US-167-AC5
+    // Every event of the batch is a moment, not a bare date (session 4: a date read as midnight, 13 "active" minutes).
+    assert.ok(readEvents(a).every((e) => /T\d\d:\d\d/.test(e.at)), readEvents(a).map((e) => e.at).join(" "));
   });
 
   // @covers US-166-AC2

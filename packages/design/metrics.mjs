@@ -19,6 +19,8 @@ const IDLE = 10 * 60 * 1000;
 
 /* Append one event; never fails the command that records it. */
 export function logEvent(app, type, data = {}, at = new Date().toISOString()) {
+  // A moment, never a bare date: a date reads as midnight and stretches every span across it (VIP List session 4).
+  if (!/T\d\d:\d\d/.test(String(at))) at = new Date().toISOString();
   try {
     const file = join(app, METRICS_FILE);
     mkdirSync(dirname(file), { recursive: true });
@@ -71,7 +73,7 @@ export function mark(app, { name, at } = {}) {
 /* Active minutes from a to b: gaps over 10 minutes are idle. */
 function active(events, from, to) {
   let ms = 0;
-  const ts = events.map((e) => Date.parse(e.at)).filter((t) => t >= from && t <= to);
+  const ts = events.map((e) => Date.parse(e.at)).filter((t) => t >= from && t <= to).sort((x, y) => x - y);
   for (let k = 1; k < ts.length; k++) ms += Math.min(ts[k] - ts[k - 1], IDLE);
   return Math.round(ms / 60000);
 }
@@ -94,7 +96,10 @@ export function metrics(app, { carried = [] } = {}) {
   const all = readEvents(app);
   const confirmed = new Set(all.filter((e) => e.type === "turn-confirmed").map((e) => e.turn));
   const ev = all.map((e) => (e.type === "turn" && confirmed.has(e.turn) ? { ...e, confirmed: true } : e));
-  const start = ev.length ? Date.parse(ev[0].at) : null;
+  // Time is measured from events with a time of day: an older log's bare date reads as midnight and would
+  // start the session hours early (VIP List session 4: "first prototype: 13 active minutes" for 3).
+  const first = ev.find((e) => /T\d\d:\d\d/.test(String(e.at)));
+  const start = first ? Date.parse(first.at) : null;
   const turns = ev.filter((e) => e.type === "turn");
   const byKind = Object.fromEntries(TURN_KINDS.map((k) => [k, turns.filter((t) => t.kind === k).length]));
   const meaningful = turns.filter((t) => MEANINGFUL.has(t.kind)).length;

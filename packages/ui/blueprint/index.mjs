@@ -45,6 +45,7 @@ export const CHECKS = [
   "screen.purpose", "consistency.same-kind",
   // Who each part of the app is for (session 2; tasks.mjs).
   "nav.audience",
+  "screen.details-asked",
 ];
 const STATES = ["empty", "loading", "error"];
 

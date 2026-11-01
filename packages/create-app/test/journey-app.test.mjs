@@ -323,6 +323,14 @@ describe("US-159: the generated app renders", () => {
         assert.deepEqual(errors, [], `${s.id}: ${errors.join("; ")}`);
         await page.close();
       }
+      // @covers US-167-AC4
+      // The header shows the app's name, not the plain theme's title beside it ("Plain rivers").
+      const home = await browser.newPage();
+      await home.goto(served.url);
+      await home.locator("[data-piq-screen]").first().waitFor({ timeout: 5000 });
+      assert.equal(await home.locator('.piq-logo[data-logo="none"]').count(), 1);
+      assert.equal((await home.locator(".brand").first().innerText()).trim(), "renders");
+      await home.close();
       const page = await browser.newPage();
       await page.goto(`${served.url}${SCREENS.find((s) => s.id === "detail").path.replace(/^\//, "")}?state=closed`);
       await page.getByText("Closed for the season").waitFor({ timeout: 5000 });

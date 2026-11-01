@@ -31,6 +31,8 @@ export const INTAKE = [
   // Facts only the person knows (VIP List session 2: no agent designing alone guessed one of them).
   { id: "use", ask: "How often does each kind of person come back to it, and on what device (a phone, a laptop, both)?", section: null },
   { id: "gives", ask: "What must each person give for it to work, and what should they never have to give (an account, a friend's details, a document)?", section: null },
+  // What each person sees of the others (VIP List sessions 3 and 4: the door showed a guest's name nobody asked for).
+  { id: "sees", ask: "What does each person need to see about the others (staff seeing a customer's name, an organizer seeing who came), and where does each of those come from?", section: null },
   { id: "rules", ask: "What are its rules: who may do what, what happens to other people when something changes (a list closes, a booking is cancelled), what is kept and for how long, and what happens when there is no signal or a check fails?", section: null },
   { id: "sources", ask: "What exists already that we should read first: research, analytics, support tickets, an existing app or its code, a competitor?", section: null },
 ];

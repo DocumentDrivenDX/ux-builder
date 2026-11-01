@@ -742,6 +742,16 @@ black and white. A state of a screen's own may say which `values` it
 changes; a list on a phone shows its first three items or those marked
 `compact`.
 
+GDL-88. **Ask what the others see, walk the rows, measure honestly**
+*(added 2026-11-01, after VIP List session 4; US-167)*. The intake asks
+what each person needs to see about the others, and where it comes from;
+the blueprint rule `screen.details-asked` warns about a person's name, phone,
+email, birth date or address shown on a screen and asked for nowhere.
+The journey walk also taps a list's first row. Status at step 4 names
+`step batch`; the theme never blocks. An app built from a design shows its
+own name in its header, without the theme's title. The guide's events
+carry a time of day, and an event without one never moves a measured span.
+
 ##### Tasks (stage 3)
 
 GDL-22. The blueprint gains `tasks[]` (an amendment to CONTRACT-005). Each
