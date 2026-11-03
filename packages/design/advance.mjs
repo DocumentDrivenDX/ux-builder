@@ -46,7 +46,7 @@ export function advance(app) {
   // The agent's own work comes before any question: problems, unverified claims, feedback to address.
   const work = [];
   if (v.problems.length) work.push(`fix ${v.problems.length} document problem${v.problems.length === 1 ? "" : "s"} (ux-builder-design validate lists them)`);
-  if (claims.length) work.push(`check ${claims.length} direction-changing claim${claims.length === 1 ? "" : "s"} against ${claims.length === 1 ? "its source" : "their sources"} before showing ${claims.length === 1 ? "it" : "them"}: ${claims.map((c) => `${c.evidence} ${c.id}`).join(", ")} (evidence claim verify, or mark low confidence)`);
+  if (claims.length) work.push(`check ${claims.length} direction-changing claim${claims.length === 1 ? "" : "s"} against ${claims.length === 1 ? "its source" : "their sources"} before showing ${claims.length === 1 ? "it" : "them"}: ${claims.map((c) => `"${c.claim}" (${c.study})`).join(", ")} (evidence claim verify, or mark low confidence)`);
   const fb = list(state.feedback).filter((f) => f.status === "open");
   if (fb.length) work.push(`address the person's feedback ${fb.map((f) => `${f.id} on ${f.item}`).join(", ")}, and record how (review respond)`);
 

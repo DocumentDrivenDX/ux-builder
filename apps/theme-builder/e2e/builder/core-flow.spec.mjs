@@ -7,14 +7,16 @@ import { join } from "node:path";
 import { root, section, token, watch } from "../helpers.mjs";
 
 test("logo to a saved theme, as in the prototype", async ({ page }) => {
+  // Room for the cold start below on top of the flow itself.
+  test.setTimeout(120_000);
   const errors = watch(page);
   await page.goto("/");
 
   // 1 (@covers US-016-AC1 @covers US-016-AC2)
   await page.getByRole("button", { name: "Use the sample logo" }).click();
   // The suite's first logo analysis: a fresh server loads the engine for it, which on a slow CI runner
-  // takes longer than expect's 5 s default (the same analysis later in the suite takes under 2 s).
-  await expect(page.getByLabel("Brand colours we found").locator("li").first()).toContainText("Navy", { timeout: 30_000 });
+  // has taken over 30 s (the same analysis later in the suite takes under 2 s).
+  await expect(page.getByLabel("Brand colours we found").locator("li").first()).toContainText("Navy", { timeout: 90_000 });
   await page.getByRole("button", { name: "Suggest palettes" }).click();
 
   // 2 (@covers US-015-AC1 @covers US-015-AC3)

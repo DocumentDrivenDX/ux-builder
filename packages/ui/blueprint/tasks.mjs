@@ -5,6 +5,15 @@
    result. Internal to @ux-builder/ui/blueprint. */
 
 const list = (x) => (Array.isArray(x) ? x : []);
+const FORMS = new Set(["FormPage", "QuickEdit", "Wizard", "SettingsPage", "ReviewConfirm"]);
+/* A person's details, by what a label names: a name, a phone, an email, a birth date, an address. */
+const PERSON = [
+  ["name", /^(?:(?:full|first|last|your|guest(?:'s)?)\s+)?name(?:\s+on\s+the\s+list)?$|^guest$/i],
+  ["phone number", /\b(mobile|phone)\b/i],
+  ["email", /\be-?mail\b/i],
+  ["birth date", /\b(date of birth|birthday|birth date)\b/i],
+  ["address", /^(?:home\s+|your\s+)?address$/i],
+];
 const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 /* journey.task-exists, task.realized, screen.purpose and consistency.same-kind. */
@@ -30,6 +39,36 @@ function checkArchitecture(bp, { add, on }) {
   const guided = list(bp?.tasks).length > 0 || screens.some(({ s }) => s.purpose || Array.isArray(s.content));
   if (guided && on("screen.purpose")) {
     for (const { s, i } of screens) if (!s.purpose) add("screen.purpose", ["screens", i], `${s.title ?? s.id} has no purpose.`, `Add "purpose": what ${s.title ?? s.id} is for, in a sentence; then order its "content" by it.`);
+  }
+  // nav.audience: a destination whose screen is for other users than the first destination's (session 2:
+  // agents finishing alone put the promoters' screens in the guest app's tabs). Reached from a link, it needs no tab.
+  if (on("nav.audience")) {
+    const usersOf = new Map(screens.map(({ s }) => [s.id, list(s.users)]));
+    const dests = list(bp?.destinations).map((d, i) => ({ d, i })).filter(({ d }) => usersOf.get(d?.screen)?.length);
+    const first = dests[0] && new Set(usersOf.get(dests[0].d.screen));
+    for (const { d, i } of dests.slice(1)) {
+      const theirs = usersOf.get(d.screen);
+      if (theirs.some((u) => first.has(u))) continue;
+      add("nav.audience", ["destinations", i], `The destination "${d.label ?? d.id}" leads to a screen for ${theirs.join(", ")}, but "${dests[0].d.label ?? dests[0].d.id}" is for ${[...first].join(", ")}: a tab for other users in their app.`, `If ${theirs.join(", ")} come in by their own link, drop the destination and give ${d.screen} "entry": "link"; if one app serves both, say so in each screen's "users".`);
+    }
+  }
+  // screen.details-asked: a person's details shown on a screen that no form asks for (VIP List sessions 3 and 4:
+  // the pass and the door showed the guest's name; the claim asked only for a mobile and a birth date).
+  if (on("screen.details-asked")) {
+    const label = (c) => (typeof c === "string" ? c : c?.label) ?? "";
+    const kindOf = (l) => PERSON.find(([, re]) => re.test(String(l).trim()))?.[0] ?? null;
+    const forms = screens.filter(({ s }) => FORMS.has(s.pattern));
+    const asked = new Set([
+      ...forms.flatMap(({ s }) => list(s.content).map(label)),
+      ...screens.flatMap(({ s }) => list(s.modals).flatMap((m) => list(m?.fields).map((f) => f?.label ?? f?.name ?? ""))),
+      ...list(bp?.journeys).flatMap((j) => list(j?.steps).flatMap((st) => [...list(st?.inputs?.required), ...list(st?.inputs?.optional)])),
+    ].map(kindOf).filter(Boolean));
+    if (forms.length) for (const { s, i } of screens.filter(({ s }) => !FORMS.has(s.pattern))) {
+      list(s.content).forEach((c, k) => {
+        const kind = kindOf(label(c));
+        if (kind && !asked.has(kind)) add("screen.details-asked", ["screens", i, "content", k], `${s.title ?? s.id} shows "${label(c)}", a person's ${kind}, but no form or journey step asks for it.`, `Ask for it where the person gives their details (add it to that form's "content" and the journey step's "inputs"), or take it off ${s.title ?? s.id}.`);
+      });
+    }
   }
   if (!on("consistency.same-kind")) return;
   // For each kind: which tasks reach it, on which screen and pattern.

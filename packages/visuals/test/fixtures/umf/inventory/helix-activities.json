@@ -1,0 +1,92 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:helix-activities",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "helix-activities",
+      "kind": "flow",
+      "form": "pipeline",
+      "title": "HELIX's activities",
+      "question": "What order does work move in?",
+      "source": {
+        "path": "helix:workflows/activities",
+        "digest": "sha256:8cc83bfd0f7e7788b14ac88920dc4bfa5d7efd481e1e77ee26d9144d44a3481c"
+      },
+      "nodes": [
+        {
+          "id": "discover",
+          "label": "Discover",
+          "detail": "workflows/activities/00-discover/"
+        },
+        {
+          "id": "frame",
+          "label": "Frame",
+          "detail": "workflows/activities/01-frame/"
+        },
+        {
+          "id": "design",
+          "label": "Design",
+          "detail": "workflows/activities/02-design/"
+        },
+        {
+          "id": "test",
+          "label": "Test",
+          "detail": "workflows/activities/03-test/"
+        },
+        {
+          "id": "build",
+          "label": "Build",
+          "detail": "workflows/activities/04-build/"
+        },
+        {
+          "id": "deploy",
+          "label": "Deploy",
+          "detail": "workflows/activities/05-deploy/"
+        },
+        {
+          "id": "iterate",
+          "label": "Iterate",
+          "detail": "workflows/activities/06-iterate/"
+        }
+      ],
+      "edges": [
+        {
+          "id": "discover--frame",
+          "from": "discover",
+          "to": "frame"
+        },
+        {
+          "id": "frame--design",
+          "from": "frame",
+          "to": "design"
+        },
+        {
+          "id": "design--test",
+          "from": "design",
+          "to": "test"
+        },
+        {
+          "id": "test--build",
+          "from": "test",
+          "to": "build"
+        },
+        {
+          "id": "build--deploy",
+          "from": "build",
+          "to": "deploy"
+        },
+        {
+          "id": "deploy--iterate",
+          "from": "deploy",
+          "to": "iterate"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

@@ -19,6 +19,7 @@
     { "id": "US-075-AC1", "reason": "Planned: FEAT-005 (public distribution), framed 2026-10-21; not built yet." },
     { "id": "US-075-AC2", "reason": "Planned: FEAT-005 (public distribution), framed 2026-10-21; not built yet." },
     { "id": "US-075-AC3", "reason": "Built: every public package.json names the @ux-builder scope and the DocumentDrivenDX/ux-builder repository. Not yet tested (FEAT-005, framed 2026-10-21)." },
-    { "id": "US-024-AC9", "reason": "Planned, optional: LocalNav (NAV-03) is kept for Praxis plug-ins, the embedded-app modality to come (AR-2026-10-22 D-8); not built yet." }
+    { "id": "US-024-AC9", "reason": "Planned, optional: LocalNav (NAV-03) is kept for Praxis plug-ins, the embedded-app modality to come (AR-2026-10-22 D-8); not built yet." },
+    { "id": "US-166-AC2", "reason": "Checked on demand against the built Storybook: node packages/visuals/scripts/check-stories.mjs opens each Visuals story in two themes and fails unless the drawing's font and colours follow the toolbar (10 stories passed, 2026-10-23). npm run check does not build Storybook." }
   ]
 }

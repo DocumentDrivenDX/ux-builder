@@ -6,7 +6,7 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, test } from "node:test";
@@ -116,6 +116,15 @@ describe("US-159: the app built from a design opens on its journeys", () => {
     assert.match(runtime, /<StatePanel kind=\{state\} onRetry=\{\(\) => to\("loading"\)\}/, "error retries into loading, which settles: the recovery");
     assert.match(runtime, /setTimeout\(\(\) => setOwn\("ideal"\), SETTLE\)/);
     assert.match(runtime, /<Notice key=\{r\.id\} tone="warning" title=\{r\.before/);
+    // The rule notes are the designer's: shown with ?rules (the toolbar's button), never by default (VIP List session 3).
+    assert.match(runtime, /\{params\.has\("rules"\) && screen\.rules\.map\(/);
+    assert.match(runtime, /\{params\.has\("rules"\) \? "Hide" : "Show"\} the business rules/);
+    // A state whose notice is an error holds back the main action (no "Let in" on a pass already used).
+    assert.match(runtime, /const halted = screen\.notices\?\.\[state\]\?\.tone === "error";/);
+    assert.match(runtime, /content && !blocked && !halted && primary\.length/);
+    // A form's main action follows its fields; other screens keep it in the header.
+    assert.match(runtime, /<PageHeader title=\{screen\.title\} description=\{screen\.purpose\} actions=\{form \? undefined : main\} \/>/);
+    assert.match(runtime, /\{body\}\n\s*\{form && main && <Cluster>\{main\}<\/Cluster>\}/);
     assert.match(runtime, /tone="error" role="alert" title=\{r\.blocked/);
     assert.match(runtime, /if \(!\(import\.meta\.env\?\.DEV \|\| params\.has\("prototype"\)\)\) return null;/, "the toolbar in npm run dev, or with ?prototype");
     assert.match(runtime, /<Button variant="secondary" onClick=\{resetSampleData\}>Reset prototype data<\/Button>/);
@@ -210,6 +219,23 @@ describe("US-156: the build installs no starter document the design already has"
     assert.match(o.helix.skipped[0].why, /the design already has a feature-specification document \(FEAT-007/);
     assert.doesNotMatch(read(other, "docs/helix/02-design/DESIGN.md"), /to: FEAT-001/, "no link to a starter document that was not written");
   });
+
+  // @covers US-172-AC6
+  test("the app is built in the design's appearance; a design with none keeps system", async () => {
+    const dark = folder("dark-look", (d) => {
+      const f = join(d, ".ux-builder/design-state.json");
+      writeFileSync(f, JSON.stringify({ ...JSON.parse(readFileSync(f, "utf8")), appearance: { value: "dark", reason: "a guest list used in dark venues" } }, null, 2));
+    });
+    const r = await buildInPlace(dark, { theme: "plain" });
+    assert.equal(r.appearance, "dark");
+    // The audit visits every designed screen, not only the home page.
+    const audit = JSON.parse(read(dark, "package.json")).scripts.audit;
+    for (const sc of r.prototype.screens) assert.ok(audit.includes(`http://127.0.0.1:4173${sc.path} `) || audit.endsWith(`http://127.0.0.1:4173${sc.path}`), `${sc.path}: ${audit}`);
+    assert.match(read(dark, "src/main.jsx"), /<ThemeProvider theme="plain" appearance="dark"/);
+    const plain = folder("plain-look", () => {});
+    assert.equal((await buildInPlace(plain, { theme: "plain" })).appearance, "system");
+    assert.match(read(plain, "src/main.jsx"), /appearance="system"/);
+  });
 });
 
 describe("US-162: the app is built in the frame the person chose", () => {
@@ -230,5 +256,87 @@ describe("US-162: the app is built in the frame the person chose", () => {
     assert.match(app("screen"), /in the frame the person\n {3}chose \(supports\.frame: screen\)/);
     assert.match(app("top-nav"), / frame="top-nav" /);
     assert.doesNotMatch(app(null), /frame=/, "side navigation, AppShell's default");
+  });
+});
+
+describe("VIP List session 2: a screen's own frame and the notices of its own states", () => {
+  test("the generated App draws a screen with frame screen alone, and the screen data carries its notices", () => {
+    const dir = mkdtempSync(join(tmp, "own-frame-"));
+    const bp = {
+      version: 1, kind: "app", name: "VIP List", supports: { modalities: ["responsive-web"], sizeClasses: ["compact"], inputs: ["coarse"], frame: "top-nav" },
+      destinations: [{ id: "tonight", label: "Tonight", screen: "tonight" }, { id: "passes", label: "My passes", screen: "passes" }],
+      screens: [
+        { id: "tonight", title: "Tonight", pattern: "CollectionList", actions: [{ id: "go", label: "My passes", to: "passes", primary: true }] },
+        { id: "passes", title: "My passes", pattern: "CollectionList", actions: [{ id: "back", label: "Tonight", to: "tonight" }] },
+        { id: "door", title: "Door check", pattern: "RecordDetail", entry: "scan", frame: "screen", states: ["already-used"], stateNotices: { "already-used": { tone: "error", title: "Already used at 11:42 PM" } }, actions: [{ id: "letin", label: "Let in", to: "back", primary: true }] },
+      ],
+      journeys: [{ id: "J-door", entry: "door", steps: [{ screen: "door", action: "letin" }] }, { id: "J-find", entry: "tonight", steps: [{ screen: "tonight", action: "go" }, { screen: "passes" }] }],
+    };
+    put(dir, BP, JSON.stringify(bp, null, 2));
+    generateJourneyApp(dir);
+    const app = readFileSync(join(dir, "src/App.jsx"), "utf8");
+    assert.match(app, /const own = screenAt\(path\)\?\.frame;\n {2}if \(own === "screen"\) return <><PrototypeToolbar \/><Screen key=\{path\} \/><\/>;/);
+    const data = readFileSync(join(dir, "src/journey/blueprint.js"), "utf8");
+    assert.match(data, /"frame": "screen"/);
+    assert.match(data, /"already-used": \{\s*"tone": "error",\s*"title": "Already used at 11:42 PM"/);
+    assert.match(readFileSync(join(dir, "src/journey/runtime.jsx"), "utf8"), /screen\.notices\?\.\[state\]/);
+  });
+});
+
+/* Built and opened in a browser: every screen renders with no page error (VIP List session 3: a change to
+   the runtime crashed every page while the source-matching tests passed), and a state of a screen's own
+   shows the values it changes. Uses this repository's packages; skipped where vite or Chromium is missing. */
+describe("US-159: the generated app renders", () => {
+  // @covers US-159-AC1
+  // @covers US-173-AC6
+  test("each designed screen opens with no page error; ?state= of a screen's own shows its notice and changed values", { timeout: 180_000 }, async (t) => {
+    const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
+    const vite = join(ROOT, "node_modules/.bin/vite");
+    let chromium;
+    try { ({ chromium } = await import("playwright")); } catch { return t.skip("no playwright"); }
+    if (!existsSync(vite)) return t.skip("no vite");
+    const dir = folder("renders", (d) => {
+      const bp = JSON.parse(read(d, BP));
+      const detail = bp.screens.find((s) => s.id === "detail");
+      detail.states = [...detail.states, "closed"];
+      detail.stateNotices = { closed: { tone: "error", title: "Closed for the season", text: "Fishing opens again in April.", values: { Access: "Closed until April" } } };
+      writeFileSync(join(d, BP), JSON.stringify(bp, null, 2) + "\n");
+    });
+    await buildInPlace(dir, { theme: "plain" });
+    rmSync(join(dir, "node_modules"), { recursive: true, force: true });
+    symlinkSync(join(ROOT, "node_modules"), join(dir, "node_modules"));
+    writeFileSync(join(dir, "vite.config.js"), 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\nexport default defineConfig({ plugins: [react()], resolve: { dedupe: ["react", "react-dom"] }, logLevel: "error" });\n');
+    const b = spawnSync(vite, ["build"], { cwd: dir, encoding: "utf8" });
+    assert.equal(b.status, 0, `${b.stdout}\n${b.stderr}`);
+    const { serveFolder } = await import("@ux-builder/audit");
+    const served = await serveFolder(join(dir, "dist"), { spa: true });
+    let browser;
+    try { browser = await chromium.launch(); } catch { await served.stop(); return t.skip("no Chromium"); }
+    try {
+      const { SCREENS } = await data(dir);
+      for (const s of SCREENS) {
+        const page = await browser.newPage();
+        const errors = [];
+        page.on("pageerror", (e) => errors.push(e.message));
+        await page.goto(served.url + s.path.replace(/^\//, ""));
+        await page.locator(`[data-piq-screen="${s.id}"]`).first().waitFor({ timeout: 5000 });
+        assert.deepEqual(errors, [], `${s.id}: ${errors.join("; ")}`);
+        await page.close();
+      }
+      // @covers US-174-AC4
+      // The header shows the app's name, not the plain theme's title beside it ("Plain rivers").
+      const home = await browser.newPage();
+      await home.goto(served.url);
+      await home.locator("[data-piq-screen]").first().waitFor({ timeout: 5000 });
+      assert.equal(await home.locator('.piq-logo[data-logo="none"]').count(), 1);
+      assert.equal((await home.locator(".brand").first().innerText()).trim(), "renders");
+      await home.close();
+      const page = await browser.newPage();
+      await page.goto(`${served.url}${SCREENS.find((s) => s.id === "detail").path.replace(/^\//, "")}?state=closed`);
+      await page.getByText("Closed for the season").waitFor({ timeout: 5000 });
+      const text = await page.locator("[data-piq-screen]").first().innerText();
+      assert.match(text, /Closed until April/);
+      assert.doesNotMatch(text, /Save river/, "the main action is held back in an error state");
+    } finally { await browser.close(); await served.stop(); }
   });
 });

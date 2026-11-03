@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1404 432" width="1404" height="432" role="img" aria-labelledby="beacon-field-guide-title" aria-describedby="beacon-field-guide-desc" class="uxb-visual uxb-visual--flow-lanes" data-visual="beacon-field-guide" style="font-family:ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="beacon-field-guide-title">A developer's first map of Beacon</title>
+<desc id="beacon-field-guide-desc">Start at the API: it is the only part that acts for an agent, and the only part that calls the model gateway.</desc>
+<rect x="0" y="0" width="1404" height="432" style="fill:#FFFFFF"/>
+<g id="beacon-field-guide--people" class="uxb-group" data-role="lane">
+<text x="40" y="36" style="fill:#6B675E;font-size:12px;font-weight:600;font-family:ui-monospace, &quot;SF Mono&quot;, Menlo, monospace;letter-spacing:0.12em">01 / PEOPLE</text>
+</g>
+<g id="beacon-field-guide--front-door" class="uxb-group" data-role="lane">
+<text x="341.26" y="36" style="fill:#6B675E;font-size:12px;font-weight:600;font-family:ui-monospace, &quot;SF Mono&quot;, Menlo, monospace;letter-spacing:0.12em">02 / FRONT DOOR</text>
+</g>
+<g id="beacon-field-guide--beacon-app" class="uxb-group" data-role="lane">
+<rect x="714.17" y="46" width="270.05" height="366" rx="16" style="fill:#FAEAE6;stroke:#E89480;stroke-width:1.5px;stroke-dasharray:6 5"/>
+<text x="730.17" y="36" style="fill:#6B675E;font-size:12px;font-weight:600;font-family:ui-monospace, &quot;SF Mono&quot;, Menlo, monospace;letter-spacing:0.12em">03 / BEACON</text>
+</g>
+<g id="beacon-field-guide--platform" class="uxb-group" data-role="lane">
+<rect x="1111.28" y="46" width="268.16" height="366" rx="16" style="fill:none;stroke:#E6E2D8;stroke-width:1.5px"/>
+<text x="1127.28" y="36" style="fill:#6B675E;font-size:12px;font-weight:600;font-family:ui-monospace, &quot;SF Mono&quot;, Menlo, monospace;letter-spacing:0.12em">04 / PLATFORM</text>
+</g>
+<g id="beacon-field-guide--gateway--models" class="uxb-edge" data-steps="s4">
+<path d="M1245.36 128 L1245.36 162" style="fill:none;stroke:#141413;stroke-width:2.5px"/>
+<path d="M1241.16 162 L1245.36 172 L1249.56 162 Z" style="fill:#141413;stroke:#141413;stroke-width:1px"/>
+</g>
+<g id="beacon-field-guide--agent--proxy" class="uxb-edge" data-steps="s1">
+<path d="M229.47 225 L331.26 225" style="fill:none;stroke:#141413;stroke-width:2.5px"/>
+<path d="M331.26 229.2 L341.26 225 L331.26 220.8 Z" style="fill:#141413;stroke:#141413;stroke-width:1px"/>
+</g>
+<g id="beacon-field-guide--proxy--api" class="uxb-edge" data-steps="s2">
+<path d="M601.26 225 L720.17 225" style="fill:none;stroke:#141413;stroke-width:2.5px"/>
+<path d="M720.17 229.2 L730.17 225 L720.17 220.8 Z" style="fill:#141413;stroke:#141413;stroke-width:1px"/>
+</g>
+<g id="beacon-field-guide--api--gateway" class="uxb-edge" data-steps="s3">
+<path d="M849.19 181 L849.19 97 Q849.19 93 853.19 93 L1117.28 93" style="fill:none;stroke:#141413;stroke-width:2.5px"/>
+<path d="M1117.28 97.2 L1127.28 93 L1117.28 88.8 Z" style="fill:#141413;stroke:#141413;stroke-width:1px"/>
+</g>
+<g id="beacon-field-guide--api--secrets" class="uxb-edge">
+<path d="M849.19 269 L849.19 361.5 Q849.19 365.5 853.19 365.5 L1119.28 365.5" style="fill:none;stroke:#706C62;stroke-width:1.5px"/>
+<path d="M1119.28 368.86 L1127.28 365.5 L1119.28 362.14 Z" style="fill:#706C62;stroke:#706C62;stroke-width:1px"/>
+</g>
+<g id="beacon-field-guide--api--telemetry" class="uxb-edge" data-steps="throughout-audit-spans-otlp">
+<path d="M968.22 225 L1043.75 225 Q1047.75 225 1047.75 229 L1047.75 278 Q1047.75 282 1051.75 282 L1117.28 282" style="fill:none;stroke:#141413;stroke-width:2.5px"/>
+<path d="M1117.28 286.2 L1127.28 282 L1117.28 277.8 Z" style="fill:#141413;stroke:#141413;stroke-width:1px"/>
+</g>
+<g id="beacon-field-guide--agent" class="uxb-node" data-role="actor" data-status="built">
+<rect x="40" y="181" width="189.47" height="88" rx="44" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="70" y="230.6" style="fill:#141413;font-size:18px;font-weight:600">Support agent</text>
+</g>
+<g id="beacon-field-guide--proxy" class="uxb-node" data-role="platform" data-status="built">
+<rect x="341.26" y="181" width="260" height="88" rx="10" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="361.26" y="213.6" style="fill:#141413;font-size:18px;font-weight:600">Sign-in proxy</text>
+<text x="361.26" y="228.6" style="fill:#3D3D3A;font-size:13px;font-weight:400">checks identity, forwards the</text>
+<text x="361.26" y="245.6" style="fill:#3D3D3A;font-size:13px;font-weight:400">agent's token</text>
+</g>
+<g id="beacon-field-guide--api" class="uxb-node" data-role="own" data-status="built">
+<rect x="730.17" y="181" width="238.05" height="88" rx="10" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2.5px"/>
+<text x="750.17" y="222.1" style="fill:#141413;font-size:18px;font-weight:600">Beacon API</text>
+<text x="750.17" y="237.1" style="fill:#6B675E;font-size:13px;font-weight:400">every request runs as the agent</text>
+</g>
+<g id="beacon-field-guide--gateway" class="uxb-node" data-role="platform" data-status="built">
+<rect x="1127.28" y="58" width="236.16" height="70" rx="10" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1147.28" y="90.1" style="fill:#141413;font-size:18px;font-weight:600">Model gateway</text>
+<text x="1147.28" y="105.1" style="fill:#3D3D3A;font-size:13px;font-weight:400">rate limits, usage, model choice</text>
+</g>
+<g id="beacon-field-guide--models" class="uxb-node" data-role="platform" data-status="built">
+<rect x="1127.28" y="172" width="236.16" height="53" rx="10" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1147.28" y="204.1" style="fill:#141413;font-size:18px;font-weight:600">Language models</text>
+</g>
+<g id="beacon-field-guide--telemetry" class="uxb-node" data-role="platform" data-status="built">
+<rect x="1127.28" y="247" width="236.16" height="70" rx="10" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1147.28" y="279.1" style="fill:#141413;font-size:18px;font-weight:600">Telemetry collector</text>
+<text x="1147.28" y="294.1" style="fill:#3D3D3A;font-size:13px;font-weight:400">traces and audit spans</text>
+</g>
+<g id="beacon-field-guide--secrets" class="uxb-node" data-role="platform" data-status="built">
+<rect x="1127.28" y="339" width="236.16" height="53" rx="10" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1.5px"/>
+<text x="1147.28" y="371.1" style="fill:#141413;font-size:18px;font-weight:600">Secret vault</text>
+</g>
+<g class="uxb-label">
+<text x="1259.36" y="152" style="fill:#6B675E;font-size:12px;font-weight:400;paint-order:stroke;stroke:#FFFFFF;stroke-width:6px;stroke-linejoin:round">routes to a model</text>
+</g>
+<g class="uxb-label">
+<text x="285.36" y="212" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400;paint-order:stroke;stroke:#FFFFFF;stroke-width:6px;stroke-linejoin:round">opens a ticket</text>
+</g>
+<g class="uxb-label">
+<text x="665.71" y="196" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400;paint-order:stroke;stroke:#FFFFFF;stroke-width:6px;stroke-linejoin:round">forwards with</text>
+<text x="665.71" y="212" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400;paint-order:stroke;stroke:#FFFFFF;stroke-width:6px;stroke-linejoin:round">the agent's token</text>
+</g>
+<g class="uxb-label">
+<text x="1117.28" y="80" text-anchor="end" style="fill:#6B675E;font-size:12px;font-weight:400;paint-order:stroke;stroke:#FFFFFF;stroke-width:6px;stroke-linejoin:round">asks for a draft</text>
+</g>
+<g class="uxb-label">
+<text x="1117.28" y="352.5" text-anchor="end" style="fill:#6B675E;font-size:12px;font-weight:400;paint-order:stroke;stroke:#FFFFFF;stroke-width:6px;stroke-linejoin:round">reads the gateway key</text>
+</g>
+<g class="uxb-label">
+<text x="1117.28" y="269" text-anchor="end" style="fill:#6B675E;font-size:12px;font-weight:400;paint-order:stroke;stroke:#FFFFFF;stroke-width:6px;stroke-linejoin:round">audit spans, OTLP</text>
+</g>
+<g id="beacon-field-guide--gateway--models--step" class="uxb-step" data-steps="s4">
+<circle cx="1245.36" cy="150" r="12" style="fill:#141413;stroke:#FFFFFF;stroke-width:3px"/>
+<text x="1245.36" y="154.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">4</text>
+</g>
+<g id="beacon-field-guide--agent--proxy--step" class="uxb-step" data-steps="s1">
+<circle cx="285.36" cy="225" r="12" style="fill:#141413;stroke:#FFFFFF;stroke-width:3px"/>
+<text x="285.36" y="229.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">1</text>
+</g>
+<g id="beacon-field-guide--proxy--api--step" class="uxb-step" data-steps="s2">
+<circle cx="665.71" cy="225" r="12" style="fill:#141413;stroke:#FFFFFF;stroke-width:3px"/>
+<text x="665.71" y="229.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">2</text>
+</g>
+<g id="beacon-field-guide--api--gateway--step" class="uxb-step" data-steps="s3">
+<circle cx="849.19" cy="137" r="12" style="fill:#141413;stroke:#FFFFFF;stroke-width:3px"/>
+<text x="849.19" y="141.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">3</text>
+</g>
+<g id="beacon-field-guide--api--telemetry--step" class="uxb-step" data-steps="throughout-audit-spans-otlp">
+<rect x="1028.93" y="270" width="117.16" height="24" rx="12" style="fill:#141413;stroke:#FFFFFF;stroke-width:3px"/>
+<text x="1087.51" y="286.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600;letter-spacing:0.06em">THROUGHOUT</text>
+</g>
+</svg>

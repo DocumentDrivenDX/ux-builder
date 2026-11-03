@@ -7,7 +7,7 @@
 import { recordDecision } from "@ux-builder/trace";
 import { DesignError } from "./app.mjs";
 import { CLOSES, firstOf, STEPS } from "./process.mjs";
-import { logEvent } from "./metrics.mjs";
+import { logEvent, personTurn } from "./metrics.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -27,7 +27,7 @@ const ORDER = ["baseline", "define", "explore", "experience", "validate"];
 const MOVES = ["core-1", "core-2"];
 const STRUCTURE = "Ask which modalities and screen sizes the app is for (ux-builder-design modality), then check each screen's purpose and the order of what it shows";
 export const FIRST_STEP = {
-  baseline: "Go through the baseline (baseline.md, beside the brief) with the person and ask what to improve",
+  baseline: "Go through what HELIX's backfill drafted from the app (the PRD and stories, as proposals) and the blueprint drawn from its screens with the person, and ask what to improve",
   define: "Interview the person about what users must accomplish, then draft the brief and ask core-1",
   explore: "Draft at least two alternatives for the open questions, compare them and ask core-2",
   experience: "Prototype the chosen design for the person to try; then build the validated prototype",
@@ -47,7 +47,7 @@ function traceCheckpoint(app, id, { answer, skip, declined, reason }) {
   }
 }
 
-export function checkpoint(app, { id, answer, skip = false, declined = false, reason, now = new Date().toISOString() } = {}) {
+export function checkpoint(app, { id, answer, skip = false, declined = false, reason, sameTurn = false, now = new Date().toISOString() } = {}) {
   if (!Object.hasOwn(CHECKPOINTS, id)) throw new DesignError(`"${id ?? ""}" is not a checkpoint; use one of ${Object.keys(CHECKPOINTS).join(", ")}`);
   if (skip && answer) throw new DesignError("give --answer or --skip, not both");
   if (skip && declined) throw new DesignError("--declined goes with --answer: the person said no or not yet");
@@ -65,6 +65,7 @@ export function checkpoint(app, { id, answer, skip = false, declined = false, re
   // A passed core checkpoint moves the loop on, and a next action that waited on it gives way.
   const moved = entry.status === "passed" && MOVES.includes(id) && moveOn(state, id);
   writeState(app, state);
+  personTurn(app, { kind: "decision", answer: answer ?? reason, sameTurn, at: now });
   logEvent(app, "checkpoint", { id, status: entry.status }, now);
   if (moved) logEvent(app, "step", { step: state.step, mode: state.mode }, now);
   const event = traceCheckpoint(app, id, { answer, skip, declined, reason });

@@ -23,6 +23,7 @@
    once into assets/. PNGs need playwright (or @playwright/test) and its
    Chromium; without them the HTML is still written and the caller is told. */
 
+import { fieldFor, sampleValue as sampleOf } from "./samples.mjs";
 import { copyFileSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
@@ -59,6 +60,21 @@ function placeholder(name, s, { h, ui, P }) {
   const text = (t) => h("p", null, t);
   const fields = (n = 3) => Array.from({ length: n }, (_, i) => h(ui.TextField, { key: i, label: `Field ${i + 1}`, name: `field${i + 1}` }));
   const tiles = [1, 2, 3].map((i) => h(P.StatTile, { key: i, label: `Figure ${i}`, value: `${i * 12}` }));
+  // The screen's own content, when it has some: its labels as columns and fields, with sample values.
+  const labels = (Array.isArray(s.content) ? s.content : []).map((c) => (typeof c === "string" ? c : c?.label)).filter(Boolean);
+  const keyOf = (l, k) => `c${k}`;
+  const sampleValue = (l, i) => s.values?.[l] ?? sampleOf(l, i);
+  // On a phone a list shows the items marked compact, else its first three (the person in VIP List session 3
+  // could not see venue, time or spots left with the first alone).
+  const items = (Array.isArray(s.content) ? s.content : []).filter((c) => (typeof c === "string" ? c : c?.label));
+  const marked = items.some((c) => c?.compact) ? new Set(items.map((c, k) => (c?.compact ? k : -1)).filter((k) => k >= 0)) : new Set([0, 1, 2]);
+  const own = labels.length ? {
+    CollectionList: { title, actions: act, columns: labels.slice(0, 5).map((l, k) => ({ key: keyOf(l, k), label: l, ...(marked.has(k) ? { priority: true } : {}) })), rows: [0, 1, 2, 3, 4].map((i) => ({ id: `r${i + 1}`, ...Object.fromEntries(labels.slice(0, 5).map((l, k) => [keyOf(l, k), sampleValue(l, i)])) })), caption: title, search: "", onSearchChange: noop },
+    RecordDetail: { title, actions: act, fields: labels.map((l) => ({ label: l, value: sampleValue(l, 0) })) },
+    DescriptionList: { items: labels.map((l) => ({ label: l, value: sampleValue(l, 0) })) },
+    WorkQueue: { title, items: [0, 1, 2].map((i) => ({ id: `i${i}`, title: sampleValue(labels[0], i), content: text(labels.slice(1).map((l) => `${l}: ${sampleValue(l, i)}`).join(" · ")) })), index: 0, onIndexChange: noop, onApprove: noop, onReject: noop },
+  }[name] : null;
+  if (own) return own;
   const props = {
     CollectionList: { title, actions: act, columns: [{ key: "name", label: "Name", priority: true }, { key: "owner", label: "Owner", priority: true }, { key: "status", label: "Status" }, { key: "updated", label: "Updated" }], rows, caption: title, search: "", onSearchChange: noop },
     RecordDetail: { title, actions: act, fields: [{ label: "Owner", value: "A. Person" }, { label: "Status", value: "Open" }, { label: "Updated", value: "2 days ago" }], children: text("Placeholder detail.") },
@@ -112,6 +128,15 @@ const STATUS_PROP = new Set(["CollectionList", "RecordDetail", "ReportViewer", "
    does around it. */
 function stateElement(s, state, lib) {
   const { h, ui, P } = lib;
+  // A state with a notice of its own (stateNotices): the screen as it is, under that notice.
+  const notice = s.stateNotices?.[state];
+  if (notice) {
+    // The values this state changes replace the samples (US-173-AC6).
+    // An error notice holds back the main action, as the built app does (no "Let in" on a pass already used).
+    const shown = { ...s, ...(notice.values ? { values: notice.values } : {}), ...(notice.tone === "error" ? { actions: (Array.isArray(s.actions) ? s.actions : []).filter((a) => !a?.primary) } : {}) };
+    const el = screenElement(shown, lib);
+    return { el: h("div", null, h(ui.Notice, { tone: notice.tone ?? "info", title: notice.title, role: notice.tone === "error" ? "alert" : "status" }, notice.text ?? null), el), by: "notice" };
+  }
   const own = STATUSES.get(s.pattern) ?? [];
   const props = placeholder(s.pattern, s, lib);
   // In error and partial, Try again is the region's primary action (states.mjs: error offers the retry
@@ -143,7 +168,17 @@ function screenElement(s, lib) {
     // form comes from useFormState, so the page is drawn inside a component that calls it.
     const Form = () => {
       const form = P.useFormState({ initial: {} });
-      return h(P[s.pattern], { title: s.title ?? s.id, form, onCancel: noop, open: true, onClose: noop }, h(P.FormSection, { title: "Details" }, [1, 2, 3].map((i) => h(lib.ui.TextField, { key: i, label: `Field ${i}`, ...form.field(`field${i}`) }))));
+      // The screen's own content as its fields, each by what its label asks for; three placeholders without content.
+      const labels = (Array.isArray(s.content) ? s.content : []).map((c) => (typeof c === "string" ? c : c?.label)).filter(Boolean);
+      const primary = (Array.isArray(s.actions) ? s.actions.find((a) => a?.primary)?.label : null) ?? undefined;
+      const ui = lib.ui;
+      const control = (l, k) => {
+        const f = fieldFor(l);
+        if (f.kind === "checkbox") return h(ui.Checkbox, { key: k, label: f.label });
+        if (f.kind === "radio") return h(ui.RadioGroup, { key: k, label: f.label, name: `f${k}`, defaultValue: f.options[0], options: f.options.map((o) => ({ value: o, label: o })) });
+        return h(ui.TextField, { key: k, label: f.label, type: f.kind === "date-text" ? "text" : f.kind, ...(f.kind === "date-text" ? { placeholder: "MM/DD/YYYY", inputMode: "numeric" } : {}), ...(f.required ? { required: true } : {}), ...form.field(`f${k}`) });
+      };
+      return h(P[s.pattern], { title: s.title ?? s.id, form, onCancel: noop, open: true, onClose: noop, ...(primary ? { submitLabel: primary } : {}) }, labels.length ? labels.map(control) : h(P.FormSection, { title: "Details" }, [1, 2, 3].map((i) => h(lib.ui.TextField, { key: i, label: `Field ${i}`, ...form.field(`field${i}`) }))));
     };
     return h(Form);
   }
@@ -153,8 +188,8 @@ function screenElement(s, lib) {
 const box = (s, state = "ideal") => `<div class="wf-unknown" role="img" aria-label="${esc(`${s.title ?? s.id}${state === "ideal" ? "" : ` (${state})`}: ${s.pattern ?? "no pattern"}`)}" style="display:grid;place-items:center;min-block-size:240px;margin:var(--piq-space-4);border:2px dashed var(--piq-color-border);border-radius:var(--piq-radius-md, 8px);color:var(--piq-color-text);font:var(--piq-font-body, inherit)"><p><strong>${esc(s.title ?? s.id)}</strong><br>${esc(s.pattern ?? "no pattern")}: not a pattern in @ux-builder/ui ${esc(catalogue.packages["@ux-builder/ui"])}</p></div>`;
 
 /* The page around a screen: the theme and the SDK's CSS, nothing else. */
-const page = (title, sizeClass, body, theme = THEME) => `<!doctype html>
-<html lang="en" data-theme="${theme}" data-appearance="light" data-size-class="${sizeClass}">
+const page = (title, sizeClass, body, theme = THEME, appearance = "light") => `<!doctype html>
+<html lang="en" data-theme="${theme}" data-appearance="${appearance}" data-size-class="${sizeClass}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -182,7 +217,7 @@ async function library() {
 
 /* The wireframes of a blueprint: one page per screen, state and supported
    size class, in blueprint order (the ideal state first). */
-export async function wireframes(bp, { theme = THEME } = {}) {
+export async function wireframes(bp, { theme = THEME, appearance = "light" } = {}) {
   const lib = await library();
   const { h, render, P } = lib;
   const sizes = sizesOf(bp);
@@ -199,7 +234,13 @@ export async function wireframes(bp, { theme = THEME } = {}) {
       try {
         let el = null;
         if (PATTERNS.has(s.pattern) && typeof P[s.pattern] === "function") {
-          if (state === "ideal") el = screenElement(s, lib);
+          if (state === "ideal") {
+            // The screen's other actions, under it, as the built app draws them: a journey that takes one
+            // ("See who's coming") can be walked on the page, not only from the prototype's bar (US-173).
+            const others = (Array.isArray(s.actions) ? s.actions : []).filter((a) => a?.label && !a.primary);
+            const own = screenElement(s, lib);
+            el = own && others.length ? h("div", null, own, h(P.Cluster, null, others.map((a, k) => h(lib.ui.Button, { key: k, variant: "secondary" }, a.label)))) : own;
+          }
           else ({ el, by } = stateElement(s, state, lib));
         }
         known = !!el;
@@ -210,14 +251,15 @@ export async function wireframes(bp, { theme = THEME } = {}) {
         const marked = state === "ideal" ? content : `<div data-state="${esc(state)}" data-drawn-by="${known ? by : "box"}">${content}</div>`;
         // A view is drawn without a shell; the host provides it. Otherwise the frame the person chose
         // (supports.frame, US-162): just the screen, a top bar, or navigation across the top or at the side.
-        const frame = bp.supports?.frame ?? (nav.length ? "side-nav" : "screen");
+        // A screen may have its own frame (a door page opened from a scan: just the screen).
+        const frame = s.frame ?? bp.supports?.frame ?? (nav.length ? "side-nav" : "screen");
         markup = bp.kind === "view" || frame === "screen" ? `<main>${marked}</main>` : render(h(P.AppShell, { nav: frame === "top-bar" ? [] : nav, frame, current: dests.find((d) => d.screen === s.id)?.id ?? null, brand: h("strong", null, bp.name ?? "App") }, h("div", { dangerouslySetInnerHTML: { __html: marked } })));
       } catch (e) {
         known = false;
         markup = `<main>${box({ ...s, pattern: `${s.pattern} (could not be drawn: ${e.message})` }, state)}</main>`;
       }
       const name = state === "ideal" ? s.id : `${s.id}.${state}`;
-      for (const size of sizes) out.push({ screen: s.id, state, drawnBy: known ? by : null, pattern: s.pattern ?? null, known, sizeClass: size, width: WIDTHS[size] ?? 1024, file: `${name}.${size}.html`, html: page(state === "ideal" ? s.title ?? s.id : `${s.title ?? s.id} (${state})`, size, markup, theme) });
+      for (const size of sizes) out.push({ screen: s.id, state, drawnBy: known ? by : null, pattern: s.pattern ?? null, known, sizeClass: size, width: WIDTHS[size] ?? 1024, file: `${name}.${size}.html`, html: page(state === "ideal" ? s.title ?? s.id : `${s.title ?? s.id} (${state})`, size, markup, theme, appearance) });
     }
   }
   return out;

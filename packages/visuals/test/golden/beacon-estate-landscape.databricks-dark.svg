@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 949 328" width="949" height="328" role="img" aria-labelledby="beacon-estate-landscape-title" aria-describedby="beacon-estate-landscape-desc" class="uxb-visual uxb-visual--structure-nested" data-visual="beacon-estate-landscape" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="beacon-estate-landscape-title">Support tools estate</title>
+<desc id="beacon-estate-landscape-desc">Four systems, each owned by one team; Beacon is the only one that writes to customers.</desc>
+<rect x="0" y="0" width="949" height="328" style="fill:#09090B"/>
+<g id="beacon-estate-landscape--estate" class="uxb-group">
+<rect x="0" y="0" width="949" height="328" rx="8" style="fill:#101012"/>
+<text x="16" y="22" style="fill:#FAFAFA;font-size:12px;font-weight:600">Support tools estate</text>
+</g>
+<g id="beacon-estate-landscape--system-beacon" class="uxb-group" data-role="own">
+<rect x="16" y="34" width="917" height="208" rx="8" style="fill:#151517;stroke:#1685DF;stroke-width:2px"/>
+<text x="32" y="56" style="fill:#FAFAFA;font-size:12px;font-weight:600">beacon</text>
+</g>
+<g id="beacon-estate-landscape--web" class="uxb-node" data-role="own" data-status="built">
+<rect x="32" y="68" width="221" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="46" y="92" style="fill:#FFFFFF;font-size:14px;font-weight:600">Web app</text>
+<text x="46" y="106" style="fill:#9F9FA9;font-size:12px;font-weight:400">the agent's inbox and draft editor</text>
+</g>
+<g id="beacon-estate-landscape--api" class="uxb-node" data-role="own" data-status="built">
+<rect x="267" y="68" width="211" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="281" y="92" style="fill:#FFFFFF;font-size:14px;font-weight:600">Beacon API</text>
+<text x="281" y="106" style="fill:#9F9FA9;font-size:12px;font-weight:400">every request runs as the agent</text>
+</g>
+<g id="beacon-estate-landscape--drafter" class="uxb-node" data-role="own" data-status="built">
+<rect x="492" y="68" width="221" height="72" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="506" y="92" style="fill:#FFFFFF;font-size:14px;font-weight:600">Reply drafter</text>
+<text x="506" y="106" style="fill:#9F9FA9;font-size:12px;font-weight:400">builds the prompt from the ticket</text>
+<text x="506" y="122" style="fill:#9F9FA9;font-size:12px;font-weight:400">and its history</text>
+</g>
+<g id="beacon-estate-landscape--worker" class="uxb-node" data-role="own" data-status="built">
+<rect x="727" y="68" width="190" height="72" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="741" y="92" style="fill:#FFFFFF;font-size:14px;font-weight:600">Job worker</text>
+<text x="741" y="106" style="fill:#9F9FA9;font-size:12px;font-weight:400">imports, re-indexing, nightly</text>
+<text x="741" y="122" style="fill:#9F9FA9;font-size:12px;font-weight:400">digests</text>
+</g>
+<g id="beacon-estate-landscape--rules" class="uxb-node" data-role="own" data-status="placeholder">
+<rect x="32" y="154" width="204" height="72" rx="8" style="fill:#18232F;stroke:#1685DF;stroke-width:2px"/>
+<text x="46" y="178" style="fill:#FFFFFF;font-size:14px;font-weight:600">Policy rules</text>
+<text x="46" y="192" style="fill:#FAFAFA;font-size:12px;font-weight:400">a fixed allow-list until the rules</text>
+<text x="46" y="208" style="fill:#FAFAFA;font-size:12px;font-weight:400">engine lands</text>
+</g>
+<g id="beacon-estate-landscape--system-ledger" class="uxb-node" data-role="own">
+<rect x="16" y="256" width="118" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="30" y="280" style="fill:#FFFFFF;font-size:14px;font-weight:600">ledger</text>
+<text x="30" y="294" style="fill:#9F9FA9;font-size:12px;font-weight:400">example/ledger</text>
+</g>
+<g id="beacon-estate-landscape--system-portal" class="uxb-node" data-role="own">
+<rect x="148" y="256" width="178" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="162" y="280" style="fill:#FFFFFF;font-size:14px;font-weight:600">portal</text>
+<text x="162" y="294" style="fill:#9F9FA9;font-size:12px;font-weight:400">example/customer-portal</text>
+</g>
+<g id="beacon-estate-landscape--system-insight" class="uxb-node" data-role="own">
+<rect x="340" y="256" width="120" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="354" y="280" style="fill:#FFFFFF;font-size:14px;font-weight:600">insight</text>
+<text x="354" y="294" style="fill:#9F9FA9;font-size:12px;font-weight:400">example/insight</text>
+</g>
+</svg>

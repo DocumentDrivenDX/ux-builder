@@ -1,0 +1,160 @@
+# Metadata for User Flow
+
+artifact:
+  name: User Flow
+  id: user-flow
+  type: document
+  activity: design
+  level: feature
+  optional: true
+
+voice: artifact-signal
+
+description: |
+  How people move between the views of one feature: the views (screens,
+  modals, panels, voice or chat turns), the actions that connect them, the
+  decision points, the entry and exit points, and every alternate path (error,
+  cancel, empty, permission). Each transition names its action, the control
+  that triggers it and the feedback the person sees. One per feature, numbered
+  from it; the feature's wireframes nest under it. The solution design links
+  the flow by ID instead of restating it. Use it only where the feature has a
+  user interface.
+
+output:
+  location: docs/helix/02-design/flows/UF-{n}-{feature}/UF-{n}.md
+  format: markdown
+  naming: UF-{feature-number}.md
+  examples:
+    - flows/UF-001-csv-import/UF-001.md
+
+id_format:
+  prefix: UF
+  pattern: "UF-[0-9]+"
+  example: UF-001
+  description: |
+    The number is the governing FEAT number, so one feature has one user flow.
+    Its wireframes take the same number followed by a two-digit view number
+    and the view name (UF-001-02-mapping-review).
+
+reuse_policy: |
+  One user flow per feature, updated in place as views, actions or alternate
+  paths change. Split only when the feature is split.
+
+validation:
+  required_sections:
+    - scope
+    - views
+    - flow_diagram
+    - transitions
+    - alternate_paths
+    - story_traceability
+    - dead_ends
+
+  quality_checks:
+    - check: entry_and_exit_defined
+      description: The flow names at least one entry and one exit, and every view is reachable from an entry
+      severity: blocking
+
+    - check: every_transition_has_action
+      description: Every transition names the action that triggers it and its control, not just an arrow
+      severity: blocking
+
+    - check: decisions_explicit
+      description: Every branch is a decision view or a guarded transition with its condition stated
+      severity: blocking
+
+    - check: alternate_paths_covered
+      description: Every action that can fail, be cancelled or return nothing has an error, cancel or empty path, or a stated reason it cannot occur
+      severity: blocking
+
+    - check: feedback_shown
+      description: Every transition that changes data or waits on the system names the feedback the person sees (progress, success, error, undo)
+      severity: blocking
+
+    - check: diagram_matches_table
+      description: The Mermaid diagram and the Transitions table describe the same views and transitions
+      severity: blocking
+
+    - check: stories_traced
+      description: Every journey through the feature is a path of named transitions with the acceptance criteria it proves
+      severity: blocking
+
+    - check: rows_named
+      description: Views and transitions are named by what they are (the view name, the action), not numbered
+      severity: warning
+
+    - check: no_layout
+      description: The flow does not specify layout (the wireframe owns it) or visual values (DESIGN.md owns them)
+      severity: warning
+
+  pattern_checks:
+    - pattern: "```mermaid"
+      expected: ">=1"
+      message: Include a Mermaid flowchart
+
+    - pattern: "US-[0-9]+-AC[0-9]+"
+      expected: ">=1"
+      message: Trace journeys to stable acceptance-criterion IDs
+
+    - pattern: "\\[TBD\\]|\\[TODO\\]|\\[NEEDS CLARIFICATION"
+      expected: 0
+      message: Resolve uncertainty that materially affects the flow
+
+variables:
+  - name: feature_id
+    description: Governing FEAT-XXX
+    required: true
+
+prompts:
+  generation: prompt.md
+  review: |
+    Review this user flow for:
+    1. Entry and exit points; every view reachable
+    2. Every transition naming its action, control, guard and feedback
+    3. Error, cancel, empty and permission paths for every action that can need them
+    4. Diagram and Transitions table in agreement
+    5. Every journey traced to named transitions and acceptance criteria
+    6. Rows named, not numbered
+    7. No layout or visual design
+
+template:
+  file: template.md
+  sections:
+    - scope: "Feature, governing artifacts, entry points, exits, size classes."
+    - views: "Screens, modals, panels, voice or chat turns, and external exits, each named."
+    - flow_diagram: "Mermaid flowchart of views, decisions and transitions."
+    - transitions: "One row per transition: from, action and control, guard, to, feedback, changed region."
+    - alternate_paths: "Error, cancel, empty and permission paths."
+    - story_traceability: "Each journey as a path of named transitions and the acceptance criteria it proves."
+    - dead_ends: "Views with no exit, unreachable views and unresolved branches, or none."
+
+example:
+  file: example.md
+
+workflow:
+  creation_order: 2
+  review_cycles: 1-2
+  update_triggers:
+    - A view or action is added, removed or retargeted
+    - A user story's walkthrough or acceptance criteria change
+    - A usability study finds a dead end or a missing path
+
+relationships:
+  informed_by:
+    - feature-specification
+    - user-stories
+    - user-journey-map
+
+  informs:
+    - wireframe
+    - solution-design
+    - story-test-plan
+
+tags:
+  - design
+  - ux
+  - user-flow
+  - navigation
+
+version: 1.0.0
+last_updated: 2026-10-28

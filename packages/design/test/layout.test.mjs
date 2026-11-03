@@ -64,7 +64,7 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     const proposed = blueprint(a, ["propose"]);
     assert.equal(proposed.status, 0, proposed.stderr);
     const files = listAll(a).filter((f) => f !== "package.json" && f !== ".helix.yml");
-    for (const f of ["docs/ux-builder/blueprint/app.blueprint.json", "docs/ux-builder/blueprint/app.blueprint.list-first.json", "docs/ux-builder/brief.md", "docs/ux-builder/decisions/UXD-1.md", "docs/ux-builder/compare/compare.html", "docs/ux-builder/prototypes/list-first/index.html", "docs/ux-builder/users.md", "docs/ux-builder/helix-proposals/report.md"]) assert.ok(files.includes(f), f);
+    for (const f of ["docs/ux-builder/blueprint/app.blueprint.json", "docs/ux-builder/blueprint/app.blueprint.list-first.json", "docs/ux-builder/brief.md", "docs/ux-builder/helix-proposals/helix/02-design/adr/ADR-001-map-first.md.patch", "docs/ux-builder/compare/compare.html", "docs/ux-builder/prototypes/list-first/index.html", "docs/ux-builder/users.md", "docs/ux-builder/helix-proposals/report.md"]) assert.ok(files.includes(f), f);
     const outside = files.filter((f) => !f.startsWith("docs/ux-builder/") && !f.startsWith(".ux-builder/") && !f.startsWith(".claude/skills/ux-builder-design/"));
     assert.deepEqual(outside, [], "nothing at the app's top but .ux-builder/ and the skill");
     assert.equal(json(a, ["status"]).layout, "current");
@@ -73,8 +73,9 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
   // @covers US-149-AC2
   test("AC2: an app on the old layout keeps its paths, and status says to migrate", () => {
     const a = oldApp();
+    writeFileSync(join(a, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
     json(a, ["decision", "add", "--question", "List first?", "--option", "Map", "--option", "List", "--choice", "List", "--why", "Faster"]);
-    assert.ok(existsSync(join(a, "docs/ux/decisions/UXD-1.md")));
+    assert.ok(existsSync(join(a, "helix-proposals/helix/02-design/adr/ADR-001-list-first.md.patch")));
     assert.ok(!existsSync(join(a, "docs/ux-builder")));
     assert.match(json(a, ["rubric", "--alternative", "list-first"]).file, /^app\.blueprint\.list-first\.json$/);
     assert.match(cli(a, ["status"]).stdout, /This app is on the old layout \(docs\/ux\/, app\.blueprint\.json at the top\): run ux-builder-design migrate to move it under docs\/ux-builder\//);
@@ -144,5 +145,28 @@ describe("US-149: keep the design work in docs/ux-builder, and choose the modali
     assert.deepEqual([ok.modalities, ok.sizeClasses], [["responsive-web", "hybrid-chat"], ["compact", "expanded"]]);
     assert.deepEqual(JSON.parse(readFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8")).supports.modalities, ["responsive-web", "hybrid-chat"]);
     assert.equal(readState(a).modality.answer, "Chat on phones and laptops");
+  });
+});
+
+describe("VIP List session 1: a chosen alternative is prototyped as the app's blueprint now", () => {
+  test("after the choice, prototype --explore of that alternative draws the app's changed blueprint, not the stale copy", () => {
+    const a = bare();
+    json(a, ["init"]);
+    const start = { ...BP, tasks: [{ ...BP.tasks[0], success: ["US-1-AC1"] }], journeys: [{ ...BP.journeys[0], story: "US-1" }] };
+    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(start, null, 2));
+    assert.equal(blueprint(a, ["alternative", "new", "list-first"]).status, 0);
+    assert.equal(blueprint(a, ["alternative", "choose", "list-first", "--reason", "Fewer steps"]).status, 0);
+    json(a, ["modality", "--answer", "Phones", "--modality", "responsive-web", "--size-classes", "compact", "--frame", "screen"]);
+    // The app's blueprint moves on after the choice: a new screen.
+    const bp = JSON.parse(readFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), "utf8"));
+    bp.screens.push({ id: "saved", title: "Saved", pattern: "CollectionList", states: st });
+    bp.journeys[0].steps.push({ screen: "saved" });
+    bp.screens[0].actions = [{ id: "save", label: "Saved", to: "saved" }];
+    bp.journeys[0].steps[0].action = "save";
+    writeFileSync(join(a, "docs/ux-builder/blueprint/app.blueprint.json"), JSON.stringify(bp, null, 2));
+    const r = blueprint(a, ["prototype", "--explore", "--alternative", "list-first", "--question", "Saved?"]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stderr, /list-first is the chosen alternative, and .*app\.blueprint\.json has changed since it was chosen/);
+    assert.ok(existsSync(join(a, "docs/ux-builder/prototypes/list-first/saved.compact.html")), "the new screen is drawn");
   });
 });

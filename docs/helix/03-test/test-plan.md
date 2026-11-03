@@ -21,7 +21,7 @@ criteria; earlier features keep their tests where they are, traced by
 
 ## Testing Strategy
 
-**Goals**: every acceptance criterion is cited by a test or excepted with a reason (`npm run coverage`) | `npm run check`, the builder and starter e2e suites, the Storybook build and tests and the site build pass before a change merges.
+**Goals**: every acceptance criterion is cited by a test or excepted with a reason (`npm run coverage`) | `npm run check`, the builder e2e suite, the Storybook build and tests and the site build pass before a change merges.
 **Out of Scope**: graded agent-run samples and representative-user studies (excepted with reasons). FEAT-009 increments 2 and 3 were built 2026-10-21 and are in scope; none of their criteria is excepted.
 **Traceability Source**: the PRD, FEAT-001 to FEAT-017 and their user stories; for FEAT-009, SD-004 and the story test plans below. FEAT-011 to FEAT-017 have no story test plans: their criteria are traced by `@covers` alone, at the layers allocated below (AR-2026-10-22).
 
@@ -105,7 +105,7 @@ criteria; earlier features keep their tests where they are, traced by
 | FEAT-018 phase 4: prototypes, readiness, trace and impact (US-135 to US-137) | [[STP-135]] to [[STP-137]] | Integration (Chromium) | Prototype pages clicked through; `impact` over a seeded ID graph |
 | FEAT-018 phase 5: heuristics, metrics, test kit, observations, report (US-138 to US-142) | [[STP-138]] to [[STP-142]] | Integration | Assessment fixtures; fixture observations and transcripts; no real participants |
 | FEAT-018 phase 6: journey events, insights, experiments (US-143 to US-145) | [[STP-143]] to [[STP-145]] | Unit and integration | Events captured by a test sink with network APIs stubbed to throw; fixture event exports |
-| FEAT-018 amendment: structured target users (US-146) | [[STP-146]] | Integration | `validate`, `brief`, `test-kit`, `report` and `trace` over fixture apps with `users.md` |
+| FEAT-018 amendment: structured target users (US-146) | [[STP-146]] | Integration | `validate`, `brief`, `test-kit`, `report` and `trace` over fixture apps with the PRD's *User Segments* |
 | FEAT-018 amendment: business rules in the task model (US-147) | [[STP-147]] | Integration | `validate`, `test-kit`, `report`, `trace` and `impact` over fixture apps whose HELIX defines `BR-<n>` rules |
 | FEAT-018 amendment: the guided conversation (US-148) | [[STP-148]] | Integration | `overview`, `status`, `step`, `explain` and `review` over fixture apps; checkpoints gated by pending reviews |
 | FEAT-018 amendment: docs/ux-builder layout and modality first (US-149) | [[STP-149]] | Integration | Commands on new and old-layout fixture apps; `migrate` in a temp git repository; the blueprint CLI's modality gate; create-app's paths |
@@ -114,6 +114,11 @@ criteria; earlier features keep their tests where they are, traced by
 | FEAT-018 amendment: the person's time goes to decisions (US-152 to US-155, US-160) | [[STP-152]] to [[STP-155]], [[STP-160]] | Integration | Approvals by meaning and diffs; review by tier, tables and the coverage map; intake, budget and metrics with given timestamps; evidence claims through `validate`; `advance --until-decision` at each stage, over fixture apps |
 | FEAT-018 amendment: the trial's findings (US-161) | [[STP-161]] | Integration | Meaning through re-wraps and bold; core-2 to step 5; re-approval only after showing; metrics per answer and testing start; contradicted claims and brief drift through `validate`; the folded toolbar; content-drawn wireframes; the skill's rules |
 | FEAT-018 amendment: the app frame is the person's choice (US-162) | [[STP-162]] | Integration, browser | AppShell's four frames at three widths in Chromium; `supports.frame` checked against destinations; wireframes and the built App in the frame; `modality --frame` with a recommendation; audit verdicts by frame; the skill and glossary |
+| FEAT-018 amendment: a prototype ends every step (US-170) | [[STP-170]] | Integration | `prototype --step` with assumed modality, frame and appearance; `--check` over every page with the audit stubbed; `step decide` gating and its three choices; the skill, glossary and overview; the decision as a metrics turn |
+| FEAT-018 amendment: finish for me (US-171) | [[STP-171]] | Integration | `finish` refusals; the brief, wireframes, prototype, kit and HELIX documents marked assumed; the summary; checkpoints skipped |
+| FEAT-018 amendment: the person where only they can help (US-172) | [[STP-172]] | Integration | HELIX 0.20 locations; the measures; defaults out of review; cheap rounds and findings; entry, frame, own states, nav.audience; content-drawn prototypes and the app from step 6; intake facts, scope and the skill |
+| FEAT-018 amendment: one answer, checks that walk, evidence that reads right (US-173) | [[STP-173]] | Integration | step batch; the journey walk in the check; findings by problem; data graphics in the lint; state values, the generated app rendered, phone lists, the bar in dark |
+| FEAT-018 amendment: ask what the others see, walk the rows, measure honestly (US-174) | [[STP-174]] | Integration | the intake's sees question and screen.details-asked; list rows in the walk; status and the batch; the app's own name in its header; timed events |
 | FEAT-018 amendment: HELIX proposals applied, starter IDs kept apart (US-156) | [[STP-156]] | Integration | `proposals preview` and `apply` over real `propose` output and fixtures (clashing IDs, stale patches, bad frontmatter); the build in place over a design folder that already has FEAT-001 and US-001 |
 | FEAT-014 amendment: modality judged by outcome (US-157) | [[STP-157]] | Integration | Modality verdicts over fixture audit pages: an AppShell with no navigation, a single destination, an alternative frame, chosen size classes |
 | FEAT-009 amendment: one report page and a doctor check (US-158) | [[STP-158]] | Integration | The landing page over fixture audit and assessment reports; `ux-builder-audit reports` and `doctor` over fixture installs |
@@ -149,14 +154,14 @@ tests in its STP.
 | Port clashes between suites | Med | Port 0 for test servers; fixed ports only for the builder (5190) and pages preview (5192) |
 | Slow execution as journeys grow | Med | Increment-1 tests stay on fixtures; the pilot test only validates and collects |
 
-**Known Gaps**: Playwright MCP itself is not run in CI; the proof uses a second Playwright client over CDP, the same protocol. Representative-user validation is out of scope (FEAT-009 COV-03).
+**Known Gaps**: The starter e2e suite (`npm run test:e2e --workspace @ux-builder/create-app`) is not run in CI or gated before merge: it installs HELIX into the created app's `.claude/`, which the HELIX marketplace plugin replaces; run it by hand. Playwright MCP itself is not run in CI; the proof uses a second Playwright client over CDP, the same protocol. Representative-user validation is out of scope (FEAT-009 COV-03).
 
 ## Build Handoff
 
 **Commands**: `npm run check` | `npm run coverage`
 **Priority**: the implementation order above.
 
-**Blocking Gate**: `npm run check`, the builder and starter e2e suites, the Storybook build and tests and the site build all pass; every FEAT-009 criterion (increments 1 to 3) is cited by a test and none is in `tools/coverage-exceptions.json`.
+**Blocking Gate**: `npm run check`, the builder e2e suite, the Storybook build and tests and the site build all pass; every FEAT-009 criterion (increments 1 to 3) is cited by a test and none is in `tools/coverage-exceptions.json`.
 
 ## Review Checklist
 

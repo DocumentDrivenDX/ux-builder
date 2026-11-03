@@ -1,0 +1,69 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:umf-extensions",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "umf-extensions",
+      "kind": "structure",
+      "form": "tree",
+      "title": "umf's extensions",
+      "question": "Which extensions does umf's TypeScript core implement?",
+      "source": {
+        "path": "umf:src/extensions",
+        "digest": "sha256:f3a0f26f9d775354d98195c09dbbeb707c4972fb63372ccee326dfeb1b63ab60"
+      },
+      "nodes": [
+        {
+          "id": "extensions",
+          "label": "src/extensions"
+        },
+        {
+          "id": "actions",
+          "label": "actions",
+          "parent": "extensions"
+        },
+        {
+          "id": "binding",
+          "label": "binding",
+          "parent": "extensions"
+        },
+        {
+          "id": "dashboard",
+          "label": "dashboard",
+          "parent": "extensions"
+        },
+        {
+          "id": "ddd",
+          "label": "ddd",
+          "parent": "extensions"
+        },
+        {
+          "id": "security",
+          "label": "security",
+          "parent": "extensions"
+        },
+        {
+          "id": "semantic-types",
+          "label": "semantic-types",
+          "parent": "extensions"
+        },
+        {
+          "id": "tables",
+          "label": "tables",
+          "parent": "extensions"
+        },
+        {
+          "id": "visual",
+          "label": "visual",
+          "parent": "extensions"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

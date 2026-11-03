@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: CONTRACT-005
@@ -30,7 +32,7 @@ ddx:
 
 ## Context
 
-CONTRACT-005 gains top-level `tasks[]`. Each task has `id` (`T-<n>`), `goal`, `jobs`, `trigger`, `inputs.required`, `inputs.optional`, `systemActions`, `userActions`, `success` (acceptance criteria IDs), `exceptions`, `subtasks` (each with its alternative `ways`) and `interactionKinds`. A journey names the task it realizes in `journeys[].task`. The guide drafts the task model and the human confirms the essential goals at checkpoint 1.
+CONTRACT-005 gains top-level `tasks[]`. Each task has `id` (its Task Model key, ADR-042; an older blueprint's `T-<n>`), `goal`, `needs` (the PRD's User Needs, by name; an older blueprint's `jobs`), `users`, `trigger`, `inputs.required`, `inputs.optional`, `systemActions`, `userActions`, `success` (acceptance criteria IDs), `exceptions`, `subtasks` (each with its alternative `ways`) and `interactionKinds`. A journey names the task it realizes in `journeys[].task`. The guide drafts the task model and the human confirms the essential goals at checkpoint 1.
 
 ## Walkthrough
 
@@ -42,11 +44,12 @@ CONTRACT-005 gains top-level `tasks[]`. Each task has `id` (`T-<n>`), `goal`, `j
 ## Acceptance Criteria
 
 - [ ] **US-127-AC1** — Given a blueprint with `tasks[]` holding every field above, when `ux-builder-blueprint check` runs, then it validates against the amended schema with no errors.
-- [ ] **US-127-AC2** — Given a task missing `goal` or `success`, or with an ID not matching `T-<n>`, when `check` runs, then it reports an error naming the task and the field.
+- [ ] **US-127-AC2** — Given a task missing `goal` or `success`, or with an ID that is neither a Task Model key (a slug) nor an older `T-<n>`, when `check` runs, then it reports an error naming the task and the field.
 - [ ] **US-127-AC3** — Given a journey whose `task` names a task the blueprint lacks, when `check` runs, then it reports an error naming the journey and the task.
 - [ ] **US-127-AC4** — Given a task that no journey realizes, when `check` runs, then it reports a warning naming the task.
 - [ ] **US-127-AC5** — Given a blueprint with no `tasks`, when `check` runs, then it reports nothing new, so existing blueprints still pass.
 - [ ] **US-127-AC6** — Given a created app, when the skill's task-modelling section is read, then it tells the agent to draft tasks from the jobs and stories and to ask the human to confirm the essential goals before Explore, recording the answer in the design state.
+- [ ] **US-127-AC7** — Given a feature specification, when `ux-builder-design task add --feature FEAT-<n> --task <t> --goal <g> [--user <who>]... [--need <need>]... [--business-rule BR-<n>]... [--realized-by <journey>]...` runs, then it proposes a row of its *Task Model* (after *Functional Areas*) with the task, goal, users and needs by name, rules, what realizes it and its key (the task's name as a slug); unknown users, needs or features are refused; and `validate` warns about a blueprint task that is not a Task Model key.
 
 ## Edge Cases
 

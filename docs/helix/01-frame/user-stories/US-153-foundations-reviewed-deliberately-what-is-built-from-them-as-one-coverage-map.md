@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: CONTRACT-008
@@ -40,7 +42,7 @@ In the first guided session, 52 of 100 human turns were approvals, most of items
 
 - [ ] **US-153-AC1** — Given an app with foundations, built items and an evidence record, when `review` runs, then it lists foundations and built items apart, records need no approval and hold no checkpoint, and its next step names the first foundation table.
 - [ ] **US-153-AC2** — Given target users awaiting review, when `review table user` runs, then it shows every user in full with its status, `review approve --kind user --answer` approves them all in the person's words, open feedback on any refuses it, and a built kind has no table and no `--kind` approval.
-- [ ] **US-153-AC3** — Given a blueprint and jobs, when `review map` runs, then it traces each job to its tasks, journeys and screens and lists the exceptions (a job nothing serves, a task serving no job, a journey with no story or task, a screen on no journey, an undefined rule, a new assumption); `review approve map` refuses, naming them, until each is fixed or accepted with `--accept`, and then approves every built item.
+- [ ] **US-153-AC3** — Given a blueprint and jobs, when `review map` runs, then it traces each job to its tasks, journeys and screens and lists the exceptions (a job nothing serves, a task serving no job, a journey with no story or task, a screen on no journey, an undefined rule, a new assumption); `review approve map` refuses, naming them, until each is fixed or accepted with `--accept`, and then approves every built item; once approved, the map is proposed as the solution design's *Experience Traceability* (need, task, flow, view; ADR-042).
 - [ ] **US-153-AC4** — Given an approved map, when a built item's meaning changes, then the map lists only that item, with its diff, and approving the map approves only it.
 - [ ] **US-153-AC5** — Given the skill, when it is read, then it reviews foundations a table per kind, built items as the map with exceptions one by one, records only as the decisions they lead to, and never asks for the same content twice.
 

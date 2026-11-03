@@ -108,6 +108,7 @@ function content(r, helix) {
         ].join("\n"),
       },
     },
+    // HELIX's packaged-design-system, ux-interaction-patterns and a11y-wcag-aa are always selected (ADR-042 decision 4).
     concerns: {
       intro: note("The stack's concerns are filled in from what the starter set up; add the product's own."),
       sections: {
@@ -248,6 +249,8 @@ export function writeStarterSet(helix, r, { log = () => {}, keep = false, skippe
     if (out.has(d.id)) continue;
     if (missing.length) log(`HELIX ${helix.manifest.version} has no ${missing.join(" and no ")} for the ${type} type; docs/helix/${path} was drafted from the starter's own sections`);
     const file = join(r.dir, "docs/helix", path);
+    // The concerns (ADR-042 decision 4) are the person's once written: never overwritten.
+    if (type === "concerns" && existsSync(file)) { skipped.push({ id: d.id, type, path: `docs/helix/${path}`, why: `docs/helix/${path} already exists` }); continue; }
     mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, draft(t.template, { ...d, links: (d.links ?? []).filter(([, to]) => known.has(to)), type }));
     written.push(`docs/helix/${path}`);
@@ -307,7 +310,7 @@ function manifest(r) {
     priority: ${i ? "important" : "critical"}
     role: member
     states: [success, empty, loading, recoverable-error, system-failure, ${ai ? "ai, " : ""}responsive-keyboard]${ai ? "" : "\n    notApplicable:\n      ai: the journey has no AI feature"}`).join("\n")
-    : `  - id: J-start
+    : `  - id: start
     story: US-001
     priority: critical
     role: member

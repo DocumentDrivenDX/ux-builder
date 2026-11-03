@@ -139,9 +139,11 @@ the user sees, the action available, the live-region announcement) and
 notes on the default transitions and any state the screen does not
 declare; `wireframes` writes `<screen>.<state>.<size>.html` and `.png` for
 each state beside the ideal `<screen>.<size>.html`; and `propose` drafts
-HELIX's interaction-state-diagram, wireframe, screen-flow and
-user-journey-map documents, as patches when the installed HELIX defines
-those types and otherwise as drafts under `docs/ux-builder/helix-proposals/drafts/`. Every command
+HELIX's user flow for each feature (`UF-<n>`), a wireframe for each of its
+views (`UF-<n>-<nn>-<view>`, with the view's states, statechart and events)
+in `docs/helix/02-design/flows/UF-<n>-<feature>/`, a user-journey-map per
+journey, and DESIGN.md's Modalities, Size Classes and App Frame, all as
+patches a person applies. Every command
 writes under `docs/ux-builder/` (the blueprint and its alternatives in
 `blueprint/`, then `prototypes/`, `helix-proposals/`, `compare/`,
 `drawings/`, `wireframes/`); an app made before that layout keeps its old
@@ -202,8 +204,12 @@ Design, Chakra, Carbon React, Fluent UI, Mantine, Bootstrap, Blueprint,
 PrimeReact, Radix Themes), icon sets (lucide-react, react-icons, Heroicons,
 Phosphor, Tabler, Font Awesome) and loader libraries, naming the SDK's
 counterpart. `ux-builder/no-inline-svg` reports `<svg>` written in JSX: use
-`<Icon>`, `@ux-builder/ui/icons` or `registerIcons`. Lint reads source; for
-what only the running app shows, run `@ux-builder/audit`.
+`<Icon>`, `@ux-builder/ui/icons` or `registerIcons`. A data graphic that
+scanners read (a QR code, a barcode) is not an icon and must stay black on
+white in every theme: mark it `data-graphic` (`<div data-graphic="qr">`, or
+`[data-graphic]` in a CSS selector), and inside it both rules accept its own
+`<svg>` and black and white as its colours, nothing else. Lint reads source;
+for what only the running app shows, run `@ux-builder/audit`.
 
 `ux-builder/ai-neutral-voice` (a warning, US-081) checks the copy around AI
 features in JSX text and string attributes. "I think", "I feel", "I

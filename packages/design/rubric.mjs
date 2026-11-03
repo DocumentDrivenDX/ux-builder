@@ -74,8 +74,8 @@ export function observedFor(app, alternative, predicted = {}) {
   const started = sum(list(ins?.journeys).map((j) => j.started)), completed = sum(list(ins?.journeys).map((j) => j.completed));
   if (started) {
     const rate = completed / started;
-    const prod = `${Math.round(rate * 100)}% of ${started} journeys completed in production (${ins.id})`;
-    const cites = [ins.id, ...list(ins.sources).map((x) => x.id)];
+    const prod = `${Math.round(rate * 100)}% of ${started} journeys completed in production (insights to ${ins.date})`;
+    const cites = [`insights to ${ins.date}`];
     const te = dims["task-effectiveness"];
     dims["task-effectiveness"] = te ? { ...te, value: `${te.value}; ${prod}`, evidence: [...te.evidence, ...cites] }
       : { value: prod, evidence: cites, verdict: predicted["task-effectiveness"]?.fails ? (rate >= 0.8 ? "contradicts" : "supports") : rate < 0.8 ? "contradicts" : "supports" };

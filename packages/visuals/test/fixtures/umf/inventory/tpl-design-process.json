@@ -1,0 +1,165 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:tpl-design-process",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "tpl-design-process",
+      "kind": "flow",
+      "form": "pipeline",
+      "title": "Process Flow",
+      "question": "What order does design work move in?",
+      "source": {
+        "path": "helix:workflows/activities/02-design/README.md",
+        "view": "Process Flow",
+        "digest": "sha256:17c6265784c4f8724d6950727a4cdbbbfe37cf42b184c22cabce1aa0198c3736"
+      },
+      "nodes": [
+        {
+          "id": "a",
+          "label": "Review Frame Outputs"
+        },
+        {
+          "id": "b",
+          "label": "Create Solution Design"
+        },
+        {
+          "id": "c",
+          "label": "Design Architecture"
+        },
+        {
+          "id": "d",
+          "label": "Create Diagrams"
+        },
+        {
+          "id": "e",
+          "label": "Define Contracts"
+        },
+        {
+          "id": "f",
+          "label": "Design Data Model"
+        },
+        {
+          "id": "g",
+          "label": "Design Security"
+        },
+        {
+          "id": "h",
+          "label": "Document ADRs"
+        },
+        {
+          "id": "i",
+          "label": "Validate Against Principles"
+        },
+        {
+          "id": "j",
+          "label": "Principles Met?"
+        },
+        {
+          "id": "k",
+          "label": "Simplify Design"
+        },
+        {
+          "id": "l",
+          "label": "Technical Review"
+        },
+        {
+          "id": "m",
+          "label": "Material choices resolved?"
+        },
+        {
+          "id": "n",
+          "label": "Gate to Test Activity"
+        }
+      ],
+      "edges": [
+        {
+          "id": "a--b",
+          "from": "a",
+          "to": "b"
+        },
+        {
+          "id": "b--c",
+          "from": "b",
+          "to": "c"
+        },
+        {
+          "id": "c--d",
+          "from": "c",
+          "to": "d"
+        },
+        {
+          "id": "d--e",
+          "from": "d",
+          "to": "e"
+        },
+        {
+          "id": "e--f",
+          "from": "e",
+          "to": "f"
+        },
+        {
+          "id": "f--g",
+          "from": "f",
+          "to": "g"
+        },
+        {
+          "id": "g--h",
+          "from": "g",
+          "to": "h"
+        },
+        {
+          "id": "h--i",
+          "from": "h",
+          "to": "i"
+        },
+        {
+          "id": "i--j",
+          "from": "i",
+          "to": "j"
+        },
+        {
+          "id": "j--k",
+          "from": "j",
+          "to": "k",
+          "label": "No"
+        },
+        {
+          "id": "k--c",
+          "from": "k",
+          "to": "c",
+          "kind": "return"
+        },
+        {
+          "id": "j--l",
+          "from": "j",
+          "to": "l",
+          "label": "Yes"
+        },
+        {
+          "id": "l--m",
+          "from": "l",
+          "to": "m"
+        },
+        {
+          "id": "m--c",
+          "from": "m",
+          "to": "c",
+          "label": "No",
+          "kind": "return"
+        },
+        {
+          "id": "m--n",
+          "from": "m",
+          "to": "n",
+          "label": "Yes"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

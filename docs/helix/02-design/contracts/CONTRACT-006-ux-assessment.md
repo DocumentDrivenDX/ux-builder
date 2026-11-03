@@ -410,9 +410,10 @@ Normative from `@ux-builder/audit` 0.3.0, which shipped FEAT-015.
   → finding. Each finding has its rule ID and full statement (or heuristic and
   source), evidence, severity 0 to 4 and fix. Findings at no step go under the
   journey's *General* section.
-- `report.md` carries `ddx:` frontmatter with `type: usability-evaluation-report`
-  and links to its journeys and stories. When the installed HELIX defines that
-  type, it is drafted from the type's template.
+- `report.md` carries `ux-builder:` frontmatter with
+  `type: usability-assessment-report`, its journeys and its stories. It is a
+  ux-builder report kept as run output, not a HELIX document (ADR-042); a
+  finding's fix reaches HELIX through `assess propose`.
 - `assess validate-report` fails a finding that names neither a rule nor a
   heuristic.
 - `assess video --pace slow|normal|fast` (default normal): a step holds 2 s;

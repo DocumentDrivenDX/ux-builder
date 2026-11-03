@@ -110,24 +110,28 @@ describe("checkpoints, HELIX, challenge and change mode in the skill", () => {
     assert.equal(steps.length, 4);
     assert.match(steps.join("\n"), /challenge[\s\S]*impact[\s\S]*complexity[\s\S]*decision/);
     assert.match(s, /Tell the person which mode you are\s+in and why, and that they can switch/);
+    // A requirement change goes through HELIX's evolve first; drift is HELIX's validate and align (ADR-042 decision 4).
+    assert.match(section("Change what exists"), /run HELIX's `evolve` first: it threads the change\s+through the PRD, features and stories/);
+    assert.match(SKILL, /Drift between\s+HELIX documents is HELIX's to find: run HELIX's `validate` and `align`/);
   });
 });
 
 describe("Define in the skill (US-122)", () => {
   // @covers US-122-AC5
-  test("runs Define through HELIX's grill, carries an undecided interaction model to Explore as an open question, and regenerates the brief when its sources change", () => {
+  test("runs Define through HELIX's frame and grill, carries an undecided interaction model to Explore as an open question, and regenerates the brief when its sources change", () => {
     const s = section("Define");
+    assert.match(s, /run HELIX's `frame` to write the PRD and principles\.md/);
     assert.match(s, /structured interview through HELIX's `grill`/);
     assert.match(s, /record it as an open question[\s\S]*carry it to Explore/);
-    assert.match(s, /Regenerate the brief whenever its sources change: the PRD, the\s+stories or the design state/);
+    assert.match(s, /Regenerate the brief whenever its sources change: the PRD,\s+principles\.md, the stories or the design state/);
   });
 });
 
 describe("starting in an existing app (US-115)", () => {
   // @covers US-115-AC6
-  test("the first session runs baseline, then routes a change, 'too complicated', complaints and a new feature", () => {
+  test("the first session runs HELIX's backfill, then routes a change, 'too complicated', complaints and a new feature", () => {
     const s = section("Starting in an existing app");
-    assert.match(s, /run `ux-builder-design baseline`/);
+    assert.match(s, /run HELIX's `backfill`: it drafts the PRD and stories from the app/);
     assert.match(s, /\*\*a specific change\*\*.*→ impact, then Explore/);
     assert.match(s, /\*\*"it feels too complicated"\*\* → the assessment, then `simplify`/);
     assert.match(s, /\*\*user complaints\*\* → evidence/);
@@ -174,5 +178,35 @@ describe("the guided conversation in the skill (US-148)", () => {
     assert.match(review, /Never\nsend the person to a file instead/);
     assert.match(section("Where the person is"), /"Step 2 of 8: Understand users\."/);
     assert.match(section("Explaining terms"), /say what it means and why it is valuable/);
+  });
+});
+
+describe("every step ends with a prototype, in the skill, the overview and the glossary (US-170)", () => {
+  // @covers US-170-AC6
+  test("AC6: each names the step prototype and the three choices; the skill reports status in four lines without engineering terms and never hands the person a dependency", async () => {
+    const { explain, overview, overviewText } = await import("../index.mjs");
+    const loop = section("Every step ends with a prototype");
+    for (const c of ["prototype --step", "--check", "--accept <id>", "step decide continue|revise|finish", "ux-builder-design finish"]) assert.ok(loop.includes(c), c);
+    assert.match(loop, /Continue to the next step, revise this one, or\s+shall I finish the rest for you\?/);
+    assert.match(loop, /Set the appearance from the product first/);
+    const talk = section("Talking to the person");
+    for (const l of ["**Ready:**", "**Blocked by:**", "**Who is handling it:**", "**What I need from you:**"]) assert.ok(talk.includes(l), l);
+    assert.match(talk, /Never say pull request, CI, branch/);
+    assert.match(talk, /Never hand them a dependency/);
+    assert.match(talk, /Never group approvals/);
+    assert.match(SKILL, /\*\*The theme never\nblocks\.\*\*/);
+    assert.match(overviewText(overview()), /Every step ends with a prototype you can click.*continue to the next step, revise this one, or have the agent finish the rest/s);
+    assert.match(explain({ term: "step prototype" }).terms[0].means, /end of every step/);
+    assert.match(explain({ term: "finish for me" }).terms[0].means, /stop being guided/);
+  });
+});
+
+describe("the person's time in the skill (session 2)", () => {
+  // @covers US-172-AC7
+  test("steps 1 to 3 are the person's, with the scope to cut; steps 4 to 6 one batch of defaults", () => {
+    const s = section("Where the person's time goes");
+    assert.match(s, /\*\*Steps 1 to 3: the person's\.\*\*/);
+    assert.match(s, /`ux-builder-design scope`/);
+    assert.match(s, /\*\*Steps 4 to 6: one batch of defaults\.\*\*[\s\S]*I'll go with these\s+unless you object/);
   });
 });

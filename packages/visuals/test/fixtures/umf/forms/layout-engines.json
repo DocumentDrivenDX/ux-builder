@@ -1,0 +1,129 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:layout-engines",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "layout-engines",
+      "kind": "comparison",
+      "form": "quadrant",
+      "title": "Graph layout engines",
+      "question": "Which graph layout engine gives control without a browser?",
+      "source": {
+        "path": "visuals:PRD.md",
+        "view": "§6.2",
+        "digest": "sha256:f944df076446c39a75b7f58323869af5337751e892b75d24cc749e8b9ff27aa5"
+      },
+      "omissions": [
+        "Ratings are this example's reading of the reasons PRD §6.2 gives, not measurements."
+      ],
+      "comparison": {
+        "items": [
+          {
+            "id": "elkjs",
+            "label": "elkjs"
+          },
+          {
+            "id": "dagre",
+            "label": "dagre"
+          },
+          {
+            "id": "graphviz",
+            "label": "Graphviz WASM"
+          },
+          {
+            "id": "d2",
+            "label": "D2"
+          },
+          {
+            "id": "mermaid",
+            "label": "Mermaid"
+          }
+        ],
+        "criteria": [
+          {
+            "id": "control",
+            "label": "Layout control",
+            "measure": "rating",
+            "max": 3,
+            "low": "Not controllable",
+            "high": "Compound nodes, ports, layer constraints"
+          },
+          {
+            "id": "runtime",
+            "label": "Runtime fit",
+            "measure": "rating",
+            "max": 3,
+            "low": "Needs a browser or a binary",
+            "high": "Runs in Node with no DOM"
+          }
+        ],
+        "values": [
+          {
+            "item": "elkjs",
+            "criterion": "control",
+            "rating": 3
+          },
+          {
+            "item": "elkjs",
+            "criterion": "runtime",
+            "rating": 3
+          },
+          {
+            "item": "dagre",
+            "criterion": "control",
+            "rating": 1
+          },
+          {
+            "item": "dagre",
+            "criterion": "runtime",
+            "rating": 3
+          },
+          {
+            "item": "graphviz",
+            "criterion": "control",
+            "rating": 1
+          },
+          {
+            "item": "graphviz",
+            "criterion": "runtime",
+            "rating": 2
+          },
+          {
+            "item": "d2",
+            "criterion": "control",
+            "rating": 2
+          },
+          {
+            "item": "d2",
+            "criterion": "runtime",
+            "rating": 0
+          },
+          {
+            "item": "mermaid",
+            "criterion": "control",
+            "rating": 0
+          },
+          {
+            "item": "mermaid",
+            "criterion": "runtime",
+            "rating": 1
+          }
+        ],
+        "axes": {
+          "x": "runtime",
+          "y": "control"
+        },
+        "chosen": {
+          "item": "elkjs",
+          "reason": "The only JS engine with compound nodes, layer and port constraints, and orthogonal routing."
+        }
+      }
+    }
+  },
+  "modules": []
+}

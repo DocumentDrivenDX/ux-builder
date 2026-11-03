@@ -1,0 +1,189 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:helix-overview-map",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "helix-overview-map",
+      "kind": "flow",
+      "form": "pipeline",
+      "title": "A request becomes a governing document",
+      "question": "How does a team's request become a project document?",
+      "takeaway": "The runtime acts; HELIX gives it the scope, the shape, and the record.",
+      "audience": "developer",
+      "source": {
+        "path": "helix:docs/helix/02-design/architecture-model.toml",
+        "view": "request",
+        "digest": "sha256:6e13adabec034747ed6d5505668e1daef353a3df6d2c54f3e4ff799cb92acff2"
+      },
+      "nodes": [
+        {
+          "id": "team",
+          "label": "Software team",
+          "detail": "sets intent",
+          "role": "actor",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "docs/helix/00-discover/product-vision.md",
+              "contains": "Software teams using AI agents"
+            }
+          ]
+        },
+        {
+          "id": "runtime",
+          "label": "Agent runtime",
+          "detail": "model, tools, execution",
+          "role": "external",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "docs/install/README.md",
+              "contains": "## Minimal runtime contract"
+            }
+          ]
+        },
+        {
+          "id": "skill",
+          "label": "Routing skill",
+          "detail": "resolves scope and mode",
+          "role": "own",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "skills/helix/SKILL.md",
+              "contains": "name: helix"
+            }
+          ]
+        },
+        {
+          "id": "marker",
+          "label": ".helix.yml",
+          "detail": "project scope",
+          "role": "store",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "docs/install/README.md",
+              "contains": "## The marker"
+            }
+          ]
+        },
+        {
+          "id": "catalog",
+          "label": "Artifact catalog",
+          "detail": "templates, prompts, rules",
+          "role": "store",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "workflows/graph.yml",
+              "contains": "nodes:"
+            }
+          ]
+        },
+        {
+          "id": "docs",
+          "label": "Project documents",
+          "detail": "intent, design, tests",
+          "role": "store",
+          "status": "built",
+          "evidence": [
+            {
+              "path": "workflows/modes/_authoring.md",
+              "contains": "Load this contract when a mode creates or edits an artifact instance."
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "team--runtime",
+          "from": "team",
+          "to": "runtime",
+          "label": "asks for work"
+        },
+        {
+          "id": "runtime--skill",
+          "from": "runtime",
+          "to": "skill",
+          "label": "loads the skill"
+        },
+        {
+          "id": "skill--marker",
+          "from": "skill",
+          "to": "marker",
+          "label": "reads the scope"
+        },
+        {
+          "id": "skill--catalog",
+          "from": "skill",
+          "to": "catalog",
+          "label": "reads the artifact type"
+        },
+        {
+          "id": "skill--docs",
+          "from": "skill",
+          "to": "docs",
+          "label": "authors and reconciles"
+        },
+        {
+          "id": "docs--runtime",
+          "from": "docs",
+          "to": "runtime",
+          "label": "governs what runs next",
+          "kind": "return"
+        }
+      ],
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Asks for work",
+          "focus": [
+            "team--runtime"
+          ]
+        },
+        {
+          "id": "s2",
+          "title": "Loads the skill",
+          "focus": [
+            "runtime--skill"
+          ]
+        },
+        {
+          "id": "s3",
+          "title": "Reads the scope",
+          "focus": [
+            "skill--marker"
+          ]
+        },
+        {
+          "id": "s4",
+          "title": "Reads the artifact type",
+          "focus": [
+            "skill--catalog"
+          ]
+        },
+        {
+          "id": "s5",
+          "title": "Authors and reconciles",
+          "focus": [
+            "skill--docs"
+          ]
+        },
+        {
+          "id": "s6",
+          "title": "Governs what runs next",
+          "focus": [
+            "docs--runtime"
+          ]
+        }
+      ]
+    }
+  },
+  "modules": []
+}

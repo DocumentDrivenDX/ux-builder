@@ -226,8 +226,9 @@ assessment.
    `assess validate-report <out>/<run>`; fix what it reports. The report reads
    by journey, then state, then step, each finding with its rule (or
    heuristic), evidence, severity and fix; a finding at no step is under its
-   state's *General*. `report.md` is a HELIX usability-evaluation-report
-   (`ddx:` frontmatter); propose it to the flow rather than copying it there. To compare with
+   state's *General*. `report.md` is a ux-builder usability assessment
+   report, run output rather than a HELIX document; propose findings' fixes
+   with `assess propose` rather than copying the report into HELIX. To compare with
    an earlier run: `assess compare <earlier> <later>`; `comparison.json`
    keeps the earlier baseline's failures, so name them in what you hand over. In CI:
    `assess gate <run> --fail-on P1` (see `examples/ux-assessment.workflow.yml`).

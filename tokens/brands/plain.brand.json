@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/brand.schema.json",
-  "$description": "A second theme proves the tokens are actually load-bearing rather than\ndecorative. Same structure, different voice.",
+  "$description": "A second theme proves the tokens are actually load-bearing rather than\ndecorative. Same structure, different voice.\nThe dark appearance (added 2026-10-31, ADR-043) lets guided prototypes show a product meant for dark rooms before any brand theme exists: the same grays and blue, inverted.",
   "name": "plain",
   "title": "Plain",
   "appearances": {
@@ -65,6 +65,66 @@
       "brand": {
         "logo-paint": {
           "$value": "#1F2937"
+        }
+      }
+    },
+    "dark": {
+      "color": {
+        "accent": {
+          "$value": "#60A5FA"
+        },
+        "border": {
+          "$value": "#374151"
+        },
+        "ground": {
+          "$value": "#0B0F17"
+        },
+        "on-accent": {
+          "$value": "#0B1220",
+          "$description": "Dark text on the light accent: the dark appearance reverses the light one's white on blue."
+        },
+        "structure": {
+          "$value": "#E5E7EB"
+        },
+        "surface": {
+          "$value": "#111827"
+        },
+        "surface-sunken": {
+          "$value": "#1F2937"
+        },
+        "text": {
+          "$value": "#D1D5DB"
+        },
+        "text-muted": {
+          "$value": "#9CA3AF"
+        },
+        "text-strong": {
+          "$value": "#F9FAFB"
+        },
+        "text-subtle": {
+          "$value": "#9AA3B2"
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#34D399"
+        },
+        "limited": {
+          "$value": "#FBBF24"
+        },
+        "purchasing": {
+          "$value": "#A5B4FC"
+        },
+        "evaluation": {
+          "$value": "#A1A8B5"
+        },
+        "closed": {
+          "$value": "#FCA5A5"
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#E5E7EB"
         }
       }
     }

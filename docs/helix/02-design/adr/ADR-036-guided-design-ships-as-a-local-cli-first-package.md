@@ -13,6 +13,8 @@ ddx:
     - kind: informs
       to: CONTRACT-008
     - kind: informs
+      to: ADR-042
+    - kind: informs
       to: SD-006
 ---
 
@@ -74,6 +76,8 @@ test the concept in ux-builder before asking HELIX for anything.
    which was chosen and why the others were rejected.
 
 *[Amended 2026-10-24 — FEAT-018 GDL-80, CONTRACT-008 Layout]* The decision stands; the paths moved. The design documents (here `docs/ux/`) are now in `docs/ux-builder/`, and the blueprint and its alternatives (here `app.blueprint.json` and `app.blueprint.<name>.json` at the app's top) in `docs/ux-builder/blueprint/`. An app not yet migrated keeps the old paths until `ux-builder-design migrate`.
+
+*[Amended 2026-10-29 — ADR-042]* Decisions 4 and 5 are replaced. ux-builder writes into HELIX's documents (ADR-042 decision 2) instead of keeping its own types in `docs/ux-builder/`, and HELIX does not hand design work to it (FEAT-018 H-5 withdrawn). Decisions 1 to 3, 6 and 7 stand.
 
 ## Alternatives Considered
 

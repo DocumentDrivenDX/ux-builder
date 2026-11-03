@@ -1,5 +1,74 @@
 # @ux-builder/create-app
 
+## 0.14.0
+
+### Minor Changes
+
+- cae0267: The blueprint can say what VIP List's person meant (session 2). `screens[].entry` (`link`, `scan`, `message`) marks a screen entered from outside the app: `flow.reachable` starts from it. `screens[].frame` gives one screen its own frame (a door page with no tabs). A screen may declare states of its own, with `stateNotices` saying what each shows; wireframes, prototypes and the generated app draw the notice over the screen, and a state with no notice is refused. `screens[].users` names who a screen is for, and the new rule `nav.audience` warns when a destination leads to screens for other users (agents finishing alone put promoters' screens in the guest app's tabs). The design skill asks who each part is for.
+- 99979dc: After VIP List session 4 (US-174): the intake asks what each person needs to see about the others, and the blueprint rule `content.asked` warns about a person's name, phone, email, birth date or address shown but asked for nowhere. The journey walk also taps a list's first row. Status at step 4 names `step batch`, and the theme never blocks. `Logo` takes `fallback="none"`, and an app built from a design shows its own name in its header without the theme's title. Events are logged with their time of day, and a bare date never moves a measured span (the batch logged one, and session 4 read 13 minutes to its first prototype for 3).
+- 8fcc754: What VIP List sessions 3 and 4 needed (US-173). `ux-builder-design step batch` records the person's one answer to steps 4 to 6. From step 5 the step check walks every journey in a browser (`walkJourneys` in `@ux-builder/audit`), and a step's first check reuses an earlier step's audited pages or the same app bundle. A report merges participants with the same problem into one finding. The lint lets a QR code or barcode marked `data-graphic` keep its own `<svg>` and black and white. In the blueprint, `stateNotices` take the `values` a state changes, and content items may be marked `compact` for phone lists (the first three otherwise); an error notice holds back the screen's main action. Drawn prototypes show each screen's other actions, a readable bar in dark, and counts that say what they count. An app built from a design takes the design's appearance and audits every designed screen; its business-rule notes show only from the prototype controls, and a form's main action follows its fields. A journey that ends where it started is no longer scored as "0 moves would do", alternatives are drawn in the design's appearance, and test-kit goals keep their verb.
+
+### Patch Changes
+
+- Updated dependencies [2ec1925]
+- Updated dependencies [cae0267]
+- Updated dependencies [f62eff9]
+- Updated dependencies [01510d3]
+- Updated dependencies [aeb208e]
+- Updated dependencies [3eadaa1]
+- Updated dependencies [718f5be]
+- Updated dependencies [b691719]
+- Updated dependencies [0199ed8]
+- Updated dependencies [d339f87]
+- Updated dependencies [580f22d]
+- Updated dependencies [a8cac87]
+- Updated dependencies [ff74560]
+- Updated dependencies [569c525]
+- Updated dependencies [e341be5]
+- Updated dependencies [f37696a]
+- Updated dependencies [d1b433a]
+- Updated dependencies [d406dd0]
+- Updated dependencies [99979dc]
+- Updated dependencies [8fcc754]
+  - @ux-builder/design@1.1.0
+  - @ux-builder/ui@0.16.0
+  - @ux-builder/audit@0.9.0
+  - @ux-builder/tokens@1.9.0
+
+## 0.13.0
+
+### Minor Changes
+
+- 2fea36b: ux-builder writes into HELIX's documents and keeps none of its own (ADR-042; needs HELIX v0.20.0's UX types and sections).
+  
+  `@ux-builder/design` (breaking): UX decisions are proposed as HELIX ADRs tagged area:ui (`decision add`, `decision status`), experiments are DDx beads (`experiment start|end`), experience principles go in principles.md (`principle add`), users, needs and tasks are rows of the PRD's User Segments and User Needs and a feature's Task Model (`segment add`, `need add`, `task add`), and research is a study's HELIX research plan (`evidence add|claim|excerpt --study`, `test-kit --study`, `transcript add --study`, `observe import --study`). Test-session material, evaluation reports and insight exports are run output in the gitignored `docs/ux-builder/runs/`; `insights` proposes Journey Funnels for the metrics dashboard; approving the coverage map proposes the solution design's Experience Traceability; the brief is compiled from HELIX and says where each section comes from. Every change to HELIX is a proposal the person applies. The baseline command and the users, jobs, ux-decision, research-evidence, test-kit, usability-evaluation-report, insights, experiment and baseline document types are gone; `migrate` proposes an app's old documents into HELIX. A person sees HELIX's IDs and names only.
+  
+  `@ux-builder/ui`: `ux-builder-blueprint propose` fills HELIX's user-flow, wireframe and user-journey-map types and DESIGN.md's modalities, size classes and app frame; its draft types are gone. Blueprint tasks take their Task Model key and cite needs and users by name; journeys may be named without the `J-` prefix; a project rule names its principle by its words. The layout gains `runs`.
+  
+  `@ux-builder/audit`: `reports.html` lists every run by path, copying nothing in; journeys may be named without `J-`. The assessment's `report.md` is a ux-builder usability assessment report (`ux-builder:` frontmatter, `type: usability-assessment-report`) rather than claiming a HELIX type, and is no longer drafted from a HELIX template.
+  
+  `@ux-builder/create-app`: a created app gitignores `docs/ux-builder/assessments/` and `docs/ux-builder/runs/`, never overwrites an existing concerns.md, and names its starter journey `start`.
+  
+  `@ux-builder/trace`: a decision event's `ux` may be a HELIX ADR (`ADR-<nnn>`); older `UXD-<n>` traces stay valid.
+  
+  `@ux-builder/mcp`: `trace` describes study task keys and ADR IDs.
+
+### Patch Changes
+
+- Updated dependencies [2fea36b]
+  - @ux-builder/design@1.0.0
+  - @ux-builder/ui@0.15.0
+  - @ux-builder/audit@0.8.0
+  - @ux-builder/trace@0.3.0
+
+## 0.12.1
+
+### Patch Changes
+
+- da1fcba: Allow explicit marketplace plugin guidance with UX_BUILDER_SKILLS=plugin; persist the selection and skip project-local skill copies while retaining project mode by default.
+- Updated dependencies [da1fcba]
+  - @ux-builder/design@0.6.1
+
 ## 0.12.0
 
 ### Minor Changes

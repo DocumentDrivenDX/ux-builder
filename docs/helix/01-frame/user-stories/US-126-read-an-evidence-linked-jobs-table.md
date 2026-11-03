@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-036
@@ -32,22 +34,22 @@ ddx:
 
 ## Context
 
-In stage 1 the table lives in `docs/ux-builder/jobs.md` (ADR-036); in stage 2 it moves to the PRD (H-2). Each job has a stable `J-<n>` ID that tasks, journeys and test results cite. A design decision that relies on a low-confidence job is flagged.
+The table is the PRD's *User Needs* (ADR-042, HELIX v0.20.0), each row named by the need; tasks and test results cite a need by its name. A design decision that relies on a low-confidence job is flagged.
 
 ## Walkthrough
 
-1. After synthesis the agent updates `docs/ux-builder/jobs.md`.
-2. "Find public access points" is high importance, cites EV-1 and EV-3, high confidence.
+1. After synthesis the agent updates the PRD's *User Needs*.
+2. "Find public access points" is high importance, cites the anglers and access studies, high confidence.
 3. "Compare river conditions" is medium importance, no evidence, low confidence.
 4. A decision record that relies on J-4 is flagged as resting on a low-confidence job.
 
 ## Acceptance Criteria
 
-- [ ] **US-126-AC1** — Given a `docs/ux-builder/jobs.md` written from the template, when `ux-builder-design validate` runs, then it checks every job has a unique `J-<n>` ID, an importance, a confidence and an evidence list, each a separate field.
-- [ ] **US-126-AC2** — Given a job whose evidence cites `EV-9` and no such evidence file exists, when `validate` runs, then it exits 1 and names the job and the missing source.
-- [ ] **US-126-AC3** — Given a job with high confidence and no evidence, when `validate` runs, then it exits 1: confidence above low needs at least one evidence source.
-- [ ] **US-126-AC4** — Given a task (`T-<n>`) or a decision record (`UXD-<n>`) that cites a low-confidence job, when `validate` runs, then it warns, naming the item and the job.
-- [ ] **US-126-AC5** — Given a job ID that a task cites but `jobs.md` lacks, when `validate` runs, then it exits 1 and names the task and the ID.
+- [ ] **US-126-AC1** — Given a need, when `ux-builder-design need add --need <need> --importance <l> [--evidence <study>] [--confidence <l>] [--status <s>]` runs, then it proposes a row of the PRD's *User Needs* (ADR-042), named by the need, with its importance, evidence, confidence and status (HELIX's words: assumed, validated, invalidated) each its own field; the same need again replaces its row, and another importance or confidence is refused.
+- [ ] **US-126-AC2** — Given a need whose evidence cites a study that does not exist, when `validate` runs, then it exits 1 and names the need and the missing study.
+- [ ] **US-126-AC3** — Given a need with confidence above low and no evidence, when `need add` runs it is refused, and when the row is written by hand `validate` fails naming it.
+- [ ] **US-126-AC4** — Given a blueprint task citing a need with low confidence, when `validate` runs, then it warns, naming the task and the need.
+- [ ] **US-126-AC5** — Given a blueprint task citing a need the PRD's *User Needs* does not have, when `validate` runs, then it exits 1 naming the task and the need.
 
 ## Edge Cases
 
@@ -57,11 +59,11 @@ In stage 1 the table lives in `docs/ux-builder/jobs.md` (ADR-036); in stage 2 it
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-126-AC1 | a `docs/ux-builder/jobs.md` written from the template | `ux-builder-design validate` runs | it checks every job has a unique `J-<n>` ID, an importance, a confidence and an evidence list, each a separate field |
-| AC2 | US-126-AC2 | a job whose evidence cites `EV-9` and no such evidence file exists | `validate` runs | it exits 1 and names the job and the missing source |
+| AC1 | US-126-AC1 | a need | `need add` runs | it proposes a *User Needs* row with importance, evidence, confidence and status, each its own field |
+| AC2 | US-126-AC2 | a job whose evidence cites a study that does not exist | `validate` runs | it exits 1 and names the job and the missing source |
 | AC3 | US-126-AC3 | a job with high confidence and no evidence | `validate` runs | it exits 1: confidence above low needs at least one evidence source |
-| AC4 | US-126-AC4 | a task (`T-<n>`) or a decision record (`UXD-<n>`) that cites a low-confidence job | `validate` runs | it warns, naming the item and the job |
-| AC5 | US-126-AC5 | a job ID that a task cites but `jobs.md` lacks | `validate` runs | it exits 1 and names the task and the ID |
+| AC4 | US-126-AC4 | a task (`T-<n>`) or a UX decision (an ADR tagged `area:ui`) that cites a low-confidence job | `validate` runs | it warns, naming the item and the job |
+| AC5 | US-126-AC5 | a job ID that a task cites but the PRD's *User Needs* lacks | `validate` runs | it exits 1 and names the task and the ID |
 
 ## Dependencies
 
@@ -72,4 +74,4 @@ In stage 1 the table lives in `docs/ux-builder/jobs.md` (ADR-036); in stage 2 it
 
 ## Out of Scope
 
-- Moving the table into the PRD (stage 2).
+- Writing the PRD directly: rows are proposed, and the person applies them.

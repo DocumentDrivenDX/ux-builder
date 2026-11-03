@@ -1,0 +1,101 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-estate-landscape",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-estate-landscape",
+      "kind": "structure",
+      "form": "nested",
+      "title": "Support tools estate",
+      "question": "Which systems make up the estate, and what is inside Beacon?",
+      "takeaway": "Four systems, each owned by one team; Beacon is the only one that writes to customers.",
+      "source": {
+        "path": "umf:fixtures/visual/sources/estate/estate.toml",
+        "digest": "sha256:fba6a89d5fb778b126ed386fab82eb92759d04240522073ef48c363fbd7bd59a"
+      },
+      "nodes": [
+        {
+          "id": "estate",
+          "label": "Support tools estate"
+        },
+        {
+          "id": "system-beacon",
+          "label": "beacon",
+          "detail": "example/beacon",
+          "role": "own",
+          "parent": "estate"
+        },
+        {
+          "id": "system-ledger",
+          "label": "ledger",
+          "detail": "example/ledger",
+          "role": "own",
+          "parent": "estate"
+        },
+        {
+          "id": "system-portal",
+          "label": "portal",
+          "detail": "example/customer-portal",
+          "role": "own",
+          "parent": "estate"
+        },
+        {
+          "id": "system-insight",
+          "label": "insight",
+          "detail": "example/insight",
+          "role": "own",
+          "parent": "estate"
+        },
+        {
+          "id": "web",
+          "label": "Web app",
+          "detail": "the agent's inbox and draft editor",
+          "role": "own",
+          "status": "built",
+          "parent": "system-beacon"
+        },
+        {
+          "id": "api",
+          "label": "Beacon API",
+          "detail": "every request runs as the agent",
+          "role": "own",
+          "status": "built",
+          "parent": "system-beacon"
+        },
+        {
+          "id": "drafter",
+          "label": "Reply drafter",
+          "detail": "builds the prompt from the ticket and its history",
+          "role": "own",
+          "status": "built",
+          "parent": "system-beacon"
+        },
+        {
+          "id": "worker",
+          "label": "Job worker",
+          "detail": "imports, re-indexing, nightly digests",
+          "role": "own",
+          "status": "built",
+          "parent": "system-beacon"
+        },
+        {
+          "id": "rules",
+          "label": "Policy rules",
+          "detail": "a fixed allow-list until the rules engine lands",
+          "role": "own",
+          "status": "placeholder",
+          "parent": "system-beacon"
+        }
+      ],
+      "omissions": [
+        "The other systems' own parts: only Beacon has an architecture model here."
+      ]
+    }
+  },
+  "modules": []
+}

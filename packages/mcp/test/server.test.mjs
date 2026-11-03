@@ -87,7 +87,8 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
     assert.equal(t.iconSet, "carbon");
     assert.equal(t.css, "@ux-builder/tokens/themes/praxis-carbon.css");
     assert.match(t.roleTokens["--piq-color-ground"], /^#/);
-    assert.match((await call("get_theme", { name: "plain", appearance: "dark" })).content[0].text, /has no dark appearance/);
+    // plain has a dark appearance since ADR-043, for guided prototypes before a brand theme.
+    assert.match((await call("get_theme", { name: "plain", appearance: "dark" })).data.roleTokens["--piq-color-ground"], /^#/);
     assert.match((await call("get_theme", { name: "acme" })).content[0].text, /No theme "acme"/);
   });
 

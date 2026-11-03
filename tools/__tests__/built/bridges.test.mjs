@@ -57,7 +57,8 @@ test("US-045-AC3: every bridge pairing passes 4.5:1 for text and 3:1 for the foc
   // The muted text falls back to a stronger text role where the theme's is too faint on the muted panel (plain light).
   const plain = resolved("plain", "light");
   assert.ok(ratio(plain["piq-color-text-muted"], plain["piq-color-surface-sunken"]) < 4.5);
-  const muted = blocks(readFileSync(join(DIST, "bridges/shadcn/plain.css"), "utf8"))[0].vars["--muted-foreground"];
+  // plain has a dark block too (ADR-043): read the light one.
+  const muted = blocks(readFileSync(join(DIST, "bridges/shadcn/plain.css"), "utf8")).find((b) => b.selectors.some((x) => /data-appearance="light"/.test(x))).vars["--muted-foreground"];
   assert.ok(ratio(muted, plain["piq-color-surface-sunken"]) >= 4.5);
 
   const d = mkdtempSync(join(tmpdir(), "bridge-bad-"));

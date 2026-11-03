@@ -26,6 +26,8 @@ import { journeyIndex, modalityVerdicts, pageScreen, themeVerdict } from "./verd
 import { versions as installed } from "./assess/collect.mjs";
 export { AI_CHECKS, FIXES, inspect, STATE_AFFECTING } from "./inspect.mjs";
 export { attach, checkpoint, startBrowser } from "./assess/checkpoint.mjs";
+export { serveFolder } from "./serve.mjs";
+export { walkJourneys } from "./walk.mjs";
 
 const own = createRequire(import.meta.url);
 export const VERSION = JSON.parse(readFileSync(own.resolve("./package.json"), "utf8")).version;

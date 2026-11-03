@@ -1,0 +1,176 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-containers",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-containers",
+      "kind": "flow",
+      "form": "network",
+      "title": "Inside Beacon",
+      "question": "What runs inside Beacon?",
+      "takeaway": "One API owns every request; the drafter and the worker never face an agent directly.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/architecture-model.toml",
+        "view": "containers",
+        "digest": "sha256:5506076ecd96344bd6b203c4d2a36ed983a7d9c37883c0e4dc65f9a59f689910"
+      },
+      "groups": [
+        {
+          "id": "app",
+          "label": "Beacon app",
+          "role": "boundary"
+        },
+        {
+          "id": "state",
+          "label": "Beacon data",
+          "role": "boundary"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "proxy",
+          "label": "Sign-in proxy",
+          "detail": "checks identity, forwards the agent's token",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "web",
+          "label": "Web app",
+          "detail": "the agent's inbox and draft editor",
+          "role": "own",
+          "status": "built",
+          "group": "app"
+        },
+        {
+          "id": "api",
+          "label": "Beacon API",
+          "detail": "every request runs as the agent",
+          "role": "own",
+          "status": "built",
+          "group": "app"
+        },
+        {
+          "id": "drafter",
+          "label": "Reply drafter",
+          "detail": "builds the prompt from the ticket and its history",
+          "role": "own",
+          "status": "built",
+          "group": "app"
+        },
+        {
+          "id": "worker",
+          "label": "Job worker",
+          "detail": "imports, re-indexing, nightly digests",
+          "role": "own",
+          "status": "built",
+          "group": "app"
+        },
+        {
+          "id": "rules",
+          "label": "Policy rules",
+          "detail": "a fixed allow-list until the rules engine lands",
+          "role": "own",
+          "status": "placeholder",
+          "group": "app"
+        },
+        {
+          "id": "db",
+          "label": "Beacon database",
+          "detail": "tickets, drafts, reviews",
+          "role": "store",
+          "status": "built",
+          "group": "state"
+        },
+        {
+          "id": "queue",
+          "label": "Job queue",
+          "role": "store",
+          "status": "built",
+          "group": "state"
+        },
+        {
+          "id": "files",
+          "label": "Attachment store",
+          "detail": "object storage",
+          "role": "store",
+          "status": "unknown",
+          "group": "state"
+        }
+      ],
+      "edges": [
+        {
+          "id": "proxy--web",
+          "from": "proxy",
+          "to": "web",
+          "label": "forwards with the agent's token"
+        },
+        {
+          "id": "proxy--api",
+          "from": "proxy",
+          "to": "api",
+          "label": "forwards with the agent's token",
+          "why": "the API acts as the agent, never as a service account"
+        },
+        {
+          "id": "web--api",
+          "from": "web",
+          "to": "api",
+          "label": "asks for a draft"
+        },
+        {
+          "id": "api--web",
+          "from": "api",
+          "to": "web",
+          "label": "returns the draft",
+          "kind": "return"
+        },
+        {
+          "id": "api--drafter",
+          "from": "api",
+          "to": "drafter",
+          "label": "hands over the ticket and its history"
+        },
+        {
+          "id": "api--rules",
+          "from": "api",
+          "to": "rules",
+          "label": "checks the reply against policy",
+          "status": "placeholder"
+        },
+        {
+          "id": "api--db",
+          "from": "api",
+          "to": "db",
+          "label": "loads ticket history"
+        },
+        {
+          "id": "worker--queue",
+          "from": "worker",
+          "to": "queue",
+          "label": "takes jobs"
+        },
+        {
+          "id": "worker--db",
+          "from": "worker",
+          "to": "db",
+          "label": "re-indexes tickets"
+        },
+        {
+          "id": "api--files",
+          "from": "api",
+          "to": "files",
+          "label": "stores attachments",
+          "status": "unknown"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

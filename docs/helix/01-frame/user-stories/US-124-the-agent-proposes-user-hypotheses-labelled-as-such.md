@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-039
@@ -30,21 +32,21 @@ ddx:
 
 ## Context
 
-Phase 2, hypothesis mode. The research capability works from the brief and domain knowledge. What it proposes is recorded in `docs/ux-builder/jobs.md` and the design state as *hypothesis*, with no evidence. `ux-builder-design validate` refuses a hypothesis that claims evidence.
+Phase 2, hypothesis mode. The research capability works from the brief and domain knowledge. What it proposes is recorded in the PRD's *User Needs* and the design state as *hypothesis*, with no evidence. `ux-builder-design validate` refuses a hypothesis that claims evidence.
 
 ## Walkthrough
 
 1. The brief exists, and no evidence has been added.
 2. The guide proposes three segments and five jobs, each marked *hypothesis*.
-3. It writes them to `docs/ux-builder/jobs.md` from the jobs template and lists them in the design state.
+3. It writes them to the PRD's *User Needs* from the jobs template and lists them in the design state.
 4. `ux-builder-design validate` passes, and `status` shows five jobs, all hypotheses.
 
 ## Acceptance Criteria
 
 - [ ] **US-124-AC1** — Given a created app, when the `ux-builder-design` skill is read, then its research section tells the agent to propose segments, jobs, motivations, frustrations, usage contexts and accessibility needs from the brief, and to mark every item *hypothesis* with no evidence.
-- [ ] **US-124-AC2** — Given a `docs/ux-builder/jobs.md` whose items all have status `hypothesis` and no evidence, when `ux-builder-design validate` runs, then it exits 0 and reports each item as a hypothesis.
-- [ ] **US-124-AC3** — Given a job with status `hypothesis` that lists an evidence source, when `ux-builder-design validate` runs, then it exits 1 and names the job and the field.
-- [ ] **US-124-AC4** — Given hypotheses recorded in the design state, when `ux-builder-design status --json` runs, then it counts jobs by status, and every hypothesis has confidence `low` or none.
+- [ ] **US-124-AC2** — Given the PRD's *User Needs* with rows that are `assumed` and cite no evidence, when `validate` runs, then it passes and reports each as assumed.
+- [ ] **US-124-AC3** — Given an `assumed` need that lists an evidence source, when `validate` runs, then it fails naming the need and the field.
+- [ ] **US-124-AC4** — Given *User Needs* rows, when `status --json` runs, then it counts the needs by status, and every assumed one has confidence low or none; before the PRD has them, the design state's job points are counted.
 
 ## Edge Cases
 
@@ -55,7 +57,7 @@ Phase 2, hypothesis mode. The research capability works from the brief and domai
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
 | AC1 | US-124-AC1 | a created app | the `ux-builder-design` skill is read | its research section tells the agent to propose segments, jobs, motivations, frustrations, usage contexts and accessibility needs from the brief, and to mark every item *hypothesis* with no evidence |
-| AC2 | US-124-AC2 | a `docs/ux-builder/jobs.md` whose items all have status `hypothesis` and no evidence | `ux-builder-design validate` runs | it exits 0 and reports each item as a hypothesis |
+| AC2 | US-124-AC2 | a the PRD's *User Needs* whose items all have status `hypothesis` and no evidence | `ux-builder-design validate` runs | it exits 0 and reports each item as a hypothesis |
 | AC3 | US-124-AC3 | a job with status `hypothesis` that lists an evidence source | `ux-builder-design validate` runs | it exits 1 and names the job and the field |
 | AC4 | US-124-AC4 | hypotheses recorded in the design state | `ux-builder-design status --json` runs | it counts jobs by status, and every hypothesis has confidence `low` or none |
 

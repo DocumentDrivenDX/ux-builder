@@ -1,0 +1,44 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:umf-ac-coverage",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "kind": "metric",
+      "audience": "executive",
+      "source": {
+        "path": "umf:docs/helix/03-test/acceptance-criteria-ledger.json",
+        "digest": "sha256:5dc577fd1bce10c6da71052da019e17b351b01b2e5ea53fa59d00a3524f1ec23"
+      },
+      "id": "umf-ac-coverage",
+      "form": "meter",
+      "title": "Acceptance criteria satisfied",
+      "question": "How far is umf from every acceptance criterion satisfied?",
+      "metric": {
+        "unit": "criteria",
+        "good": "up",
+        "format": {
+          "kind": "number",
+          "decimals": 0
+        },
+        "target": 837,
+        "series": [
+          {
+            "id": "satisfied-now",
+            "label": "Satisfied",
+            "points": [
+              {
+                "value": 180
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

@@ -7,14 +7,14 @@ import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
-import { cli, tempApp } from "./helpers.mjs";
+import { cli, helixApp, tempApp } from "./helpers.mjs";
 
 const SKILL = readFileSync(new URL("../skill/ux-builder-design/SKILL.md", import.meta.url), "utf8");
-const jobs = (rows) => `---\nux:\n  id: jobs\n  type: jobs\n---\n\n# Jobs to be done\n\n## Jobs\n\n| ID | Job | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|---|\n${rows.join("\n")}\n`;
+const PRD = "docs/helix/01-frame/prd.md";
+/* An app whose PRD has these User Needs rows (applied). */
 function app(rows) {
-  const a = tempApp();
-  mkdirSync(join(a, "docs/ux-builder"), { recursive: true });
-  writeFileSync(join(a, "docs/ux-builder/jobs.md"), jobs(rows));
+  const a = helixApp();
+  writeFileSync(join(a, PRD), `---\nddx:\n  id: prd\n  type: prd\n---\n\n# PRD\n\n## Users and Scope\n\n### User Needs\n\n| Need | Importance | Evidence | Confidence | Status |\n|---|---|---|---|---|\n${rows.join("\n")}\n`);
   return a;
 }
 
@@ -27,30 +27,30 @@ describe("US-124: hypotheses", () => {
   });
 
   // @covers US-124-AC2
-  test("AC2: a jobs table of hypotheses with no evidence passes, and each is reported as a hypothesis", () => {
-    const a = app(["| J-1 | Discover nearby rivers | high | none | low | hypothesis |", "| J-2 | Find access points | high | none | low | hypothesis |"]);
+  test("AC2: User Needs that are assumed, with no evidence, pass, and each is reported as assumed", () => {
+    const a = app(["| Discover nearby rivers | high | none | low | assumed |", "| Find access points | high | none | low | assumed |"]);
     const r = cli(a, ["validate"]);
     assert.equal(r.status, 0, r.stdout);
-    assert.match(r.stdout, /note {4}docs\/ux-builder\/jobs\.md: J-1 is a hypothesis: Discover nearby rivers/);
-    assert.match(r.stdout, /note {4}docs\/ux-builder\/jobs\.md: J-2 is a hypothesis: Find access points/);
+    assert.match(r.stdout, /note {4}docs\/helix\/01-frame\/prd\.md: need "Discover nearby rivers" is assumed/);
+    assert.match(r.stdout, /note {4}docs\/helix\/01-frame\/prd\.md: need "Find access points" is assumed/);
   });
 
   // @covers US-124-AC3
-  test("AC3: a hypothesis that lists an evidence source fails, naming the job and the field", () => {
-    const a = app(["| J-1 | Discover nearby rivers | high | EV-1 | low | hypothesis |"]);
-    mkdirSync(join(a, "docs/ux-builder/evidence"), { recursive: true });
-    writeFileSync(join(a, "docs/ux-builder/evidence/EV-1.md"), "---\nux:\n  id: EV-1\n  type: research-evidence\n  kind: interview\n  participants: {}\n---\n\n# EV-1\n\n## Source\n\n- x\n\n## Excerpts\n\n- None.\n\n## Synthesis notes\n\n- None.\n");
+  test("AC3: an assumed need that lists an evidence source fails, naming the need and the field", () => {
+    const a = app(["| Discover nearby rivers | high | anglers | low | assumed |"]);
+    mkdirSync(join(a, "docs/helix/01-frame/research"), { recursive: true });
+    writeFileSync(join(a, "docs/helix/01-frame/research/anglers.md"), "---\nddx:\n  id: research-anglers\n  type: research-plan\n---\n\n# Research plan: anglers\n");
     const r = cli(a, ["validate"]);
     assert.equal(r.status, 1);
-    assert.match(r.stdout, /docs\/ux-builder\/jobs\.md: J-1: evidence lists a source, but status is hypothesis/);
+    assert.match(r.stdout, /docs\/helix\/01-frame\/prd\.md: need "Discover nearby rivers": evidence lists a source, but status is assumed/);
   });
 
   // @covers US-124-AC4
-  test("AC4: status --json counts jobs by status, and every hypothesis has confidence low or none", () => {
-    const a = app(["| J-1 | Discover nearby rivers | high | none | low | hypothesis |", "| J-2 | Find access points | high | none | low | hypothesis |"]);
+  test("AC4: status --json counts needs by status, and every assumed one has confidence low or none", () => {
+    const a = app(["| Discover nearby rivers | high | none | low | assumed |", "| Find access points | high | none | low | assumed |"]);
     let out = JSON.parse(cli(a, ["status", "--json"]).stdout);
     assert.deepEqual(out.jobs.byStatus, { hypothesis: 2 });
-    assert.deepEqual(out.jobs.hypotheses, [{ id: "J-1", confidence: "low" }, { id: "J-2", confidence: "low" }]);
+    assert.deepEqual(out.jobs.hypotheses, [{ id: "Discover nearby rivers", confidence: "low" }, { id: "Find access points", confidence: "low" }]);
     // Before a jobs table exists, the design state's job points are counted, with no confidence yet.
     const b = tempApp({ state: { assumptions: [{ id: "A-1", text: "J-1: Discover rivers", status: "hypothesis", evidence: [], section: "jobs" }] } });
     out = JSON.parse(cli(b, ["status", "--json"]).stdout);

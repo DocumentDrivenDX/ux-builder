@@ -1,0 +1,137 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:helix-containers",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "helix-containers",
+      "kind": "flow",
+      "form": "network",
+      "title": "HELIX's containers",
+      "question": "What are HELIX's containers?",
+      "audience": "developer",
+      "source": {
+        "path": "helix:docs/helix/02-design/architecture.md",
+        "view": "Level 2",
+        "digest": "sha256:9296c500ec9c9b8382ab4d6e2b7ce1f39528dd49e2454c1d38722bddd12242ef"
+      },
+      "groups": [
+        {
+          "id": "group-helix",
+          "label": "HELIX (this system)",
+          "role": "boundary"
+        },
+        {
+          "id": "group-project",
+          "label": "Project (dogfood or adopter)",
+          "role": "boundary"
+        },
+        {
+          "id": "group-runtime",
+          "label": "Any compliant runtime",
+          "role": "boundary"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "skill",
+          "label": "skills/helix/SKILL.md",
+          "detail": "Routing skill",
+          "group": "group-helix",
+          "role": "own"
+        },
+        {
+          "id": "catalog",
+          "label": "workflows/activities/…",
+          "detail": "Artifact catalog · templates · prompts · meta.yml",
+          "group": "group-helix",
+          "role": "own"
+        },
+        {
+          "id": "schema",
+          "label": "workflows/artifact-schema.md",
+          "detail": "Instance schema",
+          "group": "group-helix",
+          "role": "own"
+        },
+        {
+          "id": "wfdocs",
+          "label": "workflows/",
+          "detail": "Methodology spec · principles · concerns · activities",
+          "group": "group-helix",
+          "role": "own"
+        },
+        {
+          "id": "instances",
+          "label": "docs/helix/",
+          "detail": "Artifact instances · activity-numbered layout",
+          "group": "group-project",
+          "role": "external"
+        },
+        {
+          "id": "engine",
+          "label": "Execution engine",
+          "detail": "tracker · queue · loop · evidence",
+          "group": "group-runtime",
+          "role": "external"
+        },
+        {
+          "id": "packages",
+          "label": "Per-runtime packages",
+          "detail": "DDx plugin · Claude Code skill · Genie skill",
+          "group": "group-runtime",
+          "role": "external"
+        }
+      ],
+      "edges": [
+        {
+          "id": "skill--catalog",
+          "from": "skill",
+          "to": "catalog",
+          "label": "reads artifact types"
+        },
+        {
+          "id": "skill--instances",
+          "from": "skill",
+          "to": "instances",
+          "label": "reads/writes"
+        },
+        {
+          "id": "catalog--schema",
+          "from": "catalog",
+          "to": "schema",
+          "label": "instances conform to"
+        },
+        {
+          "id": "packages--skill",
+          "from": "packages",
+          "to": "skill",
+          "label": "wraps same source"
+        },
+        {
+          "id": "packages--catalog",
+          "from": "packages",
+          "to": "catalog",
+          "label": "wraps same source"
+        },
+        {
+          "id": "engine--skill",
+          "from": "engine",
+          "to": "skill",
+          "label": "loads skill into agent session"
+        },
+        {
+          "id": "engine--packages",
+          "from": "engine",
+          "to": "packages",
+          "label": "installs per runtime contract"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

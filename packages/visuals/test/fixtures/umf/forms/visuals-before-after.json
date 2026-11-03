@@ -1,0 +1,100 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:visuals-before-after",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "visuals-before-after",
+      "kind": "comparison",
+      "form": "before-after",
+      "title": "Visuals before and after",
+      "question": "What changes when every visual is a umf.visual document?",
+      "source": {
+        "path": "visuals:PRD.md",
+        "view": "§1–§2",
+        "digest": "sha256:f944df076446c39a75b7f58323869af5337751e892b75d24cc749e8b9ff27aa5"
+      },
+      "comparison": {
+        "items": [
+          {
+            "id": "today",
+            "label": "Today"
+          },
+          {
+            "id": "after",
+            "label": "With umf.visual"
+          }
+        ],
+        "criteria": [
+          {
+            "id": "colors",
+            "label": "Where colors come from",
+            "measure": "text"
+          },
+          {
+            "id": "renderers",
+            "label": "What draws the visuals",
+            "measure": "text"
+          },
+          {
+            "id": "theme",
+            "label": "A theme switch restyles every visual",
+            "measure": "support"
+          },
+          {
+            "id": "source",
+            "label": "Checked against the source",
+            "measure": "support"
+          }
+        ],
+        "values": [
+          {
+            "item": "today",
+            "criterion": "colors",
+            "text": "Four places"
+          },
+          {
+            "item": "after",
+            "criterion": "colors",
+            "text": "The theme's tokens"
+          },
+          {
+            "item": "today",
+            "criterion": "renderers",
+            "text": "Mermaid, deploy.py, HTML plates, Eraser and hand SVG"
+          },
+          {
+            "item": "after",
+            "criterion": "renderers",
+            "text": "@ux-builder/visuals"
+          },
+          {
+            "item": "today",
+            "criterion": "theme",
+            "support": "no"
+          },
+          {
+            "item": "after",
+            "criterion": "theme",
+            "support": "yes"
+          },
+          {
+            "item": "today",
+            "criterion": "source",
+            "support": "partial"
+          },
+          {
+            "item": "after",
+            "criterion": "source",
+            "support": "yes"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

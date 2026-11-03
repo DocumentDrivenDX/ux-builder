@@ -4,11 +4,13 @@
      npm test --workspace @ux-builder/create-app */
 
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, mock, test } from "node:test";
 import { create } from "../index.mjs";
+import { getHelix } from "../helix.mjs";
+import { writeStarterSet } from "../helix-docs.mjs";
 import { bundle, packHelix, releaseServer } from "./fixtures/helix-release.mjs";
 
 const tmp = mkdtempSync(join(tmpdir(), "helix-docs-"));
@@ -115,5 +117,32 @@ describe("US-069: start with the HELIX documents drafted", () => {
     assert.match(b.read("01-frame/prd.md"), /on 2031-02-03 from HELIX/, "the second app was drafted on another day");
     const mask = (t) => t.replace(/\b\d{4}-\d{2}-\d{2}\b/g, "YYYY-MM-DD");
     for (const f of files(a.r)) assert.equal(mask(b.read(f)), mask(a.read(f)), f);
+  });
+});
+
+describe("ADR-042 decision 4: create-app selects HELIX's UX concerns", () => {
+  // @covers US-069-AC2
+  test("a new app's concerns.md selects packaged-design-system, ux-interaction-patterns and a11y-wcag-aa from HELIX's library", async () => {
+    const { read } = await make();
+    const concerns = read("01-frame/concerns.md");
+    assert.match(fm(concerns), /^ {2}id: concerns\n {2}type: concerns$/m);
+    const active = concerns.split("## Active Concerns")[1].split("\n## ")[0];
+    for (const c of ["packaged-design-system", "ux-interaction-patterns", "a11y-wcag-aa"]) assert.match(active, new RegExp(`^\\| ${c} \\| library \\| \`area:ui\``, "m"), c);
+    for (const h of ["## Active Concerns", "## Project Overrides", "## Area Labels"]) assert.ok(concerns.includes(h), h);
+  });
+
+  // @covers US-069-AC2
+  test("an existing concerns.md is left alone, and listed as skipped", async () => {
+    const { r, read } = await make();
+    const mine = "---\nddx:\n  id: concerns\n  type: concerns\n---\n\n# Project Concerns\n\nOurs: no packaged design system.\n";
+    writeFileSync(join(r.dir, "docs/helix/01-frame/concerns.md"), mine);
+    const prd = read("01-frame/prd.md");
+    const helix = await getHelix({ offline: true });
+    const skipped = [];
+    const written = writeStarterSet(helix, r, { skipped });
+    assert.equal(read("01-frame/concerns.md"), mine);
+    assert.ok(!written.includes("docs/helix/01-frame/concerns.md"));
+    assert.deepEqual(skipped, [{ id: "concerns", type: "concerns", path: "docs/helix/01-frame/concerns.md", why: "docs/helix/01-frame/concerns.md already exists" }]);
+    assert.equal(read("01-frame/prd.md").replace(/\d{4}-\d{2}-\d{2}/g, ""), prd.replace(/\d{4}-\d{2}-\d{2}/g, ""), "the rest of the starter set is still written");
   });
 });

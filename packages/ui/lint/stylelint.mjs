@@ -10,7 +10,7 @@
    `true` alone reports without suggestions. Every allow entry needs a reason. */
 
 import stylelint from "stylelint";
-import { RULE, check, checkAllow, loadTokens } from "./core.mjs";
+import { GRAPHIC, RULE, check, checkAllow, graphicInk, loadTokens } from "./core.mjs";
 
 const { createPlugin, utils } = stylelint;
 const isObject = (v) => v && typeof v === "object" && !Array.isArray(v);
@@ -22,6 +22,8 @@ const rule = (primary, secondary = {}) => (root, result) => {
   const tokens = loadTokens(secondary.theme, "light", result.opts?.cwd ?? process.cwd());
   const file = root.source?.input?.file;
   root.walkDecls((decl) => {
+    // A marked data graphic keeps its black and white ([data-graphic] in the selector).
+    if (decl.parent?.selector?.includes(`[${GRAPHIC}`) && graphicInk(decl.prop, decl.value)) return;
     const before = decl.prop.length + (decl.raws.between ?? ":").length;
     for (const f of check(decl.prop, decl.value, { tokens, allow: secondary.allow ?? [], file })) {
       utils.report({ ruleName: RULE, result, node: decl, message: f.message, index: before + f.index, endIndex: before + f.index + f.literal.length });

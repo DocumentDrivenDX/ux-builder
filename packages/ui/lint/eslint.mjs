@@ -21,9 +21,11 @@
 // strings without expressions); a value computed at run time is the app's own
 // data, not a hard-coded style.
 
-import { RULE, check, checkAllow, loadTokens } from "./core.mjs";
+import { GRAPHIC, RULE, check, checkAllow, graphicInk, loadTokens } from "./core.mjs";
 
 const kebab = (k) => (k.startsWith("--") ? k : k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`).replace(/^(webkit|moz|ms)-/, "-$1-"));
+// Whether a JSX element, or one around it, is marked as a data graphic.
+const inGraphic = (node) => { for (let n = node; n; n = n.parent) if (n.type === "JSXElement" && n.openingElement.attributes.some((a) => a.name?.name === GRAPHIC)) return true; return false; };
 const keyOf = (p) => (p.key.type === "Identifier" ? p.key.name : p.key.type === "Literal" ? String(p.key.value) : null);
 
 function literalOf(node, property) {
@@ -58,6 +60,7 @@ const rule = {
           if (!key) continue;
           const property = kebab(key), value = literalOf(p.value, property);
           if (value == null) continue;
+          if (graphicInk(property, value) && inGraphic(attr.parent)) continue;
           for (const f of check(property, value, { tokens, allow, file })) context.report({ node: p.value, message: f.message });
         }
       },
@@ -106,8 +109,10 @@ const foreign = {
 /* ux-builder/no-inline-svg: an <svg> written in app JSX is an icon or a loader
    drawn by hand, which keeps its shape whatever the theme's design system.
    Use <Icon> (any of @ux-builder/ui/icons, or registerIcons for the app's own
-   drawing) or the loading widgets. Charts and illustrations can opt out with
-   allow: ["chart"] matching a className or id on the <svg>. */
+   drawing) or the loading widgets; a diagram or chart is a umf.visual document
+   drawn with <Visual> from @ux-builder/visuals/react, which writes no <svg> in
+   app source (US-168). Charts and illustrations can opt out with allow:
+   ["chart"] matching a className or id on the <svg>. */
 const inlineSvg = {
   meta: {
     type: "suggestion",
@@ -122,7 +127,9 @@ const inlineSvg = {
         if (el.name.type !== "JSXIdentifier" || el.name.name !== "svg") return;
         const ids = `${attr(el, "className") ?? ""} ${attr(el, "id") ?? ""}`;
         if (allow.some((a) => ids.split(/\s+/).includes(a))) return;
-        context.report({ node: el, message: "a hand-drawn <svg> does not follow the theme's icon set: use <Icon> (import it from @ux-builder/ui/icons, or registerIcons({ name, glyphs }) for your own drawing) (ux-builder/no-inline-svg)" });
+        // A data graphic (a QR code) is not an icon: marked, it draws its own <svg>.
+        if (el.attributes.some((a) => a.name?.name === GRAPHIC) || inGraphic(el.parent?.parent)) return;
+        context.report({ node: el, message: "a hand-drawn <svg> does not follow the theme's icon set: use <Icon> (import it from @ux-builder/ui/icons, or registerIcons({ name, glyphs }) for your own drawing); for a diagram or chart, use <Visual> from @ux-builder/visuals/react (ux-builder/no-inline-svg)" });
       },
     };
   },

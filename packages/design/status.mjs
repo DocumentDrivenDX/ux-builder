@@ -9,21 +9,22 @@ import { modalityStatus } from "./modality.mjs";
 import { progress } from "./process.mjs";
 import { migrationPlan } from "./migrate.mjs";
 import { budget, budgetText } from "./intake.mjs";
+import { estimateFor } from "./metrics.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState } from "./state.mjs";
 
 const ACTIVITY = { baseline: "Baseline", define: "Define", explore: "Explore", experience: "Experience", validate: "Validate" };
 const UNTESTED = new Set(["assumed", "hypothesis", "current-state"]);
 
-/* Jobs by status, from docs/ux/jobs.md, else the design state's job
-   points; and each hypothesis with its confidence (low, or none yet). */
+/* Needs by status, from the PRD's User Needs (ADR-042), else the design
+   state's job points; and each assumed one with its confidence. */
 function jobsSummary(app, s) {
   const table = jobsTable(app);
-  const rows = table ? Object.entries(table).map(([id, j]) => ({ id, status: j.status, confidence: j.confidence || null }))
+  const rows = table ? Object.values(table).map((j) => ({ id: j.job, status: j.status, confidence: j.confidence || null }))
     : s.assumptions.filter((a) => a.section === "jobs" && a.status !== "refuted").map((a) => ({ id: a.id, status: a.status, confidence: null }));
   const byStatus = {};
   for (const r of rows) byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
-  return { from: table ? ux(app, "jobs.md") : "design state", byStatus, hypotheses: rows.filter((r) => r.status === "hypothesis").map(({ id, confidence }) => ({ id, confidence })) };
+  return { from: table ? Object.values(table)[0]?.path ?? "the PRD" : "design state", byStatus, hypotheses: rows.filter((r) => r.status === "hypothesis").map(({ id, confidence }) => ({ id, confidence })) };
 }
 
 export function status(app) {
@@ -41,6 +42,8 @@ export function status(app) {
     awaitingReview: pending.map((p) => p.id),
     // The decisions left before the first prototype (GDL-83).
     budget: budget(app),
+    // The estimate given for this step and how long it has taken (VIP List session 1: said 24, took 148).
+    estimate: null,
     activity: s.activity,
     mode: s.mode,
     startedFrom: s.startedFrom,
@@ -56,18 +59,25 @@ export function status(app) {
     runningExperiments: s.experiments.filter((e) => e.status === "running").map((e) => e.id),
     next: s.next,
     jobs: jobsSummary(app, s),
-    // Target users by status, from docs/ux/users.md (GDL-77); null without one.
-    users: (() => { const t = usersTable(app); if (!t) return null; const byStatus = {}; for (const u of Object.values(t)) byStatus[u.status] = (byStatus[u.status] ?? 0) + 1; return { from: ux(app, "users.md"), byStatus }; })(),
+    // Target users by status, from the PRD's User Segments (GDL-77, ADR-042); null without them.
+    users: (() => { const t = usersTable(app); if (!t) return null; const byStatus = {}; for (const u of Object.values(t)) byStatus[u.status] = (byStatus[u.status] ?? 0) + 1; return { from: Object.values(t)[0]?.path ?? "the PRD", byStatus }; })(),
     // The validated prototype is a prototype until core-3 says it goes to production (ADR-037 rule 4).
     prototype: s.prototype ? { branch: s.prototype.branch, status: s.checkpoints.filter((c) => c.id === "core-3").at(-1)?.status === "passed" ? "production" : "validated" } : null,
     documents: uxDocuments(app),
+    // The person asked the agent to finish (US-171): the rest was drafted, and is assumed.
+    finished: s.finished ? { at: s.finished.at, step: s.finished.step, summary: s.finished.summary } : null,
   };
+  if (result.budget) result.estimate = estimateFor(app, result.budget.step, result.budget.minutes);
   result.text = summary(result);
   return result;
 }
 
 /* What building the app in a design folder needs, in order (GDL-81). */
-export const BUILD_NEEDS = (modalityRecorded) => `To build the app here when the design is ready: ${modalityRecorded ? "" : "record the person's answer on modality (ux-builder-design modality), then "}ask them for the theme (a released one, or one they make from their brand in the theme builder), then run npm create @ux-builder/app@latest . -- --theme <name>.`;
+/* The theme never blocks: plain until a brand theme is released (VIP List sessions 3 and 4 were still told to
+   ask for it first, and not told of step batch). */
+export const BUILD_NEEDS = (modalityRecorded) => modalityRecorded
+  ? "To build the app here: npm create @ux-builder/app@latest . -- --theme <name>, on the theme the person accepted (plain until their brand theme is released; it never blocks)."
+  : "To build the app here: at step 4, recommend the alternative, the modality and frame, and the theme together (plain until a brand theme is released; it never blocks), record the person's one answer with ux-builder-design step batch, then run npm create @ux-builder/app@latest . -- --theme <name>.";
 
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
@@ -76,6 +86,7 @@ export function summary(r) {
   // Only the latest answer at a checkpoint stands: a decline after a pass, or a pass after a decline.
   const latest = new Map(r.checkpoints.map((c) => [c.id, c.status]));
   lines.push(`${r.progress.text} (${ACTIVITY[r.activity]}, in ${r.mode === "change" ? "change mode" : "the full loop"}${r.startedFrom === "existing" ? ", in an existing app" : r.startedFrom === "design" && !r.app?.built ? ", in a design folder" : ""}).`);
+  if (r.finished) lines.push(`Finished by the agent at the person's request at step ${r.finished.step}: everything after it is assumed until confirmed; what was assumed and what to check first are in ${r.finished.summary}.`);
   if (r.app && !r.app.built) lines.push(`No app yet: this folder holds the design. ${BUILD_NEEDS(r.app.modalityRecorded)}`);
   else if (r.app?.built) lines.push(`The app was built here on the ${r.app.theme} theme (${r.app.modalities.join(", ")}).`);
   if (r.frame?.chosen) lines.push(`App frame: ${r.frame.chosen}.`);
@@ -84,6 +95,7 @@ export function summary(r) {
   else if (r.toMigrate?.length) lines.push(`Still at the app's top: ${r.toMigrate.join(", ")}; run ux-builder-design migrate to move ${r.toMigrate.length === 1 ? "it" : "them"} under docs/ux-builder/.`);
   if (r.awaitingReview.length) lines.push(`Awaiting your review: ${r.awaitingReview.length} item${r.awaitingReview.length === 1 ? "" : "s"} (${r.awaitingReview.slice(0, 5).join(", ")}${r.awaitingReview.length > 5 ? ", …" : ""}).`);
   if (r.budget?.count) lines.push(budgetText(r.budget));
+  if (r.estimate?.over) lines.push(`This step was estimated at ${r.estimate.estimate} minutes and has taken ${r.estimate.minutes}: tell the person, with how far the prototype is now.`);
   lines.push(r.chosen ? `${r.chosen} is chosen.` : "No alternative is chosen yet.");
   lines.push(r.untestedAssumptions ? `${plural(r.untestedAssumptions, "assumption is", "assumptions are")} untested.` : "No untested assumptions.");
   if (r.openQuestions.length) lines.push(`Open ${r.openQuestions.length === 1 ? "question" : "questions"}: ${r.openQuestions.join("; ")}`);

@@ -99,6 +99,14 @@ function applyHunks(base, hunks) {
   return { lines: out };
 }
 
+/* A patch's result on `before` (null for a new file): the text, or null when it does not apply. */
+export function patchedText(before, patch) {
+  const parsed = parsePatch(patch);
+  if (parsed.error) return null;
+  const r = applyHunks(lines(before ?? "").map((t) => ({ t, added: false })), parsed.hunks);
+  return r.error ? null : r.lines.map((l) => l.t).join("\n") + "\n";
+}
+
 /* ----------------------------------------------------------- the plan */
 
 /* Every HELIX document by ddx.id: Map id -> [paths], app-relative. */

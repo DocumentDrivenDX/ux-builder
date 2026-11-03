@@ -1,0 +1,155 @@
+# Metadata for User Journey Map
+
+artifact:
+  name: User Journey Map
+  id: user-journey-map
+  type: document
+  activity: frame
+  level: feature
+  optional: true
+
+voice: artifact-signal
+
+description: |
+  One person's experience of one task across several stories, laid out in
+  phases with what they do, think and feel in each, the insights the team
+  draws, and the opportunities it commits to own and observe. It is keyed to a
+  task in the feature specification's Task Model, and each phase links to the
+  acceptance criteria that deliver it, so the map shows which parts of the
+  experience the stories cover and which they leave out. Make one only when a
+  task spans several stories or views and the team needs to see the whole
+  experience before design. It does not define views, layout or states.
+
+output:
+  location: docs/helix/01-frame/journey-maps/UJM-{n}-{name}.md
+  format: markdown
+  naming: UJM-{number}-{journey-name}.md
+  examples:
+    - UJM-001-import-weekly-files.md
+
+id_format:
+  prefix: UJM
+  pattern: "UJM-[0-9]+"
+  example: UJM-001
+  description: |
+    Journey maps use UJM-XXX identifiers, unique across the project. One map
+    per person and task. A current-state map and a future-state map of the
+    same task are separate instances.
+
+reuse_policy: |
+  Update the map in place when stories, acceptance criteria or evidence
+  change. Create a new instance only for a different person or task.
+
+validation:
+  required_sections:
+    - actor_and_scenario
+    - journey_phases
+    - insights
+    - opportunities
+    - story_coverage
+
+  quality_checks:
+    - check: one_actor_one_task
+      description: The map names one person (a PRD user segment), one task from the feature's Task Model, and a scenario with a trigger and an end state
+      severity: blocking
+
+    - check: expectations_stated
+      description: The person's goals and expectations are stated before the phases, so phases can be judged against them
+      severity: blocking
+
+    - check: phases_cover_trigger_to_outcome
+      description: Phases run from the trigger to the end state, including steps outside the product where the person takes them
+      severity: blocking
+
+    - check: emotion_grounded
+      description: Each phase's thoughts and emotion cite evidence or are marked as an assumption
+      severity: warning
+
+    - check: phases_traced_to_acs
+      description: Every in-product phase lists the US-<n>-AC<m> IDs that deliver it, or is marked uncovered with a reason
+      severity: blocking
+
+    - check: opportunities_owned_and_observed
+      description: Every opportunity names one owner and the metric that shows its effect; a target is optional and is labelled a hypothesis unless evidence supports it
+      severity: blocking
+
+    - check: rows_named
+      description: Phases, insights and opportunities are named by what they say, not numbered
+      severity: warning
+
+    - check: no_view_design
+      description: The map does not define views, layout or states; it links the user flow instead
+      severity: warning
+
+  pattern_checks:
+    - pattern: "US-[0-9]+-AC[0-9]+"
+      expected: ">=1"
+      message: Trace phases to stable acceptance-criterion IDs
+
+    - pattern: "\\[TBD\\]|\\[TODO\\]|\\[NEEDS CLARIFICATION"
+      expected: 0
+      message: Resolve uncertainty or record it as an assumption
+
+variables:
+  - name: actor
+    description: The PRD user segment whose experience is mapped
+    required: true
+
+  - name: task
+    description: The Task Model row the journey carries out
+    required: true
+
+  - name: map_kind
+    description: current-state or future-state
+    required: true
+
+prompts:
+  generation: prompt.md
+  review: |
+    Review this journey map for:
+    1. One person, one task, a scenario with trigger and end state, and explicit goals
+    2. Phases from trigger to end state, including steps outside the product
+    3. Thoughts and emotions grounded in evidence or marked as assumptions
+    4. Every in-product phase traced to US-<n>-AC<m> IDs, gaps named
+    5. Opportunities with one owner and one metric each; targets optional, unsupported ones labelled hypotheses
+    6. No view, layout or state design
+
+template:
+  file: template.md
+  sections:
+    - actor_and_scenario: "The person, the task, the scenario, goals and expectations."
+    - journey_phases: "Phases with actions, thoughts, emotion, touchpoints and the acceptance criteria that deliver each."
+    - insights: "Pain points and moments that matter, with evidence."
+    - opportunities: "Opportunities with owner and metric; any target is supported or labelled a hypothesis."
+    - story_coverage: "Which phases the stories cover, and which they leave uncovered."
+
+example:
+  file: example.md
+
+workflow:
+  creation_order: 3
+  review_cycles: 1
+  update_triggers:
+    - A user story or acceptance criterion in a mapped phase changes
+    - A study's findings change the person's goals, thoughts or emotions
+    - The Task Model row the map is keyed to changes
+
+relationships:
+  informed_by:
+    - feature-specification
+    - user-stories
+
+  informs:
+    - user-flow
+    - solution-design
+    - story-test-plan
+    - improvement-backlog
+
+tags:
+  - frame
+  - ux
+  - journey
+  - experience
+
+version: 1.0.0
+last_updated: 2026-10-28

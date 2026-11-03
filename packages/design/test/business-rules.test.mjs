@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, test } from "node:test";
+import { currentText, sectionOf } from "../index.mjs";
 import { cli } from "./helpers.mjs";
 import { KIT_BP, kitApp } from "./kit-fixture.mjs";
 
@@ -56,28 +57,29 @@ describe("US-147: design how users meet each business rule", () => {
   // @covers US-147-AC3
   test("AC3: the kit has a task per cited rule, in its trigger situation, with the rule as its success criterion", () => {
     const a = rulesApp();
-    const kit = json(a, ["test-kit"]);
+    const kit = json(a, ["test-kit", "--study", "rivers"]);
     const rule = kit.tasks.find((t) => t.rule === "BR-1");
     assert.equal(rule.n, 3);
     assert.equal(rule.journey, "J-find");
     assert.equal(rule.goal, "find a river to fish this weekend, and the one you like best has no public access");
     assert.deepEqual(rule.criteria, [{ id: "BR-1", text: "Only stretches with public access can be saved." }]);
     assert.equal(kit.tasks.filter((t) => t.rule).length, 1, "one task per rule, though a task and a step both cite it");
-    const scenarios = readFileSync(join(a, kit.dir, "scenarios.md"), "utf8");
-    assert.match(scenarios, /^\| 3 \| J-find \| You want to find a river to fish this weekend, and the one you like best has no public access\. Show me how you would do that\. \| BR-1 \|$/m);
-    assert.doesNotMatch(scenarios.split("\n").find((l) => l.startsWith("| 3 |")), /Save|Private|River details/);
+    const plan = currentText(a, kit.path).text;
+    const scenarios = sectionOf(plan, "Scenarios", 3);
+    assert.match(scenarios, /^\| J-find \(BR-1\) \| Find a river to fish this weekend, and the one you like best has no public access\. \|$/m);
+    assert.match(sectionOf(plan, "Success Criteria", 3), /^\| J-find \(BR-1\) \| .* \| BR-1 \|$/m);
+    assert.doesNotMatch(scenarios.split("\n").find((l) => l.startsWith("| J-find (BR-1)")), /Save|Private|River details/);
   });
 
   // @covers US-147-AC4
   test("AC4: the report lists each cited rule with its kit tasks' results, and an untested rule under Not tested", () => {
     const a = rulesApp({ designed: [DESIGNED, { ...DESIGNED, id: "BR-2", trigger: "Your saved list is full" }], cite: ["BR-1", "BR-2"] });
-    json(a, ["test-kit", "--journey", "J-find"]);
-    const scen = readFileSync(join(a, "docs/ux-builder/tests/TK-1/scenarios.md"), "utf8");
-    const br1 = Number(scen.match(/^\| (\d+) \| J-find \| [^|]* \| BR-1 \|$/m)[1]);
+    const kit = json(a, ["test-kit", "--study", "rivers", "--journey", "J-find"]);
+    const br1 = kit.tasks.find((t) => t.rule === "BR-1").n;
     writeFileSync(join(a, "sheet.csv"), ["participant,task,completed,seconds,errors,assists,remark,problem", `P1,${br1},no,90,1,1,Thought saving was broken,save looked broken`, `P2,${br1},yes,40,0,0,,`].join("\n"));
-    json(a, ["observe", "import", "sheet.csv", "--kit", "TK-1"]);
+    json(a, ["observe", "import", "sheet.csv", "--study", "rivers"]);
     const report = readFileSync(join(a, json(a, ["report"]).path), "utf8");
-    assert.match(report, new RegExp(`## Business rules\\n\\n\\| Rule \\| Kit tasks \\| Completed \\| Problems seen \\|\\n\\|---\\|---\\|---\\|---\\|\\n\\| BR-1: Only stretches with public access can be saved\\. \\| TK-1 task ${br1} \\| 1 of 2 \\| save looked broken \\|\\n\\| BR-2: A saved list holds at most 50 rivers\\. \\| TK-1 task \\d+ \\| not tested \\| none \\|`));
+    assert.match(report, new RegExp(`## Business rules\\n\\n\\| Rule \\| Kit tasks \\| Completed \\| Problems seen \\|\\n\\|---\\|---\\|---\\|---\\|\\n\\| BR-1: Only stretches with public access can be saved\\. \\| rivers task ${br1} \\| 1 of 2 \\| save looked broken \\|\\n\\| BR-2: A saved list holds at most 50 rivers\\. \\| rivers task \\d+ \\| not tested \\| none \\|`));
     assert.match(report, /## Not tested[\s\S]*- BR-2: no one met this business rule in a test/);
   });
 

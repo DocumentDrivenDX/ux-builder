@@ -1,0 +1,13 @@
+{
+  "name": "ux-builder",
+  "version": "0.1.0",
+  "description": "Design, build and assess app experiences with the project-installed UX Builder SDK.",
+  "author": {
+    "name": "DocumentDrivenDX",
+    "url": "https://github.com/DocumentDrivenDX"
+  },
+  "homepage": "https://github.com/DocumentDrivenDX/ux-builder",
+  "repository": "https://github.com/DocumentDrivenDX/ux-builder",
+  "license": "MIT OR Apache-2.0",
+  "skills": "./skills/"
+}

@@ -1,5 +1,17 @@
 # @ux-builder/tokens
 
+## 1.9.0
+
+### Minor Changes
+
+- 569c525: The `plain` theme has a dark appearance (ADR-043), so a guided prototype for a product used in dark rooms can show dark before any brand theme exists. It inverts plain's grays and blue and clears 4.5:1 in every pairing.
+
+## 1.8.0
+
+### Minor Changes
+
+- 7f35781: Add the `img-8593-databricks` theme: the `img-8593` brand (made in the theme builder from the client's logo) on the databricks design system, light by default. Select it with `data-theme="img-8593-databricks"`. `@ux-builder/ui`'s catalogue and agent guidance list it.
+
 ## 1.7.0
 
 ### Minor Changes

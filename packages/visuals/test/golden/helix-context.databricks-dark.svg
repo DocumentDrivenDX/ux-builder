@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1454 356" width="1454" height="356" role="img" aria-labelledby="helix-context-title" aria-describedby="helix-context-desc" class="uxb-visual uxb-visual--flow-network" data-visual="helix-context" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="helix-context-title">HELIX in a repository</title>
+<desc id="helix-context-desc">The runtime acts; HELIX gives it a document discipline.</desc>
+<rect x="0" y="0" width="1454" height="356" style="fill:#09090B"/>
+<g id="helix-context--team--runtime" class="uxb-edge" data-status="built">
+<path d="M179 224 L336 224" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M336 227.78 L345 224 L336 220.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="243" y="215" width="38" height="18" rx="4" style="fill:#09090B"/>
+<text x="262" y="228.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">asks</text>
+</g>
+<g id="helix-context--runtime--skill" class="uxb-edge" data-status="built">
+<path d="M506 210 L518 210 Q526 210 526 202 L526 176 Q526 168 534 168 L772 168" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M772 171.78 L781 168 L772 164.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="632" y="159" width="44" height="18" rx="4" style="fill:#09090B"/>
+<text x="654" y="172.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">loads</text>
+</g>
+<g id="helix-context--skill--marker" class="uxb-edge" data-status="built">
+<path d="M958 154 L970 154 Q978 154 978 146 L978 60 Q978 52 986 52 L1222 52" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1222 55.78 L1231 52 L1222 48.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="1063" y="43" width="84" height="18" rx="4" style="fill:#09090B"/>
+<text x="1105" y="56.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">reads scope</text>
+</g>
+<g id="helix-context--skill--catalog" class="uxb-edge" data-status="built">
+<path d="M958 168 L992 168 Q1000 168 1000 160 L1000 144 Q1000 136 1008 136 L1222 136" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1222 139.78 L1231 136 L1222 132.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="1078" y="127" width="75" height="18" rx="4" style="fill:#09090B"/>
+<text x="1115.5" y="140.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">reads type</text>
+</g>
+<g id="helix-context--skill--docs" class="uxb-edge" data-status="built">
+<path d="M958 182 L1179 182 Q1187 182 1187 190 L1187 203 Q1187 211 1195 211 L1222 211" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1222 214.78 L1231 211 L1222 207.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="1046" y="173" width="145" height="18" rx="4" style="fill:#09090B"/>
+<text x="1118.5" y="186.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">authors and reconciles</text>
+</g>
+<g id="helix-context--docs--runtime" class="uxb-edge" data-status="built">
+<path d="M1231 229 L1189.5 229 Q1187 229 1187 226.5 L1187 226.5 Q1187 224 1184.5 224 L515 224" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M515 220.22 L506 224 L515 227.78 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="583" y="215" width="118" height="18" rx="4" style="fill:#09090B"/>
+<text x="642" y="228.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">governs execution</text>
+</g>
+<g id="helix-context--runtime--documentor" class="uxb-edge" data-status="built">
+<path d="M506 238 L518 238 Q526 238 526 246 L526 296 Q526 304 534 304 L772 304" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M772 307.78 L781 304 L772 300.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="580" y="295" width="147" height="18" rx="4" style="fill:#09090B"/>
+<text x="653.5" y="308.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">runs the guide's checks</text>
+</g>
+<g id="helix-context--team" class="uxb-node" data-role="actor" data-status="built">
+<rect x="24" y="196" width="155" height="56" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<circle cx="47" cy="212.4" r="3.96" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M40.16 225 C40.16 218.16 53.84 218.16 53.84 225" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="62" y="220" style="fill:#FFFFFF;font-size:14px;font-weight:600">Software team</text>
+<text x="62" y="234" style="fill:#9F9FA9;font-size:12px;font-weight:400">sets intent</text>
+</g>
+<g id="helix-context--runtime" class="uxb-node" data-role="external" data-status="built">
+<rect x="345" y="196" width="161" height="56" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="359" y="220" style="fill:#FFFFFF;font-size:14px;font-weight:600">Agent runtime</text>
+<text x="359" y="234" style="fill:#FAFAFA;font-size:12px;font-weight:400">model, tools, execution</text>
+</g>
+<g id="helix-context--skill" class="uxb-node" data-role="own" data-status="built">
+<rect x="781" y="140" width="177" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="795" y="164" style="fill:#FFFFFF;font-size:14px;font-weight:600">Routing skill</text>
+<text x="795" y="178" style="fill:#9F9FA9;font-size:12px;font-weight:400">resolves scope and mode</text>
+</g>
+<g id="helix-context--catalog" class="uxb-node" data-role="store" data-status="built">
+<rect x="1231" y="108" width="199" height="56" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1245 122 L1245 134 C1245 138 1263 138 1263 134 L1263 122" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<ellipse cx="1254" cy="122" rx="9" ry="3" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="1269" y="132" style="fill:#FFFFFF;font-size:14px;font-weight:600">Artifact catalog</text>
+<text x="1269" y="146" style="fill:#9F9FA9;font-size:12px;font-weight:400">templates, prompts, rules</text>
+</g>
+<g id="helix-context--marker" class="uxb-node" data-role="store" data-status="built">
+<rect x="1231" y="24" width="133" height="56" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1245 38 L1245 50 C1245 54 1263 54 1263 50 L1263 38" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<ellipse cx="1254" cy="38" rx="9" ry="3" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="1269" y="48" style="fill:#FFFFFF;font-size:14px;font-weight:600">.helix.yml</text>
+<text x="1269" y="62" style="fill:#9F9FA9;font-size:12px;font-weight:400">project scope</text>
+</g>
+<g id="helix-context--docs" class="uxb-node" data-role="store" data-status="built">
+<rect x="1231" y="192" width="187" height="56" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1245 206 L1245 218 C1245 222 1263 222 1263 218 L1263 206" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<ellipse cx="1254" cy="206" rx="9" ry="3" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="1269" y="216" style="fill:#FFFFFF;font-size:14px;font-weight:600">Project documents</text>
+<text x="1269" y="230" style="fill:#9F9FA9;font-size:12px;font-weight:400">intent, design, tests</text>
+</g>
+<g id="helix-context--documentor" class="uxb-node" data-role="external" data-status="built">
+<rect x="781" y="276" width="134" height="56" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="795" y="300" style="fill:#FFFFFF;font-size:14px;font-weight:600">documentor</text>
+<text x="795" y="314" style="fill:#FAFAFA;font-size:12px;font-weight:400">checks, views, site</text>
+</g>
+</svg>

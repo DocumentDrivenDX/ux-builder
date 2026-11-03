@@ -17,6 +17,13 @@ export const MCP_SERVER = { command: "npx", args: ["@ux-builder/mcp"] };
 
 /* The skill, copied from this package into the app, replacing an older copy. */
 export function installSkill(app) {
+  const configFile = join(app, ".ux-builder/skills.json");
+  const source = process.env.UX_BUILDER_SKILLS || (existsSync(configFile) ? JSON.parse(readFileSync(configFile, "utf8")).source : "project");
+  if (!["project", "plugin"].includes(source)) throw new DesignError("UX_BUILDER_SKILLS and .ux-builder/skills.json source must be project or plugin");
+  if (source === "plugin") {
+    writeInApp(app, ".ux-builder/skills.json", JSON.stringify({ source: "plugin" }, null, 2) + "\n");
+    return ".ux-builder/skills.json";
+  }
   cpSync(SKILL_SOURCE, join(app, SKILL_DIR), { recursive: true });
   return SKILL_DIR;
 }
@@ -72,6 +79,8 @@ export function init(app, { mcp = false, startedFrom = "existing" } = {}) {
   written.push(STATE_FILE);
   if (mcp) written.push(writeMcpConfig(app));
 
-  notes.push("Start in Claude Code with /ux-builder-design, or ask your agent to design something.");
+  notes.push(written.includes(".ux-builder/skills.json")
+    ? "Use the installed UX Builder plugin’s design skill in Claude Code or Codex; project-local skill copies were skipped."
+    : "Start in Claude Code with /ux-builder-design, or ask your agent to design something.");
   return { app, startedFrom, blueprint, sdk, mcp, written, notes };
 }

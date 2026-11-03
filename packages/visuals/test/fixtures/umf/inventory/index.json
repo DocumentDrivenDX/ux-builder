@@ -1,0 +1,403 @@
+{
+  "source": "visuals-inventory.md (2026-10-22); a pilot system's rows are drawn from the fictional Beacon example",
+  "rows": [
+    {
+      "row": "helix-context",
+      "disposition": "document",
+      "documents": [
+        "helix-context"
+      ],
+      "targets": [
+        "flow/network"
+      ]
+    },
+    {
+      "row": "helix-deployment",
+      "disposition": "document",
+      "documents": [
+        "helix-deployment"
+      ],
+      "targets": [
+        "flow/zoned"
+      ]
+    },
+    {
+      "row": "helix-request",
+      "disposition": "document",
+      "documents": [
+        "helix-request"
+      ],
+      "targets": [
+        "sequence/lifelines"
+      ]
+    },
+    {
+      "row": "helix-cast",
+      "disposition": "table"
+    },
+    {
+      "row": "helix-arch-l1",
+      "disposition": "embeds",
+      "embeds": "helix-context"
+    },
+    {
+      "row": "helix-arch-l2",
+      "disposition": "embeds",
+      "embeds": "helix-containers"
+    },
+    {
+      "row": "helix-overview-map",
+      "disposition": "document",
+      "documents": [
+        "helix-overview-map"
+      ],
+      "targets": [
+        "flow/pipeline"
+      ]
+    },
+    {
+      "row": "helix-walkthrough-seq",
+      "disposition": "embeds",
+      "embeds": "helix-request"
+    },
+    {
+      "row": "helix-guide-context",
+      "disposition": "embeds",
+      "embeds": "helix-context"
+    },
+    {
+      "row": "helix-guide-containers",
+      "disposition": "embeds",
+      "embeds": "helix-containers"
+    },
+    {
+      "row": "helix-guide-request",
+      "disposition": "embeds",
+      "embeds": "helix-request"
+    },
+    {
+      "row": "helix-solution-overview",
+      "disposition": "document",
+      "documents": [
+        "helix-solution-overview"
+      ],
+      "targets": [
+        "flow/lanes"
+      ]
+    },
+    {
+      "row": "helix-field-guide",
+      "disposition": "document",
+      "documents": [
+        "helix-field-guide"
+      ],
+      "targets": [
+        "flow/lanes"
+      ]
+    },
+    {
+      "row": "plate-scaffold",
+      "disposition": "reference"
+    },
+    {
+      "row": "tpl-arch-context",
+      "disposition": "document",
+      "documents": [
+        "tpl-arch-context"
+      ],
+      "targets": [
+        "flow/network"
+      ]
+    },
+    {
+      "row": "tpl-arch-containers",
+      "disposition": "document",
+      "documents": [
+        "tpl-arch-containers"
+      ],
+      "targets": [
+        "flow/network"
+      ]
+    },
+    {
+      "row": "tpl-arch-components",
+      "disposition": "document",
+      "documents": [
+        "tpl-arch-components"
+      ],
+      "targets": [
+        "flow/network"
+      ]
+    },
+    {
+      "row": "tpl-arch-deployment",
+      "disposition": "document",
+      "documents": [
+        "tpl-arch-deployment"
+      ],
+      "targets": [
+        "flow/zoned"
+      ]
+    },
+    {
+      "row": "tpl-arch-dataflow",
+      "disposition": "document",
+      "documents": [
+        "tpl-arch-dataflow"
+      ],
+      "targets": [
+        "sequence/lifelines"
+      ]
+    },
+    {
+      "row": "tpl-sd-domain",
+      "disposition": "document",
+      "documents": [
+        "tpl-sd-domain"
+      ],
+      "targets": [
+        "structure/entities"
+      ]
+    },
+    {
+      "row": "tpl-sd-components",
+      "disposition": "document",
+      "documents": [
+        "tpl-sd-components"
+      ],
+      "targets": [
+        "flow/pipeline"
+      ],
+      "note": "The inventory proposed sequence/lifelines; the catalog example draws a pipeline of hand-offs with no messages, so the fixture keeps its pipeline."
+    },
+    {
+      "row": "tpl-so-map",
+      "disposition": "document",
+      "documents": [
+        "tpl-so-map"
+      ],
+      "targets": [
+        "flow/lanes"
+      ]
+    },
+    {
+      "row": "tpl-design-process",
+      "disposition": "document",
+      "documents": [
+        "tpl-design-process",
+        "tpl-design-investigation"
+      ],
+      "targets": [
+        "flow/pipeline",
+        "flow/pipeline"
+      ]
+    },
+    {
+      "row": "helix-parts",
+      "disposition": "document",
+      "documents": [
+        "helix-parts"
+      ],
+      "targets": [
+        "structure/stack"
+      ]
+    },
+    {
+      "row": "helix-adr-options",
+      "disposition": "document",
+      "documents": [
+        "helix-adr-options"
+      ],
+      "targets": [
+        "comparison/matrix"
+      ]
+    },
+    {
+      "row": "helix-activities",
+      "disposition": "document",
+      "documents": [
+        "helix-activities"
+      ],
+      "targets": [
+        "flow/pipeline"
+      ]
+    },
+    {
+      "row": "documentor-pipeline",
+      "disposition": "document",
+      "documents": [
+        "documentor-pipeline"
+      ],
+      "targets": [
+        "sequence/lifelines"
+      ]
+    },
+    {
+      "row": "beacon-context",
+      "disposition": "document",
+      "documents": [
+        "beacon-context"
+      ],
+      "targets": [
+        "flow/network"
+      ]
+    },
+    {
+      "row": "beacon-containers",
+      "disposition": "document",
+      "documents": [
+        "beacon-containers"
+      ],
+      "targets": [
+        "flow/network"
+      ]
+    },
+    {
+      "row": "beacon-integrations",
+      "disposition": "document",
+      "documents": [
+        "beacon-integrations"
+      ],
+      "targets": [
+        "flow/network"
+      ]
+    },
+    {
+      "row": "beacon-overview",
+      "disposition": "document",
+      "documents": [
+        "beacon-overview"
+      ],
+      "targets": [
+        "flow/pipeline"
+      ]
+    },
+    {
+      "row": "beacon-field-guide",
+      "disposition": "document",
+      "documents": [
+        "beacon-field-guide"
+      ],
+      "targets": [
+        "flow/lanes"
+      ]
+    },
+    {
+      "row": "beacon-stack",
+      "disposition": "document",
+      "documents": [
+        "beacon-stack"
+      ],
+      "targets": [
+        "structure/stack"
+      ]
+    },
+    {
+      "row": "beacon-cast",
+      "disposition": "table"
+    },
+    {
+      "row": "beacon-deployment",
+      "disposition": "document",
+      "documents": [
+        "beacon-deployment"
+      ],
+      "targets": [
+        "flow/zoned"
+      ]
+    },
+    {
+      "row": "beacon-reply-draft",
+      "disposition": "document",
+      "documents": [
+        "beacon-reply-draft"
+      ],
+      "targets": [
+        "sequence/lifelines"
+      ]
+    },
+    {
+      "row": "beacon-reply-presentation",
+      "disposition": "document",
+      "documents": [
+        "beacon-reply-presentation"
+      ],
+      "targets": [
+        "flow/zoned"
+      ]
+    },
+    {
+      "row": "beacon-walkthrough",
+      "disposition": "embeds",
+      "embeds": "beacon-reply-draft"
+    },
+    {
+      "row": "beacon-estate",
+      "disposition": "document",
+      "documents": [
+        "beacon-estate-landscape",
+        "beacon-estate"
+      ],
+      "targets": [
+        "structure/nested",
+        "flow/network"
+      ]
+    },
+    {
+      "row": "beacon-settings",
+      "disposition": "table"
+    },
+    {
+      "row": "beacon-workflows",
+      "disposition": "table"
+    },
+    {
+      "row": "beacon-schema",
+      "disposition": "document",
+      "documents": [
+        "beacon-schema-tickets",
+        "beacon-schema-workspace"
+      ],
+      "targets": [
+        "structure/entities",
+        "structure/entities"
+      ],
+      "note": "17 tables, above the 15-node ceiling: split into tickets and the workspace around them."
+    },
+    {
+      "row": "beacon-ci",
+      "disposition": "document",
+      "documents": [
+        "beacon-ci-ci",
+        "beacon-ci-nightly",
+        "beacon-ci-preview"
+      ],
+      "targets": [
+        "flow/pipeline",
+        "flow/pipeline",
+        "flow/pipeline"
+      ]
+    },
+    {
+      "row": "beacon-ticket-lifecycle",
+      "disposition": "document",
+      "documents": [
+        "beacon-ticket-lifecycle"
+      ],
+      "targets": [
+        "state/lifecycle"
+      ]
+    },
+    {
+      "row": "helix-containers",
+      "disposition": "document",
+      "documents": [
+        "helix-containers"
+      ],
+      "targets": [
+        "flow/network"
+      ],
+      "note": "New view; the inventory's helix-arch-l2 row. Drawn from the hand Mermaid until the model has a containers view."
+    }
+  ]
+}
