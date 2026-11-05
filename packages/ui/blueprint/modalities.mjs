@@ -13,7 +13,7 @@ export const MODALITIES = {
     aiRoles: [],
     shell: "AppShell with an empty Home screen",
     components: ["@ux-builder/ui", "@ux-builder/ui/patterns"],
-    ruleFamilies: ["nav", "layout", "modal", "action", "feedback", "loading", "screen", "emphasis", "input", "text", "view", "pattern", "flow", "journey", "theme"],
+    ruleFamilies: ["nav", "layout", "modal", "action", "feedback", "loading", "screen", "emphasis", "input", "text", "view", "pattern", "flow", "journey", "theme", "form", "data", "search", "auth", "help", "onboarding", "notify", "perf", "platform", "color", "motion", "media", "trust"],
     widths: [390, 768, 1280],
   },
   chat: {
@@ -23,7 +23,7 @@ export const MODALITIES = {
     aiRoles: ["assistant"],
     shell: "a full-screen Conversation",
     components: ["@ux-builder/ui/assistant"],
-    ruleFamilies: ["ai", "feedback", "input", "text", "theme"],
+    ruleFamilies: ["ai", "feedback", "input", "text", "theme", "color", "motion", "media", "trust"],
     widths: [390, 1280],
   },
   "hybrid-chat": {
@@ -33,7 +33,7 @@ export const MODALITIES = {
     aiRoles: ["assistant"],
     shell: "a Conversation that renders Adaptive Card parts",
     components: ["@ux-builder/ui/assistant", "@ux-builder/ui/adaptive-cards"],
-    ruleFamilies: ["ai", "feedback", "input", "text", "genui", "card", "theme"],
+    ruleFamilies: ["ai", "feedback", "input", "text", "genui", "card", "theme", "color", "motion", "media", "trust"],
     widths: [390, 1280],
   },
 };
@@ -72,9 +72,10 @@ export function expandModalities(names = DEFAULT_MODALITIES) {
 }
 
 /* Rule families that apply whatever the modality: the blueprint's own
-   validity, and the complexity a change adds (FEAT-018 GDL-12) (rulesFor
-   with modalities keeps them; FEAT-014 MOD-06). */
-export const SHARED_FAMILIES = ["blueprint", "simplicity", "task", "consistency"];
+   validity, the complexity a change adds (FEAT-018 GDL-12), and how the
+   design is made, measured, reviewed and audited (the guided session's
+   rules) (rulesFor with modalities keeps them; FEAT-014 MOD-06). */
+export const SHARED_FAMILIES = ["blueprint", "simplicity", "task", "consistency", "measure", "trace", "audit", "review", "research", "guide", "prototype"];
 
 /* The app frames a person chooses from (US-162; the blueprint's
    supports.frame, AppShell's frame), each with what it is in plain words. */

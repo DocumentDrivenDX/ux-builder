@@ -69,9 +69,25 @@ the findings of a blueprint check or an audit by rule ID.
 | `sources` | array | yes | At least one `{ "title", "url", "licence", "wording", "quote"? }` |
 | `sources[].licence` | `"apple-terms"`, `"google-terms"`, `"CC-BY-2.5"`, `"W3C"`, `"own"` | yes | `apple-terms` and `google-terms` are not open |
 | `sources[].wording` | `"paraphrased"` or `"quoted"` | yes | `quoted` only with an open licence, with `quote` of at most 25 words |
+| `priority` | `"P0"` to `"P6"` | no | Its level in `priorities`; every shipped rule has one |
+| `dependsOn` | string[] | no | Rule IDs that must pass before this rule is judged; no cycles |
+| `takesPrecedenceOver` | string[] | no | Rule IDs this rule wins over when they clash; never a rule at a higher priority |
+| `scope` | string | no | Where the rule applies, in words, when `when` and `appliesTo` cannot say it |
+| `plannedChecks` | array | no | Each `{ "kind", "id" }`: an automated check a proposed rule is meant to get (kinds add `journey`, `metrics`, `trace`, `guide`, `prototype`). Not yet built, so `checks` is a `review` meanwhile |
+| `heuristics` | string[] | no | Nielsen's usability heuristics the rule bears on (`"H1 Visibility of system status"`) |
+| `status` | `"proposed"` | no | Not yet reviewed into the SDK's rules; its `checks` are reviews only |
+
+`severity` also allows `"info"`, and `sources[].licence` also allows
+`"OGL-3.0"`, `"public-domain"`, `"CC-BY-SA-2.5"`, `"CC-BY-SA-4.0"`,
+`"Apache-2.0"` and `"publisher-terms"` (any other publisher's terms). All
+of these are paraphrased.
 
 `rules.json` also holds `version` (1) and `limits`: `compactDestinations`
-(5) and `lineLength` (80), the numbers rules refer to.
+(5) and `lineLength` (80), the numbers rules refer to; `priorities`, each
+`{ "id", "name", "protects", "ruleOfThumb" }` from P0 (Gate) to P6
+(Refinement); and `clashOrder`, the steps that decide which of two
+clashing rules wins: dependencies first, then the higher priority, then
+the more specific rule, then the higher severity, then a recorded decision.
 
 ### Recipe
 
