@@ -1,0 +1,10 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Copy of ux-builder-databricks to adjust on the vk/adjustments branch. UX Builder on the databricks design system: the ux-builder brand. Made in the theme builder.",
+  "name": "vk-ux-builder-databricks",
+  "title": "vk-UX Builder Databricks",
+  "brand": "vk-ux-builder",
+  "public": true,
+  "default": "light",
+  "designSystem": "databricks"
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Copy of databricks to adjust on the vk/adjustments branch. Databricks: the Databricks brand on the Databricks design system. Light by default, as Databricks Apps ship.",
+  "name": "vk-databricks",
+  "title": "vk-Databricks",
+  "brand": "vk-databricks",
+  "default": "light",
+  "designSystem": "databricks"
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Copy of praxis-carbon to adjust on the vk/adjustments branch. Praxis Carbon: brand praxis on the shared carbon design system.",
+  "name": "vk-praxis-carbon",
+  "title": "vk-Praxis Carbon",
+  "brand": "vk-praxis",
+  "default": "dark",
+  "designSystem": "carbon"
+}

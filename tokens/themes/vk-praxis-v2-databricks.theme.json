@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Copy of praxis-v2-databricks to adjust on the vk/adjustments branch. Praxis V2 on the databricks design system: the praxis-v2 brand. Made in the theme builder.",
+  "name": "vk-praxis-v2-databricks",
+  "title": "vk-Praxis V2 Databricks",
+  "brand": "vk-praxis-v2",
+  "default": "light",
+  "designSystem": "databricks"
+}

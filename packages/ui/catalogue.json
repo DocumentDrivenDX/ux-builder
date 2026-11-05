@@ -160,6 +160,136 @@
       "default": "light",
       "css": "@ux-builder/tokens/themes/ux-builder-databricks.css",
       "fonts": "@ux-builder/tokens/fonts/ux-builder-databricks.css"
+    },
+    {
+      "name": "vk-databricks",
+      "title": "vk-Databricks",
+      "brand": "vk-databricks",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/vk-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-databricks.css"
+    },
+    {
+      "name": "vk-img-8593-databricks",
+      "title": "vk-Img 8593 Databricks",
+      "brand": "vk-img-8593",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/vk-img-8593-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-img-8593-databricks.css"
+    },
+    {
+      "name": "vk-plain",
+      "title": "vk-Plain",
+      "brand": "vk-plain",
+      "designSystem": null,
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/vk-plain.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-plain.css"
+    },
+    {
+      "name": "vk-praxis",
+      "title": "vk-Praxis",
+      "brand": "vk-praxis",
+      "designSystem": null,
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/vk-praxis.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-praxis.css"
+    },
+    {
+      "name": "vk-praxis-carbon",
+      "title": "vk-Praxis Carbon",
+      "brand": "vk-praxis",
+      "designSystem": "carbon",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/vk-praxis-carbon.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-praxis-carbon.css"
+    },
+    {
+      "name": "vk-praxis-fluentui",
+      "title": "vk-Praxis Fluent",
+      "brand": "vk-praxis",
+      "designSystem": "fluent",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/vk-praxis-fluentui.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-praxis-fluentui.css"
+    },
+    {
+      "name": "vk-praxis-material",
+      "title": "vk-Praxis Material",
+      "brand": "vk-praxis",
+      "designSystem": "material",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/vk-praxis-material.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-praxis-material.css"
+    },
+    {
+      "name": "vk-praxis-v2-databricks",
+      "title": "vk-Praxis V2 Databricks",
+      "brand": "vk-praxis-v2",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/vk-praxis-v2-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-praxis-v2-databricks.css"
+    },
+    {
+      "name": "vk-synaptiq",
+      "title": "vk-Synaptiq",
+      "brand": "vk-synaptiq",
+      "designSystem": null,
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/vk-synaptiq.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-synaptiq.css"
+    },
+    {
+      "name": "vk-ux-builder-databricks",
+      "title": "vk-UX Builder Databricks",
+      "brand": "vk-ux-builder",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/vk-ux-builder-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/vk-ux-builder-databricks.css"
     }
   ],
   "designSystems": [
