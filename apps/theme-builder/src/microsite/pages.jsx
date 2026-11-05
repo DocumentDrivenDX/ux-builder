@@ -12,7 +12,7 @@ import { AI, CONTRACT_LIST, DECISIONS, FEATURES, PATTERNS, RELEASES, REPO, WIDGE
    contracts they cite, and the Reference and Proof pages are generated from
    the catalogue, the HELIX artifacts and the changelogs (sources.js). */
 
-const THEME_PAGE = `${ROOT}themes/?theme=vk-databricks`;
+const THEME_PAGE = `${ROOT}themes/?theme=vk-praxis-material`;
 
 /* Inline `code` and **bold** in generated text, nothing more. */
 export function Md({ children }) {
