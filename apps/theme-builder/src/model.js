@@ -49,8 +49,9 @@ export const SYSTEM_INFO = {
   databricks: { icons: "Lucide", blurb: "AppKit UI: 36px controls, 8px radius, segmented tabs." },
 };
 export const iconsOf = (ds) => SYSTEM_INFO[ds.name]?.icons ?? "Lucide";
-export const iconSetOf = (ds) => (["material", "fluent", "carbon"].includes(ds.name) ? ds.name : "lucide");
-export const fontsOf = (ds) => [...new Set(Object.values(ds.fonts).filter((f) => f.source !== "system" || ds.name === "fluent").map((f) => f.family))].slice(0, 2).join(", ") || "System fonts";
+// From the design system's own icon.set token, so a renamed copy (vk-material) keeps its set.
+export const iconSetOf = (ds) => { const set = ds.tokens?.icon?.set?.$value ?? ds.name; return ["material", "fluent", "carbon"].includes(set) ? set : "lucide"; };
+export const fontsOf = (ds) => [...new Set(Object.values(ds.fonts).filter((f) => f.source !== "system" || iconSetOf(ds) === "fluent").map((f) => f.family))].slice(0, 2).join(", ") || "System fonts";
 export const titleOf = (name) => name.split(/[-_ ]+/).filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
 export const brandNameFor = (theme, ds) => (theme.endsWith(`-${ds}`) && theme.length > ds.length + 1 ? theme.slice(0, -ds.length - 1) : theme);
 /* "acme-legal-logo.svg" -> "acme-legal" */

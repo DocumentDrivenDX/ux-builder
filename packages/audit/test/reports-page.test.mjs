@@ -31,7 +31,7 @@ const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR
 const AUDIT = {
   tool: "@ux-builder/audit", version: "0.5.2", versions: { "@ux-builder/audit": "0.5.2", "@ux-builder/ui": "0.12.1", "@ux-builder/tokens": "1.7.0" },
   generatedAt: "2026-10-26T10:00:00.000Z", urls: ["http://localhost:5173/"], rules: { contrast: "x", reflow: "x", "token-colors": "x", fonts: "x" },
-  runs: [{ url: "http://localhost:5173/", theme: "praxis-carbon", appearance: "light" }, { url: "http://localhost:5173/", theme: "praxis-fluent", appearance: "light" }],
+  runs: [{ url: "http://localhost:5173/", theme: "vk-praxis-carbon", appearance: "light" }, { url: "http://localhost:5173/", theme: "praxis-fluent", appearance: "light" }],
   pages: [], verdicts: {}, findings: [{ id: 1, check: "contrast", severity: "error", url: "http://localhost:5173/", message: "m", runs: [] }, { id: 2, check: "reflow", severity: "warning", url: "http://localhost:5173/", message: "m", runs: [] }],
   summary: { error: 1, warning: 1, info: 0, byRule: { contrast: 1, reflow: 1 } },
 };
@@ -126,7 +126,7 @@ describe("US-158: one page for every report, and a doctor for the versions", () 
   test("AC1: the UI audit records the @ux-builder versions that wrote it", async () => {
     const apps = await modalityApps();
     try {
-      const r = await audit({ urls: [apps.url("/web.html")], themes: ["praxis-carbon"], appearances: ["light"], contrast: false, cwd: fileURLToPath(new URL("..", import.meta.url)) });
+      const r = await audit({ urls: [apps.url("/web.html")], themes: ["vk-praxis-carbon"], appearances: ["light"], contrast: false, cwd: fileURLToPath(new URL("..", import.meta.url)) });
       assert.equal(r.versions["@ux-builder/audit"], VERSION);
       assert.match(r.versions["@ux-builder/ui"], /^\d+\.\d+\.\d+/);
       assert.match(r.versions["@ux-builder/tokens"], /^\d+\.\d+\.\d+/);

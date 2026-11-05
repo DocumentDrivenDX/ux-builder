@@ -32,7 +32,7 @@ const OWN = JSON.parse(readFileSync(join(HERE, "package.json"), "utf8"));
 export const DESIGN_FILES = ["package.json", "README.md", "AGENTS.md", "CLAUDE.md", ".gitignore", "scripts/install-skill.mjs"];
 
 /* Where a theme comes from when no released one carries the person's brand. */
-export const THEME_BUILDER = "No theme carries your brand? Make one in the theme builder: in a clone of https://github.com/DocumentDrivenDX/ux-builder run `npm install && npm run builder`, make the theme from your logo and save it (saving opens a pull request). Once it is merged and released in @ux-builder/tokens, build on it by its name. Or build on `plain` now.";
+export const THEME_BUILDER = "No theme carries your brand? Make one in the theme builder: in a clone of https://github.com/DocumentDrivenDX/ux-builder run `npm install && npm run builder`, make the theme from your logo and save it (saving opens a pull request). Once it is merged and released in @ux-builder/tokens, build on it by its name. Or build on `vk-plain` now.";
 export const themeList = () => themes().map((t) => `  ${t}`).join("\n");
 
 /* A folder made by startDesign whose app is not built yet. */

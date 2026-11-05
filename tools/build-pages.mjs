@@ -64,7 +64,7 @@ for (const t of ctx.themes) writeFileSync(join(data, "themes", `${t.name}.json`)
 if (!existsSync(join(themesOut, "index.html"))) { console.error(`build-pages: the theme pages did not build into ${themesOut}`); process.exit(1); }
 
 // The home page, into the site's root beside themes/ (its own assets/; the public/ folder brings favicon.svg).
-const brand = JSON.parse(readFileSync(join(ROOT, "tokens/brands/ux-builder.brand.json"), "utf8"));
+const brand = JSON.parse(readFileSync(join(ROOT, "tokens/brands/vk-databricks.brand.json"), "utf8"));
 process.env.VITE_INTRO_PAINT = brand.appearances.light.brand["logo-paint"].$value;
 // Link previews need the site's absolute address (SITE_URL for a fork or another host), and the image at a fixed name.
 process.env.VITE_SITE_URL = (process.env.SITE_URL ?? "https://documentdrivendx.github.io/ux-builder/").replace(/\/?$/, "/");

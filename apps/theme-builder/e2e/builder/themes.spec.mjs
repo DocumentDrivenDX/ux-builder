@@ -19,7 +19,7 @@ test.describe("Your themes", () => {
     const errors = watch(page);
     await open(page);
     const list = page.getByRole("list", { name: "Themes" });
-    for (const [name, ds] of [["praxis-carbon", "carbon"], ["databricks", "databricks"], ["plain", "own anatomy"]]) {
+    for (const [name, ds] of [["vk-praxis-carbon", "carbon"], ["databricks", "databricks"], ["vk-plain", "own anatomy"]]) {
       await expect(list.getByRole("listitem").filter({ hasText: name }).first()).toContainText(ds);
     }
     expect(errors).toEqual([]);
@@ -40,7 +40,7 @@ test.describe("Your themes", () => {
     await expect(page.getByRole("button", { name: "Suggest palettes" }), "the logo chosen before is still there").toBeVisible();
     await page.goto("/?view=themes");
     await expect(page.getByRole("heading", { level: 1, name: "Your themes" })).toBeVisible();
-    await page.goto("/?theme=praxis-carbon");
+    await page.goto("/?theme=vk-praxis-carbon");
     await page.getByRole("link", { name: "All themes" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Your themes" })).toBeVisible();
   });
@@ -49,15 +49,15 @@ test.describe("Your themes", () => {
   test("previews a theme in light and dark: palette, widgets in its anatomy and icons, logos, mark and favicon", async ({ page }) => {
     const errors = watch(page);
     await open(page);
-    await page.getByRole("link", { name: "praxis-carbon", exact: true }).click();
-    await expect(page).toHaveURL(/\?theme=praxis-carbon$/);
-    const preview = page.getByRole("region", { name: "Preview of praxis-carbon" });
+    await page.getByRole("link", { name: "vk-praxis-carbon", exact: true }).click();
+    await expect(page).toHaveURL(/\?theme=vk-praxis-carbon$/);
+    const preview = page.getByRole("region", { name: "Preview of vk-praxis-carbon" });
     await expect(preview).toContainText("design system Carbon");
-    const brand = brandFile("praxis");
+    const brand = brandFile("vk-praxis");
     for (const ap of ["light", "dark"]) {
-      const cell = preview.locator(`[data-theme-preview="praxis-carbon:${ap}"]`);
+      const cell = preview.locator(`[data-theme-preview="vk-praxis-carbon:${ap}"]`);
       // The palette, every role with its value from the brand file.
-      const palette = cell.getByRole("list", { name: `praxis-carbon ${ap} palette` });
+      const palette = cell.getByRole("list", { name: `vk-praxis-carbon ${ap} palette` });
       await expect(palette.getByRole("listitem")).toHaveCount(Object.keys(brand.appearances[ap].color).length + Object.keys(brand.appearances[ap].state).length);
       await expect(palette).toContainText(brand.appearances[ap].color.accent.$value);
       // The widgets take the theme's tokens: Carbon's square buttons, its accent, its icons.
@@ -85,12 +85,12 @@ test.describe("Your themes", () => {
   // @covers US-020-AC3
   test("a brand without artwork shows its title in its logo colour, and no mark or favicon", async ({ page }) => {
     await open(page);
-    await page.getByRole("link", { name: "plain", exact: true }).click();
+    await page.getByRole("link", { name: "vk-plain", exact: true }).click();
     const cell = page.locator('[data-theme-preview="plain:light"]');
     await expect(page.locator('[data-theme-preview="plain:dark"]')).toHaveCount(0);
     const word = cell.locator(".tb-themes__wordmark");
     await expect(word).toHaveText("Plain");
-    const paint = brandFile("plain").appearances.light.brand["logo-paint"].$value.match(/[0-9a-f]{2}/gi).map((h) => parseInt(h, 16));
+    const paint = brandFile("vk-plain").appearances.light.brand["logo-paint"].$value.match(/[0-9a-f]{2}/gi).map((h) => parseInt(h, 16));
     expect(await word.evaluate((el) => getComputedStyle(el).color)).toBe(`rgb(${paint.join(", ")})`);
     await expect(cell).toContainText("None: the app's own");
     await expect(cell.getByRole("img", { name: /mark|favicon/ })).toHaveCount(0);

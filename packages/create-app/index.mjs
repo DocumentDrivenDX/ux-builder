@@ -165,7 +165,7 @@ export function scaffold(dir, { theme, name, sdkFrom, blueprint, modalities, bas
   if (existsSync(target) && readdirSync(target).length) die(`${dir} exists and is not empty`);
   const plan = blueprint ? readBlueprint(blueprint) : null;
   const known = themes();
-  theme ??= known.includes("plain") ? "plain" : known[0];
+  theme ??= known.includes("vk-plain") ? "vk-plain" : known[0];
   if (!known.includes(theme)) die(`unknown theme "${theme}"; choose one of ${known.join(", ")}`);
   name ??= basename(target).toLowerCase().replace(/[^a-z0-9-._~]+/g, "-");
   if (!NAME.test(name)) die(`"${name}" is not a valid package name; use --name`);

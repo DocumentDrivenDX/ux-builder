@@ -5,7 +5,7 @@ import { applyFavicon, removeFavicon } from "./brand/favicon.js";
 /* The theme an app selects (ADR-018, CONTRACT-003), set on one element for
    its subtree (US-011).
 
-     <ThemeProvider theme="databricks" appearance="system">…</ThemeProvider>
+     <ThemeProvider theme="vk-databricks" appearance="system">…</ThemeProvider>
 
    The provider's element carries data-theme and data-appearance, so the
    theme CSS (@ux-builder/tokens/themes/<theme>.css) applies to everything

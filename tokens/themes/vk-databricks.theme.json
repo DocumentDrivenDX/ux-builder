@@ -5,5 +5,5 @@
   "title": "vk-Databricks",
   "brand": "vk-databricks",
   "default": "light",
-  "designSystem": "databricks"
+  "designSystem": "vk-databricks"
 }

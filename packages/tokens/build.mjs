@@ -120,7 +120,7 @@ guard(() => {
   console.log(`dist/fonts/ (${new Set(copies.map((c) => c.file)).size} files)`);
 
   write("manifest.json", JSON.stringify({
-    themes: [...src.themes.values()].map((t) => ({ name: t.name, title: t.title, brand: t.brand, designSystem: t.designSystem ?? null, default: defaultAppearance(src, t), appearances: themeAppearances(src, t) })),
+    themes: [...src.themes.values()].map((t) => ({ name: t.name, title: t.title, brand: t.brand, designSystem: t.designSystem ?? null, iconSet: ((t.designSystem ? src.designSystems.get(t.designSystem) : t.anatomy)?.tokens?.icon?.set?.$value) ?? "lucide", default: defaultAppearance(src, t), appearances: themeAppearances(src, t) })),
     brands: [...src.brands.values()].map((b) => ({ name: b.name, title: b.title, appearances: Object.keys(b.appearances) })),
     designSystems: [...src.designSystems.values()].map((s) => ({ name: s.name, title: s.title, source: s.source })),
     previewPairs: pairs,

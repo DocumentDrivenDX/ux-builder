@@ -1,5 +1,5 @@
 /* ux-builder-blueprint wireframes: each screen drawn by its catalogue
-   pattern, with placeholder content, in the neutral `plain` theme, at each
+   pattern, with placeholder content, in the neutral `vk-plain` theme, at each
    supported size class and in each state it declares, as static HTML and PNG
    (FEAT-012 DRW-02; FEAT-015 RPT-09; ADR-030 decision 6). Node only.
 
@@ -37,7 +37,7 @@ const require = createRequire(import.meta.url);
 const PATTERNS = new Set(catalogue.patterns.filter((p) => p.type === "component").map((p) => p.name));
 // The width each size class is drawn at: inside its range, at a common device width.
 export const WIDTHS = { compact: 390, medium: 720, expanded: 1024, large: 1366, "extra-large": 1920 };
-const THEME = "plain";
+const THEME = "vk-plain";
 const noop = () => {};
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 

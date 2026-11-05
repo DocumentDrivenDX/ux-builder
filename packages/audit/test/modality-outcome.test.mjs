@@ -23,7 +23,7 @@ let apps;
 before(async () => { apps = await modalityApps(); });
 after(() => { apps?.close(); rmSync(tmp, { recursive: true, force: true }); });
 
-const run = (pages, more = {}) => audit({ urls: pages.map((p) => apps.url(p)), themes: ["praxis-carbon"], appearances: ["light"], contrast: false, cwd: PKG, ...more });
+const run = (pages, more = {}) => audit({ urls: pages.map((p) => apps.url(p)), themes: ["vk-praxis-carbon"], appearances: ["light"], contrast: false, cwd: PKG, ...more });
 const web = (r) => r.verdicts.modality.find((v) => v.modality === "responsive-web");
 const widthsOf = (r) => [...new Set(r.runs.map((x) => x.width))];
 const cli = (args) => new Promise((done) => {
@@ -83,7 +83,7 @@ describe("US-157: the modality is judged by what the app does, at the size class
     assert.deepEqual([medium.status, medium.fixes], ["pass", []]);
     // On the command line, when no blueprint names them.
     const out = join(tmp, "cli-sizes");
-    const c = await cli(["--modality", "responsive-web", "--size-classes", "compact,expanded", "--theme", "praxis-carbon", "--appearance", "light", "--no-contrast", "--fail-on", "never", "--out", out, apps.url("/web.html")]);
+    const c = await cli(["--modality", "responsive-web", "--size-classes", "compact,expanded", "--theme", "vk-praxis-carbon", "--appearance", "light", "--no-contrast", "--fail-on", "never", "--out", out, apps.url("/web.html")]);
     assert.equal(c.status, 0, c.stdout + c.stderr);
     assert.deepEqual([...new Set(JSON.parse(readFileSync(join(out, "report.json"), "utf8")).runs.map((x) => x.width))], [390, 1280]);
     const bad = await cli(["--size-classes", "huge", apps.url("/web.html")]);
@@ -107,7 +107,7 @@ describe("US-157: the modality is judged by what the app does, at the size class
     assert.equal(none.status, "fail");
     assert.match(none.fixes[0], /^AppShell is missing on http:\/\/x\/, and no main landmark frames the page instead/);
     // A reflow finding at a width counts as content that does not fit there.
-    const reflow = modalityVerdicts({ modalities: { names: ["responsive-web"], widths: [390, 1280] }, pages: [{ url: "http://x/", widths: [{ width: 390, appShell: null, main: true, fits: true }, { width: 1280, appShell: null, main: true, fits: true }] }], findings: [{ id: 1, check: "reflow", url: "http://x/", severity: "warning", runs: ["praxis-carbon/light@390"] }], families: {} })[0];
+    const reflow = modalityVerdicts({ modalities: { names: ["responsive-web"], widths: [390, 1280] }, pages: [{ url: "http://x/", widths: [{ width: 390, appShell: null, main: true, fits: true }, { width: 1280, appShell: null, main: true, fits: true }] }], findings: [{ id: 1, check: "reflow", url: "http://x/", severity: "warning", runs: ["vk-praxis-carbon/light@390"] }], families: {} })[0];
     assert.match(reflow.fixes[0], /^http:\/\/x\/: content overflows at 390px:/);
   });
 });

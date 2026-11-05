@@ -15,7 +15,7 @@ import { DECISIONS, FEATURES, PATTERNS, REPO, WIDGETS } from "./sources.js";
    site's hierarchy and the current page; the right menu is this page's
    headings only. It wears ux-builder-databricks. */
 
-const THEME = "ux-builder-databricks";
+const THEME = "vk-databricks";
 const PREF = "uxm-appearance";
 const APPEARANCES = ["system", "light", "dark"];
 const saved = () => { try { const v = localStorage.getItem(PREF); return APPEARANCES.includes(v) ? v : "system"; } catch { return "system"; } };
@@ -117,7 +117,7 @@ function Proof() {
         </ul>
         <div className="uxh-row">
           <a className="uxh-btn uxh-btn--primary" href={href("proof", "decisions")}>Read the decisions<Icon icon={iconArrowRight} /></a>
-          <a className="uxh-btn" href={`${ROOT}themes/?theme=ux-builder-databricks`}>See every component live</a>
+          <a className="uxh-btn" href={`${ROOT}themes/?theme=vk-databricks`}>See every component live</a>
         </div>
       </div>
     </section>

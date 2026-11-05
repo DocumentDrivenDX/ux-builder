@@ -676,24 +676,11 @@ The rules restate guidance from Apple's Human Interface Guidelines, Material Des
 
 | Theme | Design system | Appearances |
 |-------|---------------|-------------|
-| `databricks` | databricks | dark, light (default light) |
-| `img-8593-databricks` | databricks | dark, light (default light) |
-| `plain` | own anatomy | dark, light (default light) |
-| `praxis` | own anatomy | dark, light (default dark) |
-| `praxis-carbon` | carbon | dark, light (default dark) |
-| `praxis-fluentui` | fluent | dark, light (default dark) |
-| `praxis-material` | material | dark, light (default dark) |
-| `praxis-v2-databricks` | databricks | dark, light (default light) |
-| `synaptiq` | own anatomy | dark, light (default light) |
-| `ux-builder-databricks` | databricks | dark, light (default light) |
-| `vk-databricks` | databricks | dark, light (default light) |
-| `vk-img-8593-databricks` | databricks | dark, light (default light) |
+| `vk-databricks` | vk-databricks | dark, light (default light) |
 | `vk-plain` | own anatomy | dark, light (default light) |
 | `vk-praxis` | own anatomy | dark, light (default dark) |
-| `vk-praxis-carbon` | carbon | dark, light (default dark) |
-| `vk-praxis-fluentui` | fluent | dark, light (default dark) |
-| `vk-praxis-material` | material | dark, light (default dark) |
-| `vk-praxis-v2-databricks` | databricks | dark, light (default light) |
+| `vk-praxis-carbon` | vk-carbon | dark, light (default dark) |
+| `vk-praxis-fluentui` | vk-fluent | dark, light (default dark) |
+| `vk-praxis-material` | vk-material | dark, light (default dark) |
 | `vk-synaptiq` | own anatomy | dark, light (default light) |
-| `vk-ux-builder-databricks` | databricks | dark, light (default light) |
 <!-- catalogue:end -->

@@ -23,11 +23,11 @@ const cell = (id, theme, appearance, cls = "") =>
 
 before(async () => {
   const body = [
-    cell("praxis-light", "praxis", "light"),
-    cell("praxis-dark", "praxis", "dark"),
-    cell("carbon-dark", "praxis-carbon", "dark"),
-    cell("plain", "plain", "light"),
-    cell("plain-text", "plain", "light", "piq-logo--text"),
+    cell("praxis-light", "vk-praxis", "light"),
+    cell("praxis-dark", "vk-praxis", "dark"),
+    cell("carbon-dark", "vk-praxis-carbon", "dark"),
+    cell("vk-plain", "vk-plain", "light"),
+    cell("plain-text", "vk-plain", "light", "piq-logo--text"),
   ].join("");
   const html = join(tmp, "page.html");
   writeFileSync(html, `<!doctype html><link rel="stylesheet" href="${pathToFileURL(THEMES)}"><link rel="stylesheet" href="${pathToFileURL(UI)}"><body>${body}</body>`);
@@ -63,7 +63,7 @@ test("AC8: the theme's artwork is drawn at the brand's height, the dark artwork 
 
 // @covers US-010-AC9
 test("AC9: a brand without artwork has no image token; its wordmark takes the logo colour", async () => {
-  const bare = await style("plain"), text = await style("plain-text");
+  const bare = await style("vk-plain"), text = await style("plain-text");
   assert.equal(bare.token, "none", "no artwork (the registered initial value), so Logo falls back to text");
   assert.equal(text.image, "none");
   assert.equal(text.color, "rgb(31, 41, 55)", "#1F2937, the brand's logo paint");
@@ -77,5 +77,5 @@ test("AC11: a theme's favicon token computes to an absolute URL that loads; a th
     assert.match(value, /^url\("file:\/\/\/.+\/brand\/praxis\/mark-v2\.svg"\)$/, id);
     assert.ok(await loads(value), `${id}: ${value} loads`);
   }
-  assert.equal(await favicon("plain"), "none");
+  assert.equal(await favicon("vk-plain"), "none");
 });

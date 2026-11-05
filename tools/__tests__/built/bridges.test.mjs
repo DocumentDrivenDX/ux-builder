@@ -55,17 +55,17 @@ test("US-045-AC1: every theme has a shadcn bridge, a block per appearance, setti
 test("US-045-AC3: every bridge pairing passes 4.5:1 for text and 3:1 for the focus ring in every theme; a failing one fails the build, naming theme, appearance, surface and pair", () => {
   for (const t of manifest.themes) for (const ap of t.appearances) for (const s of Object.keys(SURFACES)) assert.deepEqual(bridgeFailures(resolved(t.name, ap), s), [], `${t.name} ${ap} ${s}`);
   // The muted text falls back to a stronger text role where the theme's is too faint on the muted panel (plain light).
-  const plain = resolved("plain", "light");
+  const plain = resolved("vk-plain", "light");
   assert.ok(ratio(plain["piq-color-text-muted"], plain["piq-color-surface-sunken"]) < 4.5);
   // plain has a dark block too (ADR-043): read the light one.
-  const muted = blocks(readFileSync(join(DIST, "bridges/shadcn/plain.css"), "utf8")).find((b) => b.selectors.some((x) => /data-appearance="light"/.test(x))).vars["--muted-foreground"];
+  const muted = blocks(readFileSync(join(DIST, "bridges/shadcn/vk-plain.css"), "utf8")).find((b) => b.selectors.some((x) => /data-appearance="light"/.test(x))).vars["--muted-foreground"];
   assert.ok(ratio(muted, plain["piq-color-surface-sunken"]) >= 4.5);
 
   const d = mkdtempSync(join(tmpdir(), "bridge-bad-"));
   try {
     cpSync(join(ROOT, "tokens"), join(d, "tokens"), { recursive: true });
     cpSync(join(ROOT, "brand"), join(d, "brand"), { recursive: true });
-    const p = join(d, "tokens/brands/plain.brand.json");
+    const p = join(d, "tokens/brands/vk-plain.brand.json");
     const brand = JSON.parse(readFileSync(p, "utf8"));
     brand.appearances.light.state.closed.$value = "#C8C8C8";     // a destructive colour too faint to read on the page
     writeFileSync(p, JSON.stringify(brand, null, 2));

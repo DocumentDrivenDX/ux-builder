@@ -39,7 +39,7 @@ const list = (props = {}) => h(CollectionList, {
   page: 2, pageSize: 20, total: 312, onPageChange: () => {}, ...props,
 });
 
-async function open(body, { width = 1280, theme = "praxis-carbon", touch = false } = {}) {
+async function open(body, { width = 1280, theme = "vk-praxis-carbon", touch = false } = {}) {
   const html = join(tmp, `p-${Math.random().toString(36).slice(2)}.html`);
   writeFileSync(html, `<!doctype html><html data-theme="${theme}" data-appearance="light"><head><meta name="viewport" content="width=device-width, initial-scale=1">${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${body}</body></html>`);
   const page = await browser.newPage({ viewport: { width, height: 800 }, hasTouch: touch, isMobile: touch });
@@ -111,7 +111,7 @@ describe("US-025 in Chromium", () => {
 
   // @covers US-025-AC7
   test("AC7: while loading, skeleton rows take the loaded rows' space, so the rows arrive without shifting the page", async () => {
-    for (const theme of ["praxis-carbon", "praxis", "praxis-material"]) {
+    for (const theme of ["vk-praxis-carbon", "vk-praxis", "vk-praxis-material"]) {
       const measure = async (props) => {
         const page = await open(boxed(1024, list(props)), { theme });
         const m = await page.evaluate(() => {

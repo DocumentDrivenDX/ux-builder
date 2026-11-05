@@ -68,10 +68,10 @@ describe("CSS selectors (CONTRACT-003)", () => {
   });
 
   test("a theme's default appearance is [data-theme] alone; its other appearance adds data-appearance (ADR-018)", () => {
-    assert.match(themeCss(src, "praxis-carbon"), /^\[data-theme="praxis-carbon"\] \{/);
-    assert.match(themeCss(src, "praxis-carbon"), /^\[data-theme="praxis-carbon"\]\[data-appearance="light"\] \{/m);
-    assert.match(themeCss(src, "plain"), /^\[data-theme="plain"\]\[data-appearance="dark"\] \{/m, "plain's dark appearance (ADR-043) adds data-appearance");
-    assert.doesNotMatch(brandCss(src, "praxis"), /data-theme/, "preview blocks are not selected by data-theme");
+    assert.match(themeCss(src, "vk-praxis-carbon"), /^\[data-theme="vk-praxis-carbon"\] \{/);
+    assert.match(themeCss(src, "vk-praxis-carbon"), /^\[data-theme="vk-praxis-carbon"\]\[data-appearance="light"\] \{/m);
+    assert.match(themeCss(src, "vk-plain"), /^\[data-theme="vk-plain"\]\[data-appearance="dark"\] \{/m, "vk-plain's dark appearance (ADR-043) adds data-appearance");
+    assert.doesNotMatch(brandCss(src, "vk-praxis"), /data-theme/, "preview blocks are not selected by data-theme");
   });
 
   test("references become var() of the role's CSS name", () => {
@@ -96,12 +96,12 @@ describe("bad sources fail the build", () => {
   });
 
   test("a theme naming a missing shared design system", () => {
-    const run = broken("themes/praxis-carbon.theme.json", (t) => { t.designSystem = "nope"; return t; });
+    const run = broken("themes/vk-praxis-carbon.theme.json", (t) => { t.designSystem = "nope"; return t; });
     assert.throws(run, ComposeError);
   });
 
   test("a brand file that fails its schema", () => {
-    const run = broken("brands/praxis.brand.json", (b) => { delete b.appearances.dark.color.accent; return b; });
+    const run = broken("brands/vk-praxis.brand.json", (b) => { delete b.appearances.dark.color.accent; return b; });
     assert.throws(run, ComposeError);
   });
 });

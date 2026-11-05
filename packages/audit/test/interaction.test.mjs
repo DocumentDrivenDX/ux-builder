@@ -20,7 +20,7 @@ const FILES = { "/themes.css": join(PKG, "../tokens/dist/themes.css"), "/fonts.c
 const tmp = mkdtempSync(join(tmpdir(), "audit-ia-"));
 let server, base;
 
-const page = (body, script = "") => `<!doctype html><html lang="en" data-theme="praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>t</title>
+const page = (body, script = "") => `<!doctype html><html lang="en" data-theme="vk-praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>t</title>
 <link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css">
 <style>body { margin: 0; font-family: var(--piq-font-body); color: var(--piq-color-text); background: var(--piq-color-ground); } p { margin: 0 0 1em; }</style>
 </head><body>${body}<script>${script}</script></body></html>`;
@@ -67,7 +67,7 @@ const cliRun = (args) => new Promise((resolve) => {
   c.stdout.on("data", (d) => { stdout += d; }); c.stderr.on("data", (d) => { stderr += d; });
   c.on("close", (status) => resolve({ status, stdout, stderr }));
 });
-const OPTS = { themes: ["praxis-carbon"], appearances: ["light"], contrast: false, rules: { brand: false } };
+const OPTS = { themes: ["vk-praxis-carbon"], appearances: ["light"], contrast: false, rules: { brand: false } };
 const run = (paths, more = {}) => audit({ urls: paths.map((p) => `${base}${p}`), ...OPTS, ...more });
 const of = (r, rule, path) => r.findings.filter((f) => f.check === rule && (!path || f.url.endsWith(path)));
 
@@ -103,11 +103,11 @@ describe("US-054: the audit checks structure and interaction", () => {
     const many = of(r, "nav-per-breakpoint", "/many-destinations.html");
     assert.equal(many.length, 1, JSON.stringify(many, null, 1));
     assert.equal(many[0].selector, "#top", "the breadcrumb is not navigation between destinations");
-    assert.deepEqual(many[0].runs, ["praxis-carbon/light@390"]);
+    assert.deepEqual(many[0].runs, ["vk-praxis-carbon/light@390"]);
     assert.equal(many[0].ruleId, "nav.compact-destinations");
     const menu = of(r, "nav-per-breakpoint", "/menu-nav.html");
     assert.equal(menu.length, 1, JSON.stringify(menu, null, 1));
-    assert.deepEqual(menu[0].runs, ["praxis-carbon/light@1280"]);
+    assert.deepEqual(menu[0].runs, ["vk-praxis-carbon/light@1280"]);
     assert.equal(menu[0].ruleId, "nav.standing-at-expanded");
     assert.equal(of(await run(["/many-destinations.html"]), "nav-per-breakpoint").length, 0, "only with --width");
   });
@@ -134,7 +134,7 @@ describe("US-054: the audit checks structure and interaction", () => {
     const page = renderHtml(r);
     for (const s of ours[0].sources) assert.ok(page.includes(`<a href="${s.url}">`), s.url);
     const out = join(tmp, "cli");
-    const cli = await cliRun(["--theme", "praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--out", out, `${base}/primary.html`]);
+    const cli = await cliRun(["--theme", "vk-praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--out", out, `${base}/primary.html`]);
     assert.equal(cli.status, 0, cli.stderr + cli.stdout);
     const json = JSON.parse(readFileSync(join(out, "report.json"), "utf8"));
     assert.ok(json.findings.some((f) => f.check === "one-primary-action" && f.ruleId === "emphasis.one-primary" && f.sources.length));
@@ -145,7 +145,7 @@ describe("US-052: adopting the audit in an existing app", () => {
   // @covers US-052-AC3
   test("AC3: --write-baseline writes every finding in a stable order", async () => {
     const file = join(tmp, "baseline.json");
-    const cli = await cliRun([...["--theme", "praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--out", join(tmp, "wb")], "--write-baseline", file, `${base}/primary.html`, `${base}/lines.html`]);
+    const cli = await cliRun([...["--theme", "vk-praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--out", join(tmp, "wb")], "--write-baseline", file, `${base}/primary.html`, `${base}/lines.html`]);
     assert.equal(cli.status, 0, cli.stderr);
     const b = JSON.parse(readFileSync(file, "utf8"));
     assert.equal(b.tool, "ux-builder-audit");
@@ -175,7 +175,7 @@ describe("US-052: adopting the audit in an existing app", () => {
     // The exit code: with every finding baselined, even --fail-on warning passes.
     const file = join(tmp, "all.json");
     writeFileSync(file, JSON.stringify(toBaseline(await run(["/primary.html"]))));
-    const args = ["--theme", "praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--fail-on", "warning", "--out", join(tmp, "bl"), `${base}/primary.html`];
+    const args = ["--theme", "vk-praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--fail-on", "warning", "--out", join(tmp, "bl"), `${base}/primary.html`];
     assert.equal((await cliRun(args)).status, 1);
     assert.equal((await cliRun([...args, "--baseline", file])).status, 0);
   });

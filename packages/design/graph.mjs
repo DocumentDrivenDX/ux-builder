@@ -190,7 +190,7 @@ export async function applyImpact(app, { change, set } = {}) {
   for (const dir of existsSync(join(app, protos)) ? readdirSync(join(app, protos)).filter((n) => /^current(-[a-z0-9-]+)?$/.test(n) || (chosen && (n === chosen || n.startsWith(`${chosen}-`)))) : []) {
     // The theme it was drawn in: its assets hold that theme's CSS beside ui.css and patterns.css.
     const assetsDir = join(app, protos, dir, "assets");
-    const theme = (existsSync(assetsDir) ? readdirSync(assetsDir) : []).find((f) => f.endsWith(".css") && !["ui.css", "patterns.css"].includes(f))?.replace(/\.css$/, "") ?? "plain";
+    const theme = (existsSync(assetsDir) ? readdirSync(assetsDir) : []).find((f) => f.endsWith(".css") && !["ui.css", "patterns.css"].includes(f))?.replace(/\.css$/, "") ?? "vk-plain";
     await writePrototype(next, { root: join(app, protos), dir, question: reached.change, theme });
     regenerated.push(`${protos}/${dir}/`);
   }

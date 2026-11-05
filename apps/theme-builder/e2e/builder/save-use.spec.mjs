@@ -29,8 +29,8 @@ test.describe("Save theme", () => {
       await expect(hint).toContainText("Use lowercase letters, digits and hyphens");
       await expect(save).toBeDisabled();
     }
-    await name.fill("praxis-carbon");
-    await expect(hint).toContainText("already a theme called praxis-carbon");
+    await name.fill("vk-praxis-carbon");
+    await expect(hint).toContainText("already a theme called vk-praxis-carbon");
     await name.fill("synaptiq-carbon");
     await expect(hint).toContainText("already a brand called synaptiq");
     await name.fill("names-ok-carbon");   // unused by every other test

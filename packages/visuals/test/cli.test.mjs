@@ -13,7 +13,7 @@ const file = (id) => fixtures.find((f) => f.id === id).file;
 test("@covers US-163-AC6 one run renders several documents, checks them and exits 0", async () => {
   const out = mkdtempSync(join(tmpdir(), "uxb-visuals-"));
   try {
-    const r = await main(["render", file("helix-context"), file("beacon-reply-draft"), file("beacon-field-guide"), "--theme", "databricks", "--appearance", "both", "--output", "all", "--out", out, "--check", "--report"]);
+    const r = await main(["render", file("helix-context"), file("beacon-reply-draft"), file("beacon-field-guide"), "--theme", "vk-databricks", "--appearance", "both", "--output", "all", "--out", out, "--check", "--report"]);
     assert.equal(r.code, 0, r.stdout + r.stderr);
     const summary = JSON.parse(r.stdout);
     assert.deepEqual(summary.rendered.map((x) => x.id), ["helix-context", "beacon-reply-draft", "beacon-field-guide"]);
@@ -32,7 +32,7 @@ test("@covers US-163-AC6 a refused document makes the run exit 1 and is named in
     doc.extensions["umf.visual"].id = "helix-context-broken";
     doc.extensions["umf.visual"].edges[0].to = "nowhere";
     writeFileSync(bad, JSON.stringify(doc));
-    const r = await main(["render", file("helix-context"), bad, "--theme", "praxis", "--out", out]);
+    const r = await main(["render", file("helix-context"), bad, "--theme", "vk-praxis", "--out", out]);
     assert.equal(r.code, 1);
     const summary = JSON.parse(r.stdout);
     assert.equal(summary.rendered.length, 1);
@@ -42,7 +42,7 @@ test("@covers US-163-AC6 a refused document makes the run exit 1 and is named in
 });
 
 test("@covers US-163-AC6 usage without a theme or documents", async () => {
-  const r = await main(["render", "--theme", "praxis"]);
+  const r = await main(["render", "--theme", "vk-praxis"]);
   assert.equal(r.code, 2);
   assert.match(r.stderr, /usage: ux-builder-visuals render/);
 });

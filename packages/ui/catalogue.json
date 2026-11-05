@@ -32,140 +32,10 @@
   },
   "themes": [
     {
-      "name": "databricks",
-      "title": "Databricks",
-      "brand": "databricks",
-      "designSystem": "databricks",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/databricks.css",
-      "fonts": "@ux-builder/tokens/fonts/databricks.css"
-    },
-    {
-      "name": "img-8593-databricks",
-      "title": "Img 8593 Databricks",
-      "brand": "img-8593",
-      "designSystem": "databricks",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/img-8593-databricks.css",
-      "fonts": "@ux-builder/tokens/fonts/img-8593-databricks.css"
-    },
-    {
-      "name": "plain",
-      "title": "Plain",
-      "brand": "plain",
-      "designSystem": null,
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/plain.css",
-      "fonts": "@ux-builder/tokens/fonts/plain.css"
-    },
-    {
-      "name": "praxis",
-      "title": "Praxis",
-      "brand": "praxis",
-      "designSystem": null,
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "dark",
-      "css": "@ux-builder/tokens/themes/praxis.css",
-      "fonts": "@ux-builder/tokens/fonts/praxis.css"
-    },
-    {
-      "name": "praxis-carbon",
-      "title": "Praxis Carbon",
-      "brand": "praxis",
-      "designSystem": "carbon",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "dark",
-      "css": "@ux-builder/tokens/themes/praxis-carbon.css",
-      "fonts": "@ux-builder/tokens/fonts/praxis-carbon.css"
-    },
-    {
-      "name": "praxis-fluentui",
-      "title": "Praxis Fluent",
-      "brand": "praxis",
-      "designSystem": "fluent",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "dark",
-      "css": "@ux-builder/tokens/themes/praxis-fluentui.css",
-      "fonts": "@ux-builder/tokens/fonts/praxis-fluentui.css"
-    },
-    {
-      "name": "praxis-material",
-      "title": "Praxis Material",
-      "brand": "praxis",
-      "designSystem": "material",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "dark",
-      "css": "@ux-builder/tokens/themes/praxis-material.css",
-      "fonts": "@ux-builder/tokens/fonts/praxis-material.css"
-    },
-    {
-      "name": "praxis-v2-databricks",
-      "title": "Praxis V2 Databricks",
-      "brand": "praxis-v2",
-      "designSystem": "databricks",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/praxis-v2-databricks.css",
-      "fonts": "@ux-builder/tokens/fonts/praxis-v2-databricks.css"
-    },
-    {
-      "name": "synaptiq",
-      "title": "Synaptiq",
-      "brand": "synaptiq",
-      "designSystem": null,
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/synaptiq.css",
-      "fonts": "@ux-builder/tokens/fonts/synaptiq.css"
-    },
-    {
-      "name": "ux-builder-databricks",
-      "title": "UX Builder Databricks",
-      "brand": "ux-builder",
-      "designSystem": "databricks",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/ux-builder-databricks.css",
-      "fonts": "@ux-builder/tokens/fonts/ux-builder-databricks.css"
-    },
-    {
       "name": "vk-databricks",
       "title": "vk-Databricks",
       "brand": "vk-databricks",
-      "designSystem": "databricks",
+      "designSystem": "vk-databricks",
       "appearances": [
         "dark",
         "light"
@@ -173,19 +43,6 @@
       "default": "light",
       "css": "@ux-builder/tokens/themes/vk-databricks.css",
       "fonts": "@ux-builder/tokens/fonts/vk-databricks.css"
-    },
-    {
-      "name": "vk-img-8593-databricks",
-      "title": "vk-Img 8593 Databricks",
-      "brand": "vk-img-8593",
-      "designSystem": "databricks",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/vk-img-8593-databricks.css",
-      "fonts": "@ux-builder/tokens/fonts/vk-img-8593-databricks.css"
     },
     {
       "name": "vk-plain",
@@ -217,7 +74,7 @@
       "name": "vk-praxis-carbon",
       "title": "vk-Praxis Carbon",
       "brand": "vk-praxis",
-      "designSystem": "carbon",
+      "designSystem": "vk-carbon",
       "appearances": [
         "dark",
         "light"
@@ -230,7 +87,7 @@
       "name": "vk-praxis-fluentui",
       "title": "vk-Praxis Fluent",
       "brand": "vk-praxis",
-      "designSystem": "fluent",
+      "designSystem": "vk-fluent",
       "appearances": [
         "dark",
         "light"
@@ -243,7 +100,7 @@
       "name": "vk-praxis-material",
       "title": "vk-Praxis Material",
       "brand": "vk-praxis",
-      "designSystem": "material",
+      "designSystem": "vk-material",
       "appearances": [
         "dark",
         "light"
@@ -251,19 +108,6 @@
       "default": "dark",
       "css": "@ux-builder/tokens/themes/vk-praxis-material.css",
       "fonts": "@ux-builder/tokens/fonts/vk-praxis-material.css"
-    },
-    {
-      "name": "vk-praxis-v2-databricks",
-      "title": "vk-Praxis V2 Databricks",
-      "brand": "vk-praxis-v2",
-      "designSystem": "databricks",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/vk-praxis-v2-databricks.css",
-      "fonts": "@ux-builder/tokens/fonts/vk-praxis-v2-databricks.css"
     },
     {
       "name": "vk-synaptiq",
@@ -277,19 +121,6 @@
       "default": "light",
       "css": "@ux-builder/tokens/themes/vk-synaptiq.css",
       "fonts": "@ux-builder/tokens/fonts/vk-synaptiq.css"
-    },
-    {
-      "name": "vk-ux-builder-databricks",
-      "title": "vk-UX Builder Databricks",
-      "brand": "vk-ux-builder",
-      "designSystem": "databricks",
-      "appearances": [
-        "dark",
-        "light"
-      ],
-      "default": "light",
-      "css": "@ux-builder/tokens/themes/vk-ux-builder-databricks.css",
-      "fonts": "@ux-builder/tokens/fonts/vk-ux-builder-databricks.css"
     }
   ],
   "designSystems": [
@@ -323,6 +154,42 @@
     {
       "name": "material",
       "title": "Material Design 3",
+      "iconSet": "material",
+      "fonts": [
+        "Roboto",
+        "Roboto Mono"
+      ]
+    },
+    {
+      "name": "vk-carbon",
+      "title": "vk-Carbon",
+      "iconSet": "carbon",
+      "fonts": [
+        "IBM Plex Sans",
+        "IBM Plex Mono"
+      ]
+    },
+    {
+      "name": "vk-databricks",
+      "title": "vk-Databricks",
+      "iconSet": "lucide",
+      "fonts": [
+        "DM Sans",
+        "DM Mono"
+      ]
+    },
+    {
+      "name": "vk-fluent",
+      "title": "vk-Fluent 2",
+      "iconSet": "fluent",
+      "fonts": [
+        "Segoe UI",
+        "Consolas"
+      ]
+    },
+    {
+      "name": "vk-material",
+      "title": "vk-Material Design 3",
       "iconSet": "material",
       "fonts": [
         "Roboto",
@@ -367,7 +234,11 @@
         "carbon": "side-menu",
         "databricks": "side-menu",
         "fluent": "side-menu",
-        "material": "rail"
+        "material": "rail",
+        "vk-carbon": "side-menu",
+        "vk-databricks": "side-menu",
+        "vk-fluent": "side-menu",
+        "vk-material": "rail"
       }
     },
     {
@@ -398,7 +269,11 @@
         "carbon": "large",
         "databricks": "large",
         "fluent": "large",
-        "material": "large"
+        "material": "large",
+        "vk-carbon": "large",
+        "vk-databricks": "large",
+        "vk-fluent": "large",
+        "vk-material": "large"
       }
     },
     {
@@ -427,7 +302,11 @@
         "carbon": "ruled",
         "databricks": "ruled",
         "fluent": "ruled",
-        "material": "ruled"
+        "material": "ruled",
+        "vk-carbon": "ruled",
+        "vk-databricks": "ruled",
+        "vk-fluent": "ruled",
+        "vk-material": "ruled"
       }
     },
     {
@@ -462,7 +341,11 @@
         "carbon": "underlined",
         "databricks": "underlined",
         "fluent": "underlined",
-        "material": "underlined"
+        "material": "underlined",
+        "vk-carbon": "underlined",
+        "vk-databricks": "underlined",
+        "vk-fluent": "underlined",
+        "vk-material": "underlined"
       }
     }
   ],
@@ -1883,7 +1766,7 @@
     {
       "name": "iconSetFor",
       "type": "function",
-      "purpose": "The icon set a theme draws with.",
+      "purpose": "The icon set a theme draws with: the one its design system's icon.set token names (manifest iconSet), so a renamed copy of a design system keeps its set.",
       "props": [
         {
           "name": "theme",

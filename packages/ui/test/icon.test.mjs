@@ -28,7 +28,7 @@ const setOf = (el) => el.querySelector("svg.piq-icon").getAttribute("data-icon-s
 describe("US-010 icons", () => {
   // @covers US-010-AC5
   test("AC5: the active theme's design system picks the set; themes without one use Lucide", () => {
-    const expect = { "praxis-material": "material", "praxis-fluentui": "fluent", "praxis-carbon": "carbon", praxis: "lucide", plain: "lucide", synaptiq: "lucide", databricks: "lucide" };
+    const expect = { "vk-praxis-material": "material", "vk-praxis-fluentui": "fluent", "vk-praxis-carbon": "carbon", praxis: "lucide", plain: "lucide", synaptiq: "lucide", databricks: "lucide" };
     for (const [theme, set] of Object.entries(expect)) {
       assert.equal(iconSetFor(theme), set, theme);
       const el = render(h(ThemeProvider, { theme, appearance: "light" }, h(Icon, { name: "warning" })));
@@ -38,19 +38,19 @@ describe("US-010 icons", () => {
   });
 
   test("without a provider, the closest data-theme in the page is used", () => {
-    const el = render(h("div", { "data-theme": "praxis-fluentui" }, h(Icon, { name: "search" })));
+    const el = render(h("div", { "data-theme": "vk-praxis-fluentui" }, h(Icon, { name: "search" })));
     assert.equal(setOf(el), "fluent");
   });
 
   test("set overrides the theme", () => {
-    const el = render(h(ThemeProvider, { theme: "praxis-carbon" }, h(Icon, { name: "search", set: "material" })));
+    const el = render(h(ThemeProvider, { theme: "vk-praxis-carbon" }, h(Icon, { name: "search", set: "material" })));
     assert.equal(setOf(el), "material");
   });
 
   test("switching theme at run time switches the glyph", () => {
-    const el = render(h(ThemeProvider, { theme: "praxis-material", appearance: "light" }, h(Icon, { name: "close" })));
+    const el = render(h(ThemeProvider, { theme: "vk-praxis-material", appearance: "light" }, h(Icon, { name: "close" })));
     assert.equal(setOf(el), "material");
-    act(() => root.render(h(ThemeProvider, { theme: "praxis-carbon", appearance: "light" }, h(Icon, { name: "close" }))));
+    act(() => root.render(h(ThemeProvider, { theme: "vk-praxis-carbon", appearance: "light" }, h(Icon, { name: "close" }))));
     assert.equal(setOf(el), "carbon");
   });
 

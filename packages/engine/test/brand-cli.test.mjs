@@ -161,7 +161,7 @@ describe("regeneration (FR-12)", () => {
   });
 
   test("a hand-made brand file has nothing to regenerate from", () => {
-    const r = brand("--regenerate", join(ROOT, "tokens/brands/synaptiq.brand.json"));
+    const r = brand("--regenerate", join(ROOT, "tokens/brands/vk-synaptiq.brand.json"));
     assert.equal(r.status, 2);
     assert.match(r.stderr, /no generation/);
   });

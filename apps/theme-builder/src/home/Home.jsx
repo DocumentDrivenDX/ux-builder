@@ -281,9 +281,9 @@ function BridgeChat() {
 }
 
 export const GUARDS = [
-  { icon: iconShieldCheck, title: "Lint that knows your theme", text: "ESLint and Stylelint rules catch literal colours, fonts and radii, and suggest the role token to use instead.", code: `"ux-builder/no-hard-coded-values": ["error", { theme: "ux-builder-databricks" }]` },
+  { icon: iconShieldCheck, title: "Lint that knows your theme", text: "ESLint and Stylelint rules catch literal colours, fonts and radii, and suggest the role token to use instead.", code: `"ux-builder/no-hard-coded-values": ["error", { theme: "vk-databricks" }]` },
   { icon: iconScanEye, title: "An audit of the running app", text: "Switches your app through every theme, light and dark, and reports anything that isn't the theme's: colours, fonts, icons, favicon, contrast.", code: "npx ux-builder-audit http://localhost:5173/" },
-  { icon: iconTerminal, title: "A starter that begins on-theme", text: "A React + Vite app with ThemeProvider, an appearance switch, lint, the audit and CI, wired up from the first commit.", code: "npm create @ux-builder/app my-app -- --theme plain" },
+  { icon: iconTerminal, title: "A starter that begins on-theme", text: "A React + Vite app with ThemeProvider, an appearance switch, lint, the audit and CI, wired up from the first commit.", code: "npm create @ux-builder/app my-app -- --theme vk-plain" },
   { icon: iconBot, title: "AI checks on AI screens", text: `${AI_CHECKS} audit checks read the markers the SDK's assistant emits: a disclosure, Stop while busy, approvals that can be denied, plans with step status, recovery. The blueprint check holds each AI role to its rules first.`, code: "npx ux-builder-audit --blueprint app.blueprint.json http://localhost:5173/" },
 ];
 
@@ -415,8 +415,8 @@ export function GetStarted() {
             <h3>An app you already have</h3>
             <ol className="uxh-steps">
               <li><b>Install</b><Command text="npm install @ux-builder/tokens @ux-builder/ui" /></li>
-              <li><b>Load the theme</b><Command code text={'import "@ux-builder/tokens/themes/ux-builder-databricks.css";\nimport "@ux-builder/ui/ui.css";'} /></li>
-              <li><b>Wrap the app</b><Command code text={'<ThemeProvider theme="ux-builder-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} /></li>
+              <li><b>Load the theme</b><Command code text={'import "@ux-builder/tokens/themes/vk-databricks.css";\nimport "@ux-builder/ui/ui.css";'} /></li>
+              <li><b>Wrap the app</b><Command code text={'<ThemeProvider theme="vk-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} /></li>
             </ol>
             <a className="uxh-btn" href={href("start", "existing-app")}>Add it to an existing app<Icon name="arrow-right" /></a>
           </div>

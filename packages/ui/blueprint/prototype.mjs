@@ -70,7 +70,7 @@ function wiring(bp, page) {
 }
 
 /* The prototype's pages: [{ file, html, screen, state, sizeClass }]. */
-export async function prototypePages(bp, { question, theme = "plain", appearance = "light" } = {}) {
+export async function prototypePages(bp, { question, theme = "vk-plain", appearance = "light" } = {}) {
   const pages = await wireframes(bp, { theme, appearance });
   const sizes = [...new Set(pages.map((p) => p.sizeClass))];
   const statesOf = (screen) => [...new Set(pages.filter((p) => p.screen === screen).map((p) => p.state))];
@@ -84,7 +84,7 @@ export async function prototypePages(bp, { question, theme = "plain", appearance
 }
 
 /* Write prototype/<dir>/: the pages, their assets and an index that opens the entry screen. */
-export async function writePrototype(bp, { root = "prototype", dir, question, theme = "plain", appearance = "light" }) {
+export async function writePrototype(bp, { root = "prototype", dir, question, theme = "vk-plain", appearance = "light" }) {
   const pages = await prototypePages(bp, { question, theme, appearance });
   const out = join(root, dir);
   rmSync(out, { recursive: true, force: true });

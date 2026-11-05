@@ -31,7 +31,7 @@ test("@covers US-163-AC1 golden SVGs: one fixture per form in two themes", async
   mkdirSync(dir, { recursive: true });
   for (const [form, id] of Object.entries(PER_FORM)) {
     assert.ok(SUPPORTED.has(form));
-    for (const [name, appearance] of [["praxis", "light"], ["databricks", "dark"]]) {
+    for (const [name, appearance] of [["vk-praxis", "light"], ["vk-databricks", "dark"]]) {
       const { content } = await render(fixture(id), { theme: name, appearance });
       const file = join(dir, `${id}.${name}-${appearance}.svg`);
       if (process.env.UPDATE_GOLDEN || !existsSync(file)) writeFileSync(file, content);
@@ -42,7 +42,7 @@ test("@covers US-163-AC1 golden SVGs: one fixture per form in two themes", async
 
 test("@covers US-163-AC2 appearance both writes every colour as a var() with a fallback", async () => {
   for (const id of Object.values(PER_FORM)) {
-    const { content } = await render(fixture(id), { theme: "praxis", appearance: "both" });
+    const { content } = await render(fixture(id), { theme: "vk-praxis", appearance: "both" });
     const colours = [...content.matchAll(/(?:fill|stroke):([^;"]+)/g)].map((m) => m[1]).filter((c) => c !== "none");
     assert.ok(colours.length > 0);
     // A derived colour is a color-mix of two such vars.
@@ -55,7 +55,7 @@ test("@covers US-163-AC2 appearance both writes every colour as a var() with a f
 
 test("@covers US-163-AC3 refusals: unknown major version, dangling reference and unknown content", async () => {
   const refuse = async (doc, code, options = {}) => {
-    await assert.rejects(render(doc, { theme: "praxis", ...options }), (e) => e.code === code, code);
+    await assert.rejects(render(doc, { theme: "vk-praxis", ...options }), (e) => e.code === code, code);
   };
   const v2 = fixture("helix-context"); v2.vocabularies["umf.visual"].version = "2.0.0";
   await refuse(v2, "VISUAL_VERSION");
@@ -69,7 +69,7 @@ test("@covers US-163-AC3 refusals: unknown major version, dangling reference and
   await refuse(badRole, "VISUAL_INVALID");
   const unknown = fixture("helix-context"); unknown.extensions["umf.visual"].nodes[0].fill = "#123456";
   await refuse(unknown, "VISUAL_INCOMPLETE");
-  const drawn = await render(unknown, { theme: "praxis", allowIncomplete: true });
+  const drawn = await render(unknown, { theme: "vk-praxis", allowIncomplete: true });
   assert.deepEqual(drawn.warnings.map((w) => w.code), ["FONT_STAND_IN", "INCOMPLETE"]);
   assert.doesNotMatch(drawn.content, /#123456/i);
 });
@@ -77,7 +77,7 @@ test("@covers US-163-AC3 refusals: unknown major version, dangling reference and
 test("@covers US-163-AC5 the SVG is accessible, carries stable ids and step membership, and references nothing outside itself", async () => {
   const doc = fixture("beacon-field-guide");
   const v = doc.extensions["umf.visual"];
-  const { content, text } = await render(doc, { theme: "databricks" });
+  const { content, text } = await render(doc, { theme: "vk-databricks" });
   assert.match(content, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" viewBox="0 0 [\d.]+ [\d.]+" width="[\d.]+" height="[\d.]+" role="img" aria-labelledby="beacon-field-guide-title" aria-describedby="beacon-field-guide-desc"/);
   assert.match(content, new RegExp(`<title id="beacon-field-guide-title">${v.title.replace(/[.]/g, "\\.")}</title>`));
   assert.match(content, /<desc id="beacon-field-guide-desc">Start at the API: it is the only part that acts for an agent/);
@@ -88,25 +88,25 @@ test("@covers US-163-AC5 the SVG is accessible, carries stable ids and step memb
 });
 
 test("@covers US-163-AC1 a theme whose font is shipped is measured with it; one that is not names its stand-in", async () => {
-  const shipped = await draw(fixture("helix-context"), { theme: "databricks" });
+  const shipped = await draw(fixture("helix-context"), { theme: "vk-databricks" });
   assert.equal(shipped.layout.font.family, "DM Sans");
   assert.equal(shipped.layout.font.standIn, false);
-  const system = await draw(fixture("helix-context"), { theme: "praxis" });
+  const system = await draw(fixture("helix-context"), { theme: "vk-praxis" });
   assert.equal(system.layout.font.standIn, true);
   assert.equal(system.warnings[0].code, "FONT_STAND_IN");
 });
 
 test("@covers US-163-AC1 narrow lifelines fall back to the ladder", async () => {
-  const r = await render(fixture("beacon-reply-draft"), { theme: "praxis", width: 390 });
+  const r = await render(fixture("beacon-reply-draft"), { theme: "vk-praxis", width: 390 });
   assert.ok(r.warnings.some((w) => w.code === "NARROW_FALLBACK"));
   assert.ok(r.layout.width <= 390);
-  assert.deepEqual(check(r.layout, { theme: createTheme(loadTheme("praxis")) }), []);
+  assert.deepEqual(check(r.layout, { theme: createTheme(loadTheme("vk-praxis")) }), []);
 });
 
 test("@covers US-164-AC4 a step outside the sequence is marked with its words, not a number, in every form that walks", async () => {
   const presets = ["throughout", "before", "after", "background", "scheduled", "on-failure", "optional"];
   const words = { throughout: "THROUGHOUT", before: "BEFORE", after: "AFTER", background: "IN THE BACKGROUND", scheduled: "SCHEDULED", "on-failure": "ON FAILURE", optional: "IF NEEDED" };
-  const theme = createTheme(loadTheme("praxis", "light"), "light");
+  const theme = createTheme(loadTheme("vk-praxis", "light"), "light");
   for (const id of Object.values(PER_FORM)) {
     const base = fixture(id), kind = base.extensions["umf.visual"].kind;
     if (!["flow", "state"].includes(kind) || !SUPPORTED.has(kindForm(base))) continue;
@@ -118,7 +118,7 @@ test("@covers US-164-AC4 a step outside the sequence is marked with its words, n
       const doc = fixture(id), v = doc.extensions["umf.visual"], batch = all.slice(k, k + per);
       v.steps = [{ id: "first", title: "First", focus: [items[0]] },
         ...batch.map((when, j) => ({ id: `w-${when}`, title: when, focus: [items[1 + j]], when, ...(when === "other" ? { tag: "on retry" } : {}) }))];
-      const { content, layout } = await render(doc, { theme: "praxis" });
+      const { content, layout } = await render(doc, { theme: "vk-praxis" });
       const findings = check(layout, { theme }).filter((x) => !KNOWN[id]?.includes(x.code));
       assert.deepEqual(findings, [], `${id}: ${batch}`);
       for (const when of batch) assert.ok(content.includes(`>${when === "other" ? "ON RETRY" : words[when]}</text>`), `${id}: ${when}`);
@@ -131,9 +131,9 @@ test("@covers US-164-AC4 a step outside the sequence is marked with its words, n
 });
 
 test("@covers US-163-AC7 a zoned view captions its zones, ends its lines in the accent, and joins neighbours across zones side to side", async () => {
-  const theme = createTheme(loadTheme("praxis", "light"), "light");
+  const theme = createTheme(loadTheme("vk-praxis", "light"), "light");
   const doc = fixture("beacon-deployment"), v = doc.extensions["umf.visual"];
-  const { content, layout } = await render(doc, { theme: "praxis" });
+  const { content, layout } = await render(doc, { theme: "vk-praxis" });
   // Captions: each zone's detail, inside its zone, with no line through it.
   const zones = new Map(layout.boxes.filter((b) => b.kind === "group").map((b) => [b.id, b]));
   const segments = layout.edges.flatMap((e) => e.points.slice(1).map((p, i) => [e.points[i], p]));

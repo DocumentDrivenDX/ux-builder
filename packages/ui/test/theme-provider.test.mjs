@@ -32,32 +32,32 @@ describe("US-011", () => {
   // @covers US-011-AC1
   test("AC1: the element carries data-theme and data-appearance; useTheme returns them", () => {
     const log = [];
-    const el = render(h(ThemeProvider, { theme: "praxis-carbon", appearance: "light" }, h(Probe, { log }))).firstChild;
-    assert.equal(el.getAttribute("data-theme"), "praxis-carbon");
+    const el = render(h(ThemeProvider, { theme: "vk-praxis-carbon", appearance: "light" }, h(Probe, { log }))).firstChild;
+    assert.equal(el.getAttribute("data-theme"), "vk-praxis-carbon");
     assert.equal(el.getAttribute("data-appearance"), "light");
-    assert.deepEqual(log.at(-1), { theme: "praxis-carbon", appearance: "light" });
+    assert.deepEqual(log.at(-1), { theme: "vk-praxis-carbon", appearance: "light" });
   });
 
   // @covers US-011-AC2
   test("AC2: system resolves to the user's preference on the first render, never 'system'", () => {
     setSystemDark(true);
     const log = [];
-    render(h(ThemeProvider, { theme: "databricks", appearance: "system" }, h(Probe, { log })));
-    assert.deepEqual(log[0], { theme: "databricks", appearance: "dark" });
+    render(h(ThemeProvider, { theme: "vk-databricks", appearance: "system" }, h(Probe, { log })));
+    assert.deepEqual(log[0], { theme: "vk-databricks", appearance: "dark" });
     assert.ok(log.every((l) => l.appearance !== "system"));
   });
 
   // @covers US-011-AC3
   test("AC3: with system, a change of preference is followed without a reload", () => {
-    const el = render(h(ThemeProvider, { theme: "synaptiq", appearance: "system" }, h(Probe))).firstChild;
+    const el = render(h(ThemeProvider, { theme: "vk-synaptiq", appearance: "system" }, h(Probe))).firstChild;
     assert.equal(el.getAttribute("data-appearance"), "light");
     act(() => setSystemDark(true));
     assert.equal(el.getAttribute("data-appearance"), "dark");
-    assert.equal(el.querySelector("[data-probe]").getAttribute("data-probe"), "synaptiq/dark");
+    assert.equal(el.querySelector("[data-probe]").getAttribute("data-probe"), "vk-synaptiq/dark");
   });
 
   test("a fixed appearance ignores the system preference and stops listening", () => {
-    const el = render(h(ThemeProvider, { theme: "synaptiq", appearance: "light" }, h(Probe))).firstChild;
+    const el = render(h(ThemeProvider, { theme: "vk-synaptiq", appearance: "light" }, h(Probe))).firstChild;
     assert.equal(mediaListeners(), 0);
     act(() => setSystemDark(true));
     assert.equal(el.getAttribute("data-appearance"), "light");
@@ -66,31 +66,31 @@ describe("US-011", () => {
   // @covers US-011-AC4
   test("AC4: setTheme and setAppearance switch at run time and report the change", () => {
     const api = { current: null }, changes = [];
-    const el = render(h(ThemeProvider, { theme: "praxis-material", appearance: "dark", onChange: (c) => changes.push(c) }, h(Probe, { expose: api }))).firstChild;
-    act(() => api.current.setTheme("praxis-fluentui"));
-    assert.equal(el.getAttribute("data-theme"), "praxis-fluentui");
+    const el = render(h(ThemeProvider, { theme: "vk-praxis-material", appearance: "dark", onChange: (c) => changes.push(c) }, h(Probe, { expose: api }))).firstChild;
+    act(() => api.current.setTheme("vk-praxis-fluentui"));
+    assert.equal(el.getAttribute("data-theme"), "vk-praxis-fluentui");
     act(() => api.current.setAppearance("light"));
     assert.equal(el.getAttribute("data-appearance"), "light");
-    assert.deepEqual(changes, [{ theme: "praxis-fluentui", appearance: "dark" }, { theme: "praxis-fluentui", appearance: "light" }]);
+    assert.deepEqual(changes, [{ theme: "vk-praxis-fluentui", appearance: "dark" }, { theme: "vk-praxis-fluentui", appearance: "light" }]);
   });
 
   test("a new prop value wins over an earlier switch", () => {
     const api = { current: null };
-    const el = render(h(ThemeProvider, { theme: "praxis", appearance: "dark" }, h(Probe, { expose: api }))).firstChild;
-    act(() => api.current.setTheme("plain"));
-    act(() => root.render(h(ThemeProvider, { theme: "databricks", appearance: "dark" }, h(Probe, { expose: api }))));
-    assert.equal(el.getAttribute("data-theme"), "databricks");
+    const el = render(h(ThemeProvider, { theme: "vk-praxis", appearance: "dark" }, h(Probe, { expose: api }))).firstChild;
+    act(() => api.current.setTheme("vk-plain"));
+    act(() => root.render(h(ThemeProvider, { theme: "vk-databricks", appearance: "dark" }, h(Probe, { expose: api }))));
+    assert.equal(el.getAttribute("data-theme"), "vk-databricks");
   });
 
   // @covers US-011-AC5
   test("AC5: nested providers: each subtree uses its nearest provider", () => {
     const outer = [], inner = [];
-    const el = render(h(ThemeProvider, { theme: "praxis", appearance: "dark" },
+    const el = render(h(ThemeProvider, { theme: "vk-praxis", appearance: "dark" },
       h(Probe, { log: outer }),
-      h(ThemeProvider, { theme: "plain", appearance: "light" }, h(Probe, { log: inner })))).firstChild;
-    assert.deepEqual(outer.at(-1), { theme: "praxis", appearance: "dark" });
-    assert.deepEqual(inner.at(-1), { theme: "plain", appearance: "light" });
-    assert.equal(el.querySelector("[data-theme]").getAttribute("data-theme"), "plain");
+      h(ThemeProvider, { theme: "vk-plain", appearance: "light" }, h(Probe, { log: inner })))).firstChild;
+    assert.deepEqual(outer.at(-1), { theme: "vk-praxis", appearance: "dark" });
+    assert.deepEqual(inner.at(-1), { theme: "vk-plain", appearance: "light" });
+    assert.equal(el.querySelector("[data-theme]").getAttribute("data-theme"), "vk-plain");
   });
 
   // @covers US-011-AC6
@@ -116,7 +116,7 @@ describe("US-011", () => {
     const orig = console.warn;
     console.warn = (m) => warned.push(m);
     try {
-      const el = render(h(ThemeProvider, { theme: "plain", appearance: "dark" }, h(Probe))).firstChild;
+      const el = render(h(ThemeProvider, { theme: "vk-plain", appearance: "dark" }, h(Probe))).firstChild;
       assert.equal(el.getAttribute("data-appearance"), "dark", "plain has a dark appearance");
       assert.ok(!warned.some((m) => /has no dark appearance/.test(m)), "and no warning for it");
     } finally { console.warn = orig; }
@@ -142,9 +142,9 @@ describe("US-011", () => {
   });
 
   test("resolveAppearance: the asked-for appearance if the theme has it, else its default", () => {
-    assert.equal(resolveAppearance("praxis", "light", "dark"), "light");
-    assert.equal(resolveAppearance("praxis", "system", "light"), "light");
-    assert.equal(resolveAppearance("plain", "system", "dark"), "dark");
+    assert.equal(resolveAppearance("vk-praxis", "light", "dark"), "light");
+    assert.equal(resolveAppearance("vk-praxis", "system", "light"), "light");
+    assert.equal(resolveAppearance("vk-plain", "system", "dark"), "dark");
     assert.equal(resolveAppearance("unknown-theme", "dark"), "dark");
   });
 });

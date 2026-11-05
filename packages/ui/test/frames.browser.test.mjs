@@ -27,7 +27,7 @@ const NAV = ["Map", "Saved", "Trips"].map((label) => ({ id: label.toLowerCase(),
 async function at(frame, width) {
   const body = renderToStaticMarkup(h(AppShell, { nav: NAV, current: "map", frame, brand: h("strong", null, "Rivers") }, h("p", null, "Content")));
   const html = join(tmp, `${frame}-${width}.html`);
-  writeFileSync(html, `<!doctype html><html data-theme="praxis-carbon" data-appearance="light"><head><meta name="viewport" content="width=device-width, initial-scale=1">${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${body}</body></html>`);
+  writeFileSync(html, `<!doctype html><html data-theme="vk-praxis-carbon" data-appearance="light"><head><meta name="viewport" content="width=device-width, initial-scale=1">${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${body}</body></html>`);
   const page = await browser.newPage({ viewport: { width, height: 700 } });
   await page.goto(pathToFileURL(html).href);
   const seen = (sel) => page.evaluate((s) => { const e = document.querySelector(s); return !!e && getComputedStyle(e).display !== "none" && e.getBoundingClientRect().width > 0; }, sel);

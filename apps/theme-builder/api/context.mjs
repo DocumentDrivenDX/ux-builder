@@ -11,7 +11,7 @@ export function context({ root, model }) {
   return {
     designSystems: [...src.designSystems.values()].map((d) => { const { file, ...ds } = d; return { ...ds, baseTokens: d.baseTokens }; }).sort((a, b) => a.name.localeCompare(b.name)),
     // Palettes are first shown on neutral widgets (the prototype's step 2): the plain theme's anatomy.
-    neutral: { name: "neutral", title: "Neutral", ...src.themes.get("plain").anatomy, baseTokens: src.themes.get("plain").anatomy.baseTokens },
+    neutral: { name: "neutral", title: "Neutral", ...src.themes.get("vk-plain").anatomy, baseTokens: src.themes.get("vk-plain").anatomy.baseTokens },
     themes: [...src.themes.values()].map((t) => ({ name: t.name, title: t.title, designSystem: t.designSystem ?? null, public: t.public === true })).sort((a, b) => a.name.localeCompare(b.name)),
     taken: [...new Set([...src.brands.keys(), ...src.themes.keys()])].sort(),
     brands: [...src.brands.keys()].sort(),

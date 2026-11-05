@@ -36,7 +36,7 @@ describe("US-149-AC4: modality before any wireframe or prototype", () => {
     // In the design's appearance, as its step prototypes are (VIP List session 3).
     assert.equal(run(DESIGN, dir, "state", "set", "appearance", JSON.stringify({ value: "dark", reason: "used in dark venues" })).status, 0);
     r = explore();
-    assert.match(r.stdout, /\(plain, dark\)/);
+    assert.match(r.stdout, /\(vk-plain, dark\)/);
     assert.match(readFileSync(join(dir, "docs/ux-builder/prototypes/list-first/index.html"), "utf8") + readdirSync(join(dir, "docs/ux-builder/prototypes/list-first")).filter((f) => f.endsWith(".html")).map((f) => readFileSync(join(dir, "docs/ux-builder/prototypes/list-first", f), "utf8")).join(""), /data-appearance="dark"/);
     r = run(CLI, dir, "wireframes");
     assert.equal(r.status, 1);

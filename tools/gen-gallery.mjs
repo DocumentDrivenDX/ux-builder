@@ -61,7 +61,7 @@ const known = new Set(JSON.parse(readFileSync(join(ROOT, "tools/contrast-baselin
 
 // Every theme (ADR-018), the 0.x ones first in their 0.x order, each with its
 // appearances, default first.
-const ORDER = ["plain", "praxis", "praxis-material", "praxis-fluentui", "praxis-carbon"];
+const ORDER = ["vk-plain", "vk-praxis", "vk-praxis-material", "vk-praxis-fluentui", "vk-praxis-carbon"];
 const rank = (n) => (ORDER.includes(n) ? ORDER.indexOf(n) : ORDER.length);
 const themeList = [...manifest.themes].sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
 const themes = Object.fromEntries(themeList.map((t) => [t.name, [t.default, ...t.appearances.filter((x) => x !== t.default)]]));

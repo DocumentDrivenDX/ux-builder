@@ -37,7 +37,7 @@ function ConversationScene() {
 
 function App() {
   return (
-    <ThemeProvider theme="praxis-carbon" appearance="light">
+    <ThemeProvider theme="vk-praxis-carbon" appearance="light">
       {location.hash === "#conversation" ? <ConversationScene /> : <CardScene />}
     </ThemeProvider>
   );

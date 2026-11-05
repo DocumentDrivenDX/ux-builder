@@ -8,7 +8,7 @@ import { test } from "node:test";
 import { admit, check, createTheme, loadTheme, render } from "../node.mjs";
 import { fixture } from "./helpers.mjs";
 
-const theme = createTheme(loadTheme("praxis"));
+const theme = createTheme(loadTheme("vk-praxis"));
 const v = (doc) => doc.extensions["umf.visual"];
 const as11 = (doc) => { doc.vocabularies["umf.visual"].version = "1.1.0"; return doc; };
 const code = (fn) => { try { fn(); return "admitted"; } catch (e) { return [e.code, ...(e.diagnostics ?? []).map((d) => d.code)].join(" "); } };
@@ -43,33 +43,33 @@ test("@covers US-169-AC1 each document is read with its version's schema, and 1.
 
 test("@covers US-169-AC2 a count no crow's foot states is written, never widened, in every output", async () => {
   const doc = tickets(), r = v(doc).structure.references[0];
-  const svg = await render(doc, { theme: "praxis" });
+  const svg = await render(doc, { theme: "vk-praxis" });
   assert.match(svg.content, />2\.\.5</, "the SVG writes the notation");
   assert.deepEqual(check(svg.layout, { theme }), []);
-  const mermaid = (await render(doc, { theme: "praxis", output: "mermaid" })).content;
+  const mermaid = (await render(doc, { theme: "vk-praxis", output: "mermaid" })).content;
   assert.match(mermaid, new RegExp(`customers \\|\\|--\\|\\{ tickets : "customer_id \\(to 2\\.\\.5\\)"`), "nearest crow's foot, exact count in the label");
   assert.match(svg.text, /tickets\.customer\\_id: customer\\_id \(exactly one to 2\.\.5\)/, "the text version, Markdown-escaped");
   // A multiplicity that a cardinality states draws as that cardinality, with no count written.
   r.toMultiplicity = { min: 0 };
-  const conventional = await render(doc, { theme: "praxis" });
+  const conventional = await render(doc, { theme: "vk-praxis" });
   assert.doesNotMatch(conventional.content, />0\.\.\*</);
   assert.ok(conventional.content.length > 0);
 });
 
 test("@covers US-169-AC3 an end named only by fieldId enters at that field's row and is named by it", async () => {
   const doc = tickets();
-  const byId = await render(doc, { theme: "praxis" });
-  const byName = await render(fixture("beacon-schema-tickets"), { theme: "praxis" });
+  const byId = await render(doc, { theme: "vk-praxis" });
+  const byName = await render(fixture("beacon-schema-tickets"), { theme: "vk-praxis" });
   const end = (layout, id) => layout.edges.find((e) => e.id === id).points.at(-1);
   assert.deepEqual(end(byId.layout, "customers--tickets--customer-id"), end(byName.layout, "customers--tickets--customer-id"), "the same row as when the end names the field");
   assert.match(byId.text, /tickets\.customer\\_id/);
-  assert.match((await render(doc, { theme: "praxis", output: "mermaid" })).content, /customer_id/);
+  assert.match((await render(doc, { theme: "vk-praxis", output: "mermaid" })).content, /customer_id/);
 });
 
 test("@covers US-169-AC4 years 0000-0099 keep their value on a timeline", async () => {
   const doc = fixture("umf-releases"), t = v(doc).timeline;
   t.events = [{ id: "a", label: "A", at: "0098-03-01" }, { id: "b", label: "B", at: "0100-06-01" }, { id: "c", label: "C", at: "0101-09-01" }];
-  const { content, layout } = await render(doc, { theme: "praxis" });
+  const { content, layout } = await render(doc, { theme: "vk-praxis" });
   assert.match(content, />99</); assert.match(content, />100</);
   assert.doesNotMatch(content, /19(98|99)/, "no year in the 1900s");
   assert.deepEqual(check(layout, { theme }), []);
@@ -98,7 +98,7 @@ test("@covers US-169-AC5 every graph form draws more than fifteen nodes, and che
   const seen = {};
   for (const [form, d] of Object.entries(LARGE)) {
     assert.equal(code(() => admit(d)), "admitted", form);
-    const { content, layout } = await render(d, { theme: "praxis" });
+    const { content, layout } = await render(d, { theme: "vk-praxis" });
     assert.match(content, /^<svg/, form);
     const findings = check(layout, { theme });
     assert.ok(Array.isArray(findings), form);

@@ -173,7 +173,7 @@ describe("US-095: explore the findings in an interactive player", () => {
     const srv = createServer((q, r) => { const file = join(root, decodeURIComponent(new URL(q.url, "http://x").pathname)); if (!existsSync(file)) { r.writeHead(404); r.end(); return; } r.writeHead(200, { "content-type": file.endsWith(".html") ? "text/html" : file.endsWith(".webm") ? "video/webm" : "application/octet-stream" }); r.end(readFileSync(file)); });
     await new Promise((ok) => srv.listen(0, "127.0.0.1", ok));
     try {
-      const report = await audit({ urls: [`http://127.0.0.1:${srv.address().port}/video/index.html`], themes: ["ux-builder-databricks"] });
+      const report = await audit({ urls: [`http://127.0.0.1:${srv.address().port}/video/index.html`], themes: ["vk-databricks"] });
       assert.equal(report.summary.error, 0, JSON.stringify(report.findings.filter((x) => x.severity === "error")));
       assert.deepEqual(report.findings.filter((x) => x.severity === "warning").map((x) => x.rule), []);
     } finally { srv.close(); }

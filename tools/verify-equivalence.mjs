@@ -34,16 +34,16 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OLD = ["plain.css", "claude-like.css", "praxis.css"].map((f) => join(ROOT, "tools/fixtures/source-css", f));
-const NEW = ["plain.css", "praxis.css"].map((f) => join(ROOT, "packages/tokens/dist/themes", f));
+const NEW = ["vk-plain.css", "vk-praxis.css"].map((f) => join(ROOT, "packages/tokens/dist/themes", f));
 
 // The attributes the platform sets on <html> for each theme and appearance
 // (web/App.jsx): Praxis carried data-family="conversational" to pick up its
 // parent; the collapsed theme no longer needs it, but setting it proves the
 // new CSS is not relying on it either way.
 const CONTEXTS = [
-  { label: "plain light",   attrs: { "data-theme": "plain", "data-appearance": "light" } },
-  { label: "praxis dark",   attrs: { "data-theme": "praxis", "data-family": "conversational", "data-appearance": "dark" } },
-  { label: "praxis light",  attrs: { "data-theme": "praxis", "data-family": "conversational", "data-appearance": "light" } },
+  { label: "plain light",   attrs: { "data-theme": "vk-plain", "data-appearance": "light" } },
+  { label: "praxis dark",   attrs: { "data-theme": "vk-praxis", "data-family": "conversational", "data-appearance": "dark" } },
+  { label: "praxis light",  attrs: { "data-theme": "vk-praxis", "data-family": "conversational", "data-appearance": "light" } },
 ];
 
 // Where this package departs from the platform on purpose: the contrast

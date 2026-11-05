@@ -49,13 +49,13 @@ test("every Adaptive Cards story renders in its theme and appearance with no err
   page.on("pageerror", (e) => errors.push(e.message));
   for (const s of all) {
     for (const ap of ["light", "dark"]) {
-      await page.goto(story(s.id, "praxis-carbon", ap), { waitUntil: "networkidle" });
+      await page.goto(story(s.id, "vk-praxis-carbon", ap), { waitUntil: "networkidle" });
       await page.waitForSelector(".ds-frame > *", { state: "attached" });
       assert.equal(await page.evaluate(() => document.body.classList.contains("sb-show-errordisplay")), false, `${s.id} ${ap}`);
     }
   }
   // The walkthrough: pay, approve, and the card is no longer current.
-  await page.goto(story("patterns-adaptive-cards--pay-invoice", "praxis-carbon", "light"), { waitUntil: "networkidle" });
+  await page.goto(story("patterns-adaptive-cards--pay-invoice", "vk-praxis-carbon", "light"), { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Pay invoice" }).click();
   await page.getByRole("button", { name: "Approve" }).click();
   await page.getByText(/onAction: .*"verb":"pay"/).waitFor();

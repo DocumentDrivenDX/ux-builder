@@ -5,5 +5,5 @@
   "title": "vk-Praxis Carbon",
   "brand": "vk-praxis",
   "default": "dark",
-  "designSystem": "carbon"
+  "designSystem": "vk-carbon"
 }

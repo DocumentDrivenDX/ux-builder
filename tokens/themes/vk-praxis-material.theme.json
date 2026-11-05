@@ -5,5 +5,5 @@
   "title": "vk-Praxis Material",
   "brand": "vk-praxis",
   "default": "dark",
-  "designSystem": "material"
+  "designSystem": "vk-material"
 }

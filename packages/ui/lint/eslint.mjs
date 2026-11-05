@@ -10,7 +10,7 @@
 //     files: ["src/**/*.{js,jsx,ts,tsx}"],
 //     plugins: { "ux-builder": uxBuilder },
 //     rules: {
-//       "ux-builder/no-hard-coded-values": ["error", { theme: "databricks", allow: [] }],
+//       "ux-builder/no-hard-coded-values": ["error", { theme: "vk-databricks", allow: [] }],
 //       "ux-builder/no-foreign-ui": "error",
 //       "ux-builder/no-inline-svg": "error",
 //       "ux-builder/ai-neutral-voice": "warn",

@@ -22,7 +22,7 @@ process.env.UX_BUILDER_HELIX_BUNDLE = BUNDLE;
 after(() => { rmSync(tmp, { recursive: true, force: true }); rmSync(BUNDLE, { recursive: true, force: true }); });
 let app, checked;
 before(async () => {
-  app = await create(join(tmp, "acme"), { theme: "databricks", name: "acme", modalities: ["responsive-web", "chat"], helix: { offline: true } });
+  app = await create(join(tmp, "acme"), { theme: "vk-databricks", name: "acme", modalities: ["responsive-web", "chat"], helix: { offline: true } });
   checked = validate(load(join(app.dir, "docs/ux-builder/ux-assessment.yml")));
 });
 

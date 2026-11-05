@@ -100,7 +100,7 @@ export async function stepPrototype(app, { write = writePrototype, build = build
     e.code = 1;
     throw e;
   }
-  const theme = state.app?.theme ?? "plain";
+  const theme = state.app?.theme ?? "vk-plain";
   if (!state.app?.theme) made.push(assume(state, "theme", "Prototypes use the plain theme until the person chooses one; a brand theme not yet released never blocks: the agent swaps it in when it is."));
   const appearance = state.appearance?.value ?? "light";
   made.push(assume(state, "appearance", state.appearance ? `Prototypes are ${appearance}: ${state.appearance.reason}` : "Prototypes are light: nothing about the product suggests dark rooms or night use."));
@@ -282,7 +282,7 @@ export async function stepCheck(app, { nothingToFix = false, accept = [], reason
     const audited = sp.audited ?? prior?.audited;
     const changed = subset.filter((f) => audited?.[f] !== hashes[f]);
     const previous = list((sp.audited ? sp : prior ?? sp).rounds?.findLast((r) => r.audit?.ran)?.audit?.findings);
-    const a = changed.length ? await audit({ dir: abs, pages: changed, theme: sp.theme ?? "plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(isApp ? join(app, "docs/ux-builder/prototypes", `step-${n}`) : abs, `audit-${round}`), spa: isApp }) : { ran: true, pagesAudited: 0, errors: 0, warnings: 0, findings: [] };
+    const a = changed.length ? await audit({ dir: abs, pages: changed, theme: sp.theme ?? "vk-plain", appearance: sp.appearance ?? "light", blueprint: bp, out: join(isApp ? join(app, "docs/ux-builder/prototypes", `step-${n}`) : abs, `audit-${round}`), spa: isApp }) : { ran: true, pagesAudited: 0, errors: 0, warnings: 0, findings: [] };
     const carried = previous.filter((f) => subset.includes(f.page) && !changed.includes(f.page));
     const findings = [...list(a.findings), ...carried];
     const merged = { ...a, findings, errors: findings.filter((f) => f.severity === "error").length, warnings: findings.filter((f) => f.severity === "warning").length };

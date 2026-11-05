@@ -28,20 +28,20 @@ test("@covers US-167-AC2 a matrix draws ratings as filled and empty circles with
   const doc = fixture("layout-engines");
   doc.extensions["umf.visual"].form = "matrix";
   const c = doc.extensions["umf.visual"].comparison;
-  const { scene } = await draw(doc, { theme: loadTheme("praxis") });
+  const { scene } = await draw(doc, { theme: loadTheme("vk-praxis") });
   const circles = shapes(scene).filter((s) => s.t === "circle");
   const filled = circles.filter((s) => s.fill === "piq-color-text-strong").length;
   assert.equal(filled, c.values.reduce((s, x) => s + x.rating, 0), "one filled circle per point");
   assert.equal(circles.length, c.values.length * 3, "every point of every scale, filled or empty");
   assert.ok(texts(scene).includes("1 of 3") && texts(scene).includes("3 of 3"), "each rating also in words");
-  const ba = (await draw(fixture("visuals-before-after"), { theme: loadTheme("praxis") })).scene;
+  const ba = (await draw(fixture("visuals-before-after"), { theme: loadTheme("vk-praxis") })).scene;
   assert.ok(shapes(ba).some((s) => s.t === "path" && /A5\.5 5\.5 0 0 0/.test(s.d)) && texts(ba).includes("Partly"), "partial support: a half circle and its word");
   assert.ok(shapes(scene).some((s) => s.t === "rect" && s.fill === "piq-color-accent"), "an accent rule over the chosen column");
   assert.ok(texts(scene).some((t) => t.startsWith("Chosen: The only")), "the reason under the chosen item");
 });
 
 test("@covers US-167-AC3 a metric draws several series in the series colours in order, a change with an arrow as well as a status colour, and every number with its unit", async () => {
-  const theme = loadTheme("databricks", "light");
+  const theme = loadTheme("vk-databricks", "light");
   const trend = (await draw(fixture("umf-ac-trend"), { theme })).scene;
   const lines = shapes(trend).filter((s) => s.t === "path" && s.sw === 2).map((s) => s.stroke);
   assert.deepEqual(lines, ["piq-color-series-1", "piq-color-series-2"]);
@@ -56,7 +56,7 @@ test("@covers US-167-AC3 a metric draws several series in the series colours in 
 });
 
 test("@covers US-167-AC4 a dated roadmap is a gantt, milestones a timeline, and a stack, nested, comparison or metric a Markdown table", async () => {
-  const theme = loadTheme("praxis");
+  const theme = loadTheme("vk-praxis");
   const dated = fixture("visuals-roadmap");
   const t = dated.extensions["umf.visual"].timeline;
   const dateOf = Object.fromEntries(t.scale.periods.map((p, i) => [p.id, `2026-${String(i + 3).padStart(2, "0")}-01`]));
@@ -77,7 +77,7 @@ test("@covers US-167-AC4 a dated roadmap is a gantt, milestones a timeline, and 
 });
 
 test("@covers US-167-AC5 a comparison's and a metric's text equivalent is a table holding every value drawn", async () => {
-  const theme = loadTheme("praxis");
+  const theme = loadTheme("vk-praxis");
   const adr = fixture("helix-adr-options"), status = fixture("umf-ac-status");
   const a = await render(adr, { theme });
   for (const x of adr.extensions["umf.visual"].comparison.values) assert.ok(a.text.includes(x.text), x.text);
@@ -87,7 +87,7 @@ test("@covers US-167-AC5 a comparison's and a metric's text equivalent is a tabl
 });
 
 test("@covers US-167-AC6 below its minimum width a milestones or roadmap timeline is drawn as a history and the render warns", async () => {
-  const theme = loadTheme("praxis");
+  const theme = loadTheme("vk-praxis");
   for (const id of ["umf-releases", "visuals-roadmap"]) {
     const narrow = await draw(fixture(id), { theme, width: 390 });
     assert.ok(narrow.warnings.some((w) => w.code === "NARROW_FALLBACK"), id);
