@@ -78,7 +78,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P0"
+      "priority": "P0",
+      "heuristics": [
+        "H5 Error prevention",
+        "H4 Consistency and standards"
+      ]
     },
     {
       "id": "blueprint.warnings-decided",
@@ -140,6 +144,10 @@
       "priority": "P0",
       "dependsOn": [
         "blueprint.valid"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -183,6 +191,10 @@
       "priority": "P5",
       "dependsOn": [
         "blueprint.valid"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -224,6 +236,10 @@
       "priority": "P5",
       "dependsOn": [
         "nav.compact-destinations"
+      ],
+      "heuristics": [
+        "H6 Recognition rather than recall",
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -251,7 +267,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P5"
+      "priority": "P5",
+      "heuristics": [
+        "H4 Consistency and standards",
+        "H6 Recognition rather than recall"
+      ]
     },
     {
       "id": "layout.panes-by-size",
@@ -291,7 +311,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P5"
+      "priority": "P5",
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H7 Flexibility and efficiency of use"
+      ]
     },
     {
       "id": "layout.dense-medium-single-pane",
@@ -324,6 +348,9 @@
       ],
       "takesPrecedenceOver": [
         "layout.panes-by-size"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -635,7 +662,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P5"
+      "priority": "P5",
+      "heuristics": [
+        "H3 User control and freedom",
+        "H8 Aesthetic and minimalist design"
+      ]
     },
     {
       "id": "modal.one-at-a-time",
@@ -670,6 +701,10 @@
       "priority": "P5",
       "dependsOn": [
         "blueprint.valid"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -708,6 +743,10 @@
       ],
       "takesPrecedenceOver": [
         "simplicity.delta-decided"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -743,6 +782,9 @@
       "priority": "P2",
       "dependsOn": [
         "blueprint.valid"
+      ],
+      "heuristics": [
+        "H3 User control and freedom"
       ]
     },
     {
@@ -771,6 +813,10 @@
       ],
       "takesPrecedenceOver": [
         "modal.dismiss"
+      ],
+      "heuristics": [
+        "H5 Error prevention",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -796,6 +842,10 @@
       "priority": "P5",
       "dependsOn": [
         "modal.only-when-needed"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H5 Error prevention"
       ]
     },
     {
@@ -919,6 +969,10 @@
         "simplicity.delta-decided",
         "modal.only-when-needed",
         "feedback.undo"
+      ],
+      "heuristics": [
+        "H5 Error prevention",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -1342,7 +1396,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P5"
+      "priority": "P5",
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H8 Aesthetic and minimalist design"
+      ]
     },
     {
       "id": "feedback.explain-failure",
@@ -1367,6 +1425,10 @@
       "priority": "P3",
       "dependsOn": [
         "screen.states"
+      ],
+      "heuristics": [
+        "H9 Help users recognise, diagnose and recover from errors",
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -1806,6 +1868,9 @@
       "priority": "P5",
       "dependsOn": [
         "screen.states"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -1831,6 +1896,9 @@
       "priority": "P5",
       "dependsOn": [
         "loading.show-something"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -1885,6 +1953,10 @@
       "priority": "P3",
       "dependsOn": [
         "pattern.exists"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H9 Help users recognise, diagnose and recover from errors"
       ]
     },
     {
@@ -1913,7 +1985,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P5"
+      "priority": "P5",
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H4 Consistency and standards"
+      ]
     },
     {
       "id": "input.touch-targets",
@@ -1960,6 +2036,10 @@
         "theme.target-size",
         "theme.density-levels",
         "theme.control-sizes-aligned"
+      ],
+      "heuristics": [
+        "H5 Error prevention",
+        "H7 Flexibility and efficiency of use"
       ]
     },
     {
@@ -1993,7 +2073,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P2"
+      "priority": "P2",
+      "heuristics": [
+        "H7 Flexibility and efficiency of use",
+        "H6 Recognition rather than recall"
+      ]
     },
     {
       "id": "input.focus-visible",
@@ -2029,6 +2113,9 @@
       "priority": "P2",
       "takesPrecedenceOver": [
         "theme.widget-overrides"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -2681,7 +2768,10 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P2"
+      "priority": "P2",
+      "heuristics": [
+        "H8 Aesthetic and minimalist design"
+      ]
     },
     {
       "id": "text.lang-declared",
@@ -3417,6 +3507,10 @@
         "nav.compact-destinations",
         "nav.standing-at-expanded",
         "theme.brand"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards",
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -3456,6 +3550,9 @@
       ],
       "takesPrecedenceOver": [
         "layout.panes-by-size"
+      ],
+      "heuristics": [
+        "H7 Flexibility and efficiency of use"
       ]
     },
     {
@@ -3492,6 +3589,9 @@
       "priority": "P6",
       "dependsOn": [
         "blueprint.valid"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -3531,6 +3631,10 @@
       ],
       "takesPrecedenceOver": [
         "screen.states"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H9 Help users recognise, diagnose and recover from errors"
       ]
     },
     {
@@ -3565,6 +3669,9 @@
       "takesPrecedenceOver": [
         "theme.brand",
         "theme.dark-appearance"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -3619,6 +3726,10 @@
       "priority": "P1",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -3661,6 +3772,9 @@
       "priority": "P1",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -3711,6 +3825,10 @@
       "priority": "P5",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H10 Help and documentation",
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -3758,6 +3876,10 @@
       "priority": "P6",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H6 Recognition rather than recall",
+        "H10 Help and documentation"
       ]
     },
     {
@@ -3792,6 +3914,10 @@
       ],
       "takesPrecedenceOver": [
         "ai.starters"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H7 Flexibility and efficiency of use"
       ]
     },
     {
@@ -3839,6 +3965,10 @@
       ],
       "takesPrecedenceOver": [
         "modal.one-at-a-time"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -3889,6 +4019,10 @@
       "priority": "P1",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H9 Help users recognise, diagnose and recover from errors"
       ]
     },
     {
@@ -3925,6 +4059,10 @@
       "priority": "P6",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -3961,6 +4099,10 @@
       "priority": "P1",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -3997,6 +4139,10 @@
       "priority": "P0",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H5 Error prevention"
       ]
     },
     {
@@ -4053,6 +4199,10 @@
       "takesPrecedenceOver": [
         "simplicity.delta-decided",
         "feedback.status-in-place"
+      ],
+      "heuristics": [
+        "H5 Error prevention",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -4083,6 +4233,9 @@
       "priority": "P5",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -4119,6 +4272,9 @@
       "priority": "P1",
       "dependsOn": [
         "ai.stop"
+      ],
+      "heuristics": [
+        "H3 User control and freedom"
       ]
     },
     {
@@ -4149,6 +4305,10 @@
       "priority": "P5",
       "dependsOn": [
         "agent.on-off"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -4191,6 +4351,10 @@
       "priority": "P3",
       "dependsOn": [
         "agent.plan-visible"
+      ],
+      "heuristics": [
+        "H9 Help users recognise, diagnose and recover from errors",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -4221,6 +4385,10 @@
       "priority": "P5",
       "dependsOn": [
         "agent.plan-visible"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -4260,6 +4428,9 @@
       ],
       "takesPrecedenceOver": [
         "feedback.status-in-place"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -4309,6 +4480,10 @@
       "priority": "P5",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -4359,6 +4534,10 @@
       "priority": "P1",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H5 Error prevention"
       ]
     },
     {
@@ -4398,6 +4577,9 @@
       ],
       "takesPrecedenceOver": [
         "simplicity.delta-decided"
+      ],
+      "heuristics": [
+        "H5 Error prevention"
       ]
     },
     {
@@ -4436,6 +4618,10 @@
       "priority": "P5",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H9 Help users recognise, diagnose and recover from errors",
+        "H10 Help and documentation"
       ]
     },
     {
@@ -4472,6 +4658,10 @@
       "priority": "P1",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -4516,6 +4706,10 @@
       "priority": "P6",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H7 Flexibility and efficiency of use"
       ]
     },
     {
@@ -4553,6 +4747,10 @@
       "priority": "P1",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -4591,6 +4789,10 @@
       "priority": "P5",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -4635,6 +4837,9 @@
       "priority": "P1",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -4671,6 +4876,9 @@
       "priority": "P0",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -4720,6 +4928,10 @@
       ],
       "takesPrecedenceOver": [
         "modal.short-task"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -4757,6 +4969,10 @@
       "priority": "P1",
       "dependsOn": [
         "genui.renderable"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H5 Error prevention"
       ]
     },
     {
@@ -4796,6 +5012,10 @@
       ],
       "takesPrecedenceOver": [
         "ai.correct"
+      ],
+      "heuristics": [
+        "H5 Error prevention",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -4826,6 +5046,10 @@
       "priority": "P5",
       "dependsOn": [
         "genui.renderable"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -4848,7 +5072,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P0"
+      "priority": "P0",
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H4 Consistency and standards"
+      ]
     },
     {
       "id": "ai.user-initiates",
@@ -4886,6 +5114,10 @@
       "priority": "P6",
       "dependsOn": [
         "ai.declared"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -4930,6 +5162,9 @@
       "priority": "P5",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -4970,6 +5205,10 @@
       "priority": "P2",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H1 Visibility of system status"
       ]
     },
     {
@@ -5008,6 +5247,10 @@
       "priority": "P2",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H6 Recognition rather than recall",
+        "H5 Error prevention"
       ]
     },
     {
@@ -5042,6 +5285,10 @@
       "priority": "P2",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H9 Help users recognise, diagnose and recover from errors",
+        "H5 Error prevention"
       ]
     },
     {
@@ -5082,6 +5329,10 @@
       "priority": "P2",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -5116,6 +5367,9 @@
       "priority": "P5",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -5157,6 +5411,10 @@
       ],
       "takesPrecedenceOver": [
         "card.columns-few"
+      ],
+      "heuristics": [
+        "H7 Flexibility and efficiency of use",
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -5191,6 +5449,9 @@
       "priority": "P2",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -5231,6 +5492,10 @@
       "priority": "P2",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H2 Match between system and the real world",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -5265,6 +5530,10 @@
       "priority": "P5",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -5299,6 +5568,10 @@
       "priority": "P2",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H2 Match between system and the real world",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -5333,6 +5606,10 @@
       "priority": "P5",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H6 Recognition rather than recall",
+        "H5 Error prevention"
       ]
     },
     {
@@ -5370,7 +5647,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P0"
+      "priority": "P0",
+      "heuristics": [
+        "H5 Error prevention",
+        "H4 Consistency and standards"
+      ]
     },
     {
       "id": "card.sparingly",
@@ -5404,6 +5685,9 @@
       "priority": "P6",
       "dependsOn": [
         "card.version"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -5447,6 +5731,10 @@
       ],
       "takesPrecedenceOver": [
         "card.sparingly"
+      ],
+      "heuristics": [
+        "H5 Error prevention",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -5481,6 +5769,10 @@
       ],
       "takesPrecedenceOver": [
         "nav.audience-scoped"
+      ],
+      "heuristics": [
+        "H3 User control and freedom",
+        "H7 Flexibility and efficiency of use"
       ]
     },
     {
@@ -5503,7 +5795,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P5"
+      "priority": "P5",
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H2 Match between system and the real world"
+      ]
     },
     {
       "id": "nav.skip-link",
@@ -5989,7 +6285,11 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P3"
+      "priority": "P3",
+      "heuristics": [
+        "H5 Error prevention",
+        "H2 Match between system and the real world"
+      ]
     },
     {
       "id": "flow.no-dead-end",
@@ -6029,6 +6329,9 @@
       ],
       "takesPrecedenceOver": [
         "view.one-task"
+      ],
+      "heuristics": [
+        "H3 User control and freedom"
       ]
     },
     {
@@ -6060,6 +6363,9 @@
       "priority": "P0",
       "dependsOn": [
         "blueprint.valid"
+      ],
+      "heuristics": [
+        "H5 Error prevention"
       ]
     },
     {
@@ -6088,6 +6394,10 @@
       ],
       "takesPrecedenceOver": [
         "emphasis.one-primary"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards",
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -6119,6 +6429,9 @@
       "priority": "P3",
       "dependsOn": [
         "flow.target-exists"
+      ],
+      "heuristics": [
+        "H5 Error prevention"
       ]
     },
     {
@@ -6152,6 +6465,10 @@
         "journey.walkable",
         "action.destructive-safeguard",
         "agent.approve-high-impact"
+      ],
+      "heuristics": [
+        "H5 Error prevention",
+        "H3 User control and freedom"
       ]
     },
     {
@@ -6190,6 +6507,10 @@
       "dependsOn": [
         "journey.walkable",
         "screen.states"
+      ],
+      "heuristics": [
+        "H9 Help users recognise, diagnose and recover from errors",
+        "H5 Error prevention"
       ]
     },
     {
@@ -6221,6 +6542,9 @@
       "priority": "P3",
       "dependsOn": [
         "journey.walkable"
+      ],
+      "heuristics": [
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -6246,6 +6570,9 @@
       "priority": "P0",
       "dependsOn": [
         "blueprint.valid"
+      ],
+      "heuristics": [
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -6313,6 +6640,9 @@
       "priority": "P6",
       "dependsOn": [
         "journey.walkable"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -6339,6 +6669,10 @@
       "dependsOn": [
         "journey.task-exists",
         "journey.walkable"
+      ],
+      "heuristics": [
+        "H2 Match between system and the real world",
+        "H7 Flexibility and efficiency of use"
       ]
     },
     {
@@ -6398,6 +6732,10 @@
       "priority": "P6",
       "dependsOn": [
         "blueprint.valid"
+      ],
+      "heuristics": [
+        "H8 Aesthetic and minimalist design",
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -6430,6 +6768,10 @@
       "dependsOn": [
         "pattern.exists",
         "task.realized"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards",
+        "H6 Recognition rather than recall"
       ]
     },
     {
@@ -6458,7 +6800,10 @@
           "wording": "paraphrased"
         }
       ],
-      "priority": "P0"
+      "priority": "P0",
+      "heuristics": [
+        "H4 Consistency and standards"
+      ]
     },
     {
       "id": "theme.token-colors",
@@ -6489,6 +6834,9 @@
       "priority": "P4",
       "dependsOn": [
         "theme.token-overrides"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6521,6 +6869,9 @@
       "dependsOn": [
         "theme.fonts",
         "theme.token-overrides"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6552,6 +6903,9 @@
       "priority": "P4",
       "dependsOn": [
         "theme.token-overrides"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6583,6 +6937,9 @@
       "priority": "P4",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6608,6 +6965,9 @@
       "priority": "P4",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6633,6 +6993,9 @@
       "priority": "P4",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6658,6 +7021,9 @@
       "priority": "P4",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6689,6 +7055,9 @@
       "priority": "P4",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6720,6 +7089,10 @@
       "priority": "P4",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards",
+        "H2 Match between system and the real world"
       ]
     },
     {
@@ -6751,6 +7124,9 @@
       "priority": "P4",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H4 Consistency and standards"
       ]
     },
     {
@@ -6787,6 +7163,10 @@
         "theme.token-colors",
         "theme.brand",
         "theme.text-tiers"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status",
+        "H8 Aesthetic and minimalist design"
       ]
     },
     {
@@ -6815,6 +7195,9 @@
       ],
       "takesPrecedenceOver": [
         "layout.panes-by-size"
+      ],
+      "heuristics": [
+        "H7 Flexibility and efficiency of use"
       ]
     },
     {
@@ -6840,6 +7223,10 @@
       "priority": "P2",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H5 Error prevention",
+        "H7 Flexibility and efficiency of use"
       ]
     },
     {
@@ -6865,6 +7252,9 @@
       "priority": "P2",
       "dependsOn": [
         "theme.applied"
+      ],
+      "heuristics": [
+        "H1 Visibility of system status"
       ]
     },
     {
