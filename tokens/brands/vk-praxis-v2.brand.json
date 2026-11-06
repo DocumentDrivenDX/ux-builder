@@ -47,8 +47,8 @@
           "$description": "Primary buttons: neutral ink. Generated (neutral-accent)."
         },
         "accent": {
-          "$value": "#E1192B",
-          "$description": "Links, focus, kickers: brand colour. Generated (neutral-accent). #E5202E moved −0.010 L (OKLCH, hue kept) to clear 4.5:1."
+          "$value": "#2969C2",
+          "$description": "Not red: color.red-reserved keeps red for errors, warnings and delete, so links, selection, focus and kickers use a blue (was #E1192B, the brand red). At least 4.7:1 on every ground and surface."
         },
         "on-accent": {
           "$value": "#FFFFFF",
@@ -148,8 +148,8 @@
           "$description": "Primary buttons: neutral ink. Generated (neutral-accent)."
         },
         "accent": {
-          "$value": "#F8393E",
-          "$description": "Links, focus, kickers: brand colour. Generated (neutral-accent). #E5202E moved +0.050 L (OKLCH, hue kept) to clear 4.5:1."
+          "$value": "#5F94DD",
+          "$description": "Not red: color.red-reserved keeps red for errors, warnings and delete, so links, selection, focus and kickers use a blue (was #F8393E, the brand red). At least 4.7:1 on every ground and surface."
         },
         "on-accent": {
           "$value": "#040202",
