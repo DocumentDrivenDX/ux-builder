@@ -9,7 +9,7 @@
 <text x="341.26" y="36" style="fill:#6B675E;font-size:12px;font-weight:600;font-family:ui-monospace, &quot;SF Mono&quot;, Menlo, monospace;letter-spacing:0.12em">02 / FRONT DOOR</text>
 </g>
 <g id="beacon-field-guide--beacon-app" class="uxb-group" data-role="lane">
-<rect x="714.17" y="46" width="270.05" height="366" rx="16" style="fill:#FAEAE6;stroke:#E89480;stroke-width:1.5px;stroke-dasharray:6 5"/>
+<rect x="714.17" y="46" width="270.05" height="366" rx="16" style="fill:#E9EFF7;stroke:#92AFD8;stroke-width:1.5px;stroke-dasharray:6 5"/>
 <text x="730.17" y="36" style="fill:#6B675E;font-size:12px;font-weight:600;font-family:ui-monospace, &quot;SF Mono&quot;, Menlo, monospace;letter-spacing:0.12em">03 / BEACON</text>
 </g>
 <g id="beacon-field-guide--platform" class="uxb-group" data-role="lane">
@@ -51,7 +51,7 @@
 <text x="361.26" y="245.6" style="fill:#3D3D3A;font-size:13px;font-weight:400">agent's token</text>
 </g>
 <g id="beacon-field-guide--api" class="uxb-node" data-role="own" data-status="built">
-<rect x="730.17" y="181" width="238.05" height="88" rx="10" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2.5px"/>
+<rect x="730.17" y="181" width="238.05" height="88" rx="10" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2.5px"/>
 <text x="750.17" y="222.1" style="fill:#141413;font-size:18px;font-weight:600">Beacon API</text>
 <text x="750.17" y="237.1" style="fill:#6B675E;font-size:13px;font-weight:400">every request runs as the agent</text>
 </g>

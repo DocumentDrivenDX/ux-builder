@@ -16,18 +16,18 @@
 <path d="M656 16 L656 196" style="fill:none;stroke:#706C62;stroke-width:0.75px"/>
 <text x="656" y="212" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">500</text>
 <text x="133.03" y="38" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Satisfied</text>
-<rect x="143.03" y="24" width="184.67" height="20" rx="3" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="143.03" y="24" width="184.67" height="20" rx="3" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="333.7" y="38" style="fill:#141413;font-size:12px;font-weight:600">180</text>
 <text x="133.03" y="74" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Untested</text>
-<rect x="143.03" y="60" width="417.56" height="20" rx="3" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="143.03" y="60" width="417.56" height="20" rx="3" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="566.59" y="74" style="fill:#141413;font-size:12px;font-weight:600">407</text>
 <text x="133.03" y="110" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Uncited Coverage</text>
-<rect x="143.03" y="96" width="239.04" height="20" rx="3" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="143.03" y="96" width="239.04" height="20" rx="3" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="388.07" y="110" style="fill:#141413;font-size:12px;font-weight:600">233</text>
 <text x="133.03" y="146" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Asserted Unbacked</text>
 <text x="149.03" y="146" style="fill:#141413;font-size:12px;font-weight:600">0</text>
 <text x="133.03" y="182" text-anchor="end" style="fill:#141413;font-size:12px;font-weight:400">Reviewed Exception</text>
-<rect x="143.03" y="168" width="17.44" height="20" rx="3" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="143.03" y="168" width="17.44" height="20" rx="3" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="166.47" y="182" style="fill:#141413;font-size:12px;font-weight:600">17</text>
 <text x="656" y="230" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">criteria</text>
 </g>

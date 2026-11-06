@@ -69,17 +69,17 @@
 <text x="413" y="118" style="fill:#3D3D3A;font-size:12px;font-weight:400">agent's token</text>
 </g>
 <g id="beacon-overview--web" class="uxb-node" data-role="own" data-status="built">
-<rect x="915" y="28" width="221" height="56" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="915" y="28" width="221" height="56" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="929" y="52" style="fill:#141413;font-size:14px;font-weight:600">Web app</text>
 <text x="929" y="66" style="fill:#6B675E;font-size:12px;font-weight:400">the agent's inbox and draft editor</text>
 </g>
 <g id="beacon-overview--api" class="uxb-node" data-role="own" data-status="built">
-<rect x="1372" y="42" width="211" height="56" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="1372" y="42" width="211" height="56" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="1386" y="66" style="fill:#141413;font-size:14px;font-weight:600">Beacon API</text>
 <text x="1386" y="80" style="fill:#6B675E;font-size:12px;font-weight:400">every request runs as the agent</text>
 </g>
 <g id="beacon-overview--drafter" class="uxb-node" data-role="own" data-status="built">
-<rect x="1931" y="25" width="221" height="72" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="1931" y="25" width="221" height="72" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="1945" y="49" style="fill:#141413;font-size:14px;font-weight:600">Reply drafter</text>
 <text x="1945" y="63" style="fill:#6B675E;font-size:12px;font-weight:400">builds the prompt from the ticket</text>
 <text x="1945" y="79" style="fill:#6B675E;font-size:12px;font-weight:400">and its history</text>
@@ -94,19 +94,19 @@
 <text x="2863" y="75" style="fill:#141413;font-size:14px;font-weight:600">Language models</text>
 </g>
 <g id="beacon-overview--s1--agent--proxy" class="uxb-step" data-steps="s1">
-<circle cx="227" cy="100" r="11" style="fill:#D12800"/>
+<circle cx="227" cy="100" r="11" style="fill:#255FB1"/>
 <text x="227" y="104.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">1</text>
 </g>
 <g id="beacon-overview--s2--proxy--api" class="uxb-step" data-steps="s2">
-<circle cx="630" cy="112" r="11" style="fill:#D12800"/>
+<circle cx="630" cy="112" r="11" style="fill:#255FB1"/>
 <text x="630" y="116.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">2</text>
 </g>
 <g id="beacon-overview--s3--api--gateway" class="uxb-step" data-steps="s3">
-<circle cx="1764" cy="125" r="11" style="fill:#D12800"/>
+<circle cx="1764" cy="125" r="11" style="fill:#255FB1"/>
 <text x="1764" y="129.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">3</text>
 </g>
 <g id="beacon-overview--s4--gateway--models" class="uxb-step" data-steps="s4">
-<circle cx="2656" cy="70" r="11" style="fill:#D12800"/>
+<circle cx="2656" cy="70" r="11" style="fill:#255FB1"/>
 <text x="2656" y="74.2" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">4</text>
 </g>
 </svg>

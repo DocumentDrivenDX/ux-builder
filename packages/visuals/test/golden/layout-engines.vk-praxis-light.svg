@@ -13,7 +13,7 @@
 <text x="108" y="58" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">nodes, ports,</text>
 <text x="108" y="74" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">layer constraints</text>
 <text x="108" y="466" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">Not controllable</text>
-<circle cx="524" cy="66" r="7" style="fill:#D12800;stroke:#FFFFFF;stroke-width:2px"/>
+<circle cx="524" cy="66" r="7" style="fill:#255FB1;stroke:#FFFFFF;stroke-width:2px"/>
 <text x="536" y="70" style="fill:#141413;font-size:12px;font-weight:600">elkjs (chosen)</text>
 <circle cx="524" cy="311.33" r="7" style="fill:#141413;stroke:#FFFFFF;stroke-width:2px"/>
 <text x="536" y="315.33" style="fill:#141413;font-size:12px;font-weight:400">dagre</text>

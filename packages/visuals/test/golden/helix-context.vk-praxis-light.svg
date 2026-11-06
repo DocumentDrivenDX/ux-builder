@@ -57,7 +57,7 @@
 <text x="359" y="234" style="fill:#3D3D3A;font-size:12px;font-weight:400">model, tools, execution</text>
 </g>
 <g id="helix-context--skill" class="uxb-node" data-role="own" data-status="built">
-<rect x="781" y="140" width="177" height="56" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="781" y="140" width="177" height="56" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="795" y="164" style="fill:#141413;font-size:14px;font-weight:600">Routing skill</text>
 <text x="795" y="178" style="fill:#6B675E;font-size:12px;font-weight:400">resolves scope and mode</text>
 </g>

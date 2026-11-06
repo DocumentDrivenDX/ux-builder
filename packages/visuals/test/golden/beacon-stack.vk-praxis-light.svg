@@ -39,29 +39,29 @@
 <text x="16" y="232" style="fill:#3D3D3A;font-size:12px;font-weight:600">Beacon</text>
 </g>
 <g id="beacon-stack--web" class="uxb-node" data-role="own" data-status="built">
-<rect x="127.5" y="228" width="221" height="56" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="127.5" y="228" width="221" height="56" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="141.5" y="252" style="fill:#141413;font-size:14px;font-weight:600">Web app</text>
 <text x="141.5" y="266" style="fill:#6B675E;font-size:12px;font-weight:400">the agent's inbox and draft editor</text>
 </g>
 <g id="beacon-stack--api" class="uxb-node" data-role="own" data-status="built">
-<rect x="362.5" y="228" width="211" height="56" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="362.5" y="228" width="211" height="56" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="376.5" y="252" style="fill:#141413;font-size:14px;font-weight:600">Beacon API</text>
 <text x="376.5" y="266" style="fill:#6B675E;font-size:12px;font-weight:400">every request runs as the agent</text>
 </g>
 <g id="beacon-stack--drafter" class="uxb-node" data-role="own" data-status="built">
-<rect x="587.5" y="220" width="221" height="72" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="587.5" y="220" width="221" height="72" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="601.5" y="244" style="fill:#141413;font-size:14px;font-weight:600">Reply drafter</text>
 <text x="601.5" y="258" style="fill:#6B675E;font-size:12px;font-weight:400">builds the prompt from the ticket</text>
 <text x="601.5" y="274" style="fill:#6B675E;font-size:12px;font-weight:400">and its history</text>
 </g>
 <g id="beacon-stack--worker" class="uxb-node" data-role="own" data-status="built">
-<rect x="822.5" y="220" width="190" height="72" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="822.5" y="220" width="190" height="72" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="836.5" y="244" style="fill:#141413;font-size:14px;font-weight:600">Job worker</text>
 <text x="836.5" y="258" style="fill:#6B675E;font-size:12px;font-weight:400">imports, re-indexing, nightly</text>
 <text x="836.5" y="274" style="fill:#6B675E;font-size:12px;font-weight:400">digests</text>
 </g>
 <g id="beacon-stack--rules" class="uxb-node" data-role="own" data-status="placeholder">
-<rect x="127.5" y="306" width="204" height="72" rx="8" style="fill:#FAEAE6;stroke:#D12800;stroke-width:2px"/>
+<rect x="127.5" y="306" width="204" height="72" rx="8" style="fill:#E9EFF7;stroke:#255FB1;stroke-width:2px"/>
 <text x="141.5" y="330" style="fill:#141413;font-size:14px;font-weight:600">Policy rules</text>
 <text x="141.5" y="344" style="fill:#3D3D3A;font-size:12px;font-weight:400">a fixed allow-list until the rules</text>
 <text x="141.5" y="360" style="fill:#3D3D3A;font-size:12px;font-weight:400">engine lands</text>

@@ -27,24 +27,24 @@
 <path d="M596 40 L1160 40" style="fill:none;stroke:#706C62;stroke-width:1px"/>
 <text x="608" y="63" style="fill:#141413;font-size:12px;font-weight:600">Where colors come from</text>
 <text x="848" y="63" style="fill:#3D3D3A;font-size:12px;font-weight:400">The theme's tokens</text>
-<rect x="596" y="44" width="4" height="28" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="596" y="44" width="4" height="28" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="1148" y="63" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">changed</text>
 <path d="M596 76 L1160 76" style="fill:none;stroke:#706C62;stroke-width:1px"/>
 <text x="608" y="99" style="fill:#141413;font-size:12px;font-weight:600">What draws the visuals</text>
 <text x="848" y="99" style="fill:#3D3D3A;font-size:12px;font-weight:400">@ux-builder/visuals</text>
-<rect x="596" y="80" width="4" height="44" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="596" y="80" width="4" height="44" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="1148" y="99" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">changed</text>
 <path d="M596 128 L1160 128" style="fill:none;stroke:#706C62;stroke-width:1px"/>
 <text x="608" y="151" style="fill:#141413;font-size:12px;font-weight:600">A theme switch restyles every visual</text>
 <path d="M848 147 L852 151 L859 142" style="fill:none;stroke:#141413;stroke-width:2px"/>
 <text x="866" y="151" style="fill:#3D3D3A;font-size:12px;font-weight:400">Yes</text>
-<rect x="596" y="132" width="4" height="32" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="596" y="132" width="4" height="32" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="1148" y="151" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">changed</text>
 <path d="M596 168 L1160 168" style="fill:none;stroke:#706C62;stroke-width:1px"/>
 <text x="608" y="191" style="fill:#141413;font-size:12px;font-weight:600">Checked against the source</text>
 <path d="M848 187 L852 191 L859 182" style="fill:none;stroke:#141413;stroke-width:2px"/>
 <text x="866" y="191" style="fill:#3D3D3A;font-size:12px;font-weight:400">Yes</text>
-<rect x="596" y="172" width="4" height="32" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="596" y="172" width="4" height="32" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="1148" y="191" text-anchor="end" style="fill:#3D3D3A;font-size:12px;font-weight:400">changed</text>
 <path d="M596 208 L1160 208" style="fill:none;stroke:#706C62;stroke-width:1px"/>
 </g>

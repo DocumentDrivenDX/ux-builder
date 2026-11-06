@@ -62,12 +62,12 @@ describe("theme CSS", () => {
     const light = css.slice(css.indexOf('[data-theme="vk-synaptiq"][data-appearance="light"]'));
     assert.match(css, /^\[data-theme="vk-synaptiq"\] \{/);
     assert.match(light, /--piq-shadow-card: 0 1px 2px rgba\(49, 42, 41, 0\.06\)/, "light restores the base card shadow that dark overrode");
-    assert.match(light, /--piq-color-accent: #C4463F;/);
+    assert.match(light, /--piq-color-accent: #4D728F;/);
   });
 
   test("synaptiq: light by default, with its own anatomy and the brand's colours", () => {
     const css = themeCss(src, "vk-synaptiq");
-    assert.match(css, /^\[data-theme="vk-synaptiq"\] \{[\s\S]*--piq-color-accent: #C4463F;/);
+    assert.match(css, /^\[data-theme="vk-synaptiq"\] \{[\s\S]*--piq-color-accent: #4D728F;/);
     assert.match(css, /\[data-theme="vk-synaptiq"\]\[data-appearance="dark"\] \{[\s\S]*--piq-color-accent: #F7CFA5;/);
     assert.match(css, /--piq-font-heading: "Zilla Slab", Georgia, serif;/);
     assert.match(css, /--piq-button-radius: 3px;/);
@@ -79,7 +79,7 @@ describe("adding a theme", () => {
     const s = loadWith("themes/praxis-plain.theme.json", () => ({ name: "praxis-plain", title: "Praxis Plain", brand: "vk-praxis", anatomy: src.themes.get("vk-plain").anatomy }));
     const tokens = resolvedJson(s, "praxis-plain", "dark");
     for (const [k, v] of Object.entries(tokens)) assert.doesNotMatch(String(v), /[{}]|var\(/, `--${k} = ${v}`);
-    assert.equal(tokens["piq-color-accent"], "#FF6642", "the brand's accent");
+    assert.equal(tokens["piq-color-accent"], "#578EDB", "the brand's accent");
   });
 
   test("a theme naming a missing brand fails the build", () => {

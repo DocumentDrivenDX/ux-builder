@@ -55,9 +55,12 @@ const PRAXIS_V2 = (ap, aspect) => ({
   "--logo-image": `url("../brand/praxis/logo-v2-on-${ap}.svg")`, "--logo-aspect": aspect,
   "--mark-image": 'url("../brand/praxis/mark-v2.svg")', "--favicon": 'url("../brand/praxis/mark-v2.svg")',
 });
+// vk-praxis's accent is blue, not the brand coral: color.red-reserved keeps
+// red for errors, warnings and delete (vk-praxis.brand.json).
+const BLUE_ACCENT = (hex) => ({ "--accent": hex, "--btn-focus-ring": `2px solid ${hex}`, "--badge-bg": hex });
 const DEPARTURES = {
-  "praxis dark":   { "--muted-2": "#8E8A81", ...PRAXIS_V2("dark", "3.045") },
-  "praxis light":  { "--muted-2": "#706C62", "--state-limited": "#986A24", "--state-evaluation": "#777268", ...PRAXIS_V2("light", "3.029") },
+  "praxis dark":   { "--muted-2": "#8E8A81", ...PRAXIS_V2("dark", "3.045"), ...BLUE_ACCENT("#578EDB") },
+  "praxis light":  { "--muted-2": "#706C62", "--state-limited": "#986A24", "--state-evaluation": "#777268", ...PRAXIS_V2("light", "3.029"), ...BLUE_ACCENT("#255FB1") },
   "plain light":   { "--muted-2": "#6B7484", "--state-live": "#047152", "--state-limited": "#A24A08", "--state-evaluation": "#5E6471" },
 };
 

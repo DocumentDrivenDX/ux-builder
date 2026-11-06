@@ -6,7 +6,7 @@
 <text x="16" y="38" style="fill:#141413;font-size:28px;font-weight:600">180</text>
 <text x="72.66" y="38" style="fill:#3D3D3A;font-size:13px;font-weight:400">of 837 criteria</text>
 <rect x="16" y="56" width="480" height="16" rx="8" style="fill:#FAF9F5;stroke:#706C62;stroke-width:1px"/>
-<rect x="16" y="56" width="103.23" height="16" rx="8" style="fill:#D12800;stroke:#D12800;stroke-width:0.01px"/>
+<rect x="16" y="56" width="103.23" height="16" rx="8" style="fill:#255FB1;stroke:#255FB1;stroke-width:0.01px"/>
 <text x="16" y="94" style="fill:#3D3D3A;font-size:12px;font-weight:400">180 criteria of 837 (22%)</text>
 </g>
 </svg>

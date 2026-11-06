@@ -19,63 +19,63 @@
 </g>
 <g id="beacon-deployment--agent--proxy" class="uxb-edge">
 <path d="M358.67 112 L358.67 198 Q358.67 206 366.67 206 L928.46 206 Q936.46 206 936.46 214 L936.46 283" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M932.68 283 L936.46 292 L940.24 283 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M932.68 283 L936.46 292 L940.24 283 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--admin--proxy" class="uxb-edge">
 <path d="M1016.01 112 L1016.01 168 Q1016.01 176 1024.01 176 L1129.57 176 Q1137.57 176 1137.57 184 L1137.57 283" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M1133.79 283 L1137.57 292 L1141.35 283 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M1133.79 283 L1137.57 292 L1141.35 283 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--proxy--idp" class="uxb-edge">
 <path d="M735.34 319 L648.34 319" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M648.34 315.22 L639.34 319 L648.34 322.78 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M648.34 315.22 L639.34 319 L648.34 322.78 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--gateway--models" class="uxb-edge">
 <path d="M994.84 561 L1178.84 561" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M1178.84 564.78 L1187.84 561 L1178.84 557.22 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M1178.84 564.78 L1187.84 561 L1178.84 557.22 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--proxy--web" class="uxb-edge">
 <path d="M936.46 346 L936.46 402 Q936.46 410 928.46 410 L104 410 Q96 410 96 418 L96 517" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M92.22 517 L96 526 L99.78 517 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M92.22 517 L96 526 L99.78 517 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--proxy--api" class="uxb-edge">
 <path d="M1137.57 346 L1137.57 432 Q1137.57 440 1129.57 440 L372 440 Q364 440 364 448 L364 517" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M360.22 517 L364 526 L367.78 517 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M360.22 517 L364 526 L367.78 517 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--web--api" class="uxb-edge">
 <path d="M156 563 L295 563" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M295 566.78 L304 563 L295 559.22 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M295 566.78 L304 563 L295 559.22 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--api--web" class="uxb-edge" data-kind="return">
 <path d="M304 591 L165 591" style="fill:none;stroke:#706C62;stroke-width:1.5px;stroke-dasharray:4 4"/>
-<path d="M165 587.22 L156 591 L165 594.78 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M165 587.22 L156 591 L165 594.78 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--api--drafter" class="uxb-edge">
 <path d="M352 628 L352 706 Q352 714 360 714 L620 714 Q628 714 628 706 L628 637" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M631.78 637 L628 628 L624.22 637 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M631.78 637 L628 628 L624.22 637 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--api--db" class="uxb-edge">
 <path d="M328 628 L328 856 Q328 864 336 864 L608.3 864 Q616.3 864 616.3 872 L616.3 941" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M612.52 941 L616.3 950 L620.08 941 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M612.52 941 L616.3 950 L620.08 941 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--worker--queue" class="uxb-edge">
 <path d="M476 628 L476 766 Q476 774 468 774 L257.11 774 Q249.11 774 249.11 782 L249.11 941" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M245.33 941 L249.11 950 L252.89 941 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M245.33 941 L249.11 950 L252.89 941 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--worker--db" class="uxb-edge">
 <path d="M516 628 L516 796 Q516 804 524 804 L750.38 804 Q758.38 804 758.38 812 L758.38 941" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M754.6 941 L758.38 950 L762.16 941 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M754.6 941 L758.38 950 L762.16 941 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--api--files" class="uxb-edge" data-status="unknown">
 <path d="M400 628 L400 826 Q400 834 408 834 L1117.57 834 Q1125.57 834 1125.57 842 L1125.57 941" style="fill:none;stroke:#706C62;stroke-width:1.5px;stroke-dasharray:2 3"/>
-<path d="M1121.79 941 L1125.57 950 L1129.35 941 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M1121.79 941 L1125.57 950 L1129.35 941 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--drafter--gateway" class="uxb-edge">
 <path d="M688 577 L835 577" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M835 580.78 L844 577 L835 573.22 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M835 580.78 L844 577 L835 573.22 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g id="beacon-deployment--api--gateway" class="uxb-edge">
 <path d="M376 628 L376 736 Q376 744 384 744 L911.42 744 Q919.42 744 919.42 736 L919.42 605" style="fill:none;stroke:#6B675E;stroke-width:1.5px"/>
-<path d="M923.2 605 L919.42 596 L915.64 605 Z" style="fill:#D12800;stroke:#D12800;stroke-width:1.5px"/>
+<path d="M923.2 605 L919.42 596 L915.64 605 Z" style="fill:#255FB1;stroke:#255FB1;stroke-width:1.5px"/>
 </g>
 <g class="uxb-label">
 <rect x="449.17" y="196.5" width="395" height="19" rx="4" style="fill:#FAF9F5;stroke:#E6E2D8;stroke-width:1px"/>
@@ -195,21 +195,21 @@
 <text x="1037.01" y="328.3" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">checks identity, forwards the agent's token</text>
 </g>
 <g id="beacon-deployment--web" class="uxb-node" data-role="own" data-status="built">
-<rect x="36" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="36" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="96" y="556.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Web app</text>
 <text x="96" y="570.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">the agent's</text>
 <text x="96" y="586.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">inbox and draft</text>
 <text x="96" y="602.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">editor</text>
 </g>
 <g id="beacon-deployment--api" class="uxb-node" data-role="own" data-status="built">
-<rect x="304" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="304" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="364" y="556.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Beacon API</text>
 <text x="364" y="570.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">every request</text>
 <text x="364" y="586.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">runs as the</text>
 <text x="364" y="602.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">agent</text>
 </g>
 <g id="beacon-deployment--drafter" class="uxb-node" data-role="own" data-status="built">
-<rect x="568" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="568" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="628" y="548.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Reply drafter</text>
 <text x="628" y="562.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">builds the</text>
 <text x="628" y="578.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">prompt from</text>
@@ -217,7 +217,7 @@
 <text x="628" y="610.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">its history</text>
 </g>
 <g id="beacon-deployment--worker" class="uxb-node" data-role="own" data-status="built">
-<rect x="436" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#D12800;stroke-width:2px"/>
+<rect x="436" y="526" width="120" height="102" rx="8" style="fill:#FFFFFF;stroke:#255FB1;stroke-width:2px"/>
 <text x="496" y="556.3" text-anchor="middle" style="fill:#141413;font-size:14px;font-weight:600">Job worker</text>
 <text x="496" y="570.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">imports,</text>
 <text x="496" y="586.3" text-anchor="middle" style="fill:#6B675E;font-size:12px;font-weight:400">re-indexing,</text>

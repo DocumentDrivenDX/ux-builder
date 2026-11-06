@@ -26,7 +26,7 @@ test("US-002-AC4: Carbon's focus ring takes each brand's accent", () => {
   const acme = resolvedPairJson(src, "acme", "carbon", "light");
   assert.ok(praxis["piq-focus-ring"].includes(praxis["piq-color-accent"]), praxis["piq-focus-ring"]);
   assert.ok(acme["piq-focus-ring"].includes(acme["piq-color-accent"]), acme["piq-focus-ring"]);
-  assert.equal(praxis["piq-color-accent"], "#FF6642");
+  assert.equal(praxis["piq-color-accent"], "#578EDB");
   assert.equal(acme["piq-color-accent"], "#B4442C");
 });
 
