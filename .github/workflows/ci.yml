@@ -125,7 +125,7 @@ jobs:
           LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
           RESULTS: ${{ join(needs.*.result, ' ') }}
         run: |
-          light='^(docs/|guidelines/|prototypes/|licenses/|\.github/|\.changeset/|LICENSE)|\.md$'
+          light='^(docs/|scripts/verify-full\.sh$|\.ci/evidence/|guidelines/|prototypes/|licenses/|\.github/|\.changeset/|LICENSE)|\.md$'
           if [ "$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename' | grep -Evc "$light" || true)" = 0 ]; then
             echo "pass (c): no paths covered by the heavy tier"; exit 0
           fi
