@@ -1,9 +1,35 @@
 name: ci
 
+# PR tier (`check`, one ubuntu runner, no browsers): plugin, schemas, lint, catalogue, rules,
+# unit tests, build, packed-package and licence checks. Heavy tier (`full`): the complete
+# `npm run check` plus Chromium e2e, Storybook build and tests, and the Pages build. It runs on
+# workflow_dispatch, weekly, and on PRs labelled `ci:full`. Pushes to main are not re-checked
+# here: release.yml runs the full gate on a versioned tree before anything is published.
+#
+# Evidence gate (alternative to running `full` in CI):
+#   1. commit your change, run `scripts/verify-full.sh` locally;
+#   2. commit .ci/evidence/full-suite.json as the LAST commit (excluded from the content hash);
+#   3. `evidence-gate` recomputes the hash on the PR head and passes on a match.
+# It also passes for PRs touching only docs/guidelines/markdown/.github, or when the PR carries
+# `ci:full` and `full` is green. release.yml ignores evidence and always runs the full gate.
 on:
   pull_request:
-  push:
-    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+    paths-ignore:
+      - 'docs/**'
+      - 'guidelines/**'
+      - 'prototypes/**'
+      - '**/*.md'
+  workflow_dispatch:
+  schedule:
+    - cron: '11 5 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 # No telemetry (ADR-023 rule 8): @carbon/icons, a development dependency, runs
 # IBM's install telemetry on CI servers unless this is set. tools/check-licences.mjs
@@ -14,7 +40,32 @@ env:
 
 jobs:
   check:
+    if: github.event_name != 'schedule' && github.event.action != 'labeled'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run plugin:check
+      - run: npm run schemas
+      - run: npm run lint
+      - run: node tools/gen-catalogue.mjs --check
+      - run: npm run rules
+      - run: npm test
+      - run: npm run build
+      - run: npm run packed
+      - run: npm run licences
+
+  full:
+    if: >-
+      github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'ci:full'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,12 +87,12 @@ jobs:
         with:
           name: gallery
           path: build/gallery.html
-      # Prove every story still builds against the tokens just built, and
-      # hand reviewers the result to browse (unzip, then open index.html
-      # through a local server: npx http-server).
       # The theme builder's core flow, logo to saved theme, end to end in
       # Chromium with the model mocked (US-015).
       - run: npm run e2e --workspace @ux-builder/theme-builder
+      # Prove every story still builds against the tokens just built, and
+      # hand reviewers the result to browse (unzip, then open index.html
+      # through a local server: npx http-server).
       - run: npm run build-storybook --workspace @ux-builder/ui
       # The GitHub Pages site, as pages.yml builds it on main, so a broken
       # site shows here before it merges.
@@ -52,3 +103,38 @@ jobs:
         with:
           name: storybook
           path: packages/ui/storybook-static
+
+  evidence-gate:
+    needs: [full]
+    if: >-
+      always() && github.event_name == 'pull_request' &&
+      (github.event.action != 'labeled' || github.event.label.name == 'ci:full')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Evidence gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          light='^(docs/|guidelines/|prototypes/|licenses/|\.github/|\.changeset/|LICENSE)|\.md$'
+          if [ "$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename' | grep -Evc "$light" || true)" = 0 ]; then
+            echo "pass (c): no paths covered by the heavy tier"; exit 0
+          fi
+          h=$(git ls-files -z -- . ':!.ci/evidence' | while IFS= read -r -d '' f; do [ -f "$f" ] || continue; printf '%s\0' "$f"; cat -- "$f"; done | sha256sum | cut -d' ' -f1)
+          if [ -f .ci/evidence/full-suite.json ] && [ "$(jq -r .content_hash .ci/evidence/full-suite.json)" = "$h" ]; then
+            echo "pass (a): evidence matches $h"; exit 0
+          fi
+          if echo "$LABELS" | jq -e 'index("ci:full")' >/dev/null && [ "$RESULTS" = success ]; then
+            echo "pass (b): ci:full label and heavy suite green"; exit 0
+          fi
+          echo "::error::No valid evidence for $h. Run scripts/verify-full.sh locally and commit .ci/evidence/full-suite.json last, or add the ci:full label."
+          exit 1
