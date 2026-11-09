@@ -15,6 +15,9 @@ name: release
 # Publishing uses npm Trusted Publishing (OIDC): no npm token is stored. Each
 # public package must name this repository and release.yml as its trusted
 # publisher on npmjs.com (README, "Publishing a release").
+# A `plan` job first skips the run when no changesets are pending and every public package
+# version is already on npm, so ordinary pushes cost seconds. Evidence from PRs
+# (scripts/verify-full.sh) is ignored here: this run always executes the full gate.
 on:
   push:
     branches: [main]
@@ -40,9 +43,42 @@ env:
   DO_NOT_TRACK: "1"
 
 jobs:
-  release:
-    # Only main is released, also when the workflow is run by hand from another branch.
+  plan:
+    # A few seconds instead of a full build: release only when there is something to release,
+    # i.e. pending changesets, or a public package whose version is not on npm yet (a failed
+    # publish is retried by the next push). A push that touches neither skips the run.
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      needed: ${{ steps.p.outputs.needed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - id: p
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          needed=false
+          if [ "$EVENT" = workflow_dispatch ]; then needed=true; fi
+          if ls .changeset/*.md 2>/dev/null | grep -qv '/README.md$'; then needed=true; fi
+          if [ "$needed" = false ]; then
+            for pj in packages/*/package.json apps/*/package.json; do
+              [ -f "$pj" ] || continue
+              if [ "$(jq -r '.private // false' "$pj")" = true ]; then continue; fi
+              name=$(jq -r .name "$pj"); version=$(jq -r .version "$pj")
+              if [ -z "$(npm view "$name@$version" version 2>/dev/null)" ]; then
+                echo "$name@$version is not on npm yet"; needed=true
+              fi
+            done
+          fi
+          echo "needed=$needed"; echo "needed=$needed" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: plan
+    # Only main is released, also when the workflow is run by hand from another branch.
+    if: github.ref == 'refs/heads/main' && needs.plan.outputs.needed == 'true'
     runs-on: ubuntu-latest
     # A healthy run takes about 20 minutes, and one whose package mirror is slow
     # (44.8 kB/s on 2026-10-22) about 50 minutes; a hung runner fails at 120 instead of
