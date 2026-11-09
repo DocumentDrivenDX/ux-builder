@@ -80,7 +80,18 @@ const optimizer = vite.environments?.client?.depsOptimizer;
 const sources = [...globSync("src/**/*.{js,jsx}", { cwd: APP })].filter((f) => !/\.(test|stories)\.jsx?$/.test(f));
 await Promise.all(["src/main.jsx", "src/home/main.jsx", ...sources].map((f) => vite.warmupRequest(`/${f}`).catch(() => {})));
 await optimizer?.scanProcessing;
-await Promise.all(Object.values(optimizer?.metadata?.discovered ?? {}).map((d) => d.processing).filter(Boolean));
+// Then wait out the crawl's end, where Vite commits that bundle or re-optimises
+// for a dependency the scan missed: until it holds still across an idle pause.
+const client = vite.environments?.client;
+const state = () => JSON.stringify([optimizer?.metadata?.browserHash, Object.keys(optimizer?.metadata?.discovered ?? {}), Object.keys(optimizer?.metadata?.optimized ?? {})]);
+for (let i = 0, last = ""; optimizer && i < 50; i++) {
+  await client?.waitForRequestsIdle?.();
+  await Promise.all(Object.values(optimizer.metadata?.discovered ?? {}).map((d) => d.processing).filter(Boolean));
+  await new Promise((r) => setTimeout(r, 400));
+  const now = state();
+  if (now === last && !Object.keys(optimizer.metadata?.discovered ?? {}).length) break;
+  last = now;
+}
 http.listen(port, "127.0.0.1", () => {
   console.log(`theme builder: http://127.0.0.1:${port}/  (model: ${model.available ? model.name : "unavailable"}, review: ${review}, repo: ${root})`);
 });
