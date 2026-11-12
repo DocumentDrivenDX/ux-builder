@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Test Theme 01 on the material design system: the test-theme-01 brand. Made in the theme builder.",
+  "name": "test-theme-01",
+  "title": "Test Theme 01 Material",
+  "brand": "test-theme-01",
+  "default": "light",
+  "designSystem": "material"
+}
