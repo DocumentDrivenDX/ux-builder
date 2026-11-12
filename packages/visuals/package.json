@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/visuals",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT OR Apache-2.0",
   "description": "Draw umf.visual documents (one picture described as data) in any ux-builder theme: SVG, Mermaid, plates and stepped presentations, with no browser at render time.",
   "type": "module",
@@ -40,7 +40,7 @@
     "types": "node scripts/build-types.mjs"
   },
   "dependencies": {
-    "@ux-builder/tokens": "^1.7.0",
+    "@ux-builder/tokens": "^2.0.0",
     "ajv": "^8.20.0",
     "elkjs": "0.12.0"
   },

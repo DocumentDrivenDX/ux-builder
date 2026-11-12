@@ -1,5 +1,14 @@
 # @ux-builder/design
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies [9bb6d47]
+- Updated dependencies [7d833cd]
+  - @ux-builder/ui@0.17.0
+  - @ux-builder/audit@0.9.1
+
 ## 1.1.1
 
 ### Patch Changes

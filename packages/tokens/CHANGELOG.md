@@ -1,5 +1,16 @@
 # @ux-builder/tokens
 
+## 2.0.0
+
+### Major Changes
+
+- 7d833cd: On the vk/adjustments branch, only the vk- themes remain: vk-databricks, vk-plain, vk-praxis, vk-praxis-carbon, vk-praxis-fluentui, vk-praxis-material and vk-synaptiq. The original themes, vk-ux-builder-databricks, vk-praxis-v2-databricks, vk-img-8593-databricks and the brands only they used are removed; the SDK's defaults (wireframes, prototypes, create-app, lint, Storybook, the site) now name vk- themes. The vk- themes on a shared design system sit on vk- copies of it (vk-databricks, vk-material, vk-fluent, vk-carbon), so their shape and spacing can change without touching the shared ones. A theme's icon set now comes from its design system's icon.set token (manifest iconSet), so a renamed copy keeps its set.
+
+### Minor Changes
+
+- b4678d0: The vk- themes stop using red for links, selection, focus and kickers, as color.red-reserved asks: the vk-praxis brand (vk-praxis, vk-praxis-carbon, vk-praxis-fluentui, vk-praxis-material) and vk-praxis-v2 take a blue accent, and vk-synaptiq's light appearance takes Arctic, deepened to read as text. Each new accent clears 4.7:1 on every ground and surface in its appearance. Red stays for errors, destructive actions, the Praxis logo and Synaptiq's critical status. The original themes are unchanged.
+- 3383d93: Adds a vk- copy of every theme (10) and of the brand each one uses (7), so they can be adjusted on the vk/adjustments branch without changing the originals. Each copy starts identical to its original.
+
 ## 1.9.0
 
 ### Minor Changes

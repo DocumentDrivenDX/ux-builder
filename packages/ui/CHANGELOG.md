@@ -1,5 +1,19 @@
 # @ux-builder/ui
 
+## 0.17.0
+
+### Minor Changes
+
+- 9bb6d47: The interaction rules grow from 107 to 299. 192 proposed rules (marked `status: "proposed"`, reviewed until their planned checks are built) cover forms, input, text, trust and dark patterns, data display, search, media, notifications, AI and agents, the guided session, and the theme review's findings. Every rule now has a priority from P0 (Gate) to P6 (Refinement), and may name the rules it depends on and the rules it takes precedence over; `rules.json` describes the levels and the order that settles a clash, and the rules check fails a missing rule, a dependency cycle or a rule that takes precedence over a higher-priority one.
+- 7d833cd: On the vk/adjustments branch, only the vk- themes remain: vk-databricks, vk-plain, vk-praxis, vk-praxis-carbon, vk-praxis-fluentui, vk-praxis-material and vk-synaptiq. The original themes, vk-ux-builder-databricks, vk-praxis-v2-databricks, vk-img-8593-databricks and the brands only they used are removed; the SDK's defaults (wireframes, prototypes, create-app, lint, Storybook, the site) now name vk- themes. The vk- themes on a shared design system sit on vk- copies of it (vk-databricks, vk-material, vk-fluent, vk-carbon), so their shape and spacing can change without touching the shared ones. A theme's icon set now comes from its design system's icon.set token (manifest iconSet), so a renamed copy keeps its set.
+
+### Patch Changes
+
+- Updated dependencies [b4678d0]
+- Updated dependencies [7d833cd]
+- Updated dependencies [3383d93]
+  - @ux-builder/tokens@2.0.0
+
 ## 0.16.0
 
 ### Minor Changes
