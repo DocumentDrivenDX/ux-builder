@@ -544,6 +544,8 @@ describe("US-048 the assistant shows its answer as SDK components", () => {
     assert.deepEqual(await calls(page, "submit"), [], "an invalid form sends nothing");
     await email.fill("billing@acme.example");
     await setMessages(page, [FORMPAGE("S. Patel")]);
+    // The regenerated reply re-renders asynchronously; wait for it before reading values.
+    await page.waitForFunction(() => [...document.querySelectorAll('.piq-generative[data-component="FormPage"] input')].some((el) => el.value === "S. Patel"), null, { timeout: 5000 }).catch(() => {});
     assert.equal(await email.inputValue(), "billing@acme.example", "the edit survives regeneration");
     assert.equal(await name.inputValue(), "S. Patel", "an untouched pre-fill follows the new reply");
     assert.deepEqual(await calls(page, "submit"), []);
