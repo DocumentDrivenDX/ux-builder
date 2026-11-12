@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "To Do Vk on the databricks design system: the to-do-vk brand. Made in the theme builder.",
+  "name": "to-do-vk",
+  "title": "To Do Vk Databricks",
+  "brand": "to-do-vk",
+  "default": "light",
+  "designSystem": "databricks"
+}
