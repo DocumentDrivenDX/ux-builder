@@ -18,7 +18,7 @@ const base = () => ({
 });
 
 test("@covers US-163-AC4 a clean report passes", () => {
-  assert.deepEqual(check(base(), { theme: createTheme(loadTheme("praxis")) }), []);
+  assert.deepEqual(check(base(), { theme: createTheme(loadTheme("vk-praxis")) }), []);
 });
 
 test("@covers US-163-AC4 each problem is found with its code", () => {
@@ -33,7 +33,7 @@ test("@covers US-163-AC4 each problem is found with its code", () => {
     ["CONTRAST", (r) => { r.colors.push({ id: "b", kind: "text", fg: "piq-color-diagram-region-1", bg: "piq-color-ground" }); }],
     ["CONTRAST", (r) => { r.colors.push({ id: "b", kind: "line", fg: "piq-color-border", bg: "piq-color-ground" }); }],
   ];
-  const theme = createTheme(loadTheme("praxis"));
+  const theme = createTheme(loadTheme("vk-praxis"));
   for (const [code, mutate] of cases) {
     const r = base();
     mutate(r);
@@ -46,9 +46,9 @@ test("@covers US-163-AC4 each problem is found with its code", () => {
 test("@covers US-163-AC4 contrast is checked in both appearances for a both-appearance drawing", () => {
   const r = base();
   r.colors = [{ id: "a", kind: "text", fg: "piq-color-text-strong", bg: "piq-color-surface" }];
-  assert.deepEqual(check(r, { theme: createTheme(loadTheme("praxis", "both"), "both") }), []);
+  assert.deepEqual(check(r, { theme: createTheme(loadTheme("vk-praxis", "both"), "both") }), []);
   r.colors.push({ id: "b", kind: "text", fg: "piq-color-diagram-region-1", bg: "piq-color-ground" });
-  const found = check(r, { theme: createTheme(loadTheme("praxis", "both"), "both") }).filter((f) => f.code === "CONTRAST");
+  const found = check(r, { theme: createTheme(loadTheme("vk-praxis", "both"), "both") }).filter((f) => f.code === "CONTRAST");
   assert.equal(found.length, 2);
   assert.ok(found.some((f) => f.message.includes("(light)")) && found.some((f) => f.message.includes("(dark)")));
 });

@@ -22,7 +22,7 @@ import "../src/patterns.css";
 import "./preview.css";
 
 // Every theme in each of its appearances, from the token build. Keyed
-// "praxis-dark" rather than "praxis.dark": Storybook drops a global from the
+// "praxis-dark" rather than "vk-praxis.dark": Storybook drops a global from the
 // URL if it has a dot in it, and a theme should be linkable (the theme
 // builder's theme pages link each story in their own theme this way).
 const FILES = import.meta.glob("../../tokens/dist/resolved/*.json", { eager: true, import: "default" });

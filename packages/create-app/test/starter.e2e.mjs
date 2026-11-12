@@ -45,7 +45,7 @@ before(async () => {
   mkdirSync(join(tmp, "sdk"));
   for (const p of ["tokens", "ui", "audit", "trace", "design"]) sh("npm", ["pack", "--silent", "--pack-destination", join(tmp, "sdk")], join(ROOT, "packages", p));
   for (const [name, a] of Object.entries(APPS)) {
-    const r = spawnSync(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), dir(name), "--modality", a.modalities, "--theme", "databricks", "--sdk-from", join(tmp, "sdk"), ...(a.helix ? [] : ["--no-helix"])], { cwd: tmp, encoding: "utf8" });
+    const r = spawnSync(process.execPath, [join(ROOT, "packages/create-app/index.mjs"), dir(name), "--modality", a.modalities, "--theme", "vk-databricks", "--sdk-from", join(tmp, "sdk"), ...(a.helix ? [] : ["--no-helix"])], { cwd: tmp, encoding: "utf8" });
     assert.equal(r.status, 0, `create-app ${name}\n${r.stdout}\n${r.stderr}`);
     if (a.helix) created = r;
     sh("npm", ["install", "--no-audit", "--no-fund"], dir(name));
@@ -67,12 +67,12 @@ test("US-150: a design folder installs, runs the guide, then is built in place i
   sh("test", ["-f", join(d, ".claude/skills/ux-builder-design/SKILL.md")], d);
   assert.match(sh("npx", ["ux-builder-design", "status"], d), /No app yet: this folder holds the design/);
   sh("npx", ["ux-builder-design", "modality", "--answer", "A web app for phones to desktops", "--modality", "responsive-web", "--size-classes", "compact,medium,expanded,large", "--frame", "top-bar"], d);
-  assert.match(create(d, ".", "--theme", "databricks"), /Built designed, a responsive-web app, in \. on the databricks theme/);
+  assert.match(create(d, ".", "--theme", "vk-databricks"), /Built designed, a responsive-web app, in \. on the vk-databricks theme/);
   sh("npm", ["install", "--no-audit", "--no-fund"], d);
   sh("npm", ["run", "build"], d);
   assert.match(sh("npm", ["run", "check:blueprint"], d), /app\.blueprint\.json: no findings/);
   sh("npm", ["run", "lint"], d);
-  assert.match(sh("npx", ["ux-builder-design", "status"], d), /The app was built here on the databricks theme/);
+  assert.match(sh("npx", ["ux-builder-design", "status"], d), /The app was built here on the vk-databricks theme/);
 });
 
 test("npm install puts the SDK's Claude Code skill in place", () => {
@@ -146,7 +146,7 @@ test("AC2: the app renders on the SDK, switches theme and appearance; with respo
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
   await page.goto("http://127.0.0.1:5193/");
   const provider = page.locator(".app");
-  await assertAttr(provider, "data-theme", "databricks");
+  await assertAttr(provider, "data-theme", "vk-databricks");
   await assertAttr(provider, "data-appearance", "light");
   await page.getByRole("heading", { name: "Home", exact: true }).waitFor();
   const side = page.locator(".piq-shell__side");
@@ -159,8 +159,8 @@ test("AC2: the app renders on the SDK, switches theme and appearance; with respo
   const btn = () => page.locator(".piq-composer .piq-btn").first().evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
   assert.equal(await btn(), "8px", "Databricks buttons");
 
-  await page.getByLabel("Theme").selectOption("praxis-carbon");
-  await assertAttr(provider, "data-theme", "praxis-carbon");
+  await page.getByLabel("Theme").selectOption("vk-praxis-carbon");
+  await assertAttr(provider, "data-theme", "vk-praxis-carbon");
   assert.equal(await btn(), "0px", "Carbon buttons are square");
   assert.equal(await page.locator("svg.piq-icon").first().getAttribute("data-icon-set"), "carbon");
 
@@ -183,13 +183,13 @@ test("AC5: the header's logo follows the theme and appearance", async () => {
   await page.goto("http://127.0.0.1:5193/");
   const provider = page.locator(".app");
   const logo = page.locator(".brand .piq-logo");
-  await assertAttr(provider, "data-theme", "databricks");
+  await assertAttr(provider, "data-theme", "vk-databricks");
   // Databricks ships no artwork: its title, as a wordmark.
   await assertAttr(logo, "data-logo", "text");
   assert.equal(await logo.getAttribute("aria-label"), "Databricks");
   assert.equal(await logo.textContent(), "Databricks");
 
-  await page.getByLabel("Theme").selectOption("praxis-carbon");
+  await page.getByLabel("Theme").selectOption("vk-praxis-carbon");
   await assertAttr(logo, "data-logo", "artwork");
   assert.equal(await logo.getAttribute("aria-label"), "Praxis");
   const image = () => logo.evaluate((el) => getComputedStyle(el).backgroundImage);
@@ -220,17 +220,17 @@ test("AC6: the page's icon is the theme's favicon, and the app's own where the t
   const page = await browser.newPage({ colorScheme: "light" });
   await page.goto("http://127.0.0.1:5193/");
   const icon = () => page.evaluate(() => document.querySelector("link[data-piq-favicon]")?.href ?? null);
-  await assertAttr(page.locator(".app"), "data-theme", "databricks");
+  await assertAttr(page.locator(".app"), "data-theme", "vk-databricks");
   assert.equal(await icon(), null, "Databricks has no favicon: the app's own");
 
-  await page.getByLabel("Theme").selectOption("praxis-material");
+  await page.getByLabel("Theme").selectOption("vk-praxis-material");
   for (let i = 0; i < 40 && !(await icon()); i++) await new Promise((r) => setTimeout(r, 100));
   const href = await icon();
   assert.match(href ?? "", /\/assets\/[^/]+\.svg$/, "Vite bundles the theme's favicon");
   const res = await page.request.get(href);
   assert.equal(res.headers()["content-type"], "image/svg+xml", "it loads as an image, not the app's HTML");
 
-  await page.getByLabel("Theme").selectOption("databricks");
+  await page.getByLabel("Theme").selectOption("vk-databricks");
   for (let i = 0; i < 40 && (await icon()); i++) await new Promise((r) => setTimeout(r, 100));
   assert.equal(await icon(), null);
   await page.close();

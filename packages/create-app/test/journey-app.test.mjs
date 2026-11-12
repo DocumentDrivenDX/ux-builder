@@ -66,7 +66,7 @@ describe("US-159: the app built from a design opens on its journeys", () => {
   // @covers US-159-AC1
   test("AC1: a route per screen, its title, purpose and content in order with sample data, the journeys' actions leading step to step, the dialogs", async () => {
     dir = folder("rivers");
-    built = run(CLI, dir, ".", "--theme", "plain");
+    built = run(CLI, dir, ".", "--theme", "vk-plain");
     assert.equal(built.status, 0, built.stderr);
     assert.match(built.stdout, /The app opens on the designed journeys: 3 screens \(src\/screens\/\), journeys J-find, J-saved/);
     for (const f of ["src/App.jsx", "src/journey/runtime.jsx", "src/journey/blueprint.js", "src/screens/MapScreen.jsx", "src/screens/DetailScreen.jsx", "src/screens/SavedScreen.jsx", "e2e/journeys.spec.js"]) assert.ok(existsSync(join(dir, f)), f);
@@ -197,7 +197,7 @@ describe("US-156: the build installs no starter document the design already has"
       put(d, "docs/helix/01-frame/features/FEAT-001-reminders.md", FEAT);
       put(d, "docs/helix/01-frame/user-stories/US-001-remind-me.md", US);
     });
-    const r = await buildInPlace(dir, { theme: "plain" });
+    const r = await buildInPlace(dir, { theme: "vk-plain" });
     const ids = readdirSync(join(dir, "docs/helix"), { recursive: true }).map(String).filter((f) => f.endsWith(".md"))
       .map((f) => /^\s*id:\s*(\S+)/m.exec(read(dir, join("docs/helix", f)))?.[1]).filter(Boolean);
     for (const id of ["FEAT-001", "US-001"]) assert.equal(ids.filter((x) => x === id).length, 1, `${id}: ${ids.join(", ")}`);
@@ -214,7 +214,7 @@ describe("US-156: the build installs no starter document the design already has"
     assert.doesNotMatch(read(dir, "e2e/starter.spec.js"), /@covers US-001/);
     // A design whose feature spec has another number: the starter's FEAT-001 and its story are left out too.
     const other = folder("other-number", (d) => put(d, "docs/helix/01-frame/features/FEAT-007-trips.md", FEAT.replace("FEAT-001", "FEAT-007")));
-    const o = await buildInPlace(other, { theme: "plain" });
+    const o = await buildInPlace(other, { theme: "vk-plain" });
     assert.deepEqual(o.helix.skipped.map((s) => s.id), ["FEAT-001", "US-001", "STP-001"]);
     assert.match(o.helix.skipped[0].why, /the design already has a feature-specification document \(FEAT-007/);
     assert.doesNotMatch(read(other, "docs/helix/02-design/DESIGN.md"), /to: FEAT-001/, "no link to a starter document that was not written");
@@ -226,14 +226,14 @@ describe("US-156: the build installs no starter document the design already has"
       const f = join(d, ".ux-builder/design-state.json");
       writeFileSync(f, JSON.stringify({ ...JSON.parse(readFileSync(f, "utf8")), appearance: { value: "dark", reason: "a guest list used in dark venues" } }, null, 2));
     });
-    const r = await buildInPlace(dark, { theme: "plain" });
+    const r = await buildInPlace(dark, { theme: "vk-plain" });
     assert.equal(r.appearance, "dark");
     // The audit visits every designed screen, not only the home page.
     const audit = JSON.parse(read(dark, "package.json")).scripts.audit;
     for (const sc of r.prototype.screens) assert.ok(audit.includes(`http://127.0.0.1:4173${sc.path} `) || audit.endsWith(`http://127.0.0.1:4173${sc.path}`), `${sc.path}: ${audit}`);
-    assert.match(read(dark, "src/main.jsx"), /<ThemeProvider theme="plain" appearance="dark"/);
+    assert.match(read(dark, "src/main.jsx"), /<ThemeProvider theme="vk-plain" appearance="dark"/);
     const plain = folder("plain-look", () => {});
-    assert.equal((await buildInPlace(plain, { theme: "plain" })).appearance, "system");
+    assert.equal((await buildInPlace(plain, { theme: "vk-plain" })).appearance, "system");
     assert.match(read(plain, "src/main.jsx"), /appearance="system"/);
   });
 });
@@ -302,7 +302,7 @@ describe("US-159: the generated app renders", () => {
       detail.stateNotices = { closed: { tone: "error", title: "Closed for the season", text: "Fishing opens again in April.", values: { Access: "Closed until April" } } };
       writeFileSync(join(d, BP), JSON.stringify(bp, null, 2) + "\n");
     });
-    await buildInPlace(dir, { theme: "plain" });
+    await buildInPlace(dir, { theme: "vk-plain" });
     rmSync(join(dir, "node_modules"), { recursive: true, force: true });
     symlinkSync(join(ROOT, "node_modules"), join(dir, "node_modules"));
     writeFileSync(join(dir, "vite.config.js"), 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\nexport default defineConfig({ plugins: [react()], resolve: { dedupe: ["react", "react-dom"] }, logLevel: "error" });\n');

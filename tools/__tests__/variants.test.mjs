@@ -45,9 +45,9 @@ describe("the layout base", () => {
   });
 
   test("a design system may override a layout measure, which then wins over the default", () => {
-    const s = loadWith({ "design-systems/carbon.design-system.json": (d) => ({ ...d, tokens: { ...d.tokens, space: { ...d.tokens.space, "gutter-compact": { $value: "{space.3}" } } } }) });
-    assert.equal(resolved(s, "praxis-carbon")["piq-space-gutter-compact"], resolved(s, "praxis-carbon")["piq-space-3"]);
-    assert.equal(resolved(s, "praxis-material")["piq-space-gutter-compact"], resolved(s, "praxis-material")["piq-space-4"], "others keep the default");
+    const s = loadWith({ "design-systems/vk-carbon.design-system.json": (d) => ({ ...d, tokens: { ...d.tokens, space: { ...d.tokens.space, "gutter-compact": { $value: "{space.3}" } } } }) });
+    assert.equal(resolved(s, "vk-praxis-carbon")["piq-space-gutter-compact"], resolved(s, "vk-praxis-carbon")["piq-space-3"]);
+    assert.equal(resolved(s, "vk-praxis-material")["piq-space-gutter-compact"], resolved(s, "vk-praxis-material")["piq-space-4"], "others keep the default");
   });
 
   test("a design system that sets a size-class boundary fails the build", () => {
@@ -59,15 +59,15 @@ describe("the layout base", () => {
   });
 
   test("a theme's own anatomy that sets one fails too", () => {
-    refuses({ "themes/praxis.theme.json": (t) => ({ ...t, anatomy: { ...t.anatomy, appearances: { ...t.anatomy.appearances, dark: { ...t.anatomy.appearances?.dark, size: { "breakpoint-large": { $value: "1100px" } } } } } }) }, /theme praxis: sets size\.breakpoint-large/);
+    refuses({ "themes/vk-praxis.theme.json": (t) => ({ ...t, anatomy: { ...t.anatomy, appearances: { ...t.anatomy.appearances, dark: { ...t.anatomy.appearances?.dark, size: { "breakpoint-large": { $value: "1100px" } } } } } }) }, /theme vk-praxis: sets size\.breakpoint-large/);
   });
 });
 
 describe("variants", () => {
   test("each design system resolves the variant it names; Material's navigation is the rail", () => {
-    assert.equal(resolved(src, "praxis-material")["piq-nav-item-direction"], "column");
-    assert.equal(resolved(src, "praxis-material")["piq-nav-width"], "5rem");
-    for (const t of ["praxis-carbon", "praxis-fluentui"]) assert.equal(resolved(src, t)["piq-nav-item-direction"], "row", t);
+    assert.equal(resolved(src, "vk-praxis-material")["piq-nav-item-direction"], "column");
+    assert.equal(resolved(src, "vk-praxis-material")["piq-nav-width"], "5rem");
+    for (const t of ["vk-praxis-carbon", "vk-praxis-fluentui"]) assert.equal(resolved(src, t)["piq-nav-item-direction"], "row", t);
   });
 
   // @covers US-030-AC2
@@ -87,14 +87,14 @@ describe("variants", () => {
   });
 
   test("a design system can fine-tune one token of its variant", () => {
-    const s = loadWith({ "design-systems/material.design-system.json": (d) => ({ ...d, tokens: { ...d.tokens, nav: { width: { $value: "6rem" } } } }) });
-    const r = resolved(s, "praxis-material");
+    const s = loadWith({ "design-systems/vk-material.design-system.json": (d) => ({ ...d, tokens: { ...d.tokens, nav: { width: { $value: "6rem" } } } }) });
+    const r = resolved(s, "vk-praxis-material");
     assert.equal(r["piq-nav-width"], "6rem");
     assert.equal(r["piq-nav-item-direction"], "column", "the rest of the rail stays");
   });
 
   test("variants are emitted in each theme's own block, so a nested theme shows its own", () => {
-    for (const t of ["praxis-material", "praxis-carbon"]) assert.match(themeCss(src, t), new RegExp(`\\[data-theme="${t}"\\] \\{[^}]*--piq-nav-item-direction: ${t === "praxis-material" ? "column" : "row"};`));
+    for (const t of ["vk-praxis-material", "vk-praxis-carbon"]) assert.match(themeCss(src, t), new RegExp(`\\[data-theme="${t}"\\] \\{[^}]*--piq-nav-item-direction: ${t === "vk-praxis-material" ? "column" : "row"};`));
   });
 
   test("an unknown variant point fails the build, naming the defined points", () => {
@@ -107,7 +107,7 @@ describe("variants", () => {
 
   // @covers US-030-AC3
   test("a brand that names a variant fails the build, saying variants belong to the design system", () => {
-    refuses({ "brands/praxis.brand.json": (b) => ({ ...b, variants: { navigation: "rail" } }) }, /a brand cannot choose pattern variants; variants belong to the design system/);
+    refuses({ "brands/vk-praxis.brand.json": (b) => ({ ...b, variants: { navigation: "rail" } }) }, /a brand cannot choose pattern variants; variants belong to the design system/);
   });
 
   test("variants of one point that set different tokens fail the build", () => {

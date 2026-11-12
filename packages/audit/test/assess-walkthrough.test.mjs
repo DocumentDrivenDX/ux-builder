@@ -21,7 +21,7 @@ let server, base;
 before(async () => {
   server = createServer((req, res) => {
     const path = new URL(req.url, "http://x").pathname;
-    if (path === "/queue") { res.writeHead(200, { "content-type": "text/html" }); res.end(`<!doctype html><html lang="en" data-theme="praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>Queue</title><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/ui.css"></head><body><main><h1>Queue</h1><p id="who">Signed in as reviewer@example.test</p><p>Account 4417-2210 is flagged</p></main></body></html>`); return; }
+    if (path === "/queue") { res.writeHead(200, { "content-type": "text/html" }); res.end(`<!doctype html><html lang="en" data-theme="vk-praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>Queue</title><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/ui.css"></head><body><main><h1>Queue</h1><p id="who">Signed in as reviewer@example.test</p><p>Account 4417-2210 is flagged</p></main></body></html>`); return; }
     const file = FILES[path];
     if (!file || !existsSync(file)) { res.writeHead(404); res.end(); return; }
     res.writeHead(200, { "content-type": { ".css": "text/css" }[extname(file)] ?? "application/octet-stream" });

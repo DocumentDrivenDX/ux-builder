@@ -277,6 +277,12 @@ export const LICENCES = {
   "CC-BY-NC-SA-4.0": { name: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0", meaning: "Non-commercial and share-alike, so the rules paraphrase it and do not adapt it.", quote: false },
   "CC-BY-NC-ND-4.0": { name: "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0", meaning: "No derivatives, so the rules paraphrase it and never quote or adapt it.", quote: false },
   W3C: { name: "W3C Document License", meaning: "Open: a short quotation is allowed with attribution, credited in the notices.", quote: true },
+  "OGL-3.0": { name: "Open Government Licence v3.0", meaning: "UK government guidance (GOV.UK, the GOV.UK Design System, NCSC, legislation.gov.uk). Open, but the rules paraphrase it until the notices credit it.", quote: false },
+  "public-domain": { name: "US government work", meaning: "US federal guidance (FTC, plainlanguage.gov, NIST), not under copyright. The rules paraphrase it and link it.", quote: false },
+  "CC-BY-SA-2.5": { name: "Creative Commons Attribution-ShareAlike 2.5", meaning: "MDN Web Docs. Share-alike, so the rules paraphrase it and do not adapt it.", quote: false },
+  "CC-BY-SA-4.0": { name: "Creative Commons Attribution-ShareAlike 4.0", meaning: "OWASP. Share-alike, so the rules paraphrase it and do not adapt it.", quote: false },
+  "Apache-2.0": { name: "Apache License 2.0", meaning: "IBM's Carbon Design System. The rules paraphrase its guidance and link it.", quote: false },
+  "publisher-terms": { name: "The publisher's terms", meaning: "Research papers, books' publishers, standards bodies, regulators and other sites with no open licence shown. Paraphrased and linked, never quoted.", quote: false },
 };
 
 export function rules() {

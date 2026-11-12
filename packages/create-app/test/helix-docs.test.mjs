@@ -18,7 +18,7 @@ const BUNDLE = bundle("8.8.0");
 process.env.UX_BUILDER_HELIX_BUNDLE = BUNDLE;
 after(() => { rmSync(tmp, { recursive: true, force: true }); rmSync(BUNDLE, { recursive: true, force: true }); });
 let n = 0;
-const make = async (helix = { offline: true }, log) => { const r = await create(join(tmp, `app-${++n}`), { theme: "databricks", name: "acme", modalities: ["responsive-web"], helix, log }); return { r, read: (p) => readFileSync(join(r.dir, "docs/helix", p), "utf8") }; };
+const make = async (helix = { offline: true }, log) => { const r = await create(join(tmp, `app-${++n}`), { theme: "vk-databricks", name: "acme", modalities: ["responsive-web"], helix, log }); return { r, read: (p) => readFileSync(join(r.dir, "docs/helix", p), "utf8") }; };
 const fm = (text) => /^---\n([\s\S]*?)\n---/.exec(text)[1];
 const SET = {
   "00-discover/product-vision.md": ["product-vision", "product-vision"],
@@ -50,7 +50,7 @@ describe("US-069: start with the HELIX documents drafted", () => {
   // @covers US-069-AC2
   test("AC2: what the starter knows is filled in", async () => {
     const { read } = await make();
-    assert.match(read("01-frame/prd.md"), /acme, a React 19 \+ Vite app[\s\S]*theme `databricks`/);
+    assert.match(read("01-frame/prd.md"), /acme, a React 19 \+ Vite app[\s\S]*theme `vk-databricks`/);
     const concerns = read("01-frame/concerns.md");
     for (const c of ["react-vite", "e2e-playwright", "packaged-design-system", "a11y-wcag-aa", "ux-interaction-patterns"]) assert.match(concerns, new RegExp(`^\\| ${c} \\| library`, "m"), c);
     assert.match(concerns, /language-runtime slot[\s\S]*assumption: HELIX has no Node concern/);

@@ -9,10 +9,10 @@ test.describe("Pick design systems", () => {
   test("a card per shared design system, showing the first chosen palette in it", async ({ page }) => {
     await toSystems(page);
     const cards = page.locator(".tb-card");
-    await expect(cards).toHaveCount(4);
+    await expect(cards).toHaveCount(8);   // the four shared systems and their vk- copies
     await expect(page.locator(".tb-lede")).toContainText(/Shown with \w/);
     for (const [title, set] of Object.entries(ICONS)) {
-      const card = cards.filter({ hasText: title });
+      const card = cards.filter({ has: page.getByLabel(title, { exact: true }) });
       await expect(card.locator(".tb-hint")).toContainText(/Icons: .+\. Type: .+\./);
       await expect(card.locator(`svg.piq-icon[data-icon-set="${set}"]`).first()).toBeVisible();
     }

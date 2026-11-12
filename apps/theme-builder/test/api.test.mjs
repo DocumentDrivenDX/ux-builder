@@ -101,7 +101,7 @@ describe("save (US-019)", async () => {
 
   // @covers US-019-AC1
   test("AC1: a name already used by a brand or theme is refused; so is a malformed one", () => {
-    for (const name of ["databricks", "plain", "praxis-carbon"]) assert.throws(() => plan({ body: body({ name }), root: ROOT, designSystems: DS }), (e) => e.status === 409);
+    for (const name of ["vk-databricks", "vk-plain", "vk-praxis-carbon"]) assert.throws(() => plan({ body: body({ name }), root: ROOT, designSystems: DS }), (e) => e.status === 409);
     for (const name of ["Acme", "acme_legal", "../x", "a".repeat(41)]) assert.throws(() => plan({ body: body({ name }), root: ROOT, designSystems: DS }), (e) => e.status === 400);
   });
 
@@ -172,7 +172,7 @@ describe("save (US-019)", async () => {
   });
 
   test("a theme's artwork comes back for each appearance", () => {
-    const t = theme({ root: ROOT, name: "praxis-carbon" });
+    const t = theme({ root: ROOT, name: "vk-praxis-carbon" });
     const decode = (u) => Buffer.from(u.split(",")[1], "base64").toString("utf8");
     assert.notEqual(t.appearances.light.logo, t.appearances.dark.logo, "a logo per appearance");
     assert.match(decode(t.appearances.light.favicon), /<svg/);
@@ -242,7 +242,7 @@ describe("save (US-019)", async () => {
   });
 
   test("a theme whose brand name is taken is refused", () => {
-    assert.throws(() => plan({ body: body({ name: "synaptiq-carbon" }), root: ROOT, designSystems: DS }), (e) => e.status === 409 && /brand called "synaptiq"/.test(e.message));
+    assert.throws(() => plan({ body: body({ name: "vk-synaptiq-carbon" }), root: ROOT, designSystems: DS }), (e) => e.status === 409 && /brand called "vk-synaptiq"/.test(e.message));
   });
 
   test("an unknown design system, a bad logo or a missing option is refused", () => {

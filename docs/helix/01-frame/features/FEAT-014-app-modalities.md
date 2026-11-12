@@ -69,7 +69,7 @@ out of scope for this feature.
 | AI roles on its screens | — | `assistant` | `assistant` |
 | Starter shell | `AppShell` with one empty Home screen (`StatePanel` empty state) | A full-screen `Conversation`, empty, with its composer | A `Conversation` that renders Adaptive Card and catalogue component parts |
 | Components the guidance points to | widgets, `@ux-builder/ui/patterns` | `@ux-builder/ui/assistant` | `@ux-builder/ui/assistant`, `@ux-builder/ui/adaptive-cards` |
-| Rule families | every app rule (nav, layout, modal, action, feedback, loading, screen, emphasis, input, text, view, pattern, flow, journey), plus `theme` | the AI rules for `assistant`, plus feedback, input, text and `theme` | the chat rules, plus `genui.*` and `card.*` |
+| Rule families | every app rule (nav, layout, modal, action, feedback, loading, screen, emphasis, input, text, view, pattern, flow, journey, form, data, search, auth, help, onboarding, notify, perf, platform, color, motion, media, trust), plus `theme` | the AI rules for `assistant`, plus feedback, input, text, color, motion, media, trust and `theme` | the chat rules, plus `genui.*` and `card.*` |
 | Audit widths | 390, 768, 1280 | 390, 1280 | 390, 1280 |
 
 With several modalities, the starter combines them: an `AppShell` whose

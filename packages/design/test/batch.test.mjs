@@ -27,7 +27,7 @@ function atStep4() {
   writeState(a, s);
   return a;
 }
-const ARGS = { answer: "Go with those three.", alternative: "near", modalities: ["responsive-web"], sizeClasses: ["compact", "large"], frame: "top-nav", theme: "plain" };
+const ARGS = { answer: "Go with those three.", alternative: "near", modalities: ["responsive-web"], sizeClasses: ["compact", "large"], frame: "top-nav", theme: "vk-plain" };
 
 describe("US-173: steps 4 to 6 as one batch", () => {
   // @covers US-173-AC1
@@ -46,7 +46,7 @@ describe("US-173: steps 4 to 6 as one batch", () => {
     assert.ok(s.checkpoints.some((c) => c.id === "core-2" && c.status === "passed"));
     assert.deepEqual(pendingReviews(a).map((p) => p.id), [], "nothing left to approve");
     assert.ok([4, 5].every((n) => s.stepPrototypes[n].batch && s.stepPrototypes[n].decision.answer === "Go with those three."));
-    assert.match(s.next, /Build the app on plain .* step 6 prototype/);
+    assert.match(s.next, /Build the app on vk-plain .* step 6 prototype/);
     // One person turn, however many records.
     assert.equal(readEvents(a).filter((e) => e.type === "turn").length, turnsBefore + 1);
     // @covers US-174-AC5
@@ -70,7 +70,7 @@ describe("US-173: steps 4 to 6 as one batch", () => {
 
   test("the CLI takes the lists comma-separated", () => {
     const a = atStep4();
-    const r = cli(a, ["step", "batch", "--answer", "Go with those", "--alternative", "list", "--modality", "responsive-web", "--size-classes", "compact,large", "--frame", "top-nav", "--theme", "plain"]);
+    const r = cli(a, ["step", "batch", "--answer", "Go with those", "--alternative", "list", "--modality", "responsive-web", "--size-classes", "compact,large", "--frame", "top-nav", "--theme", "vk-plain"]);
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /Steps 4 and 5 recorded with one answer: list chosen, ADR-001 and ADR-002 approved/);
     assert.deepEqual(readState(a).modality.sizeClasses, ["compact", "large"]);

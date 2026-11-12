@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Copy of praxis-fluentui to adjust on the vk/adjustments branch. Praxis Fluent: brand praxis on the shared fluent design system.",
+  "name": "vk-praxis-fluentui",
+  "title": "vk-Praxis Fluent",
+  "brand": "vk-praxis",
+  "default": "dark",
+  "designSystem": "vk-fluent"
+}

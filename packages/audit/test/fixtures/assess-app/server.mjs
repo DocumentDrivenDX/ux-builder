@@ -16,7 +16,7 @@ const PKGS = fileURLToPath(new URL("../../../..", import.meta.url));
 const FILES = { "/themes.css": join(PKGS, "tokens/dist/themes.css"), "/fonts.css": join(PKGS, "tokens/dist/fonts.css"), "/ui.css": join(PKGS, "ui/dist/ui.css") };
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-const page = (title, body) => `<!doctype html><html lang="en" data-theme="praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>${esc(title)}</title>
+const page = (title, body) => `<!doctype html><html lang="en" data-theme="vk-praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>${esc(title)}</title>
 <link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css">
 <style>body { margin: 0; padding: var(--piq-space-5); font-family: var(--piq-font-body); color: var(--piq-color-text); background: var(--piq-color-ground); } form { display: grid; gap: var(--piq-space-3); max-inline-size: 30rem; }</style>
 </head><body><main>${body}</main></body></html>`;

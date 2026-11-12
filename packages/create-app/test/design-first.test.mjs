@@ -107,16 +107,16 @@ describe("US-150: design first, and build the app in place at the end", () => {
     const designed = readFileSync(join(dir, BP), "utf8");
     const PROPOSED = "docs/ux-builder/helix-proposals/helix/02-design/adr/ADR-001-map-first.md.patch";
     const decision = readFileSync(join(dir, PROPOSED), "utf8");
-    const r = create(dir, ".", "--theme", "databricks");
+    const r = create(dir, ".", "--theme", "vk-databricks");
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /Built rivers, a responsive-web and hybrid-chat app, in \. on the databricks theme, from the designed blueprint/);
+    assert.match(r.stdout, /Built rivers, a responsive-web and hybrid-chat app, in \. on the vk-databricks theme, from the designed blueprint/);
     assert.equal(readFileSync(join(dir, BP), "utf8"), designed, "the designed blueprint is the app's plan");
     assert.equal(readFileSync(join(dir, PROPOSED), "utf8"), decision);
     assert.equal(readFileSync(join(dir, "docs/helix/00-discover/product-vision.md"), "utf8"), "# Rivers, in the owner's words\n");
     assert.ok(existsSync(join(dir, "docs/helix/01-frame/user-stories/US-001-open-the-app-and-see-where-to-start.md")), "HELIX's starter documents where none existed");
     assert.ok(existsSync(join(dir, ".claude/skills/ux-builder-design/SKILL.md")) && existsSync(join(dir, ".claude/skills/helix/HELIX-VERSION.json")));
     for (const f of ["src/main.jsx", "src/Home.jsx", "src/Assistant.jsx", "index.html", "e2e/starter.spec.js", "docs/ux-builder/ux-assessment.yml", ".stylelintrc.json"]) assert.ok(existsSync(join(dir, f)), f);
-    assert.match(readFileSync(join(dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="databricks"/);
+    assert.match(readFileSync(join(dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="vk-databricks"/);
     const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
     assert.equal(pkg.name, "rivers");
     assert.equal(pkg.scripts.design, "ux-builder-design status", "the folder's own script is kept");
@@ -124,14 +124,14 @@ describe("US-150: design first, and build the app in place at the end", () => {
     assert.ok(pkg.dependencies["@ux-builder/ui"] && !pkg.devDependencies["@ux-builder/ui"], "ui moves to dependencies");
     assert.match(readFileSync(join(dir, "AGENTS.md"), "utf8"), /## HELIX/);
     const state = readState(dir);
-    assert.deepEqual([state.app.theme, state.app.modalities], ["databricks", ["responsive-web", "hybrid-chat"]]);
-    assert.match(status(dir).text, /The app was built here on the databricks theme \(responsive-web, hybrid-chat\)\./);
+    assert.deepEqual([state.app.theme, state.app.modalities], ["vk-databricks", ["responsive-web", "hybrid-chat"]]);
+    assert.match(status(dir).text, /The app was built here on the vk-databricks theme \(responsive-web, hybrid-chat\)\./);
     const trace = readdirSync(join(dir, ".ux-builder/trace"), { recursive: true }).map(String);
     assert.ok(trace.some((f) => /create/.test(f)), "the create episode is traced");
     // Built once: the folder is an app now, not a design folder.
-    const again = create(dir, ".", "--theme", "databricks");
+    const again = create(dir, ".", "--theme", "vk-databricks");
     assert.equal(again.status, 1);
-    assert.match(again.stderr, /\. was already built from its design, on the databricks theme/);
+    assert.match(again.stderr, /\. was already built from its design, on the vk-databricks theme/);
   });
 
   // @covers US-150-AC4
@@ -147,7 +147,7 @@ describe("US-150: design first, and build the app in place at the end", () => {
       const dir = folder(name, opts);
       prepare?.(dir);
       const before = snapshot(dir);
-      const r = create(dir, ".", "--theme", "plain", ...args);
+      const r = create(dir, ".", "--theme", "vk-plain", ...args);
       assert.equal(r.status, 1, name);
       assert.match(r.stderr, message, name);
       assert.match(r.stderr, /Nothing was written/, name);
@@ -170,8 +170,8 @@ describe("US-150: design first, and build the app in place at the end", () => {
     output.on("data", (d) => { said += d; });
     const answer = askTheme({ input, output });
     input.write("acme\n");
-    input.write(`${themes().indexOf("databricks") + 1}\n`);
-    assert.equal(await answer, "databricks");
+    input.write(`${themes().indexOf("vk-databricks") + 1}\n`);
+    assert.equal(await answer, "vk-databricks");
     assert.match(said, /Which theme should the app be built on\?[\s\S]*theme builder[\s\S]*"acme" is not a released theme/);
     // The guide: the term, and the skill's instructions at the build.
     const [term] = explain({ term: "theme" }).terms;
@@ -184,11 +184,11 @@ describe("US-150: design first, and build the app in place at the end", () => {
 
   // @covers US-150-AC6
   test("AC6: --modality still makes the app at once; --theme without --modality exits 1 saying the theme is chosen at the build", () => {
-    const r = create(tmp, "at-once", "--modality", "chat", "--theme", "plain", "--no-helix");
+    const r = create(tmp, "at-once", "--modality", "chat", "--theme", "vk-plain", "--no-helix");
     assert.equal(r.status, 0, r.stderr);
     assert.ok(existsSync(join(tmp, "at-once/src/main.jsx")));
     assert.equal(readState(join(tmp, "at-once")).startedFrom, "new");
-    const t = create(tmp, "theme-only", "--theme", "databricks");
+    const t = create(tmp, "theme-only", "--theme", "vk-databricks");
     assert.equal(t.status, 1);
     assert.match(t.stderr, /--theme without --modality: the starter makes a design folder, and the theme is chosen when the app is built there/);
     assert.ok(!existsSync(join(tmp, "theme-only")));

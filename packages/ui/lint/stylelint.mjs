@@ -3,7 +3,7 @@
      // .stylelintrc.json
      { "plugins": ["@ux-builder/ui/stylelint"],
        "rules": { "ux-builder/no-hard-coded-values": [true, {
-         "theme": "databricks",                      // suggest that theme's role tokens
+         "theme": "vk-databricks",                      // suggest that theme's role tokens
          "allow": [{ "value": "#4E79A7", "file": "src/charts/**", "reason": "chart series" }]
        }] } }
 

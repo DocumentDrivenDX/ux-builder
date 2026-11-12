@@ -18,7 +18,7 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 
 const require = createRequire(import.meta.url);
-export const THEME = "ux-builder-databricks";
+export const THEME = "vk-databricks";
 const read = (f) => JSON.parse(readFileSync(f, "utf8"));
 const maybe = (f) => { try { return read(f); } catch { return null; } };
 

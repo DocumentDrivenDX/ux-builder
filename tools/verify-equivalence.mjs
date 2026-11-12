@@ -34,16 +34,16 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OLD = ["plain.css", "claude-like.css", "praxis.css"].map((f) => join(ROOT, "tools/fixtures/source-css", f));
-const NEW = ["plain.css", "praxis.css"].map((f) => join(ROOT, "packages/tokens/dist/themes", f));
+const NEW = ["vk-plain.css", "vk-praxis.css"].map((f) => join(ROOT, "packages/tokens/dist/themes", f));
 
 // The attributes the platform sets on <html> for each theme and appearance
 // (web/App.jsx): Praxis carried data-family="conversational" to pick up its
 // parent; the collapsed theme no longer needs it, but setting it proves the
 // new CSS is not relying on it either way.
 const CONTEXTS = [
-  { label: "plain light",   attrs: { "data-theme": "plain", "data-appearance": "light" } },
-  { label: "praxis dark",   attrs: { "data-theme": "praxis", "data-family": "conversational", "data-appearance": "dark" } },
-  { label: "praxis light",  attrs: { "data-theme": "praxis", "data-family": "conversational", "data-appearance": "light" } },
+  { label: "plain light",   attrs: { "data-theme": "vk-plain", "data-appearance": "light" } },
+  { label: "praxis dark",   attrs: { "data-theme": "vk-praxis", "data-family": "conversational", "data-appearance": "dark" } },
+  { label: "praxis light",  attrs: { "data-theme": "vk-praxis", "data-family": "conversational", "data-appearance": "light" } },
 ];
 
 // Where this package departs from the platform on purpose: the contrast
@@ -55,9 +55,12 @@ const PRAXIS_V2 = (ap, aspect) => ({
   "--logo-image": `url("../brand/praxis/logo-v2-on-${ap}.svg")`, "--logo-aspect": aspect,
   "--mark-image": 'url("../brand/praxis/mark-v2.svg")', "--favicon": 'url("../brand/praxis/mark-v2.svg")',
 });
+// vk-praxis's accent is blue, not the brand coral: color.red-reserved keeps
+// red for errors, warnings and delete (vk-praxis.brand.json).
+const BLUE_ACCENT = (hex) => ({ "--accent": hex, "--btn-focus-ring": `2px solid ${hex}`, "--badge-bg": hex });
 const DEPARTURES = {
-  "praxis dark":   { "--muted-2": "#8E8A81", ...PRAXIS_V2("dark", "3.045") },
-  "praxis light":  { "--muted-2": "#706C62", "--state-limited": "#986A24", "--state-evaluation": "#777268", ...PRAXIS_V2("light", "3.029") },
+  "praxis dark":   { "--muted-2": "#8E8A81", ...PRAXIS_V2("dark", "3.045"), ...BLUE_ACCENT("#578EDB") },
+  "praxis light":  { "--muted-2": "#706C62", "--state-limited": "#986A24", "--state-evaluation": "#777268", ...PRAXIS_V2("light", "3.029"), ...BLUE_ACCENT("#255FB1") },
   "plain light":   { "--muted-2": "#6B7484", "--state-live": "#047152", "--state-limited": "#A24A08", "--state-evaluation": "#5E6471" },
 };
 

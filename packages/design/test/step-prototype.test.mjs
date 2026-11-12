@@ -71,7 +71,7 @@ describe("US-170: a prototype ends every step", () => {
   test("AC2: with no theme chosen it is plain, light by default, dark when the agent set it, the appearance recorded with its reason", async () => {
     const a = app();
     await stepPrototype(a);
-    assert.match(readFileSync(join(a, "docs/ux-builder/prototypes/step-1/map.compact.html"), "utf8"), /data-theme="plain" data-appearance="light"/);
+    assert.match(readFileSync(join(a, "docs/ux-builder/prototypes/step-1/map.compact.html"), "utf8"), /data-theme="vk-plain" data-appearance="light"/);
     assert.match(about(a, "appearance").text, /light/);
     assert.match(about(a, "theme").text, /plain/);
     const s = readState(a);
@@ -79,7 +79,7 @@ describe("US-170: a prototype ends every step", () => {
     writeState(a, s);
     const r = await stepPrototype(a);
     assert.equal(r.appearance, "dark");
-    assert.match(readFileSync(join(a, r.dir, "map.compact.html"), "utf8"), /data-theme="plain" data-appearance="dark"/);
+    assert.match(readFileSync(join(a, r.dir, "map.compact.html"), "utf8"), /data-theme="vk-plain" data-appearance="dark"/);
     assert.match(about(a, "appearance").text, /dark: a nightlife guest list/);
   });
 
@@ -202,7 +202,7 @@ describe("VIP List session 2: once the app is built, the step prototype is the a
     writeFileSync(join(a, "dist/assets/index-abc.js"), "");
     const s = readState(a);
     s.step = 6;
-    s.app = { builtAt: "2026-10-31T12:00:00.000Z", theme: "plain", modalities: ["responsive-web"] };
+    s.app = { builtAt: "2026-10-31T12:00:00.000Z", theme: "vk-plain", modalities: ["responsive-web"] };
     s.appearance = { value: "dark", reason: "a nightlife app" };
     writeState(a, s);
     let built = 0;

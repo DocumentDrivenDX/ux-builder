@@ -24,7 +24,7 @@ const FILES = { "/themes.css": join(PKG, "../tokens/dist/themes.css"), "/fonts.c
 const WIDTHS = [360, 720, 1024, 1366, 1920];
 let server, base;
 
-const page = (body, { theme = "praxis-carbon" } = {}) => `<!doctype html><html lang="en" data-theme="${theme}" data-appearance="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>t</title>
+const page = (body, { theme = "vk-praxis-carbon" } = {}) => `<!doctype html><html lang="en" data-theme="${theme}" data-appearance="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>t</title>
 <link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css"><link rel="stylesheet" href="/patterns.css">
 <style>body { margin: 0; background: var(--piq-color-ground); color: var(--piq-color-text); font-family: var(--piq-font-body); }</style></head><body>${body}</body></html>`;
 
@@ -120,12 +120,12 @@ const show = (fs) => JSON.stringify(fs.map((f) => `${f.check} ${f.selector ?? ""
 
 describe("SDK-20 audit at every size class", () => {
   let mistakes;
-  before(async () => { mistakes = await audit({ urls: [`${base}/layout-mistakes.html`], themes: ["praxis-carbon"], appearances: ["light"], widths: [320, 1280] }); });
+  before(async () => { mistakes = await audit({ urls: [`${base}/layout-mistakes.html`], themes: ["vk-praxis-carbon"], appearances: ["light"], widths: [320, 1280] }); });
 
   // @covers US-034-AC1
   test("AC1: every theme and appearance runs at each width: themes × appearances × widths runs", async () => {
-    assert.deepEqual(mistakes.runs.map((r) => `${r.theme}/${r.appearance}@${r.width}`), ["praxis-carbon/light@320", "praxis-carbon/light@1280"]);
-    const r = await audit({ urls: [`${base}/layout.html`], themes: ["praxis-carbon", "databricks"], widths: [360, 1366] });
+    assert.deepEqual(mistakes.runs.map((r) => `${r.theme}/${r.appearance}@${r.width}`), ["vk-praxis-carbon/light@320", "vk-praxis-carbon/light@1280"]);
+    const r = await audit({ urls: [`${base}/layout.html`], themes: ["vk-praxis-carbon", "vk-databricks"], widths: [360, 1366] });
     assert.equal(r.runs.length, 2 * 2 * 2);
   });
 
@@ -135,7 +135,7 @@ describe("SDK-20 audit at every size class", () => {
     const reflow = mistakes.findings.find((f) => f.check === "reflow");
     assert.ok(reflow.runs.every((x) => /@\d+$/.test(x)));
     const { html } = await import("../report.mjs");
-    const withShots = await audit({ urls: [`${base}/layout.html`], themes: ["praxis-carbon"], appearances: ["light"], widths: [360, 1366], out: join(tmpdir(), `widths-${process.pid}`) });
+    const withShots = await audit({ urls: [`${base}/layout.html`], themes: ["vk-praxis-carbon"], appearances: ["light"], widths: [360, 1366], out: join(tmpdir(), `widths-${process.pid}`) });
     const page = html(withShots);
     assert.match(page, /360px/);
     assert.match(page, /1366px/);
@@ -149,7 +149,7 @@ describe("SDK-20 audit at every size class", () => {
     assert.equal(f[0].severity, "warning");
     assert.match(f[0].message, /scrolls sideways at 320px/);
     assert.match(f[0].selector, /#wide/, "the widest element, not the 1400px child of the scrolling region");
-    assert.deepEqual(f[0].runs, ["praxis-carbon/light@320"], "not at 1280px, where it fits");
+    assert.deepEqual(f[0].runs, ["vk-praxis-carbon/light@320"], "not at 1280px, where it fits");
   });
 
   // @covers US-034-AC4
@@ -166,7 +166,7 @@ describe("SDK-20 audit at every size class", () => {
   });
 
   test("without --width the audit reports as before: none of the new checks", async () => {
-    const r = await audit({ urls: [`${base}/layout-mistakes.html`], themes: ["praxis-carbon"], appearances: ["light"] });
+    const r = await audit({ urls: [`${base}/layout-mistakes.html`], themes: ["vk-praxis-carbon"], appearances: ["light"] });
     assert.deepEqual(r.findings.filter((f) => ["reflow", "target-size", "focus-obscured"].includes(f.check)), []);
     assert.equal(r.runs[0].width, undefined);
   });
@@ -185,14 +185,14 @@ describe("SDK-20 audit at every size class", () => {
     const bad = await run(["--width", "wide", `${base}/layout.html`]);
     assert.equal(bad.status, 2);
     assert.match(bad.stderr, /--width is a whole number of CSS pixels/);
-    const ok = await run(["--json", "--off", "brand", "--width", "360", "--width", "1366", "--theme", "praxis-carbon", "--appearance", "light", `${base}/layout.html`]);
+    const ok = await run(["--json", "--off", "brand", "--width", "360", "--width", "1366", "--theme", "vk-praxis-carbon", "--appearance", "light", `${base}/layout.html`]);
     assert.equal(ok.status, 0, ok.stderr + JSON.stringify(JSON.parse(ok.stdout || "{}").findings?.filter((f) => f.severity === "error")));
     assert.deepEqual(JSON.parse(ok.stdout).runs.map((r) => r.width), [360, 1366]);
   });
 
   // @covers US-034-AC7
   test("AC7: a page whose only findings are the new checks exits 0 at the default failure level, as warnings", async () => {
-    const r = await run(["--json", "--off", "brand", "--width", "320", "--theme", "praxis-carbon", "--appearance", "light", `${base}/only-layout.html`]);
+    const r = await run(["--json", "--off", "brand", "--width", "320", "--theme", "vk-praxis-carbon", "--appearance", "light", `${base}/only-layout.html`]);
     const report = JSON.parse(r.stdout);
     assert.ok(report.findings.length > 0);
     assert.deepEqual([...new Set(report.findings.map((f) => f.check))].filter((x) => !["reflow", "target-size", "focus-obscured", "theme-applied"].includes(x)), []);
@@ -202,7 +202,7 @@ describe("SDK-20 audit at every size class", () => {
 
   // @covers US-032-AC6 @covers US-034-AC6
   test("US-032-AC6, US-034-AC6: a contrast failure inside a builder preview is reported against that preview's option and design system", async () => {
-    const r = await audit({ urls: [`${base}/preview.html`], themes: ["praxis-carbon"], appearances: ["light"], widths: [1280] });
+    const r = await audit({ urls: [`${base}/preview.html`], themes: ["vk-praxis-carbon"], appearances: ["light"], widths: [1280] });
     const c = r.findings.filter((f) => f.check === "contrast");
     assert.equal(c.length, 1, show(c));
     assert.equal(c[0].preview, "Bold:carbon:light:collection");
@@ -242,14 +242,14 @@ describe("the screen patterns audited at every size class", () => {
   });
 
   test("patterns.css is the SDK's own CSS, not the app restyling widgets", async () => {
-    const r = await audit({ urls: [`${base}/list.html`], themes: ["praxis-carbon"], appearances: ["light"] });
+    const r = await audit({ urls: [`${base}/list.html`], themes: ["vk-praxis-carbon"], appearances: ["light"] });
     assert.deepEqual(r.findings.filter((f) => f.check === "widget-overrides"), []);
   });
 });
 
 describe("the app's own markup inside the SDK's frame and patterns", () => {
   let r;
-  before(async () => { r = await audit({ urls: [`${base}/app-in-shell.html`], themes: ["praxis-carbon"], appearances: ["light"] }); });
+  before(async () => { r = await audit({ urls: [`${base}/app-in-shell.html`], themes: ["vk-praxis-carbon"], appearances: ["light"] }); });
   const at = (id) => r.findings.filter((f) => (f.selector ?? "").includes(`#${id}`));
 
   test("is held to the theme: colours, fonts, radii, icons and controls it draws itself", () => {
@@ -271,7 +271,7 @@ describe("the app's own markup inside the SDK's frame and patterns", () => {
   });
 
   test("a bundler's :is() of patterns.css is still the SDK's own CSS", async () => {
-    const m = await audit({ urls: [`${base}/merged.html`], themes: ["praxis-carbon"], appearances: ["light"] });
+    const m = await audit({ urls: [`${base}/merged.html`], themes: ["vk-praxis-carbon"], appearances: ["light"] });
     assert.deepEqual(m.findings.filter((f) => f.check === "widget-overrides"), []);
   });
 });

@@ -22,7 +22,7 @@ let browser, appJs;
 
 async function open(body) {
   const html = join(tmp, `p-${Math.random().toString(36).slice(2)}.html`);
-  writeFileSync(html, `<!doctype html><html data-theme="praxis-carbon" data-appearance="light"><head><meta name="viewport" content="width=device-width, initial-scale=1">${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${body}</body></html>`);
+  writeFileSync(html, `<!doctype html><html data-theme="vk-praxis-carbon" data-appearance="light"><head><meta name="viewport" content="width=device-width, initial-scale=1">${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${body}</body></html>`);
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(pathToFileURL(html).href);
   return page;

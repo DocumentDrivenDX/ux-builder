@@ -31,7 +31,7 @@ after(async () => { await browser?.close(); rmSync(tmp, { recursive: true, force
 /* A page with the fixture app at a scene; requests outside the page and page errors are recorded. */
 async function open(scene, { width = 1280, height = 800, js = appJs, before = "", initial, query = "" } = {}) {
   const html = join(tmp, `p-${Math.random().toString(36).slice(2)}.html`);
-  writeFileSync(html, `<!doctype html><html lang="en" data-theme="praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${before}<div id="root"></div>${initial ? `<script>window.initialMessages = ${JSON.stringify(initial).replace(/</g, "\\u003c")}</script>` : ""}<script src="${pathToFileURL(js)}"></script></body></html>`);
+  writeFileSync(html, `<!doctype html><html lang="en" data-theme="vk-praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${before}<div id="root"></div>${initial ? `<script>window.initialMessages = ${JSON.stringify(initial).replace(/</g, "\\u003c")}</script>` : ""}<script src="${pathToFileURL(js)}"></script></body></html>`);
   const page = await browser.newPage({ viewport: { width, height } });
   page.outside = []; page.errors = []; page.dialogs = [];
   page.on("request", (r) => { if (!r.url().startsWith("file:") && !r.url().startsWith("data:")) page.outside.push(r.url()); });
@@ -544,6 +544,8 @@ describe("US-048 the assistant shows its answer as SDK components", () => {
     assert.deepEqual(await calls(page, "submit"), [], "an invalid form sends nothing");
     await email.fill("billing@acme.example");
     await setMessages(page, [FORMPAGE("S. Patel")]);
+    // The regenerated reply re-renders asynchronously; wait for it before reading values.
+    await page.waitForFunction(() => [...document.querySelectorAll('.piq-generative[data-component="FormPage"] input')].some((el) => el.value === "S. Patel"), null, { timeout: 5000 }).catch(() => {});
     assert.equal(await email.inputValue(), "billing@acme.example", "the edit survives regeneration");
     assert.equal(await name.inputValue(), "S. Patel", "an untouched pre-fill follows the new reply");
     assert.deepEqual(await calls(page, "submit"), []);

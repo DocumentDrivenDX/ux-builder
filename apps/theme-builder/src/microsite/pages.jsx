@@ -12,7 +12,7 @@ import { AI, CONTRACT_LIST, DECISIONS, FEATURES, PATTERNS, RELEASES, REPO, WIDGE
    contracts they cite, and the Reference and Proof pages are generated from
    the catalogue, the HELIX artifacts and the changelogs (sources.js). */
 
-const THEME_PAGE = `${ROOT}themes/?theme=ux-builder-databricks`;
+const THEME_PAGE = `${ROOT}themes/?theme=vk-praxis-material`;
 
 /* Inline `code` and **bold** in generated text, nothing more. */
 export function Md({ children }) {
@@ -173,9 +173,9 @@ function NewApp() {
       <Command text="npm create @ux-builder/app@latest trip-planner" />
       <Command text="cd trip-planner && npm install" />
       <p>In Claude Code, type <code>/ux-builder-design</code> to <a href={href("start", "design")}>start the design</a>. When it is ready, the guide asks for the theme (a released one, or one you make from your brand in the <a href={href("start", "theme-from-logo")}>theme builder</a>) and builds the app in the same folder, from the recorded modality and the designed blueprint, keeping every design document:</p>
-      <Command text="npm create @ux-builder/app@latest . -- --theme ux-builder-databricks" />
+      <Command text="npm create @ux-builder/app@latest . -- --theme vk-databricks" />
       <H2 id="create">Create the app at once</H2>
-      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme ux-builder-databricks" />
+      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme vk-databricks" />
       <Command text="cd my-app && npm install && npm run dev" />
       <H2 id="modalities">Choose its modalities</H2>
       <p><code>--modality</code> says what the app is, and the starter builds that shell from SDK components, with no sample data. Name several, comma-separated, for an <code>AppShell</code> with one destination per modality. Without it, the starter makes a design folder instead (above).</p>
@@ -217,7 +217,7 @@ function NewApp() {
       </ul>
       <H2 id="helix-options">HELIX options</H2>
       <DataTable caption="HELIX options" rowKey="option" columns={[{ key: "option", label: "Option", render: (r) => <code>{r.option}</code> }, { key: "effect", label: "Effect", render: (r) => <Md>{r.effect}</Md> }]} rows={HELIX_OPTIONS} />
-      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme ux-builder-databricks --helix-offline" />
+      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme vk-databricks --helix-offline" />
       <p>The HELIX request reads <code>GITHUB_TOKEN</code> if it is set (never written) and honours <code>HTTPS_PROXY</code>, <code>HTTP_PROXY</code> and <code>NO_PROXY</code>.</p>
       <H2 id="plan">Plan the screens first</H2>
       <p>Before building a screen, add it to the blueprint, <code>docs/ux-builder/blueprint/app.blueprint.json</code>: its pattern, its actions and where each leads, what it deletes and how that is safeguarded, its states, its modals, and what AI does on it, if anything. The check holds the plan to the interaction rules (navigation for the space available, one modal at a time, safeguards, states, flows and journeys) before any code exists. To start from your own plan:</p>
@@ -237,16 +237,16 @@ function ExistingApp() {
       <H2 id="install">1. Install</H2>
       <Command text="npm install @ux-builder/tokens @ux-builder/ui" />
       <H2 id="load">2. Load the theme, once, before your own CSS</H2>
-      <Command code text={'import "@ux-builder/tokens/themes/ux-builder-databricks.css";\nimport "@ux-builder/tokens/fonts/ux-builder-databricks.css";\nimport "@ux-builder/ui/ui.css";'} />
+      <Command code text={'import "@ux-builder/tokens/themes/vk-databricks.css";\nimport "@ux-builder/tokens/fonts/vk-databricks.css";\nimport "@ux-builder/ui/ui.css";'} />
       <H2 id="wrap">3. Wrap the app</H2>
-      <Command code text={'import { ThemeProvider } from "@ux-builder/ui";\n\n<ThemeProvider theme="ux-builder-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} />
+      <Command code text={'import { ThemeProvider } from "@ux-builder/ui";\n\n<ThemeProvider theme="vk-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} />
       <H2 id="design">Design what comes next with your agent</H2>
       <p>To design or redesign the app's experience, add the guide and start it. Its first session starts from HELIX's backfill of what exists; then it asks what to improve (<a href={href("start", "design")}>Design the UX with your agent</a>).</p>
       <Command text="npm install -D @ux-builder/design@latest" />
       <Command text="npx ux-builder-design init" />
       <H2 id="no-react">Without React</H2>
       <p>Set <code>data-theme</code> (and optionally <code>data-appearance</code>) on <code>&lt;html&gt;</code>, and use the <code>.piq-*</code> class names each component renders.</p>
-      <Command code text={'<html data-theme="ux-builder-databricks" data-appearance="light">'} />
+      <Command code text={'<html data-theme="vk-databricks" data-appearance="light">'} />
       <H2 id="rules">Adopt the interaction rules</H2>
       <p>Describe the screens you already have, check the plan, and let the audit fail only on what is new:</p>
       <Command text="npx ux-builder-blueprint init" />
@@ -358,7 +358,7 @@ function Design() {
         <li><b>Open Claude Code in the folder and type <code>/ux-builder-design</code>.</b> Or just ask the agent to design something.</li>
         <li><b>Work through the steps.</b> At <i>Design the structure</i> the agent asks what kind of app it is (responsive web, chat or hybrid chat) and which screen sizes it must work at.</li>
         <li><b>Choose the theme when the design is ready.</b> The agent lists the released themes. If none carries your brand, make one from your logo in the <a href={href("start", "theme-from-logo")}>theme builder</a>; once it is released in <code>@ux-builder/tokens</code>, the app can wear it.</li>
-        <li><b>The app is built in the same folder</b>, from the modality you gave and the blueprint you designed, keeping every design document. The guide goes on to the validated prototype and testing with people.<Command text="npm create @ux-builder/app@latest . -- --theme ux-builder-databricks" /></li>
+        <li><b>The app is built in the same folder</b>, from the modality you gave and the blueprint you designed, keeping every design document. The guide goes on to the validated prototype and testing with people.<Command text="npm create @ux-builder/app@latest . -- --theme vk-databricks" /></li>
       </ol>
       <Notice tone="warning" title="Use @latest">Without <code>@latest</code>, <code>npm create</code> may reuse an older starter it cached, which installs an older guide.</Notice>
       <p><code>npx ux-builder-design status</code> shows where you are at any time, and, in a design folder, what building the app still needs.</p>
@@ -446,7 +446,7 @@ function Ci() {
       <p className="uxm-lede">Lint reads the source and the audit drives the running app; on AI screens, the audit's AI checks read the markers the SDK's assistant emits. The blueprint check holds the plan of the screens to the interaction rules before any of it is built.</p>
       <ul className="uxm-grid">{GUARDS.map((g) => <li key={g.title} className="uxm-tile"><span className="uxm-tile__icon"><Icon icon={g.icon} /></span><h3>{g.title}</h3><p>{g.text}</p><code className="uxm-tile__code">{g.code}</code></li>)}</ul>
       <H2 id="lint">Lint</H2>
-      <Command code text={'// eslint.config.js\nimport uxBuilder from "@ux-builder/ui/eslint";\nexport default [{\n  files: ["src/**/*.{js,jsx}"],\n  plugins: { "ux-builder": uxBuilder },\n  rules: {\n    "ux-builder/no-hard-coded-values": ["error", { theme: "ux-builder-databricks" }],\n    "ux-builder/no-foreign-ui": "error",\n    "ux-builder/no-inline-svg": "error",\n    "ux-builder/ai-neutral-voice": "warn",\n  },\n}];'} />
+      <Command code text={'// eslint.config.js\nimport uxBuilder from "@ux-builder/ui/eslint";\nexport default [{\n  files: ["src/**/*.{js,jsx}"],\n  plugins: { "ux-builder": uxBuilder },\n  rules: {\n    "ux-builder/no-hard-coded-values": ["error", { theme: "vk-databricks" }],\n    "ux-builder/no-foreign-ui": "error",\n    "ux-builder/no-inline-svg": "error",\n    "ux-builder/ai-neutral-voice": "warn",\n  },\n}];'} />
       <p><code>ux-builder/ai-neutral-voice</code> warns on UI text that presents an AI as thinking or feeling ("I think", "I understand"), and on labels that make the AI the actor ("Copilot, summarize") where the user's verb should lead.</p>
       <H2 id="audit">The audit</H2>
       <Command text={'npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/'} />
@@ -555,7 +555,7 @@ function Themes() {
       <p>Because identity and anatomy are separate, one brand can be shown on any shared design system, and a new brand is a file, not a fork. Try it:</p>
       <LiveDemo />
       <H2 id="files">As files</H2>
-      <Command code text={'// tokens/themes/ux-builder-databricks.theme.json\n{\n  "name": "ux-builder-databricks",\n  "title": "UX Builder Databricks",\n  "brand": "ux-builder",\n  "public": true,\n  "default": "light",\n  "designSystem": "databricks"\n}'} />
+      <Command code text={'// tokens/themes/vk-databricks.theme.json\n{\n  "name": "vk-databricks",\n  "title": "UX Builder Databricks",\n  "brand": "ux-builder",\n  "public": true,\n  "default": "light",\n  "designSystem": "databricks"\n}'} />
       <Cite ids={["ADR-013", "ADR-018", "CONTRACT-002", "CONTRACT-003"]} />
     </>
   );
@@ -612,7 +612,7 @@ function GenerativeUi() {
       <p>When the agent answers with a table or a form, the conversation renders the SDK's own component, not a block of HTML. Only renderable components are allowed ({RENDERABLE_NAMES.map((c, i) => <Fragment key={c}>{i ? ", " : ""}<code>{c}</code></Fragment>)}), with their props validated against a schema; anything else is refused with a plain notice. An agent built for Microsoft hosts may send an <a href={href("start", "microsoft-agents")}>Adaptive Card</a> instead.</p>
       <H2 id="bridges">Bridges for other libraries</H2>
       <p>An app that already uses AI Elements or assistant-ui keeps it: one stylesheet maps your theme onto the variables those libraries are styled by. They are bridged, not adopted as design systems.</p>
-      <Command code text={'import "@ux-builder/tokens/themes/ux-builder-databricks.css";\nimport "@ux-builder/tokens/bridges/shadcn/ux-builder-databricks.css";   // after the theme'} />
+      <Command code text={'import "@ux-builder/tokens/themes/vk-databricks.css";\nimport "@ux-builder/tokens/bridges/shadcn/vk-databricks.css";   // after the theme'} />
       <p>Each bridge is contrast-checked like the theme, and follows <code>data-theme</code> and <code>data-appearance</code> with no <code>.dark</code> class.</p>
       <H2 id="embedded">Embedded views</H2>
       <p>A host can hand a view a theme's resolved values instead of a stylesheet: <code>&lt;ThemeProvider tokens={"{resolved.tokens}"}&gt;</code>. The view wears the host's theme and never draws the brand itself.</p>

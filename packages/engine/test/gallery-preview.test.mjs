@@ -14,17 +14,20 @@ const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const built = existsSync(join(ROOT, "packages/ui/dist/index.js")) && existsSync(join(ROOT, "packages/tokens/dist/manifest.json"));
 const gallery = (...a) => spawnSync(process.execPath, [join(ROOT, "tools/gen-gallery.mjs"), ...a], { encoding: "utf8", cwd: ROOT });
 
-test("a brand file previews on all four design systems, light and dark", { skip: !built && "run npm run build first" }, () => {
+test("a brand file previews on all eight design systems (four and their vk- copies), light and dark", { skip: !built && "run npm run build first" }, () => {
   const r = gallery("--brand", "tests/fixtures/brands/sample.brand.json");
   assert.equal(r.status, 0, r.stderr);
   const html = readFileSync(join(ROOT, "build/gallery-sample.html"), "utf8");
-  assert.equal((html.match(/class="s-panel /g) ?? []).length, 8);
-  for (const ds of ["Carbon", "Databricks", "Fluent", "Material"]) assert.match(html, new RegExp(`Sample on ${ds}`));
+  assert.equal((html.match(/class="s-panel /g) ?? []).length, 16);
+  for (const ds of ["Carbon", "Databricks", "Fluent", "Material"]) {
+    assert.match(html, new RegExp(`Sample on ${ds}`));
+    assert.match(html, new RegExp(`Sample on vk-${ds}`));
+  }
   assert.doesNotMatch(html, /data-theme="sample/, "a preview is not a theme");
 });
 
 test("a brand in tokens/brands/ can be named instead of a path", { skip: !built && "run npm run build first" }, () => {
-  assert.equal(gallery("--brand", "synaptiq").status, 0);
+  assert.equal(gallery("--brand", "vk-synaptiq").status, 0);
   assert.ok(existsSync(join(ROOT, "build/gallery-synaptiq.html")));
 });
 

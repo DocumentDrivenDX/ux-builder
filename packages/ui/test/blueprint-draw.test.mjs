@@ -89,12 +89,12 @@ describe("US-090: ux-builder-blueprint wireframes", () => {
     const plan = bp();
     for (const s of plan.screens) for (const size of plan.supports.sizeClasses) {
       const html = readFileSync(join(out, `${s.id}.${size}.html`), "utf8");
-      assert.match(html, /<html lang="en" data-theme="plain" data-appearance="light" data-size-class="/);
-      assert.match(html, /<link rel="stylesheet" href="assets\/plain\.css">/);
+      assert.match(html, /<html lang="en" data-theme="vk-plain" data-appearance="light" data-size-class="/);
+      assert.match(html, /<link rel="stylesheet" href="assets\/vk-plain\.css">/);
       const png = pngSize(readFileSync(join(out, `${s.id}.${size}.png`)));
       assert.equal(png.width, { compact: 390, expanded: 1024 }[size], `${s.id} at ${size}`);
     }
-    assert.deepEqual(readdirSync(join(out, "assets")).sort(), ["patterns.css", "plain.css", "ui.css"]);
+    assert.deepEqual(readdirSync(join(out, "assets")).sort(), ["patterns.css", "ui.css", "vk-plain.css"]);
 
     // The SDK's own components draw them: the pattern's markup, in the app's shell with its destinations.
     const html = (f) => readFileSync(join(out, f), "utf8");

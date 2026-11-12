@@ -22,11 +22,11 @@ test("US-002-AC4: Carbon's focus ring takes each brand's accent", () => {
   cpSync(join(ROOT, "tokens/schema/examples/acme.brand.json"), join(tmp, "tokens/brands/acme.brand.json"));
   const src = load(join(tmp, "tokens"), join(tmp, "brand"));
   assert.match(src.designSystems.get("carbon").tokens.focus.ring.$value, /\{color\.accent\}/, "the ring refers to the accent role");
-  const praxis = resolvedPairJson(src, "praxis", "carbon", "dark");
+  const praxis = resolvedPairJson(src, "vk-praxis", "carbon", "dark");
   const acme = resolvedPairJson(src, "acme", "carbon", "light");
   assert.ok(praxis["piq-focus-ring"].includes(praxis["piq-color-accent"]), praxis["piq-focus-ring"]);
   assert.ok(acme["piq-focus-ring"].includes(acme["piq-color-accent"]), acme["piq-focus-ring"]);
-  assert.equal(praxis["piq-color-accent"], "#FF6642");
+  assert.equal(praxis["piq-color-accent"], "#578EDB");
   assert.equal(acme["piq-color-accent"], "#B4442C");
 });
 
@@ -38,6 +38,6 @@ test("US-002-AC5: a design system's light-only overrides apply in light only", a
   const light = carbon.appearances?.light?.shadow?.overlay?.$value, base = carbon.tokens.shadow.overlay.$value;
   assert.ok(light && light !== base, "Carbon softens its overlay shadow in light");
   assert.equal(carbon.appearances?.dark?.shadow?.overlay, undefined, "and does not override it in dark");
-  assert.equal(pair(src, "praxis", "carbon", "light")["piq-shadow-overlay"], light);
-  assert.equal(pair(src, "praxis", "carbon", "dark")["piq-shadow-overlay"], base);
+  assert.equal(pair(src, "vk-praxis", "carbon", "light")["piq-shadow-overlay"], light);
+  assert.equal(pair(src, "vk-praxis", "carbon", "dark")["piq-shadow-overlay"], base);
 });

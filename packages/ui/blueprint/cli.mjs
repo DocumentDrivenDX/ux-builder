@@ -184,7 +184,7 @@ async function main(argv) {
     }
     const question = values.question ?? d?.state?.questions?.find((q) => q.status === "open")?.text ?? `What is it like to use ${name}?`;
     const systems = values["design-system"] ?? [];
-    const targets = systems.length ? systems.map((ds) => ({ dir: `${name}-${ds}`, theme: themeFor(ds), ds })) : [{ dir: name, theme: "plain" }];
+    const targets = systems.length ? systems.map((ds) => ({ dir: `${name}-${ds}`, theme: themeFor(ds), ds })) : [{ dir: name, theme: "vk-plain" }];
     const missing = targets.filter((t) => !t.theme);
     if (missing.length) { console.error(`No theme shows the design system ${missing.map((t) => t.ds).join(", ")}.`); return 2; }
     const written = [];

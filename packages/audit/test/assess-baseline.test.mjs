@@ -20,7 +20,7 @@ const FILES = { "/themes.css": join(PKG, "../tokens/dist/themes.css"), "/fonts.c
 const LONG = "Entries flagged by the time rules wait here for a partner to review them before prebill closes on Friday afternoon, ".repeat(4);
 const PAGES = {
   "/sdk.html": `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css"></head>
-<body style="margin:0"><div data-theme="praxis-carbon" data-appearance="light" style="padding:var(--piq-space-5);background:var(--piq-color-ground);color:var(--piq-color-text);font-family:var(--piq-font-body)"><main><h1>Queue</h1><p style="border-radius:3px">Odd corner</p></main></div></body></html>`,
+<body style="margin:0"><div data-theme="vk-praxis-carbon" data-appearance="light" style="padding:var(--piq-space-5);background:var(--piq-color-ground);color:var(--piq-color-text);font-family:var(--piq-font-body)"><main><h1>Queue</h1><p style="border-radius:3px">Odd corner</p></main></div></body></html>`,
   "/plain.html": `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title></head><body><main><h1>Legacy queue</h1><button style="width:12px;height:12px">x</button><p>${LONG}</p></main></body></html>`,
 };
 let server, base, repo;
@@ -49,7 +49,7 @@ before(async () => {
       { id: "failing", command: `node -e "process.exit(3)"` },
       { id: "missing", command: "sh -c 'definitely-not-a-command-ux-builder'" },
     ],
-    audit: { urls: ["/sdk.html", "/plain.html"], widths: [1280], themes: ["praxis-carbon"], appearances: ["light"], off: ["token-radii", "no-such-check"] },
+    audit: { urls: ["/sdk.html", "/plain.html"], widths: [1280], themes: ["vk-praxis-carbon"], appearances: ["light"], off: ["token-radii", "no-such-check"] },
     restrictions: { writes: "report-only" },
   }));
 });

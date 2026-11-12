@@ -67,7 +67,7 @@ describe("US-112 diagram tokens", () => {
 
   // @covers US-112-AC3
   test("AC3: a brand's own series colour in light replaces the default there, and dark keeps the default", () => {
-    const praxis = src.brands.get("praxis");
+    const praxis = src.brands.get("vk-praxis");
     const brand = { ...praxis, appearances: structuredClone(praxis.appearances) };
     brand.appearances.light.color["series-2"] = { $value: "#B5470F" };
     const carbon = src.designSystems.get("carbon");
@@ -76,11 +76,11 @@ describe("US-112 diagram tokens", () => {
     assert.equal(at("dark").get("color.series-2"), src.dataviz.appearances.dark.color["series-2"].$value);
     // The brand's other slots, and every brand that sets none, keep the defaults.
     assert.equal(at("light").get("color.series-1"), src.dataviz.appearances.light.color["series-1"].$value);
-    assert.equal(resolvedJson(src, "praxis-carbon", "light")["piq-color-series-2"], src.dataviz.appearances.light.color["series-2"].$value);
+    assert.equal(resolvedJson(src, "vk-praxis-carbon", "light")["piq-color-series-2"], src.dataviz.appearances.light.color["series-2"].$value);
   });
 
   test("the subtle fills, regions, edges and lifecycle tints follow the brand's own roles", () => {
-    const r = resolvedJson(src, "praxis-carbon", "dark");
+    const r = resolvedJson(src, "vk-praxis-carbon", "dark");
     assert.equal(r["piq-color-diagram-edge"], r["piq-color-text-muted"]);
     assert.equal(r["piq-color-diagram-region-1"], `color-mix(in srgb, ${r["piq-color-text"]} 3%, ${r["piq-color-ground"]})`);
     assert.equal(r["piq-color-status-info-subtle"], `color-mix(in srgb, ${r["piq-color-status-info"]} 12%, ${r["piq-color-surface"]})`);
@@ -93,10 +93,10 @@ describe("US-112 diagram tokens", () => {
   // @covers US-112-AC6
   test("AC6: each design system has its own node radius and stroke; a theme with its own anatomy gets the defaults", () => {
     const shape = (t, ap) => { const r = resolvedJson(src, t, ap); return [r["piq-radius-diagram-node"], r["piq-size-diagram-stroke"], r["piq-size-diagram-stroke-strong"]]; };
-    assert.deepEqual(shape("praxis-carbon", "light"), ["0", "1px", "2px"]);
-    assert.deepEqual(shape("praxis-material", "light"), ["12px", "1.5px", "2px"]);
-    assert.deepEqual(shape("praxis-fluentui", "light"), ["4px", "1px", "2px"]);
-    assert.deepEqual(shape("databricks", "dark"), ["8px", "1.5px", "2px"]);
+    assert.deepEqual(shape("vk-praxis-carbon", "light"), ["0", "1px", "2px"]);
+    assert.deepEqual(shape("vk-praxis-material", "light"), ["12px", "1.5px", "2px"]);
+    assert.deepEqual(shape("vk-praxis-fluentui", "light"), ["4px", "1px", "2px"]);
+    assert.deepEqual(shape("vk-databricks", "dark"), ["8px", "1.5px", "2px"]);
     const own = [...src.themes.values()].find((t) => !t.designSystem);
     assert.ok(own, "a theme with its own anatomy");
     const d = src.layout.defaults;
@@ -107,7 +107,7 @@ describe("US-112 diagram tokens", () => {
   test("AC4: the gate fails a built theme missing a diagram role, naming it; only a file marked fixture is let off", () => {
     const resolved = join(tmp, "missing");
     mkdirSync(resolved);
-    const tokens = resolvedJson(src, "praxis-carbon", "light");
+    const tokens = resolvedJson(src, "vk-praxis-carbon", "light");
     delete tokens["piq-color-series-5"];
     delete tokens["piq-radius-diagram-node"];
     writeFileSync(join(resolved, "gap.carbon.light.json"), JSON.stringify({ theme: "gap.carbon", appearance: "light", tokens }));
@@ -127,7 +127,7 @@ describe("US-112 diagram tokens", () => {
   test("AC5: the gate fails a status colour below 4.5:1 and series that collide under deuteranopia, naming theme, appearance, pairing and value", () => {
     const resolved = join(tmp, "failing");
     mkdirSync(resolved);
-    const tokens = resolvedJson(src, "praxis-carbon", "light");
+    const tokens = resolvedJson(src, "vk-praxis-carbon", "light");
     // A pale green on a pale ground, and series 4 a hair from series 3.
     tokens["piq-color-status-positive"] = "#5FBF5F";
     tokens["piq-color-series-4"] = "#0C9467";

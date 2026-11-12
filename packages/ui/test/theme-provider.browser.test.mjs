@@ -25,7 +25,7 @@ before(async () => { browser = await chromium.launch(); });
 after(async () => { await browser?.close(); rmSync(tmp, { recursive: true, force: true }); });
 
 // The role tokens of a light theme only, as a preview composed on a neutral design system has.
-const light = JSON.parse(readFileSync(join(PKG, "../tokens/dist/resolved/plain.light.json"), "utf8")).tokens;
+const light = JSON.parse(readFileSync(join(PKG, "../tokens/dist/resolved/vk-plain.light.json"), "utf8")).tokens;
 
 // @covers US-011-AC6
 test("US-011-AC6: a light embedded view in a dark themed page keeps its own light surfaces and dark text", async () => {
@@ -34,7 +34,7 @@ test("US-011-AC6: a light embedded view in a dark themed page keeps its own ligh
     h(Select, { label: "Matter", options: [{ value: "a", label: "Halvorsen v. Atlas" }] }),
     h(Notice, { tone: "warning", title: "Two entries over the cap" })));
   const html = join(tmp, "p.html");
-  writeFileSync(html, `<!doctype html><html data-theme="synaptiq" data-appearance="dark"><head>${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}</head><body>${view}</body></html>`);
+  writeFileSync(html, `<!doctype html><html data-theme="vk-synaptiq" data-appearance="dark"><head>${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}</head><body>${view}</body></html>`);
   const page = await browser.newPage();
   await page.goto(pathToFileURL(html).href);
   const r = await page.evaluate(() => {

@@ -75,7 +75,7 @@ test.describe("The public site", () => {
     await page.goto(page_("start/design"));
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Design the UX with your agent");
     await expect(page.getByText("npm create @ux-builder/app@latest my-idea")).toBeVisible();
-    await expect(page.getByText("npm create @ux-builder/app@latest . -- --theme ux-builder-databricks")).toBeVisible();
+    await expect(page.getByText("npm create @ux-builder/app@latest . -- --theme vk-databricks")).toBeVisible();
     await expect(page.getByText("npx ux-builder-design init")).toBeVisible();
     for (const t of ["An overview first", "Step n of 8", "Terms explained", "Everything reviewed in the chat"]) await expect(page.locator("#expect ~ ul").first().getByRole("heading", { name: t })).toBeVisible();
     // The steps come from @ux-builder/design itself; the full table and the glossary have their own pages.

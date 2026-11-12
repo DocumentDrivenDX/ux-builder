@@ -32,7 +32,7 @@ test("US-040-AC5: printed, table headers repeat, each section starts a page, and
     h(PageHeader, { title: "Reports", actions: h(Button, null, "Export") }),
     h(PrintLayout, { title: "Aged debt", runDate: "2026-10-19T09:00:00", sections: [{ id: "a", title: "By client", content: table }, { id: "b", title: "By partner", content: h("p", null, "Partners") }] })));
   const html = join(tmp, "p.html");
-  writeFileSync(html, `<!doctype html><html data-theme="praxis-carbon" data-appearance="light"><head>${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}</head><body style="margin:0">${body}</body></html>`);
+  writeFileSync(html, `<!doctype html><html data-theme="vk-praxis-carbon" data-appearance="light"><head>${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}</head><body style="margin:0">${body}</body></html>`);
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await page.goto(pathToFileURL(html).href);
   await page.emulateMedia({ media: "print" });

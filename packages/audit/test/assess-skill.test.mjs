@@ -17,7 +17,7 @@ const PKG = fileURLToPath(new URL("..", import.meta.url));
 const CLI = join(PKG, "cli.mjs");
 const SKILL = readFileSync(join(PKG, "skill/ux-builder-assess/SKILL.md"), "utf8");
 const FILES = { "/themes.css": join(PKG, "../tokens/dist/themes.css"), "/fonts.css": join(PKG, "../tokens/dist/fonts.css"), "/ui.css": join(PKG, "../ui/dist/ui.css") };
-const PAGE = `<!doctype html><html lang="en" data-theme="praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>Queue</title><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css"></head>
+const PAGE = `<!doctype html><html lang="en" data-theme="vk-praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>Queue</title><link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css"></head>
 <body style="margin:0;font-family:var(--piq-font-body);color:var(--piq-color-text);background:var(--piq-color-ground)"><main><h1>Queue</h1><p id="who" style="color:#ff00aa">Signed in</p></main></body></html>`;
 let server, base;
 const repos = [];
@@ -53,7 +53,7 @@ function app(run = {}, extra = {}) {
     roles: [{ id: "reviewer", auth: "none" }],
     journeys: [{ id: "J-review", story: "US-001", priority: "critical", role: "reviewer", entry: "/queue" }],
     tests: [{ id: "unit", command: `node -e "process.exit(0)"` }],
-    audit: { urls: ["/queue"], themes: ["praxis-carbon"], appearances: ["light"] },
+    audit: { urls: ["/queue"], themes: ["vk-praxis-carbon"], appearances: ["light"] },
     restrictions: { writes: "report-only" },
     ...extra,
   }));

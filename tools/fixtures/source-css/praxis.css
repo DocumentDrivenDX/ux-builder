@@ -28,7 +28,7 @@
    conventions in one folder, which is why the copies here are named for the
    ground they sit on and nothing else. */
 
-[data-theme="praxis"] {
+[data-theme="vk-praxis"] {
   --accent:      #FF6642;   /* the warm tip of the mark, as it stands */
   --logo-paint:  #FF6642;   /* the tab icon, where the mark is painted flat */
 
@@ -54,7 +54,7 @@
   --favicon:     url("../brand/praxis/mark.png");
 }
 
-[data-theme="praxis"][data-appearance="light"] {
+[data-theme="vk-praxis"][data-appearance="light"] {
   --accent:      #D12800;   /* the same hue, 22% deeper to read on pale */
   --logo-paint:  #D12800;
   --logo-image:  url("../brand/praxis/logo-on-light.png");

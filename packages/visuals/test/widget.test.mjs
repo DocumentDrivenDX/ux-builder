@@ -35,7 +35,7 @@ const PROVIDER = `<script>addEventListener("piq:set-theme", (e) => { const app =
 const page = (body, script = "") => `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Visuals in an app</title>
 <link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css">
 <style>.shell { min-height: 100vh; padding: var(--piq-space-5); display: grid; gap: var(--piq-space-4); background: var(--piq-color-ground); color: var(--piq-color-text); font-family: var(--piq-font-body); } .visuals { display: grid; gap: var(--piq-space-5); }</style>
-${PROVIDER}</head><body style="margin:0"><div id="app" class="shell" data-theme="praxis-carbon" data-appearance="light">${body}</div>${script}</body></html>`;
+${PROVIDER}</head><body style="margin:0"><div id="app" class="shell" data-theme="vk-praxis-carbon" data-appearance="light">${body}</div>${script}</body></html>`;
 
 let server, base, bundle, browser;
 before(async () => {
@@ -74,8 +74,8 @@ const hex = (rgb) => "#" + rgb.match(/\d+/g).slice(0, 3).map((n) => Number(n).to
 test("@covers US-168-AC1 a switch of theme or appearance restyles every <Visual> through its tokens, without drawing it again", async () => {
   const { p, errors } = await open();
   const nodeFill = () => p.evaluate(() => getComputedStyle(document.querySelector('[data-visual="helix-context"] .uxb-node rect')).fill);
-  assert.equal(hex(await nodeFill()), resolved("praxis-carbon", "light")["piq-color-surface"].toUpperCase());
-  for (const [theme, ap] of [["praxis-carbon", "dark"], ["databricks", "light"], ["databricks", "dark"]]) {
+  assert.equal(hex(await nodeFill()), resolved("vk-praxis-carbon", "light")["piq-color-surface"].toUpperCase());
+  for (const [theme, ap] of [["vk-praxis-carbon", "dark"], ["vk-databricks", "light"], ["vk-databricks", "dark"]]) {
     await p.evaluate(([t, a]) => dispatchEvent(new CustomEvent("piq:set-theme", { detail: { theme: t, appearance: a } })), [theme, ap]);
     assert.equal(hex(await nodeFill()), resolved(theme, ap)["piq-color-surface"].toUpperCase(), `${theme} ${ap}`);
   }
@@ -105,7 +105,7 @@ test("@covers US-168-AC4 the audit reports nothing for <Visual> drawings in any 
   // The favicon and logo checks are about the app's chrome, which this page has none of.
   const findings = clean.findings.filter((f) => f.check !== "brand");
   assert.deepEqual(findings.filter((f) => f.severity === "error" || f.severity === "warning"), [], JSON.stringify(findings, null, 1));
-  const hand = await audit({ urls: [`${base}/hand-drawn.html`], themes: ["praxis-carbon"] });
+  const hand = await audit({ urls: [`${base}/hand-drawn.html`], themes: ["vk-praxis-carbon"] });
   const flagged = hand.findings.filter((f) => f.check === "sdk-widgets" && /<Visual>/.test(f.message));
   assert.equal(flagged.length, 1, JSON.stringify(hand.findings, null, 1));
   assert.equal(flagged[0].severity, "warning");

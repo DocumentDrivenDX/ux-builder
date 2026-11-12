@@ -98,7 +98,9 @@ test.describe("The site's Reference and Proof pages", () => {
     const errors = watch(page);
     const urls = new Set(rules.flatMap((r) => r.sources.map((s) => s.url)));
     await open(page, "proof/sources");
-    await expect(rows(page, "Sources the rules cite")).toHaveCount(urls.size);
+    // The table pages at 60 rows; its pager counts every source.
+    await expect(rows(page, "Sources the rules cite")).toHaveCount(Math.min(urls.size, 60));
+    await expect(page.getByRole("table", { name: "Sources the rules cite" }).locator("xpath=ancestor::*[1]")).toContainText(` of ${urls.size}`);
     await expect(page.getByRole("table", { name: "Licences" }).locator("tbody tr")).toHaveCount(new Set(rules.flatMap((r) => r.sources.map((s) => s.licence))).size);
     await expect(page.getByText("ux-builder-78483e2c").last()).toBeVisible();
     await expect(page.getByText(/waived counsel's review/)).toBeVisible();

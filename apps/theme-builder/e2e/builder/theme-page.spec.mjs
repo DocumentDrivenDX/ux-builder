@@ -20,19 +20,19 @@ test.describe("A theme's page", () => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
     await page.getByRole("button", { name: "Your themes" }).click();
-    await page.getByRole("link", { name: "praxis-v2-databricks", exact: true }).click();
-    await expect(page).toHaveURL(/\?theme=praxis-v2-databricks$/);
-    await expect(page.getByRole("heading", { level: 1, name: "Praxis V2 Databricks" })).toBeVisible();
-    await expect(page).toHaveTitle("Praxis V2 Databricks · Theme");
+    await page.getByRole("link", { name: "vk-databricks", exact: true }).click();
+    await expect(page).toHaveURL(/\?theme=vk-databricks$/);
+    await expect(page.getByRole("heading", { level: 1, name: "vk-Databricks" })).toBeVisible();
+    await expect(page).toHaveTitle("vk-Databricks · Theme");
 
     const sw = page.getByRole("radiogroup", { name: "Theme appearance" });
     await sw.getByRole("radio", { name: "Auto" }).click();
-    expect(await accent(page)).toBe(resolved("praxis-v2-databricks", "dark")["piq-color-accent"].toUpperCase());
+    expect(await accent(page)).toBe(resolved("vk-databricks", "dark")["piq-color-accent"].toUpperCase());
     await page.emulateMedia({ colorScheme: "light" });
-    await expect.poll(() => accent(page)).toBe(resolved("praxis-v2-databricks", "light")["piq-color-accent"].toUpperCase());
+    await expect.poll(() => accent(page)).toBe(resolved("vk-databricks", "light")["piq-color-accent"].toUpperCase());
     await sw.getByRole("radio", { name: "Dark" }).click();
     await expect(sw.getByRole("radio", { name: "Dark" })).toHaveAttribute("aria-checked", "true");
-    await expect.poll(() => accent(page)).toBe(resolved("praxis-v2-databricks", "dark")["piq-color-accent"].toUpperCase());
+    await expect.poll(() => accent(page)).toBe(resolved("vk-databricks", "dark")["piq-color-accent"].toUpperCase());
     // Arrow keys move the choice, as in any radio group.
     await sw.getByRole("radio", { name: "Dark" }).press("ArrowLeft");
     await expect(sw.getByRole("radio", { name: "Auto" })).toHaveAttribute("aria-checked", "true");
@@ -42,7 +42,7 @@ test.describe("A theme's page", () => {
 
   // @covers US-020-AC7 @covers US-020-AC8
   test("the menu reaches the brand, the CSS for light, dark and auto, and every widget and screen pattern", async ({ page }) => {
-    await page.goto("/?theme=praxis-carbon");
+    await page.goto("/?theme=vk-praxis-carbon");
     const nav = page.getByRole("navigation", { name: "Theme contents" });
     await expect(nav.getByRole("link", { name: "Logos and palette" })).toBeVisible();
     // The entries; an entry with several stories lists them beneath it.
@@ -63,14 +63,14 @@ test.describe("A theme's page", () => {
     await nav.getByRole("link", { name: "Dark", exact: true }).click();
     await expect(page).toHaveURL(/#css-dark$/);
     const dark = page.locator("#css-dark");
-    await expect(dark).toContainText('data-theme="praxis-carbon" data-appearance="dark"');
-    await expect(dark).toContainText(`--piq-color-accent: ${resolved("praxis-carbon", "dark")["piq-color-accent"]};`);
+    await expect(dark).toContainText('data-theme="vk-praxis-carbon" data-appearance="dark"');
+    await expect(dark).toContainText(`--piq-color-accent: ${resolved("vk-praxis-carbon", "dark")["piq-color-accent"]};`);
     await expect(nav.getByRole("link", { name: "Dark", exact: true })).toHaveAttribute("aria-current", "location");
     await expect(page.locator("#css-auto")).toContainText('appearance="system"');
     const bridges = page.locator("#css-bridges");
-    await expect(bridges).toContainText('@import "@ux-builder/tokens/bridges/shadcn/praxis-carbon.css"');
+    await expect(bridges).toContainText('@import "@ux-builder/tokens/bridges/shadcn/vk-praxis-carbon.css"');
     await expect(bridges.locator(".tp-code")).toHaveCount(1);   // one surface: AI Elements and assistant-ui both use shadcn's variables
-    await expect(bridges).toContainText(`--background: ${resolved("praxis-carbon", "dark")["piq-color-ground"]};`);
+    await expect(bridges).toContainText(`--background: ${resolved("vk-praxis-carbon", "dark")["piq-color-ground"]};`);
 
     await nav.getByRole("link", { name: "Tooltip" }).click();
     await expect(page.locator("#widget-Tooltip")).toBeInViewport();
@@ -81,7 +81,7 @@ test.describe("A theme's page", () => {
   // @covers US-046-AC10
   test("the Assistant section shows a conversation with a tool call, sources and an approval in the theme, and each assistant component from its story", async ({ page }) => {
     const errors = watch(page);
-    for (const [theme, ap] of [["praxis-carbon", "light"], ["databricks", "dark"]]) {
+    for (const [theme, ap] of [["vk-praxis-carbon", "light"], ["vk-databricks", "dark"]]) {
       await page.emulateMedia({ colorScheme: ap });
       await page.goto(`/?theme=${theme}`);
       await expect(page.getByRole("navigation", { name: "Theme contents" }).getByRole("link", { name: "Conversation", exact: true })).toBeVisible();
@@ -104,7 +104,7 @@ test.describe("A theme's page", () => {
   test("every widget and pattern renders from its own story, linked to that story in Storybook in this theme", async ({ page }) => {
     const errors = watch(page);
     await page.emulateMedia({ colorScheme: "light" });
-    await page.goto("/?theme=praxis-carbon");
+    await page.goto("/?theme=vk-praxis-carbon");
     await page.getByRole("radiogroup", { name: "Theme appearance" }).getByRole("radio", { name: "Light" }).click();
     for (const [kind, list] of [["widget", names("widgets")], ["pattern", names("patterns")], ["adaptive-card", names("adaptiveCards")]]) {
       for (const name of list) {
@@ -112,7 +112,7 @@ test.describe("A theme's page", () => {
         await expect(entry.locator(".tp-sample").first(), `${name} has a sample`).toBeVisible();
         for (const sample of await entry.locator(".tp-sample").all()) await expect(sample, `${name}'s stories render`).not.toContainText("did not render here");
         const story = await entry.locator(".tp-sample").first().getAttribute("data-story");
-        await expect(entry.getByRole("link", { name: "Open in Storybook" })).toHaveAttribute("href", `http://localhost:6006/?path=/story/${story}&globals=theme:praxis-carbon-light`);
+        await expect(entry.getByRole("link", { name: "Open in Storybook" })).toHaveAttribute("href", `http://localhost:6006/?path=/story/${story}&globals=theme:vk-praxis-carbon-light`);
       }
     }
     // Its own story first: Button's sample is the Button story, not one that merely contains a button.
@@ -134,12 +134,12 @@ test.describe("A theme's page", () => {
     const ai = JSON.parse(readFileSync(join(REPO, "packages/ui/ai/vendor/components.json"), "utf8")).components;
     expect(ai.map((c) => c.library)).toEqual(expect.arrayContaining(["AI Elements", "assistant-ui"]));
     await page.emulateMedia({ colorScheme: "light" });
-    await page.goto("/?theme=praxis-carbon");
+    await page.goto("/?theme=vk-praxis-carbon");
     await page.getByRole("radiogroup", { name: "Theme appearance" }).getByRole("radio", { name: "Light" }).click();
     await expect(page.getByRole("heading", { level: 2, name: "UI Components" })).toBeVisible();
     const section = page.getByRole("region", { name: "AI Components" });
-    await expect(section).toContainText('@import "@ux-builder/tokens/bridges/shadcn/praxis-carbon.css";');
-    const light = resolved("praxis-carbon", "light");
+    await expect(section).toContainText('@import "@ux-builder/tokens/bridges/shadcn/vk-praxis-carbon.css";');
+    const light = resolved("vk-praxis-carbon", "light");
     for (const c of ai) {
       const entry = section.locator(`#ai-${c.name}`);
       await expect(entry.getByRole("heading", { level: 3 })).toContainText(`${c.library} · ${c.licence}`);
@@ -147,7 +147,7 @@ test.describe("A theme's page", () => {
       await expect(entry.locator(".tp-sample")).not.toContainText("did not render here");
       const id = await entry.locator(".tp-sample").getAttribute("data-story");
       expect(id).toMatch(/^ai-components-/);
-      await expect(entry.getByRole("link", { name: "Open in Storybook" })).toHaveAttribute("href", `http://localhost:6006/?path=/story/${id}&globals=theme:praxis-carbon-light`);
+      await expect(entry.getByRole("link", { name: "Open in Storybook" })).toHaveAttribute("href", `http://localhost:6006/?path=/story/${id}&globals=theme:vk-praxis-carbon-light`);
       await expect(entry.getByRole("link", { name: "Docs" })).toHaveAttribute("href", c.docs);
     }
     // They wear the theme through the shadcn bridge's variables: the conversation's page colour and type are Praxis Carbon's.
@@ -166,7 +166,7 @@ test.describe("A theme's page", () => {
       .filter(([p]) => /^color\.(status|series|diagram|lifecycle)-/.test(p)).map(([p]) => `piq-${p.replace(/\./g, "-")}`);
     expect(diagram).toHaveLength(25);
     await page.emulateMedia({ colorScheme: "light" });
-    await page.goto("/?theme=praxis-carbon");
+    await page.goto("/?theme=vk-praxis-carbon");
     await page.getByRole("radiogroup", { name: "Theme appearance" }).getByRole("radio", { name: "Light" }).click();
     const nav = page.getByRole("navigation", { name: "Theme contents" });
     await nav.getByRole("link", { name: "Diagrams and data" }).click();
@@ -177,7 +177,7 @@ test.describe("A theme's page", () => {
     expect(await page.evaluate(() => [...document.querySelectorAll(".tp-main > section")].map((s) => s.id).slice(0, 7))).toEqual(["brand", "css-light", "css-dark", "css-auto", "css-bridges", "diagrams", "widgets"]);
 
     const check = async (ap) => {
-      const tokens = resolved("praxis-carbon", ap);
+      const tokens = resolved("vk-praxis-carbon", ap);
       await expect(section.locator("[data-token]")).toHaveCount(diagram.length);
       for (const n of diagram) {
         const row = section.locator(`[data-token="${n}"]`);
@@ -199,19 +199,19 @@ test.describe("A theme's page", () => {
   });
 
   test("Material's diagram nodes are rounded on its theme page", async ({ page }) => {
-    await page.goto("/?theme=praxis-material#diagrams");
+    await page.goto("/?theme=vk-praxis-material#diagrams");
     expect(await page.locator('#diagrams [data-sample="node"]').evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe("12px");
   });
 
   test("a theme with one appearance offers only it and Auto; an unknown theme says so", async ({ page }) => {
     // Every shipped theme has both appearances (plain gained dark, ADR-043), so a light-only theme, as the
     // builder can make, is plain served without its dark one.
-    await page.route("**/api/theme?name=plain", async (route) => {
+    await page.route("**/api/theme?name=vk-plain", async (route) => {
       const json = await (await route.fetch()).json();
       delete json.appearances.dark;
       await route.fulfill({ json: { ...json, default: "light" } });
     });
-    await page.goto("/?theme=plain");
+    await page.goto("/?theme=vk-plain");
     const sw = page.getByRole("radiogroup", { name: "Theme appearance" });
     await expect(sw.getByRole("radio", { name: "Dark" })).toBeDisabled();
     await expect(page.locator("#css-dark")).toContainText("has no dark appearance");
@@ -223,7 +223,7 @@ test.describe("A theme's page", () => {
   // @covers US-020-AC7
   test("on a phone the menu sits above the content and nothing scrolls sideways", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/?theme=praxis-carbon");
+    await page.goto("/?theme=vk-praxis-carbon");
     // No sample takes focus or moves the page as it renders (an error summary or a chat composer would).
     await page.waitForTimeout(1500);
     expect(await page.evaluate(() => [scrollY, document.activeElement === document.body])).toEqual([0, true]);

@@ -44,15 +44,15 @@ function Switcher() {
 }
 
 export const RuntimeSwitching = {
-  args: { theme: "databricks", appearance: "system" },
+  args: { theme: "vk-databricks", appearance: "system" },
   render: (args) => <ThemeProvider {...args}><Switcher /></ThemeProvider>,
 };
 
 export const Nested = {
   render: () => (
-    <ThemeProvider theme="praxis" appearance="dark" style={{ padding: "var(--piq-space-5)", background: "var(--piq-color-ground)" }}>
+    <ThemeProvider theme="vk-praxis" appearance="dark" style={{ padding: "var(--piq-space-5)", background: "var(--piq-color-ground)" }}>
       <Card title="Outer: praxis, dark"><Button>Confirm</Button></Card>
-      <ThemeProvider theme="plain" appearance="light" style={{ marginTop: "var(--piq-space-4)", padding: "var(--piq-space-5)", background: "var(--piq-color-ground)" }}>
+      <ThemeProvider theme="vk-plain" appearance="light" style={{ marginTop: "var(--piq-space-4)", padding: "var(--piq-space-5)", background: "var(--piq-color-ground)" }}>
         <Card title="Inner: plain, light (the nearest provider wins)"><Button>Confirm</Button></Card>
       </ThemeProvider>
     </ThemeProvider>

@@ -18,7 +18,7 @@ test("@covers US-164-AC1 a plate holds the takeaway, the visual, the numbered st
   const doc = fixture("beacon-field-guide");
   const v = doc.extensions["umf.visual"];
   v.omissions = ["The job workers; see the containers view."];
-  const { content } = await render(doc, { theme: "praxis", output: "plate" });
+  const { content } = await render(doc, { theme: "vk-praxis", output: "plate" });
   assert.match(content, /^<!doctype html>/);
   assert.ok(content.includes(`<h1>${v.title}</h1>`), "the title is the headline");
   assert.ok(content.includes(`<p>${v.takeaway}</p>`), "the takeaway is the lede");
@@ -43,7 +43,7 @@ test("@covers US-164-AC1 a plate holds the takeaway, the visual, the numbered st
 test("@covers US-164-AC2 a presentation walks the steps with the buttons and the arrow keys, focusing each step's items", async () => {
   const doc = fixture("beacon-reply-presentation");
   const v = doc.extensions["umf.visual"];
-  const { content } = await render(doc, { theme: "databricks", appearance: "dark", output: "presentation" });
+  const { content } = await render(doc, { theme: "vk-databricks", appearance: "dark", output: "presentation" });
   assert.doesNotMatch(offline(content), /https?:|@import|<link|src=/);
   writeFileSync(join(dir, "presentation.html"), content);
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
@@ -74,18 +74,18 @@ test("@covers US-164-AC2 a presentation walks the steps with the buttons and the
 });
 
 test("@covers US-164-AC3 a presentation of a visual with no steps is refused", async () => {
-  await assert.rejects(render(fixture("helix-context"), { theme: "praxis", output: "presentation" }), (e) => e.code === "VISUAL_NO_STEPS");
+  await assert.rejects(render(fixture("helix-context"), { theme: "vk-praxis", output: "presentation" }), (e) => e.code === "VISUAL_NO_STEPS");
 });
 
 test("@covers US-164-AC4 a step outside the sequence follows the numbered steps, led by when it happens", async () => {
   const doc = fixture("beacon-field-guide");
   const v = doc.extensions["umf.visual"];
-  const { content } = await render(doc, { theme: "praxis", output: "plate" });
+  const { content } = await render(doc, { theme: "vk-praxis", output: "plate" });
   assert.match(content, /<p class="uxb-aside"><strong>Throughout: every draft and every send is traced back to the agent who asked\.<\/strong>/);
   assert.match(content, /numbered steps in order, and the call that runs throughout/);
   assert.ok(content.indexOf("</ol>") < content.indexOf('class="uxb-aside"'), "after the numbered list");
   v.steps.at(-1).tag = "ALWAYS ON";
-  const tagged = await render(doc, { theme: "praxis", output: "plate" });
+  const tagged = await render(doc, { theme: "vk-praxis", output: "plate" });
   assert.match(tagged.content, /<strong>Always on: every draft and every send is traced back to the agent who asked\.<\/strong>/);
   assert.match(tagged.content, /the call that is marked ALWAYS ON/);
 });

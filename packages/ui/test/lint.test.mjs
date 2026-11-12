@@ -50,12 +50,12 @@ describe("US-013", () => {
 
   // @covers US-013-AC3
   test("AC3: a literal equal to a role token in the app's theme names that token", async () => {
-    const [colour, radius] = await css(`.a { color: #1B3139; border-radius: 8px; }`, { theme: "databricks" });
+    const [colour, radius] = await css(`.a { color: #1B3139; border-radius: 8px; }`, { theme: "vk-databricks" });
     assert.match(colour.text, /use var\(--piq-color-text\)/);
     assert.match(radius.text, /use var\(--piq-radius-control\)/);
-    const [font] = jsx(`export const A = () => <p style={{ fontFamily: "'DM Sans', sans-serif" }} />;`, { theme: "databricks" });
+    const [font] = jsx(`export const A = () => <p style={{ fontFamily: "'DM Sans', sans-serif" }} />;`, { theme: "vk-databricks" });
     assert.match(font.text, /use var\(--piq-font-body\)/);
-    const [none] = await css(`.a { color: #123456; }`, { theme: "databricks" });
+    const [none] = await css(`.a { color: #123456; }`, { theme: "vk-databricks" });
     assert.match(none.text, /use a --piq-\* role token/);
   });
 

@@ -73,12 +73,12 @@ describe("US-135: exploratory prototypes", () => {
   // @covers US-135-AC3
   test("AC3: --design-system twice writes one prototype per design system, each named by it", () => {
     const dir = app();
-    const r = run(dir, "prototype", "--explore", "--alternative", "map-first", "--design-system", "material", "--design-system", "carbon", "--json");
+    const r = run(dir, "prototype", "--explore", "--alternative", "map-first", "--design-system", "vk-material", "--design-system", "vk-carbon", "--json");
     assert.equal(r.status, 0, r.stderr);
     const out = JSON.parse(r.stdout);
-    assert.deepEqual(out.prototypes.map((p) => [p.dir, p.theme]), [["prototype/map-first-material", "praxis-material"], ["prototype/map-first-carbon", "praxis-carbon"]]);
-    assert.match(readFileSync(join(dir, "prototype/map-first-material/map.compact.html"), "utf8"), /data-theme="praxis-material"[\s\S]*assets\/praxis-material\.css/);
-    assert.ok(existsSync(join(dir, "prototype/map-first-carbon/assets/praxis-carbon.css")));
+    assert.deepEqual(out.prototypes.map((p) => [p.dir, p.theme]), [["prototype/map-first-vk-material", "vk-praxis-material"], ["prototype/map-first-vk-carbon", "vk-praxis-carbon"]]);
+    assert.match(readFileSync(join(dir, "prototype/map-first-vk-material/map.compact.html"), "utf8"), /data-theme="vk-praxis-material"[\s\S]*assets\/vk-praxis-material\.css/);
+    assert.ok(existsSync(join(dir, "prototype/map-first-vk-carbon/assets/vk-praxis-carbon.css")));
   });
 
   // @covers US-135-AC6

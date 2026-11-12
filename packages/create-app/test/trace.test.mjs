@@ -29,10 +29,10 @@ const sha = (p) => `sha256:${createHash("sha256").update(readFileSync(p, "utf8")
 let dir, plain;
 before(async () => {
   dir = join(tmp, "acme");
-  const r = spawnSync(process.execPath, [CLI, dir, "--modality", "responsive-web,hybrid-chat", "--theme", "databricks", "--helix-offline", "--agent", "claude-code", "--model", "claude-opus-5-5"], { cwd: tmp, encoding: "utf8", env: ENV });
+  const r = spawnSync(process.execPath, [CLI, dir, "--modality", "responsive-web,hybrid-chat", "--theme", "vk-databricks", "--helix-offline", "--agent", "claude-code", "--model", "claude-opus-5-5"], { cwd: tmp, encoding: "utf8", env: ENV });
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, new RegExp(`Episode trace: E-${today()}-create in \\.ux-builder/trace/`));
-  plain = await create(join(tmp, "plain"), { modalities: ["chat"], helix: { skip: true } });
+  plain = await create(join(tmp, "vk-plain"), { modalities: ["chat"], helix: { skip: true } });
 });
 
 describe("US-105: creating the app is its first episode", () => {
@@ -56,7 +56,7 @@ describe("US-105: creating the app is its first episode", () => {
     assert.deepEqual(start.goal.stories, ["US-001"]);
     assert.equal(created.kind, "created");
     assert.deepEqual(created.modalities, ["responsive-web", "hybrid-chat"]);
-    assert.equal(created.theme, "databricks");
+    assert.equal(created.theme, "vk-databricks");
     assert.equal(created.options.helix, "offline");
     assert.ok(created.files > 20, `${created.files} files`);
     assert.equal(created.blueprint, sha(join(dir, "docs/ux-builder/blueprint/app.blueprint.json")));

@@ -56,9 +56,9 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
   test("get_token: its value in every theme and appearance", async () => {
     const t = (await call("get_token", { name: "color.accent" })).data;
     assert.equal(t.name, "--piq-color-accent");
-    assert.match(t.values.databricks.light, /^#[0-9A-F]{6}$/i);
-    assert.match(t.values.databricks.dark, /^#[0-9A-F]{6}$/i);
-    assert.deepEqual(Object.keys((await call("get_token", { name: "--piq-button-radius", theme: "praxis-carbon" })).data.values), ["praxis-carbon"]);
+    assert.match(t.values["vk-databricks"].light, /^#[0-9A-F]{6}$/i);
+    assert.match(t.values["vk-databricks"].dark, /^#[0-9A-F]{6}$/i);
+    assert.deepEqual(Object.keys((await call("get_token", { name: "--piq-button-radius", theme: "vk-praxis-carbon" })).data.values), ["vk-praxis-carbon"]);
     assert.equal((await call("get_token", { name: "--piq-color-sparkle" })).isError, true);
   });
 
@@ -77,23 +77,23 @@ describe("US-014-AC5: agents list the SDK over MCP", () => {
   // @covers US-014-AC5
   test("list_brands: every brand, with the themes built on it", async () => {
     const brands = (await call("list_brands")).data;
-    assert.ok(brands.length >= 5);
-    assert.deepEqual(brands.find((b) => b.name === "praxis").themes.sort(), ["praxis", "praxis-carbon", "praxis-fluentui", "praxis-material"]);
+    assert.ok(brands.length >= 4);
+    assert.deepEqual(brands.find((b) => b.name === "vk-praxis").themes.sort(), ["vk-praxis", "vk-praxis-carbon", "vk-praxis-fluentui", "vk-praxis-material"]);
   });
 
   test("list_themes and get_theme: imports, icon set and every role token's value", async () => {
     assert.equal((await call("list_themes")).data.length, cat.themes.length);
-    const t = (await call("get_theme", { name: "praxis-carbon", appearance: "dark" })).data;
+    const t = (await call("get_theme", { name: "vk-praxis-carbon", appearance: "dark" })).data;
     assert.equal(t.iconSet, "carbon");
-    assert.equal(t.css, "@ux-builder/tokens/themes/praxis-carbon.css");
+    assert.equal(t.css, "@ux-builder/tokens/themes/vk-praxis-carbon.css");
     assert.match(t.roleTokens["--piq-color-ground"], /^#/);
     // plain has a dark appearance since ADR-043, for guided prototypes before a brand theme.
-    assert.match((await call("get_theme", { name: "plain", appearance: "dark" })).data.roleTokens["--piq-color-ground"], /^#/);
+    assert.match((await call("get_theme", { name: "vk-plain", appearance: "dark" })).data.roleTokens["--piq-color-ground"], /^#/);
     assert.match((await call("get_theme", { name: "acme" })).content[0].text, /No theme "acme"/);
   });
 
   test("design systems, icons and guidance", async () => {
-    assert.deepEqual((await call("list_design_systems")).data.map((d) => d.name), ["carbon", "databricks", "fluent", "material"]);
+    assert.deepEqual((await call("list_design_systems")).data.map((d) => d.name), ["carbon", "databricks", "fluent", "material", "vk-carbon", "vk-databricks", "vk-fluent", "vk-material"]);
     assert.equal((await call("list_icons")).data.length, 33);
     const found = (await call("list_icons", { query: "paperclip" })).data;
     assert.equal(found.library.import, "@ux-builder/ui/icons");

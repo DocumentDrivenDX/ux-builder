@@ -36,7 +36,7 @@ addEventListener("piq:set-theme", (e) => {
 const page = (body, { screen = null, head = "" } = {}) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Fixture</title>
 <link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css"><link rel="stylesheet" href="/patterns.css">
 <style>body { margin: 0; } #app { min-height: 100vh; background: var(--piq-color-ground); color: var(--piq-color-text); font-family: var(--piq-font-body); }</style>${head}${PROVIDER}</head>
-<body><div id="app" data-theme="praxis-carbon" data-appearance="light"${screen ? ` data-piq-screen="${screen}"` : ""}>${body}</div></body></html>`;
+<body><div id="app" data-theme="vk-praxis-carbon" data-appearance="light"${screen ? ` data-piq-screen="${screen}"` : ""}>${body}</div></body></html>`;
 
 const NAV = ["Home", "Settings", "Help"].map((label, i) => ({ id: label.toLowerCase(), label, href: `#${label.toLowerCase()}`, icon: ["home", "view", "info"][i] }));
 const shell = (content, props = {}) => renderToStaticMarkup(h(AppShell, { nav: NAV, current: "home", brand: h(Logo), ...props }, content));

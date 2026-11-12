@@ -1,6 +1,6 @@
-import "@ux-builder/tokens/themes/ux-builder-databricks.css";
+import "@ux-builder/tokens/themes/vk-praxis-material.css";
 import "@ux-builder/tokens/fonts.css";
-import "@ux-builder/tokens/bridges/shadcn/ux-builder-databricks.css";
+import "@ux-builder/tokens/bridges/shadcn/vk-praxis-material.css";
 import "@ux-builder/ui/ui.css";
 import "@ux-builder/ui/patterns.css";
 import "../app.css";

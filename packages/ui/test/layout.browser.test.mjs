@@ -29,7 +29,7 @@ const kitchenSink = () => h(Page, { as: "main" },
     h(Grid, { gap: 4 }, ...[1, 2, 3, 4, 5, 6].map(card)),
     h(SplitView, { primary: h("ul", null, h("li", null, "Acme v. Doe")), secondary: h("article", null, "Detail"), primaryLabel: "List", secondaryLabel: "Detail" })));
 
-async function open(body, { width = 1280, dir = "ltr", theme = "praxis-carbon" } = {}) {
+async function open(body, { width = 1280, dir = "ltr", theme = "vk-praxis-carbon" } = {}) {
   const html = join(tmp, `page-${Math.random().toString(36).slice(2)}.html`);
   writeFileSync(html, `<!doctype html><html dir="${dir}" data-theme="${theme}" data-appearance="light"><head>${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${body}</body></html>`);
   const page = await browser.newPage({ viewport: { width, height: 900 } });
@@ -45,7 +45,7 @@ after(async () => { await browser?.close(); rmSync(tmp, { recursive: true, force
 describe("US-023 in Chromium", () => {
   // @covers US-023-AC2
   test("AC2: every gap between children equals one of the active theme's space tokens", async () => {
-    for (const theme of ["praxis-carbon", "praxis-material", "databricks"]) {
+    for (const theme of ["vk-praxis-carbon", "vk-praxis-material", "vk-databricks"]) {
       const page = await open(boxed(900, h("div", null,
         h(Stack, { gap: 3, id: "s" }, card(1), card(2)),
         h(Cluster, { gap: 5, id: "c" }, card(1), card(2)),

@@ -29,7 +29,7 @@ const shell = (content) => renderToStaticMarkup(h(AppShell, {
   breadcrumbs: h(Breadcrumbs, { items: CRUMBS }),
 }, content ?? h("p", null, "Content")));
 
-async function open(body, { width, theme = "praxis-carbon", touch = false }) {
+async function open(body, { width, theme = "vk-praxis-carbon", touch = false }) {
   const html = join(tmp, `p-${Math.random().toString(36).slice(2)}.html`);
   writeFileSync(html, `<!doctype html><html data-theme="${theme}" data-appearance="light"><head><meta name="viewport" content="width=device-width, initial-scale=1">${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}<style>body{margin:0}</style></head><body>${body}</body></html>`);
   const page = await browser.newPage({ viewport: { width, height: 800 }, hasTouch: touch, isMobile: touch });
@@ -62,7 +62,7 @@ describe("US-024 in Chromium", () => {
       await page.close();
     }
     // Material chooses the rail at expanded size too (ADR-022).
-    const material = await open(shell(), { width: 1366, theme: "praxis-material" });
+    const material = await open(shell(), { width: 1366, theme: "vk-praxis-material" });
     assert.equal(await material.locator(".piq-shell__side .piq-primary-nav__link").first().evaluate((a) => getComputedStyle(a).flexDirection), "column");
     assert.equal(Math.round(await material.locator(".piq-shell__side").evaluate((s) => s.getBoundingClientRect().width)), 80);
     await material.close();
