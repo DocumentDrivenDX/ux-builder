@@ -22,8 +22,8 @@ test.describe("A theme's page", () => {
     await page.getByRole("button", { name: "Your themes" }).click();
     await page.getByRole("link", { name: "vk-databricks", exact: true }).click();
     await expect(page).toHaveURL(/\?theme=vk-databricks$/);
-    await expect(page.getByRole("heading", { level: 1, name: "Praxis V2 Databricks" })).toBeVisible();
-    await expect(page).toHaveTitle("Praxis V2 Databricks · Theme");
+    await expect(page.getByRole("heading", { level: 1, name: "vk-Databricks" })).toBeVisible();
+    await expect(page).toHaveTitle("vk-Databricks · Theme");
 
     const sw = page.getByRole("radiogroup", { name: "Theme appearance" });
     await sw.getByRole("radio", { name: "Auto" }).click();
@@ -206,7 +206,7 @@ test.describe("A theme's page", () => {
   test("a theme with one appearance offers only it and Auto; an unknown theme says so", async ({ page }) => {
     // Every shipped theme has both appearances (plain gained dark, ADR-043), so a light-only theme, as the
     // builder can make, is plain served without its dark one.
-    await page.route("**/api/theme?name=plain", async (route) => {
+    await page.route("**/api/theme?name=vk-plain", async (route) => {
       const json = await (await route.fetch()).json();
       delete json.appearances.dark;
       await route.fulfill({ json: { ...json, default: "light" } });

@@ -52,7 +52,7 @@ test.describe("Your themes", () => {
     await page.getByRole("link", { name: "vk-praxis-carbon", exact: true }).click();
     await expect(page).toHaveURL(/\?theme=vk-praxis-carbon$/);
     const preview = page.getByRole("region", { name: "Preview of vk-praxis-carbon" });
-    await expect(preview).toContainText("design system Carbon");
+    await expect(preview).toContainText("design system vk-Carbon");
     const brand = brandFile("vk-praxis");
     for (const ap of ["light", "dark"]) {
       const cell = preview.locator(`[data-theme-preview="vk-praxis-carbon:${ap}"]`);
@@ -86,10 +86,10 @@ test.describe("Your themes", () => {
   test("a brand without artwork shows its title in its logo colour, and no mark or favicon", async ({ page }) => {
     await open(page);
     await page.getByRole("link", { name: "vk-plain", exact: true }).click();
-    const cell = page.locator('[data-theme-preview="plain:light"]');
-    await expect(page.locator('[data-theme-preview="plain:dark"]')).toHaveCount(0);
+    const cell = page.locator('[data-theme-preview="vk-plain:light"]');
+    await expect(page.locator('[data-theme-preview="vk-plain:dark"]')).toHaveCount(0);
     const word = cell.locator(".tb-themes__wordmark");
-    await expect(word).toHaveText("Plain");
+    await expect(word).toHaveText("vk-Plain");
     const paint = brandFile("vk-plain").appearances.light.brand["logo-paint"].$value.match(/[0-9a-f]{2}/gi).map((h) => parseInt(h, 16));
     expect(await word.evaluate((el) => getComputedStyle(el).color)).toBe(`rgb(${paint.join(", ")})`);
     await expect(cell).toContainText("None: the app's own");

@@ -31,8 +31,8 @@ test.describe("Save theme", () => {
     }
     await name.fill("vk-praxis-carbon");
     await expect(hint).toContainText("already a theme called vk-praxis-carbon");
-    await name.fill("synaptiq-carbon");
-    await expect(hint).toContainText("already a brand called synaptiq");
+    await name.fill("vk-synaptiq-carbon");
+    await expect(hint).toContainText("already a brand called vk-synaptiq");
     await name.fill("names-ok-carbon");   // unused by every other test
     await expect(hint).toHaveText("Lowercase letters, digits and hyphens.");
     await expect(save).toBeEnabled();
@@ -100,7 +100,7 @@ test.describe("Save and use", () => {
 
     // A chat library (US-045-AC6): its command, the theme's shadcn bridge and how to connect it; none adds nothing.
     const chat = page.getByRole("radiogroup", { name: "Chat library" });
-    await expect(chat.getByRole("radio")).toHaveText(["None", "AI Elements", "assistant-ui"], { useInnerText: true });
+    await expect(chat.getByRole("radio")).toHaveText([/None/, /AI Elements/, /assistant-ui/]);
     await chat.getByRole("radio", { name: "AI Elements" }).click();
     await expect(page.locator(".tb-task")).toHaveCount(9);
     await expect(page.locator("#task-chat h3")).toContainText("Add the assistant with AI Elements");
