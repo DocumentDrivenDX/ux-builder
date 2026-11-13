@@ -1,0 +1,587 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Synaptiq: the Synaptiq brand on its own anatomy, reverse-engineered from synaptiq.ai (HubSpot theme CSS, read 2026-10-06: Quicksand body, Lust and Museo Slab headings, Jasper links and 3px calls to action, #F7F6F7 fields) and the Synaptiq Design System (tokens, 2-4px radii, Soil-tinted shadows, ALL-CAPS captions tracked 0.08em, no gradients). Licensed faces are replaced by the brand guide's own Google alternates.",
+  "name": "synaptiq",
+  "title": "Synaptiq",
+  "brand": "synaptiq",
+  "default": "light",
+  "anatomy": {
+    "source": {
+      "system": "Synaptiq (synaptiq.ai and the Synaptiq Design System)",
+      "url": "https://www.synaptiq.ai"
+    },
+    "fonts": {
+      "display": {
+        "family": "Abril Fatface",
+        "fallback": [
+          "Georgia",
+          "serif"
+        ],
+        "source": "bundled",
+        "weights": [
+          400
+        ],
+        "license": "OFL-1.1"
+      },
+      "heading": {
+        "family": "Zilla Slab",
+        "fallback": [
+          "Georgia",
+          "serif"
+        ],
+        "source": "bundled",
+        "weights": [
+          300,
+          500
+        ],
+        "license": "OFL-1.1"
+      },
+      "body": {
+        "family": "Quicksand",
+        "fallback": [
+          "Helvetica Neue",
+          "Helvetica",
+          "sans-serif"
+        ],
+        "source": "bundled",
+        "weights": [
+          400,
+          600
+        ],
+        "license": "OFL-1.1"
+      },
+      "mono": {
+        "family": "ui-monospace",
+        "fallback": [
+          "SF Mono",
+          "Menlo",
+          "monospace"
+        ],
+        "source": "system"
+      }
+    },
+    "tokens": {
+      "font-size": {
+        "display": {
+          "$value": "3.5rem",
+          "$description": "The site sets H1 in Lust at 72px; the brand guide's sanctioned stand-in is Abril Fatface. Scaled for app screens."
+        },
+        "title": {
+          "$value": "2rem",
+          "$description": "H3 on the site: Museo Slab 32px (Zilla Slab here, the guide's Google alternate)."
+        },
+        "heading": {
+          "$value": "1.25rem"
+        },
+        "lead": {
+          "$value": "1.125rem",
+          "$description": "The site's body size, 18px."
+        },
+        "body": {
+          "$value": "1rem"
+        },
+        "small": {
+          "$value": "0.875rem"
+        },
+        "label": {
+          "$value": "0.75rem",
+          "$description": "ALL-CAPS captions and eyebrows."
+        }
+      },
+      "font-weight": {
+        "regular": {
+          "$value": "400"
+        },
+        "strong": {
+          "$value": "600",
+          "$description": "Quicksand 600: the site's button labels."
+        }
+      },
+      "line-height": {
+        "tight": {
+          "$value": "1.1",
+          "$description": "The site's headings run 1.1; the decks set titles at 0.9."
+        },
+        "body": {
+          "$value": "1.45",
+          "$description": "The design system's body leading."
+        }
+      },
+      "letter-spacing": {
+        "label": {
+          "$value": "0.08em",
+          "$description": "ALL CAPS is tracked +0.08em in the design system."
+        },
+        "eyebrow": {
+          "$value": "0.08em"
+        }
+      },
+      "space": {
+        "1": {
+          "$value": "0.25rem"
+        },
+        "2": {
+          "$value": "0.5rem"
+        },
+        "3": {
+          "$value": "0.75rem"
+        },
+        "4": {
+          "$value": "1rem"
+        },
+        "5": {
+          "$value": "1.5rem"
+        },
+        "6": {
+          "$value": "2rem"
+        },
+        "7": {
+          "$value": "3rem"
+        },
+        "8": {
+          "$value": "4rem"
+        }
+      },
+      "size": {
+        "measure": {
+          "$value": "65ch"
+        }
+      },
+      "radius": {
+        "control": {
+          "$value": "3px",
+          "$description": "The site's call-to-action buttons: 3px."
+        },
+        "card": {
+          "$value": "4px",
+          "$description": "The design system's radius-md: tiles stay nearly square."
+        }
+      },
+      "border": {
+        "default": {
+          "$value": "1px solid {color.border}",
+          "$description": "A hairline in Soil 20."
+        }
+      },
+      "shadow": {
+        "card": {
+          "$value": "0 1px 2px rgba(49, 42, 41, 0.06), 0 2px 8px rgba(49, 42, 41, 0.06)",
+          "$description": "The design system's shadow-card: soft and Soil-tinted, never black."
+        },
+        "overlay": {
+          "$value": "0 2px 4px rgba(49, 42, 41, 0.08), 0 8px 24px rgba(49, 42, 41, 0.1)",
+          "$description": "The design system's shadow-raised."
+        }
+      },
+      "focus": {
+        "ring": {
+          "$value": "2px solid {color.accent}",
+          "$description": "The design system's 2px focus ring."
+        },
+        "offset": {
+          "$value": "2px"
+        }
+      },
+      "state-layer": {
+        "hover": {
+          "$value": "8%"
+        },
+        "press": {
+          "$value": "14%"
+        }
+      },
+      "button": {
+        "radius": {
+          "$value": "3px",
+          "$description": "The site's .hs-cta-button: 3px."
+        },
+        "height": {
+          "$value": "48px",
+          "$description": "15px padding around an 18px label, as on the site."
+        },
+        "padding-x": {
+          "$value": "1.5rem",
+          "$description": "25px on the site."
+        },
+        "font-weight": {
+          "$value": "{font-weight.strong}"
+        },
+        "font-size": {
+          "$value": "1rem"
+        },
+        "shadow": {
+          "$value": "none",
+          "$description": "Flat buttons, as on the site."
+        },
+        "shadow-hover": {
+          "$value": "none"
+        },
+        "shadow-press": {
+          "$value": "none"
+        },
+        "offset-hover": {
+          "$value": "0px"
+        },
+        "offset-press": {
+          "$value": "0px"
+        },
+        "shadow-flat": {
+          "$value": "none"
+        },
+        "secondary-bg": {
+          "$value": "{color.surface}",
+          "$description": "The site's white button with a Jasper label."
+        },
+        "secondary-fg": {
+          "$value": "{color.accent}"
+        },
+        "secondary-border": {
+          "$value": "1px solid {color.accent}"
+        },
+        "ghost-fg": {
+          "$value": "{color.accent}",
+          "$description": "Links are Jasper on the site."
+        }
+      },
+      "pill": {
+        "radius": {
+          "$value": "999px"
+        },
+        "border": {
+          "$value": "0 solid transparent"
+        },
+        "bg": {
+          "$value": "{color.surface-sunken}"
+        },
+        "padding": {
+          "$value": "0.3em 0.8em"
+        },
+        "gap": {
+          "$value": "0.45em"
+        },
+        "dot-size": {
+          "$value": "0.55em",
+          "$description": "A status dot, as in the decks' RAG grids."
+        },
+        "font-weight": {
+          "$value": "{font-weight.strong}"
+        },
+        "font-size": {
+          "$value": "{font-size.label}"
+        },
+        "text-transform": {
+          "$value": "uppercase",
+          "$description": "ALL-CAPS captions are a typographic level in the design system."
+        },
+        "letter-spacing": {
+          "$value": "0.08em"
+        }
+      },
+      "badge": {
+        "bg": {
+          "$value": "{color.accent}"
+        },
+        "fg": {
+          "$value": "{color.on-accent}"
+        },
+        "radius": {
+          "$value": "999px"
+        },
+        "font-size": {
+          "$value": "0.6875rem"
+        }
+      },
+      "field": {
+        "height": {
+          "$value": "44px"
+        },
+        "padding-x": {
+          "$value": "0.875rem"
+        },
+        "bg": {
+          "$value": "{color.surface-sunken}",
+          "$description": "The site's form fields sit on #F7F6F7."
+        },
+        "border": {
+          "$value": "1px solid {color.surface-sunken}",
+          "$description": "As on the site: the fill, not a box, marks the field."
+        },
+        "border-bottom": {
+          "$value": "1px solid {color.text-subtle}",
+          "$description": "An edge the eye can find; the site's fields have none."
+        },
+        "radius": {
+          "$value": "3px"
+        },
+        "border-hover": {
+          "$value": "{color.text-muted}"
+        },
+        "focus-outline": {
+          "$value": "2px solid {color.accent}"
+        },
+        "focus-offset": {
+          "$value": "0px"
+        },
+        "focus-shadow": {
+          "$value": "none"
+        },
+        "invalid-shadow": {
+          "$value": "inset 0 0 0 1px {state.closed}"
+        },
+        "label-fg": {
+          "$value": "{color.text-muted}"
+        },
+        "label-font-size": {
+          "$value": "{font-size.label}"
+        },
+        "label-font-weight": {
+          "$value": "{font-weight.strong}"
+        },
+        "label-letter-spacing": {
+          "$value": "0.08em"
+        },
+        "label-text-transform": {
+          "$value": "uppercase",
+          "$description": "Field labels as ALL-CAPS captions."
+        }
+      },
+      "check": {
+        "size": {
+          "$value": "18px"
+        },
+        "radius": {
+          "$value": "2px",
+          "$description": "The design system's radius-sm."
+        },
+        "border": {
+          "$value": "1.5px solid {color.text-muted}"
+        },
+        "checked-bg": {
+          "$value": "{color.structure}"
+        },
+        "checked-fg": {
+          "$value": "{color.surface}"
+        }
+      },
+      "switch": {
+        "width": {
+          "$value": "40px"
+        },
+        "height": {
+          "$value": "22px"
+        },
+        "radius": {
+          "$value": "999px"
+        },
+        "thumb-inset": {
+          "$value": "3px"
+        },
+        "track-bg": {
+          "$value": "{color.border}"
+        },
+        "track-border": {
+          "$value": "0 solid transparent"
+        },
+        "thumb-size": {
+          "$value": "16px"
+        },
+        "thumb-bg": {
+          "$value": "{color.surface}"
+        },
+        "checked-track-bg": {
+          "$value": "{state.live}",
+          "$description": "Pine: on-track."
+        },
+        "checked-thumb-bg": {
+          "$value": "{color.surface}"
+        }
+      },
+      "menu": {
+        "radius": {
+          "$value": "4px"
+        },
+        "shadow": {
+          "$value": "0 2px 4px rgba(49, 42, 41, 0.08), 0 8px 24px rgba(49, 42, 41, 0.1)"
+        },
+        "border": {
+          "$value": "1px solid {color.border}"
+        },
+        "bg": {
+          "$value": "{color.surface}"
+        },
+        "padding-y": {
+          "$value": "0.25rem"
+        },
+        "item-height": {
+          "$value": "40px"
+        },
+        "item-hover-bg": {
+          "$value": "color-mix(in srgb, {color.text-strong} 6%, transparent)"
+        },
+        "item-selected-bg": {
+          "$value": "{color.surface-sunken}"
+        },
+        "item-selected-fg": {
+          "$value": "{color.text-strong}"
+        },
+        "item-selected-font-weight": {
+          "$value": "{font-weight.strong}"
+        }
+      },
+      "choice-picker": {
+        "height": {
+          "$value": "40px"
+        },
+        "radius": {
+          "$value": "3px"
+        },
+        "gap": {
+          "$value": "0"
+        },
+        "border": {
+          "$value": "1px solid {color.structure}"
+        },
+        "divider": {
+          "$value": "1px solid {color.structure}"
+        },
+        "padding-x": {
+          "$value": "1rem"
+        },
+        "option-bg": {
+          "$value": "transparent"
+        },
+        "option-fg": {
+          "$value": "{color.structure}"
+        },
+        "option-hover-bg": {
+          "$value": "transparent"
+        },
+        "option-selected-bg": {
+          "$value": "{color.structure}"
+        },
+        "option-selected-fg": {
+          "$value": "{color.surface}"
+        },
+        "font-size": {
+          "$value": "0.875rem"
+        },
+        "font-weight": {
+          "$value": "{font-weight.strong}"
+        }
+      },
+      "card": {
+        "bg": {
+          "$value": "{color.surface}"
+        },
+        "border": {
+          "$value": "1px solid {color.border}"
+        },
+        "padding": {
+          "$value": "1.5rem"
+        }
+      },
+      "notice": {
+        "radius": {
+          "$value": "4px"
+        },
+        "stripe-width": {
+          "$value": "4px",
+          "$description": "The design system's border-heavy."
+        },
+        "border-width": {
+          "$value": "0"
+        },
+        "border-tone-mix": {
+          "$value": "0%"
+        },
+        "bg": {
+          "$value": "{color.surface-sunken}"
+        },
+        "tone-mix": {
+          "$value": "10%"
+        }
+      },
+      "toast": {
+        "bg": {
+          "$value": "{color.text-strong}",
+          "$description": "Soil: the design system's inverse surface."
+        },
+        "fg": {
+          "$value": "{color.ground}"
+        },
+        "action-fg": {
+          "$value": "{color.ground}"
+        },
+        "radius": {
+          "$value": "4px"
+        },
+        "shadow": {
+          "$value": "0 2px 4px rgba(49, 42, 41, 0.08), 0 8px 24px rgba(49, 42, 41, 0.1)"
+        },
+        "stripe-width": {
+          "$value": "0"
+        }
+      },
+      "table": {
+        "font-size": {
+          "$value": "0.875rem"
+        },
+        "row-height": {
+          "$value": "48px"
+        },
+        "header-height": {
+          "$value": "44px"
+        },
+        "cell-padding-x": {
+          "$value": "1rem"
+        },
+        "cell-padding-y": {
+          "$value": "0"
+        },
+        "header-bg": {
+          "$value": "{color.surface-sunken}"
+        },
+        "header-fg": {
+          "$value": "{color.text-muted}"
+        },
+        "header-font-size": {
+          "$value": "{font-size.label}"
+        },
+        "header-font-weight": {
+          "$value": "{font-weight.strong}"
+        },
+        "header-letter-spacing": {
+          "$value": "0.08em"
+        },
+        "header-text-transform": {
+          "$value": "uppercase"
+        },
+        "header-border": {
+          "$value": "2px solid {color.border}",
+          "$description": "The design system's 2px rule."
+        },
+        "row-hover-bg": {
+          "$value": "color-mix(in srgb, {color.text-strong} 4%, transparent)"
+        }
+      }
+    },
+    "appearances": {
+      "dark": {
+        "shadow": {
+          "card": {
+            "$value": "0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3)",
+            "$description": "Derived for dark: Soil shadows vanish on Soil grounds."
+          },
+          "overlay": {
+            "$value": "0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.45)"
+          }
+        },
+        "switch": {
+          "checked-thumb-bg": {
+            "$value": "{color.ground}"
+          }
+        }
+      }
+    }
+  }
+}

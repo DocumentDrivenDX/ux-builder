@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Img 8593 on the databricks design system: the img-8593 brand. Made in the theme builder.",
+  "name": "img-8593-databricks",
+  "title": "Img 8593 Databricks",
+  "brand": "img-8593",
+  "default": "light",
+  "designSystem": "databricks"
+}

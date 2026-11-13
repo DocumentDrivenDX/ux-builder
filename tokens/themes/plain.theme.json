@@ -1,0 +1,243 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Plain: brand plain with its own anatomy (was the plain design system until ADR-018).",
+  "name": "plain",
+  "title": "Plain",
+  "brand": "plain",
+  "default": "light",
+  "anatomy": {
+    "source": {
+      "system": "Plain control theme (platform ADR-005)"
+    },
+    "fonts": {
+      "display": {
+        "family": "system-ui",
+        "fallback": [
+          "-apple-system",
+          "Segoe UI",
+          "sans-serif"
+        ],
+        "source": "system"
+      },
+      "heading": {
+        "family": "system-ui",
+        "fallback": [
+          "-apple-system",
+          "Segoe UI",
+          "sans-serif"
+        ],
+        "source": "system"
+      },
+      "body": {
+        "family": "system-ui",
+        "fallback": [
+          "-apple-system",
+          "Segoe UI",
+          "sans-serif"
+        ],
+        "source": "system"
+      },
+      "mono": {
+        "family": "ui-monospace",
+        "fallback": [
+          "SF Mono",
+          "Menlo",
+          "monospace"
+        ],
+        "source": "system"
+      }
+    },
+    "tokens": {
+      "font-size": {
+        "display": {
+          "$value": "2.25rem"
+        },
+        "title": {
+          "$value": "1.5rem"
+        },
+        "heading": {
+          "$value": "1.0625rem"
+        },
+        "lead": {
+          "$value": "0.9375rem"
+        },
+        "body": {
+          "$value": "0.9375rem"
+        },
+        "small": {
+          "$value": "0.875rem"
+        },
+        "label": {
+          "$value": "0.75rem"
+        }
+      },
+      "font-weight": {
+        "regular": {
+          "$value": "400"
+        },
+        "strong": {
+          "$value": "600"
+        }
+      },
+      "letter-spacing": {
+        "label": {
+          "$value": "0.04em"
+        },
+        "eyebrow": {
+          "$value": "0.06em"
+        }
+      },
+      "line-height": {
+        "tight": {
+          "$value": "1.25"
+        },
+        "body": {
+          "$value": "1.6"
+        }
+      },
+      "radius": {
+        "control": {
+          "$value": "6px"
+        },
+        "card": {
+          "$value": "10px"
+        }
+      },
+      "border": {
+        "default": {
+          "$value": "1px solid {color.border}"
+        }
+      },
+      "shadow": {
+        "card": {
+          "$value": "0 1px 2px rgba(0, 0, 0, 0.05)"
+        },
+        "overlay": {
+          "$value": "0 4px 12px rgba(0, 0, 0, 0.08)"
+        }
+      },
+      "space": {
+        "1": {
+          "$value": "0.25rem"
+        },
+        "2": {
+          "$value": "0.5rem"
+        },
+        "3": {
+          "$value": "0.75rem"
+        },
+        "4": {
+          "$value": "1rem"
+        },
+        "5": {
+          "$value": "1.5rem"
+        },
+        "6": {
+          "$value": "2rem"
+        },
+        "7": {
+          "$value": "3rem"
+        },
+        "8": {
+          "$value": "4rem"
+        }
+      },
+      "size": {
+        "measure": {
+          "$value": "70ch"
+        }
+      },
+      "button": {
+        "radius": {
+          "$value": "6px",
+          "$description": "Plain deliberately runs a DIFFERENT treatment — A + 1: radiused buttons\nwith no shadow, and fully-round tinted pills. Nothing outside this block\nchanges. If the component layer ever hard-codes a corner or a shadow, the\ntwo themes stop differing here and the regression is visible."
+        },
+        "height": {
+          "$value": "34px"
+        },
+        "padding-x": {
+          "$value": "{space.4}"
+        },
+        "font-weight": {
+          "$value": "{font-weight.strong}"
+        },
+        "font-size": {
+          "$value": "{font-size.small}"
+        },
+        "shadow": {
+          "$value": "none"
+        },
+        "shadow-hover": {
+          "$value": "none"
+        },
+        "shadow-press": {
+          "$value": "none"
+        },
+        "offset-hover": {
+          "$value": "0"
+        },
+        "offset-press": {
+          "$value": "1px"
+        },
+        "shadow-flat": {
+          "$value": "none"
+        }
+      },
+      "focus": {
+        "ring": {
+          "$value": "2px solid {color.accent}"
+        },
+        "offset": {
+          "$value": "2px"
+        }
+      },
+      "pill": {
+        "radius": {
+          "$value": "999px"
+        },
+        "border": {
+          "$value": "0"
+        },
+        "bg": {
+          "$value": "color-mix(in srgb, currentColor 13%, transparent)",
+          "$description": "The tint derives from the state's own colour, so adding a state needs no\nnew token."
+        },
+        "padding": {
+          "$value": "3px 9px"
+        },
+        "gap": {
+          "$value": "0.3em"
+        },
+        "dot-size": {
+          "$value": "0"
+        },
+        "font-weight": {
+          "$value": "{font-weight.strong}"
+        },
+        "font-size": {
+          "$value": "{font-size.label}"
+        },
+        "text-transform": {
+          "$value": "uppercase"
+        },
+        "letter-spacing": {
+          "$value": "{letter-spacing.label}"
+        }
+      },
+      "badge": {
+        "bg": {
+          "$value": "{color.accent}"
+        },
+        "fg": {
+          "$value": "{color.on-accent}"
+        },
+        "radius": {
+          "$value": "999px"
+        },
+        "font-size": {
+          "$value": "0.6875rem"
+        }
+      }
+    }
+  }
+}
