@@ -32,6 +32,136 @@
   },
   "themes": [
     {
+      "name": "databricks",
+      "title": "Databricks",
+      "brand": "databricks",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/databricks.css"
+    },
+    {
+      "name": "img-8593-databricks",
+      "title": "Img 8593 Databricks",
+      "brand": "img-8593",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/img-8593-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/img-8593-databricks.css"
+    },
+    {
+      "name": "plain",
+      "title": "Plain",
+      "brand": "plain",
+      "designSystem": null,
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/plain.css",
+      "fonts": "@ux-builder/tokens/fonts/plain.css"
+    },
+    {
+      "name": "praxis",
+      "title": "Praxis",
+      "brand": "praxis",
+      "designSystem": null,
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/praxis.css",
+      "fonts": "@ux-builder/tokens/fonts/praxis.css"
+    },
+    {
+      "name": "praxis-carbon",
+      "title": "Praxis Carbon",
+      "brand": "praxis",
+      "designSystem": "carbon",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/praxis-carbon.css",
+      "fonts": "@ux-builder/tokens/fonts/praxis-carbon.css"
+    },
+    {
+      "name": "praxis-fluentui",
+      "title": "Praxis Fluent",
+      "brand": "praxis",
+      "designSystem": "fluent",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/praxis-fluentui.css",
+      "fonts": "@ux-builder/tokens/fonts/praxis-fluentui.css"
+    },
+    {
+      "name": "praxis-material",
+      "title": "Praxis Material",
+      "brand": "praxis",
+      "designSystem": "material",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "dark",
+      "css": "@ux-builder/tokens/themes/praxis-material.css",
+      "fonts": "@ux-builder/tokens/fonts/praxis-material.css"
+    },
+    {
+      "name": "praxis-v2-databricks",
+      "title": "Praxis V2 Databricks",
+      "brand": "praxis-v2",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/praxis-v2-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/praxis-v2-databricks.css"
+    },
+    {
+      "name": "synaptiq",
+      "title": "Synaptiq",
+      "brand": "synaptiq",
+      "designSystem": null,
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/synaptiq.css",
+      "fonts": "@ux-builder/tokens/fonts/synaptiq.css"
+    },
+    {
+      "name": "ux-builder-databricks",
+      "title": "UX Builder Databricks",
+      "brand": "ux-builder",
+      "designSystem": "databricks",
+      "appearances": [
+        "dark",
+        "light"
+      ],
+      "default": "light",
+      "css": "@ux-builder/tokens/themes/ux-builder-databricks.css",
+      "fonts": "@ux-builder/tokens/fonts/ux-builder-databricks.css"
+    },
+    {
       "name": "vk-databricks",
       "title": "vk-Databricks",
       "brand": "vk-databricks",
@@ -28229,13 +28359,13 @@
           {
             "kind": "review",
             "id": "theme.focus-ring"
+          },
+          {
+            "kind": "theme",
+            "id": "theme-focus-ring"
           }
         ],
         "plannedChecks": [
-          {
-            "kind": "lint",
-            "id": "theme-focus-ring"
-          },
           {
             "kind": "audit",
             "id": "theme-focus-ring"
@@ -28289,13 +28419,13 @@
           {
             "kind": "review",
             "id": "theme.small-text-floor"
+          },
+          {
+            "kind": "theme",
+            "id": "theme-small-text"
           }
         ],
         "plannedChecks": [
-          {
-            "kind": "lint",
-            "id": "theme-small-text"
-          },
           {
             "kind": "audit",
             "id": "theme-small-text"
@@ -28377,11 +28507,9 @@
           {
             "kind": "review",
             "id": "theme.dark-appearance"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-dark-appearance"
           }
         ],
@@ -28584,11 +28712,9 @@
           {
             "kind": "review",
             "id": "theme.text-tiers"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-text-tiers"
           }
         ],
@@ -28627,11 +28753,9 @@
           {
             "kind": "review",
             "id": "theme.contrast-margin"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-contrast-margin"
           }
         ],
@@ -28670,11 +28794,9 @@
           {
             "kind": "review",
             "id": "theme.structure-accent-distinct"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-structure-accent"
           }
         ],
@@ -28713,13 +28835,13 @@
           {
             "kind": "review",
             "id": "theme.surface-separation"
+          },
+          {
+            "kind": "theme",
+            "id": "theme-surface-separation"
           }
         ],
         "plannedChecks": [
-          {
-            "kind": "lint",
-            "id": "theme-surface-separation"
-          },
           {
             "kind": "audit",
             "id": "theme-surface-separation"
@@ -28851,11 +28973,9 @@
           {
             "kind": "review",
             "id": "theme.weights"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-weights"
           }
         ],
@@ -29013,11 +29133,9 @@
           {
             "kind": "review",
             "id": "theme.families-limited"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-families"
           }
         ],
@@ -30695,6 +30813,10 @@
           {
             "kind": "review",
             "id": "color.red-reserved"
+          },
+          {
+            "kind": "theme",
+            "id": "theme-red-reserved"
           }
         ],
         "plannedChecks": [

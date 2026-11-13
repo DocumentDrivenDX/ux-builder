@@ -1,0 +1,1120 @@
+{
+  "$description": "What the themes did when the theme checks arrived (tools/theme-rules.mjs). Fix them; do not add to this list.",
+  "known": [
+    {
+      "id": "databricks.light: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #1B3139 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "databricks.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "databricks.light: theme-focus-ring: ring contrast",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring #8D989C is 2.96:1 on #FFFFFF; at least 3:1"
+    },
+    {
+      "id": "databricks.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #1B3139, shadow 0 0 0 3px color-mix(in srgb, #1B3139 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "databricks.light: theme-text-tiers: text-strong/text",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-strong #1B3139 and --piq-color-text #1B3139 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "databricks.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #547580 and --piq-color-text-subtle #547580 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "databricks.dark: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #4C8AA1 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "databricks.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "databricks.dark: theme-focus-ring: ring contrast",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring #2B4A56 is 1.87:1 on #18181B; at least 3:1"
+    },
+    {
+      "id": "databricks.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #4C8AA1, shadow 0 0 0 3px color-mix(in srgb, #4C8AA1 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "databricks.dark: theme-contrast-margin: --piq-color-accent on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "accent #1685DF on --piq-color-surface #18181B is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "databricks.dark: theme-contrast-margin: --piq-color-surface on --piq-color-structure",
+      "rule": "theme.contrast-margin",
+      "message": "primary button label #18181B on --piq-color-structure #4C8AA1 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "databricks.dark: theme-text-tiers: text-strong/text",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-strong #FFFFFF and --piq-color-text #FAFAFA are 1.04:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "databricks.dark: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #9F9FA9 and --piq-color-text-subtle #9F9FA9 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "databricks.dark: theme-structure-accent: structure/accent",
+      "rule": "theme.structure-accent-distinct",
+      "message": "structure #4C8AA1 and accent #1685DF are ΔE 10.3 apart; at least 15"
+    },
+    {
+      "id": "databricks.dark: theme-surface-separation: card",
+      "rule": "theme.surface-separation",
+      "message": "a card (#18181B) on the ground (#09090B) is 1.12:1, its border 1.22:1, and its shadow at most 0.1 alpha; one of: tone 1.25:1, a border 1.25:1, or a shadow of 0.3 alpha or more in dark"
+    },
+    {
+      "id": "databricks.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)); dark sets its own"
+    },
+    {
+      "id": "databricks.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.); dark sets its own"
+    },
+    {
+      "id": "img-8593-databricks.light: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #272320 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "img-8593-databricks.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "img-8593-databricks.light: theme-focus-ring: ring contrast",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring #939190 is 2.99:1 on #FCF9F8; at least 3:1"
+    },
+    {
+      "id": "img-8593-databricks.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #272320, shadow 0 0 0 3px color-mix(in srgb, #272320 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "img-8593-databricks.dark: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #F0EAE6 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "img-8593-databricks.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "img-8593-databricks.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #F0EAE6, shadow 0 0 0 3px color-mix(in srgb, #F0EAE6 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "img-8593-databricks.dark: theme-contrast-margin: --piq-color-accent on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "accent #AF7752 on --piq-color-surface #1E1C1B is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "img-8593-databricks.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)); dark sets its own"
+    },
+    {
+      "id": "img-8593-databricks.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.); dark sets its own"
+    },
+    {
+      "id": "plain.light: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "plain.light: theme-contrast-margin: --piq-color-text-muted on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "muted text #6B7280 on --piq-color-ground #F9FAFB is 4.63:1; at least 4.7:1"
+    },
+    {
+      "id": "plain.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #6B7484 on --piq-color-ground #F9FAFB is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "plain.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B7280 and --piq-color-text-subtle #6B7484 are 1.03:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "plain.dark: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "plain.dark: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #9CA3AF and --piq-color-text-subtle #9AA3B2 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "plain.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 2px rgba(0, 0, 0, 0.05)); dark sets its own"
+    },
+    {
+      "id": "plain.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 4px 12px rgba(0, 0, 0, 0.08)); dark sets its own"
+    },
+    {
+      "id": "praxis.light: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "praxis.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #706C62 on --piq-color-ground #F0EEE6 is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis.light: theme-contrast-margin: --piq-color-status-positive on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #007D02 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis.light: theme-contrast-margin: --piq-color-status-caution on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "caution status #8E6300 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis.light: theme-contrast-margin: --piq-color-status-negative on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #C73234 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis.light: theme-contrast-margin: --piq-color-status-info on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "info status #196AC7 on --piq-color-ground #F0EEE6 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "praxis.dark: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "praxis.dark: theme-contrast-margin: --piq-color-text-subtle on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis.dark: theme-weights: strong",
+      "rule": "theme.weights",
+      "message": "strong text is weight 500; 600 or more"
+    },
+    {
+      "id": "praxis.dark: theme-weights: piq-font-weight-strong light/dark",
+      "rule": "theme.weights",
+      "message": "--piq-font-weight-strong is 600 in light and 500 in dark; the same weight in both (lower the tone, not the weight)"
+    },
+    {
+      "id": "praxis.dark: theme-weights: piq-button-font-weight light/dark",
+      "rule": "theme.weights",
+      "message": "--piq-button-font-weight is 600 in light and 500 in dark; the same weight in both (lower the tone, not the weight)"
+    },
+    {
+      "id": "praxis-carbon.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is -2px; 2 px"
+    },
+    {
+      "id": "praxis-carbon.light: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "praxis-carbon.light: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "praxis-carbon.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #706C62 on --piq-color-ground #F0EEE6 is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-carbon.light: theme-contrast-margin: --piq-color-status-positive on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #007D02 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-carbon.light: theme-contrast-margin: --piq-color-status-caution on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "caution status #8E6300 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-carbon.light: theme-contrast-margin: --piq-color-status-negative on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #C73234 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-carbon.light: theme-contrast-margin: --piq-color-status-info on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "info status #196AC7 on --piq-color-ground #F0EEE6 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-carbon.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "praxis-carbon.light: theme-weights: button",
+      "rule": "theme.weights",
+      "message": "button labels are weight 400; 500 or more"
+    },
+    {
+      "id": "praxis-carbon.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is -2px; 2 px"
+    },
+    {
+      "id": "praxis-carbon.dark: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "praxis-carbon.dark: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "praxis-carbon.dark: theme-contrast-margin: --piq-color-text-subtle on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-carbon.dark: theme-weights: button",
+      "rule": "theme.weights",
+      "message": "button labels are weight 400; 500 or more"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 1px; 2 px"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #29261F); a solid ring at least 2 px, 3:1"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #706C62 on --piq-color-ground #F0EEE6 is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-contrast-margin: --piq-color-status-positive on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #007D02 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-contrast-margin: --piq-color-status-caution on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "caution status #8E6300 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-contrast-margin: --piq-color-status-negative on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #C73234 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-contrast-margin: --piq-color-status-info on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "info status #196AC7 on --piq-color-ground #F0EEE6 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-fluentui.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "praxis-fluentui.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 1px; 2 px"
+    },
+    {
+      "id": "praxis-fluentui.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #E8E6DF); a solid ring at least 2 px, 3:1"
+    },
+    {
+      "id": "praxis-fluentui.dark: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "praxis-fluentui.dark: theme-contrast-margin: --piq-color-text-subtle on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-material.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #255FB1); a solid ring at least 2 px, 3:1"
+    },
+    {
+      "id": "praxis-material.light: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "praxis-material.light: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "praxis-material.light: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "praxis-material.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #706C62 on --piq-color-ground #F0EEE6 is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-material.light: theme-contrast-margin: --piq-color-status-positive on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #007D02 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-material.light: theme-contrast-margin: --piq-color-status-caution on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "caution status #8E6300 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-material.light: theme-contrast-margin: --piq-color-status-negative on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #C73234 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-material.light: theme-contrast-margin: --piq-color-status-info on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "info status #196AC7 on --piq-color-ground #F0EEE6 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-material.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "praxis-material.light: theme-weights: strong",
+      "rule": "theme.weights",
+      "message": "strong text is weight 500; 600 or more"
+    },
+    {
+      "id": "praxis-material.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #578EDB); a solid ring at least 2 px, 3:1"
+    },
+    {
+      "id": "praxis-material.dark: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "praxis-material.dark: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "praxis-material.dark: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "praxis-material.dark: theme-contrast-margin: --piq-color-text-subtle on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "praxis-material.dark: theme-weights: strong",
+      "rule": "theme.weights",
+      "message": "strong text is weight 500; 600 or more"
+    },
+    {
+      "id": "praxis-material.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.); dark sets its own"
+    },
+    {
+      "id": "praxis-material.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 8px 3px rgba(0, 0, 0, 0.); dark sets its own"
+    },
+    {
+      "id": "praxis-v2-databricks.light: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #282322 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "praxis-v2-databricks.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "praxis-v2-databricks.light: theme-focus-ring: ring contrast",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring #949191 is 2.99:1 on #FDF9F9; at least 3:1"
+    },
+    {
+      "id": "praxis-v2-databricks.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #282322, shadow 0 0 0 3px color-mix(in srgb, #282322 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "praxis-v2-databricks.dark: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #F0E9E8 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "praxis-v2-databricks.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "praxis-v2-databricks.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #F0E9E8, shadow 0 0 0 3px color-mix(in srgb, #F0E9E8 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "praxis-v2-databricks.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)); dark sets its own"
+    },
+    {
+      "id": "praxis-v2-databricks.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.); dark sets its own"
+    },
+    {
+      "id": "synaptiq.light: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "synaptiq.light: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "synaptiq.light: theme-text-tiers: text-strong/text",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-strong #312A29 and --piq-color-text #312A29 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "synaptiq.light: theme-families: families",
+      "rule": "theme.families-limited",
+      "message": "the theme uses 3 families (Quicksand, Zilla Slab, Abril Fatface); one for text and at most one more"
+    },
+    {
+      "id": "synaptiq.dark: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "synaptiq.dark: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "synaptiq.dark: theme-contrast-margin: --piq-color-status-positive on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #1FAB1D on --piq-color-surface #312A29 is 4.62:1; at least 4.7:1"
+    },
+    {
+      "id": "synaptiq.dark: theme-contrast-margin: --piq-color-status-negative on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #F7615B on --piq-color-surface #312A29 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "synaptiq.dark: theme-contrast-margin: --piq-color-status-info on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "info status #4895F4 on --piq-color-surface #312A29 is 4.61:1; at least 4.7:1"
+    },
+    {
+      "id": "synaptiq.dark: theme-structure-accent: structure/accent",
+      "rule": "theme.structure-accent-distinct",
+      "message": "structure #F7CFA5 and accent #F7CFA5 are ΔE 0.0 apart; at least 15"
+    },
+    {
+      "id": "synaptiq.dark: theme-families: families",
+      "rule": "theme.families-limited",
+      "message": "the theme uses 3 families (Quicksand, Zilla Slab, Abril Fatface); one for text and at most one more"
+    },
+    {
+      "id": "ux-builder-databricks.light: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #6F00E0 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "ux-builder-databricks.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "ux-builder-databricks.light: theme-focus-ring: ring contrast",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring #B780F0 is 2.73:1 on #FAF9FF; at least 3:1"
+    },
+    {
+      "id": "ux-builder-databricks.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #6F00E0, shadow 0 0 0 3px color-mix(in srgb, #6F00E0 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "ux-builder-databricks.light: theme-structure-accent: structure/accent",
+      "rule": "theme.structure-accent-distinct",
+      "message": "structure #6F00E0 and accent #6F00E0 are ΔE 0.0 apart; at least 15"
+    },
+    {
+      "id": "ux-builder-databricks.dark: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #AA8EFF 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "ux-builder-databricks.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "ux-builder-databricks.dark: theme-focus-ring: ring contrast",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring #5E4F8F is 2.42:1 on #1D1A2A; at least 3:1"
+    },
+    {
+      "id": "ux-builder-databricks.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #AA8EFF, shadow 0 0 0 3px color-mix(in srgb, #AA8EFF 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "ux-builder-databricks.dark: theme-structure-accent: structure/accent",
+      "rule": "theme.structure-accent-distinct",
+      "message": "structure #AA8EFF and accent #AA8EFF are ΔE 0.0 apart; at least 15"
+    },
+    {
+      "id": "ux-builder-databricks.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)); dark sets its own"
+    },
+    {
+      "id": "ux-builder-databricks.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.); dark sets its own"
+    },
+    {
+      "id": "vk-databricks.light: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #1B3139 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "vk-databricks.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "vk-databricks.light: theme-focus-ring: ring contrast",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring #8D989C is 2.96:1 on #FFFFFF; at least 3:1"
+    },
+    {
+      "id": "vk-databricks.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #1B3139, shadow 0 0 0 3px color-mix(in srgb, #1B3139 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "vk-databricks.light: theme-text-tiers: text-strong/text",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-strong #1B3139 and --piq-color-text #1B3139 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-databricks.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #547580 and --piq-color-text-subtle #547580 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-databricks.dark: theme-focus-ring: ring halo",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #4C8AA1 50%, transparent)); a solid ring, with any halo on top of it"
+    },
+    {
+      "id": "vk-databricks.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 0px; 2 px"
+    },
+    {
+      "id": "vk-databricks.dark: theme-focus-ring: ring contrast",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring #2B4A56 is 1.87:1 on #18181B; at least 3:1"
+    },
+    {
+      "id": "vk-databricks.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus (outline 1px solid #4C8AA1, shadow 0 0 0 3px color-mix(in srgb, #4C8AA1 50%, transparent)) is not a solid ring at least 2 px at 3:1"
+    },
+    {
+      "id": "vk-databricks.dark: theme-contrast-margin: --piq-color-accent on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "accent #1685DF on --piq-color-surface #18181B is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-databricks.dark: theme-contrast-margin: --piq-color-surface on --piq-color-structure",
+      "rule": "theme.contrast-margin",
+      "message": "primary button label #18181B on --piq-color-structure #4C8AA1 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-databricks.dark: theme-text-tiers: text-strong/text",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-strong #FFFFFF and --piq-color-text #FAFAFA are 1.04:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-databricks.dark: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #9F9FA9 and --piq-color-text-subtle #9F9FA9 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-databricks.dark: theme-structure-accent: structure/accent",
+      "rule": "theme.structure-accent-distinct",
+      "message": "structure #4C8AA1 and accent #1685DF are ΔE 10.3 apart; at least 15"
+    },
+    {
+      "id": "vk-databricks.dark: theme-surface-separation: card",
+      "rule": "theme.surface-separation",
+      "message": "a card (#18181B) on the ground (#09090B) is 1.12:1, its border 1.22:1, and its shadow at most 0.1 alpha; one of: tone 1.25:1, a border 1.25:1, or a shadow of 0.3 alpha or more in dark"
+    },
+    {
+      "id": "vk-databricks.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)); dark sets its own"
+    },
+    {
+      "id": "vk-databricks.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.); dark sets its own"
+    },
+    {
+      "id": "vk-plain.light: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "vk-plain.light: theme-contrast-margin: --piq-color-text-muted on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "muted text #6B7280 on --piq-color-ground #F9FAFB is 4.63:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-plain.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #6B7484 on --piq-color-ground #F9FAFB is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-plain.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B7280 and --piq-color-text-subtle #6B7484 are 1.03:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-plain.dark: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "vk-plain.dark: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #9CA3AF and --piq-color-text-subtle #9AA3B2 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-plain.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 2px rgba(0, 0, 0, 0.05)); dark sets its own"
+    },
+    {
+      "id": "vk-plain.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 4px 12px rgba(0, 0, 0, 0.08)); dark sets its own"
+    },
+    {
+      "id": "vk-praxis.light: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "vk-praxis.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #706C62 on --piq-color-ground #F0EEE6 is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis.light: theme-contrast-margin: --piq-color-status-positive on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #007D02 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis.light: theme-contrast-margin: --piq-color-status-caution on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "caution status #8E6300 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis.light: theme-contrast-margin: --piq-color-status-negative on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #C73234 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis.light: theme-contrast-margin: --piq-color-status-info on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "info status #196AC7 on --piq-color-ground #F0EEE6 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-praxis.dark: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "vk-praxis.dark: theme-contrast-margin: --piq-color-text-subtle on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis.dark: theme-weights: strong",
+      "rule": "theme.weights",
+      "message": "strong text is weight 500; 600 or more"
+    },
+    {
+      "id": "vk-praxis.dark: theme-weights: piq-font-weight-strong light/dark",
+      "rule": "theme.weights",
+      "message": "--piq-font-weight-strong is 600 in light and 500 in dark; the same weight in both (lower the tone, not the weight)"
+    },
+    {
+      "id": "vk-praxis.dark: theme-weights: piq-button-font-weight light/dark",
+      "rule": "theme.weights",
+      "message": "--piq-button-font-weight is 600 in light and 500 in dark; the same weight in both (lower the tone, not the weight)"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is -2px; 2 px"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #706C62 on --piq-color-ground #F0EEE6 is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-contrast-margin: --piq-color-status-positive on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #007D02 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-contrast-margin: --piq-color-status-caution on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "caution status #8E6300 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-contrast-margin: --piq-color-status-negative on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #C73234 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-contrast-margin: --piq-color-status-info on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "info status #196AC7 on --piq-color-ground #F0EEE6 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-praxis-carbon.light: theme-weights: button",
+      "rule": "theme.weights",
+      "message": "button labels are weight 400; 500 or more"
+    },
+    {
+      "id": "vk-praxis-carbon.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is -2px; 2 px"
+    },
+    {
+      "id": "vk-praxis-carbon.dark: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "vk-praxis-carbon.dark: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "vk-praxis-carbon.dark: theme-contrast-margin: --piq-color-text-subtle on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-carbon.dark: theme-weights: button",
+      "rule": "theme.weights",
+      "message": "button labels are weight 400; 500 or more"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 1px; 2 px"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #29261F); a solid ring at least 2 px, 3:1"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #706C62 on --piq-color-ground #F0EEE6 is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-contrast-margin: --piq-color-status-positive on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #007D02 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-contrast-margin: --piq-color-status-caution on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "caution status #8E6300 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-contrast-margin: --piq-color-status-negative on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #C73234 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-contrast-margin: --piq-color-status-info on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "info status #196AC7 on --piq-color-ground #F0EEE6 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-fluentui.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-praxis-fluentui.dark: theme-focus-ring: ring offset",
+      "rule": "theme.focus-ring",
+      "message": "the focus ring's offset is 1px; 2 px"
+    },
+    {
+      "id": "vk-praxis-fluentui.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #E8E6DF); a solid ring at least 2 px, 3:1"
+    },
+    {
+      "id": "vk-praxis-fluentui.dark: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "vk-praxis-fluentui.dark: theme-contrast-margin: --piq-color-text-subtle on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #255FB1); a solid ring at least 2 px, 3:1"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #706C62 on --piq-color-ground #F0EEE6 is 4.51:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-contrast-margin: --piq-color-status-positive on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #007D02 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-contrast-margin: --piq-color-status-caution on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "caution status #8E6300 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-contrast-margin: --piq-color-status-negative on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #C73234 on --piq-color-ground #F0EEE6 is 4.59:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-contrast-margin: --piq-color-status-info on --piq-color-ground",
+      "rule": "theme.contrast-margin",
+      "message": "info status #196AC7 on --piq-color-ground #F0EEE6 is 4.60:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-text-tiers: text-muted/text-subtle",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-praxis-material.light: theme-weights: strong",
+      "rule": "theme.weights",
+      "message": "strong text is weight 500; 600 or more"
+    },
+    {
+      "id": "vk-praxis-material.dark: theme-focus-ring: field focus",
+      "rule": "theme.focus-ring",
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #578EDB); a solid ring at least 2 px, 3:1"
+    },
+    {
+      "id": "vk-praxis-material.dark: theme-small-text: small size",
+      "rule": "theme.small-text-floor",
+      "message": "the small size is 12 px; at least 14 px"
+    },
+    {
+      "id": "vk-praxis-material.dark: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "vk-praxis-material.dark: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "vk-praxis-material.dark: theme-contrast-margin: --piq-color-text-subtle on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-praxis-material.dark: theme-weights: strong",
+      "rule": "theme.weights",
+      "message": "strong text is weight 500; 600 or more"
+    },
+    {
+      "id": "vk-praxis-material.dark: theme-dark-appearance: piq-shadow-card",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-card is the light value (0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.); dark sets its own"
+    },
+    {
+      "id": "vk-praxis-material.dark: theme-dark-appearance: piq-shadow-overlay",
+      "rule": "theme.dark-appearance",
+      "message": "--piq-shadow-overlay is the light value (0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 8px 3px rgba(0, 0, 0, 0.); dark sets its own"
+    },
+    {
+      "id": "vk-synaptiq.light: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "vk-synaptiq.light: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "vk-synaptiq.light: theme-text-tiers: text-strong/text",
+      "rule": "theme.text-tiers",
+      "message": "--piq-color-text-strong #312A29 and --piq-color-text #312A29 are 1.00:1 apart; neighbouring tiers at least 1.1:1, or retire one"
+    },
+    {
+      "id": "vk-synaptiq.light: theme-families: families",
+      "rule": "theme.families-limited",
+      "message": "the theme uses 3 families (Quicksand, Zilla Slab, Abril Fatface); one for text and at most one more"
+    },
+    {
+      "id": "vk-synaptiq.dark: theme-small-text: field label size",
+      "rule": "theme.small-text-floor",
+      "message": "field labels are 12 px; the small size (at least 14 px) or larger"
+    },
+    {
+      "id": "vk-synaptiq.dark: theme-small-text: piq-badge-font-size",
+      "rule": "theme.small-text-floor",
+      "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
+    },
+    {
+      "id": "vk-synaptiq.dark: theme-contrast-margin: --piq-color-status-positive on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "positive status #1FAB1D on --piq-color-surface #312A29 is 4.62:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-synaptiq.dark: theme-contrast-margin: --piq-color-status-negative on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "negative status #F7615B on --piq-color-surface #312A29 is 4.56:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-synaptiq.dark: theme-contrast-margin: --piq-color-status-info on --piq-color-surface",
+      "rule": "theme.contrast-margin",
+      "message": "info status #4895F4 on --piq-color-surface #312A29 is 4.61:1; at least 4.7:1"
+    },
+    {
+      "id": "vk-synaptiq.dark: theme-structure-accent: structure/accent",
+      "rule": "theme.structure-accent-distinct",
+      "message": "structure #F7CFA5 and accent #F7CFA5 are ΔE 0.0 apart; at least 15"
+    },
+    {
+      "id": "vk-synaptiq.dark: theme-families: families",
+      "rule": "theme.families-limited",
+      "message": "the theme uses 3 families (Quicksand, Zilla Slab, Abril Fatface); one for text and at most one more"
+    }
+  ]
+}

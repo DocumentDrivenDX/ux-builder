@@ -1,0 +1,168 @@
+{
+  "$schema": "../schema/brand.schema.json",
+  "$description": "Databricks, as AppKit apps are branded: Databricks AppKit UI (@databricks/appkit-ui 0.81.0) with the dbx-tools brand bridge and default brand (@dbx-tools/ui-appkit, @dbx-tools/ui-branding, @dbx-tools/shared-core 0.9.43), documented at https://docs.dbx.tools/packages/ui-appkit. Identity colours (primary, primary-hover, accent, foreground, background, surface, muted, border) are the dbx-tools default brand context; states are AppKit's success, warning and destructive. The brand bridge leaves AppKit's neutrals in place for dark, so dark uses AppKit's dark neutrals with the brand's identity colours. Colours moved for contrast say so.",
+  "name": "databricks",
+  "title": "Databricks",
+  "appearances": {
+    "light": {
+      "color": {
+        "ground": {
+          "$value": "#FFFFFF",
+          "$description": "Brand background (AppKit --background)."
+        },
+        "ground-recessed": {
+          "$value": "#F9F7F4",
+          "$description": "Brand surface: secondary surface background, sidebar."
+        },
+        "surface": {
+          "$value": "#FFFFFF",
+          "$description": "AppKit --card / --popover: white."
+        },
+        "surface-sunken": {
+          "$value": "#F9F7F4",
+          "$description": "Brand surface: secondary buttons, tab lists, muted panels."
+        },
+        "text-strong": {
+          "$value": "#1B3139",
+          "$description": "Brand foreground (Navy)."
+        },
+        "text": {
+          "$value": "#1B3139",
+          "$description": "Brand foreground (Navy): default text."
+        },
+        "text-muted": {
+          "$value": "#547580",
+          "$description": "Brand muted text. Official #618794 moved -6.4% in lightness (hue kept) to clear 4.5:1."
+        },
+        "text-subtle": {
+          "$value": "#547580",
+          "$description": "Brand muted text. Official #618794 moved -6.4% in lightness (hue kept) to clear 4.5:1."
+        },
+        "structure": {
+          "$value": "#1B3139",
+          "$description": "Brand primary (Navy): primary buttons, checked controls, focus ring (AppKit --primary and --ring)."
+        },
+        "accent": {
+          "$value": "#0E538B",
+          "$description": "Brand primary-hover (Blue): links, kickers, and the hover and selected tint the brand bridge mixes into --accent."
+        },
+        "on-accent": {
+          "$value": "#FFFFFF",
+          "$description": "Brand background on primary (AppKit --primary-foreground)."
+        },
+        "border": {
+          "$value": "#E4E2DD",
+          "$description": "Brand border (AppKit --border, --input)."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#00805D",
+          "$description": "AppKit --success. Official #009A70 moved -5.0% in lightness (hue kept) to clear 4.5:1."
+        },
+        "limited": {
+          "$value": "#966709",
+          "$description": "AppKit --warning. Official #F2AE24 moved -23.4% in lightness (hue kept) to read as text (AppKit uses it as a fill under dark text)."
+        },
+        "purchasing": {
+          "$value": "#0E538B",
+          "$description": "Brand primary-hover (Blue)."
+        },
+        "evaluation": {
+          "$value": "#547580",
+          "$description": "Brand muted. Official #618794 moved -6.4% in lightness (hue kept) to clear 4.5:1."
+        },
+        "closed": {
+          "$value": "#E2000B",
+          "$description": "AppKit --destructive. Official #E7000B moved -1.0% in lightness (hue kept) to clear 4.5:1."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#FF3621",
+          "$description": "Lava 600: the symbol in the dbx-tools logo assets."
+        }
+      }
+    },
+    "dark": {
+      "color": {
+        "ground": {
+          "$value": "#09090B",
+          "$description": "AppKit dark --background."
+        },
+        "ground-recessed": {
+          "$value": "#18181B",
+          "$description": "AppKit dark --sidebar."
+        },
+        "surface": {
+          "$value": "#18181B",
+          "$description": "AppKit dark --card / --popover."
+        },
+        "surface-sunken": {
+          "$value": "#27272A",
+          "$description": "AppKit dark --muted / --secondary."
+        },
+        "text-strong": {
+          "$value": "#FFFFFF",
+          "$description": "White."
+        },
+        "text": {
+          "$value": "#FAFAFA",
+          "$description": "AppKit dark --foreground."
+        },
+        "text-muted": {
+          "$value": "#9F9FA9",
+          "$description": "AppKit dark --muted-foreground."
+        },
+        "text-subtle": {
+          "$value": "#9F9FA9",
+          "$description": "AppKit dark --muted-foreground."
+        },
+        "structure": {
+          "$value": "#4C8AA1",
+          "$description": "Brand primary. The bridge keeps Navy #1B3139 with white text in dark; here the button label is the surface colour, so official #1B3139 moved +30.0% in lightness (hue kept) to carry it at 4.5:1."
+        },
+        "accent": {
+          "$value": "#1685DF",
+          "$description": "Brand primary-hover. Official #0E538B moved +18.2% in lightness (hue kept) to clear 4.5:1 on the dark ground."
+        },
+        "on-accent": {
+          "$value": "#09090B",
+          "$description": "Dark ground on the lightened accent."
+        },
+        "border": {
+          "$value": "#202023",
+          "$description": "AppKit dark --border: white at 10% over the ground."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#35AC86",
+          "$description": "AppKit dark --success."
+        },
+        "limited": {
+          "$value": "#F8BD1D",
+          "$description": "AppKit dark --warning."
+        },
+        "purchasing": {
+          "$value": "#2A94EA",
+          "$description": "Brand primary-hover. Official #0E538B moved +24.0% in lightness (hue kept) to clear 4.5:1."
+        },
+        "evaluation": {
+          "$value": "#9F9FA9",
+          "$description": "AppKit dark --muted-foreground."
+        },
+        "closed": {
+          "$value": "#FF6467",
+          "$description": "AppKit dark --destructive."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#FF3621",
+          "$description": "Lava 600: the symbol in the dbx-tools logo assets."
+        }
+      }
+    }
+  }
+}

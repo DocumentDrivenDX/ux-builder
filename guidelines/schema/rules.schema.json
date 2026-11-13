@@ -224,6 +224,7 @@
                   "audit",
                   "lint",
                   "card",
+                  "theme",
                   "review"
                 ]
               },
@@ -252,6 +253,7 @@
                   "audit",
                   "lint",
                   "card",
+                  "theme",
                   "journey",
                   "metrics",
                   "trace",
@@ -317,7 +319,7 @@
           "enum": [
             "proposed"
           ],
-          "description": "proposed: not yet reviewed into the SDK's rules; its checks are reviews until its planned checks are built"
+          "description": "proposed: not yet reviewed into the SDK's rules; reviewed by hand, plus whichever of its planned checks are built"
         }
       }
     },

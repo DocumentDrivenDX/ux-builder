@@ -70,7 +70,7 @@ def rule_of(d):
     kinds, ids = commas(d["Check type(s)"]), commas(d["Check ID(s)"])
     if not kinds or len(kinds) != len(ids): bad(rid, "Check type(s) and Check ID(s) must pair up, one ID per type")
     for k in kinds:
-        if k not in CHECKS: bad(rid, f"check type '{k}' is not one of {sorted(CHECKS)}; an unbuilt check goes in Planned checks, with review here")
+        if k not in CHECKS: bad(rid, f"check type '{k}' is not one of {sorted(CHECKS)}; an unbuilt check goes in Planned checks")
     o["checks"] = [OrderedDict(kind=k, id=i) for k, i in zip(kinds, ids)]
     if d.get("Planned checks"):
         pcs = []
@@ -104,8 +104,8 @@ def rule_of(d):
     h = lines(d["Heuristic impact (Nielsen)"])
     if h: o["heuristics"] = h
     if d.get("Status"): o["status"] = str(d["Status"]).strip()
-    if o.get("status") == "proposed" and any(c["kind"] != "review" for c in o["checks"]):
-        bad(rid, "a proposed rule's checks are reviews until its checks are built")
+    if o.get("status") == "proposed" and not any(c["kind"] == "review" for c in o["checks"]):
+        bad(rid, "a proposed rule keeps its review check beside any check built for it")
     return o
 
 new = OrderedDict()

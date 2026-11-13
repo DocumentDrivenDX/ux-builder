@@ -1,0 +1,212 @@
+{
+  "$schema": "../schema/brand.schema.json",
+  "$description": "Generated in the theme builder by @ux-builder/engine 0.1.0, strategy neutral-accent. Regenerate with: npm run brand -- --regenerate tokens/brands/img-8593.brand.json",
+  "name": "img-8593",
+  "title": "Img 8593",
+  "appearances": {
+    "light": {
+      "color": {
+        "ground": {
+          "$value": "#FCF9F8",
+          "$description": "Page ground. Generated (neutral-accent)."
+        },
+        "ground-recessed": {
+          "$value": "#F4F1EF",
+          "$description": "Recessed ground (sidebar). Generated (neutral-accent)."
+        },
+        "surface": {
+          "$value": "#FFFFFF",
+          "$description": "Cards, fields and menus. Generated (neutral-accent)."
+        },
+        "surface-sunken": {
+          "$value": "#F2EFEE",
+          "$description": "Sunken panels and pills. Generated (neutral-accent)."
+        },
+        "border": {
+          "$value": "#E1DDDA",
+          "$description": "Borders. Generated (neutral-accent)."
+        },
+        "text-strong": {
+          "$value": "#191513",
+          "$description": "Headings. Generated (neutral-accent)."
+        },
+        "text": {
+          "$value": "#272320",
+          "$description": "Body text. Generated (neutral-accent)."
+        },
+        "text-muted": {
+          "$value": "#514C49",
+          "$description": "Muted text. Generated (neutral-accent)."
+        },
+        "text-subtle": {
+          "$value": "#67625F",
+          "$description": "Subtle text. Generated (neutral-accent)."
+        },
+        "structure": {
+          "$value": "#272320",
+          "$description": "Primary buttons: neutral ink. Generated (neutral-accent)."
+        },
+        "accent": {
+          "$value": "#945E3A",
+          "$description": "Links, focus, kickers: brand colour. Generated (neutral-accent)."
+        },
+        "on-accent": {
+          "$value": "#FFFFFF",
+          "$description": "Text and icons on the accent. Generated (neutral-accent)."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#467922",
+          "$description": "Status: live. Generated (neutral-accent)."
+        },
+        "limited": {
+          "$value": "#906400",
+          "$description": "Status: limited. Generated (neutral-accent). #956800 moved −0.015 L (OKLCH, hue kept) to clear 4.5:1."
+        },
+        "purchasing": {
+          "$value": "#3959A6",
+          "$description": "Status: purchasing. Generated (neutral-accent)."
+        },
+        "closed": {
+          "$value": "#BA2C24",
+          "$description": "Status: closed. Generated (neutral-accent)."
+        },
+        "evaluation": {
+          "$value": "#514C49",
+          "$description": "Status: evaluation (muted). Generated (neutral-accent)."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#945E3A",
+          "$description": "The logo's top brand colour, as supplied."
+        },
+        "logo-image": {
+          "$value": "../../brand/img-8593/logo.png",
+          "$description": "The logo, as uploaded to the theme builder."
+        },
+        "logo-aspect": {
+          "$value": "0.75",
+          "$description": "The framed logo's width over its height."
+        }
+      }
+    },
+    "dark": {
+      "color": {
+        "ground": {
+          "$value": "#131110",
+          "$description": "Page ground. Generated (neutral-accent)."
+        },
+        "ground-recessed": {
+          "$value": "#0D0B0A",
+          "$description": "Recessed ground (sidebar). Generated (neutral-accent)."
+        },
+        "surface": {
+          "$value": "#1E1C1B",
+          "$description": "Cards, fields and menus. Generated (neutral-accent)."
+        },
+        "surface-sunken": {
+          "$value": "#282625",
+          "$description": "Sunken panels and pills. Generated (neutral-accent)."
+        },
+        "border": {
+          "$value": "#383533",
+          "$description": "Borders. Generated (neutral-accent)."
+        },
+        "text-strong": {
+          "$value": "#FDF7F3",
+          "$description": "Headings. Generated (neutral-accent)."
+        },
+        "text": {
+          "$value": "#F0EAE6",
+          "$description": "Body text. Generated (neutral-accent)."
+        },
+        "text-muted": {
+          "$value": "#C2BCB9",
+          "$description": "Muted text. Generated (neutral-accent)."
+        },
+        "text-subtle": {
+          "$value": "#A39D9A",
+          "$description": "Subtle text. Generated (neutral-accent)."
+        },
+        "structure": {
+          "$value": "#F0EAE6",
+          "$description": "Primary buttons: neutral ink. Generated (neutral-accent)."
+        },
+        "accent": {
+          "$value": "#AF7752",
+          "$description": "Links, focus, kickers: brand colour. Generated (neutral-accent). #945E3A moved +0.085 L (OKLCH, hue kept) to clear 4.5:1."
+        },
+        "on-accent": {
+          "$value": "#1F1B18",
+          "$description": "Text and icons on the accent. Generated (neutral-accent). #0E0A08 moved +0.075 L (OKLCH, hue kept) to clear 4.5:1."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#89C06A",
+          "$description": "Status: live. Generated (neutral-accent)."
+        },
+        "limited": {
+          "$value": "#F2B959",
+          "$description": "Status: limited. Generated (neutral-accent)."
+        },
+        "purchasing": {
+          "$value": "#7CA2F6",
+          "$description": "Status: purchasing. Generated (neutral-accent)."
+        },
+        "closed": {
+          "$value": "#FA6A5B",
+          "$description": "Status: closed. Generated (neutral-accent)."
+        },
+        "evaluation": {
+          "$value": "#C2BCB9",
+          "$description": "Status: evaluation (muted). Generated (neutral-accent)."
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#945E3A",
+          "$description": "The logo's top brand colour, as supplied."
+        },
+        "logo-image": {
+          "$value": "../../brand/img-8593/logo.png",
+          "$description": "The logo, as uploaded to the theme builder."
+        },
+        "logo-aspect": {
+          "$value": "0.75",
+          "$description": "The framed logo's width over its height."
+        }
+      }
+    }
+  },
+  "generation": {
+    "engine": "0.1.0",
+    "extracted": [
+      "#945E3A",
+      "#DDC191",
+      "#FBC670",
+      "#5E80B6"
+    ],
+    "strategy": "neutral-accent",
+    "settings": {
+      "strategies": "faithful,muted,vibrant,neutral-accent,two-colour",
+      "primaryCandidate": 0,
+      "secondaryCandidate": -1,
+      "hueShift": 0,
+      "chromaScale": 1,
+      "neutralTint": 1,
+      "groundLight": 0.985,
+      "groundDark": 0.18,
+      "stateHarmony": 0.5,
+      "minContrast": 4.5,
+      "suggestedHue": 250,
+      "appearances": "light,dark"
+    },
+    "logo": {
+      "path": "../../brand/img-8593/logo.png",
+      "sha256": "61bb404a82e9dd2fccb2aa429b14d9a576b83f426383a7b2fc8a4008b7a8692e"
+    }
+  }
+}
