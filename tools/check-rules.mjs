@@ -17,7 +17,8 @@
    4. Every check a rule names exists: blueprint checks in
       @ux-builder/ui/blueprint, audit checks in @ux-builder/audit, lint rules
       in the catalogue, card checks in @ux-builder/ui/adaptive-cards (CHECKS
-      of its check module, the one checkCard runs).
+      of its check module, the one checkCard runs), theme checks in
+      tools/theme-rules.mjs (run on every theme by check-theme-rules.mjs).
    5. Every pattern a rule or recipe names is a catalogue pattern, and every
       rule a recipe names exists.
 
@@ -39,12 +40,14 @@ export async function known() {
   const { CHECKS } = await import("../packages/ui/blueprint/index.mjs");
   const { RULES } = await import("../packages/audit/audit.mjs");
   const { CHECKS: CARD_CHECKS } = await import("../packages/ui/adaptive-cards/check.mjs");
+  const { CHECKS: THEME_CHECKS } = await import("./theme-rules.mjs");
   const cat = read("packages/ui/catalogue.json");
   return {
     blueprint: new Set(CHECKS),
     audit: new Set(Object.keys(RULES)),
     lint: new Set(cat.lint.rules),
     card: new Set(CARD_CHECKS),
+    theme: new Set(Object.keys(THEME_CHECKS)),
     patterns: new Set(cat.patterns.filter((p) => p.type === "component").map((p) => p.name)),
   };
 }

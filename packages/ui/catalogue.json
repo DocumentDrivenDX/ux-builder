@@ -28359,13 +28359,13 @@
           {
             "kind": "review",
             "id": "theme.focus-ring"
+          },
+          {
+            "kind": "theme",
+            "id": "theme-focus-ring"
           }
         ],
         "plannedChecks": [
-          {
-            "kind": "lint",
-            "id": "theme-focus-ring"
-          },
           {
             "kind": "audit",
             "id": "theme-focus-ring"
@@ -28419,13 +28419,13 @@
           {
             "kind": "review",
             "id": "theme.small-text-floor"
+          },
+          {
+            "kind": "theme",
+            "id": "theme-small-text"
           }
         ],
         "plannedChecks": [
-          {
-            "kind": "lint",
-            "id": "theme-small-text"
-          },
           {
             "kind": "audit",
             "id": "theme-small-text"
@@ -28507,11 +28507,9 @@
           {
             "kind": "review",
             "id": "theme.dark-appearance"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-dark-appearance"
           }
         ],
@@ -28714,11 +28712,9 @@
           {
             "kind": "review",
             "id": "theme.text-tiers"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-text-tiers"
           }
         ],
@@ -28757,11 +28753,9 @@
           {
             "kind": "review",
             "id": "theme.contrast-margin"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-contrast-margin"
           }
         ],
@@ -28800,11 +28794,9 @@
           {
             "kind": "review",
             "id": "theme.structure-accent-distinct"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-structure-accent"
           }
         ],
@@ -28843,13 +28835,13 @@
           {
             "kind": "review",
             "id": "theme.surface-separation"
+          },
+          {
+            "kind": "theme",
+            "id": "theme-surface-separation"
           }
         ],
         "plannedChecks": [
-          {
-            "kind": "lint",
-            "id": "theme-surface-separation"
-          },
           {
             "kind": "audit",
             "id": "theme-surface-separation"
@@ -28981,11 +28973,9 @@
           {
             "kind": "review",
             "id": "theme.weights"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-weights"
           }
         ],
@@ -29143,11 +29133,9 @@
           {
             "kind": "review",
             "id": "theme.families-limited"
-          }
-        ],
-        "plannedChecks": [
+          },
           {
-            "kind": "lint",
+            "kind": "theme",
             "id": "theme-families"
           }
         ],
@@ -30825,6 +30813,10 @@
           {
             "kind": "review",
             "id": "color.red-reserved"
+          },
+          {
+            "kind": "theme",
+            "id": "theme-red-reserved"
           }
         ],
         "plannedChecks": [
