@@ -1,5 +1,5 @@
 /* The builder for the e2e run: a throwaway copy of tokens/ and brand/ as the
-   repository, the mock model, and files-only review, so the run is
+   repository, the mock model, files-only review and no live reload, so the run is
    deterministic and touches nothing real. Writes the copy's path to
    e2e/.root for the test to inspect. */
 
@@ -13,5 +13,5 @@ const root = mkdtempSync(join(tmpdir(), "theme-builder-e2e-"));
 cpSync(join(REPO, "tokens"), join(root, "tokens"), { recursive: true });
 cpSync(join(REPO, "brand"), join(root, "brand"), { recursive: true });
 writeFileSync(new URL(".root", import.meta.url), root);
-Object.assign(process.env, { BUILDER_ROOT: root, BUILDER_MODEL: "mock", BUILDER_REVIEW: "files", PORT: process.env.PORT ?? "5190" });
+Object.assign(process.env, { BUILDER_ROOT: root, BUILDER_MODEL: "mock", BUILDER_REVIEW: "files", BUILDER_HMR: "off", PORT: process.env.PORT ?? "5190" });
 await import("../server.mjs");
