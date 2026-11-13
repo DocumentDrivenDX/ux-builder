@@ -182,29 +182,9 @@
       "message": "--piq-shadow-overlay is the light value (0 4px 12px rgba(0, 0, 0, 0.08)); dark sets its own"
     },
     {
-      "id": "praxis.light: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis.light: theme-red-reserved: focus ring",
-      "rule": "color.red-reserved",
-      "message": "the focus ring is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis.light: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis.light: theme-small-text: piq-badge-font-size",
       "rule": "theme.small-text-floor",
       "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
-    },
-    {
-      "id": "praxis.light: theme-contrast-margin: --piq-color-accent on --piq-color-ground",
-      "rule": "theme.contrast-margin",
-      "message": "accent #D12800 on --piq-color-ground #F0EEE6 is 4.50:1; at least 4.7:1"
     },
     {
       "id": "praxis.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
@@ -237,21 +217,6 @@
       "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
     },
     {
-      "id": "praxis.dark: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis.dark: theme-red-reserved: focus ring",
-      "rule": "color.red-reserved",
-      "message": "the focus ring is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis.dark: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis.dark: theme-small-text: piq-badge-font-size",
       "rule": "theme.small-text-floor",
       "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
@@ -277,26 +242,6 @@
       "message": "--piq-button-font-weight is 600 in light and 500 in dark; the same weight in both (lower the tone, not the weight)"
     },
     {
-      "id": "praxis-carbon.light: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-carbon.light: theme-red-reserved: focus ring",
-      "rule": "color.red-reserved",
-      "message": "the focus ring is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-carbon.light: theme-red-reserved: field focus outline",
-      "rule": "color.red-reserved",
-      "message": "the field focus outline is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-carbon.light: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis-carbon.light: theme-focus-ring: ring offset",
       "rule": "theme.focus-ring",
       "message": "the focus ring's offset is -2px; 2 px"
@@ -310,11 +255,6 @@
       "id": "praxis-carbon.light: theme-small-text: field label size",
       "rule": "theme.small-text-floor",
       "message": "field labels are 12 px; the small size (at least 14 px) or larger"
-    },
-    {
-      "id": "praxis-carbon.light: theme-contrast-margin: --piq-color-accent on --piq-color-ground",
-      "rule": "theme.contrast-margin",
-      "message": "accent #D12800 on --piq-color-ground #F0EEE6 is 4.50:1; at least 4.7:1"
     },
     {
       "id": "praxis-carbon.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
@@ -352,26 +292,6 @@
       "message": "button labels are weight 400; 500 or more"
     },
     {
-      "id": "praxis-carbon.dark: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-carbon.dark: theme-red-reserved: focus ring",
-      "rule": "color.red-reserved",
-      "message": "the focus ring is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-carbon.dark: theme-red-reserved: field focus outline",
-      "rule": "color.red-reserved",
-      "message": "the field focus outline is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-carbon.dark: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis-carbon.dark: theme-focus-ring: ring offset",
       "rule": "theme.focus-ring",
       "message": "the focus ring's offset is -2px; 2 px"
@@ -397,16 +317,6 @@
       "message": "button labels are weight 400; 500 or more"
     },
     {
-      "id": "praxis-fluentui.light: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-fluentui.light: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis-fluentui.light: theme-focus-ring: ring offset",
       "rule": "theme.focus-ring",
       "message": "the focus ring's offset is 1px; 2 px"
@@ -420,11 +330,6 @@
       "id": "praxis-fluentui.light: theme-small-text: small size",
       "rule": "theme.small-text-floor",
       "message": "the small size is 12 px; at least 14 px"
-    },
-    {
-      "id": "praxis-fluentui.light: theme-contrast-margin: --piq-color-accent on --piq-color-ground",
-      "rule": "theme.contrast-margin",
-      "message": "accent #D12800 on --piq-color-ground #F0EEE6 is 4.50:1; at least 4.7:1"
     },
     {
       "id": "praxis-fluentui.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
@@ -457,16 +362,6 @@
       "message": "--piq-color-text-muted #6B675E and --piq-color-text-subtle #706C62 are 1.08:1 apart; neighbouring tiers at least 1.1:1, or retire one"
     },
     {
-      "id": "praxis-fluentui.dark: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-fluentui.dark: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis-fluentui.dark: theme-focus-ring: ring offset",
       "rule": "theme.focus-ring",
       "message": "the focus ring's offset is 1px; 2 px"
@@ -487,19 +382,9 @@
       "message": "subtle text #8E8A81 on --piq-color-surface #242322 is 4.56:1; at least 4.7:1"
     },
     {
-      "id": "praxis-material.light: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-material.light: theme-red-reserved: focus ring",
-      "rule": "color.red-reserved",
-      "message": "the focus ring is red (#D12800, hue 33°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis-material.light: theme-focus-ring: field focus",
       "rule": "theme.focus-ring",
-      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #D12800); a solid ring at least 2 px, 3:1"
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #255FB1); a solid ring at least 2 px, 3:1"
     },
     {
       "id": "praxis-material.light: theme-small-text: small size",
@@ -515,11 +400,6 @@
       "id": "praxis-material.light: theme-small-text: piq-badge-font-size",
       "rule": "theme.small-text-floor",
       "message": "--piq-badge-font-size is 11 px; nothing people read is set below 12 px"
-    },
-    {
-      "id": "praxis-material.light: theme-contrast-margin: --piq-color-accent on --piq-color-ground",
-      "rule": "theme.contrast-margin",
-      "message": "accent #D12800 on --piq-color-ground #F0EEE6 is 4.50:1; at least 4.7:1"
     },
     {
       "id": "praxis-material.light: theme-contrast-margin: --piq-color-text-subtle on --piq-color-ground",
@@ -557,19 +437,9 @@
       "message": "strong text is weight 500; 600 or more"
     },
     {
-      "id": "praxis-material.dark: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-material.dark: theme-red-reserved: focus ring",
-      "rule": "color.red-reserved",
-      "message": "the focus ring is red (#FF6642, hue 35°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis-material.dark: theme-focus-ring: field focus",
       "rule": "theme.focus-ring",
-      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #FF6642); a solid ring at least 2 px, 3:1"
+      "message": "a field's focus is a bottom bar alone (inset 0 -2px 0 #578EDB); a solid ring at least 2 px, 3:1"
     },
     {
       "id": "praxis-material.dark: theme-small-text: small size",
@@ -607,16 +477,6 @@
       "message": "--piq-shadow-overlay is the light value (0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 8px 3px rgba(0, 0, 0, 0.); dark sets its own"
     },
     {
-      "id": "praxis-v2-databricks.light: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#E1192B, hue 25°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-v2-databricks.light: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#E1192B, hue 25°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis-v2-databricks.light: theme-focus-ring: ring halo",
       "rule": "theme.focus-ring",
       "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #282322 50%, transparent)); a solid ring, with any halo on top of it"
@@ -637,21 +497,6 @@
       "message": "a field's focus (outline 1px solid #282322, shadow 0 0 0 3px color-mix(in srgb, #282322 50%, transparent)) is not a solid ring at least 2 px at 3:1"
     },
     {
-      "id": "praxis-v2-databricks.light: theme-contrast-margin: --piq-color-accent on --piq-color-ground",
-      "rule": "theme.contrast-margin",
-      "message": "accent #E1192B on --piq-color-ground #FDF9F9 is 4.59:1; at least 4.7:1"
-    },
-    {
-      "id": "praxis-v2-databricks.dark: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#F8393E, hue 25°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "praxis-v2-databricks.dark: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#F8393E, hue 25°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
       "id": "praxis-v2-databricks.dark: theme-focus-ring: ring halo",
       "rule": "theme.focus-ring",
       "message": "the focus ring is a half-opacity halo (color-mix(in srgb, #F0E9E8 50%, transparent)); a solid ring, with any halo on top of it"
@@ -667,11 +512,6 @@
       "message": "a field's focus (outline 1px solid #F0E9E8, shadow 0 0 0 3px color-mix(in srgb, #F0E9E8 50%, transparent)) is not a solid ring at least 2 px at 3:1"
     },
     {
-      "id": "praxis-v2-databricks.dark: theme-contrast-margin: --piq-color-accent on --piq-color-surface",
-      "rule": "theme.contrast-margin",
-      "message": "accent #F8393E on --piq-color-surface #1F1C1C is 4.55:1; at least 4.7:1"
-    },
-    {
       "id": "praxis-v2-databricks.dark: theme-dark-appearance: piq-shadow-card",
       "rule": "theme.dark-appearance",
       "message": "--piq-shadow-card is the light value (0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)); dark sets its own"
@@ -680,26 +520,6 @@
       "id": "praxis-v2-databricks.dark: theme-dark-appearance: piq-shadow-overlay",
       "rule": "theme.dark-appearance",
       "message": "--piq-shadow-overlay is the light value (0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.); dark sets its own"
-    },
-    {
-      "id": "synaptiq.light: theme-red-reserved: accent (links, selection, kickers)",
-      "rule": "color.red-reserved",
-      "message": "the accent (links, selection, kickers) is red (#C4463F, hue 27°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "synaptiq.light: theme-red-reserved: focus ring",
-      "rule": "color.red-reserved",
-      "message": "the focus ring is red (#C4463F, hue 27°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "synaptiq.light: theme-red-reserved: field focus outline",
-      "rule": "color.red-reserved",
-      "message": "the field focus outline is red (#C4463F, hue 27°); red is kept for errors, critical warnings and destructive actions"
-    },
-    {
-      "id": "synaptiq.light: theme-red-reserved: selected nav item",
-      "rule": "color.red-reserved",
-      "message": "the selected nav item is red (#C4463F, hue 27°); red is kept for errors, critical warnings and destructive actions"
     },
     {
       "id": "synaptiq.light: theme-small-text: field label size",

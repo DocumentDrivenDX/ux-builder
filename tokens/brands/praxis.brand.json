@@ -7,8 +7,8 @@
     "dark": {
       "color": {
         "accent": {
-          "$value": "#FF6642",
-          "$description": "the warm tip of the mark, as it stands"
+          "$value": "#578EDB",
+          "$description": "Not red: color.red-reserved keeps red for errors, warnings and delete, so links, selection, focus and kickers use a blue (was #FF6642, the brand coral, which stays on the logo). At least 4.7:1 on every ground and surface."
         },
         "border": {
           "$value": "#353431"
@@ -113,8 +113,8 @@
     "light": {
       "color": {
         "accent": {
-          "$value": "#D12800",
-          "$description": "the same hue, 22% deeper to read on pale"
+          "$value": "#255FB1",
+          "$description": "Not red: color.red-reserved keeps red for errors, warnings and delete, so links, selection, focus and kickers use a blue (was #D12800, the brand coral, which stays on the logo). At least 4.7:1 on every ground and surface."
         },
         "border": {
           "$value": "#E6E2D8"

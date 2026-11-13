@@ -43,8 +43,8 @@
           "$description": "Soil: the design system's primary action and selection colour."
         },
         "accent": {
-          "$value": "#C4463F",
-          "$description": "Jasper, the site's link and call-to-action colour (#CC5E58), darkened 6.4% in lightness (hue kept) so it clears 4.5:1 as text on white (4.89) and the light grey (4.54), and under white text. Flagged for review."
+          "$value": "#4D728F",
+          "$description": "Not red: color.red-reserved keeps red for errors, warnings and delete, so links, selection, focus and kickers use Arctic, the brand's cool supporting colour (#A1B8CA), deepened to read as text (was Jasper #C4463F, which stays the critical status). At least 4.7:1 on every ground and surface."
         },
         "on-accent": {
           "$value": "#FFFFFF",
