@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Databricks: the Databricks brand on the Databricks design system. Light by default, as Databricks Apps ship.",
+  "name": "databricks",
+  "title": "Databricks",
+  "brand": "databricks",
+  "default": "light",
+  "designSystem": "databricks"
+}

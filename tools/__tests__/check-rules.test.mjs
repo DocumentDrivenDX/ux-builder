@@ -69,10 +69,14 @@ describe("rule priority, dependencies and precedence", () => {
     assert.ok(problems.some((p) => p.startsWith(`rule ${low.id}: takes precedence over ${high.id}, which has a higher priority`)), problems.join("\n"));
   });
 
-  test("every shipped rule has a priority, and a proposed rule is only reviewed until its checks are built", () => {
+  test("every shipped rule has a priority, and a proposed rule keeps its review beside any check built for it", () => {
     const { rules } = read("guidelines/rules.json");
     assert.deepEqual(rules.filter((r) => !r.priority).map((r) => r.id), []);
-    for (const r of rules.filter((x) => x.status === "proposed")) assert.ok(r.checks.every((c) => c.kind === "review"), r.id);
+    for (const r of rules.filter((x) => x.status === "proposed")) {
+      assert.ok(r.checks.some((c) => c.kind === "review"), `${r.id}: no review check`);
+      // A built check is a theme check so far; the others are still planned.
+      assert.ok(r.checks.every((c) => c.kind === "review" || c.kind === "theme"), r.id);
+    }
   });
 });
 

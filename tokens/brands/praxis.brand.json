@@ -1,0 +1,214 @@
+{
+  "$schema": "../schema/brand.schema.json",
+  "$description": "Praxis — one theme, dark by default with a light appearance.\n\nCollapsed on 2026-10-03 from two themes in the platform: claude-like, which supplied everything structural (ground, surfaces, type scale, the shape of every control), and praxis, which supplied the accent, the logos and the mark. There is no longer a separate parent; what follows is both.\n\n— From claude-like —\n\nClaude-like theme — the Business User concept.\n\nA deliberate opposite to a printed-document theme:\nsquared corners, rules instead of shadows, dense small type, ink on paper.\nThis is an application surface, and a dark one — taken from the Claude\ndesktop app rather than from a print deck.\n\nMeasured off a screenshot of the real thing rather than guessed:\nground          warm charcoal, never a blue-grey\nsidebar         a shade darker than the working area, not lighter\ntype            off-white, and the greeting is a serif at display size\naccent          the coral of the Claude mark, used once per screen\ncontrols        low-contrast fills; the active one is lighter, not coloured\n\nThe restraint is the point. Almost nothing on that screen carries a colour,\nand what a control does is said with an icon rather than a word, so the only\nsaturated thing in view is the mark itself.\n\nSame token contract as the other two themes, so ui.css never learns which\none is on.\n\n— From praxis —\n\nPraxis.\n\nA member of the conversational family, so everything structural — the near\nblack ground, the surfaces, the type scale, the shape of every control —\ncomes from `[data-family=\"conversational\"]` in claude-like.css. What is\ndeclared here is only what makes this theme Praxis: its red, its logo, its\nmark, and the line of provenance in the corner.\n\nThe highlight is the warm tip of the mark's gradient rather than its red\nbody. The red covers far more of the artwork — it is what the tool picks on\ncoverage alone — but the reddish-orange is the colour the mark is going\ntowards, and it was chosen deliberately over the measurement.\n\n#FF6642, hue 11, the most prevalent of the seventy warm shades that make up\nthe gradient's tip. It is used as TEXT in the kickers above every answer, so\nit is fitted to each ground rather than used raw: it clears 4.5:1 untouched\non the dark ground, and has to travel 22% darker to clear it on the light\none. That second move is large — the hue survives but the orange reads much\ndeeper — and it is the honest cost of a colour this light on a pale ground.\n\nLogos are drawn as supplied rather than painted, because the mark carries\ntwo colours and a gradient that a stencil would flatten to one. That is why\nthere are two of them: dark ink for the light ground, light ink for the\ndark one.\n\nA note on the file names they arrived with. `praxis-dark.png` is dark INK,\nfor a LIGHT ground; `powered-by-dark.png` is for a DARK ground. Two opposite\nconventions in one folder, which is why the copies here are named for the\nground they sit on and nothing else.",
+  "name": "praxis",
+  "title": "Praxis",
+  "appearances": {
+    "dark": {
+      "color": {
+        "accent": {
+          "$value": "#FF6642",
+          "$description": "the warm tip of the mark, as it stands"
+        },
+        "border": {
+          "$value": "#353431"
+        },
+        "ground": {
+          "$value": "#1B1A19",
+          "$description": "the working ground — near-black, still warm"
+        },
+        "ground-recessed": {
+          "$value": "#141312",
+          "$description": "the rail: a shelf BEHIND the work,\nso it is darker than the ground"
+        },
+        "on-accent": {
+          "$value": "#1F1E1D",
+          "$description": "Text and counts drawn on the accent (was the literal value of --badge-fg)."
+        },
+        "structure": {
+          "$value": "#E8E6DF",
+          "$description": "the structural role; light here, not blue"
+        },
+        "surface": {
+          "$value": "#242322",
+          "$description": "composer, cards — lifted off the ground"
+        },
+        "surface-sunken": {
+          "$value": "#201F1E",
+          "$description": "panels lifted off the ground"
+        },
+        "text": {
+          "$value": "#D6D3CC"
+        },
+        "text-muted": {
+          "$value": "#A8A49B"
+        },
+        "text-strong": {
+          "$value": "#F5F4EE",
+          "$description": "headings and the greeting"
+        },
+        "text-subtle": {
+          "$value": "#8E8A81",
+          "$description": "Lifted from the platform's #7E7A72 to clear 4.5:1 on paper, surface and the sunken panel (5.05, 4.56, 4.78)."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#7FA98A",
+          "$description": "Optional. Set --favicon to a url() to supply one; leave it out and the\napp draws one from the brand mark in this theme's --logo-paint, which is\nwhy adding a theme never means remembering to draw an icon.\nSee web/favicon.js.\n\nAvailability, dimmed to sit on a dark ground without glowing."
+        },
+        "limited": {
+          "$value": "#C2A15F"
+        },
+        "purchasing": {
+          "$value": "#8FA3C8"
+        },
+        "evaluation": {
+          "$value": "#9B968C"
+        },
+        "closed": {
+          "$value": "#D98A78"
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#FF6642",
+          "$description": "the tab icon, where the mark is painted flat"
+        },
+        "logo-image": {
+          "$value": "../../brand/praxis/logo-v2-on-dark.svg",
+          "$description": "The wordmark, drawn as supplied (v2, 2026-10-07: praxis-v2-light.svg and praxis-v2-dark.svg, framed to the artwork's drawn bounds plus 8 units).\n\nThe aspect is set per appearance because the two files are not quite the same\nshape — 3.029 and 3.045. Using one ratio for both letterboxes one of them."
+        },
+        "logo-bg": {
+          "$value": "transparent"
+        },
+        "logo-mask": {
+          "$value": "none"
+        },
+        "logo-aspect": {
+          "$value": "3.045"
+        },
+        "logo-height": {
+          "$value": "37px",
+          "$description": "A third larger than the default 28px. This artwork is a mark plus a\nwordmark where the shared default was sized for a wordmark alone, so the\nletters come out smaller at the same height."
+        },
+        "logo-height-sm": {
+          "$value": "27px"
+        },
+        "mark-image": {
+          "$value": "../../brand/praxis/mark-v2.svg",
+          "$description": "The mark: beside the greeting, and in the tab (v2, 2026-10-07: praxis-v2-favicon.svg, framed to its drawn bounds). Square."
+        },
+        "mark-bg": {
+          "$value": "transparent"
+        },
+        "mark-mask": {
+          "$value": "none"
+        },
+        "favicon": {
+          "$value": "../../brand/praxis/mark-v2.svg"
+        }
+      }
+    },
+    "light": {
+      "color": {
+        "accent": {
+          "$value": "#D12800",
+          "$description": "the same hue, 22% deeper to read on pale"
+        },
+        "border": {
+          "$value": "#E6E2D8"
+        },
+        "ground": {
+          "$value": "#F0EEE6"
+        },
+        "ground-recessed": {
+          "$value": "#E4E0D4",
+          "$description": "Same relationship in daylight: a shade deeper than the working\nground, not a white card floating on it."
+        },
+        "on-accent": {
+          "$value": "#FFFFFF",
+          "$description": "Text and counts drawn on the accent (was the literal value of --badge-fg)."
+        },
+        "structure": {
+          "$value": "#29261F"
+        },
+        "surface": {
+          "$value": "#FFFFFF"
+        },
+        "surface-sunken": {
+          "$value": "#FAF9F5"
+        },
+        "text": {
+          "$value": "#3D3D3A"
+        },
+        "text-muted": {
+          "$value": "#6B675E"
+        },
+        "text-strong": {
+          "$value": "#141413"
+        },
+        "text-subtle": {
+          "$value": "#706C62",
+          "$description": "Darkened from the platform's #8F8A7E to clear 4.5:1 on paper (4.51); this close to --muted, light has one quiet text tier, not two."
+        }
+      },
+      "state": {
+        "live": {
+          "$value": "#3F6B4F"
+        },
+        "limited": {
+          "$value": "#986A24",
+          "$description": "Darkened a step from the platform's #9A6B24 to clear 4.5:1 on the sunken panel (4.51)."
+        },
+        "purchasing": {
+          "$value": "#4A5A7A"
+        },
+        "evaluation": {
+          "$value": "#777268",
+          "$description": "Darkened a step from the platform's #7A756A to clear 4.5:1 on the sunken panel (4.54)."
+        },
+        "closed": {
+          "$value": "#A33B2A"
+        }
+      },
+      "brand": {
+        "logo-paint": {
+          "$value": "#D12800"
+        },
+        "logo-image": {
+          "$value": "../../brand/praxis/logo-v2-on-light.svg"
+        },
+        "logo-bg": {
+          "$value": "transparent"
+        },
+        "logo-mask": {
+          "$value": "none"
+        },
+        "logo-aspect": {
+          "$value": "3.029"
+        },
+        "logo-height": {
+          "$value": "37px",
+          "$description": "A third larger than the default 28px. This artwork is a mark plus a\nwordmark where the shared default was sized for a wordmark alone, so the\nletters come out smaller at the same height."
+        },
+        "logo-height-sm": {
+          "$value": "27px"
+        },
+        "mark-image": {
+          "$value": "../../brand/praxis/mark-v2.svg",
+          "$description": "The mark: beside the greeting, and in the tab (v2, 2026-10-07: praxis-v2-favicon.svg, framed to its drawn bounds). Square."
+        },
+        "mark-bg": {
+          "$value": "transparent"
+        },
+        "mark-mask": {
+          "$value": "none"
+        },
+        "favicon": {
+          "$value": "../../brand/praxis/mark-v2.svg"
+        }
+      }
+    }
+  }
+}

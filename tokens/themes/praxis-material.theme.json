@@ -1,0 +1,9 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Praxis Material: brand praxis on the shared material design system.",
+  "name": "praxis-material",
+  "title": "Praxis Material",
+  "brand": "praxis",
+  "default": "dark",
+  "designSystem": "material"
+}
