@@ -19,6 +19,7 @@ import { writeReports } from "../report.mjs";
 import { serve } from "../serve.mjs";
 import { versions } from "./collect.mjs";
 import { SECRETS } from "./manifest.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 export const NOTE = "Passing functional tests do not show that usability criteria are met.";
 // Checks that hold an app to the SDK's theme: on a page not on the SDK they only mean "not yet on the SDK".
@@ -79,7 +80,7 @@ function runCommand({ command, cwd, timeoutMs, mask, log }) {
 
 /* Run the baseline for a validated manifest; writes under <out>/<run>/. */
 export async function baseline({ manifest, resolved, out, run, now = new Date(), log = () => {} }) {
-  const dir = resolve(manifest.dir, out ?? resolved.evidence?.out ?? "ux-assessment", run);
+  const dir = resolve(manifest.dir, out ?? resolved.evidence?.out ?? reportsOf(manifest.dir).assessments, run);
   mkdirSync(join(dir, "logs"), { recursive: true });
   const mask = masker(resolved);
   const cwd = resolved.run.cwd;

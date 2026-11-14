@@ -42,7 +42,7 @@ before(async () => {
 after(() => { server?.close(); rmSync(tmp, { recursive: true, force: true }); });
 
 const audit = (cwd, page) => new Promise((resolve) => {
-  const c = spawn(process.execPath, [join(PKG, "cli.mjs"), "--theme", "praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--modality", "chat", "--out", join(cwd, "audit-report"), "--fail-on", "never", `${base}/${page}`], { cwd });
+  const c = spawn(process.execPath, [join(PKG, "cli.mjs"), "--theme", "vk-praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--modality", "chat", "--out", join(cwd, "audit-report"), "--fail-on", "never", `${base}/${page}`], { cwd });
   let stdout = "", stderr = "";
   c.stdout.on("data", (d) => { stdout += d; }); c.stderr.on("data", (d) => { stderr += d; });
   c.on("close", (status) => resolve({ status, stdout, stderr }));

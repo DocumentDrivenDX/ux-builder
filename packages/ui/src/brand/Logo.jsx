@@ -35,8 +35,9 @@ export function brandTitleFor(theme) {
   return t ? BRANDS.get(t.brand)?.title ?? t.title : null;
 }
 
-/* The active theme's logo, or its mark (variant="mark"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour. */
-export function Logo({ variant = "logo", size = "md", label, className = "", ...rest }) {
+/* The active theme's logo, or its mark (variant="mark"), drawn from the brand's artwork; a brand without artwork gets its title as a wordmark in the logo colour,
+   or nothing with fallback="none" (an app with its own name beside it: VIP List's header read "Plain VIP List"). */
+export function Logo({ variant = "logo", size = "md", label, fallback = "text", className = "", ...rest }) {
   const context = useContext(ThemeContext);
   const ref = useRef(null);
   const [pageTheme, setPageTheme] = useState(null);
@@ -63,6 +64,8 @@ export function Logo({ variant = "logo", size = "md", label, className = "", ...
   const classes = ["piq-logo", `piq-logo--${kind}`, size === "sm" && "piq-logo--sm", !artwork && "piq-logo--text", className].filter(Boolean).join(" ");
   const text = !artwork && name ? (kind === "mark" ? name.trim()[0] : name) : null;
   return (
+    // Kept in the page, hidden, so the brand's artwork is still looked for when the theme changes.
+    !artwork && fallback === "none" ? <span ref={ref} className={classes} data-logo="none" hidden {...rest} /> :
     <span ref={ref} role="img" aria-label={name || undefined} className={classes} data-logo={artwork ? "artwork" : "text"} {...rest}>
       {text && <span className="piq-logo__text" aria-hidden="true">{text}</span>}
     </span>

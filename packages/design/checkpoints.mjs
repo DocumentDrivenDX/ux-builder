@@ -6,7 +6,8 @@
 
 import { recordDecision } from "@ux-builder/trace";
 import { DesignError } from "./app.mjs";
-import { CLOSES, firstOf } from "./process.mjs";
+import { CLOSES, firstOf, STEPS } from "./process.mjs";
+import { logEvent, personTurn } from "./metrics.mjs";
 import { pendingReviews } from "./review.mjs";
 import { readState, writeState } from "./state.mjs";
 
@@ -19,12 +20,14 @@ export const CHECKPOINTS = {
   release: "a production release of a changed experience",
 };
 
-/* The activity each passed core checkpoint moves the loop to, and what the
-   guide does there first: the loop moves on only forward. */
+/* A passed core checkpoint moves the loop to the step after the ones it
+   closes (core-1 to step 4, core-2 to step 5, Design the structure), and
+   what the guide does there first: the loop moves on only forward. */
 const ORDER = ["baseline", "define", "explore", "experience", "validate"];
-const AFTER = { "core-1": "explore", "core-2": "experience" };
+const MOVES = ["core-1", "core-2"];
+const STRUCTURE = "Ask which modalities and screen sizes the app is for (ux-builder-design modality), then check each screen's purpose and the order of what it shows";
 export const FIRST_STEP = {
-  baseline: "Go through the baseline (baseline.md, beside the brief) with the person and ask what to improve",
+  baseline: "Go through what HELIX's backfill drafted from the app (the PRD and stories, as proposals) and the blueprint drawn from its screens with the person, and ask what to improve",
   define: "Interview the person about what users must accomplish, then draft the brief and ask core-1",
   explore: "Draft at least two alternatives for the open questions, compare them and ask core-2",
   experience: "Prototype the chosen design for the person to try; then build the validated prototype",
@@ -44,7 +47,7 @@ function traceCheckpoint(app, id, { answer, skip, declined, reason }) {
   }
 }
 
-export function checkpoint(app, { id, answer, skip = false, declined = false, reason, now = new Date().toISOString() } = {}) {
+export function checkpoint(app, { id, answer, skip = false, declined = false, reason, sameTurn = false, now = new Date().toISOString() } = {}) {
   if (!Object.hasOwn(CHECKPOINTS, id)) throw new DesignError(`"${id ?? ""}" is not a checkpoint; use one of ${Object.keys(CHECKPOINTS).join(", ")}`);
   if (skip && answer) throw new DesignError("give --answer or --skip, not both");
   if (skip && declined) throw new DesignError("--declined goes with --answer: the person said no or not yet");
@@ -53,18 +56,33 @@ export function checkpoint(app, { id, answer, skip = false, declined = false, re
   // A checkpoint is not passed while items of the steps it closes await the person's review (GDL-79).
   if (!skip && !declined && CLOSES[id]) {
     const waiting = pendingReviews(app, { steps: CLOSES[id] });
-    if (waiting.length) throw new DesignError(`checkpoint ${id} cannot be passed yet: ${waiting.length} item${waiting.length === 1 ? "" : "s"} await${waiting.length === 1 ? "s" : ""} the person's review: ${waiting.map((w) => w.id).join(", ")}. Show each inline, one at a time, and record the approval (ux-builder-design review approve <item> --answer "<their words>"). Nothing was recorded.`);
+    if (waiting.length) throw new DesignError(`checkpoint ${id} cannot be passed yet: ${waiting.length} item${waiting.length === 1 ? "" : "s"} await${waiting.length === 1 ? "s" : ""} the person's review: ${waiting.map((w) => w.id).join(", ")}. Show each foundation kind as a table (ux-builder-design review table <kind>) and the built items as the coverage map (review map), and record the approvals (review approve --kind <kind> | map --answer "<their words>"). Nothing was recorded.`);
   }
   const state = structuredClone(readState(app));
   // A "no" or "not yet" is an answer too, but it never counts as passed.
   const entry = skip ? { id, status: "skipped", reason: reason.trim(), at: now } : { id, status: declined ? "declined" : "passed", answer: answer.trim(), at: now };
   state.checkpoints.push(entry);
   // A passed core checkpoint moves the loop on, and a next action that waited on it gives way.
-  const to = entry.status === "passed" && AFTER[id];
-  const moved = to && advance(state, to);
+  const moved = entry.status === "passed" && MOVES.includes(id) && moveOn(state, id);
   writeState(app, state);
+  personTurn(app, { kind: "decision", answer: answer ?? reason, sameTurn, at: now });
+  logEvent(app, "checkpoint", { id, status: entry.status }, now);
+  if (moved) logEvent(app, "step", { step: state.step, mode: state.mode }, now);
   const event = traceCheckpoint(app, id, { answer, skip, declined, reason });
-  return { checkpoint: entry, about: CHECKPOINTS[id], activity: state.activity, ...(moved ? { moved: true } : {}), next: state.next, trace: event ? { episode: event.episode, seq: event.seq } : null };
+  return { checkpoint: entry, about: CHECKPOINTS[id], activity: state.activity, ...(moved ? { moved: true, step: state.step } : {}), next: state.next, trace: event ? { episode: event.episode, seq: event.seq } : null };
+}
+
+/* Move the loop to the step after those checkpoint `id` closes, and its
+   activity, when it is behind. Returns whether it moved. */
+function moveOn(state, id) {
+  const n = Math.max(...CLOSES[id]) + 1, to = STEPS[n - 1].activity;
+  const activity = ORDER.indexOf(to) > ORDER.indexOf(state.activity), step = state.mode !== "change" && (state.step ?? 0) < n;
+  if (!activity && !step) return false;
+  if (activity) state.activity = to;
+  if (step) state.step = n;
+  const first = n === firstOf(to) ? FIRST_STEP[to] : STRUCTURE;
+  if (!state.next || state.checkpoints.some((c) => c.status === "passed" && state.next.includes(c.id)) || [...Object.values(FIRST_STEP), STRUCTURE].includes(state.next)) state.next = first;
+  return true;
 }
 
 /* Move the loop on to `to` when it is behind, replacing a next action that

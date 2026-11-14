@@ -46,7 +46,7 @@ const cliRun = (args) => new Promise((resolve) => {
   c.stdout.on("data", (d) => { stdout += d; }); c.stderr.on("data", (d) => { stderr += d; });
   c.on("close", (status) => resolve({ status, stdout, stderr }));
 });
-const OPTS = { themes: ["praxis-carbon"], appearances: ["light"], contrast: false, rules: { brand: false } };
+const OPTS = { themes: ["vk-praxis-carbon"], appearances: ["light"], contrast: false, rules: { brand: false } };
 const run = (pages, more = {}) => audit({ urls: pages.map((p) => `${base}/${p}`), ...OPTS, ...more });
 const AI = new Set(AI_CHECKS);
 const ai = (r, page) => r.findings.filter((f) => AI.has(f.check) && (!page || f.url.endsWith(`/${page}`)));
@@ -114,7 +114,7 @@ describe("US-078: the audit checks marked AI content", () => {
     assert.deepEqual(of(await run(["clean-chat.html"]), "ai-declared"), [], "only with --blueprint");
     // The command reads the file.
     const out = join(tmp, "bp");
-    const cli = await cliRun(["--theme", "praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--out", out, "--blueprint", join(FIXTURES, "app.blueprint.json"), `${base}/clean-chat.html`]);
+    const cli = await cliRun(["--theme", "vk-praxis-carbon", "--appearance", "light", "--no-contrast", "--off", "brand", "--out", out, "--blueprint", join(FIXTURES, "app.blueprint.json"), `${base}/clean-chat.html`]);
     assert.equal(cli.status, 0, cli.stderr + cli.stdout);
     const json = JSON.parse(readFileSync(join(out, "report.json"), "utf8"));
     assert.ok(json.findings.some((f) => f.check === "ai-declared" && /"chat"/.test(f.message)));
@@ -231,7 +231,7 @@ describe("US-080: a chat that renders UI inline", () => {
     assert.match(label.message, /placeholder "Amount" is not a label/);
     const [wide] = await seeded("card-narrow-first.html", "card-narrow-first", { selector: "#answer", widths: [360, 1280] });
     assert.equal(wide.ruleId, "card.narrow-first");
-    assert.deepEqual(wide.runs, ["praxis-carbon/light@360"], "at the compact size class only");
+    assert.deepEqual(wide.runs, ["vk-praxis-carbon/light@360"], "at the compact size class only");
   });
 });
 

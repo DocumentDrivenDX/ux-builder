@@ -13,6 +13,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { DesignError, bpFile } from "./app.mjs";
 import { readState } from "./state.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
 const list = (x) => (Array.isArray(x) ? x : []);
@@ -45,7 +46,7 @@ export function ready(app, { for: purpose = "production" } = {}) {
   const pkg = readJson(join(app, "package.json")) ?? {};
   const scripts = pkg.scripts ?? {};
   const checks = [script(app, "lint", scripts), script(app, "check:blueprint", scripts)];
-  const audit = readJson(join(app, "audit-report/report.json"));
+  const audit = readJson(join(app, reportsOf(app).auditReport, "report.json"));
   checks.push(!audit?.summary ? { name: "audit", ok: false, detail: "no audit report: run npm run audit" }
     : { name: "audit", ok: audit.summary.error === 0, detail: audit.summary.error === 0 ? "no errors" : `${audit.summary.error} error${audit.summary.error === 1 ? "" : "s"}` });
   if (audit?.summary) {

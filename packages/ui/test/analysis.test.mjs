@@ -201,7 +201,7 @@ describe("US-040 drill-down, comparison and print", () => {
   // @covers US-040-AC4
   test("AC4: printing switches a dark theme to light and back, with a header of title, logo and run date", () => {
     const wrap = document.createElement("div");
-    wrap.setAttribute("data-theme", "praxis"); wrap.setAttribute("data-appearance", "dark");
+    wrap.setAttribute("data-theme", "vk-praxis"); wrap.setAttribute("data-appearance", "dark");
     document.body.append(wrap);
     host = document.createElement("div"); wrap.append(host);
     root = createRoot(host);

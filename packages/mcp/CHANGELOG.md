@@ -1,5 +1,73 @@
 # @ux-builder/mcp
 
+## 0.7.7
+
+### Patch Changes
+
+- Updated dependencies [9bb6d47]
+- Updated dependencies [b4678d0]
+- Updated dependencies [7d833cd]
+- Updated dependencies [3383d93]
+  - @ux-builder/ui@0.17.0
+  - @ux-builder/tokens@2.0.0
+
+## 0.7.6
+
+### Patch Changes
+
+- Updated dependencies [cae0267]
+- Updated dependencies [01510d3]
+- Updated dependencies [3eadaa1]
+- Updated dependencies [718f5be]
+- Updated dependencies [b691719]
+- Updated dependencies [0199ed8]
+- Updated dependencies [d339f87]
+- Updated dependencies [ff74560]
+- Updated dependencies [569c525]
+- Updated dependencies [d406dd0]
+- Updated dependencies [99979dc]
+- Updated dependencies [8fcc754]
+  - @ux-builder/ui@0.16.0
+  - @ux-builder/tokens@1.9.0
+
+## 0.7.5
+
+### Patch Changes
+
+- 2fea36b: ux-builder writes into HELIX's documents and keeps none of its own (ADR-042; needs HELIX v0.20.0's UX types and sections).
+  
+  `@ux-builder/design` (breaking): UX decisions are proposed as HELIX ADRs tagged area:ui (`decision add`, `decision status`), experiments are DDx beads (`experiment start|end`), experience principles go in principles.md (`principle add`), users, needs and tasks are rows of the PRD's User Segments and User Needs and a feature's Task Model (`segment add`, `need add`, `task add`), and research is a study's HELIX research plan (`evidence add|claim|excerpt --study`, `test-kit --study`, `transcript add --study`, `observe import --study`). Test-session material, evaluation reports and insight exports are run output in the gitignored `docs/ux-builder/runs/`; `insights` proposes Journey Funnels for the metrics dashboard; approving the coverage map proposes the solution design's Experience Traceability; the brief is compiled from HELIX and says where each section comes from. Every change to HELIX is a proposal the person applies. The baseline command and the users, jobs, ux-decision, research-evidence, test-kit, usability-evaluation-report, insights, experiment and baseline document types are gone; `migrate` proposes an app's old documents into HELIX. A person sees HELIX's IDs and names only.
+  
+  `@ux-builder/ui`: `ux-builder-blueprint propose` fills HELIX's user-flow, wireframe and user-journey-map types and DESIGN.md's modalities, size classes and app frame; its draft types are gone. Blueprint tasks take their Task Model key and cite needs and users by name; journeys may be named without the `J-` prefix; a project rule names its principle by its words. The layout gains `runs`.
+  
+  `@ux-builder/audit`: `reports.html` lists every run by path, copying nothing in; journeys may be named without `J-`. The assessment's `report.md` is a ux-builder usability assessment report (`ux-builder:` frontmatter, `type: usability-assessment-report`) rather than claiming a HELIX type, and is no longer drafted from a HELIX template.
+  
+  `@ux-builder/create-app`: a created app gitignores `docs/ux-builder/assessments/` and `docs/ux-builder/runs/`, never overwrites an existing concerns.md, and names its starter journey `start`.
+  
+  `@ux-builder/trace`: a decision event's `ux` may be a HELIX ADR (`ADR-<nnn>`); older `UXD-<n>` traces stay valid.
+  
+  `@ux-builder/mcp`: `trace` describes study task keys and ADR IDs.
+- Updated dependencies [2fea36b]
+  - @ux-builder/ui@0.15.0
+  - @ux-builder/trace@0.3.0
+
+## 0.7.4
+
+### Patch Changes
+
+- Updated dependencies [4350756]
+- Updated dependencies [88942e5]
+  - @ux-builder/ui@0.14.0
+
+## 0.7.3
+
+### Patch Changes
+
+- f11e073: Lessons from the first guided session (FEAT-018 GDL-82). `ux-builder-design explain <ID>` says what an ID such as U-1, J-1, J-find, T-2 or BR-1 names and where it lives, and `explain ids` lists every kind; the overview mentions them and the guide never shows a bare ID. HELIX stories are read without a type tag, and a near-miss tag such as `user-story` is read as `user-stories` and reported; the guides never hand the person a command to edit HELIX or guess a HELIX field. Asked for an audit, the guides ask whether the person wants the UI audit, the usability assessment, or both. The assessment's manifest and runs and the UI audit's report now live under `docs/ux-builder/` (`ux-assessment.yml`, `assessments/`, `audit-report/`), the manifest's paths still relative to the app; an app that keeps them at its top keeps working, `status` lists them and `ux-builder-design migrate` moves them.
+- Updated dependencies [f11e073]
+- Updated dependencies [309ec20]
+  - @ux-builder/ui@0.13.0
+
 ## 0.7.2
 
 ### Patch Changes

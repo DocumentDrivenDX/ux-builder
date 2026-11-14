@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 992 144" width="992" height="144" role="img" aria-labelledby="umf-releases-title" aria-describedby="umf-releases-desc" class="uxb-visual uxb-visual--timeline-milestones" data-visual="umf-releases" style="font-family:ui-sans-serif, system-ui, -apple-system, &quot;Segoe UI&quot;, sans-serif">
+<title id="umf-releases-title">umf releases</title>
+<desc id="umf-releases-desc">When did each umf SDK release ship?</desc>
+<rect x="0" y="0" width="992" height="144" style="fill:#F0EEE6"/>
+<g class="uxb-axis">
+<path d="M16 98 L976 98" style="fill:none;stroke:#706C62;stroke-width:1.5px"/>
+<path d="M56 94 L56 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="56" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">13 Oct</text>
+<path d="M144 94 L144 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="144" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">14 Oct</text>
+<path d="M232 94 L232 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="232" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">15 Oct</text>
+<path d="M320 94 L320 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="320" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">16 Oct</text>
+<path d="M408 94 L408 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="408" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">17 Oct</text>
+<path d="M496 94 L496 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="496" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">18 Oct</text>
+<path d="M584 94 L584 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="584" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">19 Oct</text>
+<path d="M672 94 L672 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="672" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">20 Oct</text>
+<path d="M760 94 L760 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="760" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">21 Oct</text>
+<path d="M848 94 L848 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="848" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">22 Oct</text>
+<path d="M936 94 L936 102" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<text x="936" y="120" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">23 Oct</text>
+<path d="M56 98 L56 88" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<circle cx="56" cy="98" r="5" style="fill:#141413;stroke:#141413;stroke-width:1.5px"/>
+<path d="M320 98 L320 88" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<circle cx="320" cy="98" r="5" style="fill:#141413;stroke:#141413;stroke-width:1.5px"/>
+<path d="M496 98 L496 88" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<circle cx="496" cy="98" r="5" style="fill:#141413;stroke:#141413;stroke-width:1.5px"/>
+<path d="M584 98 L584 88" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<circle cx="584" cy="98" r="5" style="fill:#141413;stroke:#141413;stroke-width:1.5px"/>
+<path d="M672 98 L672 88" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<circle cx="672" cy="98" r="5" style="fill:#141413;stroke:#141413;stroke-width:1.5px"/>
+<path d="M760 98 L760 88" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<circle cx="760" cy="98" r="5" style="fill:#141413;stroke:#141413;stroke-width:1.5px"/>
+<path d="M936 98 L936 88" style="fill:none;stroke:#706C62;stroke-width:1px"/>
+<circle cx="936" cy="98" r="5" style="fill:#141413;stroke:#141413;stroke-width:1.5px"/>
+</g>
+<g id="umf-releases--umf-v0-2-0" class="uxb-event">
+<text x="56" y="68" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.2.0</text>
+<text x="56" y="83" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">13 Oct 2026</text>
+</g>
+<g id="umf-releases--umf-v0-3-0" class="uxb-event">
+<text x="320" y="68" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.3.0</text>
+<text x="320" y="83" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">16 Oct 2026</text>
+</g>
+<g id="umf-releases--umf-v0-4-0_umf-v0-4-1_umf-v0-5-0" class="uxb-event">
+<text x="496" y="36" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.4.0</text>
+<text x="496" y="52" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.4.1</text>
+<text x="496" y="68" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.5.0</text>
+<text x="496" y="83" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">18 Oct 2026</text>
+</g>
+<g id="umf-releases--umf-v0-5-1" class="uxb-event">
+<text x="584" y="68" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.5.1</text>
+<text x="584" y="83" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">19 Oct 2026</text>
+</g>
+<g id="umf-releases--umf-v0-5-2_umf-v0-5-3" class="uxb-event">
+<text x="672" y="52" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.5.2</text>
+<text x="672" y="68" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.5.3</text>
+<text x="672" y="83" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">20 Oct 2026</text>
+</g>
+<g id="umf-releases--umf-v0-5-4" class="uxb-event">
+<text x="760" y="68" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.5.4</text>
+<text x="760" y="83" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">21 Oct 2026</text>
+</g>
+<g id="umf-releases--umf-v0-5-5_umf-v0-5-6" class="uxb-event">
+<text x="936" y="52" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.5.5</text>
+<text x="936" y="68" text-anchor="middle" style="fill:#141413;font-size:12px;font-weight:600">umf-v0.5.6</text>
+<text x="936" y="83" text-anchor="middle" style="fill:#3D3D3A;font-size:12px;font-weight:400">23 Oct 2026</text>
+</g>
+</svg>

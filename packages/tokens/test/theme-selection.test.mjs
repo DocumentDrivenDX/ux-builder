@@ -55,10 +55,10 @@ test("US-005-AC1: data-theme with an appearance shows that theme's brand in its 
   }
   assert.ok(checked > manifest.themes.length * 150, `${checked} values checked`);
   // The widgets draw from them: a button's fill is the theme's structure colour.
-  const t = manifest.themes.find((x) => x.name === "praxis-carbon");
+  const t = manifest.themes.find((x) => x.name === "vk-praxis-carbon");
   for (const ap of t.appearances) {
-    const hex = resolved("praxis-carbon", ap)["piq-color-structure"];
-    const bg = await page.locator(`#praxis-carbon--${ap} .piq-btn`).evaluate((el) => getComputedStyle(el).backgroundColor);
+    const hex = resolved("vk-praxis-carbon", ap)["piq-color-structure"];
+    const bg = await page.locator(`#vk-praxis-carbon--${ap} .piq-btn`).evaluate((el) => getComputedStyle(el).backgroundColor);
     assert.equal(bg, `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(", ")})`, ap);
   }
 });

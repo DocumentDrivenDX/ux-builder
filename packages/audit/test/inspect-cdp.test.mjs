@@ -100,7 +100,7 @@ describe("US-062: checks on the state just reached, in the agent's own browser",
       for (const f of c.findings) {
         assert.deepEqual(f.checkpoint, { id, journey: "J-new-entry", step, role: "tester", state });
         assert.deepEqual(f.viewport, { width: 1280, height: 900 });
-        assert.equal(f.theme, "praxis-carbon");
+        assert.equal(f.theme, "vk-praxis-carbon");
         assert.equal(f.finding_type, "deterministic");
       }
       assert.ok(existsSync(join(tmp, "R-proof", "checkpoints", id, c.screenshot)), `${id} screenshot`);

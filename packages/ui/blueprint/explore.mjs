@@ -37,6 +37,18 @@ function shortest(bp, from, to) {
   return null;
 }
 
+/* A journey's shortest path from its first screen to its last; one that
+   comes back to where it started (post an event, back on My events) goes
+   there and back by way of the last screen it left for. */
+function shortestOf(bp, steps) {
+  if (!steps.length) return null;
+  const from = steps[0].screen, to = steps.at(-1).screen;
+  const via = from === to ? steps.findLast((s) => s.screen !== from)?.screen : null;
+  if (!via) return shortest(bp, from, to);
+  const there = shortest(bp, from, via), back = shortest(bp, via, to);
+  return there == null || back == null ? null : there + back;
+}
+
 /* Per journey, what it asks of its user: { journey, task, steps, shortestPath,
    screens, modals, requiredInputs, decisions, hops, findings, patterns:
    { reused, introduced }, label: "predicted" }. */
@@ -59,7 +71,7 @@ export function score(bp) {
       task: j.task ?? null,
       label: "predicted",
       steps: steps.length,
-      shortestPath: steps.length ? shortest(bp, steps[0].screen, steps.at(-1).screen) : null,
+      shortestPath: shortestOf(bp, steps),
       screens: ids.length,
       modals,
       requiredInputs: steps.reduce((n, s) => n + list(s.inputs?.required).length, 0),

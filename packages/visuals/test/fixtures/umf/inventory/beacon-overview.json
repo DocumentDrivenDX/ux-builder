@@ -1,0 +1,170 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-overview",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-overview",
+      "kind": "flow",
+      "form": "pipeline",
+      "title": "One draft, end to end",
+      "question": "How does one draft move through Beacon?",
+      "takeaway": "A draft is asked for by the agent, built by the drafter, and written by a model the gateway chooses.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/architecture-model.toml",
+        "view": "overview",
+        "digest": "sha256:5506076ecd96344bd6b203c4d2a36ed983a7d9c37883c0e4dc65f9a59f689910"
+      },
+      "nodes": [
+        {
+          "id": "agent",
+          "label": "Support agent",
+          "role": "actor",
+          "status": "built"
+        },
+        {
+          "id": "proxy",
+          "label": "Sign-in proxy",
+          "detail": "checks identity, forwards the agent's token",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "web",
+          "label": "Web app",
+          "detail": "the agent's inbox and draft editor",
+          "role": "own",
+          "status": "built"
+        },
+        {
+          "id": "api",
+          "label": "Beacon API",
+          "detail": "every request runs as the agent",
+          "role": "own",
+          "status": "built"
+        },
+        {
+          "id": "drafter",
+          "label": "Reply drafter",
+          "detail": "builds the prompt from the ticket and its history",
+          "role": "own",
+          "status": "built"
+        },
+        {
+          "id": "gateway",
+          "label": "Model gateway",
+          "detail": "rate limits, usage, model choice",
+          "role": "platform",
+          "status": "built"
+        },
+        {
+          "id": "models",
+          "label": "Language models",
+          "role": "platform",
+          "status": "built"
+        }
+      ],
+      "edges": [
+        {
+          "id": "agent--proxy",
+          "from": "agent",
+          "to": "proxy",
+          "label": "opens a ticket",
+          "why": "nothing reaches Beacon without a signed-in agent"
+        },
+        {
+          "id": "gateway--models",
+          "from": "gateway",
+          "to": "models",
+          "label": "routes to a model",
+          "why": "the gateway, not Beacon, chooses and meters the model"
+        },
+        {
+          "id": "proxy--web",
+          "from": "proxy",
+          "to": "web",
+          "label": "forwards with the agent's token"
+        },
+        {
+          "id": "proxy--api",
+          "from": "proxy",
+          "to": "api",
+          "label": "forwards with the agent's token",
+          "why": "the API acts as the agent, never as a service account"
+        },
+        {
+          "id": "web--api",
+          "from": "web",
+          "to": "api",
+          "label": "asks for a draft"
+        },
+        {
+          "id": "api--web",
+          "from": "api",
+          "to": "web",
+          "label": "returns the draft",
+          "kind": "return"
+        },
+        {
+          "id": "api--drafter",
+          "from": "api",
+          "to": "drafter",
+          "label": "hands over the ticket and its history"
+        },
+        {
+          "id": "drafter--gateway",
+          "from": "drafter",
+          "to": "gateway",
+          "label": "sends the prompt"
+        },
+        {
+          "id": "api--gateway",
+          "from": "api",
+          "to": "gateway",
+          "label": "asks for a draft",
+          "why": "drafting is the only call that leaves the platform's trust boundary"
+        }
+      ],
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Opens a ticket",
+          "caption": "The proxy signs the agent in through the identity provider and keeps their token.",
+          "focus": [
+            "agent--proxy"
+          ]
+        },
+        {
+          "id": "s2",
+          "title": "Forwards with the agent's token",
+          "caption": "Every later call carries the agent's identity, so the helpdesk's own permissions still apply.",
+          "focus": [
+            "proxy--api"
+          ]
+        },
+        {
+          "id": "s3",
+          "title": "Asks for a draft",
+          "caption": "The API sends the ticket, its history and the matching articles in one prompt.",
+          "focus": [
+            "api--gateway"
+          ]
+        },
+        {
+          "id": "s4",
+          "title": "Routes to a model",
+          "caption": "Beacon names a purpose, not a model, so the platform can change models without a release.",
+          "focus": [
+            "gateway--models"
+          ]
+        }
+      ]
+    }
+  },
+  "modules": []
+}

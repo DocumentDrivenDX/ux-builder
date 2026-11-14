@@ -21,16 +21,18 @@ import { checkBlueprint } from "@ux-builder/ui/blueprint";
 import { CURRENT } from "@ux-builder/ui/blueprint/paths";
 import { init as initDesign, modalityStatus, readState, STATE_FILE, writeState } from "@ux-builder/design";
 import { getHelix, install as installHelix, installed } from "./helix.mjs";
+import { generateJourneyApp, withoutHome } from "./journey-app.mjs";
 import { agentOf, marker, scaffold, sdkVersions, themes, traceCreate, uncite } from "./index.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const NAME = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+const OWN = JSON.parse(readFileSync(join(HERE, "package.json"), "utf8"));
 
 /* The files a design folder writes that the app's own replace at the build. */
 export const DESIGN_FILES = ["package.json", "README.md", "AGENTS.md", "CLAUDE.md", ".gitignore", "scripts/install-skill.mjs"];
 
 /* Where a theme comes from when no released one carries the person's brand. */
-export const THEME_BUILDER = "No theme carries your brand? Make one in the theme builder: in a clone of https://github.com/DocumentDrivenDX/ux-builder run `npm install && npm run builder`, make the theme from your logo and save it (saving opens a pull request). Once it is merged and released in @ux-builder/tokens, build on it by its name. Or build on `plain` now.";
+export const THEME_BUILDER = "No theme carries your brand? Make one in the theme builder: in a clone of https://github.com/DocumentDrivenDX/ux-builder run `npm install && npm run builder`, make the theme from your logo and save it (saving opens a pull request). Once it is merged and released in @ux-builder/tokens, build on it by its name. Or build on `vk-plain` now.";
 export const themeList = () => themes().map((t) => `  ${t}`).join("\n");
 
 /* A folder made by startDesign whose app is not built yet. */
@@ -90,7 +92,7 @@ export async function buildInPlace(dir, { theme, modalities: given, blueprint, n
   if (!isDesignFolder(target)) fail(`${dir} is not a design folder waiting for its app (made by npm create @ux-builder/app without --modality)`);
   if (blueprint) fail("--blueprint is refused in a design folder: the app is built from the designed blueprint, docs/ux-builder/blueprint/app.blueprint.json. Nothing was written.");
   const m = modalityStatus(target);
-  if (!m.confirmed) fail(`the app's modalities are not recorded yet: ask the person which modalities and screen sizes the app is for, and record their answer with ux-builder-design modality --answer "<their words>" --modality <list> --size-classes <list>. Nothing was written.`);
+  if (!m.confirmed) fail(`the app's modalities are not recorded yet: ask the person which modalities and screen sizes the app is for and, for responsive web, its app frame, and record their answer with ux-builder-design modality --answer "<their words>" --modality <list> --size-classes <list> --frame <frame>. Nothing was written.`);
   const modalities = m.modalities;
   if (given && (given.length !== modalities.length || given.some((x) => !modalities.includes(x)))) fail(`--modality ${given.join(",")} differs from the modalities recorded in the design, ${modalities.join(",")}; leave out --modality, or record the new answer with ux-builder-design modality. Nothing was written.`);
   if (!theme) fail(`which theme? Choose one with --theme <name>:\n${themeList()}\n${THEME_BUILDER}`);
@@ -119,15 +121,44 @@ export async function buildInPlace(dir, { theme, modalities: given, blueprint, n
     r = { ...made, dir: target };
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 
-  // HELIX: its starter documents where none exists, and the toolchain wired to it.
+  // In the design's appearance, as its step prototypes were (VIP List session 3 built a dark design as "system").
+  let appearance = null;
+  try { appearance = JSON.parse(readFileSync(join(target, ".ux-builder/design-state.json"), "utf8")).appearance?.value ?? null; } catch {}
+  const main = join(target, "src/main.jsx");
+  if ((appearance === "light" || appearance === "dark") && existsSync(main)) writeFileSync(main, readFileSync(main, "utf8").replace('appearance="system"', `appearance="${appearance}"`));
+  r.appearance = appearance ?? "system";
+  // The app's own name in its header, and the theme's logo only when the theme has artwork (no "Plain" beside it).
+  const brand = join(target, "src/ThemeSwitch.jsx");
+  if (existsSync(brand)) writeFileSync(brand, readFileSync(brand, "utf8").replace('<Logo size="sm" />', '<Logo size="sm" fallback="none" />'));
+
+  // The journey skeleton (US-159): the designed screens and journeys, in place of the empty Home.
+  r.prototype = generateJourneyApp(target, { modalities });
+  if (r.prototype.generated) {
+    const spec = join(target, "e2e/starter.spec.js");
+    if (existsSync(spec)) writeFileSync(spec, withoutHome(readFileSync(spec, "utf8")));
+    rmSync(join(target, "src/Home.jsx"), { force: true });
+    r.files = [...new Set([...r.files.filter((f) => f !== "src/Home.jsx"), ...r.prototype.written])].sort();
+    const pkgFile = join(target, "package.json");
+    const own = JSON.parse(readFileSync(pkgFile, "utf8"));
+    own.scripts = { ...own.scripts, prototype: `npx @ux-builder/create-app@${OWN.version} --prototype .` };
+    // The audit visits every designed screen, not only the home page (VIP List sessions 2 and 3).
+    const paths = [...new Set(r.prototype.screens.map((sc) => sc.path).filter(Boolean))];
+    if (own.scripts.audit && paths.length) own.scripts.audit = own.scripts.audit.replace(/ http:\/\/127\.0\.0\.1:4173\/\S*$/, ` ${paths.map((p) => `http://127.0.0.1:4173${p}`).join(" ")}`);
+    writeFileSync(pkgFile, JSON.stringify(own, null, 2) + "\n");
+  }
+
+  // HELIX: its starter documents where the design has none (by ID or role, US-156-AC3), and the toolchain wired to it.
   const helix = existsSync(join(target, ".helix.yml")) && !h.skip ? installed(target) : null;
   if (helix) {
     const docs = await import("./helix-docs.mjs");
-    const written = docs.writeStarterSet(helix, r, { log, keep: true });
+    const skipped = [];
+    const written = docs.writeStarterSet(helix, r, { log, keep: true, skipped });
+    r.helixSkipped = skipped;
     docs.wire(helix, r);
-    r.helix = { ...helix.provenance, skillFiles: 0, documents: written };
+    r.helix = { ...helix.provenance, skillFiles: 0, documents: written, skipped };
   }
-  if (!r.helix) {
+  // The starter's test cites US-001's criteria only when US-001 is the starter's.
+  if (!r.helix || r.helixSkipped?.some((s) => s.id === "US-001")) {
     const spec = join(target, "e2e/starter.spec.js");
     if (existsSync(spec)) writeFileSync(spec, uncite(readFileSync(spec, "utf8")));
   }

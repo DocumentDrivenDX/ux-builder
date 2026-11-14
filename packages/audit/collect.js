@@ -22,16 +22,19 @@
    element, has an inline style or a class that is not the SDK's; or when it
    is a control, picture or icon, which the SDK always draws with a class
    (its two bare buttons, a menu item and an appearance option, have a
-   role). */
+   role). A drawing from @ux-builder/visuals carries uxb-* classes, which are
+   the SDK's too (US-168). */
 export function installAppOwned() {
   const SDK = '[class^="piq-"], [class*=" piq-"]';
   const DRAWN = /^(button|input|select|textarea|table|svg|img|progress)$/;
   globalThis.__piqAppOwned = (el) => {
+    // A drawing by <Visual> (@ux-builder/visuals/react) is the SDK's, whatever its own attributes.
+    if (el.matches?.("svg.uxb-visual") && el.closest(".piq-visual")) return false;
     const sdk = el.closest(SDK);
     if (!sdk) return true;
     if (sdk === el) return false;
     for (let e = el; e && e !== sdk; e = e.parentElement) {
-      if (e.hasAttribute("style") || [...e.classList].some((c) => !c.startsWith("piq-"))) return true;
+      if (e.hasAttribute("style") || [...e.classList].some((c) => !c.startsWith("piq-") && !c.startsWith("uxb-"))) return true;
     }
     return DRAWN.test(el.tagName.toLowerCase()) && !el.hasAttribute("role");
   };
@@ -243,6 +246,7 @@ export function collect({ sdkRules, bundledFamilies, ignore, rules, theme, appea
     if (on("sdk-widgets")) {
       const tag = el.tagName.toLowerCase();
       if (tag === "svg" && box.width <= 96 && box.height <= 96) add("sdk-widgets", "error", el, "an icon the app draws itself: use <Icon> (any of 2,000+ in @ux-builder/ui/icons, or registerIcons for your own) so it follows the theme's icon set", { widget: "Icon" });
+      else if (tag === "svg" && !el.closest(".chart, [data-audit-chart]")) add("sdk-widgets", "warning", el, "a diagram or chart the app draws itself: describe it as a umf.visual document and draw it with <Visual> from @ux-builder/visuals/react, so it follows the theme and passes this audit", { widget: "Visual" });
       else if (tag === "img" && /logo/i.test(`${el.alt} ${el.src}`)) add("sdk-widgets", "error", el, "a logo image the app hard-codes: use <Logo /> so it follows the theme and appearance", { widget: "Logo" });
       else if (tag === "img" && box.width <= 48 && box.height <= 48) add("sdk-widgets", "warning", el, "a small image used as an icon: use <Icon>", { widget: "Icon" });
       else if (CONTROLS[tag]) add("sdk-widgets", "warning", el, `a native <${tag}>: use ${CONTROLS[tag]} from @ux-builder/ui`, { widget: CONTROLS[tag].slice(1, -1) });

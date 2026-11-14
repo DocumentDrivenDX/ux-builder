@@ -22,7 +22,7 @@ export function Themes({ themes }) {
           ))}
         </ul>
       </div>
-      <p className="tb-hint">Each page is linked by its name: <code>?theme=praxis-carbon</code>, say. Its widgets and patterns render from the SDK's Storybook stories, each with a link to that story in Storybook.</p>
+      <p className="tb-hint">Each page is linked by its name: <code>?theme=vk-praxis-carbon</code>, say. Its widgets and patterns render from the SDK's Storybook stories, each with a link to that story in Storybook.</p>
     </div>
   );
 }

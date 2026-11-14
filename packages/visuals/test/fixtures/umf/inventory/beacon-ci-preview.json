@@ -1,0 +1,54 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-ci-preview",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-ci-preview",
+      "kind": "flow",
+      "form": "pipeline",
+      "title": "Preview",
+      "question": "What runs, in what order, when preview.yml starts?",
+      "takeaway": "Starts on pull_request.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/workflows/preview.yml",
+        "digest": "sha256:bfdf92086a2c3ec04c7dc246c760c2e4460e285a7e0cbeb836bab27aa5fac0e9"
+      },
+      "nodes": [
+        {
+          "id": "build",
+          "label": "build",
+          "detail": "ubuntu-latest"
+        },
+        {
+          "id": "preview",
+          "label": "Deploy a preview",
+          "detail": "ubuntu-latest"
+        },
+        {
+          "id": "smoke",
+          "label": "Smoke-test the preview",
+          "detail": "ubuntu-latest"
+        }
+      ],
+      "edges": [
+        {
+          "id": "build--preview",
+          "from": "build",
+          "to": "preview"
+        },
+        {
+          "id": "preview--smoke",
+          "from": "preview",
+          "to": "smoke"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

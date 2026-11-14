@@ -53,6 +53,29 @@ describe("US-050-AC4: the rules check enforces provenance", () => {
   });
 });
 
+describe("rule priority, dependencies and precedence", () => {
+  test("a missing dependency, a cycle and an outranked winner each fail, naming the rule", () => {
+    const s = sources();
+    const [a, b, c] = s.rules.rules;
+    a.dependsOn = ["no.such-rule"];
+    b.dependsOn = [c.id];
+    c.dependsOn = [b.id];
+    const low = s.rules.rules.find((r) => r.priority === "P6");
+    const high = s.rules.rules.find((r) => r.priority === "P0");
+    low.takesPrecedenceOver = [high.id];
+    const problems = checkRules(s, k);
+    assert.ok(problems.some((p) => p === `rule ${a.id}: depends on "no.such-rule", which does not exist`), problems.join("\n"));
+    assert.ok(problems.some((p) => /its dependencies form a cycle/.test(p) && p.includes(b.id) && p.includes(c.id)), problems.join("\n"));
+    assert.ok(problems.some((p) => p.startsWith(`rule ${low.id}: takes precedence over ${high.id}, which has a higher priority`)), problems.join("\n"));
+  });
+
+  test("every shipped rule has a priority, and a proposed rule is only reviewed until its checks are built", () => {
+    const { rules } = read("guidelines/rules.json");
+    assert.deepEqual(rules.filter((r) => !r.priority).map((r) => r.id), []);
+    for (const r of rules.filter((x) => x.status === "proposed")) assert.ok(r.checks.every((c) => c.kind === "review"), r.id);
+  });
+});
+
 describe("US-076-AC4: the AI sources' licences (FEAT-011 AIP-01, AIP-03)", () => {
   const mslOnly = { title: "Microsoft Learn: Human-centered design for agents", url: "https://learn.microsoft.com/en-us/agents/design-guidelines/human-centered-design", licence: "microsoft-terms", wording: "paraphrased" };
 

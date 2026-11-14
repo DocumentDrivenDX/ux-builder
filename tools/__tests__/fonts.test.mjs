@@ -27,7 +27,7 @@ function loadWith(file, edit) {
     rmSync(d, { recursive: true, force: true });
   }
 }
-const withBrandFont = (font) => loadWith("brands/praxis.brand.json", (b) => ({ ...b, fonts: { body: font } }));
+const withBrandFont = (font) => loadWith("brands/vk-praxis.brand.json", (b) => ({ ...b, fonts: { body: font } }));
 
 describe("brand fonts", () => {
   // @covers US-001-AC5
@@ -53,13 +53,13 @@ describe("brand fonts", () => {
 
   test("a google font with a fallback passes and overrides the design system's", () => {
     const src = withBrandFont({ family: "Inter", fallback: ["system-ui", "sans-serif"], source: "google" });
-    assert.equal(composePair(src, "praxis", "carbon", "dark").get("font.body").value, "Inter, system-ui, sans-serif");
-    assert.match(composePair(src, "praxis", "carbon", "dark").get("font.mono").value, /^"IBM Plex Mono"/, "roles not overridden stay the design system's");
+    assert.equal(composePair(src, "vk-praxis", "carbon", "dark").get("font.body").value, "Inter, system-ui, sans-serif");
+    assert.match(composePair(src, "vk-praxis", "carbon", "dark").get("font.mono").value, /^"IBM Plex Mono"/, "roles not overridden stay the design system's");
   });
 
   test("a bundled font licensed OFL-1.1 passes", () => {
     const src = withBrandFont({ family: "Inter", fallback: ["sans-serif"], source: "bundled", license: "OFL-1.1" });
-    assert.ok(src.brands.get("praxis").fonts.body);
+    assert.ok(src.brands.get("vk-praxis").fonts.body);
   });
 });
 
@@ -75,9 +75,9 @@ describe("design system fonts", () => {
 describe("a brand without fonts", () => {
   test("uses each shared design system's fonts", () => {
     const src = load(join(ROOT, "tokens"), join(ROOT, "brand"));
-    assert.equal(src.brands.get("praxis").fonts, undefined);
+    assert.equal(src.brands.get("vk-praxis").fonts, undefined);
     for (const [name, ds] of src.designSystems) {
-      const m = composePair(src, "praxis", name, "dark");
+      const m = composePair(src, "vk-praxis", name, "dark");
       for (const r of ["display", "heading", "body", "mono"]) assert.equal(m.get(`font.${r}`).value, fontStack(ds.fonts[r]), `${name} ${r}`);
     }
   });
@@ -90,7 +90,7 @@ describe("font CSS by source", async () => {
 
   // @covers US-010-AC2
   test("AC2: a design system's open-licensed faces are bundled, with font-display: swap and no third-party host", () => {
-    for (const t of ["praxis-material", "praxis-carbon", "databricks", "synaptiq"]) {
+    for (const t of ["vk-praxis-material", "vk-praxis-carbon", "vk-databricks", "vk-synaptiq"]) {
       const { css, copies } = themeFontCss(src, src.themes.get(t));
       assert.match(css, /@font-face/, t);
       assert.doesNotMatch(css, /googleapis|gstatic|@import/, t);
@@ -100,11 +100,11 @@ describe("font CSS by source", async () => {
   });
 
   test("system faces load nothing", () => {
-    for (const t of ["praxis", "plain", "praxis-fluentui"]) assert.doesNotMatch(themeFontCss(src, src.themes.get(t)).css, /@font-face|@import/, t);
+    for (const t of ["vk-praxis", "vk-plain", "vk-praxis-fluentui"]) assert.doesNotMatch(themeFontCss(src, src.themes.get(t)).css, /@font-face|@import/, t);
   });
 
   test("only the declared weights are shipped", () => {
-    const { css } = themeFontCss(src, src.themes.get("databricks"));
+    const { css } = themeFontCss(src, src.themes.get("vk-databricks"));
     const weights = (family) => [...new Set([...css.matchAll(new RegExp(`font-family: '${family}';[\\s\\S]*?font-weight: (\\d+)`, "g"))].map((m) => Number(m[1])))].sort();
     assert.deepEqual(weights("DM Sans"), [400, 500, 600]);
     assert.deepEqual(weights("DM Mono"), [400, 500]);
@@ -112,11 +112,11 @@ describe("font CSS by source", async () => {
 
   // @covers US-010-AC3
   test("AC3: a brand's google and client-hosted overrides load from where they say", () => {
-    const s = loadWith("brands/praxis.brand.json", (b) => ({ ...b, fonts: {
+    const s = loadWith("brands/vk-praxis.brand.json", (b) => ({ ...b, fonts: {
       display: { family: "Playfair Display", fallback: ["Georgia", "serif"], source: "google", weights: [700] },
       body: { family: "Acme Sans", fallback: ["system-ui"], source: "client-hosted", url: "https://fonts.acme.example/acme-sans.css" },
     } }));
-    const { css } = themeFontCss(s, s.themes.get("praxis"));
+    const { css } = themeFontCss(s, s.themes.get("vk-praxis"));
     assert.match(css, /@import url\("https:\/\/fonts\.googleapis\.com\/css2\?family=Playfair\+Display:wght@700&display=swap"\);/);
     assert.match(css, /@import url\("https:\/\/fonts\.acme\.example\/acme-sans\.css"\);/);
   });

@@ -60,10 +60,10 @@ describe("FEAT-012 FLW-01, JRN-01: actions, modal actions and journeys in the sc
     assert.deepEqual(valid(checkBlueprint(bp)).map((x) => x.path), ["/screens/0/modals/0/actions/1/extra", "/screens/0/modals/0/actions/1/id"]);
   });
 
-  test("journeys: J- IDs, US- stories and AC IDs, steps with known states, alternates from a step index, scenarios", () => {
+  test("journeys: kebab-case names (an older J- one still passes), US- stories and AC IDs, steps with known states, alternates from a step index, scenarios", () => {
     const bp = withExamples();
     bp.journeys.push({
-      id: "review", story: "US12", criteria: ["US-012-1"], entry: "queue",
+      id: "Review Queue", story: "US12", criteria: ["US-012-1"], entry: "queue",
       steps: [{ screen: "queue", state: "busy", scenario: "scary" }],
       alternates: [{ from: -1, steps: [] }],
     });
@@ -72,7 +72,7 @@ describe("FEAT-012 FLW-01, JRN-01: actions, modal actions and journeys in the sc
       "/journeys/1/alternates/0/from", "/journeys/1/alternates/0/steps", "/journeys/1/criteria/0", "/journeys/1/id",
       "/journeys/1/steps/0/scenario", "/journeys/1/steps/0/state", "/journeys/1/story",
     ]);
-    assert.match(f.find((x) => x.path === "/journeys/1/id").message, /"review"; it must match/);
+    assert.match(f.find((x) => x.path === "/journeys/1/id").message, /"Review Queue"; it must match/);
     const ok = withExamples();
     ok.journeys[0].alternates[0] = { ...ok.journeys[0].alternates[0], reason: "The entry is wrong", scenario: "errorProne" };
     ok.journeys[0].steps[1].scenario = "risky";

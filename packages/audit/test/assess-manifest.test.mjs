@@ -116,4 +116,15 @@ describe("US-056: bootstrap and validate the assessment manifest", () => {
     assert.match(at["/restrictions/allow/0"], /consequential action/);
     assert.match(at["/restrictions/writes"], /report-only/);
   });
+
+  // @covers US-151-AC8
+  test("AC8: a journey is named by what it is, without the J- prefix; an older J- name still passes, and a name that is not kebab-case does not", () => {
+    const r = repo();
+    for (const id of ["review", "J-review"]) {
+      const m = good(); m.journeys[0].id = id;
+      assert.deepEqual(check(r, m).problems.filter((p) => p.path.startsWith("/journeys/0/id")), [], id);
+    }
+    const bad = good(); bad.journeys[0].id = "Review Queue";
+    assert.ok(check(r, bad).problems.some((p) => p.path === "/journeys/0/id"));
+  });
 });

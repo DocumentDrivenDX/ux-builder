@@ -66,6 +66,8 @@ framework": apps own their screens' content, data, routing and logic.
 
 *[Amended 2026-10-24 — FEAT-018 GDL-80, CONTRACT-008 Layout]* The decision stands; exploratory prototypes (here `prototype/<alternative>/`) are now written to `docs/ux-builder/prototypes/<alternative>/`, and the lint rule refuses imports from either folder.
 
+*[Amended 2026-10-27 — FEAT-018 GDL-83, US-159; operator: asked for a working prototype generated from the chosen blueprint]* Decisions 3 and 6 change in one respect: when a design folder is built in place, `@ux-builder/create-app` generates the validated prototype's **starting skeleton** in the app's source (`src/App.jsx`, `src/journey/`, `src/screens/`) from the chosen blueprint: routes, screens in their content order from the SDK's components, sample data, the journeys' actions, every state and a reset. It is app code, in the app's theme, marked `@generated` with the blueprint's hash; the agent refines it from there, and `--prototype` regenerates only the files nobody edited. It is still a prototype until `ready` and core-3 (decision 4), and exploratory prototypes stay disposable and outside the source (decisions 1 and 2).
+
 ## Alternatives Considered
 
 | Option | Evaluation |

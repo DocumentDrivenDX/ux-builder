@@ -84,7 +84,8 @@ export async function auditOptions() {
   const src = read("packages/audit/cli.mjs");
   const { RULES } = await import(pathToFileURL(join(REPO, "packages/audit/audit.mjs")).href);
   return {
-    options: headerOptions(src), parsed: parseArgsOptions(src),
+    // The main parseArgs, after the subcommands' own (reports, doctor).
+    options: headerOptions(src), parsed: parseArgsOptions(src, src.indexOf('import { parseArgs } from "node:util"')),
     synopsis: run("packages/audit/cli.mjs", ["--help"]).split("\n")[0].trim(),
     checks: Object.entries(RULES).map(([id, text]) => ({ id, text })),
   };
@@ -202,8 +203,11 @@ export const NOTES = {
   "@ux-builder/ui ./eslint": "The ESLint plugin: no hard-coded values in JSX, and the AI voice rules",
   "@ux-builder/ui ./blueprint": "checkBlueprint, the interaction rules and the blueprint schema",
   "@ux-builder/ui ./blueprint/modalities": "The app modalities: each one's size classes, inputs, AI roles, components, rule families and audit widths",
+  "@ux-builder/ui ./blueprint/model": "A blueprint's screens, journey walks and state models, for tools that generate from it (screensOf, walkJourney, stateModels)",
   "@ux-builder/ui ./blueprint/paths": "Where an app's design work lives: the docs/ux-builder/ layout and the old one, layoutOf, alternativeFile and the write fence (FEAT-018)",
   "@ux-builder/ui ./blueprint/prototype": "Exploratory prototypes of a blueprint: writePrototype, prototypePages, archivePrototype and themeFor (FEAT-018)",
+  "@ux-builder/ui ./blueprint/wireframes": "Wireframes of a blueprint, every screen in every state at its size classes, light or dark: wireframes and writeWireframes (FEAT-018)",
+  "@ux-builder/ui ./blueprint/samples": "Sample values and form fields from a screen's content labels, so wireframes and prototypes show the design's own content: sampleValue and fieldFor (FEAT-018)",
   "@ux-builder/ui ./blueprint/propose": "HELIX proposals drafted from a blueprint as patches: propose and writeProposals",
   "@ux-builder/ui ./catalogue.json": "The machine-readable catalogue: widgets, patterns, tokens, icons, rules and recipes",
   "@ux-builder/ui ./AGENTS.md": "Guidance for AI coding agents, generated from the catalogue",
@@ -211,6 +215,8 @@ export const NOTES = {
   "@ux-builder/ui ./package.json": "The package's own metadata",
   "@ux-builder/audit .": "audit(): drive a running app through every theme and appearance and report what is off-theme",
   "@ux-builder/audit ./report": "Write the audit's HTML, Markdown and JSON reports",
+  "@ux-builder/audit ./reports": "landingPage(): the one page beside the design that lists the UI audit and every assessment run",
+  "@ux-builder/audit ./doctor": "doctor(): the installed @ux-builder versions, and any range another package or the app wants that they do not meet",
   "@ux-builder/audit ./schema/*": "The JSON Schemas of the audit report and the assessment's records",
   "@ux-builder/audit ./skill/*": "The ux-builder-assess skill: how an agent runs a UX assessment",
   "@ux-builder/audit ./assess/*": "The assessment's operations, as ux-builder-audit assess runs them",
@@ -223,6 +229,12 @@ export const NOTES = {
   "@ux-builder/design ./artifacts/*": "The design document types: each one's meta.yml, template, prompt and example, as validate reads them (docs/ux-builder/)",
   "@ux-builder/design ./schema/*": "The JSON Schema of the design state, .ux-builder/design-state.json",
   "@ux-builder/design ./package.json": "The package's own metadata",
+  "@ux-builder/visuals .": "render(): a umf.visual document as SVG, Mermaid, a plate or a presentation in a theme; check() on its layout",
+  "@ux-builder/visuals ./node": "render() and loadTheme() with themes by name from @ux-builder/tokens, for Node and the ux-builder-visuals command",
+  "@ux-builder/visuals ./player": "The walkthrough player a presentation inlines: steps by buttons and arrow keys",
+  "@ux-builder/visuals ./react": "<Visual doc>: draws a document inside a React app in the page's theme, with its text equivalent",
+  "@ux-builder/visuals ./schema/*": "The pinned umf.visual schema and where it was pinned from",
+  "@ux-builder/visuals ./package.json": "The package's own metadata",
 };
 
 /* What a wildcard export matches today, from the package's files. */
@@ -265,6 +277,12 @@ export const LICENCES = {
   "CC-BY-NC-SA-4.0": { name: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0", meaning: "Non-commercial and share-alike, so the rules paraphrase it and do not adapt it.", quote: false },
   "CC-BY-NC-ND-4.0": { name: "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0", meaning: "No derivatives, so the rules paraphrase it and never quote or adapt it.", quote: false },
   W3C: { name: "W3C Document License", meaning: "Open: a short quotation is allowed with attribution, credited in the notices.", quote: true },
+  "OGL-3.0": { name: "Open Government Licence v3.0", meaning: "UK government guidance (GOV.UK, the GOV.UK Design System, NCSC, legislation.gov.uk). Open, but the rules paraphrase it until the notices credit it.", quote: false },
+  "public-domain": { name: "US government work", meaning: "US federal guidance (FTC, plainlanguage.gov, NIST), not under copyright. The rules paraphrase it and link it.", quote: false },
+  "CC-BY-SA-2.5": { name: "Creative Commons Attribution-ShareAlike 2.5", meaning: "MDN Web Docs. Share-alike, so the rules paraphrase it and do not adapt it.", quote: false },
+  "CC-BY-SA-4.0": { name: "Creative Commons Attribution-ShareAlike 4.0", meaning: "OWASP. Share-alike, so the rules paraphrase it and do not adapt it.", quote: false },
+  "Apache-2.0": { name: "Apache License 2.0", meaning: "IBM's Carbon Design System. The rules paraphrase its guidance and link it.", quote: false },
+  "publisher-terms": { name: "The publisher's terms", meaning: "Research papers, books' publishers, standards bodies, regulators and other sites with no open licence shown. Paraphrased and linked, never quoted.", quote: false },
 };
 
 export function rules() {
@@ -353,7 +371,7 @@ export function notices() {
 export async function guide() {
   const p = await import(pathToFileURL(join(REPO, "packages/design/process.mjs")).href);
   const pick = (s) => ({ n: s.n, name: s.name, activity: s.activity, you: s.you, produces: s.produces, terms: s.terms ?? [] });
-  return { steps: p.STEPS.map(pick), changeSteps: p.CHANGE_STEPS.map(pick), glossary: p.GLOSSARY.map(({ term, step, means, why }) => ({ term, step, means, why })) };
+  return { steps: p.STEPS.map(pick), changeSteps: p.CHANGE_STEPS.map(pick), glossary: p.GLOSSARY.map(({ term, step, means, why }) => ({ term, step, means, why })), ids: p.IDS.map(({ id, kind, where }) => ({ id, kind, where })) };
 }
 
 /* A Markdown document as blocks the site renders (headings, paragraphs,
@@ -391,17 +409,19 @@ export function mdBlocks(text) {
 }
 
 /* The guide's example documents (one fictional app, River Path), for the
-   worked example: each type's example.md as the guide writes it. */
+   worked example: what the guide proposes into HELIX, applied, and the
+   brief it compiles (ADR-042), generated by running its commands. */
 export const EXAMPLE_TYPES = [
-  ["experience-brief", "The experience brief", 1],
-  ["users", "Target users", 2],
-  ["jobs", "Jobs to be done", 2],
-  ["ux-decision", "An interaction decision", 4],
-  ["test-kit", "A usability test kit", 7],
-  ["usability-evaluation-report", "The UX evaluation report", 7],
+  ["brief", "The experience brief, compiled from HELIX", 1],
+  ["prd", "The PRD's User Segments and User Needs", 2],
+  ["research-plan", "A study: its sources, quotes and claims", 2],
+  ["feature-specification", "A feature's Task Model", 3],
+  ["principles", "Experience principles", 1],
+  ["adr", "A UX decision, as a HELIX ADR", 4],
+  ["metrics-dashboard", "Journey funnels on the metrics dashboard", 8],
 ];
 export function examples() {
-  return EXAMPLE_TYPES.map(([type, title, step]) => ({ type, title, step, url: blob(`packages/design/artifacts/${type}/example.md`), blocks: mdBlocks(read(`packages/design/artifacts/${type}/example.md`)) }));
+  return EXAMPLE_TYPES.map(([type, title, step]) => ({ type, title, step, url: blob(`packages/design/examples/${type}.md`), blocks: mdBlocks(read(`packages/design/examples/${type}.md`)) }));
 }
 
 export async function micrositeData() {

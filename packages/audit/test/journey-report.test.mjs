@@ -22,10 +22,10 @@ const tmp = mkdtempSync(join(tmpdir(), "audit-journeys-"));
 let apps, r, html, flat;
 before(async () => {
   apps = await modalityApps();
-  r = await audit({ urls: ["/web.html", "/settings.html", "/orphan.html"].map((p) => apps.url(p)), themes: ["praxis-carbon"], blueprint: BLUEPRINT, out: tmp, cwd: PKG });
+  r = await audit({ urls: ["/web.html", "/settings.html", "/orphan.html"].map((p) => apps.url(p)), themes: ["vk-praxis-carbon"], blueprint: BLUEPRINT, out: tmp, cwd: PKG });
   writeReports(r, tmp);
   html = readFileSync(join(tmp, "index.html"), "utf8");
-  flat = await audit({ urls: ["/web.html", "/settings.html"].map((p) => apps.url(p)), themes: ["praxis-carbon"], appearances: ["light"], cwd: PKG });
+  flat = await audit({ urls: ["/web.html", "/settings.html"].map((p) => apps.url(p)), themes: ["vk-praxis-carbon"], appearances: ["light"], cwd: PKG });
 });
 after(() => { apps?.close(); rmSync(tmp, { recursive: true, force: true }); });
 
@@ -42,8 +42,8 @@ describe("US-100: read the audit by journey, with each rule spelled out", () => 
     const step2 = setup.slice(setup.indexOf("Step 2: Settings"));
     const pink = r.findings.find((f) => f.check === "token-colors");
     assert.equal(pink.screen, "settings");
-    assert.match(step2, /<img src="screens\/2-praxis-carbon-light-1280\.png"/, "the settings screen's screenshot");
-    assert.ok(existsSync(join(tmp, "screens/2-praxis-carbon-light-1280.png")));
+    assert.match(step2, /<img src="screens\/2-vk-praxis-carbon-light-1280\.png"/, "the settings screen's screenshot");
+    assert.ok(existsSync(join(tmp, "screens/2-vk-praxis-carbon-light-1280.png")));
     for (const f of r.findings.filter((x) => x.screen === "settings")) assert.ok(step2.includes(`<span class="id">#${f.id}</span>`), `#${f.id} under the step`);
     assert.ok(!step2.includes(`#${r.findings.find((f) => f.screen === "orphan").id}<`), "nothing from another screen");
     // The settings screen is also J-tour's first step: shown there too.

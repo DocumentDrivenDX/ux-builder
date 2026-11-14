@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/ui",
-  "version": "0.12.1",
+  "version": "0.17.0",
   "license": "MIT OR Apache-2.0",
   "description": "Widgets for the harness and embedded products: prefixed CSS and React 19 components on @ux-builder/tokens, shaped by whichever theme is on.",
   "type": "module",
@@ -34,8 +34,11 @@
     "./blueprint": "./blueprint/index.mjs",
     "./blueprint/modalities": "./blueprint/modalities.mjs",
     "./blueprint/prototype": "./blueprint/prototype.mjs",
+    "./blueprint/wireframes": "./blueprint/wireframes.mjs",
+    "./blueprint/samples": "./blueprint/samples.mjs",
     "./blueprint/propose": "./blueprint/propose.mjs",
     "./blueprint/paths": "./blueprint/paths.mjs",
+    "./blueprint/model": "./blueprint/model.mjs",
     "./catalogue.json": "./catalogue.json",
     "./AGENTS.md": "./AGENTS.md",
     "./skill/*": "./skill/*",
@@ -51,7 +54,7 @@
     "icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
-    "@ux-builder/tokens": "^1.6.0"
+    "@ux-builder/tokens": "^2.0.0"
   },
   "peerDependencies": {
     "@assistant-ui/react": ">=0.15 <0.16",

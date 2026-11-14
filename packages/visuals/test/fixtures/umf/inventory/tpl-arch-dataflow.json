@@ -1,0 +1,145 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:tpl-arch-dataflow",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "tpl-arch-dataflow",
+      "kind": "sequence",
+      "form": "lifelines",
+      "title": "Data Flow",
+      "question": "What happens, step by step, when a client imports files?",
+      "source": {
+        "path": "helix:workflows/activities/02-design/artifacts/architecture/example.md",
+        "view": "Data Flow",
+        "digest": "sha256:4c79ba17f9d9342592c062b9a51cef0232816004b59f110488f696e7a8e191b8"
+      },
+      "sequence": {
+        "participants": [
+          {
+            "id": "maya",
+            "label": "Maya"
+          },
+          {
+            "id": "web",
+            "label": "React Web App"
+          },
+          {
+            "id": "api",
+            "label": "Fastify API"
+          },
+          {
+            "id": "s3",
+            "label": "S3 Source File Store"
+          },
+          {
+            "id": "db",
+            "label": "PostgreSQL"
+          },
+          {
+            "id": "worker",
+            "label": "Matching Worker"
+          }
+        ],
+        "messages": [
+          {
+            "id": "m1",
+            "from": "maya",
+            "to": "web",
+            "label": "Upload bank and invoice CSVs",
+            "kind": "call"
+          },
+          {
+            "id": "m2",
+            "from": "web",
+            "to": "api",
+            "label": "POST import session files",
+            "kind": "call"
+          },
+          {
+            "id": "m3",
+            "from": "api",
+            "to": "s3",
+            "label": "Store encrypted originals",
+            "kind": "call"
+          },
+          {
+            "id": "m4",
+            "from": "api",
+            "to": "api",
+            "label": "Validate mapping and rows",
+            "kind": "call"
+          },
+          {
+            "id": "m5",
+            "from": "api",
+            "to": "db",
+            "label": "Commit accepted rows and rejection reasons",
+            "kind": "call"
+          },
+          {
+            "id": "m6",
+            "from": "api",
+            "to": "web",
+            "label": "Import summary",
+            "kind": "return"
+          },
+          {
+            "id": "m7",
+            "from": "maya",
+            "to": "web",
+            "label": "Confirm import summary",
+            "kind": "call"
+          },
+          {
+            "id": "m8",
+            "from": "web",
+            "to": "api",
+            "label": "Confirm import",
+            "kind": "call"
+          },
+          {
+            "id": "m9",
+            "from": "api",
+            "to": "db",
+            "label": "Mark import confirmed and enqueue matching job",
+            "kind": "call"
+          },
+          {
+            "id": "m10",
+            "from": "worker",
+            "to": "db",
+            "label": "Read accepted rows and create suggestions",
+            "kind": "call"
+          },
+          {
+            "id": "m11",
+            "from": "web",
+            "to": "api",
+            "label": "Load match review queue",
+            "kind": "call"
+          },
+          {
+            "id": "m12",
+            "from": "api",
+            "to": "db",
+            "label": "Read suggestions with source-row evidence",
+            "kind": "call"
+          },
+          {
+            "id": "m13",
+            "from": "api",
+            "to": "web",
+            "label": "Suggestions and evidence",
+            "kind": "return"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

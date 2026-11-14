@@ -38,10 +38,12 @@ export const ICON_NAMES = Object.keys(GLYPHS.lucide).sort();
 let dev = true;
 try { dev = process.env.NODE_ENV !== "production"; } catch { /* no bundler */ }
 
-/* The icon set a theme draws with. */
+/* The icon set a theme draws with: the one its design system's icon.set token
+   names (manifest iconSet), so a renamed copy of a design system keeps its set. */
 export function iconSetFor(theme) {
-  const ds = THEMES.get(theme)?.designSystem;
-  return OWN_SETS.has(ds) ? ds : "lucide";
+  const t = THEMES.get(theme);
+  const set = t?.iconSet ?? t?.designSystem;
+  return OWN_SETS.has(set) ? set : "lucide";
 }
 
 /* The glyph for a name in a set, falling back to Lucide: [glyph, set used]. */

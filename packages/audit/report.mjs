@@ -14,6 +14,7 @@
 
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { refreshLandingPage } from "./reports.mjs";
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const SEV = { error: 0, warning: 1, info: 2 };
@@ -22,6 +23,7 @@ const STATUS = { pass: "Pass", warn: "Warn", fail: "Fail", "not-checked": "Not c
 export function writeReports(report, out) {
   writeFileSync(join(out, "report.json"), JSON.stringify(report, null, 2) + "\n");
   writeFileSync(join(out, "index.html"), html(report));
+  refreshLandingPage(out);
 }
 
 const pathOf = (u) => { try { const x = new URL(u); return x.pathname + x.search; } catch { return u; } };
@@ -109,7 +111,7 @@ ${(f.rule?.sources ?? f.sources)?.length ? `<p class="meta">Sources: ${sources(f
 <ul>${v.theme.items.map((i) => `<li>${badge(i.status)} ${esc(i.label)}${i.note ? ` <span class="meta">(${esc(i.note)})</span>` : ""}${i.rules.length ? ` · ${i.rules.map((x) => `<code>${esc(x)}</code>`).join(", ")}` : ""}${i.findings.length ? ` · ${i.findings.map(link).join(" ")}` : ""}${i.fix && i.status !== "pass" ? `<br><span class="meta">Fix: ${esc(i.fix)}</span>` : ""}</li>`).join("")}</ul></section>` : "";
   const modV = v?.modality?.length ? `<section class="verdict" id="verdict-modality"><h2>Modality fit ${badge(v.modality.map((m) => m.status).includes("fail") ? "fail" : v.modality.some((m) => m.status === "warn") ? "warn" : "pass")}</h2>
 ${v.modality.map((m) => `<div class="modality"><h3><code>${esc(m.modality)}</code> ${badge(m.status)}</h3>${m.assumed ? `<p class="meta">${esc(m.note)}</p>` : ""}
-<p>Components: ${m.components.map((c) => `${esc(c.name)} <b>${c.present ? "present" : "missing"}</b>${c.adapts === true ? " (adapts by size class)" : c.adapts === false ? " (<b>does not adapt</b> by size class)" : c.adapts === null ? " (adaptation not checked)" : ""}`).join("; ")}</p>
+<p>Components: ${m.components.map((c) => `${esc(c.name)} <b>${c.alternative ? "not used" : c.present ? "present" : "missing"}</b>${c.alternative ? " (a main landmark frames each page, and the content fits)" : c.framed === false && c.present ? " (<b>a page has no frame that fits</b>)" : ""}${c.navigation === false ? " (no navigation to adapt)" : ""}${c.adapts === true ? " (adapts by size class)" : c.adapts === false ? " (<b>does not adapt</b> by size class)" : c.adapts === null ? " (adaptation not checked)" : ""}`).join("; ")}</p>
 <p>Rule families: ${m.ruleFamilies.map((f) => `<code>${esc(f.family)}</code> ${f.checked === true ? "checked" : f.checked === false ? "<b>not checked</b>" : `<span class="meta">(${esc(f.by)})</span>`}`).join(", ")}</p>
 ${m.fixes.length ? `<ul>${m.fixes.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
 <details><summary>Evidence</summary><ul>${m.evidence.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></details>${m.findings.length ? `<p class="meta">Findings of its rule families: ${m.findings.map(link).join(" ")}</p>` : ""}</div>`).join("\n")}</section>` : "";

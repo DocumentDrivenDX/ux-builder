@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/audit",
-  "version": "0.5.2",
+  "version": "0.9.1",
   "license": "MIT OR Apache-2.0",
   "description": "Audit a running app's use of the AI-UI SDK theme: switches it through every theme and appearance in Chromium and reports colours, fonts and radii that are not the theme's, restyled widgets, hand-drawn icons and loaders, other UI libraries, the favicon and logo, and contrast (FEAT-004 SDK-18); and a HELIX-aware UX assessment (FEAT-009): page-level inspection of an agent's browser state, journeys traced to HELIX documents and tests, and a recorded baseline.",
   "type": "module",
@@ -10,6 +10,8 @@
   "exports": {
     ".": "./audit.mjs",
     "./report": "./report.mjs",
+    "./reports": "./reports.mjs",
+    "./doctor": "./doctor.mjs",
     "./package.json": "./package.json",
     "./schema/*": "./schema/*",
     "./skill/*": "./skill/*",
@@ -26,7 +28,10 @@
     "cli.mjs",
     "collect.js",
     "serve.mjs",
+    "walk.mjs",
     "report.mjs",
+    "reports.mjs",
+    "doctor.mjs",
     "trace.mjs",
     "README.md",
     "THIRD-PARTY-NOTICES.md"
@@ -35,8 +40,8 @@
     "test": "node --test 'test/*.test.mjs'"
   },
   "dependencies": {
-    "@ux-builder/tokens": "^1.6.0",
-    "@ux-builder/ui": "^0.12.1",
+    "@ux-builder/tokens": "^2.0.0",
+    "@ux-builder/ui": "^0.17.0",
     "ajv": "^8.20.0",
     "axe-core": "^4.14.0",
     "playwright": "~1.63.0",

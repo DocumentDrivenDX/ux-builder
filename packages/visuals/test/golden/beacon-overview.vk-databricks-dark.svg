@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3024 173" width="3024" height="173" role="img" aria-labelledby="beacon-overview-title" aria-describedby="beacon-overview-desc" class="uxb-visual uxb-visual--flow-pipeline" data-visual="beacon-overview" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="beacon-overview-title">One draft, end to end</title>
+<desc id="beacon-overview-desc">A draft is asked for by the agent, built by the drafter, and written by a model the gateway chooses.</desc>
+<rect x="0" y="0" width="3024" height="173" style="fill:#09090B"/>
+<g id="beacon-overview--agent--proxy" class="uxb-edge" data-steps="s1">
+<path d="M177 100 L390 100" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M390 103.78 L399 100 L390 96.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="241" y="91" width="94" height="18" rx="4" style="fill:#09090B"/>
+<text x="288" y="104.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">opens a ticket</text>
+</g>
+<g id="beacon-overview--gateway--models" class="uxb-edge" data-steps="s4">
+<path d="M2606 70 L2840 70" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M2840 73.78 L2849 70 L2840 66.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="2670" y="61" width="115" height="18" rx="4" style="fill:#09090B"/>
+<text x="2727.5" y="74.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">routes to a model</text>
+</g>
+<g id="beacon-overview--proxy--web" class="uxb-edge">
+<path d="M594 88 L606 88 Q614 88 614 80 L614 64 Q614 56 622 56 L906 56" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M906 59.78 L915 56 L906 52.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="668" y="47" width="193" height="18" rx="4" style="fill:#09090B"/>
+<text x="764.5" y="60.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">forwards with the agent's token</text>
+</g>
+<g id="beacon-overview--proxy--api" class="uxb-edge" data-steps="s2">
+<path d="M594 112 L1320 112 Q1328 112 1328 104 L1328 92 Q1328 84 1336 84 L1363 84" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1363 87.78 L1372 84 L1363 80.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="644" y="103" width="193" height="18" rx="4" style="fill:#09090B"/>
+<text x="740.5" y="116.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">forwards with the agent's token</text>
+</g>
+<g id="beacon-overview--web--api" class="uxb-edge">
+<path d="M1136 47 L1323.5 47 Q1328 47 1328 51.5 L1328 51.5 Q1328 56 1332.5 56 L1363 56" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1363 59.78 L1372 56 L1363 52.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="1183" y="38" width="99" height="18" rx="4" style="fill:#09090B"/>
+<text x="1232.5" y="51.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">asks for a draft</text>
+</g>
+<g id="beacon-overview--api--web" class="uxb-edge" data-kind="return">
+<path d="M1372 70 L1158.5 70 Q1156 70 1156 67.5 L1156 67.5 Q1156 65 1153.5 65 L1145 65" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px;stroke-dasharray:4 4"/>
+<path d="M1145 61.22 L1136 65 L1145 68.78 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="1210" y="61" width="108" height="18" rx="4" style="fill:#09090B"/>
+<text x="1264" y="74.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">returns the draft</text>
+</g>
+<g id="beacon-overview--api--drafter" class="uxb-edge">
+<path d="M1583 61 L1922 61" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M1922 64.78 L1931 61 L1922 57.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="1647" y="52" width="220" height="18" rx="4" style="fill:#09090B"/>
+<text x="1757" y="65.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">hands over the ticket and its history</text>
+</g>
+<g id="beacon-overview--drafter--gateway" class="uxb-edge">
+<path d="M2152 61 L2387 61" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M2387 64.78 L2396 61 L2387 57.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="2192" y="52" width="116" height="18" rx="4" style="fill:#09090B"/>
+<text x="2250" y="65.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">sends the prompt</text>
+</g>
+<g id="beacon-overview--api--gateway" class="uxb-edge" data-steps="s3">
+<path d="M1583 79 L1595 79 Q1603 79 1603 87 L1603 117 Q1603 125 1611 125 L2344 125 Q2352 125 2352 117 L2352 87 Q2352 79 2360 79 L2387 79" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M2387 82.78 L2396 79 L2387 75.22 Z" style="fill:#9F9FA9;stroke:#9F9FA9;stroke-width:1.5px"/>
+<rect x="1778" y="116" width="99" height="18" rx="4" style="fill:#09090B"/>
+<text x="1827.5" y="129.2" text-anchor="middle" style="fill:#FAFAFA;font-size:12px;font-weight:400">asks for a draft</text>
+</g>
+<g id="beacon-overview--agent" class="uxb-node" data-role="actor" data-status="built">
+<rect x="24" y="81" width="153" height="38" rx="8" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1.5px"/>
+<circle cx="47" cy="97.4" r="3.96" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<path d="M40.16 110 C40.16 103.16 53.84 103.16 53.84 110" style="fill:none;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="62" y="105" style="fill:#FFFFFF;font-size:14px;font-weight:600">Support agent</text>
+</g>
+<g id="beacon-overview--proxy" class="uxb-node" data-role="platform" data-status="built">
+<rect x="399" y="64" width="195" height="72" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="413" y="88" style="fill:#FFFFFF;font-size:14px;font-weight:600">Sign-in proxy</text>
+<text x="413" y="102" style="fill:#FAFAFA;font-size:12px;font-weight:400">checks identity, forwards the</text>
+<text x="413" y="118" style="fill:#FAFAFA;font-size:12px;font-weight:400">agent's token</text>
+</g>
+<g id="beacon-overview--web" class="uxb-node" data-role="own" data-status="built">
+<rect x="915" y="28" width="221" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="929" y="52" style="fill:#FFFFFF;font-size:14px;font-weight:600">Web app</text>
+<text x="929" y="66" style="fill:#9F9FA9;font-size:12px;font-weight:400">the agent's inbox and draft editor</text>
+</g>
+<g id="beacon-overview--api" class="uxb-node" data-role="own" data-status="built">
+<rect x="1372" y="42" width="211" height="56" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="1386" y="66" style="fill:#FFFFFF;font-size:14px;font-weight:600">Beacon API</text>
+<text x="1386" y="80" style="fill:#9F9FA9;font-size:12px;font-weight:400">every request runs as the agent</text>
+</g>
+<g id="beacon-overview--drafter" class="uxb-node" data-role="own" data-status="built">
+<rect x="1931" y="25" width="221" height="72" rx="8" style="fill:#18181B;stroke:#1685DF;stroke-width:2px"/>
+<text x="1945" y="49" style="fill:#FFFFFF;font-size:14px;font-weight:600">Reply drafter</text>
+<text x="1945" y="63" style="fill:#9F9FA9;font-size:12px;font-weight:400">builds the prompt from the ticket</text>
+<text x="1945" y="79" style="fill:#9F9FA9;font-size:12px;font-weight:400">and its history</text>
+</g>
+<g id="beacon-overview--gateway" class="uxb-node" data-role="platform" data-status="built">
+<rect x="2396" y="42" width="210" height="56" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="2410" y="66" style="fill:#FFFFFF;font-size:14px;font-weight:600">Model gateway</text>
+<text x="2410" y="80" style="fill:#FAFAFA;font-size:12px;font-weight:400">rate limits, usage, model choice</text>
+</g>
+<g id="beacon-overview--models" class="uxb-node" data-role="platform" data-status="built">
+<rect x="2849" y="51" width="151" height="38" rx="8" style="fill:#27272A;stroke:#9F9FA9;stroke-width:1.5px"/>
+<text x="2863" y="75" style="fill:#FFFFFF;font-size:14px;font-weight:600">Language models</text>
+</g>
+<g id="beacon-overview--s1--agent--proxy" class="uxb-step" data-steps="s1">
+<circle cx="227" cy="100" r="11" style="fill:#1685DF"/>
+<text x="227" y="104.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">1</text>
+</g>
+<g id="beacon-overview--s2--proxy--api" class="uxb-step" data-steps="s2">
+<circle cx="630" cy="112" r="11" style="fill:#1685DF"/>
+<text x="630" y="116.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">2</text>
+</g>
+<g id="beacon-overview--s3--api--gateway" class="uxb-step" data-steps="s3">
+<circle cx="1764" cy="125" r="11" style="fill:#1685DF"/>
+<text x="1764" y="129.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">3</text>
+</g>
+<g id="beacon-overview--s4--gateway--models" class="uxb-step" data-steps="s4">
+<circle cx="2656" cy="70" r="11" style="fill:#1685DF"/>
+<text x="2656" y="74.2" text-anchor="middle" style="fill:#09090B;font-size:12px;font-weight:600">4</text>
+</g>
+</svg>

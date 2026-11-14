@@ -1,7 +1,7 @@
 /* A theme inside another shows none of the outer theme's tokens (US-022-AC9):
    each theme's base block sets or resets (initial) every token, because
    custom properties inherit. Found by @ux-builder/audit on the starter, where
-   <html data-theme="databricks"> showed Databricks's white cards inside a
+   <html data-theme="vk-databricks"> showed Databricks's white cards inside a
    Praxis dark provider.
 
      npm run build --workspace @ux-builder/tokens && npm test --workspace @ux-builder/tokens */
@@ -25,5 +25,5 @@ test("AC9: every theme's base selector sets or resets every token", () => {
 });
 
 test("a reset is initial, so the widget's ui.css fallback applies", () => {
-  assert.match(css, /\[data-theme="praxis"\] \{\n  \/\*\* Not set by this theme[^}]*--piq-card-bg: initial;/);
+  assert.match(css, /\[data-theme="vk-praxis"\] \{\n  \/\*\* Not set by this theme[^}]*--piq-card-bg: initial;/);
 });

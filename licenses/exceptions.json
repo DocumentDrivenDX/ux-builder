@@ -36,6 +36,12 @@
       "licence": "BlueOak-1.0.0",
       "reason": "Reached through eslint and stylelint (peer dependencies). Blue Oak Model License 1.0.0 is permissive, with a patent grant.",
       "reviewBy": "2026-11-18"
+    },
+    {
+      "name": "elkjs",
+      "licence": "EPL-2.0 OR GPL-3.0-or-later",
+      "reason": "The graph layout engine of @ux-builder/visuals (ADR-042), used unmodified as a dependency, never bundled or changed. EPL-2.0 is file-level copyleft: modified elkjs files would have to be published under it; using it unmodified does not extend EPL to our code, the same reasoning as axe-core's MPL-2.0. It lays out network, pipeline, state machine, entities and tree; zoned, lanes, sequence and lifecycle are our own placement and do not use it. If counsel refuses, the fallback is @dagrejs/dagre (MIT) for network and pipeline, with more of our own placement for compound states and field-level entity references, where dagre is weaker.",
+      "reviewBy": "2026-11-22"
     }
   ]
 }

@@ -22,7 +22,7 @@ import { html as renderHtml } from "../report.mjs";
 
 const PKG = fileURLToPath(new URL("..", import.meta.url));
 const FILES = { "/themes.css": join(PKG, "../tokens/dist/themes.css"), "/fonts.css": join(PKG, "../tokens/dist/fonts.css"), "/ui.css": join(PKG, "../ui/dist/ui.css") };
-const THEMES = ["praxis-carbon", "databricks"];
+const THEMES = ["vk-praxis-carbon", "vk-databricks"];
 const tmp = mkdtempSync(join(tmpdir(), "audit-"));
 let server, base;
 
@@ -42,7 +42,7 @@ addEventListener("piq:set-theme", (e) => {
 const page = (body, { head = "", provider = true } = {}) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>t</title>
 <link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css">
 <style>.shell { min-height: 100vh; padding: var(--piq-space-5); display: grid; gap: var(--piq-space-4); background: var(--piq-color-ground); color: var(--piq-color-text); font-family: var(--piq-font-body); }</style>
-${head}${provider ? PROVIDER : ""}</head><body style="margin:0"><div id="app" class="shell" data-theme="praxis-carbon" data-appearance="light">${body}</div></body></html>`;
+${head}${provider ? PROVIDER : ""}</head><body style="margin:0"><div id="app" class="shell" data-theme="vk-praxis-carbon" data-appearance="light">${body}</div></body></html>`;
 
 const sdk = renderToStaticMarkup(h("div", { className: "shell-inner" },
   h(Logo), h(Notice, { tone: "info", title: "Prebill closes Friday" }),
@@ -67,8 +67,8 @@ const PAGES = {
     .replace("</body>", `<p id="outside" style="color:#333">Outside the theme</p>${PROVIDER.replace(/link\.href = href;/, "/* never sets the favicon */")}</body>`),
   "/no-provider.html": page(sdk, { provider: false }),
   // The starter's index.html: a theme on <html> to start with, and a mark the bundler inlined, quotes and brackets in it.
-  "/inlined.html": page(sdk, { head: `<style>#app[data-theme="praxis-carbon"] { --piq-brand-favicon: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20fill='url(%23g)'%20d='M0%200h1v1z'/%3e%3c/svg%3e"); }</style>` })
-    .replace('<html lang="en">', `<html lang="en" data-theme="databricks" style="--piq-brand-favicon: url('/brand/elsewhere.svg')">`),
+  "/inlined.html": page(sdk, { head: `<style>#app[data-theme="vk-praxis-carbon"] { --piq-brand-favicon: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20fill='url(%23g)'%20d='M0%200h1v1z'/%3e%3c/svg%3e"); }</style>` })
+    .replace('<html lang="en">', `<html lang="en" data-theme="vk-databricks" style="--piq-brand-favicon: url('/brand/elsewhere.svg')">`),
 };
 
 before(async () => {
@@ -94,7 +94,7 @@ describe("US-022 @ux-builder/audit", () => {
   // @covers US-022-AC1
   test("AC1: a page of SDK widgets and role tokens passes in every theme and appearance, switched as a user would", async () => {
     const r = await audit({ urls: [`${base}/clean.html`], themes: THEMES });
-    assert.deepEqual(r.runs.map((x) => `${x.theme}/${x.appearance}`), ["praxis-carbon/dark", "praxis-carbon/light", "databricks/dark", "databricks/light"]);
+    assert.deepEqual(r.runs.map((x) => `${x.theme}/${x.appearance}`), ["vk-praxis-carbon/dark", "vk-praxis-carbon/light", "vk-databricks/dark", "vk-databricks/light"]);
     assert.ok(r.runs.every((x) => x.mode === "event"), "switched through the provider's event");
     assert.deepEqual(r.findings.filter((f) => f.severity === "error"), [], JSON.stringify(r.findings, null, 1));
     assert.deepEqual(r.findings.filter((f) => f.severity === "warning"), [], JSON.stringify(r.findings, null, 1));
@@ -141,7 +141,7 @@ describe("US-022 @ux-builder/audit", () => {
   test("AC5: a favicon that does not follow the theme; contrast, the app's an error and the SDK's a warning", () => {
     const fav = of(dirty, "brand", "favicon");
     assert.equal(fav[0].severity, "error");
-    assert.deepEqual(fav[0].runs.sort(), ["praxis-carbon/dark", "praxis-carbon/light"], "only themes with a favicon");
+    assert.deepEqual(fav[0].runs.sort(), ["vk-praxis-carbon/dark", "vk-praxis-carbon/light"], "only themes with a favicon");
     const faint = of(dirty, "contrast", "#faint");
     assert.equal(faint[0].severity, "error");
     assert.equal(faint[0].owner, "app");
@@ -169,12 +169,12 @@ describe("US-022 @ux-builder/audit", () => {
       p.stderr.on("data", (d) => { stderr += d; });
       p.on("close", (status) => done({ status, stdout, stderr }));
     });
-    const bad = await run("--theme", "databricks", "--appearance", "light", "--out", join(tmp, "cli"), `${base}/dirty.html`);
+    const bad = await run("--theme", "vk-databricks", "--appearance", "light", "--out", join(tmp, "cli"), `${base}/dirty.html`);
     assert.equal(bad.status, 1, bad.stderr);
     assert.match(bad.stdout, /Theme audit: \d+ errors/);
     assert.ok(existsSync(join(tmp, "cli/index.html")) && existsSync(join(tmp, "cli/report.json")));
-    assert.equal((await run("--theme", "databricks", "--appearance", "light", "--no-contrast", "--fail-on", "never", "--out", join(tmp, "cli2"), `${base}/dirty.html`)).status, 0);
-    const clean = await run("--theme", "databricks", "--appearance", "light", "--out", join(tmp, "cli3"), `${base}/clean.html`);
+    assert.equal((await run("--theme", "vk-databricks", "--appearance", "light", "--no-contrast", "--fail-on", "never", "--out", join(tmp, "cli2"), `${base}/dirty.html`)).status, 0);
+    const clean = await run("--theme", "vk-databricks", "--appearance", "light", "--out", join(tmp, "cli3"), `${base}/clean.html`);
     assert.equal(clean.status, 0, clean.stdout + clean.stderr);
     assert.equal((await run("--off", "nonsense", base)).status, 2);
   });
@@ -186,7 +186,7 @@ describe("US-022 @ux-builder/audit", () => {
   });
 
   test("an app that does not answer the switch is switched by attribute, and says so", async () => {
-    const r = await audit({ urls: [`${base}/no-provider.html`], themes: ["databricks"], appearances: ["light"] });
+    const r = await audit({ urls: [`${base}/no-provider.html`], themes: ["vk-databricks"], appearances: ["light"] });
     assert.equal(r.runs[0].mode, "attributes");
     assert.match(of(r, "theme-applied")[0].message, /did not answer the theme switch/);
     assert.equal(of(r, "brand").length, 0, "favicon checks skipped");

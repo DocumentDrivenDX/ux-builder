@@ -1,0 +1,367 @@
+/* The person's time spent on decisions: approvals by meaning, three tiers
+   of review, the intake and budget, workflow metrics, grounded evidence and
+   advance --until-decision (US-152 to US-155, US-160; FEAT-018 GDL-83;
+   CONTRACT-008 Commands).
+
+     npm test --workspace @ux-builder/design */
+
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, test } from "node:test";
+import { advance, budget, carried, checkpoint, claimAdd, claimVerify, coverageMap, decisionAdd, evidenceAdd, intake, logTurn, mark, metrics, pendingReviews, readState, reviewApprove, reviewFeedback, reviewList, reviewTable, setStep, stateSet, validate, writeState, currentText, proposeChange, sectionOf, status } from "../index.mjs";
+import { cli, tempApp } from "./helpers.mjs";
+import { kitApp, withUsers } from "./kit-fixture.mjs";
+
+const SKILL = readFileSync(new URL("../skill/ux-builder-design/SKILL.md", import.meta.url), "utf8");
+const STORY = "docs/helix/01-frame/user-stories/US-001-find.md";
+const edit = (a, path, f) => writeFileSync(join(a, path), f(readFileSync(join(a, path), "utf8")));
+const ids = (a) => pendingReviews(a).map((p) => p.id);
+const json = (a, args) => { const r = cli(a, [...args, "--json"]); assert.equal(r.status, 0, r.stderr); return JSON.parse(r.stdout); };
+
+/* The kit app with target users and a decision: every tier has items. */
+function app() {
+  const a = kitApp();
+  withUsers(a);
+  decisionAdd(a, { question: "Map first?", options: ["Map", "List"], choice: "Map", why: "Fewer steps" });
+  return a;
+}
+const approveFoundations = (a) => { for (const k of ["brief", "user", "job", "story", "decision"]) if (reviewTable(a, { kind: k }).pending.length) reviewApprove(a, { kind: k, answer: "Yes" }); };
+
+describe("US-152: an approval holds until the meaning changes, and then shows the change", () => {
+  // @covers US-152-AC1
+  test("AC1: a change to a story's frontmatter or formatting keeps its approval; the approval is kept as it was carried", () => {
+    const a = app();
+    reviewApprove(a, { item: "story:US-001", answer: "Yes" });
+    edit(a, STORY, (t) => t.replace("type: user-stories", "type: user-stories\n  status: draft").replace(/^- \[ \]/gm, "*   [ ]").replace("then they find one with access.", "then they find one with access.   ") + "\n\n\n");
+    assert.ok(!ids(a).includes("story:US-001"), "metadata and formatting do not reopen it");
+    assert.deepEqual(carried(a), ["story:US-001"]);
+    const r = readState(a).reviews.find((x) => x.item === "story:US-001");
+    assert.match(r.snapshot, /^# US-001: Find a river\n\n- \[ \] US-001-AC1/);
+    assert.ok(r.raw && r.raw !== r.hash);
+  });
+
+  // @covers US-152-AC2
+  test("AC2: a change to the meaning reopens it, with a diff of only what changed; approving it again is recorded as reopened", () => {
+    const a = app();
+    reviewApprove(a, { item: "story:US-001", answer: "Yes" });
+    edit(a, STORY, (t) => t.replace("they find one with access", "they find one with public access"));
+    const p = pendingReviews(a).find((x) => x.id === "story:US-001");
+    assert.equal(p.changed, true);
+    assert.match(p.diff, /^- - \[ \] US-001-AC1 — Given rivers nearby, when the angler looks, then they find one with access\.\n\+ - \[ \] US-001-AC1 — .*public access\.\n {2}- \[ \] US-001-AC2/m);
+    assert.doesNotMatch(p.diff, /ddx:/, "no frontmatter in the diff");
+    const shown = cli(a, ["review", "show", "story:US-001"]).stdout;
+    assert.match(shown, /changed since approved[\s\S]*Changed since approved:\n- - \[ \] US-001-AC1/);
+    reviewApprove(a, { item: "story:US-001", answer: "Yes, public access" });
+    assert.deepEqual(metrics(a).reopened, { count: 1, items: ["story:US-001"] });
+  });
+
+  // @covers US-152-AC3
+  test("AC3: an approval recorded before meanings were kept still holds, and a later change reopens it without a diff", () => {
+    const a = app();
+    const text = readFileSync(join(a, STORY), "utf8");
+    const s = readState(a);
+    s.reviews = [{ item: "story:US-001", hash: createHash("sha256").update(text).digest("hex").slice(0, 16), answer: "Yes", at: "2026-10-01T00:00:00Z" }];
+    writeState(a, s);
+    assert.ok(!ids(a).includes("story:US-001"));
+    edit(a, STORY, (t) => t.replace("Find a river", "Find a river nearby"));
+    const p = pendingReviews(a).find((x) => x.id === "story:US-001");
+    assert.deepEqual([p.changed, p.diff], [true, undefined]);
+  });
+});
+
+describe("US-153: foundations reviewed deliberately, what is built from them as one coverage map, records as decisions", () => {
+  // @covers US-153-AC1
+  test("AC1: review lists foundations and built items apart; records need no approval and hold no checkpoint", () => {
+    const a = app();
+    writeFileSync(join(a, "notes.txt"), "interview notes");
+    evidenceAdd(a, { file: "notes.txt", kind: "interview", study: "anglers" });
+    const r = reviewList(a);
+    assert.deepEqual(r.foundations, ["brief", "user:weekend-anglers", "user:guides", "job:find-a-river", "job:go-back-to-a-river", "story:US-001", "story:US-002", "decision:ADR-001"]);
+    assert.deepEqual(r.derived, ["task:T-1", "task:T-2", "journey:J-find", "journey:J-saved", "screen:map", "screen:detail", "screen:saved"]);
+    assert.deepEqual(r.records, ["evidence:anglers"]);
+    assert.match(r.next, /^Show the brief table \(ux-builder-design review table brief\), every row in full/);
+    const text = cli(a, ["review"]).stdout;
+    assert.match(text, /Foundations, a table per kind:\n {2}step 1 {2}brief[\s\S]*Built from them, as the coverage map:\n {2}step 3 {2}task:T-1/);
+    for (const k of ["brief", "user", "job", "story"]) reviewApprove(a, { kind: k, answer: "Yes" });
+    reviewApprove(a, { item: "map", answer: "Yes", accept: [] });
+    assert.equal(checkpoint(a, { id: "core-1", answer: "Yes" }).checkpoint.status, "passed", "the evidence record held nothing");
+  });
+
+  // @covers US-153-AC2
+  test("AC2: a foundation kind is one table, approved at once in the person's words; open feedback refuses it; built kinds have no table", () => {
+    const a = app();
+    const t = json(a, ["review", "table", "user"]);
+    assert.deepEqual(t.items.map((i) => [i.id, i.status]), [["user:weekend-anglers", "awaiting review"], ["user:guides", "awaiting review"]]);
+    assert.match(cli(a, ["review", "table", "user"]).stdout, /user:weekend-anglers: Weekend anglers \(awaiting review; docs\/helix\/01-frame\/prd\.md\)\n\nuser: Weekend anglers\n[\s\S]*user:guides: Guides[\s\S]*2 awaiting review: ux-builder-design review approve --kind user/);
+    reviewFeedback(a, { item: "user:guides", text: "Guides use it on a phone too" });
+    assert.match(cli(a, ["review", "approve", "--kind", "user", "--answer", "Yes"]).stderr, /user:guides has feedback not yet addressed: FB-1/);
+    cli(a, ["review", "respond", "FB-1", "--text", "Context now says phone or desk"]);
+    const ok = json(a, ["review", "approve", "--kind", "user", "--answer", "Yes, those two"]);
+    assert.deepEqual(ok.items, ["user:weekend-anglers", "user:guides"]);
+    assert.deepEqual(readState(a).reviews.map((r) => [r.item, r.via, r.answer]), [["user:weekend-anglers", "table", "Yes, those two"], ["user:guides", "table", "Yes, those two"]]);
+    assert.equal(cli(a, ["review", "table", "screen"]).status, 2);
+    assert.match(cli(a, ["review", "approve", "--kind", "task", "--answer", "Yes"]).stderr, /built items are approved with the coverage map/);
+  });
+
+  // @covers US-153-AC3
+  test("AC3: the coverage map traces each job to its tasks, journeys and screens; its exceptions must be fixed or accepted before it approves every built item", () => {
+    const a = app();
+    edit(a, "docs/helix/01-frame/prd.md", (t) => `${t}| Plan a trip | low | none | low | assumed |\n`);
+    edit(a, "docs/ux-builder/blueprint/app.blueprint.json", (t) => { const bp = JSON.parse(t); bp.screens.push({ id: "settings", title: "Settings", pattern: "Form" }); return JSON.stringify(bp); });
+    stateSet(a, { path: "assumptions[+]", value: { text: "Anglers carry phones at the river" } });
+    const m = coverageMap(a);
+    assert.deepEqual(m.rows[0], { job: "find-a-river", title: "Find a river", tasks: ["T-1"], journeys: ["J-find"], screens: ["map", "detail"] });
+    assert.deepEqual(m.exceptions.map((e) => e.id), ["gap:plan-a-trip", "untraced:screen:settings", "assumption:A-1"]);
+    const text = cli(a, ["review", "map"]).stdout;
+    assert.match(text, /^ {2}Find a river\n {4}tasks T-1; journeys J-find; screens map, detail/m);
+    assert.match(text, /Exceptions to look at one by one \(3\):\n {2}gap:plan-a-trip: the need "Plan a trip" has no task serving it\n {2}untraced:screen:settings: screen settings \("Settings"\) is on no journey/);
+    const refused = cli(a, ["review", "approve", "map", "--answer", "Looks right"]);
+    assert.equal(refused.status, 2);
+    assert.match(refused.stderr, /exceptions the person has not seen through: gap:plan-a-trip \(the need "Plan a trip" has no task serving it\); untraced:screen:settings/);
+    // With a solution design, the approved map is proposed as its Experience Traceability (ADR-042).
+    mkdirSync(join(a, "docs/helix/02-design/solution-designs"), { recursive: true });
+    writeFileSync(join(a, "docs/helix/02-design/solution-designs/SD-001-rivers.md"), "---\nddx:\n  id: SD-001\n  type: solution-design\n---\n\n# SD-001: Rivers\n\n## Traceability\n\n| Requirement | Component |\n|---|---|\n| FR-1 | map |\n\n## Risks\n\n- None\n");
+    const ok = json(a, ["review", "approve", "map", "--answer", "Fine; trips come later", "--accept", "gap:plan-a-trip", "--accept", "untraced:screen:settings", "--accept", "assumption:A-1"]);
+    assert.equal(ok.items.length, 8);
+    assert.equal(ok.traceability.path, "docs/helix/02-design/solution-designs/SD-001-rivers.md");
+    const trace = sectionOf(currentText(a, ok.traceability.path).text, "Experience Traceability", 3);
+    assert.match(trace, /^\| Need \| Task \| Flow \| View \|$/m);
+    assert.match(trace, /^\| Find a river \| Find a river to fish this weekend on the River map \| – \| map \|$/m);
+    assert.match(trace, /^\| Plan a trip \| none yet \| – \| – \|$/m);
+    assert.match(currentText(a, ok.traceability.path).text, /## Traceability\n\n\| Requirement \| Component \|[\s\S]*### Experience Traceability[\s\S]*## Risks/, "inside Traceability, its table kept");
+    assert.deepEqual(reviewList(a).derived, []);
+    assert.deepEqual(coverageMap(a).exceptions.map((e) => e.id), ["gap:plan-a-trip", "untraced:screen:settings"], "an accepted assumption is not asked again");
+  });
+
+  // @covers US-153-AC4
+  test("AC4: after the map is approved, only what changed comes back: the changed item with its diff", () => {
+    const a = app();
+    reviewApprove(a, { item: "map", answer: "Yes" });
+    edit(a, "docs/ux-builder/blueprint/app.blueprint.json", (t) => { const bp = JSON.parse(t); bp.journeys[1].entry = "map"; return JSON.stringify(bp); });
+    const m = coverageMap(a);
+    assert.deepEqual(m.pending, ["journey:J-saved"]);
+    assert.match(m.changed[0].diff, /^- entry: saved\n\+ entry: map$/m);
+    assert.match(cli(a, ["review", "map"]).stdout, /Changed since approved:\n {2}journey:J-saved\n {6}task: T-2\n {4}- entry: saved\n {4}\+ entry: map\n[\s\S]*Approving the map approves 1 built item: journey:J-saved\./);
+  });
+
+  // @covers US-153-AC5
+  test("AC5: the skill reviews foundations a table per kind, built items as the map, and records only as decisions", () => {
+    assert.match(SKILL, /\*\*Three tiers of review\.\*\*/);
+    assert.match(SKILL, /`ux-builder-design review table <kind>`/);
+    assert.match(SKILL, /`ux-builder-design review map`/);
+    assert.match(SKILL, /Never ask the person to approve the same content twice/);
+  });
+});
+
+describe("US-154: the intake asked together, the budget shown, and the guide's own time measured", () => {
+  // @covers US-154-AC1
+  // @covers US-172-AC7
+  test("AC1: intake asks what the sources do not answer, together, and lists what to confirm from them", () => {
+    const empty = tempApp();
+    const r = intake(empty);
+    assert.deepEqual(r.ask, ["product", "users", "outcome", "jobs", "constraints", "use", "gives", "sees", "rules", "sources"]);
+    // Amended 2026-10-31 (session 2): the facts only the person knows, and the business rules, are asked at intake.
+    assert.match(r.text, /How often does each kind of person come back to it, and on what device/);
+    // Amended 2026-11-01 (sessions 3 and 4): what each person sees about the others, and where it comes from.
+    // @covers US-174-AC1
+    assert.match(r.text, /What does each person need to see about the others/);
+    assert.match(r.text, /What are its rules: who may do what, what happens to other people when something changes/);
+    assert.match(r.text, /^Ask together, in one message; a narrative answer is fine, and a part they skip becomes an assumption:\n {2}1\. What is the product/);
+    const a = app();
+    // The kit's PRD holds the needs; the brief answers product, users and outcome.
+    const k = intake(a);
+    assert.deepEqual(k.confirm, [{ id: "product", from: "docs/ux-builder/brief.md" }, { id: "users", from: "docs/ux-builder/brief.md" }, { id: "outcome", from: "docs/ux-builder/brief.md" }, { id: "jobs", from: "docs/helix/01-frame/prd.md" }, { id: "constraints", from: "docs/helix/01-frame/prd.md" }]);
+    assert.deepEqual(k.ask, ["use", "gives", "sees", "rules", "sources"]);
+    // Rules HELIX already defines are confirmed, not asked.
+    edit(a, "docs/helix/01-frame/prd.md", (t) => `${t}\n## Business Rules\n\n**BR-1** — Only public stretches can be saved.\n`);
+    assert.deepEqual(intake(a).ask, ["use", "gives", "sees", "sources"]);
+    assert.match(cli(a, ["intake"]).stdout, /Read first, then confirm in one line each:\n {2}product: from docs\/ux-builder\/brief\.md/);
+    assert.match(SKILL, /\*\*Ask the intake together\.\*\*/);
+  });
+
+  // @covers US-154-AC2
+  test("AC2: the budget counts the decisions left before the first prototype, and falls as they are made", () => {
+    // Amended 2026-10-31 (ADR-043): every step ends with a prototype, so the budget counts this step's
+    // decisions before its prototype, and the agent's drafting and checking as well as the person's time.
+    const a = app();
+    writeState(a, { ...readState(a), step: 2 });
+    const before = budget(a);
+    assert.deepEqual(before.decisions, ["the target users table", "the jobs table", "your decision on the step 2 prototype"]);
+    assert.deepEqual([before.perDecision, before.agentMinutes, before.minutes, before.basis], [3, 10, 19, "default"]);
+    for (const k of ["user", "job"]) reviewApprove(a, { kind: k, answer: "Yes" });
+    assert.equal(budget(a).count, 1);
+    assert.match(cli(a, ["status"]).stdout, /About 1 decision before the step 2 prototype, roughly 13 minutes: 3 of your time and 10 of the agent's drafting and checking\. Decisions: your decision on the step 2 prototype\./);
+  });
+
+  test("the budget learns this design's pace, and status says when a step runs over its estimate", () => {
+    const a = app();
+    const t0 = Date.parse("2026-10-31T09:00:00.000Z"), at = (min) => new Date(t0 + min * 60000).toISOString();
+    for (let k = 0; k < 6; k++) logTurn(a, { kind: "decision", at: at(k * 6) });
+    const b = budget(a);
+    assert.equal(b.basis, "recorded");
+    assert.equal(b.perDecision, 6, "six minutes between decisions, as recorded");
+    const s = status(a);
+    assert.equal(s.estimate.estimate, b.minutes, "the first status records the estimate");
+    assert.ok(!s.estimate.over);
+  });
+
+  // @covers US-154-AC3
+  test("AC3: metrics count turns, approvals before testing, reopened and carried approvals, and minutes to the first prototype, against the targets", () => {
+    const a = app();
+    const at = (m) => new Date(Date.UTC(2026, 9, 27, 10, m)).toISOString();
+    logTurn(a, { kind: "answer", at: at(0) });
+    reviewApprove(a, { kind: "user", answer: "Yes", now: at(4) });
+    logTurn(a, { kind: "approval", at: at(4) });
+    logTurn(a, { kind: "other", note: "go on", at: at(6) });
+    logTurn(a, { kind: "decision", at: at(8) });
+    mark(a, { name: "prototype", at: at(16) });
+    logTurn(a, { kind: "correction", at: at(25) });
+    const m = metrics(a);
+    assert.deepEqual([m.turns, m.byKind.other, m.meaningfulShare, m.approvals, m.approvalsBeforeTesting, m.minutesToPrototype], [5, 1, 0.8, 1, 1, 16]);
+    assert.deepEqual(m.targets.map((t) => t.met), [true, true, true, true]);
+    assert.equal(cli(a, ["metrics", "turn", "--kind", "chat"]).status, 2);
+    const text = cli(a, ["metrics"]).stdout;
+    assert.match(text, /Turns: 5 \(1 answer, 1 decision, 1 approval, 1 correction, 1 other\); 80% new information or decisions\./);
+    assert.match(text, /First prototype: 16 active minutes/);
+    assert.match(text, /met: at most 10 approvals before testing \(1\)/);
+    assert.match(SKILL, /`ux-builder-design metrics turn --kind/);
+  });
+});
+
+describe("US-155: every claim that shapes the design names its source", () => {
+  const withEvidence = () => { const a = app(); writeFileSync(join(a, "notes.txt"), "notes"); evidenceAdd(a, { file: "notes.txt", kind: "observation", study: "anglers" }); return a; };
+
+  // @covers US-155-AC1
+  test("AC1: a claim is proposed with its source, basis and confidence in the study's Findings > Claims, HELIX's columns; one without is refused", () => {
+    const a = withEvidence();
+    const C = ["evidence", "claim", "add", "--study", "anglers"];
+    assert.equal(cli(a, [...C, "--text", "Ranking is by distance", "--basis", "observed", "--confidence", "high"]).status, 2);
+    assert.match(cli(a, [...C, "--text", "Ranking is by distance", "--source", "src/rank.js:12", "--basis", "seen", "--confidence", "high"]).stderr, /the basis starts with observed or inferred/);
+    const r = json(a, [...C, "--text", "Ranking is by distance | then rating", "--source", "src/rank.js:12", "--basis", "observed in the code", "--confidence", "high", "--contradicts", "the help page says rating"]);
+    assert.equal(r.claim, "Ranking is by distance | then rating");
+    const claims = sectionOf(currentText(a, r.path).text, "Claims", 3);
+    assert.equal(claims, "| Claim | Source | Basis | Confidence | Direction | Verified | Contradicting | Unknown |\n|---|---|---|---|---|---|---|---|\n| Ranking is by distance \\| then rating | src/rank.js:12 | observed in the code | high | – | no | the help page says rating | – |");
+    assert.equal(validate(a).valid, true, JSON.stringify(validate(a).problems));
+  });
+
+  // @covers US-155-AC2
+  test("AC2: a direction-changing claim not checked against its source is a warning until it is verified or marked low confidence; a row with no source fails validate", () => {
+    const a = withEvidence();
+    const r = claimAdd(a, { study: "anglers", text: "Assigners are notified on every change", source: "subagent summary of src/notify", basis: "inferred", confidence: "medium", direction: "refutes: notify on assignment only" });
+    assert.match(r.warnings[0], /anglers: "Assigners are notified on every change" changes the design's direction but was not checked against its source/);
+    assert.match(validate(a).warnings.map((w) => w.message).join("\n"), /"Assigners are notified on every change" changes the design's direction/);
+    claimVerify(a, { study: "anglers", claim: "Assigners are notified", confidence: "high" });
+    assert.equal(validate(a).warnings.filter((w) => /Assigners/.test(w.message)).length, 0);
+    claimAdd(a, { study: "anglers", text: "Most users are on phones", source: "P2 remark", basis: "inferred", confidence: "low", direction: "weakens: desktop first" });
+    assert.equal(validate(a).warnings.filter((w) => /phones/.test(w.message)).length, 0, "low confidence is labelled uncertain");
+    proposeChange(a, r.path, (t) => t.replace("| Most users are on phones | P2 remark |", "| Most users are on phones | – |"));
+    assert.match(validate(a).problems.map((p) => p.message).join("\n"), /anglers: "Most users are on phones" has no source/);
+    assert.match(SKILL, /never relay a\s+subagent's summary as fact/);
+  });
+});
+
+describe("US-160: advance does the safe work and stops at the one decision the person must make", () => {
+  // @covers US-160-AC1
+  test("AC1: a new design stops at the intake; then the foundations a table per kind; then the map; then core-1; then core-2", () => {
+    const a = app();
+    assert.equal(advance(a).decision.kind, "intake");
+    reviewApprove(a, { item: "brief", answer: "Yes" });
+    let d = advance(a).decision;
+    assert.deepEqual([d.kind, d.table, d.items], ["table", "user", ["user:weekend-anglers", "user:guides"]]);
+    assert.equal(d.record, 'ux-builder-design review approve --kind user --answer "<their words>"');
+    approveFoundations(a);
+    setStep(a, { to: "3" });
+    assert.equal(advance(a).decision.kind, "map");
+    reviewApprove(a, { item: "map", answer: "Yes" });
+    assert.deepEqual([advance(a).decision.kind, advance(a).decision.checkpoint], ["checkpoint", "core-1"]);
+    checkpoint(a, { id: "core-1", answer: "Yes" });
+    assert.equal(advance(a).decision.checkpoint, "core-2");
+  });
+
+  // @covers US-160-AC2
+  test("AC2: it says what it did, what it checked, the agent's own work first, the decision with a recommendation and what follows; it records no approval", () => {
+    const a = app();
+    reviewApprove(a, { item: "brief", answer: "Yes" });
+    edit(a, STORY, (t) => t.replace("type: user-stories", "type: user-stories\n  status: draft"));
+    reviewApprove(a, { kind: "story", answer: "Yes" });
+    edit(a, STORY, (t) => t.replace("status: draft", "status: approved"));
+    writeFileSync(join(a, "notes.txt"), "notes");
+    evidenceAdd(a, { file: "notes.txt", kind: "observation", study: "anglers" });
+    claimAdd(a, { study: "anglers", text: "Anglers search by river name", source: "agent summary", basis: "inferred", confidence: "medium", direction: true });
+    const before = readFileSync(join(a, ".ux-builder/design-state.json"), "utf8");
+    const r = cli(a, ["advance", "--until-decision"]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /^Step 1 of 8: Define intent\.\nDone: kept 1 approval through a formatting or metadata change: story:US-001\.\nDone: worked out the coverage map: 2 jobs, 0 exceptions\.\nChecked: \d+ design documents?: no problems, \d+ warnings\.\nBefore asking, the agent must:\n {2}check 1 direction-changing claim against its source before showing it: "Anglers search by river name" \(anglers\)/);
+    assert.match(r.stdout, /Decision for the person: approve the user table \(2 items\)\n {2}Show: ux-builder-design review table user, every row in full\n {2}Recommended: .+\n {2}Record: .+\n {2}After: the next foundation table \(job\)\nAbout \d+ decisions? (?:left|before the step)/);
+    assert.equal(readFileSync(join(a, ".ux-builder/design-state.json"), "utf8"), before, "no approval recorded");
+    assert.equal(cli(a, ["advance"]).status, 2);
+    assert.match(SKILL, /`ux-builder-design advance --until-decision`/);
+  });
+});
+
+describe("VIP List session 1: the whole session is measured, even when no turn is logged by hand", () => {
+  test("commands that take the person's words record their turns; a declined `metrics turn` leaves them counted", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "Approve users" });
+    checkpoint(a, { id: "experiment", answer: "Not yet", declined: true });
+    const r = metrics(a);
+    assert.equal(r.turns, 3);
+    assert.deepEqual([r.byKind.approval, r.byKind.decision], [2, 1]);
+  });
+
+  test("an approval logged by hand right after the command recorded it is not counted twice", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Yes" });
+    assert.ok(logTurn(a, { kind: "approval" }).merged);
+    assert.equal(metrics(a).turns, 1);
+    logTurn(a, { kind: "question" });
+    assert.equal(metrics(a).turns, 2);
+  });
+
+  test("approvals are counted per turn: one message approving two kinds is one, the same words in two messages are two", () => {
+    const a = app();
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "And the users", sameTurn: true });
+    assert.equal(metrics(a).personApprovals, 1);
+    reviewApprove(a, { kind: "job", answer: "Approve brief" });
+    assert.equal(metrics(a).personApprovals, 2);
+  });
+
+  test("active time starts at the first command of the session, not the first approval", () => {
+    const a = app();
+    json(a, ["overview"]);
+    const first = JSON.parse(readFileSync(join(a, ".ux-builder/metrics.jsonl"), "utf8").split("\n")[0]);
+    assert.equal(first.type, "command");
+    assert.equal(first.command, "overview");
+  });
+});
+
+describe("VIP List session 1: each approval is asked for once", () => {
+  test("the brief is not approved while a question raised after it was drafted is open; regenerated, it is", () => {
+    const a = app();
+    stateSet(a, { path: "questions[+]", value: { text: "Can two guests share one pass?" } });
+    assert.throws(() => reviewApprove(a, { kind: "brief", answer: "Approve brief" }), /drafted before this question was raised: Q-1 .*Nothing was recorded/s);
+    cli(a, ["brief"]);
+    assert.equal(reviewApprove(a, { kind: "brief", answer: "Approve brief" }).approved, true);
+  });
+
+  test("the brief keeps its approval when it changes only because target users the person has approved changed", () => {
+    const a = app();
+    cli(a, ["brief"]);
+    reviewApprove(a, { kind: "brief", answer: "Approve brief" });
+    reviewApprove(a, { kind: "user", answer: "Approve users" });
+    edit(a, "docs/helix/01-frame/prd.md", (t) => t.replace("On a phone at the river", "On a phone at the river, about three times a month"));
+    reviewTable(a, { kind: "user" });
+    reviewApprove(a, { kind: "user", answer: "Yes, three times a month" });
+    cli(a, ["brief"]);
+    assert.ok(!ids(a).includes("brief"), "the brief's change came from approved users");
+    assert.ok(carried(a).includes("brief"));
+    // A change of its own still reopens it.
+    stateSet(a, { path: "assumptions[+]", value: { text: "Anglers fish at dawn", section: "outcome" } });
+    cli(a, ["brief"]);
+    assert.ok(ids(a).includes("brief"));
+  });
+});

@@ -38,7 +38,7 @@ describe("US-014", () => {
     const manifest = JSON.parse(read("packages/tokens/dist/manifest.json"));
     assert.deepEqual(cat.themes.map((t) => t.name).sort(), manifest.themes.map((t) => t.name).sort());
     assert.equal(cat.icons.length, 33);
-    assert.deepEqual(Object.fromEntries(cat.designSystems.map((d) => [d.name, d.iconSet])), { carbon: "carbon", databricks: "lucide", fluent: "fluent", material: "material" });
+    assert.deepEqual(Object.fromEntries(cat.designSystems.map((d) => [d.name, d.iconSet])), { carbon: "carbon", databricks: "lucide", fluent: "fluent", material: "material", "vk-carbon": "carbon", "vk-databricks": "lucide", "vk-fluent": "fluent", "vk-material": "material" });
   });
 
   test("AC1: the catalogue lists every pattern export with its import, and every variant point with each design system's choice", () => {

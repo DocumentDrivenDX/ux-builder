@@ -114,7 +114,7 @@ export function criteria(modalities) {
   const before = await root.getAttribute("data-theme");
   const options = await page.getByLabel("Theme").locator("option").evaluateAll((o) => o.map((x) => x.value));
   // Any other theme with a dark appearance (plain has only light).
-  const other = options.find((v) => v !== before && v !== "plain");
+  const other = options.find((v) => v !== before && v !== "vk-plain");
   await page.getByLabel("Theme").selectOption(other);
   await expect(root).toHaveAttribute("data-theme", other);
   await page.getByRole("radio", { name: "Dark" }).click();

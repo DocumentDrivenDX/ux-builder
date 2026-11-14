@@ -1,9 +1,0 @@
-{
-  "$schema": "../schema/theme.schema.json",
-  "$description": "Praxis Carbon: brand praxis on the shared carbon design system.",
-  "name": "praxis-carbon",
-  "title": "Praxis Carbon",
-  "brand": "praxis",
-  "default": "dark",
-  "designSystem": "carbon"
-}

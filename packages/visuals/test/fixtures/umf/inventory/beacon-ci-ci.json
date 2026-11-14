@@ -1,0 +1,74 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-ci-ci",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-ci-ci",
+      "kind": "flow",
+      "form": "pipeline",
+      "title": "CI",
+      "question": "What runs, in what order, when ci.yml starts?",
+      "takeaway": "Starts on pull_request, push.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/workflows/ci.yml",
+        "digest": "sha256:2a117bf9b9372c2c4e10d26c1abc40bc0c994bce5084a4c0c4b4af00036fe9c2"
+      },
+      "nodes": [
+        {
+          "id": "lint",
+          "label": "lint",
+          "detail": "ubuntu-latest"
+        },
+        {
+          "id": "test",
+          "label": "test",
+          "detail": "ubuntu-latest"
+        },
+        {
+          "id": "migrations",
+          "label": "Migrations apply cleanly",
+          "detail": "ubuntu-latest"
+        },
+        {
+          "id": "build",
+          "label": "build",
+          "detail": "ubuntu-latest"
+        },
+        {
+          "id": "deploy",
+          "label": "Deploy to the app platform",
+          "detail": "ubuntu-latest"
+        }
+      ],
+      "edges": [
+        {
+          "id": "lint--build",
+          "from": "lint",
+          "to": "build"
+        },
+        {
+          "id": "test--build",
+          "from": "test",
+          "to": "build"
+        },
+        {
+          "id": "migrations--build",
+          "from": "migrations",
+          "to": "build"
+        },
+        {
+          "id": "build--deploy",
+          "from": "build",
+          "to": "deploy"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

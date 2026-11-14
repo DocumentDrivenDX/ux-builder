@@ -1,5 +1,5 @@
 {
-  "$comment": "The guided design loop's terms (FEAT-018 GDL-79): what each means, and why it is valuable to the person. The agent explains each the first time it comes up; ux-builder-design explain prints them.",
+  "$comment": "The guided design loop's terms (FEAT-018 GDL-79): what each means, and why it is valuable to the person. The agent explains each the first time it comes up; ux-builder-design explain prints them. ids: the short IDs the guide shows, what kind of thing each names and where it lives; the agent names the kind with an ID the first time it shows one. ids: only HELIX's own IDs and participant pseudonyms (ADR-042 decision 5); everything else is named by what it says.",
   "terms": [
     {
       "term": "checkpoint",
@@ -18,6 +18,18 @@
       "step": 0,
       "means": "The app's requirements and design documents (docs/helix/): the product vision, the PRD, features and user stories.",
       "why": "The design follows what the product is meant to do, and changes to requirements go through a reviewed proposal, never a silent edit."
+    },
+    {
+      "term": "foundations",
+      "step": 0,
+      "means": "What the rest of the design is built on: the experience brief, target users, jobs, user stories, business rules and decisions. You review each kind as one table, every row in full.",
+      "why": "A mistake here spreads into every journey, screen and test, so this is where your careful attention pays most; what is built from the foundations needs only its exceptions checked."
+    },
+    {
+      "term": "coverage map",
+      "step": 0,
+      "means": "One view of what is built from the foundations: each job, the tasks that serve it, their journeys and the screens they walk, with the exceptions (a job nothing serves, a screen on no journey, a new assumption) listed one by one.",
+      "why": "You check that nothing was missed or added without reading every task and screen again; approving the map approves them."
     },
     {
       "term": "experience brief",
@@ -122,6 +134,12 @@
       "why": "It decides which patterns, navigation and rules apply, so it is settled before any screen is drawn."
     },
     {
+      "term": "app frame",
+      "step": 5,
+      "means": "What surrounds every screen of a web app: nothing (just the screen), a top bar with the app's name, navigation across the top, or a side menu. You choose it with the modality.",
+      "why": "A one-screen app needs no menus, and an app with many destinations needs a side menu; the frame should fit the app, not a template."
+    },
+    {
       "term": "size class",
       "step": 5,
       "means": "A range of screen widths the app must work at: compact (phones), medium (small tablets), expanded (tablets and small laptops), large and extra-large (desktops).",
@@ -144,6 +162,18 @@
       "step": 5,
       "means": "A plain drawing of a screen's layout and content, without the final look.",
       "why": "It shows structure and priorities quickly, before effort goes into visual detail."
+    },
+    {
+      "term": "step prototype",
+      "step": 1,
+      "means": "A clickable prototype drawn at the end of every step from what you have confirmed so far, with the agent's assumptions for the rest; checked for accessibility and usability before you see it.",
+      "why": "You react to screens from the first step instead of documents, and decide at each step whether to go on, revise it, or have the agent finish."
+    },
+    {
+      "term": "finish for me",
+      "step": 1,
+      "means": "Your choice at the end of any step to stop being guided: the agent drafts everything the remaining steps would produce, writes every design and HELIX document from it marked as assumed, and lists what it guessed and what to check first.",
+      "why": "Stopping early still gives you a complete, consistent design, and you know exactly which parts are confirmed and which are guesses."
     },
     {
       "term": "exploratory prototype",
@@ -178,8 +208,20 @@
     {
       "term": "evaluation report",
       "step": 7,
-      "means": "The results of an evaluation: the method, the tasks, what people did against what was predicted, findings by journey and what was not tested (UER-1).",
+      "means": "The results of an evaluation: the method, the tasks, what people did against what was predicted, findings by journey and what was not tested; run output, kept out of the repository.",
       "why": "It is the evidence for deciding what to fix and whether the design is ready to build."
+    },
+    {
+      "term": "UI audit",
+      "step": 7,
+      "means": "An automatic check of the running app in every theme and in light and dark: the interaction and AI rules, contrast, and anything that is not the theme's (a hard-coded colour, a stray font). `npm run audit` runs it.",
+      "why": "It catches broken and off-brand screens in minutes, before anyone spends time testing them."
+    },
+    {
+      "term": "usability assessment",
+      "step": 7,
+      "means": "A walk through each journey from your user stories in the running app, inspecting every screen state, applying usability heuristics and measuring each task, ending in a report with proposed changes. The agent runs it with `ux-builder-audit assess`.",
+      "why": "It shows whether people could actually do what the stories promise, and where they would struggle, before you test with real users."
     },
     {
       "term": "journey event",
@@ -198,6 +240,65 @@
       "step": 8,
       "means": "Showing a changed design to some users, measured against a success metric and guardrails, to test a hypothesis (EXP-1).",
       "why": "A change is kept because it measurably helped, not because it seemed better."
+    }
+  ],
+  "ids": [
+    {
+      "id": "US-<n>-AC<m>",
+      "pattern": "^US-\\d+-AC\\d+$",
+      "kind": "acceptance criterion",
+      "term": "acceptance criterion",
+      "where": "its user story, in HELIX (docs/helix/)"
+    },
+    {
+      "id": "US-<n>",
+      "pattern": "^US-\\d+$",
+      "kind": "user story",
+      "term": "user story",
+      "where": "HELIX's user stories (docs/helix/)"
+    },
+    {
+      "id": "FEAT-<n>",
+      "pattern": "^FEAT-\\d+$",
+      "kind": "feature specification",
+      "where": "HELIX's features (docs/helix/)"
+    },
+    {
+      "id": "BR-<n>",
+      "pattern": "^BR-\\d+$",
+      "kind": "business rule",
+      "term": "business rule",
+      "where": "defined once in HELIX; the blueprint designs how the user meets it"
+    },
+    {
+      "id": "ADR-<nnn>",
+      "pattern": "^ADR-\\d+$",
+      "kind": "decision, a HELIX ADR (a UX decision is tagged area:ui)",
+      "where": "HELIX's ADRs (docs/helix/02-design/adr/)"
+    },
+    {
+      "id": "UF-<n>",
+      "pattern": "^UF-\\d+$",
+      "kind": "user flow, one per feature",
+      "where": "HELIX's user flows (docs/helix/02-design/flows/)"
+    },
+    {
+      "id": "UF-<n>-<nn>-<view>",
+      "pattern": "^UF-\\d+-\\d+-[a-z0-9-]+$",
+      "kind": "wireframe of one view in a user flow",
+      "where": "beside its user flow (docs/helix/02-design/flows/UF-<n>-<feature>/)"
+    },
+    {
+      "id": "UJM-<n>",
+      "pattern": "^UJM-\\d+$",
+      "kind": "user journey map",
+      "where": "HELIX's journey maps (docs/helix/01-frame/journey-maps/)"
+    },
+    {
+      "id": "P<n>",
+      "pattern": "^P\\d+$",
+      "kind": "test participant, by pseudonym",
+      "where": "test sessions; the real name never leaves this machine"
     }
   ]
 }

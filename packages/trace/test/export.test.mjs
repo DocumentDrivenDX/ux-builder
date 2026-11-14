@@ -21,7 +21,7 @@ const FIXTURE_ASSESSMENT = { run: "R-20261022-0930", compare: [{ rule: "list.emp
 /* The CONTRACT-007 fixture: created, guidance, failing then passing checks, a decision, a transcript, change, outcome. */
 function fixtureEpisode(app, { goal = "Review screen" } = {}) {
   const id = openEpisode(app, { trigger: "create", goal: { text: goal, stories: ["US-003"], screens: ["review"], journeys: ["J-review"] }, agent: { name: "claude-code", model: "claude-opus-5-5" } });
-  appendEvent(app, "created", { modalities: ["responsive-web"], theme: "databricks", options: { helix: true }, files: 42, blueprint: "sha256:abc" }, { by: "@ux-builder/create-app@0.7.0" });
+  appendEvent(app, "created", { modalities: ["responsive-web"], theme: "vk-databricks", options: { helix: true }, files: 42, blueprint: "sha256:abc" }, { by: "@ux-builder/create-app@0.7.0" });
   appendEvent(app, "guidance", { tool: "get_rules", input: { context: "view", sizeClass: "compact" }, answer: { ruleIds: ["flow.back", "list.empty"], components: ["List"], recipes: ["list-detail"], guidanceHash: "sha256:def", bytes: 2048 } }, { by: "@ux-builder/mcp@0.6.0" });
   for (const [status, findings] of [["fail", [{ ruleId: "ux-builder/no-hex", severity: "error", count: 2 }]], ["pass", []]]) appendEvent(app, "check", { check: "lint", attempt: attemptOf(app, "lint"), status, findings }, { by: "@ux-builder/ui@0.9.0" });
   appendEvent(app, "check", { check: "audit", attempt: attemptOf(app, "audit"), status: "warn", findings: [{ ruleId: "theme.radius", severity: "minor", count: 1 }], report: "audit-report/report.json", verdicts: FIXTURE_VERDICTS, assessment: FIXTURE_ASSESSMENT }, { by: "@ux-builder/audit@0.4.0" });

@@ -66,12 +66,12 @@ test("US-001-AC6: the schema check fails on a brand whose artwork file is missin
   const copy = join(tmp, "repo");
   cpSync(join(ROOT, "tokens"), join(copy, "tokens"), { recursive: true });
   cpSync(join(ROOT, "brand"), join(copy, "brand"), { recursive: true });
-  const p = join(copy, "tokens/brands/praxis.brand.json");
+  const p = join(copy, "tokens/brands/vk-praxis.brand.json");
   const brand = JSON.parse(readFileSync(p, "utf8"));
   brand.appearances.dark.brand["logo-image"].$value = "../../brand/praxis/no-such-logo.png";
   writeFileSync(p, JSON.stringify(brand));
   const r = run("validate-schemas.mjs", "--root", copy);
   assert.equal(r.status, 1, r.stdout);
-  assert.match(r.stdout + r.stderr, /tokens\/brands\/praxis\.brand\.json: dark brand\.logo-image points to a missing file \.\.\/\.\.\/brand\/praxis\/no-such-logo\.png/);
+  assert.match(r.stdout + r.stderr, /tokens\/brands\/vk-praxis\.brand\.json: dark brand\.logo-image points to a missing file \.\.\/\.\.\/brand\/praxis\/no-such-logo\.png/);
   assert.equal(run("validate-schemas.mjs").status, 0, "the real files still pass");
 });

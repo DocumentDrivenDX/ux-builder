@@ -1,0 +1,1137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:umf:visual:1.0.0",
+  "title": "UMF visual vocabulary 1.0.0",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "form",
+    "question"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/id"
+    },
+    "kind": {
+      "enum": [
+        "flow",
+        "sequence",
+        "structure",
+        "state",
+        "timeline",
+        "comparison",
+        "metric"
+      ]
+    },
+    "form": {
+      "enum": [
+        "network",
+        "pipeline",
+        "zoned",
+        "lanes",
+        "lifelines",
+        "ladder",
+        "stack",
+        "tree",
+        "nested",
+        "entities",
+        "machine",
+        "lifecycle",
+        "milestones",
+        "roadmap",
+        "history",
+        "matrix",
+        "quadrant",
+        "before-after",
+        "stat",
+        "bar",
+        "line",
+        "meter"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "takeaway": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audience": {
+      "enum": [
+        "developer",
+        "operator",
+        "user",
+        "data",
+        "executive"
+      ]
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "omissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/group"
+      },
+      "minItems": 1
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      },
+      "minItems": 1
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/edge"
+      },
+      "minItems": 1
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/step"
+      },
+      "minItems": 1
+    },
+    "sequence": {
+      "$ref": "#/$defs/sequence"
+    },
+    "structure": {
+      "$ref": "#/$defs/structure"
+    },
+    "state": {
+      "$ref": "#/$defs/state"
+    },
+    "timeline": {
+      "$ref": "#/$defs/timeline"
+    },
+    "comparison": {
+      "$ref": "#/$defs/comparison"
+    },
+    "metric": {
+      "$ref": "#/$defs/metric"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z0-9]+(?:[_-]+[a-z0-9]+)*$"
+    },
+    "status": {
+      "enum": [
+        "built",
+        "placeholder",
+        "decided",
+        "unknown"
+      ]
+    },
+    "emphasis": {
+      "enum": [
+        "focus",
+        "muted"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contains": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "labelled": {
+      "type": "object",
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "role"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "enum": [
+            "zone",
+            "boundary",
+            "lane",
+            "tier",
+            "region",
+            "phase",
+            "loop",
+            "alternative"
+          ]
+        },
+        "tier": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "parent": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "emphasis": {
+          "$ref": "#/$defs/emphasis"
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "enum": [
+            "actor",
+            "own",
+            "platform",
+            "external",
+            "store",
+            "document"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "emphasis": {
+          "$ref": "#/$defs/emphasis"
+        },
+        "group": {
+          "$ref": "#/$defs/id"
+        },
+        "parent": {
+          "$ref": "#/$defs/id"
+        },
+        "layer": {
+          "$ref": "#/$defs/id"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        }
+      }
+    },
+    "participant": {
+      "type": "object",
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "enum": [
+            "actor",
+            "own",
+            "platform",
+            "external",
+            "store",
+            "document"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "emphasis": {
+          "$ref": "#/$defs/emphasis"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": [
+        "id",
+        "from",
+        "to"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "from": {
+          "$ref": "#/$defs/id"
+        },
+        "to": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "action",
+            "data",
+            "control",
+            "return"
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "emphasis": {
+          "$ref": "#/$defs/emphasis"
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "focus"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "caption": {
+          "type": "string",
+          "minLength": 1
+        },
+        "focus": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "minItems": 1
+        },
+        "when": {
+          "enum": [
+            "throughout",
+            "before",
+            "after",
+            "background",
+            "scheduled",
+            "on-failure",
+            "optional",
+            "other"
+          ]
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 24
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "view": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "sequence": {
+      "type": "object",
+      "required": [
+        "participants",
+        "messages"
+      ],
+      "properties": {
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/participant"
+          },
+          "minItems": 2
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "from",
+              "to",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "from": {
+                "$ref": "#/$defs/id"
+              },
+              "to": {
+                "$ref": "#/$defs/id"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "enum": [
+                  "call",
+                  "return",
+                  "async",
+                  "note"
+                ]
+              },
+              "group": {
+                "$ref": "#/$defs/id"
+              },
+              "status": {
+                "$ref": "#/$defs/status"
+              },
+              "emphasis": {
+                "$ref": "#/$defs/emphasis"
+              },
+              "evidence": {
+                "$ref": "#/$defs/evidence"
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "cardinality": {
+      "enum": [
+        "zero-or-one",
+        "exactly-one",
+        "zero-or-many",
+        "one-or-many"
+      ]
+    },
+    "endpoint": {
+      "type": "object",
+      "required": [
+        "node"
+      ],
+      "properties": {
+        "node": {
+          "$ref": "#/$defs/id"
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "structure": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "layers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/labelled"
+          },
+          "minItems": 1
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "node",
+              "fields"
+            ],
+            "properties": {
+              "node": {
+                "$ref": "#/$defs/id"
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "type": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "keys": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "pk",
+                          "fk",
+                          "uk"
+                        ]
+                      },
+                      "uniqueItems": true
+                    },
+                    "nullable": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "from",
+              "to"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "from": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "to": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fromCardinality": {
+                "$ref": "#/$defs/cardinality"
+              },
+              "toCardinality": {
+                "$ref": "#/$defs/cardinality"
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "required": [
+        "initial",
+        "transitions"
+      ],
+      "properties": {
+        "initial": {
+          "$ref": "#/$defs/id"
+        },
+        "final": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "minItems": 1
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "from",
+              "to",
+              "event"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "from": {
+                "$ref": "#/$defs/id"
+              },
+              "to": {
+                "$ref": "#/$defs/id"
+              },
+              "event": {
+                "type": "string",
+                "minLength": 1
+              },
+              "guard": {
+                "type": "string",
+                "minLength": 1
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "enum": [
+                  "main",
+                  "alternate",
+                  "failure"
+                ]
+              },
+              "status": {
+                "$ref": "#/$defs/status"
+              },
+              "emphasis": {
+                "$ref": "#/$defs/emphasis"
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "required": [
+        "scale"
+      ],
+      "properties": {
+        "scale": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "date"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "periods"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "period"
+                },
+                "periods": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/labelled"
+                  },
+                  "minItems": 1
+                }
+              }
+            }
+          ]
+        },
+        "lanes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/labelled"
+          },
+          "minItems": 1
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "at"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "at": {
+                "type": "string",
+                "minLength": 1
+              },
+              "lane": {
+                "$ref": "#/$defs/id"
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "$ref": "#/$defs/status"
+              },
+              "emphasis": {
+                "$ref": "#/$defs/emphasis"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "start",
+              "end"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "start": {
+                "type": "string",
+                "minLength": 1
+              },
+              "end": {
+                "type": "string",
+                "minLength": 1
+              },
+              "lane": {
+                "$ref": "#/$defs/id"
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "$ref": "#/$defs/status"
+              },
+              "emphasis": {
+                "$ref": "#/$defs/emphasis"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "markers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "at",
+              "kind"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "at": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "enum": [
+                  "today",
+                  "deadline",
+                  "marker"
+                ]
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "required": [
+        "items",
+        "criteria",
+        "values"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "minItems": 2
+        },
+        "criteria": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "measure"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1
+              },
+              "measure": {
+                "enum": [
+                  "text",
+                  "rating",
+                  "support"
+                ]
+              },
+              "max": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 10
+              },
+              "low": {
+                "type": "string",
+                "minLength": 1
+              },
+              "high": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "item",
+              "criterion"
+            ],
+            "properties": {
+              "item": {
+                "$ref": "#/$defs/id"
+              },
+              "criterion": {
+                "$ref": "#/$defs/id"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rating": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "support": {
+                "enum": [
+                  "yes",
+                  "no",
+                  "partial"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "chosen": {
+          "type": "object",
+          "required": [
+            "item",
+            "reason"
+          ],
+          "properties": {
+            "item": {
+              "$ref": "#/$defs/id"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "axes": {
+          "type": "object",
+          "required": [
+            "x",
+            "y"
+          ],
+          "properties": {
+            "x": {
+              "$ref": "#/$defs/id"
+            },
+            "y": {
+              "$ref": "#/$defs/id"
+            }
+          }
+        }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "required": [
+        "unit",
+        "series"
+      ],
+      "properties": {
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "good": {
+          "enum": [
+            "up",
+            "down"
+          ]
+        },
+        "format": {
+          "type": "object",
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "number",
+                "percent",
+                "currency",
+                "duration"
+              ]
+            },
+            "decimals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "compact": {
+              "type": "boolean"
+            }
+          }
+        },
+        "axis": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "time"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "categories"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "category"
+                },
+                "categories": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/labelled"
+                  },
+                  "minItems": 1
+                }
+              }
+            }
+          ]
+        },
+        "series": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "points"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "emphasis": {
+                "$ref": "#/$defs/emphasis"
+              },
+              "points": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "value"
+                  ],
+                  "properties": {
+                    "at": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "minItems": 1
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "target": {
+          "type": "number"
+        },
+        "baseline": {
+          "type": "number"
+        },
+        "comparison": {
+          "type": "object",
+          "required": [
+            "label",
+            "value"
+          ],
+          "properties": {
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

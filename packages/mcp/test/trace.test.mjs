@@ -43,7 +43,7 @@ const ARGS = {
   simplify_blueprint: { blueprint: skeleton("app") },
   score_blueprint: { blueprint: skeleton("app") },
   compare_blueprints: { alternatives: [{ name: "a", blueprint: skeleton("app") }, { name: "b", blueprint: skeleton("app") }] },
-  get_theme: { name: "databricks" }, get_widget: { name: "Button" }, get_pattern: { name: "CollectionList" }, get_token: { name: "color.accent" },
+  get_theme: { name: "vk-databricks" }, get_widget: { name: "Button" }, get_pattern: { name: "CollectionList" }, get_token: { name: "color.accent" },
   list_icons: { query: "pin" }, get_rules: { modalities: ["chat"] }, list_recipes: { job: "review and approve flagged time entries" }, get_recipe: { id: "review-queue" },
   check_blueprint: { blueprint: skeleton("app") }, check_card: { card: CLEAN }, get_guidance: { modalities: ["responsive-web"] },
   propose_from_blueprint: { blueprint: skeleton("app"), path: join(app, "app.blueprint.json") },

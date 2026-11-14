@@ -27,7 +27,7 @@ test("US-035-AC1: the step list shows from the medium size class; below it a pro
   const markup = renderToStaticMarkup(h(Wizard, { steps: ["Client", "Matter", "Billing", "Team", "Review"].map((t) => ({ id: t, title: t, content: h(TextField, { label: t, name: t }) })) }));
   for (const [w, list, bar] of [[390, false, true], [720, true, false]]) {
     const html = join(tmp, `w${w}.html`);
-    writeFileSync(html, `<!doctype html><html data-theme="praxis-carbon"><head>${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}</head><body><div style="inline-size:${w}px">${markup}</div></body></html>`);
+    writeFileSync(html, `<!doctype html><html data-theme="vk-praxis-carbon"><head>${SHEETS.map((s) => `<link rel="stylesheet" href="${pathToFileURL(s)}">`).join("")}</head><body><div style="inline-size:${w}px">${markup}</div></body></html>`);
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     await page.goto(pathToFileURL(html).href);
     const r = await page.evaluate(() => ({ list: document.querySelector(".piq-wizard__steps").checkVisibility(), bar: document.querySelector('.piq-wizard__progress [role="progressbar"]').checkVisibility() }));

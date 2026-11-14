@@ -4,11 +4,11 @@
      npm test --workspace @ux-builder/design */
 
 import assert from "node:assert/strict";
-import fs, { readFileSync, writeFileSync } from "node:fs";
+import fs, { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, test } from "node:test";
 import { syncBuiltinESMExports } from "node:module";
-import { insights, rubric } from "../index.mjs";
+import { currentText, insights, rubric, sectionOf } from "../index.mjs";
 import { cli, PKG } from "./helpers.mjs";
 import { kitApp } from "./kit-fixture.mjs";
 
@@ -38,19 +38,23 @@ function insightsApp() {
   return a;
 }
 
+const RUN = "docs/ux-builder/runs/insights/2026-10-23";
+const DASH = "docs/helix/06-iterate/metrics-dashboard.md";
+
 describe("US-144: read production insights per journey", () => {
   // @covers US-144-AC1
-  test("AC1: insights writes INS-<date>.md with completion, abandonment points, failed searches, feature use and time per step per journey", () => {
+  test("AC1: insights writes the dated insights as run output, with completion, abandonment points, failed searches, feature use and time per step per journey", () => {
     const a = insightsApp();
     const r = json(a, ["insights", "events.jsonl", "--date", "2026-10-23"]);
-    assert.equal(r.path, "docs/ux-builder/insights/INS-2026-10-23.md");
+    assert.equal(r.path, `${RUN}/insights.md`);
     const find = r.journeys.find((j) => j.journey === "J-find");
     assert.deepEqual({ started: find.started, completed: find.completed, abandoned: find.abandoned, failedSearches: find.failedSearches, errors: find.errors, features: find.features, secondsPerStep: find.secondsPerStep },
       { started: 4, completed: 2, abandoned: { 1: 1, 2: 1 }, failedSearches: 1, errors: 1, features: { map: 4, detail: 3 }, secondsPerStep: { "1→2": 20 } });
     const t = readFileSync(join(a, r.path), "utf8");
-    assert.match(t, /^\| J-find \| 4 \| 2 \| 50% \| step 1 \(1\) \| 1 \| 1 \| map 4, detail 3 \| 1→2: 20 \|$/m);
+    assert.match(t, /^\| J-find \| 4 \| 2 \| 50% \| step 1 \(1 left\) \| 1 \| 1 \| map 4, detail 3 \| 1→2: 20 \|$/m);
     assert.match(t, /^\| J-saved \| 1 \| 1 \| 100% \| none \| 0 \| 0 \| saved 1 \| – \|$/m);
-    assert.equal(cli(a, ["validate"]).stdout.includes("INS-2026-10-23.md:"), false, "it validates as an insights document");
+    assert.ok(JSON.parse(readFileSync(join(a, RUN, "insights.json"), "utf8")).journeys.length, "the export's data, beside it");
+    assert.deepEqual(JSON.parse(cli(a, ["validate", "--json"]).stdout).documents.filter((d) => d.path.startsWith("docs/ux-builder/runs/")), [], "run output is not a document");
   });
 
   // @covers US-144-AC2
@@ -59,36 +63,38 @@ describe("US-144: read production insights per journey", () => {
     const r = cli(a, ["insights", "events.jsonl", "--date", "2026-10-23"]);
     assert.equal(r.status, 0);
     assert.match(r.stdout, /unmatched: J-activity \(2 events; not in the blueprint\)/);
-    assert.match(readFileSync(join(a, "docs/ux-builder/insights/INS-2026-10-23.md"), "utf8"), /## Unmatched events\n\n- J-activity: 2 events name a journey the blueprint does not have/);
+    assert.match(readFileSync(join(a, RUN, "insights.md"), "utf8"), /## Unmatched events\n\n- J-activity: 2 events name a journey the blueprint does not have/);
   });
 
   // @covers US-144-AC3
-  test("AC3: support and feedback entries are masked and linked to the journeys they mention, as evidence sources", () => {
+  test("AC3: support and feedback entries are masked and linked to the journeys they mention, in the run output only", () => {
     const a = insightsApp();
     const r = json(a, ["insights", "events.jsonl", "--support", "support.jsonl", "--feedback", "feedback.txt", "--date", "2026-10-23"]);
-    assert.deepEqual(r.sources.map((s) => [s.id, s.kind]), [["EV-1", "analytics"], ["EV-2", "support"], ["EV-3", "feedback"]]);
-    assert.deepEqual(r.linked.map((l) => [l.evidence, l.journeys]), [["EV-2", ["J-find", "J-saved"]], ["EV-3", ["J-saved"]]]);
-    const support = readFileSync(join(a, "docs/ux-builder/evidence/EV-2.md"), "utf8");
-    assert.match(support, /^- \[J-find, J-saved\] "The River details page never shows where to park\. Call me at \[masked:phone\]\."$/m);
-    assert.ok(!support.includes("sam@example.com") && !support.includes("Billing"), "an entry naming no journey is not cited");
-    const feedback = readFileSync(join(a, "docs/ux-builder/evidence/EV-3.md"), "utf8");
-    assert.match(feedback, /^- \[J-saved\] "Saved rivers are hard to find, says P1"$/m);
-    assert.ok(!feedback.includes("Dana"));
-    assert.equal(JSON.parse(cli(a, ["validate", "--json"]).stdout).problems.filter((p) => p.path.startsWith("docs/ux-builder/evidence/")).length, 0);
+    assert.deepEqual(r.sources.map((s) => s.kind), ["analytics", "support", "feedback"]);
+    assert.deepEqual(r.linked.map((l) => [l.kind, l.journeys]), [["support", ["J-find", "J-saved"]], ["feedback", ["J-saved"]]]);
+    const t = readFileSync(join(a, RUN, "insights.md"), "utf8");
+    assert.match(t, /^- support \[J-find, J-saved\]: "The River details page never shows where to park\. Call me at \[masked:phone\]\."$/m);
+    assert.match(t, /^- feedback \[J-saved\]: "Saved rivers are hard to find, says P1"$/m);
+    assert.ok(!t.includes("sam@example.com") && !t.includes("Billing") && !t.includes("Dana"));
+    assert.ok(!currentText(a, DASH).text.includes("park"), "no entry reaches HELIX");
   });
 
   // @covers US-144-AC4
-  test("AC4: the run's sources join the evidence store, and the jobs table's confidence and the rubric's observed column cite them", () => {
+  test("AC4: each journey's funnel is proposed into HELIX's metrics dashboard, a diagnosis into its row, and the rubric's observed column cites the insights", () => {
     const a = insightsApp();
-    json(a, ["insights", "events.jsonl", "--support", "support.jsonl", "--date", "2026-10-23"]);
-    assert.deepEqual(json(a, ["evidence", "list"]).evidence.map((e) => [e.id, e.kind]), [["EV-1", "analytics"], ["EV-2", "support"]]);
-    const jobs = readFileSync(join(a, "docs/ux-builder/jobs.md"), "utf8");
-    assert.match(jobs, /^\| J-1 \| Find a river \| high \| EV-1, EV-2 \| medium \| confirmed \|$/m);
-    assert.match(jobs, /^\| J-2 \| Go back to a river \| medium \| EV-1, EV-2 \| medium \| confirmed \|$/m);
-    assert.equal(cli(a, ["validate"]).status, 0, cli(a, ["validate"]).stdout);
-    const eff = rubric(a).dimensions.find((d) => d.id === "task-effectiveness");
-    assert.equal(eff.observed.value, "60% of 5 journeys completed in production (INS-2026-10-23)");
-    assert.deepEqual(eff.observed.evidence, ["INS-2026-10-23", "EV-1", "EV-2"]);
+    const r = json(a, ["insights", "events.jsonl", "--support", "support.jsonl", "--date", "2026-10-23"]);
+    assert.equal(r.dashboard, DASH);
+    const d = currentText(a, DASH).text;
+    assert.match(d, /^---\nddx:\n  id: metrics-dashboard\n  type: metrics-dashboard\n/);
+    for (const h of ["Decision", "Summary", "Metrics Table", "Interpretation Rules", "Trend Notes", "Journey Funnels", "Follow-Up"]) assert.match(d, new RegExp(`^## ${h}$`, "m"), h);
+    assert.match(sectionOf(d, "Journey Funnels"), /^\| J-find \| 50% of 4 started \| step 1 \(1 left\) \| – \| production events to 2026-10-23 \(docs\/ux-builder\/runs\/insights\/2026-10-23\/insights\.json\) \|$/m);
+    assert.ok(!existsSync(join(a, DASH)), "HELIX is written only by applying the proposal");
+    // A diagnosis with --journey fills that row's Diagnosis.
+    json(a, ["diagnose", "--insight", "2026-10-23", "--journey", "J-find", "--observation", "Half of J-find is abandoned", "--explanation", "The map is slow", "--explanation", "People expect a list", "--hypothesis", "If the list comes first, more find a river", "--alternative", "current"]);
+    assert.match(sectionOf(currentText(a, DASH).text, "Journey Funnels"), /^\| J-find \| 50% of 4 started \| step 1 \(1 left\) \| The map is slow; or People expect a list\. Testing: current/m);
+    const eff = rubric(a).dimensions.find((x) => x.id === "task-effectiveness");
+    assert.equal(eff.observed.value, "60% of 5 journeys completed in production (insights to 2026-10-23)");
+    assert.deepEqual(eff.observed.evidence, ["insights to 2026-10-23"]);
   });
 
   // @covers US-144-AC5

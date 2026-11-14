@@ -48,8 +48,8 @@ describe("US-090-AC3: a wireframe passes its pattern's audit checks", () => {
     assert.deepEqual([...new Set(known.filter((p) => p.screen === "list").map((p) => p.state))], ["ideal", "loading", "empty", "error"]);
     for (const width of [...new Set(known.map((p) => p.width))]) {
       const urls = known.filter((p) => p.width === width).map((p) => `${base}/${p.file}`);
-      const r = await audit({ urls, themes: ["plain"], appearances: ["light"], widths: [width] });
-      assert.deepEqual([...new Set(r.runs.map((x) => `${x.theme}/${x.appearance}@${x.width}`))], [`plain/light@${width}`]);
+      const r = await audit({ urls, themes: ["vk-plain"], appearances: ["light"], widths: [width] });
+      assert.deepEqual([...new Set(r.runs.map((x) => `${x.theme}/${x.appearance}@${x.width}`))], [`vk-plain/light@${width}`]);
       assert.deepEqual(problems(r), [], show(problems(r)));
     }
   });

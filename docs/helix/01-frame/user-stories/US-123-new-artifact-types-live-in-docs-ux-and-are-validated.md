@@ -32,7 +32,7 @@ Stage 1 homes (ADR-036): each type's `meta.yml`, `template.md`, `prompt.md` and 
 
 ## Walkthrough
 
-1. The guide writes `docs/ux-builder/decisions/UXD-1.md` from its template.
+1. The guide compiles `docs/ux-builder/brief.md` from HELIX, the one document type of its own left (ADR-042).
 2. `ux-builder-design validate` checks every `docs/ux-builder/` document.
 3. `status` lists them.
 

@@ -13,8 +13,17 @@ npx ux-builder-audit http://localhost:5173/
 npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/ /settings /matters
 ```
 
-It prints a summary, writes `audit-report/index.html` (with the screenshots)
-and `audit-report/report.json`, and exits 1 if it found an error.
+It prints a summary, writes `docs/ux-builder/audit-report/index.html` (with the screenshots)
+and `docs/ux-builder/audit-report/report.json`, and exits 1 if it found an error.
+
+Every report on the app is linked from one page, `docs/ux-builder/reports.html`
+(`reports.html` at the top of an app on the old layout): the latest UI audit
+and each usability assessment run, newest first, with the latest run's
+journeys step by step and the `@ux-builder` versions that wrote each. It is
+rewritten whenever either report is written; `npx ux-builder-audit reports
+[--open]` rewrites it and prints its path. `npx ux-builder-audit doctor
+[--json]` lists the installed `@ux-builder` packages and exits 1 when one's
+range on another is not met by the version installed.
 
 ## What it checks
 
@@ -25,7 +34,7 @@ and `audit-report/report.json`, and exits 1 if it found an error.
 | `token-radii` | warning | Corners use one of the theme's radii (or are fully round). |
 | `token-overrides` | error | No app stylesheet sets `--piq-*` tokens; the theme does. |
 | `widget-overrides` | warning | No app stylesheet restyles an SDK widget, even under the SDK's own selector. |
-| `sdk-widgets` | error / warning | No icon (`<svg>`) or logo image the app draws itself (errors); no native button, field, checkbox, table, progress bar or endless animation where the SDK has a widget (warnings). |
+| `sdk-widgets` | error / warning | No icon (`<svg>`) or logo image the app draws itself (errors); no diagram or chart the app draws as its own `<svg>`, where `<Visual>` from `@ux-builder/visuals/react` draws it (a warning; `.chart` or `data-audit-chart` opts out); no native button, field, checkbox, table, progress bar or endless animation where the SDK has a widget (warnings). |
 | `foreign-components` | warning | No other UI kit's components (Material UI, Ant Design, Chakra, Carbon React, Fluent UI, Mantine, Blueprint, PrimeReact). |
 | `outside-theme` | warning | Nothing visible is outside the themed element, where it would never change. |
 | `brand` | error / warning | The page's favicon is the theme's; a theme with a logo has `<Logo />` on the page. |
@@ -96,15 +105,23 @@ The report opens with two verdicts (FEAT-014), in `report.json` as `verdicts`:
   the modality needs, and whether its rule families were checked, with the fix
   for anything missing. `chat` and `hybrid-chat` need the SDK's `Conversation`
   (its log and composer; missing, the verdict fails); `hybrid-chat` also an
-  Adaptive Card part (missing, it warns); `responsive-web` needs `AppShell`
-  (missing, it fails) whose navigation adapts by size class: the bottom bar
-  below 600 px and the side navigation from 840 px (not adapting, it warns).
+  Adaptive Card part (missing, it warns). `responsive-web` is judged by
+  outcome: each page is framed by `AppShell`, or by a `main` landmark whose
+  content fits (no sideways scroll) at every audited width (neither, it
+  fails, saying which: "content overflows at 390px", or AppShell missing with
+  no `main`); where there is navigation it adapts by size class, the bottom
+  bar below 600 px and the side navigation from 840 px (not adapting, it
+  warns). An app with one top-level destination, or an AppShell with no
+  navigation items, has no navigation to adapt.
 
 The modalities come from the blueprint's `supports.modalities`, else
 `--modality`, else `responsive-web`, which the report says it assumed. Named,
 they choose the widths of FEAT-014's matrix (`responsive-web` 390, 768 and
 1280; `chat` and `hybrid-chat` 390 and 1280; the union for several) unless
-`--width` is given, and the rule families: a check whose rules are of no
+`--width` is given, only those of the size classes the app chose
+(`supports.sizeClasses`, else `--size-classes`; compact 390, medium 768,
+expanded 1280, large 1600): a size class not chosen is never audited or
+reported unchecked. And they choose the rule families: a check whose rules are of no
 family the modalities need is not run (`chat` runs no `nav`, `modal` or
 `emphasis` check; only `hybrid-chat` runs the `card` checks). Assumed, every
 check runs at the widths `--width` gives, as before.
@@ -158,13 +175,14 @@ the report says so, and the favicon check is skipped.
 | `--ignore <selector>` | Leave these elements out (repeat). Elements with `data-audit-ignore` always are, e.g. a chart. |
 | `--off <check>` | Turn a check off (repeat). |
 | `--no-contrast` | Skip the contrast check. |
-| `--out <dir>` | Where the report goes. Default `audit-report`. |
+| `--out <dir>` | Where the report goes. Default `docs/ux-builder/audit-report` in an app with `docs/ux-builder/`, else `audit-report`. |
 | `--fail-on <error\|warning\|never>` | What makes the exit code 1. Default `error`. |
 | `--json` | Print the report as JSON. |
 | `--write-baseline <file>` | Write every finding (not notes) to this file, in a stable order. Run it once when adopting the audit in an existing app, and commit the file. |
 | `--baseline <file>` | Leave out the findings in this file: they are not reported and do not affect the exit code. New findings are reported as usual; baselined ones no longer found are listed as resolved, so the file can shrink. A check the file names that this version lacks is ignored with a note. |
 | `--blueprint <file>` | The app's blueprint (default `docs/ux-builder/blueprint/app.blueprint.json`). Its `supports.modalities` choose the widths and rule families; the report follows its journeys, step by step, matching each page to a screen by `data-piq-screen="<screen id>"`, else by the screen's `path`. AI markup on a screen whose blueprint declares no AI role is reported (`ai-declared`); the screen's `ai.roles` and `ai.takeover` apply to the agent checks. |
 | `--modality <list>` | The app's modalities when the blueprint names none, comma-separated: `responsive-web`, `chat`, `hybrid-chat`. They choose the widths and rule families, and the report gives a modality-fit verdict for each. A future modality (`ios`, `android`, `macos`, `windows`) or an unknown one exits 2. Without it or a blueprint, `responsive-web` is assumed. |
+| `--size-classes <list>` | The size classes the app chose when the blueprint names none (`supports.sizeClasses`), comma-separated: `compact`, `medium`, `expanded`, `large`. Only their widths are audited (390, 768, 1280, 1600), and one not chosen is never reported unchecked. An unknown one exits 2. |
 
 A URL that starts with `/` is relative to the first full URL. The SDK's CSS
 and theme list are read from the app's own `@ux-builder/ui` and
@@ -185,7 +203,7 @@ if (report.summary.error) process.exitCode = 1;
 
 The report is built to be handed to a coding agent: `report.json` names each
 finding's element, value, the rule it breaks in full, the fix, and the themes
-and widths it was seen in. "Fix every error in `audit-report/report.json`, then run
+and widths it was seen in. "Fix every error in `docs/ux-builder/audit-report/report.json`, then run
 `npm run audit` again" is a complete instruction.
 
 ## UX assessment
@@ -194,12 +212,12 @@ and widths it was seen in. "Fix every error in `audit-report/report.json`, then 
 UX (FEAT-009, CONTRACT-006). The agent does the reasoning, guided by the
 skill `skill/ux-builder-assess/SKILL.md` shipped in this package; the
 commands do the deterministic work. An assessment writes only under its
-output path (`ux-assessment/<run>/` by default) and never changes the app's
+output path (`docs/ux-builder/assessments/<run>/` by default: beside the manifest at `docs/ux-builder/ux-assessment.yml`; an app without `docs/ux-builder/`, or one that still keeps `ux-assessment.yml` at its top until `ux-builder-design migrate`, keeps both there and its runs in `ux-assessment/<run>/`. Paths inside the manifest are relative to the app, wherever the manifest is) and never changes the app's
 code or its HELIX documents.
 
 | Command | Does |
 |---|---|
-| `assess init` | Proposes `ux-assessment.yml` from the repository: the HELIX marker, flow and catalogue, the test scripts, and the flow's stories as candidate journeys, by ID only. Values it cannot work out are `<fill-in: …>` |
+| `assess init` | Proposes `docs/ux-builder/ux-assessment.yml` from the repository: the HELIX marker, flow and catalogue, the test scripts, and the flow's stories as candidate journeys, by ID only. Values it cannot work out are `<fill-in: …>` |
 | `assess validate` | Checks the manifest against its schema, the repository and HELIX: the marker as HELIX reads it, one flow, existing stories, criteria and commands, credentials only by reference, local or staging only |
 | `assess collect --run <R-id>` | Writes `requirements.json` (every HELIX document with its type, ID, path, hash and revision; goals, roles, stories and criteria) and `traceability.json` (each journey's criteria, linked to the tests that cite them with `@covers`, or marked uncovered) |
 | `assess baseline --run <R-id>` | Runs the declared tests and the audit before any change, and writes `baseline.json`; a page not on the SDK is also inspected as it is, with its SDK-adoption gaps counted apart |
@@ -211,7 +229,7 @@ code or its HELIX documents.
 | `assess merge --run <R-id>` | One finding per user problem, with every evidence reference and a stable `F-` ID |
 | `assess propose --finding <F-id> --target <HELIX ID> \| --new <type>` | Writes a patch against a HELIX artifact (by `ddx.id`), or a new instance named and numbered by the catalogue and drafted from its template; nothing is applied |
 | `assess check-writes`, `assess apply-check P-<n>` | Nothing under the HELIX root or the app changed during the run; a proposal's target is unchanged before it is applied |
-| `assess report <run-dir>` | `report.html`, `report.md` and `evidence.json`: what was checked, seen and left uncertain; the findings by journey, then the state it was walked in, then step, each with its rule ID and full statement (or heuristic and source), evidence, severity on Nielsen's 0 to 4 scale and fix (a finding at no step under its state's *General*); heuristics also indexed as recommendations; claims for representative users. `report.md` is a HELIX `usability-evaluation-report` (`ddx:` frontmatter linking its journeys and stories), drafted from the installed HELIX's template when it defines that type |
+| `assess report <run-dir>` | `report.html`, `report.md` and `evidence.json`: what was checked, seen and left uncertain; the findings by journey, then the state it was walked in, then step, each with its rule ID and full statement (or heuristic and source), evidence, severity on Nielsen's 0 to 4 scale and fix (a finding at no step under its state's *General*); heuristics also indexed as recommendations; claims for representative users. `report.md` is a ux-builder usability assessment report (`ux-builder:` frontmatter naming its journeys and stories), run output rather than a HELIX document |
 | `assess compare <earlier> <later>` | Each finding new, persistent, resolved, regressed or not rechecked; an unassessed state never resolves one |
 | `assess video --run <R-id>` | Replays each walked journey (its steps' `do`) in a browser of its own, signed in as its role, with `evidence.redact` masked from the first frame, pausing at each checkpoint's findings; writes `video/`: an MP4 per journey with the findings drawn in (needs `ffmpeg` on the PATH), the clean recording and its annotation timeline, captions, a chapter track with a chapter per step (`J-review · step 2: entry`), and `index.html`, a player whose findings pop up, pause the video and link to the report (FEAT-013). Each caption has the problem in plain English, the rule's ID and full statement (or heuristic and source) and the fix. `--pace slow\|normal\|fast` (default normal): a step holds 2 s, a finding max(5 s, its caption's words at 200 a minute); slow × 1.5, fast × 0.6, never under 1 s a step or 3 s a finding (FEAT-015) |
 | `assess gate <run-dir> --fail-on P1` | For CI: fails on an open finding at that priority or above, or a blocked stage. See `examples/ux-assessment.workflow.yml` |
@@ -260,4 +278,4 @@ for representative users to confirm.
 ## In CI
 
 The starter (`npm create @ux-builder/app`) runs `npm run lint` and `npm run audit`
-in `.github/workflows/ci.yml` and uploads `audit-report` as an artifact.
+in `.github/workflows/ci.yml` and uploads `docs/ux-builder/audit-report` as an artifact.

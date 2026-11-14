@@ -1,0 +1,85 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:umf-releases",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "umf-releases",
+      "kind": "timeline",
+      "form": "milestones",
+      "title": "umf releases",
+      "question": "When did each umf SDK release ship?",
+      "source": {
+        "path": "umf:refs/tags/umf-v*",
+        "digest": "sha256:4e697437ce963d7c2e03824f30f3bbcaa51f8f74533786fa320f8302de0a3228"
+      },
+      "timeline": {
+        "scale": {
+          "kind": "date"
+        },
+        "events": [
+          {
+            "id": "umf-v0-2-0",
+            "label": "umf-v0.2.0",
+            "at": "2026-10-13"
+          },
+          {
+            "id": "umf-v0-3-0",
+            "label": "umf-v0.3.0",
+            "at": "2026-10-16"
+          },
+          {
+            "id": "umf-v0-4-0",
+            "label": "umf-v0.4.0",
+            "at": "2026-10-18"
+          },
+          {
+            "id": "umf-v0-4-1",
+            "label": "umf-v0.4.1",
+            "at": "2026-10-18"
+          },
+          {
+            "id": "umf-v0-5-0",
+            "label": "umf-v0.5.0",
+            "at": "2026-10-18"
+          },
+          {
+            "id": "umf-v0-5-1",
+            "label": "umf-v0.5.1",
+            "at": "2026-10-19"
+          },
+          {
+            "id": "umf-v0-5-2",
+            "label": "umf-v0.5.2",
+            "at": "2026-10-20"
+          },
+          {
+            "id": "umf-v0-5-3",
+            "label": "umf-v0.5.3",
+            "at": "2026-10-20"
+          },
+          {
+            "id": "umf-v0-5-4",
+            "label": "umf-v0.5.4",
+            "at": "2026-10-21"
+          },
+          {
+            "id": "umf-v0-5-5",
+            "label": "umf-v0.5.5",
+            "at": "2026-10-23"
+          },
+          {
+            "id": "umf-v0-5-6",
+            "label": "umf-v0.5.6",
+            "at": "2026-10-23"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

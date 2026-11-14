@@ -12,7 +12,7 @@
    them there, and says how to move. */
 
 import { existsSync, readdirSync } from "node:fs";
-import { join, relative, resolve, sep } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 
 export const CURRENT = {
   name: "current",
@@ -24,6 +24,11 @@ export const CURRENT = {
   compare: "docs/ux-builder/compare",
   drawings: "docs/ux-builder/drawings",
   wireframes: "docs/ux-builder/wireframes",
+  assessmentManifest: "docs/ux-builder/ux-assessment.yml",
+  assessments: "docs/ux-builder/assessments",
+  auditReport: "docs/ux-builder/audit-report",
+  // Run output (ADR-042 decision 6): studies' materials and results, insight exports; gitignored.
+  runs: "docs/ux-builder/runs",
 };
 export const LEGACY = {
   name: "legacy",
@@ -35,6 +40,10 @@ export const LEGACY = {
   compare: "blueprint-compare",
   drawings: "blueprint-drawings",
   wireframes: "blueprint-wireframes",
+  assessmentManifest: "ux-assessment.yml",
+  assessments: "ux-assessment",
+  auditReport: "audit-report",
+  runs: "ux-builder-runs",
 };
 export const MIGRATE_HINT = "this app is on the old layout (app.blueprint.json, docs/ux/ at the top); `npx ux-builder-design migrate` moves it under docs/ux-builder/";
 
@@ -48,6 +57,25 @@ export function layoutOf(app = process.cwd()) {
   return CURRENT;
 }
 
+/* Where the UX assessment's manifest and runs and the UI audit's report go
+   (FEAT-018 GDL-82): under docs/ux-builder/ in an app that has it, unless the
+   app still keeps its manifest at its top (an app made before, until
+   `ux-builder-design migrate` moves it); elsewhere at the app's top, as
+   before. { manifest, assessments, auditReport, layout }, app-relative. */
+export function reportsOf(app = process.cwd()) {
+  const has = (p) => existsSync(join(app, p));
+  const old = !has(CURRENT.docs) || (has(LEGACY.assessmentManifest) && !has(CURRENT.assessmentManifest));
+  const l = old ? LEGACY : CURRENT;
+  return { manifest: l.assessmentManifest, assessments: l.assessments, auditReport: l.auditReport, layout: l.name };
+}
+
+/* The app a manifest belongs to: its folder, or the app above docs/ux-builder/ for one kept there. */
+export function manifestApp(file) {
+  const abs = resolve(file);
+  const tail = `${sep}${CURRENT.assessmentManifest.split("/").join(sep)}`;
+  return abs.endsWith(tail) ? abs.slice(0, -tail.length) || sep : dirname(abs);
+}
+
 /* An alternative's blueprint file: app.blueprint.<name>.json beside the app's blueprint. */
 export const alternativeFile = (layout, name) => (name && name !== "current" ? `${layout.blueprintDir === "." ? "" : `${layout.blueprintDir}/`}app.blueprint.${name}.json` : layout.blueprint);
 
@@ -59,7 +87,7 @@ export function writable(path) {
   const p = String(path);
   for (const l of [CURRENT, LEGACY]) {
     if (l === CURRENT && (p === l.docs || p.startsWith(`${l.docs}/`))) return true;
-    if (l === LEGACY && [l.docs, l.prototypes, l.proposals, l.compare].some((d) => p.startsWith(`${d}/`))) return true;
+    if (l === LEGACY && [l.docs, l.prototypes, l.proposals, l.compare, l.runs].some((d) => p.startsWith(`${d}/`))) return true;
   }
   return /^app\.blueprint(\.[a-z0-9-]+)?\.json$/.test(p);
 }

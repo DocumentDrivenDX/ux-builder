@@ -12,7 +12,7 @@ import { AI, CONTRACT_LIST, DECISIONS, FEATURES, PATTERNS, RELEASES, REPO, WIDGE
    contracts they cite, and the Reference and Proof pages are generated from
    the catalogue, the HELIX artifacts and the changelogs (sources.js). */
 
-const THEME_PAGE = `${ROOT}themes/?theme=ux-builder-databricks`;
+const THEME_PAGE = `${ROOT}themes/?theme=vk-praxis-material`;
 
 /* Inline `code` and **bold** in generated text, nothing more. */
 export function Md({ children }) {
@@ -162,7 +162,7 @@ const MODALITIES = [
 const HELIX_OPTIONS = [
   { option: "--helix-version <tag>", effect: "Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written." },
   { option: "--helix-offline", effect: "Use the HELIX bundled with the starter, with no network request. Not with `--helix-version`." },
-  { option: "--no-helix", effect: "Leave HELIX out: no marker, documents, skill or `ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines." },
+  { option: "--no-helix", effect: "Leave HELIX out: no marker, documents, skill or `docs/ux-builder/ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines." },
 ];
 function NewApp() {
   return (
@@ -173,9 +173,9 @@ function NewApp() {
       <Command text="npm create @ux-builder/app@latest trip-planner" />
       <Command text="cd trip-planner && npm install" />
       <p>In Claude Code, type <code>/ux-builder-design</code> to <a href={href("start", "design")}>start the design</a>. When it is ready, the guide asks for the theme (a released one, or one you make from your brand in the <a href={href("start", "theme-from-logo")}>theme builder</a>) and builds the app in the same folder, from the recorded modality and the designed blueprint, keeping every design document:</p>
-      <Command text="npm create @ux-builder/app@latest . -- --theme ux-builder-databricks" />
+      <Command text="npm create @ux-builder/app@latest . -- --theme vk-databricks" />
       <H2 id="create">Create the app at once</H2>
-      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme ux-builder-databricks" />
+      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme vk-databricks" />
       <Command text="cd my-app && npm install && npm run dev" />
       <H2 id="modalities">Choose its modalities</H2>
       <p><code>--modality</code> says what the app is, and the starter builds that shell from SDK components, with no sample data. Name several, comma-separated, for an <code>AppShell</code> with one destination per modality. Without it, the starter makes a design folder instead (above).</p>
@@ -190,7 +190,7 @@ function NewApp() {
         <li><code>CLAUDE.md</code> and <code>AGENTS.md</code> pointing at the SDK's guidance, and the Claude Code skill <code>ux-builder-ui</code></li>
         <li><code>docs/ux-builder/blueprint/app.blueprint.json</code>, the plan of the app's screens, and <code>npm run check:blueprint</code></li>
         <li><code>@ux-builder/design</code>, its skill and an empty design state, so <code>/ux-builder-design</code> can <a href={href("start", "design")}>guide the design</a> (<code>--mcp</code> also writes <code>.mcp.json</code>)</li>
-        <li>HELIX, its documents, <code>ux-assessment.yml</code> and <code>e2e/starter.spec.js</code> (below)</li>
+        <li>HELIX, its documents, <code>docs/ux-builder/ux-assessment.yml</code> and <code>e2e/starter.spec.js</code> (below)</li>
         <li>The episode trace (<code>@ux-builder/trace</code>): creating the app is its first episode, <code>npm run lint</code> records each run, and a Claude Code hook attaches each session's transcript (<a href={`${href("start", "agents")}#trace`}>below, for agents</a>)</li>
       </ul>
       <H2 id="helix">On HELIX from the first commit</H2>
@@ -212,12 +212,12 @@ function NewApp() {
       </ol>
       <H2 id="tests">The manifest and the starter's test</H2>
       <ul>
-        <li><code>ux-assessment.yml</code> binds the UX assessment to the app's HELIX documents through <code>.helix.yml</code>, with one journey for <code>US-001</code>. <code>npm run assess:validate</code> checks it.</li>
+        <li><code>docs/ux-builder/ux-assessment.yml</code> binds the UX assessment to the app's HELIX documents through <code>.helix.yml</code>, with one journey for <code>US-001</code>. <code>npm run assess:validate</code> checks it.</li>
         <li><code>e2e/starter.spec.js</code> is a Playwright test of the starter screen that cites <code>US-001</code>'s criteria. <code>npm run test:e2e</code> runs it.</li>
       </ul>
       <H2 id="helix-options">HELIX options</H2>
       <DataTable caption="HELIX options" rowKey="option" columns={[{ key: "option", label: "Option", render: (r) => <code>{r.option}</code> }, { key: "effect", label: "Effect", render: (r) => <Md>{r.effect}</Md> }]} rows={HELIX_OPTIONS} />
-      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme ux-builder-databricks --helix-offline" />
+      <Command text="npm create @ux-builder/app my-app -- --modality responsive-web --theme vk-databricks --helix-offline" />
       <p>The HELIX request reads <code>GITHUB_TOKEN</code> if it is set (never written) and honours <code>HTTPS_PROXY</code>, <code>HTTP_PROXY</code> and <code>NO_PROXY</code>.</p>
       <H2 id="plan">Plan the screens first</H2>
       <p>Before building a screen, add it to the blueprint, <code>docs/ux-builder/blueprint/app.blueprint.json</code>: its pattern, its actions and where each leads, what it deletes and how that is safeguarded, its states, its modals, and what AI does on it, if anything. The check holds the plan to the interaction rules (navigation for the space available, one modal at a time, safeguards, states, flows and journeys) before any code exists. To start from your own plan:</p>
@@ -237,16 +237,16 @@ function ExistingApp() {
       <H2 id="install">1. Install</H2>
       <Command text="npm install @ux-builder/tokens @ux-builder/ui" />
       <H2 id="load">2. Load the theme, once, before your own CSS</H2>
-      <Command code text={'import "@ux-builder/tokens/themes/ux-builder-databricks.css";\nimport "@ux-builder/tokens/fonts/ux-builder-databricks.css";\nimport "@ux-builder/ui/ui.css";'} />
+      <Command code text={'import "@ux-builder/tokens/themes/vk-databricks.css";\nimport "@ux-builder/tokens/fonts/vk-databricks.css";\nimport "@ux-builder/ui/ui.css";'} />
       <H2 id="wrap">3. Wrap the app</H2>
-      <Command code text={'import { ThemeProvider } from "@ux-builder/ui";\n\n<ThemeProvider theme="ux-builder-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} />
+      <Command code text={'import { ThemeProvider } from "@ux-builder/ui";\n\n<ThemeProvider theme="vk-databricks" appearance="system">\n  <App />\n</ThemeProvider>'} />
       <H2 id="design">Design what comes next with your agent</H2>
-      <p>To design or redesign the app's experience, add the guide and start it. Its first session is a baseline of what exists; then it asks what to improve (<a href={href("start", "design")}>Design the UX with your agent</a>).</p>
+      <p>To design or redesign the app's experience, add the guide and start it. Its first session starts from HELIX's backfill of what exists; then it asks what to improve (<a href={href("start", "design")}>Design the UX with your agent</a>).</p>
       <Command text="npm install -D @ux-builder/design@latest" />
       <Command text="npx ux-builder-design init" />
       <H2 id="no-react">Without React</H2>
       <p>Set <code>data-theme</code> (and optionally <code>data-appearance</code>) on <code>&lt;html&gt;</code>, and use the <code>.piq-*</code> class names each component renders.</p>
-      <Command code text={'<html data-theme="ux-builder-databricks" data-appearance="light">'} />
+      <Command code text={'<html data-theme="vk-databricks" data-appearance="light">'} />
       <H2 id="rules">Adopt the interaction rules</H2>
       <p>Describe the screens you already have, check the plan, and let the audit fail only on what is new:</p>
       <Command text="npx ux-builder-blueprint init" />
@@ -323,18 +323,18 @@ const CHECKPOINTS = [
   ["release", "After an experiment", "Release it, or keep what we have?"],
 ];
 const DOCS = [
-  ["brief.md", "The experience brief: product, users, outcome, jobs, principles, constraints, open questions"],
-  ["users.md", "Target users: one record per segment, with its context, goals, constraints and evidence"],
-  ["jobs.md", "Jobs to be done, each with its importance, evidence and confidence"],
-  ["blueprint/", "The blueprint (app.blueprint.json): screens, tasks, journeys and how each business rule is met; and its alternatives"],
-  ["evidence/EV-n.md", "A research source: where its owner keeps it, and only the masked quotes the synthesis cites"],
-  ["decisions/UXD-n.md", "An interaction decision: the alternatives, the choice and why, its assumptions and whether it was tested"],
-  ["compare/, prototypes/", "The comparison page, and disposable clickable prototypes"],
-  ["tests/TK-n/", "A usability test kit: scenarios, script, consent, screener and observation sheet"],
-  ["evaluations/UER-n.md", "The UX evaluation report: the rubric predicted, agent-measured and observed, findings by journey"],
-  ["insights/INS-date.md", "What people did in production, per journey"],
-  ["experiments/EXP-n.md", "An experiment: hypothesis, variant, metrics, duration and result"],
-  ["helix-proposals/", "Changes to HELIX's documents, drafted as patches for you to apply"],
+  ["docs/helix/01-frame/prd.md", "HELIX's PRD: its User Segments and User Needs, each rated for evidence and confidence (need add, segment add)"],
+  ["docs/helix/01-frame/features/FEAT-n…", "A feature's Task Model: what people must accomplish, keyed for the blueprint (task add)"],
+  ["docs/helix/01-frame/principles.md", "Experience Principles (principle add)"],
+  ["docs/helix/02-design/adr/ADR-n…", "A UX decision, tagged area:ui: the alternatives, the choice and why, its assumptions and Validation (decision add)"],
+  ["docs/helix/01-frame/research/<study>.md", "A study: its sources, scenarios, success criteria and screener, and in Findings the masked quotes and claims"],
+  ["docs/helix/02-design/flows/UF-n…", "User flows and their wireframes, drafted from the blueprint (ux-builder-blueprint propose)"],
+  ["docs/ux-builder/brief.md", "The experience brief, compiled from HELIX: product, users, outcome, needs, principles, constraints, open questions"],
+  ["docs/ux-builder/blueprint/", "The blueprint (app.blueprint.json): screens, tasks, journeys and how each business rule is met; and its alternatives"],
+  ["docs/ux-builder/compare/, prototypes/", "The comparison page, and disposable clickable prototypes"],
+  ["docs/ux-builder/helix-proposals/", "Every change to HELIX's documents, drafted as patches for you to apply"],
+  ["docs/ux-builder/runs/", "Run output, not committed: a study's session materials and observations, evaluations, insight exports"],
+  ["DDx beads", "Experiments: hypothesis, variant, metrics and stopping rule; the result goes in the decision's Validation"],
 ];
 const EXPECT = [
   ["An overview first", "The first session opens with the eight steps: what you do in each, what comes out, and where it stops for you."],
@@ -358,15 +358,15 @@ function Design() {
         <li><b>Open Claude Code in the folder and type <code>/ux-builder-design</code>.</b> Or just ask the agent to design something.</li>
         <li><b>Work through the steps.</b> At <i>Design the structure</i> the agent asks what kind of app it is (responsive web, chat or hybrid chat) and which screen sizes it must work at.</li>
         <li><b>Choose the theme when the design is ready.</b> The agent lists the released themes. If none carries your brand, make one from your logo in the <a href={href("start", "theme-from-logo")}>theme builder</a>; once it is released in <code>@ux-builder/tokens</code>, the app can wear it.</li>
-        <li><b>The app is built in the same folder</b>, from the modality you gave and the blueprint you designed, keeping every design document. The guide goes on to the validated prototype and testing with people.<Command text="npm create @ux-builder/app@latest . -- --theme ux-builder-databricks" /></li>
+        <li><b>The app is built in the same folder</b>, from the modality you gave and the blueprint you designed, keeping every design document. The guide goes on to the validated prototype and testing with people.<Command text="npm create @ux-builder/app@latest . -- --theme vk-databricks" /></li>
       </ol>
       <Notice tone="warning" title="Use @latest">Without <code>@latest</code>, <code>npm create</code> may reuse an older starter it cached, which installs an older guide.</Notice>
       <p><code>npx ux-builder-design status</code> shows where you are at any time, and, in a design folder, what building the app still needs.</p>
       <H2 id="other-starts">Other ways in</H2>
       <ul>
         <li><b>An app made at once</b> (<code>npm create @ux-builder/app@latest my-app -- --modality responsive-web --theme databricks</code>) has the guide too: type <code>/ux-builder-design</code>.</li>
-        <li><b>An existing app</b>: install the guide and start it. Its first session is a <b>baseline</b>: the agent drafts what exists from the blueprint, the HELIX stories and the latest assessment, each point marked current state, assumed, then asks what to improve.<Command text="npm install -D @ux-builder/design@latest" /><Command text="npx ux-builder-design init" /></li>
-        <li><b>An app from before <code>docs/ux-builder/</code></b> (its design in <code>docs/ux/</code>, <code>app.blueprint.json</code> at the top) keeps working; <code>status</code> says so, and <code>migrate</code> moves it, with <code>git mv</code>, rewriting its scripts, CI and guidance. <code>--dry-run</code> shows the moves first.<Command text="npx ux-builder-design migrate --dry-run" /></li>
+        <li><b>An existing app</b>: install the guide and start it. Its first session runs HELIX's <b>backfill</b>: the PRD and stories drafted from what exists, as proposals, each point marked current state, assumed; the blueprint is drawn from the app's screens; then it asks what to improve.<Command text="npm install -D @ux-builder/design@latest" /><Command text="npx ux-builder-design init" /></li>
+        <li><b>An app from before <code>docs/ux-builder/</code></b> (its design in <code>docs/ux/</code>, <code>app.blueprint.json</code> at the top) keeps working; <code>status</code> says so, and <code>migrate</code> moves it, with <code>git mv</code>, rewriting its scripts, CI and guidance. It also proposes the design documents ux-builder used to keep (users, jobs, decision and evidence records) into HELIX, and moves kits and reports to run output. <code>--dry-run</code> shows the moves first.<Command text="npx ux-builder-design migrate --dry-run" /></li>
       </ul>
       <Notice tone="info" title="CLI first; MCP optional; nothing hosted">Every capability is a command with <code>--json</code> output, run through the agent's shell. <code>init --mcp</code> also writes <code>.mcp.json</code> for the ux-builder MCP server, whose design tools return the same results. The package makes no network request and calls no model.</Notice>
 
@@ -378,7 +378,7 @@ function Design() {
       <p>What each step produces, which checkpoint closes it and how the steps fit together are in <a href={href("concepts", "guided-design")}>the guided design process</a>.</p>
 
       <H2 id="review">Review and approval</H2>
-      <p>Files are where the work is kept; the conversation is where it is reviewed. The agent shows each item in the chat, one at a time, asks for your feedback, makes the changes and asks for your approval before showing the next. Approval is refused while your feedback on the item is unaddressed; an item that changes after you approved it needs approving again; and a checkpoint does not pass while items of the steps it closes await review.</p>
+      <p>Files are where the work is kept; the conversation is where it is reviewed, and your time goes to what everything else rests on. The foundations (the brief, target users, jobs, stories, business rules and decisions) come in the chat a table per kind, every row in full, for your feedback and approval. What is built from them (tasks, journeys, screens) comes as one coverage map: each job with what serves it, and only the exceptions to look at one by one. Records such as evidence and reports need no approval; you decide what to do about what they found. An approval holds until the meaning changes, and then you see only the change. Approval is refused while your feedback is unaddressed, and a checkpoint does not pass while items of the steps it closes await review.</p>
       <Command text="npx ux-builder-design review" />
       <Command text={'npx ux-builder-design review approve user:U-1 --answer "Yes, that is our angler"'} />
 
@@ -386,12 +386,12 @@ function Design() {
       <p>The agent explains each of its {glossary.length} terms the first time it comes up: what it means, and why it is worth your time. <code>ux-builder-design explain &lt;term&gt;</code> prints one; the <a href={href("reference", "glossary")}>design glossary</a> lists them all. To see the documents the guide writes, read <a href={href("proof", "worked-example")}>a worked example</a>.</p>
 
       <H2 id="users-rules">Target users and business rules</H2>
-      <p><b>Target users</b> are evidence-backed records in <code>docs/ux-builder/users.md</code>, one per segment (<code>U-1</code>…): their context, goals, constraints and the evidence for each, starting as hypotheses until research confirms them. Jobs, tasks and test scenarios name the users they serve.</p>
-      <p><b>Business rules</b> stay defined once in HELIX, as <code>**BR-n** — the rule</code>. The blueprint's tasks and journey steps cite the rules they depend on, and say how the user meets each: what triggers it, what they see before, what happens when they are blocked and how they recover. <code>validate</code> fails a cited rule HELIX does not define or whose experience is not designed; the test kit adds a task per rule; the report shows how people fared with each.</p>
+      <p><b>Target users</b> are evidence-backed rows of HELIX's PRD, its User Segments, one per segment, named by who they are: their context, needs and the evidence for each, starting as assumed until research confirms them. Tasks and studies name the users they serve.</p>
+      <p><b>Business rules</b> stay defined once in HELIX, as <code>**BR-n** — the rule</code>. The blueprint's tasks and journey steps cite the rules they depend on, and say how the user meets each: what triggers it, what they see before, what happens when they are blocked and how they recover. <code>validate</code> fails a cited rule HELIX does not define or whose experience is not designed; a study's test kit adds a scenario per rule; the report shows how people fared with each.</p>
 
       <H2 id="modality">Modality first, theme last</H2>
-      <p>Before any wireframe or prototype is drawn, the agent asks which modalities and screen sizes the app is for, and records your answer in the blueprint. Wireframes and prototypes wait for it, and ask again if the blueprint's sizes change.</p>
-      <Command text={'npx ux-builder-design modality --answer "A web app for phones and laptops" --modality responsive-web --size-classes compact,medium,expanded,large'} />
+      <p>Before any wireframe or prototype is drawn, the agent asks which modalities and screen sizes the app is for and, for a web app, its <b>app frame</b>: just the screen with no menus, a top bar, navigation across the top, or a side menu. It recommends one from your app's destinations; you choose. Your answer is recorded in the blueprint; wireframes, prototypes and the built app are drawn in that frame, and ask again if it changes.</p>
+      <Command text={'npx ux-builder-design modality --answer "A web app for phones and laptops" --modality responsive-web --size-classes compact,medium,expanded,large --frame top-nav'} />
       <p>The theme is chosen when the app is built, so the look serves the experience you designed. Make your own from a logo in the <a href={href("start", "theme-from-logo")}>theme builder</a>: it pairs a palette that passes contrast with a design system, and saving it opens a pull request; once released in <code>@ux-builder/tokens</code>, any app can wear it by name.</p>
 
       <H2 id="checkpoints">Checkpoints: you decide</H2>
@@ -446,11 +446,11 @@ function Ci() {
       <p className="uxm-lede">Lint reads the source and the audit drives the running app; on AI screens, the audit's AI checks read the markers the SDK's assistant emits. The blueprint check holds the plan of the screens to the interaction rules before any of it is built.</p>
       <ul className="uxm-grid">{GUARDS.map((g) => <li key={g.title} className="uxm-tile"><span className="uxm-tile__icon"><Icon icon={g.icon} /></span><h3>{g.title}</h3><p>{g.text}</p><code className="uxm-tile__code">{g.code}</code></li>)}</ul>
       <H2 id="lint">Lint</H2>
-      <Command code text={'// eslint.config.js\nimport uxBuilder from "@ux-builder/ui/eslint";\nexport default [{\n  files: ["src/**/*.{js,jsx}"],\n  plugins: { "ux-builder": uxBuilder },\n  rules: {\n    "ux-builder/no-hard-coded-values": ["error", { theme: "ux-builder-databricks" }],\n    "ux-builder/no-foreign-ui": "error",\n    "ux-builder/no-inline-svg": "error",\n    "ux-builder/ai-neutral-voice": "warn",\n  },\n}];'} />
+      <Command code text={'// eslint.config.js\nimport uxBuilder from "@ux-builder/ui/eslint";\nexport default [{\n  files: ["src/**/*.{js,jsx}"],\n  plugins: { "ux-builder": uxBuilder },\n  rules: {\n    "ux-builder/no-hard-coded-values": ["error", { theme: "vk-databricks" }],\n    "ux-builder/no-foreign-ui": "error",\n    "ux-builder/no-inline-svg": "error",\n    "ux-builder/ai-neutral-voice": "warn",\n  },\n}];'} />
       <p><code>ux-builder/ai-neutral-voice</code> warns on UI text that presents an AI as thinking or feeling ("I think", "I understand"), and on labels that make the AI the actor ("Copilot, summarize") where the user's verb should lead.</p>
       <H2 id="audit">The audit</H2>
       <Command text={'npx ux-builder-audit --serve "npm run preview -- --port 4173" http://localhost:4173/'} />
-      <p>It writes <code>audit-report/index.html</code> with screenshots and exits 1 on an error. Every finding names its rule: its ID, its statement in full, its sources and the fix.</p>
+      <p>It writes <code>docs/ux-builder/audit-report/index.html</code> with screenshots and exits 1 on an error. Every finding names its rule: its ID, its statement in full, its sources and the fix.</p>
       <p>The report opens with two verdicts: the <b>theme</b> (applied, SDK components only, contrast in light and dark) and the <b>fit of each modality</b> (the components it needs, and whether its rule families were checked). The modalities come from the blueprint, else <code>--modality</code>, and choose the widths and checks that run. With <code>--blueprint</code> and its journeys, the report then follows each journey step by step, with each screen's screenshot and its findings drawn on it.</p>
       <H2 id="ai-checks">The AI checks</H2>
       <p>{AI_AUDIT_CHECKS.length} checks look only at AI markup (<code>data-piq-ai</code> and its companions), which the SDK's assistant components and Adaptive Cards emit and an app's own AI UI adds, so a page without it gets no AI finding: {AI_AUDIT_CHECKS.map((c, i) => <Fragment key={c}>{i ? ", " : ""}<code>{c}</code></Fragment>)}. With <code>--blueprint app.blueprint.json</code>, a screen showing AI markup must declare an AI role, and its roles select the agent checks.</p>
@@ -468,7 +468,7 @@ function Assess() {
     <>
       <p className="uxm-lede">The UX assessment walks a HELIX-governed app's journeys the way a careful reviewer would, and reports what it checked, what it saw and what is left for representative users to confirm. A coding agent does the reasoning, guided by a skill; <code>ux-builder-audit assess</code> does the deterministic work. It changes nothing in the app or its HELIX documents.</p>
       <H2 id="manifest">1. The manifest</H2>
-      <p><code>ux-assessment.yml</code> binds HELIX rather than restating it: it names the flow, how to start the app (local or staging only), the roles, and the journeys by story ID, or by a journey of the app's <a href={href("concepts", "flows-journeys")}>blueprint</a>. The starter writes one; for any other app, <code>init</code> proposes one, with placeholders for what it cannot work out.</p>
+      <p><code>docs/ux-builder/ux-assessment.yml</code> binds HELIX rather than restating it: it names the flow, how to start the app (local or staging only), the roles, and the journeys by story ID, or by a journey of the app's <a href={href("concepts", "flows-journeys")}>blueprint</a>. The starter writes one; for any other app, <code>init</code> proposes one, with placeholders for what it cannot work out.</p>
       <Command code text={'version: 1\napp: { name: Review app }\nhelix: { flow: helix }\nrun: { start: npm run preview, baseUrl: http://127.0.0.1:4173/, environment: local }\nroles: [{ id: reviewer, auth: { storageState: .auth/reviewer.json } }]\njourneys:\n  - { id: J-review, story: US-012, priority: critical, role: reviewer, entry: /queue }\ntests: [{ id: e2e, command: npm run test:e2e }]\nrestrictions: { writes: report-only }'} />
       <Command text="npx ux-builder-audit assess init" />
       <Command text="npx ux-builder-audit assess validate" />
@@ -497,8 +497,8 @@ function Assess() {
       <Command code text={'scenarios:\n  normal:     { description: "the task as intended" }\n  errorProne: { description: "an ambiguous or failing request" }\n  risky:      { description: "a step with a high-impact action", step: 4 }'} />
       <H2 id="report">5. The report</H2>
       <p><code>assess merge</code> makes one finding per user problem, each with a stable ID and every piece of evidence. <code>assess propose</code> writes a change to a HELIX artifact as a patch, applied only by a person. Then:</p>
-      <Command text="npx ux-builder-audit assess report ux-assessment/<run>" />
-      <p>It writes <code>report.html</code>, <code>report.md</code> and <code>evidence.json</code>: what was checked, seen and left uncertain. Findings are grouped by journey, then the state it was walked in, then step, each with its rule's ID and full statement (or its heuristic and source), the evidence, a severity on Nielsen's 0 to 4 scale and the fix. <code>report.md</code> is a HELIX <i>usability-evaluation-report</i>. Every conclusion is labelled deterministic, observed, heuristic, SDK adoption or real user; confusion, trust and time saved are left for representative users. <code>assess compare</code> says which findings are new, persistent, resolved or regressed between two runs, and <code>assess gate --fail-on P1</code> fails CI on an open finding at that priority.</p>
+      <Command text="npx ux-builder-audit assess report docs/ux-builder/assessments/<run>" />
+      <p>It writes <code>report.html</code>, <code>report.md</code> and <code>evidence.json</code>: what was checked, seen and left uncertain. Findings are grouped by journey, then the state it was walked in, then step, each with its rule's ID and full statement (or its heuristic and source), the evidence, a severity on Nielsen's 0 to 4 scale and the fix. <code>report.md</code> is a ux-builder usability assessment report, kept as run output rather than a HELIX document. Every conclusion is labelled deterministic, observed, heuristic, SDK adoption or real user; confusion, trust and time saved are left for representative users. <code>assess compare</code> says which findings are new, persistent, resolved or regressed between two runs, and <code>assess gate --fail-on P1</code> fails CI on an open finding at that priority.</p>
       <H2 id="video">6. Walkthrough videos</H2>
       <p><code>assess video</code> replays each walked journey in a browser of its own, signed in as its role, with sensitive data masked from the first frame, and pauses at each finding. For every journey it writes an MP4 with the findings drawn in, captions and a chapter per step, and a player whose findings pop up, pause the video and link to the report. Each caption gives the problem in plain English, the rule and the fix. It needs <code>ffmpeg</code> on the path.</p>
       <Command text="npx ux-builder-audit assess video --run <run> --pace slow" />
@@ -555,7 +555,7 @@ function Themes() {
       <p>Because identity and anatomy are separate, one brand can be shown on any shared design system, and a new brand is a file, not a fork. Try it:</p>
       <LiveDemo />
       <H2 id="files">As files</H2>
-      <Command code text={'// tokens/themes/ux-builder-databricks.theme.json\n{\n  "name": "ux-builder-databricks",\n  "title": "UX Builder Databricks",\n  "brand": "ux-builder",\n  "public": true,\n  "default": "light",\n  "designSystem": "databricks"\n}'} />
+      <Command code text={'// tokens/themes/vk-databricks.theme.json\n{\n  "name": "vk-databricks",\n  "title": "UX Builder Databricks",\n  "brand": "ux-builder",\n  "public": true,\n  "default": "light",\n  "designSystem": "databricks"\n}'} />
       <Cite ids={["ADR-013", "ADR-018", "CONTRACT-002", "CONTRACT-003"]} />
     </>
   );
@@ -612,7 +612,7 @@ function GenerativeUi() {
       <p>When the agent answers with a table or a form, the conversation renders the SDK's own component, not a block of HTML. Only renderable components are allowed ({RENDERABLE_NAMES.map((c, i) => <Fragment key={c}>{i ? ", " : ""}<code>{c}</code></Fragment>)}), with their props validated against a schema; anything else is refused with a plain notice. An agent built for Microsoft hosts may send an <a href={href("start", "microsoft-agents")}>Adaptive Card</a> instead.</p>
       <H2 id="bridges">Bridges for other libraries</H2>
       <p>An app that already uses AI Elements or assistant-ui keeps it: one stylesheet maps your theme onto the variables those libraries are styled by. They are bridged, not adopted as design systems.</p>
-      <Command code text={'import "@ux-builder/tokens/themes/ux-builder-databricks.css";\nimport "@ux-builder/tokens/bridges/shadcn/ux-builder-databricks.css";   // after the theme'} />
+      <Command code text={'import "@ux-builder/tokens/themes/vk-databricks.css";\nimport "@ux-builder/tokens/bridges/shadcn/vk-databricks.css";   // after the theme'} />
       <p>Each bridge is contrast-checked like the theme, and follows <code>data-theme</code> and <code>data-appearance</code> with no <code>.dark</code> class.</p>
       <H2 id="embedded">Embedded views</H2>
       <p>A host can hand a view a theme's resolved values instead of a stylesheet: <code>&lt;ThemeProvider tokens={"{resolved.tokens}"}&gt;</code>. The view wears the host's theme and never draws the brand itself.</p>
@@ -842,7 +842,7 @@ function GuidedDesign() {
       <H2 id="checkpoints">Checkpoints: the person decides</H2>
       <p><code>core-1</code> closes steps 1 to 3 (is this the outcome, and how will we know it worked?), <code>core-2</code> closes step 4 (which approach to try), and <code>core-3</code> closes steps 5 to 7 (is this validated enough to build?). The agent asks one question and waits; the answer is recorded in the person's words. A no or not yet is recorded too and never counts as yes, and the guide cannot move past a checkpoint that has not passed.</p>
       <H2 id="review">Reviewed in the conversation</H2>
-      <p>Files are where the work is kept; the conversation is where it is reviewed. Each item the agent produces (the brief, each target user, job, story, task, journey, screen and decision) is shown in the chat, one at a time. The person gives feedback, the agent addresses it and says how, and the person approves. An approval records their words and the content they approved, so an item that changes needs approving again; a checkpoint does not pass while items of its steps await review.</p>
+      <p>Files are where the work is kept; the conversation is where it is reviewed. The foundations (the brief, target users, jobs, stories, business rules and decisions) are shown in the chat a table per kind; what is built from them (tasks, journeys, alternatives, screens, kits) as one coverage map with its exceptions; records (evidence, reports, insights) need no approval. The person gives feedback, the agent addresses it and says how, and the person approves. An approval records their words and the meaning they approved, so a change of metadata or formatting keeps it and a change of meaning comes back as a diff; a checkpoint does not pass while items of its steps await review. <code>advance --until-decision</code> does the safe work and names the next decision, and <code>metrics</code> measures the session against its targets.</p>
       <H2 id="evidence">Hypotheses until evidence</H2>
       <p>What users need starts as labelled hypotheses, drafted from the person's account and the domain. Research (interview notes, support tickets, analytics) is stored as masked, pseudonymous excerpts with the person's consent, and moves a hypothesis to confirmed or refuted. The brief, target users and jobs show each point as confirmed, assumed or hypothesis, so nobody mistakes a guess for a finding. A finding always says whether a person was observed or the agent recommends it.</p>
       <H2 id="simplicity">The simplest experience that works</H2>
@@ -865,6 +865,10 @@ function Glossary() {
       <p className="uxm-lede">Every term the guided design explains, read from <code>@ux-builder/design</code>'s glossary: what it means, and why it is worth the person's time. The agent explains each the first time it comes up; <code>ux-builder-design explain &lt;term&gt;</code> prints one.</p>
       <DataTable caption="Design glossary" rowKey="term" rows={glossary} pageSize={glossary.length}
         columns={[{ key: "term", label: "Term", sortable: true, render: (r) => <b>{r.term}</b> }, { key: "step", label: "Step", sortable: true, render: (r) => stepName(r.step) }, { key: "means", label: "What it means" }, { key: "why", label: "Why it matters" }]} />
+      <H2 id="ids">The IDs you will see</H2>
+      <p>The work uses short IDs so each item can be found and traced. The agent names the thing beside its ID and explains each kind the first time it comes up; <code>ux-builder-design explain &lt;ID&gt;</code> says what one is.</p>
+      <DataTable caption="Design IDs" rowKey="id" rows={cliData.guide.ids} pageSize={cliData.guide.ids.length}
+        columns={[{ key: "id", label: "ID", render: (r) => <code>{r.id}</code> }, { key: "kind", label: "What it names" }, { key: "where", label: "Where it lives" }]} />
       <Generated><code>packages/design/glossary.json</code></Generated>
     </>
   );

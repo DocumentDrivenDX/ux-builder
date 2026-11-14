@@ -21,10 +21,11 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { aiHeuristics, catalogueRules, rolesOf, walkthroughs } from "./ai.mjs";
 import { STATES } from "./manifest.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const read = (dir, f) => JSON.parse(readFileSync(join(dir, f), "utf8"));
 const write = (dir, f, d) => writeFileSync(join(dir, f), JSON.stringify(d, null, 2) + "\n");
-export const runDir = (manifest, resolved, out, run) => resolve(manifest.dir, out ?? resolved.evidence?.out ?? "ux-assessment", run);
+export const runDir = (manifest, resolved, out, run) => resolve(manifest.dir, out ?? resolved.evidence?.out ?? reportsOf(manifest.dir).assessments, run);
 
 export function plan({ manifest, resolved, out, run, agent, model, env = process.env }) {
   const dir = runDir(manifest, resolved, out, run);

@@ -157,14 +157,14 @@ describe("US-083: an agent's Adaptive Card renders in the app's theme", () => {
     });
     const switchTo = (theme, appearance) => page.evaluate(([t, a]) => window.dispatchEvent(new CustomEvent("piq:set-theme", { detail: { theme: t, appearance: a } })), [theme, appearance]);
     const light = await look();
-    await switchTo("praxis-carbon", "dark");
+    await switchTo("vk-praxis-carbon", "dark");
     await page.waitForFunction(() => document.querySelector("[data-theme]").dataset.appearance === "dark");
     const dark = await look();
     assert.notEqual(dark.bg, light.bg, "the surface follows the appearance");
     assert.notEqual(dark.text, light.text, "the text colour follows the appearance");
     assert.notEqual(dark.stripe, light.stripe, "the good style's tone follows the appearance");
     for (const [ap, v] of [["light", light], ["dark", dark]]) assert.equal(v.stripe, v.positive, `the good style is the theme's status-positive in ${ap}`);
-    const other = (await page.evaluate(() => [...new Set([...document.styleSheets].flatMap((s) => { try { return [...s.cssRules]; } catch { return []; } }).flatMap((r) => [...(r.selectorText ?? "").matchAll(/\[data-theme="([^"]+)"\]/g)].map((m) => m[1])))])).find((t) => t !== "praxis-carbon");
+    const other = (await page.evaluate(() => [...new Set([...document.styleSheets].flatMap((s) => { try { return [...s.cssRules]; } catch { return []; } }).flatMap((r) => [...(r.selectorText ?? "").matchAll(/\[data-theme="([^"]+)"\]/g)].map((m) => m[1])))])).find((t) => t !== "vk-praxis-carbon");
     await switchTo(other, "light");
     await page.waitForFunction((t) => document.querySelector("[data-theme]").dataset.theme === t, other);
     const themed = await look();
@@ -244,7 +244,7 @@ describe("US-083: an agent's Adaptive Card renders in the app's theme", () => {
     await conv.close();
     const cards = [CLEAN, PAY_INVOICE, EVERY_ELEMENT, DESTRUCTIVE, COLUMNS, ...samples.map((f) => offline(JSON.parse(readFileSync(join(SAMPLES, f), "utf8"))))];
     const urls = cards.map((c) => pageFile(c, { width: 700 }));
-    const r = await audit({ urls, themes: ["praxis-carbon"], appearances: ["light", "dark"], wait: ".piq-adaptive-card", rules: { brand: false }, cwd: PKG });
+    const r = await audit({ urls, themes: ["vk-praxis-carbon"], appearances: ["light", "dark"], wait: ".piq-adaptive-card", rules: { brand: false }, cwd: PKG });
     const errors = r.findings.filter((f) => f.severity === "error").map((f) => `${f.check} ${f.url.replace(/.*\//, "")} ${f.selector ?? ""}: ${f.message}`);
     assert.deepEqual(errors, []);
     assert.equal(r.runs.length, urls.length * 2);

@@ -78,7 +78,7 @@
         ],
         "properties": {
           "id": { "type": "string" },
-          "blueprint": { "type": "string", "pattern": "^J-[a-z0-9]+(-[a-z0-9]+)*$", "description": "A journey id in the app's blueprint: its story, criteria, entry and steps come from there, and the manifest gives none of them; id defaults to it (FEAT-012 ASM-01)" },
+          "blueprint": { "type": "string", "pattern": "^(J-)?[a-z][a-z0-9]*(-[a-z0-9]+)*$", "description": "A journey id in the app's blueprint: its story, criteria, entry and steps come from there, and the manifest gives none of them; id defaults to it (FEAT-012 ASM-01)" },
           "ai": { "type": "boolean", "description": "An AI journey: walked in three scenarios, with the AI rules for its roles as heuristics (FEAT-011 AIX-01, AIX-02)" },
           "scenarios": {
             "type": "object", "additionalProperties": false, "required": ["normal", "errorProne", "risky"],

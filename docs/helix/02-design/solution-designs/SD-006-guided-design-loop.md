@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-036
@@ -23,6 +25,9 @@ ddx:
 ---
 
 # SD-006: Guided design loop
+
+
+*Amended 2026-10-29 by ADR-042: ux-builder writes into HELIX's documents and keeps none of its own beyond the blueprint and the compiled brief; the docs/ux-builder document types below are replaced by their HELIX homes (see ADR-042 decision 2), and `helix.mjs`, `people.mjs`, `studies.mjs` and `migrate-docs.mjs` carry the new paths.*
 
 ## Scope
 
@@ -132,7 +137,8 @@ frontmatter adapted to `docs/ux-builder/`.
 ### Baseline (GDL-74)
 
 Reads the blueprint, the HELIX PRD and stories (through the marker), the
-latest audit report and assessment run. Writes `docs/ux-builder/baseline.md` with
+latest audit report and assessment run. *Retired by ADR-042: an existing app now starts
+from HELIX's backfill.* Wrote `docs/ux-builder/baseline.md` with
 the current destinations, screens, journeys, findings by journey and a
 draft brief, jobs and task list, every item an `A-<n>` assumption with
 status `current-state`. The agent then edits it with the person.
@@ -194,13 +200,13 @@ assumes.
 
 `check --diff <base>` compares two blueprints by IDs: screens, steps per
 journey, required inputs and decisions. A journey that grows with no
-`decision` event naming it (trace, or a `UXD-` record linking it) gets
+`decision` event naming it (trace, or a UX decision ADR linking it) gets
 `simplicity.delta-decided`.
 
 ### Impact and trace (GDL-47 to GDL-49)
 
 An ID graph built from: jobs (`J-`) ← tasks (`T-`) ← journeys ← screens ←
-prototype pages ← test-kit tasks ← findings (`F-`), plus `UXD-` links and
+prototype pages ← study tasks ← findings (`F-`), plus UX decision ADRs and
 HELIX story and AC IDs. `trace <id>` walks it both ways. `impact` matches
 the change's words to blueprint items (screen and action labels, task
 goals, step names), lists everything reachable downstream, and sets
@@ -274,9 +280,10 @@ screen paths they carry.
 
 ### Target users and business rules (GDL-77, GDL-78)
 
-`docs/ux-builder/users.md` is a document type (`users`) whose table rows
-(`U-<n>`) `documents.usersTable` parses; the brief's Target users section
-reads only it, and jobs, tasks and test-kit scenarios cite `U-` IDs.
+Target users are the PRD's *User Segments* (ADR-042), rows named by who
+they are, which `people.segmentsTable` parses (applied or proposed); the
+brief's Target users section reads only them, and tasks and studies cite
+users by name.
 Business rules stay in HELIX as `**BR-<n>** — <rule>`
 (`documents.businessRules` reads them through the marker); blueprint tasks
 and journey steps cite them in `rules`, and the blueprint's
@@ -298,6 +305,8 @@ that hash, so a changed item needs approving again; feedback (`FB-<n>`)
 must be addressed before approval. A checkpoint, and `step next`, refuse
 while items of the steps they close await review; `step` also refuses to
 move past a step an unpassed core checkpoint closes.
+*[Amended 2026-10-27 — FEAT-018 GDL-83]* The hash is now of the item's
+meaning (see *The person's time* below), and items are reviewed by tier.
 
 ### Layout, migration and modality (GDL-80)
 
@@ -322,6 +331,59 @@ moves it in, merges `package.json`, writes HELIX's starter documents from
 the folder's installed copy where none exists, records `state.app` and
 traces the create episode. `status` reports what a design folder's build
 needs (`BUILD_NEEDS`).
+
+### The person's time (GDL-83)
+
+- **Tiers.** `review.mjs` gives each item a tier from its kind (`TIERS`):
+  foundation (`brief`, `user`, `job`, `story`, `rule`, `decision`),
+  derived (`task`, `journey`, `alternative`, `screen`, `kit`) or record
+  (`evidence`, `report`, `insight`, `experiment`). `pendingReviews` leaves
+  records out unless asked, so they hold no checkpoint. `reviewTable(kind)`
+  gives a foundation kind's items; `review approve --kind` approves its
+  pending items in one answer (`via: table`).
+- **Meaning.** `meaningOf(content)` drops a document's frontmatter, trailing
+  space and blank runs, and makes list markers one form; the item's `hash`
+  is of that, `raw` of the whole content. An approval records `hash`, `raw`
+  and `snapshot` (the meaning); it holds while `hash` matches (or, for an
+  approval recorded before GDL-83, `raw`). A changed item carries
+  `diffText(lineDiff(snapshot, meaning))`, an LCS line diff with one line
+  of context, trimmed. `carried(app)` lists approvals that held through a
+  change of `raw`.
+- **Coverage map.** `coverageMap(app)` builds rows job → tasks (`t.jobs`) →
+  journeys (`j.task`) → screens (entry and steps), and exceptions with
+  stable IDs (`gap:J-n`, `untraced:<kind>:<id>`, `undefined:BR-n`,
+  `assumption:A-n`, an assumption not in the last map approval's
+  `assumptions`). `approveMap` refuses while an exception is neither fixed
+  nor in `--accept`, then records every pending derived item (`via: map`)
+  and a `map` entry with the accepted exceptions and the assumptions seen.
+- **Intake and budget.** `intake.mjs` holds the six independent intake
+  questions and marks each answered by a source (a brief section other than
+  "None yet", HELIX's PRD, the users and jobs tables, evidence, `src/`).
+  `budget(app)` lists the decisions left before the first prototype and
+  multiplies by `MINUTES_PER_DECISION` (3); `status` prints it.
+- **Claims.** `documents.mjs` reads each evidence record's `## Claims`
+  table (`evidenceClaims`) and checks it (`claimChecks`): no source, basis
+  or confidence is a problem; a direction-changing claim neither verified
+  nor low confidence a warning. `research.mjs` writes rows (`claimAdd`,
+  `claimVerify`), the section placed before the synthesis notes.
+- **Proposals.** `proposals.mjs` reads `helix-proposals/proposals.json`
+  and its patches and drafts; `proposalsApply` applies the accepted ones in
+  memory, indexes `ddx.id` across the HELIX root, renumbers a clashing new
+  ID to the next free one of its prefix (renaming the file and rewriting
+  references in the accepted set), checks every result's frontmatter, then
+  writes; a failed write restores the originals. Applied files move to
+  `applied/`.
+- **Advance.** `advance.mjs` runs `validate`, `carried`, `coverageMap`,
+  `unverifiedClaims` and the pending proposals, lists the agent's own work,
+  and picks the next decision in order: intake, a foundation table, the
+  map, core-1, core-2, the modality, proposals, core-3. It writes nothing.
+- **Metrics.** `metrics.mjs` appends events (`approval`, `checkpoint`,
+  `step`, `feedback`, `turn`, `milestone`) to `.ux-builder/metrics.jsonl`;
+  the writers call `logEvent`, which never fails a command. `metrics(app)`
+  summarizes active time (gaps capped at 10 minutes), turns by kind,
+  approvals before testing (before the `testing` milestone or step 7),
+  reopened approvals and minutes to the `prototype` milestone, against
+  `TARGETS`.
 
 ## Rubric and rule sources (FEAT-018 D-10)
 

@@ -138,7 +138,7 @@ test.describe(`a client app on the generated theme`, () => {
     const eslint = new ESLint({ cwd: CLIENT, overrideConfigFile: true, overrideConfig: [{
       files: ["**/*.jsx"], plugins: { "ux-builder": uxBuilder },
       languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
-      rules: { "ux-builder/no-hard-coded-values": ["error", { theme: "praxis" }] },
+      rules: { "ux-builder/no-hard-coded-values": ["error", { theme: "vk-praxis" }] },
     }] });
     const [result] = await eslint.lintFiles([join(CLIENT, "main.jsx")]);
     expect(result.messages.map((m) => `${m.line} ${m.message}`)).toEqual([]);

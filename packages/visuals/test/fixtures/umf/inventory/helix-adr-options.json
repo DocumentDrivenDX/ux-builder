@@ -1,0 +1,89 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:helix-adr-options",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "helix-adr-options",
+      "kind": "comparison",
+      "form": "matrix",
+      "title": "ADR-002: options considered",
+      "question": "Which tracker write-safety option, and why?",
+      "source": {
+        "path": "helix:docs/helix/02-design/adr/ADR-002-tracker-write-safety-model.md",
+        "view": "Alternatives",
+        "digest": "sha256:888950fe3ebb754719453419e8315243784fe08847327ba88a189c9c14c93dc5"
+      },
+      "comparison": {
+        "items": [
+          {
+            "id": "option-1",
+            "label": "Replace the tracker immediately with a database-backed system"
+          },
+          {
+            "id": "option-2",
+            "label": "Keep JSONL but define and enforce a conservative write-safety contract"
+          }
+        ],
+        "criteria": [
+          {
+            "id": "pros",
+            "label": "Pros",
+            "measure": "text"
+          },
+          {
+            "id": "cons",
+            "label": "Cons",
+            "measure": "text"
+          },
+          {
+            "id": "evaluation",
+            "label": "Evaluation",
+            "measure": "text"
+          }
+        ],
+        "values": [
+          {
+            "item": "option-1",
+            "criterion": "pros",
+            "text": "Stronger concurrency primitives"
+          },
+          {
+            "item": "option-1",
+            "criterion": "cons",
+            "text": "Much larger implementation jump, higher distribution complexity, changes HELIX surface area substantially"
+          },
+          {
+            "item": "option-1",
+            "criterion": "evaluation",
+            "text": "Rejected for now: too large for the immediate hardening goal"
+          },
+          {
+            "item": "option-2",
+            "criterion": "pros",
+            "text": "Preserves the current HELIX tracker shape, addresses current failures, enables deterministic testing"
+          },
+          {
+            "item": "option-2",
+            "criterion": "cons",
+            "text": "Requires explicit conflict/corruption handling and careful write-path design"
+          },
+          {
+            "item": "option-2",
+            "criterion": "evaluation",
+            "text": "Selected: smallest sufficient hardening"
+          }
+        ],
+        "chosen": {
+          "item": "option-2",
+          "reason": "smallest sufficient hardening"
+        }
+      }
+    }
+  },
+  "modules": []
+}

@@ -1,0 +1,163 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:tpl-sd-domain",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "tpl-sd-domain",
+      "kind": "structure",
+      "form": "entities",
+      "title": "Domain Model",
+      "question": "What does the import domain hold?",
+      "source": {
+        "path": "helix:workflows/activities/02-design/artifacts/solution-design/example.md",
+        "view": "Domain Model",
+        "digest": "sha256:5fac95cb298eb6534f2622aff81438c9e144954f3d8760694ff039360e120ab2"
+      },
+      "nodes": [
+        {
+          "id": "client",
+          "label": "Client"
+        },
+        {
+          "id": "import_session",
+          "label": "Import Session"
+        },
+        {
+          "id": "import_file",
+          "label": "Import File"
+        },
+        {
+          "id": "source_row",
+          "label": "Source Row"
+        },
+        {
+          "id": "mapping_profile",
+          "label": "Mapping Profile"
+        },
+        {
+          "id": "validation_result",
+          "label": "Validation Result"
+        },
+        {
+          "id": "match_evidence",
+          "label": "Match Evidence"
+        }
+      ],
+      "structure": {
+        "entities": [
+          {
+            "node": "client",
+            "fields": []
+          },
+          {
+            "node": "import_session",
+            "fields": []
+          },
+          {
+            "node": "import_file",
+            "fields": []
+          },
+          {
+            "node": "source_row",
+            "fields": []
+          },
+          {
+            "node": "mapping_profile",
+            "fields": []
+          },
+          {
+            "node": "validation_result",
+            "fields": []
+          },
+          {
+            "node": "match_evidence",
+            "fields": []
+          }
+        ],
+        "references": [
+          {
+            "id": "client--import_session",
+            "from": {
+              "node": "client"
+            },
+            "to": {
+              "node": "import_session"
+            },
+            "label": "owns",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "import_session--import_file",
+            "from": {
+              "node": "import_session"
+            },
+            "to": {
+              "node": "import_file"
+            },
+            "label": "contains",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "one-or-many"
+          },
+          {
+            "id": "import_session--source_row",
+            "from": {
+              "node": "import_session"
+            },
+            "to": {
+              "node": "source_row"
+            },
+            "label": "accepts",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "client--mapping_profile",
+            "from": {
+              "node": "client"
+            },
+            "to": {
+              "node": "mapping_profile"
+            },
+            "label": "saves",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "import_file--validation_result",
+            "from": {
+              "node": "import_file"
+            },
+            "to": {
+              "node": "validation_result"
+            },
+            "label": "produces",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "source_row--match_evidence",
+            "from": {
+              "node": "source_row"
+            },
+            "to": {
+              "node": "match_evidence"
+            },
+            "label": "supports",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          }
+        ]
+      },
+      "omissions": [
+        "The example's entity diagram lists no fields."
+      ]
+    }
+  },
+  "modules": []
+}

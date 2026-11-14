@@ -78,6 +78,7 @@ public themes; any other opens by its name. The site is rebuilt from `main` by
 | [`@ux-builder/ui`](packages/ui) | dependency | Widgets (React 19 and CSS), patterns, the assistant, Adaptive Cards, `ThemeProvider`, icons, `Logo`, favicon, the blueprint, lint rules, agent guidance |
 | [`@ux-builder/create-app`](packages/create-app) | `npm create` | A new React + Vite app on the SDK and on HELIX, shaped by its modalities, with lint, the audit, the trace and CI |
 | [`@ux-builder/audit`](packages/audit) | devDependency | `ux-builder-audit`: checks the running app in every theme and appearance; `assess` runs the UX assessment |
+| [`@ux-builder/visuals`](packages/visuals) | dependency | Diagrams from `umf.visual` documents, drawn in the theme: SVG, Mermaid, plates and presentations, with `ux-builder-visuals` |
 | [`@ux-builder/mcp`](packages/mcp) | `npx` | The SDK for AI coding agents over MCP, including the blueprint and card checks and the episode trace |
 | [`@ux-builder/trace`](packages/trace) | devDependency | `ux-builder-trace`: the episode trace an app keeps while it is built, and the export its owner shares by choice |
 
@@ -235,7 +236,7 @@ The starter comes with:
 - the blueprint, `docs/ux-builder/blueprint/app.blueprint.json`, and
   `npm run check:blueprint`;
 - the latest HELIX release (its skill, the `.helix.yml` marker and the
-  starter HELIX documents), `ux-assessment.yml`, and a Playwright test that
+  starter HELIX documents), `docs/ux-builder/ux-assessment.yml`, and a Playwright test that
   cites the first story's criteria;
 - the episode trace: creating the app is its first episode, and a Claude Code
   hook attaches each session's transcript;
@@ -441,7 +442,7 @@ modality** (the components it needs and the rule families checked). The
 modalities come from the blueprint's `supports.modalities`, else
 `--modality`. With `--blueprint`, the report then follows the app's
 journeys: each step's screenshot with its findings drawn on it. It writes
-`audit-report/index.html` and `audit-report/report.json`, and exits 1 on an
+`docs/ux-builder/audit-report/index.html` and `docs/ux-builder/audit-report/report.json`, and exits 1 on an
 error. See [`packages/audit`](packages/audit/README.md) for the options.
 
 ### Interaction and screen rules
@@ -540,7 +541,7 @@ ux-builder is not affiliated with or endorsed by Apple or Google. Human Interfac
 ### UX assessment
 
 `ux-builder-audit assess` lets a coding agent assess a HELIX-governed app's UX
-(FEAT-009). A `ux-assessment.yml` manifest binds the app's HELIX marker, flow
+(FEAT-009). A `docs/ux-builder/ux-assessment.yml` manifest binds the app's HELIX marker, flow
 and catalogue. The commands trace each journey to its HELIX stories,
 acceptance criteria and tests, record the app's tests and the audit as a
 baseline, and inspect the exact page state the agent's browser reached, over
@@ -551,9 +552,9 @@ Journeys through an assistant or agent are walked in three scenarios
 action.
 
 ```sh
-npx ux-builder-audit assess init                       # proposes ux-assessment.yml
+npx ux-builder-audit assess init                       # proposes docs/ux-builder/ux-assessment.yml
 npx ux-builder-audit assess validate
-npx ux-builder-audit assess report ux-assessment/<run> # report.html, report.md, evidence.json
+npx ux-builder-audit assess report docs/ux-builder/assessments/<run> # report.html, report.md, evidence.json
 npx ux-builder-audit assess video --run <run>          # an annotated walkthrough video per journey
 ```
 
@@ -571,6 +572,12 @@ proposes changes as patches. See
 [`packages/audit`](packages/audit/README.md#ux-assessment).
 
 ### AI coding agents
+
+The three UX Builder workflows are also packaged as a Claude Code and Codex
+plugin. See [plugin installation and prerequisites](plugin/README.md). The plugin
+uses the app’s installed SDK and keeps MCP optional; enabling it does not adopt
+a component library.
+
 
 - `node_modules/@ux-builder/ui/AGENTS.md`: the rules, set-up, and a
   reference of every component, prop, token, icon and theme.
@@ -690,7 +697,7 @@ version on `main` that isn't on npm yet.
 
 It publishes with [npm Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
 (OIDC), so no npm token is stored anywhere. That needs a one-time setting:
-each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`, `trace`, `design`)
+each public package (`@ux-builder/tokens`, `ui`, `audit`, `create-app`, `mcp`, `trace`, `design`, `visuals`)
 lists GitHub Actions, `DocumentDrivenDX/ux-builder`, workflow `release.yml` as
 a trusted publisher on npmjs.com. A brand-new package has to
 be published once by hand before a trusted publisher can be added to it.

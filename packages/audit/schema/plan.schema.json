@@ -33,7 +33,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^J-"
+            "pattern": "^(J-)?[a-z]"
           },
           "entryKind": {
             "description": "screen: entry is a blueprint screen id (a blueprint journey); otherwise a path or URL",
@@ -42,7 +42,7 @@
           "blueprint": {
             "description": "The blueprint journey this journey is (FEAT-012 ASM-01)",
             "type": "string",
-            "pattern": "^J-"
+            "pattern": "^(J-)?[a-z]"
           },
           "steps": {
             "description": "A blueprint journey's steps, numbered from 1",

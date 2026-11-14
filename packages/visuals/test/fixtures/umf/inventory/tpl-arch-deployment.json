@@ -1,0 +1,154 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:tpl-arch-deployment",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "tpl-arch-deployment",
+      "kind": "flow",
+      "form": "zoned",
+      "title": "Deployment",
+      "question": "Where does each part of DepositMatch run?",
+      "source": {
+        "path": "helix:workflows/activities/02-design/artifacts/architecture/example.md",
+        "view": "Deployment",
+        "digest": "sha256:4c79ba17f9d9342592c062b9a51cef0232816004b59f110488f696e7a8e191b8"
+      },
+      "groups": [
+        {
+          "id": "tier-1",
+          "label": "Tier 1",
+          "role": "tier",
+          "tier": 1
+        },
+        {
+          "id": "tier-2",
+          "label": "Tier 2",
+          "role": "tier",
+          "tier": 2
+        },
+        {
+          "id": "tier-3",
+          "label": "Tier 3",
+          "role": "tier",
+          "tier": 3
+        },
+        {
+          "id": "tier-4",
+          "label": "Tier 4",
+          "role": "tier",
+          "tier": 4
+        }
+      ],
+      "nodes": [
+        {
+          "id": "user",
+          "label": "Browser",
+          "group": "tier-1"
+        },
+        {
+          "id": "cf",
+          "label": "CloudFront",
+          "group": "tier-2"
+        },
+        {
+          "id": "s3web",
+          "label": "S3 Web App",
+          "group": "tier-3"
+        },
+        {
+          "id": "alb",
+          "label": "Application Load Balancer",
+          "group": "tier-2"
+        },
+        {
+          "id": "api1",
+          "label": "ECS API Task A",
+          "group": "tier-3"
+        },
+        {
+          "id": "api2",
+          "label": "ECS API Task B",
+          "group": "tier-3"
+        },
+        {
+          "id": "worker",
+          "label": "ECS Matching Worker",
+          "group": "tier-1"
+        },
+        {
+          "id": "rds",
+          "label": "RDS PostgreSQL 16 Multi-AZ",
+          "role": "store",
+          "group": "tier-4"
+        },
+        {
+          "id": "files3",
+          "label": "S3 Source Files",
+          "role": "store",
+          "group": "tier-4"
+        }
+      ],
+      "edges": [
+        {
+          "id": "user--cf",
+          "from": "user",
+          "to": "cf"
+        },
+        {
+          "id": "cf--s3web",
+          "from": "cf",
+          "to": "s3web"
+        },
+        {
+          "id": "user--alb",
+          "from": "user",
+          "to": "alb"
+        },
+        {
+          "id": "alb--api1",
+          "from": "alb",
+          "to": "api1"
+        },
+        {
+          "id": "alb--api2",
+          "from": "alb",
+          "to": "api2"
+        },
+        {
+          "id": "worker--rds",
+          "from": "worker",
+          "to": "rds"
+        },
+        {
+          "id": "api1--rds",
+          "from": "api1",
+          "to": "rds"
+        },
+        {
+          "id": "api2--rds",
+          "from": "api2",
+          "to": "rds"
+        },
+        {
+          "id": "api1--files3",
+          "from": "api1",
+          "to": "files3"
+        },
+        {
+          "id": "api2--files3",
+          "from": "api2",
+          "to": "files3"
+        }
+      ],
+      "omissions": [
+        "The example names no zones; tiers are each part's depth from the browser."
+      ]
+    }
+  },
+  "modules": []
+}

@@ -5,7 +5,9 @@
      npm test --workspace @ux-builder/create-app */
 
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, describe, test } from "node:test";
@@ -20,14 +22,14 @@ process.env.UX_BUILDER_HELIX_BUNDLE = BUNDLE;
 after(() => { rmSync(tmp, { recursive: true, force: true }); rmSync(BUNDLE, { recursive: true, force: true }); });
 let app, checked;
 before(async () => {
-  app = await create(join(tmp, "acme"), { theme: "databricks", name: "acme", modalities: ["responsive-web", "chat"], helix: { offline: true } });
-  checked = validate(load(join(app.dir, "ux-assessment.yml")));
+  app = await create(join(tmp, "acme"), { theme: "vk-databricks", name: "acme", modalities: ["responsive-web", "chat"], helix: { offline: true } });
+  checked = validate(load(join(app.dir, "docs/ux-builder/ux-assessment.yml")));
 });
 
 describe("US-070: the new app's documents pass HELIX's reading and are traced", () => {
   // @covers US-070-AC1
   test("AC1: every document typed by frontmatter, IDs valid, links resolving: collect records no warning", () => {
-    const r = collect({ ...checked, manifest: load(join(app.dir, "ux-assessment.yml")), out: join(tmp, "runs"), run: "R-20261021T000000Z" });
+    const r = collect({ ...checked, manifest: load(join(app.dir, "docs/ux-builder/ux-assessment.yml")), out: join(tmp, "runs"), run: "R-20261021T000000Z" });
     const warnings = r.requirements.problems.filter((p) => p.severity === "warning");
     assert.deepEqual(warnings, []);
     assert.equal(r.run.helix.catalog.source, "project-skill", "the HELIX the starter installed");
@@ -37,7 +39,7 @@ describe("US-070: the new app's documents pass HELIX's reading and are traced", 
   });
 
   // @covers US-070-AC2
-  test("AC2: the app's ux-assessment.yml validates as created", () => {
+  test("AC2: the app's assessment manifest, docs/ux-builder/ux-assessment.yml, validates as created", () => {
     assert.deepEqual(checked.problems, []);
     assert.equal(checked.helix.flow.id, "helix");
     assert.deepEqual(checked.resolved.journeys.map((j) => j.story), ["US-001"]);
@@ -49,9 +51,35 @@ describe("US-070: the new app's documents pass HELIX's reading and are traced", 
   test("AC3: the starter's e2e test cites every US-001 criterion, and collect links each as explicit", () => {
     const spec = readFileSync(join(app.dir, "e2e/starter.spec.js"), "utf8");
     for (const ac of ["US-001-AC1", "US-001-AC2", "US-001-AC3"]) assert.match(spec, new RegExp(`@covers ${ac}\\b`), ac);
-    const r = collect({ ...checked, manifest: load(join(app.dir, "ux-assessment.yml")), out: join(tmp, "runs"), run: "R-20261021T000001Z" });
+    const r = collect({ ...checked, manifest: load(join(app.dir, "docs/ux-builder/ux-assessment.yml")), out: join(tmp, "runs"), run: "R-20261021T000001Z" });
     assert.deepEqual(r.traceability.journeys[0].criteria.map((c) => [c.id, c.link, c.tests[0]?.file]), ["AC1", "AC2", "AC3"].map((a) => [`US-001-${a}`, "explicit", "e2e/starter.spec.js"]));
     assert.equal(JSON.parse(readFileSync(join(app.dir, "package.json"), "utf8")).scripts["test:e2e"], "playwright test");
+  });
+});
+
+describe("US-151-AC4: a new app keeps its assessment and audit report beside the design", () => {
+  // @covers US-151-AC4
+  test("the manifest is docs/ux-builder/ux-assessment.yml; runs and the audit report are ignored there; CI uploads the report from there", () => {
+    assert.ok(existsSync(join(app.dir, "docs/ux-builder/ux-assessment.yml")) && !existsSync(join(app.dir, "ux-assessment.yml")));
+    assert.deepEqual(reportsOf(app.dir), { manifest: "docs/ux-builder/ux-assessment.yml", assessments: "docs/ux-builder/assessments", auditReport: "docs/ux-builder/audit-report", layout: "current" });
+    const ignore = readFileSync(join(app.dir, ".gitignore"), "utf8");
+    assert.match(ignore, /^docs\/ux-builder\/audit-report\/$/m);
+    assert.match(ignore, /^docs\/ux-builder\/assessments\/$/m);
+    assert.match(readFileSync(join(app.dir, ".github/workflows/ci.yml"), "utf8"), /^ {10}path: docs\/ux-builder\/audit-report$/m);
+  });
+});
+
+describe("ADR-042 decision 6: run output stays out of the new app's repository", () => {
+  // @covers US-151-AC4
+  test("the app's .gitignore ignores the assessment runs and the run folder (docs/ux-builder/runs/), and git agrees", () => {
+    const ignore = readFileSync(join(app.dir, ".gitignore"), "utf8");
+    assert.match(ignore, /^docs\/ux-builder\/assessments\/$/m);
+    assert.match(ignore, /^docs\/ux-builder\/runs\/$/m);
+    assert.match(ignore, /^# Run output stays out of the repository \(ADR-042\)/m);
+    spawnSync("git", ["init", "-q"], { cwd: app.dir });
+    const ignored = (p) => spawnSync("git", ["check-ignore", "-q", p], { cwd: app.dir }).status === 0;
+    for (const p of ["docs/ux-builder/assessments/R-20261028T080000Z/run.json", "docs/ux-builder/runs/studies/onboarding/findings.md", "docs/ux-builder/runs/insights/2026-10-28/funnels.json"]) assert.equal(ignored(p), true, p);
+    assert.equal(ignored("docs/ux-builder/blueprint/app.blueprint.json"), false, "the blueprint is committed");
   });
 });
 

@@ -23,11 +23,11 @@ let browser;
 
 // Theme → what its design system sets (own anatomy: ui.css's fallbacks).
 const EXPECT = {
-  "praxis-material": { height: 4, radius: "2px", cap: "round", effect: "piq-pulse" },
-  "praxis-carbon": { height: 8, radius: "0px", cap: "butt", effect: "piq-shimmer" },
-  "praxis-fluentui": { height: 2, radius: "1px", cap: "round", effect: "piq-shimmer" },
-  databricks: { height: 8, radius: "9999px", cap: "round", effect: "piq-pulse" },
-  praxis: { height: 6, cap: "round", effect: "piq-pulse" },
+  "vk-praxis-material": { height: 4, radius: "2px", cap: "round", effect: "piq-pulse" },
+  "vk-praxis-carbon": { height: 8, radius: "0px", cap: "butt", effect: "piq-shimmer" },
+  "vk-praxis-fluentui": { height: 2, radius: "1px", cap: "round", effect: "piq-shimmer" },
+  "vk-databricks": { height: 8, radius: "9999px", cap: "round", effect: "piq-pulse" },
+  "vk-praxis": { height: 6, cap: "round", effect: "piq-pulse" },
 };
 
 const cell = (theme) => `<section data-theme="${theme}" data-appearance="light" id="${theme}" style="width:300px">${renderToStaticMarkup(h("div", null,

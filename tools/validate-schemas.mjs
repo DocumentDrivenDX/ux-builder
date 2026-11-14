@@ -111,9 +111,9 @@ for (const [file, ds] of anatomies) {
 }
 
 // ---- 4: the rules reject what they should
-const praxis = read(join(ROOT, "tokens/brands/praxis.brand.json"));
+const praxis = read(join(ROOT, "tokens/brands/vk-praxis.brand.json"));
 const carbon = read(join(ROOT, "tokens/design-systems/carbon.design-system.json"));
-const synaptiq = read(join(ROOT, "tokens/themes/synaptiq.theme.json"));
+const synaptiq = read(join(ROOT, "tokens/themes/vk-synaptiq.theme.json"));
 const tabsPoint = read(join(ROOT, "tokens/variants/tabs.variants.json"));
 const layout = read(join(ROOT, "tokens/layout.json"));
 const dataviz = read(join(ROOT, "tokens/dataviz.json"));

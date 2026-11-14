@@ -1,0 +1,261 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-deployment",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-deployment",
+      "kind": "flow",
+      "form": "zoned",
+      "title": "Where Beacon runs",
+      "question": "Where does everything run?",
+      "takeaway": "Beacon's code runs on the app platform; its data and the models run beside it, each deployed its own way.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/architecture-model.toml",
+        "view": "deployment",
+        "digest": "sha256:5506076ecd96344bd6b203c4d2a36ed983a7d9c37883c0e4dc65f9a59f689910"
+      },
+      "groups": [
+        {
+          "id": "zone-support-team",
+          "label": "Support team",
+          "role": "zone",
+          "tier": 1
+        },
+        {
+          "id": "zone-edge",
+          "label": "Edge",
+          "role": "zone",
+          "tier": 2
+        },
+        {
+          "id": "zone-app-platform",
+          "label": "App platform",
+          "detail": "Deployed by CI on every merge",
+          "role": "zone",
+          "tier": 3
+        },
+        {
+          "id": "zone-data",
+          "label": "Data",
+          "detail": "Provisioned with Terraform",
+          "role": "zone",
+          "tier": 4
+        },
+        {
+          "id": "zone-model-services",
+          "label": "Model services",
+          "role": "zone",
+          "tier": 3
+        }
+      ],
+      "nodes": [
+        {
+          "id": "agent",
+          "label": "Support agent",
+          "role": "actor",
+          "status": "built",
+          "group": "zone-support-team"
+        },
+        {
+          "id": "admin",
+          "label": "Workspace admin",
+          "detail": "sets policies and rules",
+          "role": "actor",
+          "status": "built",
+          "group": "zone-support-team"
+        },
+        {
+          "id": "idp",
+          "label": "Identity provider",
+          "detail": "single sign-on",
+          "role": "platform",
+          "status": "built",
+          "group": "zone-edge"
+        },
+        {
+          "id": "proxy",
+          "label": "Sign-in proxy",
+          "detail": "checks identity, forwards the agent's token",
+          "role": "platform",
+          "status": "built",
+          "group": "zone-edge"
+        },
+        {
+          "id": "web",
+          "label": "Web app",
+          "detail": "the agent's inbox and draft editor",
+          "role": "own",
+          "status": "built",
+          "group": "zone-app-platform"
+        },
+        {
+          "id": "api",
+          "label": "Beacon API",
+          "detail": "every request runs as the agent",
+          "role": "own",
+          "status": "built",
+          "group": "zone-app-platform"
+        },
+        {
+          "id": "drafter",
+          "label": "Reply drafter",
+          "detail": "builds the prompt from the ticket and its history",
+          "role": "own",
+          "status": "built",
+          "group": "zone-app-platform"
+        },
+        {
+          "id": "worker",
+          "label": "Job worker",
+          "detail": "imports, re-indexing, nightly digests",
+          "role": "own",
+          "status": "built",
+          "group": "zone-app-platform"
+        },
+        {
+          "id": "db",
+          "label": "Beacon database",
+          "detail": "tickets, drafts, reviews",
+          "role": "store",
+          "status": "built",
+          "group": "zone-data"
+        },
+        {
+          "id": "queue",
+          "label": "Job queue",
+          "role": "store",
+          "status": "built",
+          "group": "zone-data"
+        },
+        {
+          "id": "files",
+          "label": "Attachment store",
+          "detail": "object storage",
+          "role": "store",
+          "status": "unknown",
+          "group": "zone-data"
+        },
+        {
+          "id": "gateway",
+          "label": "Model gateway",
+          "detail": "rate limits, usage, model choice",
+          "role": "platform",
+          "status": "built",
+          "group": "zone-model-services"
+        },
+        {
+          "id": "models",
+          "label": "Language models",
+          "role": "platform",
+          "status": "built",
+          "group": "zone-model-services"
+        }
+      ],
+      "edges": [
+        {
+          "id": "agent--proxy",
+          "from": "agent",
+          "to": "proxy",
+          "label": "opens a ticket",
+          "why": "nothing reaches Beacon without a signed-in agent"
+        },
+        {
+          "id": "admin--proxy",
+          "from": "admin",
+          "to": "proxy",
+          "label": "sets policies"
+        },
+        {
+          "id": "proxy--idp",
+          "from": "proxy",
+          "to": "idp",
+          "label": "signs in"
+        },
+        {
+          "id": "gateway--models",
+          "from": "gateway",
+          "to": "models",
+          "label": "routes to a model",
+          "why": "the gateway, not Beacon, chooses and meters the model"
+        },
+        {
+          "id": "proxy--web",
+          "from": "proxy",
+          "to": "web",
+          "label": "forwards with the agent's token"
+        },
+        {
+          "id": "proxy--api",
+          "from": "proxy",
+          "to": "api",
+          "label": "forwards with the agent's token",
+          "why": "the API acts as the agent, never as a service account"
+        },
+        {
+          "id": "web--api",
+          "from": "web",
+          "to": "api",
+          "label": "asks for a draft"
+        },
+        {
+          "id": "api--web",
+          "from": "api",
+          "to": "web",
+          "label": "returns the draft",
+          "kind": "return"
+        },
+        {
+          "id": "api--drafter",
+          "from": "api",
+          "to": "drafter",
+          "label": "hands over the ticket and its history"
+        },
+        {
+          "id": "api--db",
+          "from": "api",
+          "to": "db",
+          "label": "loads ticket history"
+        },
+        {
+          "id": "worker--queue",
+          "from": "worker",
+          "to": "queue",
+          "label": "takes jobs"
+        },
+        {
+          "id": "worker--db",
+          "from": "worker",
+          "to": "db",
+          "label": "re-indexes tickets"
+        },
+        {
+          "id": "api--files",
+          "from": "api",
+          "to": "files",
+          "label": "stores attachments",
+          "status": "unknown"
+        },
+        {
+          "id": "drafter--gateway",
+          "from": "drafter",
+          "to": "gateway",
+          "label": "sends the prompt"
+        },
+        {
+          "id": "api--gateway",
+          "from": "api",
+          "to": "gateway",
+          "label": "asks for a draft",
+          "why": "drafting is the only call that leaves the platform's trust boundary"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

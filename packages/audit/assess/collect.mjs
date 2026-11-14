@@ -15,6 +15,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { createRequire } from "node:module";
 import { join, relative, resolve, sep } from "node:path";
 import { criteriaOf, instances, revisionOf } from "./helix.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const own = createRequire(import.meta.url);
 // The HELIX types an assessment reads (HLX-05): required, then optional.
@@ -71,7 +72,7 @@ export function citations(roots) {
 /* Collect for a validated manifest. helix is validate()'s binding. */
 export function collect({ manifest, resolved, helix, out, run = runId(), now = new Date() }) {
   const repo = helix.marker.repo;
-  const dir = resolve(manifest.dir, out ?? resolved.evidence?.out ?? "ux-assessment", run);
+  const dir = resolve(manifest.dir, out ?? resolved.evidence?.out ?? reportsOf(manifest.dir).assessments, run);
   mkdirSync(dir, { recursive: true });
   const docs = instances(helix.flow, helix.types, { include: resolved.helix?.include, exclude: resolved.helix?.exclude, repo, templates: helix.templates });
   const known = new Set([...helix.types.map((t) => t.id), ...(helix.templates ?? []).map((t) => t.id)]);
@@ -81,7 +82,8 @@ export function collect({ manifest, resolved, helix, out, run = runId(), now = n
     const revision = revisionOf(d.abs);
     // info: worth knowing, not a gap (a README, a discovery note); warning: a gap in the documents.
     if (d.typedBy === "none") problems.push({ kind: "unclassified", severity: "info", path: d.path, detail: "not a HELIX artifact or report: no ddx.type, and no catalogue location or template title matches" });
-    else if (d.typedBy === "location" || d.typedBy === "template") problems.push({ kind: "untyped", severity: "warning", path: d.path, detail: `typed ${d.type} by its ${d.typedBy === "location" ? "location" : "title (a HELIX template)"}; add ddx: frontmatter with id and type` });
+    else if (d.typedBy === "corrected") problems.push({ kind: "type-corrected", severity: "info", path: d.path, detail: `ddx.type ${d.written} read as HELIX's ${d.type}; it was read, and nothing is missing` });
+    else if (d.typedBy === "location" || d.typedBy === "template") problems.push({ kind: "untyped", severity: "warning", path: d.path, detail: `read as ${d.type} by its ${d.typedBy === "location" ? "location" : "title (a HELIX template)"}, so nothing is missing; when it is next edited in HELIX, its frontmatter can name the type exactly: ddx.type ${d.type}` });
     else if (helix.catalog.source !== "none" && !known.has(d.type)) problems.push({ kind: "type-not-in-catalogue", severity: "info", path: d.path, detail: `ddx.type ${d.type} is not an artifact type or template in the bound catalogue (${helix.catalog.source}${helix.catalog.version ? ` ${helix.catalog.version}` : ""})` });
     if (!d.id && ["user-stories", "feature-specification"].includes(d.type)) problems.push({ kind: "no-id", severity: "warning", path: d.path, detail: `a ${d.type} without a stable ddx.id` });
     if (d.id && !d.idValid) problems.push({ kind: "bad-id", severity: "warning", path: d.path, detail: `${d.id} does not match its type's ID format` });

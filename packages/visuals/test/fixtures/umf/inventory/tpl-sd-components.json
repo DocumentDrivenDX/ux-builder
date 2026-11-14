@@ -1,0 +1,87 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:tpl-sd-components",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "tpl-sd-components",
+      "kind": "flow",
+      "form": "pipeline",
+      "title": "Component Interactions",
+      "question": "Which component hands the import to which?",
+      "source": {
+        "path": "helix:workflows/activities/02-design/artifacts/solution-design/example.md",
+        "view": "Component Interactions",
+        "digest": "sha256:5fac95cb298eb6534f2622aff81438c9e144954f3d8760694ff039360e120ab2"
+      },
+      "nodes": [
+        {
+          "id": "upload",
+          "label": "Upload Controller"
+        },
+        {
+          "id": "mapping",
+          "label": "Mapping Service"
+        },
+        {
+          "id": "validation",
+          "label": "CSV Validation Service"
+        },
+        {
+          "id": "summary",
+          "label": "Import Summary"
+        },
+        {
+          "id": "commit",
+          "label": "Import Commit Service"
+        },
+        {
+          "id": "rows",
+          "label": "Source Rows",
+          "role": "store"
+        },
+        {
+          "id": "evidence",
+          "label": "Evidence Service"
+        }
+      ],
+      "edges": [
+        {
+          "id": "upload--mapping",
+          "from": "upload",
+          "to": "mapping"
+        },
+        {
+          "id": "mapping--validation",
+          "from": "mapping",
+          "to": "validation"
+        },
+        {
+          "id": "validation--summary",
+          "from": "validation",
+          "to": "summary"
+        },
+        {
+          "id": "summary--commit",
+          "from": "summary",
+          "to": "commit"
+        },
+        {
+          "id": "commit--rows",
+          "from": "commit",
+          "to": "rows"
+        },
+        {
+          "id": "commit--evidence",
+          "from": "commit",
+          "to": "evidence"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

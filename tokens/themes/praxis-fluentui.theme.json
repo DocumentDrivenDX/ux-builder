@@ -1,9 +1,0 @@
-{
-  "$schema": "../schema/theme.schema.json",
-  "$description": "Praxis Fluent: brand praxis on the shared fluent design system.",
-  "name": "praxis-fluentui",
-  "title": "Praxis Fluent",
-  "brand": "praxis",
-  "default": "dark",
-  "designSystem": "fluent"
-}

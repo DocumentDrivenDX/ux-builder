@@ -1,6 +1,6 @@
 {
   "name": "@ux-builder/design",
-  "version": "0.4.1",
+  "version": "1.1.2",
   "license": "MIT OR Apache-2.0",
   "description": "The guided design loop (FEAT-018, CONTRACT-008): the ux-builder-design skill, the new artifact types' templates and prompts, the design state and the ux-builder-design command. CLI first, MCP optional; it makes no network request and calls no model.",
   "type": "module",
@@ -20,7 +20,6 @@
     "status.mjs",
     "checkpoints.mjs",
     "init.mjs",
-    "baseline.mjs",
     "brief.mjs",
     "research.mjs",
     "decisions.mjs",
@@ -36,6 +35,10 @@
     "review.mjs",
     "modality.mjs",
     "migrate.mjs",
+    "metrics.mjs",
+    "intake.mjs",
+    "advance.mjs",
+    "proposals.mjs",
     "glossary.json",
     "documents.mjs",
     "cli.mjs",
@@ -43,7 +46,17 @@
     "schema",
     "skill",
     "README.md",
-    "THIRD-PARTY-NOTICES.md"
+    "THIRD-PARTY-NOTICES.md",
+    "helix.mjs",
+    "migrate-docs.mjs",
+    "people.mjs",
+    "principles.mjs",
+    "studies.mjs",
+    "scope.mjs",
+    "finish.mjs",
+    "batch.mjs",
+    "stepproto.mjs",
+    "examples"
   ],
   "scripts": {
     "test": "node --test 'test/*.test.mjs'"
@@ -52,9 +65,9 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@ux-builder/audit": "^0.5.2",
-    "@ux-builder/trace": "^0.2.0",
-    "@ux-builder/ui": "^0.12.1",
+    "@ux-builder/audit": "^0.9.1",
+    "@ux-builder/trace": "^0.3.0",
+    "@ux-builder/ui": "^0.17.0",
     "ajv": "^8.20.0",
     "yaml": "^2.9.1"
   },

@@ -42,7 +42,7 @@ FEAT-012's `propose` and `draw` cover flows and ideal-state wireframes. RPT-09 a
 
 - [ ] **US-104-AC1** — Given a screen declaring states, when `draw` runs, then it writes a Mermaid `stateDiagram-v2` per screen with every declared state and the transitions between them, and a state table with what the user sees, the action available and the announcement.
 - [ ] **US-104-AC2** — Given a screen declaring states, when `wireframes` runs, then it writes a wireframe per supported size class for each declared state (ideal, empty, loading, partial, error), from the real pattern in that state.
-- [ ] **US-104-AC3** — Given an installed HELIX that defines `interaction-state-diagram`, `screen-flow`, `wireframe` or `user-journey-map`, when `propose` runs, then it drafts that type from its template as a patch; when it does not, `propose` says which types are missing and writes the drafts under the run's output.
+- [ ] **US-104-AC3** — Given an installed HELIX, when `propose` runs, then it drafts a `user-flow` (UF-<n>) per feature, a `wireframe` (UF-<n>-<nn>-<view>) per screen with its states, statechart and events, and a `user-journey-map` per journey, each from HELIX's template as a patch (ADR-042); when HELIX lacks a type's template, the patch is drafted from the blueprint alone and the run says so.
 - [ ] **US-104-AC4** — Given the same blueprint, when `draw` runs twice, then its output is identical.
 - [ ] **US-104-AC5** — Given a screen declaring `partial` among its states, when the blueprint is checked, drawn and wireframed, then it is valid, its state diagram has `partial` with its retry, and it gets a wireframe in that state. *[Added 2026-10-23, AR-2026-10-22 D-4]*
 

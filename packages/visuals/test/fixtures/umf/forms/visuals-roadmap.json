@@ -1,0 +1,147 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:visuals-roadmap",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "visuals-roadmap",
+      "kind": "timeline",
+      "form": "roadmap",
+      "title": "Visuals milestones",
+      "question": "Which repository delivers each visuals milestone, in what order?",
+      "source": {
+        "path": "visuals:PRD.md",
+        "view": "§11",
+        "digest": "sha256:f944df076446c39a75b7f58323869af5337751e892b75d24cc749e8b9ff27aa5"
+      },
+      "timeline": {
+        "scale": {
+          "kind": "period",
+          "periods": [
+            {
+              "id": "m0",
+              "label": "M0"
+            },
+            {
+              "id": "m1",
+              "label": "M1"
+            },
+            {
+              "id": "m2",
+              "label": "M2"
+            },
+            {
+              "id": "m3",
+              "label": "M3"
+            },
+            {
+              "id": "m4",
+              "label": "M4"
+            },
+            {
+              "id": "m5",
+              "label": "M5"
+            },
+            {
+              "id": "m6",
+              "label": "M6"
+            },
+            {
+              "id": "m7",
+              "label": "M7"
+            }
+          ]
+        },
+        "lanes": [
+          {
+            "id": "umf",
+            "label": "umf"
+          },
+          {
+            "id": "ux-builder",
+            "label": "ux-builder"
+          },
+          {
+            "id": "helix",
+            "label": "helix"
+          },
+          {
+            "id": "documentor",
+            "label": "documentor"
+          }
+        ],
+        "spans": [
+          {
+            "id": "span-m0",
+            "label": "HELIX PR #95 lands as it is",
+            "start": "m0",
+            "end": "m0",
+            "lane": "helix",
+            "status": "built"
+          },
+          {
+            "id": "span-m1",
+            "label": "umf: `umf.visual/1`",
+            "start": "m1",
+            "end": "m1",
+            "lane": "umf",
+            "status": "decided"
+          },
+          {
+            "id": "span-m2",
+            "label": "ux-builder: tokens",
+            "start": "m2",
+            "end": "m2",
+            "lane": "ux-builder",
+            "status": "decided"
+          },
+          {
+            "id": "span-m3",
+            "label": "ux-builder: `@ux-builder/visuals` 0.1 (graph kinds)",
+            "start": "m3",
+            "end": "m3",
+            "lane": "ux-builder",
+            "status": "decided"
+          },
+          {
+            "id": "span-m4",
+            "label": "ux-builder: 0.2 (the rest)",
+            "start": "m4",
+            "end": "m4",
+            "lane": "ux-builder",
+            "status": "decided"
+          },
+          {
+            "id": "span-m5",
+            "label": "HELIX: decision layer",
+            "start": "m5",
+            "end": "m5",
+            "lane": "helix",
+            "status": "decided"
+          },
+          {
+            "id": "span-m6",
+            "label": "documentor: producers and embedding",
+            "start": "m6",
+            "end": "m6",
+            "lane": "documentor",
+            "status": "decided"
+          },
+          {
+            "id": "span-m7",
+            "label": "Proof",
+            "start": "m7",
+            "end": "m7",
+            "lane": "helix",
+            "status": "decided"
+          }
+        ]
+      }
+    }
+  },
+  "modules": []
+}

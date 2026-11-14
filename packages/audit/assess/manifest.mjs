@@ -11,7 +11,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, relative, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
-import { layoutOf } from "@ux-builder/ui/blueprint/paths";
+import { layoutOf, manifestApp, reportsOf } from "@ux-builder/ui/blueprint/paths";
 import { rolesOf, riskyStep, SCENARIOS } from "./ai.mjs";
 import { bind, criteriaOf, globOutsideRoot, HelixError, instances } from "./helix.mjs";
 
@@ -51,9 +51,11 @@ export const SECRETS = [
 const SECRET_KEYS = /^(password|passwd|secret|token|apiKey|api_key|cookie|authorization)$/i;
 
 /* Parse a manifest file. Throws with the YAML error. */
+/* dir is the folder the manifest's relative paths start from: the app's
+   own, whether the manifest sits at its top or in docs/ux-builder/ (GDL-82). */
 export function load(file) {
   const text = readFileSync(file, "utf8");
-  return { file: resolve(file), dir: dirname(resolve(file)), data: parseYaml(text), text };
+  return { file: resolve(file), dir: manifestApp(file), data: parseYaml(text), text };
 }
 
 const ptr = (p) => p.map((k) => "/" + String(k).replace(/~/g, "~0").replace(/\//g, "~1")).join("") || "/";
@@ -141,7 +143,7 @@ export function validate(m) {
   }
   for (const [i, j] of (d.journeys ?? []).entries()) {
     if (j?.priority && !PRIORITIES.includes(j.priority) && !PLACEHOLDER.test(j.priority)) add(["journeys", i, "priority"], `must be one of ${PRIORITIES.join(", ")}`);
-    if (j?.id && !/^J-[a-z0-9][a-z0-9-]*$/.test(j.id) && !PLACEHOLDER.test(j.id)) add(["journeys", i, "id"], "must look like J-<kebab-case>");
+    if (j?.id && !/^(J-)?[a-z][a-z0-9-]*$/.test(j.id) && !PLACEHOLDER.test(j.id)) add(["journeys", i, "id"], "must be a kebab-case name, such as capture (an older J-capture still passes)");
   }
   const base = d.run?.baseUrl && !PLACEHOLDER.test(d.run.baseUrl) ? d.run.baseUrl : null;
   const origins = (d.run?.origins?.length ? d.run.origins : base ? [base] : []).map((u) => origin(u)).filter(Boolean);

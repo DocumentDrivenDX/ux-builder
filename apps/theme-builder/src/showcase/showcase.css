@@ -1,0 +1,120 @@
+/* The theme showcase's own markup. Every colour, font, size and radius is a
+   --piq-* role token, so the screen changes with the theme and nothing else;
+   no SDK widget or pattern is restyled here. */
+
+body { margin: 0; }
+
+.sc-root {
+  min-block-size: 100vh;
+  background: var(--piq-color-ground);
+  color: var(--piq-color-text);
+  font-family: var(--piq-font-body);
+  font-size: var(--piq-font-size-body);
+  line-height: var(--piq-line-height-body);
+}
+
+/* The type scale, used where a real screen would use it. */
+.sc-display {
+  margin: 0;
+  font-family: var(--piq-font-display);
+  font-size: var(--piq-font-size-display);
+  font-weight: var(--piq-font-weight-strong);
+  color: var(--piq-color-text-strong);
+  line-height: 1.1;
+}
+.sc-h2 {
+  margin: 0;
+  font-family: var(--piq-font-heading);
+  font-size: var(--piq-font-size-title);
+  font-weight: var(--piq-font-weight-regular);
+  color: var(--piq-color-text-strong);
+}
+.sc-lead {
+  margin: 0;
+  max-inline-size: min(var(--piq-size-measure), 60ch);
+  font-size: var(--piq-font-size-lead);
+  color: var(--piq-color-text);
+}
+.sc-body {
+  margin: 0;
+  max-inline-size: min(var(--piq-size-measure), 60ch);
+  font-size: var(--piq-font-size-body);
+}
+.sc-small {
+  margin: 0;
+  max-inline-size: min(var(--piq-size-measure), 60ch);
+  font-size: var(--piq-font-size-small);
+  color: var(--piq-color-text-muted);
+}
+.sc-eyebrow {
+  margin: 0;
+  font-size: var(--piq-font-size-label);
+  font-weight: var(--piq-font-weight-strong);
+  color: var(--piq-color-text-muted);
+}
+.sc-mono {
+  font-family: var(--piq-font-mono);
+  font-size: var(--piq-font-size-small);
+}
+
+.sc-section { display: grid; gap: var(--piq-space-3); }
+
+/* The headline figure beside the stat tiles. */
+.sc-spotlight {
+  display: grid;
+  align-content: start;
+  gap: var(--piq-space-2);
+  padding: var(--piq-space-5);
+  background: var(--piq-color-surface);
+  border: var(--piq-border-default);
+  border-radius: var(--piq-radius-card);
+}
+
+/* Top-bar tools: the theme menu sits inline with the other controls. */
+.sc-tools { min-inline-size: 0; justify-content: flex-end; }
+.sc-theme { min-inline-size: 0; max-inline-size: 14rem; }
+
+/* Main column and side column; one column below the expanded size class. */
+.sc-columns {
+  display: grid;
+  gap: var(--piq-space-6);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+@media (min-width: 1200px) {
+  .sc-columns { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+}
+.sc-main, .sc-side { min-inline-size: 0; }
+.sc-grow { flex: 1; min-inline-size: 0; }
+
+/* The bar chart inside ChartFrame: a value axis from 0, bars as boxes, the
+   total above each, and failures hatched so they never rely on colour alone. */
+.sc-chart { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--piq-space-2); }
+.sc-axis {
+  display: flex; flex-direction: column; justify-content: space-between;
+  block-size: 12rem; margin-block-start: calc(var(--piq-font-size-small) * 1.5 + var(--piq-space-1));
+  font-size: var(--piq-font-size-small); color: var(--piq-color-text-muted); text-align: end;
+}
+.sc-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--piq-space-3); }
+.sc-bars__col { display: grid; grid-template-rows: auto 12rem auto; gap: var(--piq-space-1); text-align: center; }
+.sc-bars__value { font-size: var(--piq-font-size-small); color: var(--piq-color-text); line-height: 1.5; }
+.sc-bars__track { display: flex; align-items: flex-end; border-block-end: var(--piq-border-default); }
+.sc-bars__stack { display: flex; flex-direction: column; inline-size: 100%; min-block-size: var(--piq-space-1); }
+.sc-bars__seg { display: block; min-block-size: 0; }
+.sc-bars__seg--ok { background: var(--piq-color-series-1); }
+.sc-bars__seg--failed, .sc-swatch--failed {
+  background: repeating-linear-gradient(45deg, var(--piq-color-status-negative) 0 3px, var(--piq-color-surface) 3px 6px);
+  outline: 1px solid var(--piq-color-status-negative);
+  outline-offset: -1px;
+}
+.sc-bars__label { font-size: var(--piq-font-size-small); color: var(--piq-color-text-muted); }
+
+.sc-swatch {
+  display: inline-block;
+  inline-size: var(--piq-space-3);
+  block-size: var(--piq-space-3);
+  margin-inline-end: var(--piq-space-2);
+}
+.sc-swatch--ok { background: var(--piq-color-series-1); }
+
+.sc-rule { margin: 0; border: 0; border-block-start: var(--piq-border-default); }

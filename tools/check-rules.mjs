@@ -83,6 +83,32 @@ export function checkRules({ rules, recipes, notices = "" }, k) {
     }
     for (const p of r.appliesTo?.patterns ?? []) if (!k.patterns.has(p)) problems.push(`${at}: names the pattern "${p}", which is not in the catalogue`);
   }
+  // Priority and order: every rule a rule depends on or takes precedence
+  // over exists; dependencies have no cycle; a rule never takes precedence
+  // over one at a higher priority (P0 is highest).
+  const byId = new Map((rules.rules ?? []).map((r) => [r.id, r]));
+  const level = (r) => (r?.priority ? Number(r.priority.slice(1)) : null);
+  for (const r of rules.rules ?? []) {
+    for (const [field, verb] of [["dependsOn", "depends on"], ["takesPrecedenceOver", "takes precedence over"]]) {
+      for (const id of r[field] ?? []) {
+        if (id === r.id) problems.push(`rule ${r.id}: ${verb} itself`);
+        else if (!byId.has(id)) problems.push(`rule ${r.id}: ${verb} "${id}", which does not exist`);
+      }
+    }
+    for (const id of r.takesPrecedenceOver ?? []) {
+      const w = level(r), l = level(byId.get(id));
+      if (w !== null && l !== null && w > l) problems.push(`rule ${r.id}: takes precedence over ${id}, which has a higher priority (${r.priority} under ${byId.get(id).priority})`);
+    }
+  }
+  const state = new Map();
+  const visit = (id, path) => {
+    if (state.get(id) === "done") return;
+    if (state.get(id) === "open") { problems.push(`rule ${id}: its dependencies form a cycle (${[...path.slice(path.indexOf(id)), id].join(" → ")})`); return; }
+    state.set(id, "open");
+    for (const d of byId.get(id)?.dependsOn ?? []) if (byId.has(d)) visit(d, [...path, id]);
+    state.set(id, "done");
+  };
+  for (const id of byId.keys()) visit(id, []);
   // Every audit check is a catalogue rule's (FEAT-015 RPT-02, US-101-AC3):
   // a finding is reported under the rule that names its check.
   const named = new Set((rules.rules ?? []).flatMap((r) => (r.checks ?? []).filter((c) => c.kind === "audit").map((c) => c.id)));

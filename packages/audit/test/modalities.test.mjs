@@ -23,7 +23,7 @@ let apps;
 before(async () => { apps = await modalityApps(); });
 after(() => { apps?.close(); rmSync(tmp, { recursive: true, force: true }); });
 
-const run = (pages, more = {}) => audit({ urls: pages.map((p) => apps.url(p)), themes: ["praxis-carbon"], cwd: PKG, ...more });
+const run = (pages, more = {}) => audit({ urls: pages.map((p) => apps.url(p)), themes: ["vk-praxis-carbon"], cwd: PKG, ...more });
 const widthsOf = (r) => [...new Set(r.runs.map((x) => x.width))];
 const cli = (args) => new Promise((done) => {
   const c = spawn(process.execPath, [join(PKG, "cli.mjs"), ...args], { cwd: tmp });
@@ -49,7 +49,7 @@ describe("US-099: the audit says whether the app fits its theme and modalities",
     assert.ok(web.modalities.off.includes("ai-disclose") && !web.modalities.off.includes("nav-per-breakpoint"));
     // --modality on the command line, when no blueprint names them.
     const out = join(tmp, "cli-chat");
-    const r = await cli(["--modality", "chat", "--theme", "praxis-carbon", "--appearance", "light", "--out", out, apps.url("/chat.html")]);
+    const r = await cli(["--modality", "chat", "--theme", "vk-praxis-carbon", "--appearance", "light", "--out", out, apps.url("/chat.html")]);
     assert.equal(r.status, 0, r.stdout + r.stderr);
     const json = JSON.parse(readFileSync(join(out, "report.json"), "utf8"));
     assert.deepEqual([json.modalities.names, json.modalities.source], [["chat"], "option"]);
@@ -93,8 +93,8 @@ describe("US-099: the audit says whether the app fits its theme and modalities",
   test("AC4: the theme verdict states the declared theme, whether it applies, its design system, SDK-only components and contrast per appearance, each failure with its theme.* rule", async () => {
     const r = await run(["/settings.html", "/orphan.html"], { modalities: ["responsive-web"] });
     const t = r.verdicts.theme;
-    assert.equal(t.theme, "praxis-carbon");
-    assert.equal(t.designSystem, "carbon");
+    assert.equal(t.theme, "vk-praxis-carbon");
+    assert.equal(t.designSystem, "vk-carbon");
     assert.equal(t.applied, true);
     assert.equal(t.sdkOnly, true);
     assert.deepEqual(t.contrast, { light: "fail", dark: "fail" });
@@ -133,7 +133,7 @@ describe("US-099: the audit says whether the app fits its theme and modalities",
 
   test("the report says it in HTML and JSON", async () => {
     const out = join(tmp, "html");
-    const r = await cli(["--modality", "hybrid-chat", "--theme", "praxis-carbon", "--appearance", "light", "--out", out, apps.url("/hybrid-no-card.html")]);
+    const r = await cli(["--modality", "hybrid-chat", "--theme", "vk-praxis-carbon", "--appearance", "light", "--out", out, apps.url("/hybrid-no-card.html")]);
     assert.equal(r.status, 0, r.stderr);
     assert.ok(existsSync(join(out, "index.html")));
     const html = readFileSync(join(out, "index.html"), "utf8");

@@ -25,52 +25,52 @@ const logo = (el) => el.querySelector(".piq-logo");
 
 describe("US-010 logo", () => {
   test("brand titles come from the themes the package was built with", () => {
-    assert.equal(brandTitleFor("praxis-carbon"), "Praxis");
-    assert.equal(brandTitleFor("plain"), "Plain");
+    assert.equal(brandTitleFor("vk-praxis-carbon"), "vk-Praxis");
+    assert.equal(brandTitleFor("vk-plain"), "vk-Plain");
     assert.equal(brandTitleFor("no-such-theme"), null);
   });
 
   // @covers US-010-AC8
   test("AC8: a brand with artwork is drawn as artwork, one named image", () => {
-    const el = render(h(ThemeProvider, { theme: "praxis", appearance: "light" },
+    const el = render(h(ThemeProvider, { theme: "vk-praxis", appearance: "light" },
       h(Logo, { style: { "--piq-brand-logo-image": 'url("logo.png")' } })));
     const l = logo(el);
     assert.equal(l.getAttribute("data-logo"), "artwork");
     assert.equal(l.getAttribute("role"), "img");
-    assert.equal(l.getAttribute("aria-label"), "Praxis");
+    assert.equal(l.getAttribute("aria-label"), "vk-Praxis");
     assert.equal(l.textContent, "");
     assert.ok(!l.classList.contains("piq-logo--text"));
   });
 
   test("a single-colour brand drawn as a mask counts as artwork", () => {
-    const el = render(h(ThemeProvider, { theme: "plain" }, h(Logo, { style: { "--piq-brand-logo-mask": 'url("logo.svg")' } })));
+    const el = render(h(ThemeProvider, { theme: "vk-plain" }, h(Logo, { style: { "--piq-brand-logo-mask": 'url("logo.svg")' } })));
     assert.equal(logo(el).getAttribute("data-logo"), "artwork");
   });
 
   // @covers US-010-AC9
   test("AC9: a brand without artwork gets its title as a wordmark; the mark gets its initial", () => {
-    const el = render(h(ThemeProvider, { theme: "plain" }, h(Logo), h(Logo, { variant: "mark", size: "sm" })));
+    const el = render(h(ThemeProvider, { theme: "vk-plain" }, h(Logo), h(Logo, { variant: "mark", size: "sm" })));
     const [word, mark] = el.querySelectorAll(".piq-logo");
     assert.equal(word.getAttribute("data-logo"), "text");
     assert.ok(word.classList.contains("piq-logo--text"));
-    assert.equal(word.textContent, "Plain");
-    assert.equal(word.getAttribute("aria-label"), "Plain");
+    assert.equal(word.textContent, "vk-Plain");
+    assert.equal(word.getAttribute("aria-label"), "vk-Plain");
     assert.equal(word.querySelector(".piq-logo__text").getAttribute("aria-hidden"), "true", "named once, by the image");
-    assert.equal(mark.textContent, "P");
+    assert.equal(mark.textContent, "v");
     assert.ok(mark.classList.contains("piq-logo--mark") && mark.classList.contains("piq-logo--sm"));
   });
 
   test("switching theme switches the logo", () => {
-    const el = render(h(ThemeProvider, { theme: "databricks" }, h(Logo)));
-    assert.equal(logo(el).textContent, "Databricks");
-    act(() => root.render(h(ThemeProvider, { theme: "synaptiq" }, h(Logo))));
-    assert.equal(logo(el).textContent, "Synaptiq");
+    const el = render(h(ThemeProvider, { theme: "vk-databricks" }, h(Logo)));
+    assert.equal(logo(el).textContent, "vk-Databricks");
+    act(() => root.render(h(ThemeProvider, { theme: "vk-synaptiq" }, h(Logo))));
+    assert.equal(logo(el).textContent, "vk-Synaptiq");
   });
 
   test("without a provider, the closest data-theme names the brand; label overrides", () => {
-    const el = render(h("div", { "data-theme": "databricks" }, h(Logo), h(Logo, { label: "Matters" })));
+    const el = render(h("div", { "data-theme": "vk-databricks" }, h(Logo), h(Logo, { label: "Matters" })));
     const [a, b] = el.querySelectorAll(".piq-logo");
-    assert.equal(a.getAttribute("aria-label"), "Databricks");
+    assert.equal(a.getAttribute("aria-label"), "vk-Databricks");
     assert.equal(b.getAttribute("aria-label"), "Matters");
     assert.equal(b.textContent, "Matters");
   });

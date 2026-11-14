@@ -11,6 +11,8 @@ ddx:
     - kind: informs
       to: CONTRACT-008
     - kind: informs
+      to: ADR-042
+    - kind: informs
       to: SD-006
 ---
 
@@ -55,6 +57,8 @@ anything is written, using the trace's masking.
    *hypothesis* until evidence supports them.
 
 *[Amended 2026-10-24 — FEAT-018 GDL-80, CONTRACT-008 Layout]* The decision stands; evidence (here `docs/ux/evidence/`) is now in `docs/ux-builder/evidence/`.
+
+*[Amended 2026-10-29 — ADR-042]* Decision 5 is replaced: evidence and claims live in the study's research plan, `docs/helix/01-frame/research/<study>.md`, under Findings. Decisions 1 to 4 and 6 stand and apply there.
 
 ## Alternatives Considered
 

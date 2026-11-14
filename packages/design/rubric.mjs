@@ -14,6 +14,7 @@ import { DesignError, bpFile } from "./app.mjs";
 import { latestInsights } from "./insights.mjs";
 import { observedDimensions, observedMeasures } from "./sessions.mjs";
 import { readState } from "./state.mjs";
+import { reportsOf } from "@ux-builder/ui/blueprint/paths";
 
 const require = createRequire(import.meta.url);
 export const RUBRIC = JSON.parse(readFileSync(require.resolve("@ux-builder/ui/catalogue.json"), "utf8")).interaction.rubric;
@@ -39,7 +40,7 @@ function computed(bp, app) {
   const inputs = sum(scores.map((s) => s.requiredInputs)), decisions = sum(scores.map((s) => s.decisions)), hops = sum(scores.map((s) => s.hops));
   const screens = list(bp.screens).filter((s) => s?.id);
   const content = screens.filter((s) => Array.isArray(s.content));
-  const audit = readJson(join(app, "audit-report/report.json"));
+  const audit = readJson(join(app, reportsOf(app).auditReport, "report.json"));
   const out = {};
   if (scores.length) {
     const notWalkable = count("journey.walkable"), unrealized = count("task.realized");
@@ -73,8 +74,8 @@ export function observedFor(app, alternative, predicted = {}) {
   const started = sum(list(ins?.journeys).map((j) => j.started)), completed = sum(list(ins?.journeys).map((j) => j.completed));
   if (started) {
     const rate = completed / started;
-    const prod = `${Math.round(rate * 100)}% of ${started} journeys completed in production (${ins.id})`;
-    const cites = [ins.id, ...list(ins.sources).map((x) => x.id)];
+    const prod = `${Math.round(rate * 100)}% of ${started} journeys completed in production (insights to ${ins.date})`;
+    const cites = [`insights to ${ins.date}`];
     const te = dims["task-effectiveness"];
     dims["task-effectiveness"] = te ? { ...te, value: `${te.value}; ${prod}`, evidence: [...te.evidence, ...cites] }
       : { value: prod, evidence: cites, verdict: predicted["task-effectiveness"]?.fails ? (rate >= 0.8 ? "contradicts" : "supports") : rate < 0.8 ? "contradicts" : "supports" };

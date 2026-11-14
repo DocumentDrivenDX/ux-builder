@@ -39,7 +39,7 @@ test("every widget, screen pattern and assistant component has a story, its own 
 });
 
 test("a Storybook link names the story and the theme in its appearance", () => {
-  assert.equal(storybookUrl("http://localhost:6006/", "ui-components-button--primary", "praxis-carbon", "dark"), "http://localhost:6006/?path=/story/ui-components-button--primary&globals=theme:praxis-carbon-dark");
+  assert.equal(storybookUrl("http://localhost:6006/", "ui-components-button--primary", "vk-praxis-carbon", "dark"), "http://localhost:6006/?path=/story/ui-components-button--primary&globals=theme:vk-praxis-carbon-dark");
 });
 
 test("every story in Storybook has a place on the page", () => {

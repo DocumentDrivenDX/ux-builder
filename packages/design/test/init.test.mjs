@@ -86,3 +86,20 @@ describe("init in an existing app", () => {
     assert.deepEqual(JSON.parse(readFileSync(join(app, ".mcp.json"), "utf8")).mcpServers, { other: { command: "other-server" }, "ux-builder": { command: "npx", args: ["@ux-builder/mcp"] } });
   });
 });
+
+
+test("plugin mode persists skill selection and does not copy a local design skill", () => {
+  const app = existingApp();
+  const saved = process.env.UX_BUILDER_SKILLS;
+  try {
+    process.env.UX_BUILDER_SKILLS = "plugin";
+    const r = cli(app, ["init", "--json"]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.deepEqual(JSON.parse(readFileSync(join(app, ".ux-builder/skills.json"), "utf8")), { source: "plugin" });
+    assert.equal(existsSync(join(app, ".claude/skills/ux-builder-design/SKILL.md")), false);
+    assert.ok(existsSync(join(app, ".ux-builder/design-state.json")));
+  } finally {
+    if (saved === undefined) delete process.env.UX_BUILDER_SKILLS;
+    else process.env.UX_BUILDER_SKILLS = saved;
+  }
+});

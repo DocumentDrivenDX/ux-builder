@@ -69,9 +69,25 @@ the findings of a blueprint check or an audit by rule ID.
 | `sources` | array | yes | At least one `{ "title", "url", "licence", "wording", "quote"? }` |
 | `sources[].licence` | `"apple-terms"`, `"google-terms"`, `"CC-BY-2.5"`, `"W3C"`, `"own"` | yes | `apple-terms` and `google-terms` are not open |
 | `sources[].wording` | `"paraphrased"` or `"quoted"` | yes | `quoted` only with an open licence, with `quote` of at most 25 words |
+| `priority` | `"P0"` to `"P6"` | no | Its level in `priorities`; every shipped rule has one |
+| `dependsOn` | string[] | no | Rule IDs that must pass before this rule is judged; no cycles |
+| `takesPrecedenceOver` | string[] | no | Rule IDs this rule wins over when they clash; never a rule at a higher priority |
+| `scope` | string | no | Where the rule applies, in words, when `when` and `appliesTo` cannot say it |
+| `plannedChecks` | array | no | Each `{ "kind", "id" }`: an automated check a proposed rule is meant to get (kinds add `journey`, `metrics`, `trace`, `guide`, `prototype`). Not yet built, so `checks` is a `review` meanwhile |
+| `heuristics` | string[] | no | Nielsen's usability heuristics the rule bears on (`"H1 Visibility of system status"`) |
+| `status` | `"proposed"` | no | Not yet reviewed into the SDK's rules; its `checks` are reviews only |
+
+`severity` also allows `"info"`, and `sources[].licence` also allows
+`"OGL-3.0"`, `"public-domain"`, `"CC-BY-SA-2.5"`, `"CC-BY-SA-4.0"`,
+`"Apache-2.0"` and `"publisher-terms"` (any other publisher's terms). All
+of these are paraphrased.
 
 `rules.json` also holds `version` (1) and `limits`: `compactDestinations`
-(5) and `lineLength` (80), the numbers rules refer to.
+(5) and `lineLength` (80), the numbers rules refer to; `priorities`, each
+`{ "id", "name", "protects", "ruleOfThumb" }` from P0 (Gate) to P6
+(Refinement); and `clashOrder`, the steps that decide which of two
+clashing rules wins: dependencies first, then the higher priority, then
+the more specific rule, then the higher severity, then a recorded decision.
 
 ### Recipe
 
@@ -93,6 +109,7 @@ the findings of a blueprint check or an audit by rule ID.
 | `name` | string | yes | |
 | `supports.sizeClasses` | size-class[] | yes | Non-empty |
 | `supports.inputs` | input[] | yes | Non-empty |
+| `supports.frame` | `screen`, `top-bar`, `top-nav` or `side-nav` | no | The app frame the person chose (US-162, ADR-041); without it, `side-nav` |
 | `destinations` | array | app: yes; view: no | Each `{ "id", "label", "screen" }`; `screen` names a screen `id` |
 | `screens` | array | yes | Non-empty; each below |
 | `screens[].id`, `.title`, `.pattern` | string | yes | `pattern`: a catalogue pattern |
@@ -363,6 +380,18 @@ field is read as `["responsive-web"]`. `supports.sizeClasses` and
 `supports.inputs` must include those FEAT-014's matrix derives from the
 modalities, or `blueprint.valid` warns naming the missing values.
 
+### `supports.frame`
+*[Added 2026-10-27 — US-162, ADR-041]*
+
+The app frame the person chose for a responsive-web app: `screen` (the
+content alone), `top-bar` (the app's name and actions, no navigation),
+`top-nav` (destinations across the top bar from medium, a bottom bar on
+phones) or `side-nav` (a side menu, a rail at medium, a bottom bar on
+phones). Wireframes, prototypes and the built app are drawn in it.
+`blueprint.valid` warns when a frame without navigation has more than one
+destination, when `top-nav` or `side-nav` has one destination or none, and
+when `top-nav` has more than five.
+
 ### `screens[].path`
 
 A screen may name the URL path it is served at (`"path": "/review"`). The
@@ -433,3 +462,15 @@ check that names no rule.
 - [x] Every field has a type and a rule.
 - [x] Exit codes and ordering are defined.
 - [x] Licence values and the quotation limit are normative.
+
+### Amendment: entry points, a frame per screen, states of a screen's own, and who a screen is for *(2026-10-31, FEAT-018, VIP List session 2)*
+
+| Field | Shape | Meaning |
+|---|---|---|
+| `screens[].entry` | `link`, `scan` or `message` | The screen is entered from outside the app; `flow.reachable` starts from it and does not call it unreachable |
+| `screens[].frame` | `screen`, `top-bar`, `top-nav`, `side-nav` | This screen's frame in place of `supports.frame`; wireframes, prototypes and the generated app draw it so |
+| `screens[].states` | adds IDs of the screen's own (`^[a-z][a-z0-9-]*$`) | A state such as `already-used`; one with no `stateNotices` entry is a `blueprint.valid` error |
+| `screens[].stateNotices` | `{ [state]: { tone?, title, text?, values? } }` | What a state shows: a notice over the screen, in wireframes, prototypes and the generated app; `values` (`{ [content label]: text }`, US-173) the content it changes, shown in place of the samples. In the generated app an `error` notice holds back the screen's main action |
+| `screens[].content[].compact` | boolean | In a list, shown on a phone (compact); with none marked, a list shows its first three items there (US-173) |
+| rule `screen.details-asked` (warning) | — | A person's name, phone number, email, birth date or address shown on a screen that no form, dialog field or journey step input asks for (US-174) |
+| `screens[].users` | `U-<n>` IDs | The target users the screen is for; `nav.audience` (a warning) names a destination whose screen is for users the first destination's is not |

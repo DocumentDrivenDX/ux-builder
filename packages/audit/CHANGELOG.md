@@ -1,5 +1,90 @@
 # @ux-builder/audit
 
+## 0.9.1
+
+### Patch Changes
+
+- Updated dependencies [9bb6d47]
+- Updated dependencies [b4678d0]
+- Updated dependencies [7d833cd]
+- Updated dependencies [3383d93]
+  - @ux-builder/ui@0.17.0
+  - @ux-builder/tokens@2.0.0
+
+## 0.9.0
+
+### Minor Changes
+
+- 0199ed8: One prototype that grows (VIP List session 2, where the step prototype showed "Item 1" and "Field 1" and stopped changing after step 3). Wireframes and step prototypes draw each screen with its own content: list columns and rows, detail fields and form fields from its content labels, with product-neutral sample values (names, phones, dates, times, cities, counts) and form controls by what each label asks for. Once the app is built, `ux-builder-design prototype --step` builds it and the check audits its routes, so from step 6 the prototype the person uses is the one checked. The audit's `serveFolder` serves an app's routes (`spa`).
+- d406dd0: A prototype ends every guided step (US-170, ADR-043). `ux-builder-design prototype --step` draws the current step's prototype in `docs/ux-builder/prototypes/step-<n>/`, assuming the modality, size classes, input types, frame, theme (`plain`) and appearance the person has not chosen yet and recording each as an assumption, instead of refusing. `--check` serves the prototype locally, runs the UI audit on every page (its own toolbar left out) and the deterministic heuristics, and writes `check-<round>.json`; from step 5 it asks for the journey walk too. Wireframes and exploratory prototypes take an appearance; the audit exports `serveFolder`; `resolveAppearance` takes the themes to resolve against.
+- 99979dc: After VIP List session 4 (US-174): the intake asks what each person needs to see about the others, and the blueprint rule `content.asked` warns about a person's name, phone, email, birth date or address shown but asked for nowhere. The journey walk also taps a list's first row. Status at step 4 names `step batch`, and the theme never blocks. `Logo` takes `fallback="none"`, and an app built from a design shows its own name in its header without the theme's title. Events are logged with their time of day, and a bare date never moves a measured span (the batch logged one, and session 4 read 13 minutes to its first prototype for 3).
+- 8fcc754: What VIP List sessions 3 and 4 needed (US-173). `ux-builder-design step batch` records the person's one answer to steps 4 to 6. From step 5 the step check walks every journey in a browser (`walkJourneys` in `@ux-builder/audit`), and a step's first check reuses an earlier step's audited pages or the same app bundle. A report merges participants with the same problem into one finding. The lint lets a QR code or barcode marked `data-graphic` keep its own `<svg>` and black and white. In the blueprint, `stateNotices` take the `values` a state changes, and content items may be marked `compact` for phone lists (the first three otherwise); an error notice holds back the screen's main action. Drawn prototypes show each screen's other actions, a readable bar in dark, and counts that say what they count. An app built from a design takes the design's appearance and audits every designed screen; its business-rule notes show only from the prototype controls, and a form's main action follows its fields. A journey that ends where it started is no longer scored as "0 moves would do", alternatives are drawn in the design's appearance, and test-kit goals keep their verb.
+
+### Patch Changes
+
+- Updated dependencies [cae0267]
+- Updated dependencies [01510d3]
+- Updated dependencies [3eadaa1]
+- Updated dependencies [718f5be]
+- Updated dependencies [b691719]
+- Updated dependencies [0199ed8]
+- Updated dependencies [d339f87]
+- Updated dependencies [ff74560]
+- Updated dependencies [569c525]
+- Updated dependencies [d406dd0]
+- Updated dependencies [99979dc]
+- Updated dependencies [8fcc754]
+  - @ux-builder/ui@0.16.0
+  - @ux-builder/tokens@1.9.0
+
+## 0.8.0
+
+### Minor Changes
+
+- 2fea36b: ux-builder writes into HELIX's documents and keeps none of its own (ADR-042; needs HELIX v0.20.0's UX types and sections).
+  
+  `@ux-builder/design` (breaking): UX decisions are proposed as HELIX ADRs tagged area:ui (`decision add`, `decision status`), experiments are DDx beads (`experiment start|end`), experience principles go in principles.md (`principle add`), users, needs and tasks are rows of the PRD's User Segments and User Needs and a feature's Task Model (`segment add`, `need add`, `task add`), and research is a study's HELIX research plan (`evidence add|claim|excerpt --study`, `test-kit --study`, `transcript add --study`, `observe import --study`). Test-session material, evaluation reports and insight exports are run output in the gitignored `docs/ux-builder/runs/`; `insights` proposes Journey Funnels for the metrics dashboard; approving the coverage map proposes the solution design's Experience Traceability; the brief is compiled from HELIX and says where each section comes from. Every change to HELIX is a proposal the person applies. The baseline command and the users, jobs, ux-decision, research-evidence, test-kit, usability-evaluation-report, insights, experiment and baseline document types are gone; `migrate` proposes an app's old documents into HELIX. A person sees HELIX's IDs and names only.
+  
+  `@ux-builder/ui`: `ux-builder-blueprint propose` fills HELIX's user-flow, wireframe and user-journey-map types and DESIGN.md's modalities, size classes and app frame; its draft types are gone. Blueprint tasks take their Task Model key and cite needs and users by name; journeys may be named without the `J-` prefix; a project rule names its principle by its words. The layout gains `runs`.
+  
+  `@ux-builder/audit`: `reports.html` lists every run by path, copying nothing in; journeys may be named without `J-`. The assessment's `report.md` is a ux-builder usability assessment report (`ux-builder:` frontmatter, `type: usability-assessment-report`) rather than claiming a HELIX type, and is no longer drafted from a HELIX template.
+  
+  `@ux-builder/create-app`: a created app gitignores `docs/ux-builder/assessments/` and `docs/ux-builder/runs/`, never overwrites an existing concerns.md, and names its starter journey `start`.
+  
+  `@ux-builder/trace`: a decision event's `ux` may be a HELIX ADR (`ADR-<nnn>`); older `UXD-<n>` traces stay valid.
+  
+  `@ux-builder/mcp`: `trace` describes study task keys and ADR IDs.
+
+### Patch Changes
+
+- Updated dependencies [2fea36b]
+  - @ux-builder/ui@0.15.0
+
+## 0.7.0
+
+### Minor Changes
+
+- 4350756: The app frame is the person's choice (US-162, ADR-041). AppShell takes `frame`: `screen` (the content alone), `top-bar` (no navigation), `top-nav` (destinations across the top, a bottom bar on phones) or `side-nav` (the default). The blueprint records it in `supports.frame` and `check` warns when it no longer fits the destinations; wireframes, prototypes and the built app are drawn in it; `ux-builder-design modality` asks for it with the modality and recommends one from the destinations; the audit judges it by outcome.
+
+### Patch Changes
+
+- Updated dependencies [4350756]
+- Updated dependencies [88942e5]
+  - @ux-builder/ui@0.14.0
+
+## 0.6.0
+
+### Minor Changes
+
+- f11e073: Lessons from the first guided session (FEAT-018 GDL-82). `ux-builder-design explain <ID>` says what an ID such as U-1, J-1, J-find, T-2 or BR-1 names and where it lives, and `explain ids` lists every kind; the overview mentions them and the guide never shows a bare ID. HELIX stories are read without a type tag, and a near-miss tag such as `user-story` is read as `user-stories` and reported; the guides never hand the person a command to edit HELIX or guess a HELIX field. Asked for an audit, the guides ask whether the person wants the UI audit, the usability assessment, or both. The assessment's manifest and runs and the UI audit's report now live under `docs/ux-builder/` (`ux-assessment.yml`, `assessments/`, `audit-report/`), the manifest's paths still relative to the app; an app that keeps them at its top keeps working, `status` lists them and `ux-builder-design migrate` moves them.
+- 309ec20: The person's time goes to decisions (FEAT-018 GDL-83, ADR-040). Review comes in three tiers: the foundations (brief, target users, jobs, stories, business rules, decisions) a table per kind (`ux-builder-design review table <kind>`, `review approve --kind <kind>`); what is built from them as one coverage map with its exceptions (`review map`, `review approve map [--accept <exception>]`); records need no approval. An approval holds through changes of frontmatter and formatting, and a change of meaning comes back as a diff. `intake` asks the open questions together after reading what exists, and `status` shows the decisions left before the first prototype. `evidence claim add|verify` grounds each claim in its source, and `validate` warns about an unchecked one that changes the design's direction. `proposals preview` and `proposals apply --accepted <ids>` apply HELIX proposals all or nothing, renumbering a clashing ID. `advance --until-decision` does the safe work and names the next decision. `metrics` measures the session against its targets. The build in place generates a working journey skeleton from the chosen blueprint (`create-app --prototype` regenerates it) and no longer adds starter HELIX documents that clash with the design's. The responsive-web verdict is judged by outcome at the chosen size classes (`ux-builder-audit --size-classes`); every report is listed on `docs/ux-builder/reports.html` (`ux-builder-audit reports`); and `ux-builder-audit doctor` checks the installed packages agree.
+
+### Patch Changes
+
+- Updated dependencies [f11e073]
+- Updated dependencies [309ec20]
+  - @ux-builder/ui@0.13.0
+
 ## 0.5.2
 
 ### Patch Changes

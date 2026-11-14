@@ -148,7 +148,7 @@ describe("US-138: the assessment runs a heuristic inspection pass", () => {
     try {
       const base = `http://127.0.0.1:${server.address().port}`;
       const out = join(root, "audit");
-      const r = await audit({ urls: ["/queue.compact.html", "/entry.compact.html"].map((u) => base + u), themes: ["praxis-carbon"], appearances: ["light"], blueprint: BP, out, cwd: PKG });
+      const r = await audit({ urls: ["/queue.compact.html", "/entry.compact.html"].map((u) => base + u), themes: ["vk-praxis-carbon"], appearances: ["light"], blueprint: BP, out, cwd: PKG });
       assert.deepEqual(r.pages.map((x) => [x.screen, x.screenVia]), [["queue", "data-piq-screen"], ["entry", "data-piq-screen"]]);
       // The prototype's own content block keeps the declared order; its bar is left out of the check.
       const page = readFileSync(join(dir, "entry.compact.html"), "utf8");

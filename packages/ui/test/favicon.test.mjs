@@ -34,7 +34,7 @@ afterEach(() => {
 describe("US-010 favicon", () => {
   // @covers US-010-AC11
   test("AC11: the top-level provider sets the theme's favicon, last in the head, and follows changes", () => {
-    render(h(ThemeProvider, { theme: "praxis", appearance: "dark", style: withFavicon }, "app"));
+    render(h(ThemeProvider, { theme: "vk-praxis", appearance: "dark", style: withFavicon }, "app"));
     const link = sdkIcon();
     assert.ok(link, "an SDK icon link");
     assert.equal(link.getAttribute("href"), MARK);
@@ -44,15 +44,15 @@ describe("US-010 favicon", () => {
     assert.ok(document.getElementById("own"), "the app's own icon is kept");
 
     // A theme without a favicon: the SDK's link goes, the app's shows.
-    act(() => root.render(h(ThemeProvider, { theme: "databricks", appearance: "light" }, "app")));
+    act(() => root.render(h(ThemeProvider, { theme: "vk-databricks", appearance: "light" }, "app")));
     assert.equal(sdkIcon(), null);
-    act(() => root.render(h(ThemeProvider, { theme: "praxis", appearance: "light", style: withFavicon }, "app")));
+    act(() => root.render(h(ThemeProvider, { theme: "vk-praxis", appearance: "light", style: withFavicon }, "app")));
     assert.equal(sdkIcon().getAttribute("href"), MARK);
     assert.equal(document.head.querySelectorAll("link[data-piq-favicon]").length, 1, "one link, reused");
   });
 
   test("unmounting the provider removes its icon", () => {
-    render(h(ThemeProvider, { theme: "praxis", style: withFavicon }, "app"));
+    render(h(ThemeProvider, { theme: "vk-praxis", style: withFavicon }, "app"));
     assert.ok(sdkIcon());
     act(() => root.unmount()); root = null;
     assert.equal(sdkIcon(), null);
@@ -95,10 +95,10 @@ describe("US-010 favicon", () => {
   test("AC12: an embedded view, a nested provider and favicon={false} set no icon", () => {
     render(h(ThemeProvider, { tokens: { "piq-brand-favicon": `url("${MARK}")` }, style: withFavicon }, "embedded"));
     assert.equal(sdkIcon(), null, "embedded view");
-    act(() => root.render(h(ThemeProvider, { theme: "praxis", favicon: false, style: withFavicon }, "off")));
+    act(() => root.render(h(ThemeProvider, { theme: "vk-praxis", favicon: false, style: withFavicon }, "off")));
     assert.equal(sdkIcon(), null, "favicon={false}");
-    act(() => root.render(h(ThemeProvider, { theme: "databricks", favicon: false },
-      h(ThemeProvider, { theme: "praxis", style: withFavicon }, "nested"))));
+    act(() => root.render(h(ThemeProvider, { theme: "vk-databricks", favicon: false },
+      h(ThemeProvider, { theme: "vk-praxis", style: withFavicon }, "nested"))));
     assert.equal(sdkIcon(), null, "a nested provider");
     assert.ok(document.getElementById("own"), "the app's own icon stays");
   });

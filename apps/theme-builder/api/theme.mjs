@@ -58,7 +58,8 @@ export function theme({ root, name }) {
     title: t.title,
     brand: { name: brand.name, title: brand.title, generated: Boolean(brand.generation) },
     designSystem: ds ? { name: ds.name, title: ds.title } : null,
-    iconSet: ICON_SETS.has(t.designSystem) ? t.designSystem : "lucide",
+    // From the design system's own icon.set token, so a renamed copy (vk-carbon) keeps its set.
+    iconSet: ((s) => (ICON_SETS.has(s) ? s : "lucide"))(ds?.tokens?.icon?.set?.$value ?? t.designSystem),
     default: t.default ?? null,
     // The theme mapped onto each generative UI library's variables (ADR-023), as the build emits it.
     bridges: Object.fromEntries(Object.keys(SURFACES).map((s) => [s, { title: SURFACES[s].title, css: bridgeCss(t.name, resolvedBy, defaultAppearance(src, t), s) }])),

@@ -65,7 +65,7 @@ test("US-045-AC4: each AI story renders in its theme with no error and no reques
   page.on("pageerror", (e) => errors.push(e.message));
   for (const s of ai) {
     for (const ap of ["light", "dark"]) {
-      await page.goto(story(s.id, "praxis-carbon", ap), { waitUntil: "networkidle" });
+      await page.goto(story(s.id, "vk-praxis-carbon", ap), { waitUntil: "networkidle" });
       await page.waitForSelector(".ai-frame", { state: "attached" });
       const r = await page.evaluate(() => ({ failed: document.body.classList.contains("sb-show-errordisplay"), height: document.querySelector(".ai-frame").getBoundingClientRect().height, bg: getComputedStyle(document.querySelector(".ds-frame")).getPropertyValue("--background").trim() }));
       assert.equal(r.failed, false, `${s.id} ${ap} rendered`);

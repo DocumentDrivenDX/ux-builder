@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 316 182" width="316" height="182" role="img" aria-labelledby="umf-ac-satisfied-title" aria-describedby="umf-ac-satisfied-desc" class="uxb-visual uxb-visual--metric-stat" data-visual="umf-ac-satisfied" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="umf-ac-satisfied-title">Satisfied acceptance criteria</title>
+<desc id="umf-ac-satisfied-desc">How many of umf's acceptance criteria are satisfied, and is that rising?</desc>
+<rect x="0" y="0" width="316" height="182" style="fill:#09090B"/>
+<g id="umf-ac-satisfied--satisfied" class="uxb-stat">
+<text x="16" y="60" style="fill:#FFFFFF;font-size:44px;font-weight:600">180</text>
+<text x="100.46" y="60" style="fill:#FAFAFA;font-size:13px;font-weight:400">criteria</text>
+<path d="M16 86 L21 76 L26 86 Z" style="fill:#1FAB1D;stroke:#1FAB1D;stroke-width:0.01px"/>
+<text x="32" y="86" style="fill:#1FAB1D;font-size:12px;font-weight:600">+12 since 18 Oct</text>
+<path d="M16.00 156.00 L48.50 152.93 L81.00 148.70 L113.50 132.19 L146.00 132.19 L178.50 132.19 L211.00 114.53 L243.50 112.61 L276.00 108.00" style="fill:none;stroke:#1685DF;stroke-width:2px"/>
+<circle cx="276" cy="108" r="4" style="fill:#1685DF;stroke:#09090B;stroke-width:2px"/>
+</g>
+</svg>

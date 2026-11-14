@@ -16,7 +16,7 @@
    file); every theme's page is built, so an unlisted one opens by its name.
 
    The home page (apps/theme-builder/home.html, src/home/) is built from the
-   same app with the SDK's widgets and AI Components, in ux-builder-databricks.
+   same app with the SDK's widgets and AI Components, in vk-praxis-material.
    Its intro video plays on the brand's logo paint, read here from the brand
    file, since the intro shows before the page's CSS arrives. Its link
    preview tags take the site's address from SITE_URL (default: the project
@@ -64,7 +64,7 @@ for (const t of ctx.themes) writeFileSync(join(data, "themes", `${t.name}.json`)
 if (!existsSync(join(themesOut, "index.html"))) { console.error(`build-pages: the theme pages did not build into ${themesOut}`); process.exit(1); }
 
 // The home page, into the site's root beside themes/ (its own assets/; the public/ folder brings favicon.svg).
-const brand = JSON.parse(readFileSync(join(ROOT, "tokens/brands/ux-builder.brand.json"), "utf8"));
+const brand = JSON.parse(readFileSync(join(ROOT, "tokens/brands/vk-praxis.brand.json"), "utf8"));
 process.env.VITE_INTRO_PAINT = brand.appearances.light.brand["logo-paint"].$value;
 // Link previews need the site's absolute address (SITE_URL for a fork or another host), and the image at a fixed name.
 process.env.VITE_SITE_URL = (process.env.SITE_URL ?? "https://documentdrivendx.github.io/ux-builder/").replace(/\/?$/, "/");

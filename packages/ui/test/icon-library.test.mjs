@@ -55,32 +55,32 @@ describe("US-010 icon library", () => {
   });
 
   test("an icon passed as icon, or registered, follows the theme's set; a set without one draws Lucide's", () => {
-    let el = render(h(ThemeProvider, { theme: "praxis-material" }, h(Icon, { icon: library.iconPin })));
+    let el = render(h(ThemeProvider, { theme: "vk-praxis-material" }, h(Icon, { icon: library.iconPin })));
     assert.deepEqual(drawn(el), ["pin", "material"]);
-    act(() => root.render(h(ThemeProvider, { theme: "praxis-carbon" }, h(Icon, { icon: library.iconPin }))));
+    act(() => root.render(h(ThemeProvider, { theme: "vk-praxis-carbon" }, h(Icon, { icon: library.iconPin }))));
     assert.deepEqual(drawn(el), ["pin", "carbon"]);
     act(() => root.unmount()); host.remove();
 
     registerIcons(library.iconPlay, library.iconPaperclip);
-    el = render(h(ThemeProvider, { theme: "praxis-fluentui" }, h(Icon, { name: "play", label: "Play" }), h(Icon, { name: "paperclip" })));
+    el = render(h(ThemeProvider, { theme: "vk-praxis-fluentui" }, h(Icon, { name: "play", label: "Play" }), h(Icon, { name: "paperclip" })));
     const svgs = el.querySelectorAll("svg.piq-icon");
     assert.deepEqual([...svgs].map((s) => [s.getAttribute("data-icon"), s.getAttribute("data-icon-set")]), [["play", "fluent"], ["paperclip", "fluent"]]);
     assert.equal(svgs[0].getAttribute("aria-label"), "Play");
     const onlyLucide = library[exportName(Object.entries(libraryMap()).find(([, m]) => !m.carbon)[0])];
-    act(() => root.render(h(ThemeProvider, { theme: "praxis-carbon" }, h(Icon, { icon: onlyLucide }))));
+    act(() => root.render(h(ThemeProvider, { theme: "vk-praxis-carbon" }, h(Icon, { icon: onlyLucide }))));
     assert.equal(el.querySelector("svg.piq-icon").getAttribute("data-icon-set"), "lucide");
   });
 
   test("a shared name keeps its shared glyph even if a library icon of that name is registered", () => {
     registerIcons({ name: "search", glyphs: { lucide: { viewBox: "0 0 1 1", body: "<rect/>" } } });
-    const el = render(h(ThemeProvider, { theme: "praxis-material" }, h(Icon, { name: "search" })));
+    const el = render(h(ThemeProvider, { theme: "vk-praxis-material" }, h(Icon, { name: "search" })));
     assert.deepEqual(drawn(el), ["search", "material"]);
   });
 
   // @covers US-010-AC14
   test("AC14: an app's own icon registers and draws through Icon; unsafe markup is refused", () => {
     assert.deepEqual(registerIcons({ name: "acme-gavel", glyphs: { lucide: { viewBox: "0 0 24 24", body: '<path d="M4 20h10"/>' } } }), ["acme-gavel"]);
-    const el = render(h(ThemeProvider, { theme: "praxis-carbon" }, h(Icon, { name: "acme-gavel", label: "Ruling" })));
+    const el = render(h(ThemeProvider, { theme: "vk-praxis-carbon" }, h(Icon, { name: "acme-gavel", label: "Ruling" })));
     const svg = el.querySelector("svg.piq-icon");
     assert.deepEqual([svg.getAttribute("data-icon"), svg.getAttribute("data-icon-set")], ["acme-gavel", "lucide"]);
     assert.equal(svg.getAttribute("stroke"), "currentColor", "drawn like a Lucide icon");

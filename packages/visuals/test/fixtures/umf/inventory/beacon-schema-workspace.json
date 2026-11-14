@@ -1,0 +1,316 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-schema-workspace",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-schema-workspace",
+      "kind": "structure",
+      "form": "entities",
+      "title": "What a workspace keeps",
+      "question": "What does the database keep for the workspace, its people and its jobs?",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/migrations",
+        "digest": "sha256:8a3e9b961a37bcce32cad3187344203535e63994b6a1d46e02f8bb99e6649c90"
+      },
+      "nodes": [
+        {
+          "id": "workspaces",
+          "label": "workspaces",
+          "role": "store"
+        },
+        {
+          "id": "agents",
+          "label": "agents",
+          "role": "store"
+        },
+        {
+          "id": "settings",
+          "label": "settings",
+          "role": "store"
+        },
+        {
+          "id": "integrations",
+          "label": "integrations",
+          "role": "store"
+        },
+        {
+          "id": "jobs",
+          "label": "jobs",
+          "role": "store"
+        },
+        {
+          "id": "job_runs",
+          "label": "job_runs",
+          "role": "store"
+        },
+        {
+          "id": "schedules",
+          "label": "schedules",
+          "role": "store"
+        }
+      ],
+      "structure": {
+        "entities": [
+          {
+            "node": "workspaces",
+            "fields": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "keys": [
+                  "pk"
+                ]
+              },
+              {
+                "name": "name",
+                "type": "text"
+              },
+              {
+                "name": "created_at",
+                "type": "timestamptz"
+              }
+            ]
+          },
+          {
+            "node": "agents",
+            "fields": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "keys": [
+                  "pk"
+                ]
+              },
+              {
+                "name": "workspace_id",
+                "type": "uuid",
+                "keys": [
+                  "fk"
+                ]
+              },
+              {
+                "name": "email",
+                "type": "text"
+              },
+              {
+                "name": "role",
+                "type": "text"
+              }
+            ]
+          },
+          {
+            "node": "settings",
+            "fields": [
+              {
+                "name": "workspace_id",
+                "type": "uuid",
+                "keys": [
+                  "pk",
+                  "fk"
+                ]
+              },
+              {
+                "name": "default_tone",
+                "type": "text"
+              },
+              {
+                "name": "auto_draft",
+                "type": "boolean"
+              }
+            ]
+          },
+          {
+            "node": "integrations",
+            "fields": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "keys": [
+                  "pk"
+                ]
+              },
+              {
+                "name": "workspace_id",
+                "type": "uuid",
+                "keys": [
+                  "fk"
+                ]
+              },
+              {
+                "name": "kind",
+                "type": "text"
+              },
+              {
+                "name": "connected_at",
+                "type": "timestamptz"
+              }
+            ]
+          },
+          {
+            "node": "jobs",
+            "fields": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "keys": [
+                  "pk"
+                ]
+              },
+              {
+                "name": "workspace_id",
+                "type": "uuid",
+                "keys": [
+                  "fk"
+                ]
+              },
+              {
+                "name": "kind",
+                "type": "text"
+              }
+            ]
+          },
+          {
+            "node": "job_runs",
+            "fields": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "keys": [
+                  "pk"
+                ]
+              },
+              {
+                "name": "job_id",
+                "type": "uuid",
+                "keys": [
+                  "fk"
+                ]
+              },
+              {
+                "name": "started_at",
+                "type": "timestamptz"
+              },
+              {
+                "name": "finished_at",
+                "type": "timestamptz"
+              }
+            ]
+          },
+          {
+            "node": "schedules",
+            "fields": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "keys": [
+                  "pk"
+                ]
+              },
+              {
+                "name": "job_id",
+                "type": "uuid",
+                "keys": [
+                  "fk"
+                ]
+              },
+              {
+                "name": "cron",
+                "type": "text"
+              }
+            ]
+          }
+        ],
+        "references": [
+          {
+            "id": "workspaces--agents--workspace-id",
+            "from": {
+              "node": "workspaces"
+            },
+            "to": {
+              "node": "agents",
+              "field": "workspace_id"
+            },
+            "label": "workspace_id",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "workspaces--settings--workspace-id",
+            "from": {
+              "node": "workspaces"
+            },
+            "to": {
+              "node": "settings",
+              "field": "workspace_id"
+            },
+            "label": "workspace_id",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "workspaces--integrations--workspace-id",
+            "from": {
+              "node": "workspaces"
+            },
+            "to": {
+              "node": "integrations",
+              "field": "workspace_id"
+            },
+            "label": "workspace_id",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "workspaces--jobs--workspace-id",
+            "from": {
+              "node": "workspaces"
+            },
+            "to": {
+              "node": "jobs",
+              "field": "workspace_id"
+            },
+            "label": "workspace_id",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "jobs--job_runs--job-id",
+            "from": {
+              "node": "jobs"
+            },
+            "to": {
+              "node": "job_runs",
+              "field": "job_id"
+            },
+            "label": "job_id",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          },
+          {
+            "id": "jobs--schedules--job-id",
+            "from": {
+              "node": "jobs"
+            },
+            "to": {
+              "node": "schedules",
+              "field": "job_id"
+            },
+            "label": "job_id",
+            "fromCardinality": "exactly-one",
+            "toCardinality": "zero-or-many"
+          }
+        ]
+      },
+      "omissions": [
+        "3 references to tables in the other half: customers.workspace_id → workspaces, drafts.agent_id → agents, tickets.workspace_id → workspaces."
+      ]
+    }
+  },
+  "modules": []
+}

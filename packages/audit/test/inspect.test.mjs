@@ -16,7 +16,7 @@ import { inspect } from "../inspect.mjs";
 
 const PKG = fileURLToPath(new URL("..", import.meta.url));
 const FILES = { "/themes.css": join(PKG, "../tokens/dist/themes.css"), "/fonts.css": join(PKG, "../tokens/dist/fonts.css"), "/ui.css": join(PKG, "../ui/dist/ui.css") };
-const page = (body, script = "") => `<!doctype html><html lang="en" data-theme="praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>t</title>
+const page = (body, script = "") => `<!doctype html><html lang="en" data-theme="vk-praxis-carbon" data-appearance="light"><head><meta charset="utf-8"><title>t</title>
 <link rel="stylesheet" href="/themes.css"><link rel="stylesheet" href="/fonts.css"><link rel="stylesheet" href="/ui.css">
 <style>body { margin: 0; font-family: var(--piq-font-body); color: var(--piq-color-text); background: var(--piq-color-ground); }</style>
 </head><body>${body}<script>${script}</script></body></html>`;
@@ -124,7 +124,7 @@ describe("US-062: inspect() checks the state just reached", () => {
   // @covers US-062-AC2
   test("AC2: audit() and inspect() give the same findings for the same page and theme", async () => {
     const url = `${base}/plain.html`;
-    const r = await audit({ urls: [url], themes: ["praxis-carbon"], appearances: ["light"], widths: [1280], contrast: true, rules: { brand: false }, cwd: PKG });
+    const r = await audit({ urls: [url], themes: ["vk-praxis-carbon"], appearances: ["light"], widths: [1280], contrast: true, rules: { brand: false }, cwd: PKG });
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     try {
       const p = await context.newPage();

@@ -25,12 +25,12 @@ const WEB = ["responsive-web"];
 
 describe("scaffold", () => {
   test("writes a React + Vite app on the SDK, on the chosen theme", () => {
-    const r = scaffold(join(tmp, "acme"), { theme: "databricks", modalities: WEB });
+    const r = scaffold(join(tmp, "acme"), { theme: "vk-databricks", modalities: WEB });
     assert.deepEqual(r.files, [".claude/settings.json", ".github/workflows/ci.yml", ".gitignore", ".stylelintrc.json", "AGENTS.md", "CLAUDE.md", "README.md", "docs/ux-builder/blueprint/app.blueprint.json", "e2e/starter.spec.js", "eslint.config.js", "index.html", "package.json", "playwright.config.js", "scripts/install-skill.mjs", "src/App.css", "src/App.jsx", "src/Home.jsx", "src/ThemeSwitch.jsx", "src/main.jsx", "vite.config.js"]);
     const pkg = JSON.parse(readFileSync(join(r.dir, "package.json"), "utf8"));
     assert.equal(pkg.name, "acme");
-    assert.match(readFileSync(join(r.dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="databricks" appearance="system"/);
-    assert.match(readFileSync(join(r.dir, ".stylelintrc.json"), "utf8"), /"theme": "databricks"/);
+    assert.match(readFileSync(join(r.dir, "src/main.jsx"), "utf8"), /<ThemeProvider theme="vk-databricks" appearance="system"/);
+    assert.match(readFileSync(join(r.dir, ".stylelintrc.json"), "utf8"), /"theme": "vk-databricks"/);
     assert.match(readFileSync(join(r.dir, "CLAUDE.md"), "utf8"), /node_modules\/@ux-builder\/ui\/AGENTS\.md/);
     for (const f of r.files) assert.doesNotMatch(readFileSync(join(r.dir, f), "utf8"), /__[A-Z_]+__/, f);
   });
@@ -71,8 +71,8 @@ describe("scaffold", () => {
   });
 
   test("the default theme is plain; every shipped theme is accepted", () => {
-    assert.equal(scaffold(join(tmp, "default"), { modalities: WEB }).theme, "plain");
-    assert.ok(themes().includes("praxis-carbon"));
+    assert.equal(scaffold(join(tmp, "default"), { modalities: WEB }).theme, "vk-plain");
+    assert.ok(themes().includes("vk-praxis-carbon"));
   });
 
   test("an unknown theme, a non-empty folder or a bad name is refused", () => {
@@ -85,9 +85,9 @@ describe("scaffold", () => {
   test("runs through a symlinked bin, as npm create does", () => {
     mkdirSync(join(tmp, "bin"));
     symlinkSync(CLI, join(tmp, "bin", "create-app"));
-    const r = spawnSync(process.execPath, [join(tmp, "bin", "create-app"), join(tmp, "linked"), "--modality", "responsive-web", "--theme", "databricks"], { encoding: "utf8", cwd: tmp, env: HELIX_ENV });
+    const r = spawnSync(process.execPath, [join(tmp, "bin", "create-app"), join(tmp, "linked"), "--modality", "responsive-web", "--theme", "vk-databricks"], { encoding: "utf8", cwd: tmp, env: HELIX_ENV });
     assert.equal(r.status, 0, r.stderr);
-    assert.match(r.stdout, /Created linked, a responsive-web app, on the databricks theme/);
+    assert.match(r.stdout, /Created linked, a responsive-web app, on the vk-databricks theme/);
     assert.match(readFileSync(join(tmp, "linked", "package.json"), "utf8"), /"name": "linked"/);
   });
 

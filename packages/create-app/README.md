@@ -32,7 +32,28 @@ exists, and records the build in the design state. It writes nothing, and says
 why, when the modality is not recorded, a `--modality` given differs from it,
 `--blueprint` is given, the blueprint has an error, or a file it did not write
 is in the way. Without `--theme` it asks in a terminal and exits 1 listing the
-themes without one. `--theme` without `--modality` in an empty folder exits 1:
+themes without one.
+
+A starter HELIX document is written only where the design has none: one whose
+`ddx.id` (under any file name) or role (a feature spec, a story, a story test
+plan) the design already has is left out, and the build lists each one left
+out and why; the starter's test then cites none of the design's criteria.
+
+When the blueprint has journeys, the app opens on them rather than on an empty
+Home (`journey-app.mjs`): a route per screen in `src/screens/`, each with its
+title, purpose and content in the blueprint's order and sample data made from
+the blueprint (no network); the journeys' actions lead from step to step; the
+blueprint's dialogs and sheets open; each screen has its loading, empty, error
+(with a retry that recovers) and other states, and a warning, and a `blocked`
+state, where a task or step cites a business rule. `?state=<name>` forces a
+state on any screen; the prototype toolbar (`npm run dev`, or `?prototype`)
+forces one too, walks a journey and resets the sample data (kept in
+`localStorage`). `e2e/journeys.spec.js` walks each journey, and the assessment
+manifest names the blueprint's journeys. Each generated file starts with a
+header naming the blueprint and its hash; after changing the blueprint,
+`npm run prototype` (`npx @ux-builder/create-app --prototype .`) writes them
+again, except a file edited by hand or not written by it, which it leaves and
+lists. `--theme` without `--modality` in an empty folder exits 1:
 the theme is chosen at the build.
 
 ## The app at once
@@ -62,7 +83,7 @@ There is no sample domain or data. Native `ios`, `android`, `macos` and
 | `--blueprint <file>` | Start from this plan of the app's screens instead of the starter's. A plan with an error (`ux-builder-blueprint check`) is refused, with each error, and nothing is written. Its `supports.modalities` (or `responsive-web` when it names none) must agree with `--modality`, or the starter exits 1 naming both |
 | `--helix-version <tag>` | Start on this HELIX release instead of the latest. If it cannot be fetched and verified, nothing is written |
 | `--helix-offline` | Use the HELIX bundled with this starter; no network request. Not with `--helix-version` (refused, nothing written) |
-| `--no-helix` | Leave HELIX out: no marker, documents, skill or `ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines |
+| `--no-helix` | Leave HELIX out: no marker, documents, skill or `docs/ux-builder/ux-assessment.yml`. The app still gets `e2e/starter.spec.js` and `npm run test:e2e`, without `@covers` lines |
 | `--mcp` | Also write `.mcp.json` for the ux-builder MCP server (`npx @ux-builder/mcp`). Optional: the skills and the guided design loop work without it (ADR-036) |
 
 The HELIX request reads `GITHUB_TOKEN` (sent to GitHub's API as a bearer
@@ -87,12 +108,13 @@ without HELIX, and the output says why.
   the product's purpose, users, goals and metrics are yours to write. The
   package is verified against GitHub's SHA-256 digest; offline, the HELIX
   bundled with the starter is used, and the app records why.
-- `ux-assessment.yml` for the UX assessment (`npm run assess:validate`), and
+- `docs/ux-builder/ux-assessment.yml` for the UX assessment (`npm run assess:validate`), and
   `e2e/starter.spec.js`, a Playwright test of the shell that cites
   US-001's criteria (`npm run test:e2e`).
 
 - `src/main.jsx`: every theme's CSS and fonts, `@ux-builder/ui/ui.css` and
-  `patterns.css`, imported once; `ThemeProvider` (`appearance="system"`) and
+  `patterns.css`, imported once; `ThemeProvider` (`appearance="system"`, or
+  the design's own light or dark when built from a design folder) and
   `ToastProvider`.
 - `src/App.jsx`: the shell for the modalities, with `src/Home.jsx` and
   `src/Assistant.jsx` as they need, built from SDK components and role tokens
@@ -117,7 +139,7 @@ without HELIX, and the output says why.
   decisions, add the `UX-Episode:` trailer to its commits and end it.
 - `npm run audit`: builds, serves and audits the app in every theme and
   appearance with `@ux-builder/audit` (run `npx playwright install chromium`
-  once); the report is in `audit-report/`.
+  once); the report is in `docs/ux-builder/audit-report/`.
 - `docs/ux-builder/blueprint/app.blueprint.json`: the plan of the app's destinations and screens, and
   `npm run check:blueprint`, which checks it against the interaction rules.
 - `.github/workflows/ci.yml`: `npm ci`, the blueprint check, lint and the audit on every push,

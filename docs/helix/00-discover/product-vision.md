@@ -31,7 +31,8 @@ UX Builder is where an app's experience is designed and where its look
 lives. A product owner or designer describes what people should
 accomplish; the agent guides them through eight steps, from intent to
 users, tasks, alternatives, structure, prototype and tests with people,
-showing every piece for their approval. When the design is ready, the app
+showing the foundations for their deliberate approval and the rest as the
+changes and exceptions that need their judgment. When the design is ready, the app
 is built in the same folder on a theme a brand owner made from a logo in
 one sitting. Rules, lint and audits keep it usable and on-brand, and when
 the brand or design system changes, every app follows by upgrading a
@@ -59,7 +60,7 @@ re-themed.
 
 | Who | What they get |
 |-----|---------------|
-| **Product owners, designers and founders** with an idea | A guided design conversation with their agent: an overview, "Step n of 8", every term explained, every item shown for their feedback and approval; then an app built from the design they approved |
+| **Product owners, designers and founders** with an idea | A guided design conversation with their agent: an overview, "Step n of 8", every term explained, the foundations shown for their feedback and approval and the rest as one coverage map; then an app built from the design they approved |
 | **App developers** at Synaptiq and its clients' teams, and anyone who installs the packages from npm | Widgets, screen patterns, fonts, icons and themes from packages; a starter that is on the design system from the first commit; lint rules and an audit that keep it there; a bridge that dresses the chat library they choose in the app's theme |
 | **Brand owners** (delivery leads, designers, client stakeholders) | A guided builder: logo in, palette options shown on real widgets in light and dark, plain-language feedback, a theme saved for review |
 | **AI coding agents** working in those apps | A design skill that leads the conversation, and guidance, a catalogue and an MCP server that name the real widgets, patterns, tokens and rules, so generated UI uses them |
@@ -124,7 +125,13 @@ re-themed.
   approved every item) in **one working session**, and an app built from
   it the same day.
 - Every design item the guide produces is **reviewed and approved** by a
-  person before the step it belongs to closes.
+  person before the step it belongs to closes, and **no content is
+  approved twice**: the foundations a table per kind, what is built from
+  them as one coverage map.
+- A new design reaches a **working prototype within 30 minutes** of the
+  person's active time, with **at most 10 approvals** before testing and
+  at least **80%** of their turns spent on new information or decisions
+  (`ux-builder-design metrics`).
 - Adopting apps contain **zero** hard-coded presentation values (lint).
 - A logo becomes a reviewed theme in **under 30 minutes**.
 - **90%** of agent-built components use SDK widgets and role tokens, and

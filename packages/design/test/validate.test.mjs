@@ -19,9 +19,8 @@ function appWithDocs() {
   writeFileSync(join(app, ".helix.yml"), "flows:\n  - id: helix\n    root: docs/helix/\n");
   put(app, "docs/helix/01-frame/prd.md", "---\nddx:\n  id: prd\n  type: prd\n---\n\n# PRD\n");
   put(app, "docs/ux-builder/brief.md", example("experience-brief"));
-  put(app, "docs/ux-builder/evidence/EV-1.md", example("research-evidence"));
-  put(app, "docs/ux-builder/jobs.md", example("jobs"));
-  put(app, "docs/ux-builder/decisions/UXD-1.md", example("ux-decision"));
+  // A study (ADR-042).
+  put(app, "docs/helix/01-frame/research/anglers.md", "---\nddx:\n  id: research-anglers\n  type: research-plan\n---\n\n# Research plan: anglers\n");
   return app;
 }
 
@@ -38,42 +37,29 @@ describe("validate", () => {
     const app = appWithDocs();
     const r = cli(app, ["validate", "--json"]);
     assert.equal(r.status, 0, r.stdout + r.stderr);
-    assert.equal(JSON.parse(r.stdout).documents.length, 4);
+    assert.equal(JSON.parse(r.stdout).documents.length, 1);
   });
 
   // @covers US-123-AC3
   test("a missing frontmatter field, a wrong ID format or a link to a HELIX ID that does not exist: exit 1 naming the file and the problem", () => {
     const app = appWithDocs();
-    put(app, "docs/ux-builder/decisions/UXD-2.md", example("ux-decision").replace("  id: UXD-1\n", "").replace("# UXD-1", "# UXD-2"));
-    put(app, "docs/ux-builder/decisions/decision-3.md", example("ux-decision").replace("id: UXD-1", "id: decision-3"));
-    put(app, "docs/ux-builder/brief.md", example("experience-brief").replace("to: prd", "to: FEAT-404"));
+    put(app, "docs/ux-builder/old/brief.md", example("experience-brief").replace("  id: brief\n", ""));
+    put(app, "docs/ux-builder/brief.md", example("experience-brief").replace("id: brief", "id: brief-3").replace("to: prd", "to: FEAT-404"));
     const r = cli(app, ["validate"]);
     assert.equal(r.status, 1);
     assert.match(r.stdout, /^docs\/ux-builder\/brief\.md: link to FEAT-404 \(informed_by\) does not resolve to a docs\/ux document or a HELIX document$/m);
-    assert.match(r.stdout, /^docs\/ux-builder\/decisions\/UXD-2\.md: the frontmatter is missing ux\.id$/m);
-    assert.match(r.stdout, /^docs\/ux-builder\/decisions\/decision-3\.md: ID "decision-3" does not match UXD's format \(UXD-1\)$/m);
+    assert.match(r.stdout, /^docs\/ux-builder\/old\/brief\.md: the frontmatter is missing ux\.id$/m);
+    assert.match(r.stdout, /^docs\/ux-builder\/brief\.md: ID "brief-3" does not match brief's format \(brief\)$/m);
   });
 
-  test("type rules: a section missing, a job rated without evidence, a decision status, a misplaced document", () => {
+  test("type rules: a section missing, a misplaced document", () => {
     const app = appWithDocs();
-    put(app, "docs/ux-builder/jobs.md", example("jobs").replace("| J-3 | Compare river conditions | medium | none | low | hypothesis |", "| J-3 | Compare river conditions | medium | none | high | hypothesis |"));
-    put(app, "docs/ux-builder/decisions/UXD-1.md", example("ux-decision").replace("status: not-tested", "status: maybe").replace("## Rationale", "## Reasons"));
-    put(app, "docs/ux-builder/UXD-9.md", example("ux-decision").replace("id: UXD-1", "id: UXD-9"));
+    put(app, "docs/ux-builder/brief.md", example("experience-brief").replace("## Constraints", "## Limits"));
+    put(app, "docs/ux-builder/old/brief.md", example("experience-brief"));
     const { problems } = validate(app);
     const msgs = problems.map((p) => `${p.path}: ${p.message}`);
-    assert.ok(msgs.includes("docs/ux-builder/jobs.md: J-3: confidence high needs at least one evidence source (EV-<n>)"), msgs.join("\n"));
-    assert.ok(msgs.includes('docs/ux-builder/decisions/UXD-1.md: status is "maybe"; use not-tested, tested or refuted'));
-    assert.ok(msgs.includes('docs/ux-builder/decisions/UXD-1.md: missing the section "## Rationale"'));
-    assert.ok(msgs.includes("docs/ux-builder/UXD-9.md: a ux-decision with ID UXD-9 belongs at docs/ux-builder/decisions/UXD-9.md, not docs/ux-builder/UXD-9.md"));
-  });
-
-  test("research evidence: pseudonyms only, and no unmasked secret", () => {
-    const app = appWithDocs();
-    const key = ["sk", "live", "Zx9Yw8Vu7Ts6Rq5Po4Nm3Lk2"].join("-");
-    put(app, "docs/ux-builder/evidence/EV-1.md", example("research-evidence").replace('- P2: "We never', `- P3: "key ${key}. We never`));
-    const msgs = validate(app).problems.map((p) => p.message);
-    assert.ok(msgs.includes("excerpt by P3, who is not listed under participants"), msgs.join("\n"));
-    assert.ok(msgs.some((m) => /holds an unmasked .*; mask it \(ADR-039\)/.test(m)), msgs.join("\n"));
+    assert.ok(msgs.includes('docs/ux-builder/brief.md: missing the section "## Constraints"'), msgs.join("\n"));
+    assert.ok(msgs.includes("docs/ux-builder/old/brief.md: a experience-brief with ID brief belongs at docs/ux-builder/brief.md, not docs/ux-builder/old/brief.md"), msgs.join("\n"));
   });
 
   // @covers US-123-AC4
@@ -100,9 +86,6 @@ describe("validate", () => {
     const { documents } = JSON.parse(cli(app, ["status", "--json"]).stdout);
     assert.deepEqual(documents, [
       { path: "docs/ux-builder/brief.md", type: "experience-brief", id: "brief" },
-      { path: "docs/ux-builder/decisions/UXD-1.md", type: "ux-decision", id: "UXD-1" },
-      { path: "docs/ux-builder/evidence/EV-1.md", type: "research-evidence", id: "EV-1" },
-      { path: "docs/ux-builder/jobs.md", type: "jobs", id: "jobs" },
     ]);
   });
 });

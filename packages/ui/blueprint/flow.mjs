@@ -95,7 +95,7 @@ export function checkFlow(bp, { add, on, helix }) {
     // Entry screens: the destinations of an app, or a view's first screen. The
     // app's navigation (or the host) leads on from them.
     const entries = bp.kind === "view" ? [...screens.keys()].slice(0, 1)
-      : list(bp.destinations).map((d) => d.screen).filter((id) => screens.has(id));
+      : [...new Set([...list(bp.destinations).map((d) => d.screen), ...[...screens.values()].filter((sc) => sc.s.entry).map((sc) => sc.s.id)])].filter((id) => screens.has(id));
 
     // flow.reachable: from the entries, through every action of a reached
     // screen and of its modals. Navigation is the same at every size class
@@ -114,7 +114,8 @@ export function checkFlow(bp, { add, on, helix }) {
           }
         }
       }
-      for (const sc of screens.values()) if (!reached.has(sc.s.id)) {
+      // A screen reached from outside the app (a link, a scan, a message: entry) is an entry of its own.
+      for (const sc of screens.values()) if (!reached.has(sc.s.id) && !sc.s.entry) {
         add("flow.reachable", sc.at, `"${sc.s.title ?? sc.s.id}" is unreachable at ${and(sizes) || "every size class"}: no destination, and no action of a reachable screen or modal, leads to it.`, bp.kind === "view" ? "Add an action that leads to it from the view's first screen or a modal, or remove it." : "Add it to destinations, or add an action that leads to it from a reachable screen or modal.");
       }
     }

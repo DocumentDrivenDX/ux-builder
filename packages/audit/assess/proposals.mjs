@@ -19,6 +19,7 @@ import { tmpdir } from "node:os";
 import { join, relative, resolve, sep } from "node:path";
 import { instances, revisionOf } from "./helix.mjs";
 import { runDir } from "./plan.mjs";
+import { appOfReport, landingPath } from "../reports.mjs";
 
 const read = (f) => JSON.parse(readFileSync(f, "utf8"));
 const sha = (s) => createHash("sha256").update(s).digest("hex");
@@ -178,7 +179,9 @@ export function checkWrites({ manifest, resolved, helix, out, run }) {
   const before = new Set(rec.app?.changed ?? []);
   const outRel = relative(repo, dir.replace(/\/[^/]+$/, "")).split(sep).join("/");
   const inScope = (p) => p.startsWith(helix.flow.rootRel.replace(/\/?$/, "/")) || p.startsWith((relative(repo, resolved.run.cwd).split(sep).join("/") || ".").replace(/^\.$/, "").replace(/(.)$/, "$1/"));
-  return changedSince(repo, rec.app?.commit ?? "HEAD").filter((p) => !before.has(p) && !p.startsWith(outRel + "/") && inScope(p));
+  // The reports page (US-158) is the assessment's own output, as its run directory is.
+  const app = appOfReport(dir), page = app ? relative(repo, landingPath(app)).split(sep).join("/") : null;
+  return changedSince(repo, rec.app?.commit ?? "HEAD").filter((p) => !before.has(p) && !p.startsWith(outRel + "/") && p !== page && inScope(p));
 }
 
 /* Whether a proposal's target is as it was when the proposal was written. */

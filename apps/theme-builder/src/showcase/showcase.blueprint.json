@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "kind": "app",
+  "name": "Theme showcase: Pipelines workspace",
+  "supports": {
+    "sizeClasses": ["compact", "medium", "expanded", "large"],
+    "inputs": ["coarse", "fine"],
+    "modalities": ["responsive-web"]
+  },
+  "destinations": [
+    { "id": "pipelines", "label": "Pipelines", "screen": "pipelines" }
+  ],
+  "screens": [
+    {
+      "id": "pipelines",
+      "title": "Pipelines",
+      "pattern": "Dashboard",
+      "path": "/showcase.html",
+      "purpose": "Shows how every scheduled pipeline in the workspace is running and what needs attention today.",
+      "states": ["empty", "loading", "error"],
+      "primaryAction": { "label": "Create pipeline" },
+      "destructiveActions": [{ "label": "Delete pipeline", "safeguard": "confirm" }],
+      "content": [
+        { "label": "Headline figures", "kind": "data", "compact": true },
+        { "label": "Runs this week", "kind": "data" },
+        { "label": "Recent runs", "kind": "data", "compact": true },
+        { "label": "Selected run", "kind": "data" },
+        { "label": "Schedule", "kind": "action" },
+        { "label": "About this workspace", "kind": "help" }
+      ],
+      "actions": [
+        { "id": "new-pipeline", "label": "Create pipeline", "to": "pipelines", "primary": true },
+        { "id": "run-queued", "label": "Start queued runs", "to": "pipelines" },
+        { "id": "filter-runs", "label": "Filters", "to": "modal:filters" },
+        { "id": "delete-pipeline", "label": "Delete pipeline", "to": "modal:confirm-delete", "destructive": "confirm" }
+      ],
+      "modals": [
+        {
+          "id": "filters", "title": "Filter runs", "kind": "sheet", "dismiss": "cancel",
+          "actions": [{ "id": "apply-filters", "label": "Apply filters", "to": "back" }]
+        },
+        {
+          "id": "confirm-delete", "title": "Delete this pipeline?", "kind": "dialog", "dismiss": "cancel",
+          "actions": [{ "id": "confirm-delete-pipeline", "label": "Delete pipeline", "to": "pipelines", "destructive": "confirm" }]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-ci-nightly",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-ci-nightly",
+      "kind": "flow",
+      "form": "pipeline",
+      "title": "Nightly",
+      "question": "What runs, in what order, when nightly.yml starts?",
+      "takeaway": "Starts on schedule, workflow_dispatch.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/workflows/nightly.yml",
+        "digest": "sha256:2ceec4ca0d9eef1e92f16bb2b86ca25281bad95ec1a1f8126ad7924bfe323c1a"
+      },
+      "nodes": [
+        {
+          "id": "eval",
+          "label": "Draft quality evaluation",
+          "detail": "ubuntu-latest"
+        },
+        {
+          "id": "report",
+          "label": "report",
+          "detail": "reuses ./.github/workflows/report.yml"
+        }
+      ],
+      "edges": [
+        {
+          "id": "eval--report",
+          "from": "eval",
+          "to": "report"
+        }
+      ]
+    }
+  },
+  "modules": []
+}

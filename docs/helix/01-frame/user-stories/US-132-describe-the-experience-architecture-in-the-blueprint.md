@@ -41,7 +41,7 @@ The blueprint already covers navigation, patterns, states, size classes and acce
 - [ ] **US-132-AC1** — Given a screen with `purpose` and a `content` list of objects with `label` and optional `kind`, when `ux-builder-blueprint check` runs, then it validates; a `content` that is not an array, or an item without `label`, is an error naming the screen.
 - [ ] **US-132-AC2** — Given a screen with no `purpose`, when `check` runs, then it reports a warning naming the screen.
 - [ ] **US-132-AC3** — Given a screen with three content items, when `ux-builder-blueprint wireframes` runs, then each wireframe page shows the items labelled in that order, before any placeholder content.
-- [ ] **US-132-AC4** — Given a blueprint with purposes and content, when `ux-builder-blueprint propose` runs, then the wireframe drafts list each screen's purpose and content order.
+- [ ] **US-132-AC4** — Given a blueprint with purposes and content, when `ux-builder-blueprint propose` runs, then the wireframe patches list each screen's purpose and content order.
 - [ ] **US-132-AC5** — Given a created app, when the skill's UX design section is read, then it tells the agent to generate information architecture, interaction design and interface design together from the chosen flow, and to fill every screen's purpose and content.
 
 ## Edge Cases

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 636 526" width="636" height="526" role="img" aria-labelledby="layout-engines-title" aria-describedby="layout-engines-desc" class="uxb-visual uxb-visual--comparison-quadrant" data-visual="layout-engines" style="font-family:&quot;DM Sans&quot;, system-ui, sans-serif">
+<title id="layout-engines-title">Graph layout engines</title>
+<desc id="layout-engines-desc">Which graph layout engine gives control without a browser?</desc>
+<rect x="0" y="0" width="636" height="526" style="fill:#09090B"/>
+<g id="layout-engines--quadrant" class="uxb-quadrant">
+<rect x="120" y="30" width="440" height="440" style="fill:#18181B;stroke:#9F9FA9;stroke-width:1px"/>
+<path d="M340 30 L340 470 M120 250 L560 250" style="fill:none;stroke:#9F9FA9;stroke-width:1px;stroke-dasharray:4 4"/>
+<text x="340" y="510" text-anchor="middle" style="fill:#FFFFFF;font-size:12px;font-weight:600">Runtime fit</text>
+<text x="120" y="490" style="fill:#FAFAFA;font-size:12px;font-weight:400">Needs a browser or a binary</text>
+<text x="560" y="490" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">Runs in Node with no DOM</text>
+<text x="108" y="250" text-anchor="end" style="fill:#FFFFFF;font-size:12px;font-weight:600">Layout control</text>
+<text x="108" y="42" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">Compound</text>
+<text x="108" y="58" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">nodes, ports,</text>
+<text x="108" y="74" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">layer constraints</text>
+<text x="108" y="466" text-anchor="end" style="fill:#FAFAFA;font-size:12px;font-weight:400">Not controllable</text>
+<circle cx="524" cy="66" r="7" style="fill:#1685DF;stroke:#18181B;stroke-width:2px"/>
+<text x="536" y="70" style="fill:#FFFFFF;font-size:12px;font-weight:600">elkjs (chosen)</text>
+<circle cx="524" cy="311.33" r="7" style="fill:#FFFFFF;stroke:#18181B;stroke-width:2px"/>
+<text x="536" y="315.33" style="fill:#FFFFFF;font-size:12px;font-weight:400">dagre</text>
+<circle cx="401.33" cy="311.33" r="7" style="fill:#FFFFFF;stroke:#18181B;stroke-width:2px"/>
+<text x="413.33" y="315.33" style="fill:#FFFFFF;font-size:12px;font-weight:400">Graphviz WASM</text>
+<circle cx="156" cy="188.67" r="7" style="fill:#FFFFFF;stroke:#18181B;stroke-width:2px"/>
+<text x="168" y="192.67" style="fill:#FFFFFF;font-size:12px;font-weight:400">D2</text>
+<circle cx="278.67" cy="434" r="7" style="fill:#FFFFFF;stroke:#18181B;stroke-width:2px"/>
+<text x="290.67" y="438" style="fill:#FFFFFF;font-size:12px;font-weight:400">Mermaid</text>
+</g>
+</svg>

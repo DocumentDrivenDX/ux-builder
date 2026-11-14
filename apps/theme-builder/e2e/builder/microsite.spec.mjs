@@ -75,7 +75,7 @@ test.describe("The public site", () => {
     await page.goto(page_("start/design"));
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Design the UX with your agent");
     await expect(page.getByText("npm create @ux-builder/app@latest my-idea")).toBeVisible();
-    await expect(page.getByText("npm create @ux-builder/app@latest . -- --theme ux-builder-databricks")).toBeVisible();
+    await expect(page.getByText("npm create @ux-builder/app@latest . -- --theme vk-databricks")).toBeVisible();
     await expect(page.getByText("npx ux-builder-design init")).toBeVisible();
     for (const t of ["An overview first", "Step n of 8", "Terms explained", "Everything reviewed in the chat"]) await expect(page.locator("#expect ~ ul").first().getByRole("heading", { name: t })).toBeVisible();
     // The steps come from @ux-builder/design itself; the full table and the glossary have their own pages.
@@ -107,9 +107,10 @@ test.describe("The public site", () => {
     await page.goto(page_("reference/glossary"));
     const terms = page.getByRole("table", { name: "Design glossary" });
     for (const t of ["blueprint", "target user", "modality", "theme"]) await expect(terms.getByText(t, { exact: true })).toBeVisible();
+    for (const id of ["ADR-<nnn>", "UF-<n>", "BR-<n>"]) await expect(page.getByRole("table", { name: "Design IDs" }).getByText(id, { exact: true })).toBeVisible();
     await page.goto(page_("proof/worked-example"));
-    for (const h of ["The experience brief", "Target users", "Jobs to be done", "An interaction decision", "A usability test kit", "The UX evaluation report"]) await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
-    await expect(page.locator("#ex-users ~ div table").first()).toContainText("Weekend anglers new to an area");
+    for (const h of ["The experience brief, compiled from HELIX", "The PRD's User Segments and User Needs", "A study: its sources, quotes and claims", "A feature's Task Model", "A UX decision, as a HELIX ADR", "Journey funnels on the metrics dashboard"]) await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
+    await expect(page.locator("#ex-prd ~ div table").first()).toContainText("Weekend anglers new to an area");
     expect(errors).toEqual([]);
   });
 

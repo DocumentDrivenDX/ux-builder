@@ -1,0 +1,10 @@
+{
+  "$schema": "../schema/theme.schema.json",
+  "$description": "Copy of praxis-material to adjust on the vk/adjustments branch. Praxis Material: brand praxis on the shared material design system.",
+  "name": "vk-praxis-material",
+  "title": "vk-Praxis Material",
+  "brand": "vk-praxis",
+  "default": "dark",
+  "designSystem": "vk-material",
+  "public": true
+}

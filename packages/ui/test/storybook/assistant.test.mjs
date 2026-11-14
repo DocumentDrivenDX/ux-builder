@@ -50,14 +50,14 @@ test("every assistant story, on either adapter too, renders in its theme with no
   page.on("pageerror", (e) => errors.push(e.message));
   for (const s of all) {
     for (const ap of ["light", "dark"]) {
-      await page.goto(story(s.id, "praxis-carbon", ap), { waitUntil: "networkidle" });
+      await page.goto(story(s.id, "vk-praxis-carbon", ap), { waitUntil: "networkidle" });
       await page.waitForSelector(".ds-frame > *", { state: "attached" });
       assert.equal(await page.evaluate(() => document.body.classList.contains("sb-show-errordisplay")), false, `${s.id} ${ap}`);
     }
   }
   // A conversation on each adapter: send, and the reply streams in with nothing fetched.
   for (const id of ["patterns-assistant--on-the-ai-sdk", "patterns-assistant--on-assistant-ui"]) {
-    await page.goto(story(id, "praxis-carbon", "light"), { waitUntil: "networkidle" });
+    await page.goto(story(id, "vk-praxis-carbon", "light"), { waitUntil: "networkidle" });
     await page.getByRole("textbox", { name: "Ask the assistant" }).fill("And the bundle?");
     await page.keyboard.press("Enter");
     await page.waitForFunction(() => [...document.querySelectorAll('.piq-message[data-role="assistant"]')].at(-1)?.dataset.status === "done" && document.querySelectorAll(".piq-message").length >= 4, null, { timeout: 10000 });
@@ -86,7 +86,7 @@ test("the AI audit checks report nothing on the assistant's conversation stories
   const ids = ["full-conversation", "empty", "streaming", "failed", "unavailable", "generated-components", "generated-wizard", "generated-form-page", "on-the-ai-sdk", "on-assistant-ui"].map((s) => `patterns-assistant--${s}`);
   const all = stories();
   for (const id of ids) assert.ok(all.some((s) => s.id === id), id);
-  const r = await audit({ urls: ids.map((id) => story(id, "praxis-carbon", "light")), themes: ["praxis-carbon"], appearances: ["light"], wait: ".piq-conversation", rules: { brand: false }, cwd: PKG });
+  const r = await audit({ urls: ids.map((id) => story(id, "vk-praxis-carbon", "light")), themes: ["vk-praxis-carbon"], appearances: ["light"], wait: ".piq-conversation", rules: { brand: false }, cwd: PKG });
   const ai = r.findings.filter((f) => /^(ai|agent|genui|card)[-.]/.test(f.rule));
   assert.deepEqual(ai.map((f) => `${f.rule} ${f.url.replace(/.*id=([^&]+).*/, "$1")}: ${f.message}`), []);
 });

@@ -32,12 +32,12 @@ const COMPONENTS = `.shadcn-card { background: var(--background); color: var(--f
 // @covers US-045-AC2
 test("US-045-AC2: with data-theme and data-appearance on <html>, components follow run-time switching without .dark, outrank the library's defaults, and a nested theme shows its own", async () => {
   // The bridges load before the theme here, the harder order: the theme's appearance blocks set the 0.x alias --muted too.
-  const sheets = ["bridges/shadcn/praxis-carbon.css", "bridges/shadcn/praxis-material.css", "themes.css"]
+  const sheets = ["bridges/shadcn/vk-praxis-carbon.css", "bridges/shadcn/vk-praxis-material.css", "themes.css"]
     .map((f) => `<link rel="stylesheet" href="${pathToFileURL(join(TOKENS, f))}">`).join("");
   const html = join(tmp, "page.html");
-  writeFileSync(html, `<!doctype html><html data-theme="praxis-carbon" data-appearance="light"><head>${sheets}<style>${LIBRARY_DEFAULTS}${COMPONENTS}</style></head>
+  writeFileSync(html, `<!doctype html><html data-theme="vk-praxis-carbon" data-appearance="light"><head>${sheets}<style>${LIBRARY_DEFAULTS}${COMPONENTS}</style></head>
 <body><div id="outer" class="shadcn-card"><button id="btn" class="shadcn-button">Send</button><div id="muted" class="shadcn-muted">Muted</div></div>
-<section data-theme="praxis-material" data-appearance="dark"><div id="nested" class="shadcn-card">Nested</div></section></body></html>`);
+<section data-theme="vk-praxis-material" data-appearance="dark"><div id="nested" class="shadcn-card">Nested</div></section></body></html>`);
   const page = await browser.newPage();
   await page.goto(pathToFileURL(html).href);
   const read = () => page.evaluate(() => Object.fromEntries(["outer", "btn", "muted", "nested"].map((id) => {
@@ -45,7 +45,7 @@ test("US-045-AC2: with data-theme and data-appearance on <html>, components foll
     return [id, { bg: cs.backgroundColor, fg: cs.color, radius: cs.borderTopLeftRadius, font: cs.fontFamily }];
   })));
 
-  const carbonLight = resolved("praxis-carbon", "light"), carbonDark = resolved("praxis-carbon", "dark"), materialDark = resolved("praxis-material", "dark");
+  const carbonLight = resolved("vk-praxis-carbon", "light"), carbonDark = resolved("vk-praxis-carbon", "dark"), materialDark = resolved("vk-praxis-material", "dark");
   let r = await read();
   assert.equal(r.outer.bg, rgb(carbonLight["piq-color-ground"]), "the bridge outranks the library's :root default");
   assert.equal(r.outer.fg, rgb(carbonLight["piq-color-text"]));
@@ -69,9 +69,9 @@ test("US-045-AC2: with data-theme and data-appearance on <html>, components foll
   assert.equal(r.outer.bg, rgb(carbonLight["piq-color-ground"]), "the theme's appearance wins over the library's .dark");
 
   // Theme switch, and the default appearance without data-appearance.
-  await page.evaluate(() => { document.documentElement.classList.remove("dark"); document.documentElement.dataset.theme = "praxis-material"; delete document.documentElement.dataset.appearance; });
+  await page.evaluate(() => { document.documentElement.classList.remove("dark"); document.documentElement.dataset.theme = "vk-praxis-material"; delete document.documentElement.dataset.appearance; });
   r = await read();
-  const mDefault = JSON.parse(readFileSync(join(TOKENS, "manifest.json"), "utf8")).themes.find((t) => t.name === "praxis-material").default;
-  assert.equal(r.outer.bg, rgb(resolved("praxis-material", mDefault)["piq-color-ground"]));
+  const mDefault = JSON.parse(readFileSync(join(TOKENS, "manifest.json"), "utf8")).themes.find((t) => t.name === "vk-praxis-material").default;
+  assert.equal(r.outer.bg, rgb(resolved("vk-praxis-material", mDefault)["piq-color-ground"]));
   await page.close();
 });

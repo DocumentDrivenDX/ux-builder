@@ -69,7 +69,7 @@ out of scope for this feature.
 | AI roles on its screens | — | `assistant` | `assistant` |
 | Starter shell | `AppShell` with one empty Home screen (`StatePanel` empty state) | A full-screen `Conversation`, empty, with its composer | A `Conversation` that renders Adaptive Card and catalogue component parts |
 | Components the guidance points to | widgets, `@ux-builder/ui/patterns` | `@ux-builder/ui/assistant` | `@ux-builder/ui/assistant`, `@ux-builder/ui/adaptive-cards` |
-| Rule families | every app rule (nav, layout, modal, action, feedback, loading, screen, emphasis, input, text, view, pattern, flow, journey), plus `theme` | the AI rules for `assistant`, plus feedback, input, text and `theme` | the chat rules, plus `genui.*` and `card.*` |
+| Rule families | every app rule (nav, layout, modal, action, feedback, loading, screen, emphasis, input, text, view, pattern, flow, journey, form, data, search, auth, help, onboarding, notify, perf, platform, color, motion, media, trust), plus `theme` | the AI rules for `assistant`, plus feedback, input, text, color, motion, media, trust and `theme` | the chat rules, plus `genui.*` and `card.*` |
 | Audit widths | 390, 768, 1280 | 390, 1280 | 390, 1280 |
 
 With several modalities, the starter combines them: an `AppShell` whose
@@ -134,9 +134,22 @@ modality, with the evidence.
   - `chat` and `hybrid-chat` render the SDK `Conversation` (its markers);
   - `hybrid-chat` can render an Adaptive Card part;
   - `responsive-web` uses `AppShell` navigation that adapts by size class.
+    *[Amended 2026-10-27 — US-162, ADR-041]* In the app frame the person
+    chose (`supports.frame`): navigation across the top bar adapts as the
+    side navigation does, and a frame without navigation has none to adapt.
 - **Rules:** the rule families the modality needs were checked.
 - **Missing pieces:** each missing component or rule family is named, with
   the fix.
+- *[Amended 2026-10-27 — FEAT-018 GDL-83, US-157]* **By outcome.**
+  `responsive-web` is judged by what the app does: each audited page is
+  framed (by `AppShell`, or by a `main` landmark) and fits with no
+  horizontal overflow; navigation adapts by size class only where there is
+  navigation (an `AppShell` with nav items in a blueprint with more than one
+  destination). An `AppShell` with no navigation, or an app with one
+  destination, passes. Only the size classes the app chose (the blueprint's
+  `supports.sizeClasses`, else `--size-classes`) are audited, and one not
+  chosen is never reported as unchecked. A failure names the outcome
+  ("content overflows at 390px").
 
 MOD-10. The audit gives a **theme verdict**, with the evidence:
 - the theme the app declares is applied;

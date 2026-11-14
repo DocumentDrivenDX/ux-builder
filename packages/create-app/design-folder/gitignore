@@ -1,3 +1,10 @@
 node_modules
 # The real names behind research pseudonyms stay on this machine (ADR-039).
 .ux-builder/participants.local.json
+# What the guide last showed the person, for re-approvals (US-161).
+.ux-builder/shown.local.json
+# The UI audit's report is rebuilt, not committed.
+docs/ux-builder/audit-report/
+# Run output stays out of the repository (ADR-042): assessment runs, studies, insight exports, evaluation results.
+docs/ux-builder/assessments/
+docs/ux-builder/runs/

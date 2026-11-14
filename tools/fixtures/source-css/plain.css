@@ -1,7 +1,7 @@
 /* Plain theme, as the 0.x platform shipped it: the reference for
    tools/verify-equivalence.mjs. */
 
-[data-theme="plain"] {
+[data-theme="vk-plain"] {
   --ink:              #111827;
   --body:             #374151;
   --navy:             #1F2937;

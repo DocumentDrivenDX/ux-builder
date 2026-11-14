@@ -1,0 +1,200 @@
+{
+  "umf": "0.10.0",
+  "id": "visual:beacon-reply-draft",
+  "vocabularies": {
+    "umf.visual": {
+      "version": "1.0.0"
+    }
+  },
+  "extensions": {
+    "umf.visual": {
+      "id": "beacon-reply-draft",
+      "kind": "sequence",
+      "form": "lifelines",
+      "title": "Drafting a reply",
+      "question": "What happens when an agent asks for a draft?",
+      "takeaway": "Eight hand-offs from an open ticket to a draft the agent can edit, and every one runs as the agent.",
+      "audience": "developer",
+      "source": {
+        "path": "umf:fixtures/visual/sources/beacon/architecture-model.toml",
+        "view": "reply-draft",
+        "digest": "sha256:5506076ecd96344bd6b203c4d2a36ed983a7d9c37883c0e4dc65f9a59f689910"
+      },
+      "sequence": {
+        "participants": [
+          {
+            "id": "agent",
+            "label": "Support agent",
+            "role": "actor",
+            "status": "built"
+          },
+          {
+            "id": "proxy",
+            "label": "Sign-in proxy",
+            "detail": "checks identity, forwards the agent's token",
+            "role": "platform",
+            "status": "built"
+          },
+          {
+            "id": "web",
+            "label": "Web app",
+            "detail": "the agent's inbox and draft editor",
+            "role": "own",
+            "status": "built"
+          },
+          {
+            "id": "api",
+            "label": "Beacon API",
+            "detail": "every request runs as the agent",
+            "role": "own",
+            "status": "built"
+          },
+          {
+            "id": "db",
+            "label": "Beacon database",
+            "detail": "tickets, drafts, reviews",
+            "role": "store",
+            "status": "built"
+          },
+          {
+            "id": "drafter",
+            "label": "Reply drafter",
+            "detail": "builds the prompt from the ticket and its history",
+            "role": "own",
+            "status": "built"
+          },
+          {
+            "id": "gateway",
+            "label": "Model gateway",
+            "detail": "rate limits, usage, model choice",
+            "role": "platform",
+            "status": "built"
+          },
+          {
+            "id": "models",
+            "label": "Language models",
+            "role": "platform",
+            "status": "built"
+          }
+        ],
+        "messages": [
+          {
+            "id": "m1",
+            "from": "agent",
+            "to": "proxy",
+            "label": "opens a ticket",
+            "kind": "call"
+          },
+          {
+            "id": "m2",
+            "from": "proxy",
+            "to": "web",
+            "label": "forwards with the agent's token",
+            "kind": "call"
+          },
+          {
+            "id": "m3",
+            "from": "web",
+            "to": "api",
+            "label": "asks for a draft",
+            "kind": "call"
+          },
+          {
+            "id": "m4",
+            "from": "api",
+            "to": "db",
+            "label": "loads ticket history",
+            "kind": "call"
+          },
+          {
+            "id": "m5",
+            "from": "api",
+            "to": "drafter",
+            "label": "hands over the ticket and its history",
+            "kind": "call"
+          },
+          {
+            "id": "m6",
+            "from": "drafter",
+            "to": "gateway",
+            "label": "sends the prompt",
+            "kind": "call"
+          },
+          {
+            "id": "m7",
+            "from": "gateway",
+            "to": "models",
+            "label": "routes to a model",
+            "kind": "call"
+          },
+          {
+            "id": "m8",
+            "from": "api",
+            "to": "web",
+            "label": "returns the draft",
+            "kind": "return"
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "s1",
+          "title": "Opens a ticket",
+          "focus": [
+            "m1"
+          ]
+        },
+        {
+          "id": "s2",
+          "title": "Forwards with the agent's token",
+          "focus": [
+            "m2"
+          ]
+        },
+        {
+          "id": "s3",
+          "title": "Asks for a draft",
+          "focus": [
+            "m3"
+          ]
+        },
+        {
+          "id": "s4",
+          "title": "Loads ticket history",
+          "focus": [
+            "m4"
+          ]
+        },
+        {
+          "id": "s5",
+          "title": "Hands over the ticket and its history",
+          "focus": [
+            "m5"
+          ]
+        },
+        {
+          "id": "s6",
+          "title": "Sends the prompt",
+          "focus": [
+            "m6"
+          ]
+        },
+        {
+          "id": "s7",
+          "title": "Routes to a model",
+          "focus": [
+            "m7"
+          ]
+        },
+        {
+          "id": "s8",
+          "title": "Returns the draft",
+          "focus": [
+            "m8"
+          ]
+        }
+      ]
+    }
+  },
+  "modules": []
+}

@@ -5,6 +5,8 @@ ddx:
   status: draft
   links:
     - kind: informed_by
+      to: ADR-042
+    - kind: informed_by
       to: FEAT-018
     - kind: informed_by
       to: ADR-039
@@ -30,7 +32,7 @@ ddx:
 
 ## Context
 
-`ux-builder-design test-kit` writes `docs/ux-builder/tests/TK-<n>/` (CONTRACT-008). Participants are recruited and paid by the owner (out of scope).
+`ux-builder-design test-kit` writes the study's research plan and its run folder, `docs/ux-builder/runs/studies/<study>/` (CONTRACT-008). Participants are recruited and paid by the owner (out of scope).
 
 ## Walkthrough
 
@@ -40,11 +42,11 @@ ddx:
 
 ## Acceptance Criteria
 
-- [ ] **US-140-AC1** — Given a blueprint with journeys tied to stories, when `ux-builder-design test-kit` runs, then it writes `docs/ux-builder/tests/TK-<n>/` with `scenarios.md`, `script.md`, `consent.md`, `screener.md` and `observations.csv`, numbering the kit after the last one.
+- [ ] **US-140-AC1** — Given a blueprint with journeys tied to stories, when `ux-builder-design test-kit --study <study>` runs, then it proposes the study's *Scenarios*, *Success Criteria* and *Screener* for its HELIX research plan's *Research Methods*, and writes the facilitator script, consent note, observation sheet and task list to `docs/ux-builder/runs/studies/<study>/` (run output, ADR-042).
 - [ ] **US-140-AC2** — Given a journey whose steps name screens and actions, when its scenario is written, then the scenario states the user's goal with no screen, pattern or control names from the blueprint.
-- [ ] **US-140-AC3** — Given a journey tied to acceptance criteria, when the kit is written, then each scenario lists its success criteria from those criteria by ID.
+- [ ] **US-140-AC3** — Given a journey tied to acceptance criteria, when the kit is written, then each scenario's success criteria list those criteria by ID.
 - [ ] **US-140-AC4** — Given `--journey` given, when the kit is written, then only the named journeys are in it; an unknown journey ID exits 2 naming it.
-- [ ] **US-140-AC5** — Given a brief listing target users, when the kit is written, then `screener.md` asks about those users, and `observations.csv` has one row per task with columns for participant, completed, time, errors, assists and remark.
+- [ ] **US-140-AC5** — Given a brief listing target users, when the kit is written, then the plan's *Screener* asks about those users, and `observations.csv` has one row per task with columns for participant, completed, time, errors, assists and remark.
 
 ## Edge Cases
 
@@ -54,7 +56,7 @@ ddx:
 
 | Scenario | AC ID | Input / State | Action | Expected Result |
 |----------|-------|---------------|--------|-----------------|
-| AC1 | US-140-AC1 | a blueprint with journeys tied to stories | `ux-builder-design test-kit` runs | it writes `docs/ux-builder/tests/TK-<n>/` with `scenarios.md`, `script.md`, `consent.md`, `screener.md` and `observations.csv`, numbering the kit after the last one |
+| AC1 | US-140-AC1 | a blueprint with journeys tied to stories | `ux-builder-design test-kit --study <study>` runs | it writes the study's research plan and its run folder, `docs/ux-builder/runs/studies/<study>/` with `scenarios.md`, `script.md`, `consent.md`, `screener.md` and `observations.csv`, numbering the kit after the last one |
 | AC2 | US-140-AC2 | a journey whose steps name screens and actions | its scenario is written | the scenario states the user's goal with no screen, pattern or control names from the blueprint |
 | AC3 | US-140-AC3 | a journey tied to acceptance criteria | the kit is written | each scenario lists its success criteria from those criteria by ID |
 | AC4 | US-140-AC4 | `--journey` given | the kit is written | only the named journeys are in it; an unknown journey ID exits 2 naming it |

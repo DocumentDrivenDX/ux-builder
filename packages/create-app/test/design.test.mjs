@@ -31,7 +31,7 @@ before(async () => {
   // The bundled HELIX, served without the network, as the other starter tests do.
   process.env.UX_BUILDER_HELIX_API = "http://127.0.0.1:9";
   process.env.UX_BUILDER_HELIX_BUNDLE = BUNDLE;
-  app = await create(join(tmp, "rivers"), { modalities: ["responsive-web"], theme: "databricks", helix: { offline: true } });
+  app = await create(join(tmp, "rivers"), { modalities: ["responsive-web"], theme: "vk-databricks", helix: { offline: true } });
   withMcp = await create(join(tmp, "rivers-mcp"), { modalities: ["responsive-web"], helix: { skip: true }, mcp: true });
 });
 
