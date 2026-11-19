@@ -74,6 +74,12 @@ export function brandTokens(brand, appearance, viz = brand.dataviz ?? DATAVIZ) {
   }
   // CONTRACT-002 Composition step 5.
   if (!m.has("color.ground-recessed")) m.set("color.ground-recessed", { value: "{color.ground}", description: "Derived: equals color.ground when a brand sets no recessed ground." });
+  // Optional supporting roles (vk-synaptiq, 2026-11-19): a brand that sets none looks exactly as before.
+  const derive = (role, from, what) => { if (!m.has(`color.${role}`)) m.set(`color.${role}`, { value: `{${from}}`, description: `Derived: equals ${from} when a brand sets no ${what}.` }); };
+  derive("primary-fill", "color.structure", "primary fill");
+  derive("on-primary-fill", "color.surface", "colour on the primary fill");
+  derive("highlight", "color.accent", "highlight");
+  derive("sequential", "color.accent", "sequential base");
   return m;
 }
 

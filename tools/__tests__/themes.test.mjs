@@ -68,9 +68,14 @@ describe("theme CSS", () => {
   test("synaptiq: light by default, with its own anatomy and the brand's colours", () => {
     const css = themeCss(src, "vk-synaptiq");
     assert.match(css, /^\[data-theme="vk-synaptiq"\] \{[\s\S]*--piq-color-accent: #4D728F;/);
-    assert.match(css, /\[data-theme="vk-synaptiq"\]\[data-appearance="dark"\] \{[\s\S]*--piq-color-accent: #F7CFA5;/);
+    // Atlas's look (2026-11-19): Sky in dark, pill buttons, a Sky primary fill, Arctic highlights, an Agave scale
+    assert.match(css, /\[data-theme="vk-synaptiq"\]\[data-appearance="dark"\] \{[\s\S]*--piq-color-accent: #B5DCEC;/);
     assert.match(css, /--piq-font-heading: "Zilla Slab", Georgia, serif;/);
-    assert.match(css, /--piq-button-radius: 3px;/);
+    assert.match(css, /--piq-button-radius: var\(--piq-pill-radius\);/);
+    assert.match(css, /--piq-color-primary-fill: #B5DCEC;/);
+    assert.match(css, /--piq-color-highlight: #A1B8CA;/);
+    assert.match(css, /--piq-color-sequential: #5C767A;/);
+    assert.match(css, /--piq-icon-set: synaptiq;/);
   });
 });
 

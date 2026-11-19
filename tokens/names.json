@@ -237,6 +237,22 @@
       "tier": "role",
       "css0": "rule"
     },
+    "color.primary-fill": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.on-primary-fill": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.highlight": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.sequential": {
+      "tier": "role",
+      "css0": null
+    },
     "color.ground": {
       "tier": "role",
       "css0": "paper"
@@ -886,6 +902,10 @@
       "css0": null
     },
     "page-header.gap": {
+      "tier": "component",
+      "css0": null
+    },
+    "page-header.title-fg": {
       "tier": "component",
       "css0": null
     },

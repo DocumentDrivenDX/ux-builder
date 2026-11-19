@@ -1,7 +1,17 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { themes as MANIFEST_THEMES } from "@ux-builder/tokens/manifest.json";
 import { ThemeContext } from "../ThemeProvider.jsx";
-import { GLYPHS, SETS } from "./glyphs.generated.js";
+import { GLYPHS as SHARED_GLYPHS, SETS as SHARED_SETS } from "./glyphs.generated.js";
+import { SYNAPTIQ_SET, SYNAPTIQ_SHARED } from "./synaptiq-shared.generated.js";
+
+/* The Synaptiq brand icons (vk-synaptiq, 2026-11-19) are one more set: the shared names drawn with brand icons for a
+   theme whose icon.set is "synaptiq", and every icon of the brand's library by its number, syn-NN-MMM, in any theme.
+   The library is loaded only when a page first draws one of its icons. */
+const GLYPHS = { ...SHARED_GLYPHS, synaptiq: SYNAPTIQ_SHARED };
+const SETS = { ...SHARED_SETS, synaptiq: SYNAPTIQ_SET };
+const LIBRARY_NAME = /^syn-\d{2}-\d{3}$/;
+let library = null, loading = null;
+const loadLibrary = () => (loading ??= import("./synaptiq-library.generated.js").then((m) => (library = m.SYNAPTIQ_LIBRARY)));
 
 /* One icon component for every theme (FEAT-004 SDK-03, US-010).
 
@@ -31,7 +41,7 @@ import { GLYPHS, SETS } from "./glyphs.generated.js";
    { viewBox, body } } } (or per set), drawn the same way (US-010-AC14). */
 
 const THEMES = new Map(MANIFEST_THEMES.map((t) => [t.name, t]));
-const OWN_SETS = new Set(["material", "fluent", "carbon"]);
+const OWN_SETS = new Set(["material", "fluent", "carbon", "synaptiq"]);
 /* The shared names Icon accepts. */
 export const ICON_NAMES = Object.keys(GLYPHS.lucide).sort();
 
@@ -98,9 +108,22 @@ export function Icon({ name, icon, set, size = "1em", label, className = "", ...
     if (!context?.theme) setPageTheme(ref.current.closest?.("[data-theme]")?.getAttribute("data-theme") ?? null);
   });
 
+  // a library icon (syn-NN-MMM) not registered by the app: drawn once the library has loaded, an empty box till then
+  const fromLibrary = !icon && LIBRARY_NAME.test(name ?? "") && !REGISTRY.has(name);
+  const [, setLoaded] = useState(library !== null);
+  useEffect(() => {
+    if (!fromLibrary || library) return undefined;
+    let live = true;
+    loadLibrary().then(() => { if (live) setLoaded(true); }, () => {});
+    return () => { live = false; };
+  }, [fromLibrary]);
+
   const active = set ?? tokenSet ?? iconSetFor(context?.theme ?? pageTheme);
   const def = icon ?? (GLYPHS.lucide[name] ? null : REGISTRY.get(name));
-  const [glyph, used] = def ? fromDef(def, active) : pickGlyph(name, active);
+  const [glyph, used] = def ? fromDef(def, active) : fromLibrary ? [library?.[name] ?? null, "synaptiq"] : pickGlyph(name, active);
+  if (fromLibrary && !library) {
+    return <svg ref={ref} xmlns="http://www.w3.org/2000/svg" width={size} height={size} className={`piq-icon${className ? ` ${className}` : ""}`} data-icon={name} data-icon-set="synaptiq" {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": "true", focusable: "false" })} {...rest} />;
+  }
   if (!glyph) {
     if (dev) console.warn(`@ux-builder/ui Icon: no icon "${name}". Shared names: ${ICON_NAMES.join(", ")}. Every Lucide icon is in @ux-builder/ui/icons: import it (e.g. import { iconPin } from "@ux-builder/ui/icons") and pass icon={iconPin}, or registerIcons(iconPin) once.`);
     return null;

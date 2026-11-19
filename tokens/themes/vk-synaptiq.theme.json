@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/theme.schema.json",
-  "$description": "Copy of synaptiq to adjust on the vk/adjustments branch. Synaptiq: the Synaptiq brand on its own anatomy, reverse-engineered from synaptiq.ai (HubSpot theme CSS, read 2026-10-06: Quicksand body, Lust and Museo Slab headings, Jasper links and 3px calls to action, #F7F6F7 fields) and the Synaptiq Design System (tokens, 2-4px radii, Soil-tinted shadows, ALL-CAPS captions tracked 0.08em, no gradients). Licensed faces are replaced by the brand guide's own Google alternates.",
+  "$description": "Copy of synaptiq to adjust on the vk/adjustments branch. Synaptiq: the Synaptiq brand on its own anatomy, reverse-engineered from synaptiq.ai (HubSpot theme CSS, read 2026-10-06: Quicksand body, Lust and Museo Slab headings, Jasper links and 3px calls to action, #F7F6F7 fields) and the Synaptiq Design System (tokens, 2-4px radii, Soil-tinted shadows, ALL-CAPS captions tracked 0.08em, no gradients). Licensed faces are replaced by the brand guide's own Google alternates. Atlas's look (2026-11-19): wider spacing, pill controls, a major-second type scale from a 20px body, 20px card corners, edgeless fields, Arctic titles and the Synaptiq icon library.",
   "name": "vk-synaptiq",
   "title": "vk-Synaptiq",
   "brand": "vk-synaptiq",
@@ -63,29 +63,32 @@
     "tokens": {
       "font-size": {
         "display": {
-          "$value": "3.5rem",
-          "$description": "The site sets H1 in Lust at 72px; the brand guide's sanctioned stand-in is Abril Fatface. Scaled for app screens."
+          "$value": "2.5rem",
+          "$description": "40px at a 16px root: a major-second scale (1.125) from a 20px body (Atlas, 2026-11-18)."
         },
         "title": {
           "$value": "2rem",
-          "$description": "H3 on the site: Museo Slab 32px (Zilla Slab here, the guide's Google alternate)."
+          "$description": "32px at a 16px root: a major-second scale (1.125) from a 20px body (Atlas, 2026-11-18)."
         },
         "heading": {
-          "$value": "1.25rem"
+          "$value": "1.5625rem",
+          "$description": "25px at a 16px root: a major-second scale (1.125) from a 20px body (Atlas, 2026-11-18)."
         },
         "lead": {
-          "$value": "1.125rem",
-          "$description": "The site's body size, 18px."
+          "$value": "1.375rem",
+          "$description": "22px at a 16px root: a major-second scale (1.125) from a 20px body (Atlas, 2026-11-18)."
         },
         "body": {
-          "$value": "1rem"
+          "$value": "1.25rem",
+          "$description": "20px at a 16px root: a major-second scale (1.125) from a 20px body (Atlas, 2026-11-18)."
         },
         "small": {
-          "$value": "0.875rem"
+          "$value": "1.125rem",
+          "$description": "18px at a 16px root: a major-second scale (1.125) from a 20px body (Atlas, 2026-11-18)."
         },
         "label": {
-          "$value": "0.75rem",
-          "$description": "ALL-CAPS captions and eyebrows."
+          "$value": "0.875rem",
+          "$description": "14px at a 16px root: a major-second scale (1.125) from a 20px body (Atlas, 2026-11-18)."
         }
       },
       "font-weight": {
@@ -99,12 +102,12 @@
       },
       "line-height": {
         "tight": {
-          "$value": "1.1",
-          "$description": "The site's headings run 1.1; the decks set titles at 0.9."
+          "$value": "1.2",
+          "$description": "1.2 for titles that wrap to two lines (was 1.1)."
         },
         "body": {
-          "$value": "1.45",
-          "$description": "The design system's body leading."
+          "$value": "1.5",
+          "$description": "1.5 for the 20px body (was 1.45)."
         }
       },
       "letter-spacing": {
@@ -130,16 +133,20 @@
           "$value": "1rem"
         },
         "5": {
-          "$value": "1.5rem"
+          "$value": "calc(1.5rem + 20px)",
+          "$description": "1.5rem plus 20px: wider page margins and gaps between containers (Atlas, 2026-11-18)."
         },
         "6": {
-          "$value": "2rem"
+          "$value": "calc(2rem + 20px)",
+          "$description": "2rem plus 20px: wider page margins and gaps between containers (Atlas, 2026-11-18)."
         },
         "7": {
-          "$value": "3rem"
+          "$value": "calc(3rem + 20px)",
+          "$description": "3rem plus 20px: wider page margins and gaps between containers (Atlas, 2026-11-18)."
         },
         "8": {
-          "$value": "4rem"
+          "$value": "calc(4rem + 20px)",
+          "$description": "4rem plus 20px: wider page margins and gaps between containers (Atlas, 2026-11-18)."
         }
       },
       "size": {
@@ -153,8 +160,8 @@
           "$description": "The site's call-to-action buttons: 3px."
         },
         "card": {
-          "$value": "4px",
-          "$description": "The design system's radius-md: tiles stay nearly square."
+          "$value": "20px",
+          "$description": "20px corners on cards and panels (Atlas, 2026-11-18); was 4px."
         }
       },
       "border": {
@@ -192,12 +199,12 @@
       },
       "button": {
         "radius": {
-          "$value": "3px",
-          "$description": "The site's .hs-cta-button: 3px."
+          "$value": "{pill.radius}",
+          "$description": "Pill-shaped buttons, every variant (Atlas, 2026-11-18); was 3px."
         },
         "height": {
-          "$value": "48px",
-          "$description": "15px padding around an 18px label, as on the site."
+          "$value": "max(48px, 3rem)",
+          "$description": "48px, growing with the text size."
         },
         "padding-x": {
           "$value": "1.5rem",
@@ -303,15 +310,16 @@
           "$description": "The site's form fields sit on #F7F6F7."
         },
         "border": {
-          "$value": "1px solid {color.surface-sunken}",
-          "$description": "As on the site: the fill, not a box, marks the field."
+          "$value": "0 solid transparent",
+          "$description": "No edge (Atlas, 2026-11-19): the darker bottom edge read as a drop shadow; the grey fill marks the field."
         },
         "border-bottom": {
-          "$value": "1px solid {color.text-subtle}",
-          "$description": "An edge the eye can find; the site's fields have none."
+          "$value": "0 solid transparent",
+          "$description": "No edge (Atlas)."
         },
         "radius": {
-          "$value": "3px"
+          "$value": "{pill.radius}",
+          "$description": "One-line inputs are pills (Atlas); multi-line inputs keep 20px corners in the app."
         },
         "border-hover": {
           "$value": "{color.text-muted}"
@@ -347,7 +355,8 @@
       },
       "check": {
         "size": {
-          "$value": "18px"
+          "$value": "max(18px, 1.125rem)",
+          "$description": "18px, growing with the text size."
         },
         "radius": {
           "$value": "2px",
@@ -430,10 +439,16 @@
       },
       "choice-picker": {
         "height": {
-          "$value": "40px"
+          "$value": "max(40px, 2.5rem)",
+          "$description": "40px, growing with the text size."
         },
         "radius": {
-          "$value": "3px"
+          "$value": "{pill.radius}",
+          "$description": "A pill-shaped segmented control (Atlas); was 3px."
+        },
+        "option-radius": {
+          "$value": "{pill.radius}",
+          "$description": "The chosen segment is a pill inside the pill."
         },
         "gap": {
           "$value": "0"
@@ -442,7 +457,8 @@
           "$value": "1px solid {color.structure}"
         },
         "divider": {
-          "$value": "1px solid {color.structure}"
+          "$value": "none",
+          "$description": "None: the chosen segment's pill is the only division (Atlas)."
         },
         "padding-x": {
           "$value": "1rem"
@@ -457,10 +473,12 @@
           "$value": "transparent"
         },
         "option-selected-bg": {
-          "$value": "{color.structure}"
+          "$value": "{color.primary-fill}",
+          "$description": "Sky with Iron words, as a primary button (Atlas)."
         },
         "option-selected-fg": {
-          "$value": "{color.surface}"
+          "$value": "{color.on-primary-fill}",
+          "$description": "Iron on Sky."
         },
         "font-size": {
           "$value": "0.875rem"
@@ -561,7 +579,38 @@
           "$description": "The design system's 2px rule."
         },
         "row-hover-bg": {
-          "$value": "color-mix(in srgb, {color.text-strong} 4%, transparent)"
+          "$value": "color-mix(in srgb, {color.text-strong} 2.5%, color-mix(in srgb, {color.surface-sunken} 75%, {color.surface}))",
+          "$description": "One hover colour for every row, a little darker than the grey rows (Atlas)."
+        },
+        "row-stripe-bg": {
+          "$value": "color-mix(in srgb, {color.surface-sunken} 75%, {color.surface})",
+          "$description": "Alternate rows a grey 25% lighter than the header row's (Atlas)."
+        }
+      },
+      "progress": {
+        "height": {
+          "$value": "12px",
+          "$description": "A 12px bar (Atlas, 2026-11-19)."
+        },
+        "fill-bg": {
+          "$value": "{color.highlight}",
+          "$description": "Arctic (Atlas)."
+        }
+      },
+      "page-header": {
+        "title-fg": {
+          "$value": "{color.accent}",
+          "$description": "Page titles in Arctic, deepened to read as text in light (#4D728F, 4.7:1 on the 4% grey); Arctic itself in dark (Atlas)."
+        },
+        "gap": {
+          "$value": "20px",
+          "$description": "20px under every page title (Atlas, 2026-11-18)."
+        }
+      },
+      "icon": {
+        "set": {
+          "$value": "synaptiq",
+          "$description": "The Synaptiq brand icon library (581 icons; brand/synaptiq/icons): filled shapes in the text colour, Lucide for any name it lacks."
         }
       }
     },
@@ -579,6 +628,12 @@
         "switch": {
           "checked-thumb-bg": {
             "$value": "{color.ground}"
+          }
+        },
+        "page-header": {
+          "title-fg": {
+            "$value": "{color.highlight}",
+            "$description": "Arctic #A1B8CA in dark: 9.5:1 on Blackwood."
           }
         }
       }

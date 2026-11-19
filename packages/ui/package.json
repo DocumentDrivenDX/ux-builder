@@ -21,6 +21,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./icons": "./dist/icons.js",
+    "./icons/synaptiq": "./dist/icons-synaptiq.js",
     "./patterns": "./dist/patterns.js",
     "./assistant": "./dist/assistant.js",
     "./assistant/ai-sdk": "./dist/assistant-ai-sdk.js",
@@ -45,7 +46,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "node scripts/gen-icons.mjs --library && vite build && cp src/ui.css dist/ui.css && cp src/patterns.css dist/patterns.css",
+    "build": "node scripts/gen-icons.mjs --library && node scripts/gen-synaptiq-icons.mjs && vite build && cp src/ui.css dist/ui.css && cp src/patterns.css dist/patterns.css",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
     "test:storybook": "node --test 'test/storybook/*.test.mjs'",

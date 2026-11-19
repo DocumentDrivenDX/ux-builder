@@ -191,6 +191,7 @@ export const NOTES = {
   "@ux-builder/tokens ./package.json": "The package's own metadata",
   "@ux-builder/ui .": "The React widgets, ThemeProvider and hooks",
   "@ux-builder/ui ./icons": "Every icon as an import, following the theme's design system",
+  "@ux-builder/ui ./icons/synaptiq": "The Synaptiq brand icon library (581 icons) by number, syn-NN-MMM; Icon also loads it on first use",
   "@ux-builder/ui ./patterns": "The screen patterns and layout primitives",
   "@ux-builder/ui ./assistant": "Conversation, generative UI and agent components on the SDK's own widgets",
   "@ux-builder/ui ./assistant/ai-sdk": "The assistant adapter for the Vercel AI SDK's messages",
