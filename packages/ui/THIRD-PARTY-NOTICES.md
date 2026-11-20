@@ -31,11 +31,11 @@ package as installed; the licence texts of vendored source are in this package's
 | @cacheable/utils | 2.5.0 | MIT | https://github.com/jaredwray/cacheable |
 | @csstools/css-calc | 3.4.3 | MIT | https://github.com/csstools/postcss-plugins |
 | @csstools/css-parser-algorithms | 4.0.2 | MIT | https://github.com/csstools/postcss-plugins |
-| @csstools/css-syntax-patches-for-csstree | 1.1.15 | MIT-0 (exception awaiting counsel until 2026-11-18) | https://github.com/csstools/postcss-plugins |
+| @csstools/css-syntax-patches-for-csstree | 1.1.15 | MIT-0 (exception awaiting counsel until 2026-12-18) | https://github.com/csstools/postcss-plugins |
 | @csstools/css-tokenizer | 4.0.2 | MIT | https://github.com/csstools/postcss-plugins |
 | @csstools/media-query-list-parser | 5.0.2 | MIT | https://github.com/csstools/postcss-plugins |
-| @csstools/selector-resolve-nested | 4.0.2 | MIT-0 (exception awaiting counsel until 2026-11-18) | https://github.com/csstools/postcss-plugins |
-| @csstools/selector-specificity | 6.0.1 | MIT-0 (exception awaiting counsel until 2026-11-18) | https://github.com/csstools/postcss-plugins |
+| @csstools/selector-resolve-nested | 4.0.2 | MIT-0 (exception awaiting counsel until 2026-12-18) | https://github.com/csstools/postcss-plugins |
+| @csstools/selector-specificity | 6.0.1 | MIT-0 (exception awaiting counsel until 2026-12-18) | https://github.com/csstools/postcss-plugins |
 | @eslint-community/eslint-utils | 4.10.1 | MIT | https://github.com/eslint-community/eslint-utils |
 | @eslint-community/regexpp | 4.12.2 | MIT | https://github.com/eslint-community/regexpp |
 | @eslint/config-array | 0.23.5 | Apache-2.0 | https://github.com/eslint/rewrite |
@@ -132,7 +132,7 @@ package as installed; the licence texts of vendored source are in this package's
 | ansi-regex | 5.0.1 | MIT | chalk/ansi-regex |
 | ansi-regex | 6.4.0 | MIT | chalk/ansi-regex |
 | ansi-styles | 4.3.0 | MIT | chalk/ansi-styles |
-| argparse | 2.0.1 | Python-2.0 (exception awaiting counsel until 2026-11-18) | nodeca/argparse |
+| argparse | 2.0.1 | Python-2.0 (exception awaiting counsel until 2026-12-18) | nodeca/argparse |
 | aria-hidden | 1.2.6 | MIT | https://github.com/theKashey/aria-hidden |
 | assistant-cloud | 0.2.7 | MIT | https://github.com/assistant-ui/assistant-ui |
 | assistant-stream | 0.3.52 | MIT | https://github.com/assistant-ui/assistant-ui |
@@ -223,7 +223,7 @@ package as installed; the licence texts of vendored source are in this package's
 | meow | 14.1.0 | MIT | sindresorhus/meow |
 | merge2 | 1.4.1 | MIT | git@github.com:teambition/merge2 |
 | micromatch | 4.0.8 | MIT | micromatch/micromatch |
-| minimatch | 10.2.6 | BlueOak-1.0.0 (exception awaiting counsel until 2026-11-18) | git@github.com:isaacs/minimatch |
+| minimatch | 10.2.6 | BlueOak-1.0.0 (exception awaiting counsel until 2026-12-18) | git@github.com:isaacs/minimatch |
 | ms | 2.1.3 | MIT | vercel/ms |
 | nanoid | 3.3.19 | MIT | ai/nanoid |
 | nanoid | 6.0.2 | MIT | ai/nanoid |
