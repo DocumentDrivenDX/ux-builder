@@ -28,7 +28,7 @@ test("a brand file previews on all eight design systems (four and their vk- copi
 
 test("a brand in tokens/brands/ can be named instead of a path", { skip: !built && "run npm run build first" }, () => {
   assert.equal(gallery("--brand", "vk-synaptiq").status, 0);
-  assert.ok(existsSync(join(ROOT, "build/gallery-synaptiq.html")));
+  assert.ok(existsSync(join(ROOT, "build/gallery-vk-synaptiq.html")));
 });
 
 test("an unknown or invalid brand is refused", { skip: !built && "run npm run build first" }, () => {
