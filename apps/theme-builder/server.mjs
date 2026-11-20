@@ -32,10 +32,12 @@ const model = modelName === "mock"
   : { available: false, reason: "No OpenAI API key: set OPENAI_API_KEY or add the Keychain item openai-api-key. The settings panel still works." };
 
 // Live reload rides on this server's own port, so two dev servers never fight over one.
+// The e2e run turns it off (BUILDER_HMR=off): its client reloads the page when it loses the socket,
+// which aborts a test mid-load with "Failed to fetch dynamically imported module".
 const http = createServer();
 const vite = await createVite({
   ...viteOptions(), appType: "spa",
-  server: { middlewareMode: true, hmr: { server: http }, fs: { allow: [REPO] } },
+  server: { middlewareMode: true, hmr: process.env.BUILDER_HMR === "off" ? false : { server: http }, fs: { allow: [REPO] } },
   // Every page the server serves, so their dependencies are optimised up front:
   // one discovered mid-session answers 504 "Outdated Optimize Dep" and reloads.
   // Not the e2e test client's page.
@@ -78,7 +80,22 @@ http.on("request", async (req, res) => {
 // it discover them all at start; then wait for the bundling to finish.
 const optimizer = vite.environments?.client?.depsOptimizer;
 const sources = [...globSync("src/**/*.{js,jsx}", { cwd: APP })].filter((f) => !/\.(test|stories)\.jsx?$/.test(f));
-await Promise.all(["src/main.jsx", "src/home/main.jsx", ...sources].map((f) => vite.warmupRequest(`/${f}`).catch(() => {})));
+// Follow every static and dynamic import from there, so the lazily loaded pages (the theme page, the
+// site's pages, the SDK source and stories they pull in) are compiled too: left to the first visit,
+// they are slow enough to time a test out, and a dependency found then re-optimises and reloads the page.
+// Browser source only: not dependencies (the optimiser bundles those), tests, tools or Node-only modules.
+const client = vite.environments.client, seen = new Set();
+const SKIP = /\/node_modules\/|\/e2e\/|\/test\/|\/tools\/|microsite-data\.mjs|\.node$/;
+const crawl = async (url) => {
+  if (seen.has(url) || SKIP.test(url)) return;
+  seen.add(url);
+  await client.transformRequest(url).catch(() => {});
+  const mod = await client.moduleGraph.getModuleByUrl(url);
+  // A stylesheet's "imports" include the files Tailwind watches (vite.shared.mjs, server.mjs): follow only its CSS.
+  const css = /\.css($|\?)/;
+  await Promise.all([...(mod?.importedModules ?? [])].filter((m) => !css.test(url) || css.test(m.url)).map((m) => crawl(m.url)));
+};
+await Promise.all(["src/main.jsx", "src/home/main.jsx", ...sources].map((f) => crawl(`/${f}`)));
 await optimizer?.scanProcessing;
 await Promise.all(Object.values(optimizer?.metadata?.discovered ?? {}).map((d) => d.processing).filter(Boolean));
 http.listen(port, "127.0.0.1", () => {

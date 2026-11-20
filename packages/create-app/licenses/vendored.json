@@ -4,7 +4,7 @@
     {
       "name": "HELIX plugin package (skill and catalogue)",
       "source": "https://github.com/DocumentDrivenDX/helix",
-      "version": "0.18.0",
+      "version": "0.21.0",
       "licence": "MIT",
       "licenceFile": "licenses/helix.LICENSE",
       "files": []

@@ -7,7 +7,7 @@ package as installed; the licence texts of vendored source are in this package's
 
 | Source | Version | Licence | Licence text | Files |
 |---|---|---|---|---|
-| HELIX plugin package (skill and catalogue) (https://github.com/DocumentDrivenDX/helix) | 0.18.0 | MIT | licenses/helix.LICENSE |  |
+| HELIX plugin package (skill and catalogue) (https://github.com/DocumentDrivenDX/helix) | 0.21.0 | MIT | licenses/helix.LICENSE |  |
 
 ## Dependencies
 
