@@ -1,5 +1,28 @@
 # @ux-builder/ui
 
+## 0.18.0
+
+### Minor Changes
+
+- fd2a663: vk-synaptiq takes Atlas's look: neutral greys and Iron text in light; Blackwood, Shadow and Iron with Sky in dark; Lava
+  for errors; Sky primary fills, Arctic highlights and titles, and an Agave scale; a spacing scale of 8, 8, 16, 24,
+  32, 48, 64 and 80px; pill controls; a major-second type scale from a 20px body; 20px card corners; edgeless fields; and
+  32px checkboxes with 8px corners, checked in Arctic with a white check.
+  
+  Four optional brand colour roles, each defaulting to what the SDK drew before, so other brands look the same:
+  color.primary-fill and color.on-primary-fill (the primary button and a chosen segment), color.highlight and
+  color.sequential; and page-header.title-fg, the page title's colour.
+  
+  A "synaptiq" icon set: on a theme whose icon.set is "synaptiq" (vk-synaptiq), the shared names draw in the Synaptiq
+  brand's icons, filled in the text colour. Every icon of the brand library (581, brand/synaptiq/icons) draws by its
+  number, <Icon name="syn-60-031" />, in any theme; Icon loads the library on first use. @ux-builder/ui/icons/synaptiq
+  exports it for apps that want it in the bundle from the start.
+
+### Patch Changes
+
+- Updated dependencies [fd2a663]
+  - @ux-builder/tokens@2.1.0
+
 ## 0.17.0
 
 ### Minor Changes

@@ -156,6 +156,18 @@
       "size": {
         "measure": {
           "$value": "65ch"
+        },
+        "content-form": {
+          "$value": "45rem",
+          "$description": "Atlas: 40rem at Atlas's former 18px root, kept at the 16px root (720px)."
+        },
+        "content-page": {
+          "$value": "101.25rem",
+          "$description": "Atlas: 90rem at Atlas's former 18px root, kept at the 16px root (1620px)."
+        },
+        "target-touch": {
+          "$value": "3.0938rem",
+          "$description": "Atlas: 2.75rem at Atlas's former 18px root, kept at the 16px root (49.5px)."
         }
       },
       "radius": {
@@ -211,14 +223,15 @@
           "$description": "48px, growing with the text size."
         },
         "padding-x": {
-          "$value": "1.5rem",
-          "$description": "25px on the site."
+          "$value": "1.6875rem",
+          "$description": "Atlas: 1.5rem at Atlas's former 18px root, kept at the 16px root (27px)."
         },
         "font-weight": {
           "$value": "{font-weight.strong}"
         },
         "font-size": {
-          "$value": "1rem"
+          "$value": "1.125rem",
+          "$description": "Atlas: 1rem at Atlas's former 18px root, kept at the 16px root (18px)."
         },
         "shadow": {
           "$value": "none",
@@ -299,7 +312,8 @@
           "$value": "999px"
         },
         "font-size": {
-          "$value": "0.6875rem"
+          "$value": "0.7734rem",
+          "$description": "Atlas: 0.6875rem at Atlas's former 18px root, kept at the 16px root (12.375px)."
         }
       },
       "field": {
@@ -307,7 +321,8 @@
           "$value": "44px"
         },
         "padding-x": {
-          "$value": "0.875rem"
+          "$value": "0.9844rem",
+          "$description": "Atlas: 0.875rem at Atlas's former 18px root, kept at the 16px root (15.75px)."
         },
         "bg": {
           "$value": "{color.surface-sunken}",
@@ -425,7 +440,8 @@
           "$value": "{color.surface}"
         },
         "padding-y": {
-          "$value": "0.25rem"
+          "$value": "0.2813rem",
+          "$description": "Atlas: 0.25rem at Atlas's former 18px root, kept at the 16px root (4.5px)."
         },
         "item-height": {
           "$value": "40px"
@@ -467,7 +483,8 @@
           "$description": "None: the chosen segment's pill is the only division (Atlas)."
         },
         "padding-x": {
-          "$value": "1rem"
+          "$value": "1.125rem",
+          "$description": "Atlas: 1rem at Atlas's former 18px root, kept at the 16px root (18px)."
         },
         "option-bg": {
           "$value": "transparent"
@@ -487,7 +504,8 @@
           "$description": "Iron on Sky."
         },
         "font-size": {
-          "$value": "0.875rem"
+          "$value": "0.9844rem",
+          "$description": "Atlas: 0.875rem at Atlas's former 18px root, kept at the 16px root (15.75px)."
         },
         "font-weight": {
           "$value": "{font-weight.strong}"
@@ -501,7 +519,8 @@
           "$value": "1px solid {color.border}"
         },
         "padding": {
-          "$value": "1.5rem"
+          "$value": "1.6875rem",
+          "$description": "Atlas: 1.5rem at Atlas's former 18px root, kept at the 16px root (27px)."
         }
       },
       "notice": {
@@ -548,7 +567,8 @@
       },
       "table": {
         "font-size": {
-          "$value": "0.875rem"
+          "$value": "0.9844rem",
+          "$description": "Atlas: 0.875rem at Atlas's former 18px root, kept at the 16px root (15.75px)."
         },
         "row-height": {
           "$value": "48px"
@@ -557,7 +577,8 @@
           "$value": "44px"
         },
         "cell-padding-x": {
-          "$value": "1rem"
+          "$value": "1.125rem",
+          "$description": "Atlas: 1rem at Atlas's former 18px root, kept at the 16px root (18px)."
         },
         "cell-padding-y": {
           "$value": "0"
@@ -609,14 +630,24 @@
           "$description": "Page titles in Arctic, deepened to read as text in light (#4D728F, 4.7:1 on the 4% grey); Arctic itself in dark (Atlas)."
         },
         "gap": {
-          "$value": "20px",
-          "$description": "20px under every page title (Atlas, 2026-11-18)."
+          "$value": "{space.3}",
+          "$description": "Atlas: 16px under a page title, on the 8-16-24-32-48-64-80 scale (was 20px, off the scale)."
         }
       },
       "icon": {
         "set": {
           "$value": "synaptiq",
           "$description": "The Synaptiq brand icon library (581 icons; brand/synaptiq/icons): filled shapes in the text colour, Lucide for any name it lacks."
+        }
+      },
+      "nav": {
+        "width": {
+          "$value": "18rem",
+          "$description": "Atlas: 16rem at Atlas's former 18px root, kept at the 16px root (288px)."
+        },
+        "bar-height": {
+          "$value": "4.5rem",
+          "$description": "Atlas: 4rem at Atlas's former 18px root, kept at the 16px root (72px)."
         }
       }
     },
