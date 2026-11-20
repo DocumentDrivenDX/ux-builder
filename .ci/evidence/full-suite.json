@@ -1,10 +1,10 @@
 {
   "suite": "ux-builder-full",
   "tool_versions": [
-    "v24.17.0",
-    "11.13.0"
+    "v22.19.0",
+    "11.6.0"
   ],
-  "content_hash": "c7f5d2760aed1b74ccc7184babac1eb71b227198a0bffb2c30e6b668a6366cae",
-  "timestamp": "2026-11-20T19:17:27Z",
+  "content_hash": "12bdc16aebd53f3f68758008dff6dfcb49676ac56b51d1acad204f2a20fdf973",
+  "timestamp": "2026-11-20T19:37:20Z",
   "command": "npm ci && npx playwright install chromium && npm run check && git checkout -- . && npm run e2e --workspace @ux-builder/theme-builder && npm run build-storybook --workspace @ux-builder/ui && node tools/build-pages.mjs _site && npm run test:storybook --workspace @ux-builder/ui && git checkout -- ."
 }
