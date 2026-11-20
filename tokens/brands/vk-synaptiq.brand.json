@@ -1,46 +1,46 @@
 {
   "$schema": "../schema/brand.schema.json",
-  "$description": "Copy of the synaptiq brand to adjust on the vk/adjustments branch. Synaptiq, from synaptiq.ai and the Synaptiq Design System (brand guide v1.1). Light is the brand as published: white ground, Soil text, Jasper links and calls to action, Arctic and Apricot Ink as supporting colours. Synaptiq defines no dark mode; the dark appearance is derived here (Soil grounds, Apricot Ink as the accent) and should be reviewed by the brand owner. Operator-approved 2026-10-06: the derived dark appearance, the darkened Grapefruit 'limited' state, and Google font stand-ins for the licensed faces.",
+  "$description": "Copy of the synaptiq brand to adjust on the vk/adjustments branch. Synaptiq, from synaptiq.ai and the Synaptiq Design System (brand guide v1.1). Light is the brand as published: white ground, Soil text, Jasper links and calls to action, Arctic and Apricot Ink as supporting colours. Synaptiq defines no dark mode; the dark appearance is derived here (Soil grounds, Apricot Ink as the accent) and should be reviewed by the brand owner. Operator-approved 2026-10-06: the derived dark appearance, the darkened Grapefruit 'limited' state, and Google font stand-ins for the licensed faces. Atlas's look (2026-11-19): neutral greys and Iron text in light; Blackwood, Shadow and Iron with Sky in dark; Lava for errors; Sky primary fills, Arctic highlights and an Agave scale.",
   "name": "vk-synaptiq",
   "title": "vk-Synaptiq",
   "appearances": {
     "light": {
       "color": {
         "ground": {
-          "$value": "#FFFFFF",
-          "$description": "White: the site and the decks set every page on white."
+          "$value": "#F5F5F5",
+          "$description": "A 4% grey page, so a container can sit on it in white or a 12% grey (Atlas, 2026-11-18; was white)."
         },
         "surface": {
           "$value": "#FFFFFF",
           "$description": "Cards sit on white and are set off by a hairline and a soft Soil shadow."
         },
         "surface-sunken": {
-          "$value": "#F7F6F7",
-          "$description": "The site's light grey: form fields and quiet panels."
+          "$value": "#EBEBEB",
+          "$description": "An 8% grey: fields, table headings and quiet panels, set off from the 4% grey page (was #F7F6F7)."
         },
         "ground-recessed": {
           "$value": "#F6F8FA",
           "$description": "Arctic 10: the cool tint the design system uses for sunken surfaces."
         },
         "text-strong": {
-          "$value": "#312A29",
-          "$description": "Soil: headings and body copy on the site."
+          "$value": "#282828",
+          "$description": "Iron #282828: headings and subheadings; 14.0:1 on the 4% grey (Atlas, 2026-11-18)."
         },
         "text": {
-          "$value": "#312A29",
-          "$description": "Soil: the site sets paragraphs in Soil."
+          "$value": "#282828",
+          "$description": "Iron #282828: body text (Atlas, 2026-11-18)."
         },
         "text-muted": {
-          "$value": "#494F5B",
-          "$description": "Hale Navy: the design system's caption colour; 7.6:1 on the light grey."
+          "$value": "#282828",
+          "$description": "Iron #282828: captions too (Atlas, 2026-11-18)."
         },
         "text-subtle": {
-          "$value": "#6F6A69",
-          "$description": "Soil 70; 5.3:1 on white."
+          "$value": "#616161",
+          "$description": "Neutral grey: 5.7:1 on the 4% grey, 4.7:1 on a 12% grey (was #6F6A69)."
         },
         "structure": {
-          "$value": "#312A29",
-          "$description": "Soil: the design system's primary action and selection colour."
+          "$value": "#282828",
+          "$description": "Iron #282828: checks, selections and field labels (Atlas, 2026-11-18)."
         },
         "accent": {
           "$value": "#4D728F",
@@ -51,8 +51,28 @@
           "$description": "White, as on the site's Jasper buttons."
         },
         "border": {
-          "$value": "#D6D4D4",
-          "$description": "Soil 20: the design system's subtle border."
+          "$value": "#D6D6D6",
+          "$description": "Neutral (was Soil 20, #D6D4D4)."
+        },
+        "status-negative": {
+          "$value": "#DB1F26",
+          "$description": "Lava #DB1F26: destructive actions and errors; 4.96:1 on white, and white on it."
+        },
+        "primary-fill": {
+          "$value": "#B5DCEC",
+          "$description": "Sky #B5DCEC: primary buttons and chosen segments, with Iron words (10.1:1)."
+        },
+        "on-primary-fill": {
+          "$value": "#282828",
+          "$description": "Iron on Sky, 10.1:1."
+        },
+        "highlight": {
+          "$value": "#A1B8CA",
+          "$description": "Arctic #A1B8CA: progress fills, highlight icons (not text: 2.0:1 on white)."
+        },
+        "sequential": {
+          "$value": "#5C767A",
+          "$description": "Agave #5C767A: an ordered scale (an assessment's levels) as tints of 20% to 100% over the surface."
         }
       },
       "state": {
@@ -61,20 +81,20 @@
           "$description": "Pine: the design system's on-track status."
         },
         "limited": {
-          "$value": "#7E721A",
-          "$description": "Grapefruit (#E8DE90), the design system's watch status, darkened 44% in lightness (hue kept) to read as text at 4.52:1 on the light grey. A large move: flagged for review. Approved by the operator 2026-10-06."
+          "$value": "#756A18",
+          "$description": "Deepened 7% from #7E721A, so a pill's words keep 4.6:1 on the 8% grey."
         },
         "purchasing": {
-          "$value": "#5C767A",
-          "$description": "Agave (#6A888D) darkened 6.4% in lightness to clear 4.5:1 on white."
+          "$value": "#566E71",
+          "$description": "Agave deepened 7% from #5C767A, so a pill's words keep 4.6:1 on the 8% grey."
         },
         "evaluation": {
           "$value": "#494F5B",
           "$description": "Hale Navy."
         },
         "closed": {
-          "$value": "#C4463F",
-          "$description": "Jasper, darkened as the accent is; the design system's critical status."
+          "$value": "#CE1D24",
+          "$description": "Lava deepened 6% for status words and outlines (an invalid field, a closed pill): 4.6:1 on the 8% grey of pills and fields, 5.5:1 on white. Lava #DB1F26 itself is color.status-negative, the destructive fill."
         }
       },
       "brand": {
@@ -103,20 +123,20 @@
     "dark": {
       "color": {
         "ground": {
-          "$value": "#231E1D",
-          "$description": "Derived: Soil deepened (the design system's active-press Soil). Synaptiq has no dark mode."
+          "$value": "#121212",
+          "$description": "Blackwood #121212 (was Soil-dark #231E1D)."
         },
         "surface": {
-          "$value": "#312A29",
-          "$description": "Derived: Soil, lifted off the ground."
+          "$value": "#282828",
+          "$description": "Iron #282828 (was #312A29)."
         },
         "surface-sunken": {
-          "$value": "#2A2423",
-          "$description": "Derived: between ground and surface."
+          "$value": "#181818",
+          "$description": "Shadow #181818 (was #2A2423)."
         },
         "ground-recessed": {
-          "$value": "#1B1716",
-          "$description": "Derived: behind the ground."
+          "$value": "#060606",
+          "$description": "Neutral; the same step below the ground as before (was #1B1716)."
         },
         "text-strong": {
           "$value": "#FFFFFF",
@@ -127,28 +147,48 @@
           "$description": "Soil 10."
         },
         "text-muted": {
-          "$value": "#C1BFBF",
-          "$description": "Soil 30."
+          "$value": "#BFBFBF",
+          "$description": "Neutral grey of the same brightness (was #C1BFBF); 8.0:1 on the surface."
         },
         "text-subtle": {
-          "$value": "#ACAAA9",
-          "$description": "Soil 40; 6.1:1 on the surface."
+          "$value": "#AAAAAA",
+          "$description": "Neutral grey of the same brightness (was #ACAAA9); 6.3:1 on the surface."
         },
         "structure": {
-          "$value": "#F7CFA5",
-          "$description": "Apricot Ink: the brand's \"present\" colour carries primary actions on dark, with Soil labels (9.7:1)."
+          "$value": "#B5DCEC",
+          "$description": "Sky #B5DCEC in place of Apricot Ink: filled buttons and selections; 10.1:1 on Iron, and Iron on it."
         },
         "accent": {
-          "$value": "#F7CFA5",
-          "$description": "Apricot Ink, the design system's accent text on dark (text-accent)."
+          "$value": "#B5DCEC",
+          "$description": "Sky #B5DCEC in place of Apricot Ink: links, focus rings, outlines and accent text."
         },
         "on-accent": {
-          "$value": "#312A29",
-          "$description": "Soil on Apricot Ink, as the design system's secondary action."
+          "$value": "#282828",
+          "$description": "Iron on Sky, 10.1:1 (was Soil #312A29)."
         },
         "border": {
-          "$value": "#46403F",
-          "$description": "Soil 90."
+          "$value": "#3E3E3E",
+          "$description": "Neutral; the same 1.38:1 against the surface as before (was #46403F)."
+        },
+        "status-negative": {
+          "$value": "#E7676B",
+          "$description": "Lava with 32% white: Lava itself is 2.97:1 on Iron, too dark for red text on dark; 4.6:1 on Iron."
+        },
+        "primary-fill": {
+          "$value": "#B5DCEC",
+          "$description": "Sky #B5DCEC: primary buttons and chosen segments, with Iron words (10.1:1)."
+        },
+        "on-primary-fill": {
+          "$value": "#282828",
+          "$description": "Iron on Sky, 10.1:1."
+        },
+        "highlight": {
+          "$value": "#A1B8CA",
+          "$description": "Arctic #A1B8CA: progress fills, highlight icons, and page titles in dark (9.5:1 on Blackwood)."
+        },
+        "sequential": {
+          "$value": "#5C767A",
+          "$description": "Agave #5C767A: an ordered scale (an assessment's levels) as tints of 20% to 100% over the surface."
         }
       },
       "state": {
@@ -169,8 +209,8 @@
           "$description": "Stone; 5.2:1 on the surface."
         },
         "closed": {
-          "$value": "#D47873",
-          "$description": "Jasper (#CC5E58) lightened 6.8% to clear 4.5:1 on the surface (4.51). Approved by the operator 2026-10-06."
+          "$value": "#E7676B",
+          "$description": "Lava with 32% white #E7676B (was #D47873)."
         }
       },
       "brand": {

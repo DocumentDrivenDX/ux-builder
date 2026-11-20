@@ -53,7 +53,11 @@
             "text-strong": { "$ref": "#/$defs/colour" }, "text": { "$ref": "#/$defs/colour" },
             "text-muted": { "$ref": "#/$defs/colour" }, "text-subtle": { "$ref": "#/$defs/colour" },
             "structure": { "$ref": "#/$defs/colour" }, "accent": { "$ref": "#/$defs/colour" },
-            "on-accent": { "$ref": "#/$defs/colour" }, "border": { "$ref": "#/$defs/colour" }
+            "on-accent": { "$ref": "#/$defs/colour" }, "border": { "$ref": "#/$defs/colour" },
+            "primary-fill": { "$ref": "#/$defs/colour", "description": "Optional: the primary button's body and a chosen segment (default: color.structure)." },
+            "on-primary-fill": { "$ref": "#/$defs/colour", "description": "Optional: words and icons on color.primary-fill (default: color.surface)." },
+            "highlight": { "$ref": "#/$defs/colour", "description": "Optional: a supporting brand colour for fills, icons and large titles, not body text (default: color.accent)." },
+            "sequential": { "$ref": "#/$defs/colour", "description": "Optional: the base of an ordered scale (levels, ratings), drawn as tints of it over the surface (default: color.accent)." }
           },
           "patternProperties": {
             "^(status-(positive|caution|negative|info)|series-[1-8])$": { "$ref": "#/$defs/colour", "description": "Optional: replaces the SDK's default status or series colour (tokens/dataviz.json) in this appearance only (FEAT-017 VIZ-06)." }

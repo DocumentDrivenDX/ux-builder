@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     // The components, the icon library (one export per icon, so apps tree-shake it), the patterns (ADR-020) and the assistant with its two adapters (ADR-023) and Adaptive Cards (ADR-029), so an app that uses none carries none.
-    lib: { entry: { index: "src/index.js", icons: "src/icons/library.js", patterns: "src/patterns/index.js", assistant: "src/assistant/index.js", "assistant-ai-sdk": "src/assistant/adapters/ai-sdk.js", "assistant-assistant-ui": "src/assistant/adapters/assistant-ui.js", "adaptive-cards": "src/adaptive-cards/index.js" }, formats: ["es"], fileName: (_, entry) => `${entry}.js` },
+    lib: { entry: { index: "src/index.js", icons: "src/icons/library.js", "icons-synaptiq": "src/icons/synaptiq.js", patterns: "src/patterns/index.js", assistant: "src/assistant/index.js", "assistant-ai-sdk": "src/assistant/adapters/ai-sdk.js", "assistant-assistant-ui": "src/assistant/adapters/assistant-ui.js", "adaptive-cards": "src/adaptive-cards/index.js" }, formats: ["es"], fileName: (_, entry) => `${entry}.js` },
     // Code both entries use (the widgets the patterns compose, the theme context) is one shared chunk, so an app has one copy.
     rollupOptions: { external: ["react", "react-dom", "react/jsx-runtime"], output: { chunkFileNames: "shared-[hash].js" } },
     sourcemap: true,
