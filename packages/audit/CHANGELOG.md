@@ -1,5 +1,13 @@
 # @ux-builder/audit
 
+## 0.9.2
+
+### Patch Changes
+
+- Updated dependencies [fd2a663]
+  - @ux-builder/tokens@2.1.0
+  - @ux-builder/ui@0.18.0
+
 ## 0.9.1
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @ux-builder/create-app
 
+## 0.14.2
+
+### Patch Changes
+
+- Updated dependencies [fd2a663]
+  - @ux-builder/tokens@2.1.0
+  - @ux-builder/ui@0.18.0
+  - @ux-builder/audit@0.9.2
+  - @ux-builder/design@1.1.3
+
 ## 0.14.1
 
 ### Patch Changes
