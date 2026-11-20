@@ -3,5 +3,5 @@
   "@ux-builder/ui": "0.18.0",
   "@ux-builder/audit": "0.9.2",
   "@ux-builder/trace": "0.3.0",
-  "@ux-builder/tokens": "2.1.0"
+  "@ux-builder/tokens": "2.1.1"
 }
