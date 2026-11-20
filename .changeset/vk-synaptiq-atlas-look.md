@@ -4,8 +4,9 @@
 ---
 
 vk-synaptiq takes Atlas's look: neutral greys and Iron text in light; Blackwood, Shadow and Iron with Sky in dark; Lava
-for errors; Sky primary fills, Arctic highlights and titles, and an Agave scale; wider spacing, pill controls, a
-major-second type scale from a 20px body, 20px card corners and edgeless fields.
+for errors; Sky primary fills, Arctic highlights and titles, and an Agave scale; a spacing scale of 8, 8, 16, 24,
+32, 48, 64 and 80px; pill controls; a major-second type scale from a 20px body; 20px card corners; edgeless fields; and
+32px checkboxes with 8px corners, checked in Arctic with a white check.
 
 Four optional brand colour roles, each defaulting to what the SDK drew before, so other brands look the same:
 color.primary-fill and color.on-primary-fill (the primary button and a chosen segment), color.highlight and

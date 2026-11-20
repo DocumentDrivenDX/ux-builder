@@ -121,32 +121,36 @@
       },
       "space": {
         "1": {
-          "$value": "0.25rem"
+          "$value": "8px",
+          "$description": "Atlas: 8px on the 8-16-24-32-48-64-80 scale, in px so it stays put at any text size."
         },
         "2": {
-          "$value": "0.5rem"
+          "$value": "8px",
+          "$description": "Atlas: 8px on the 8-16-24-32-48-64-80 scale, in px so it stays put at any text size."
         },
         "3": {
-          "$value": "0.75rem"
+          "$value": "16px",
+          "$description": "Atlas: 16px on the 8-16-24-32-48-64-80 scale, in px so it stays put at any text size."
         },
         "4": {
-          "$value": "1rem"
+          "$value": "24px",
+          "$description": "Atlas: 24px on the 8-16-24-32-48-64-80 scale, in px so it stays put at any text size."
         },
         "5": {
-          "$value": "calc(1.5rem + 20px)",
-          "$description": "1.5rem plus 20px: wider page margins and gaps between containers (Atlas, 2026-11-18)."
+          "$value": "32px",
+          "$description": "Atlas: 32px on the 8-16-24-32-48-64-80 scale, in px so it stays put at any text size."
         },
         "6": {
-          "$value": "calc(2rem + 20px)",
-          "$description": "2rem plus 20px: wider page margins and gaps between containers (Atlas, 2026-11-18)."
+          "$value": "48px",
+          "$description": "Atlas: 48px on the 8-16-24-32-48-64-80 scale, in px so it stays put at any text size."
         },
         "7": {
-          "$value": "calc(3rem + 20px)",
-          "$description": "3rem plus 20px: wider page margins and gaps between containers (Atlas, 2026-11-18)."
+          "$value": "64px",
+          "$description": "Atlas: 64px on the 8-16-24-32-48-64-80 scale, in px so it stays put at any text size."
         },
         "8": {
-          "$value": "calc(4rem + 20px)",
-          "$description": "4rem plus 20px: wider page margins and gaps between containers (Atlas, 2026-11-18)."
+          "$value": "80px",
+          "$description": "Atlas: 80px on the 8-16-24-32-48-64-80 scale, in px so it stays put at any text size."
         }
       },
       "size": {
@@ -355,21 +359,23 @@
       },
       "check": {
         "size": {
-          "$value": "max(18px, 1.125rem)",
-          "$description": "18px, growing with the text size."
+          "$value": "32px",
+          "$description": "Atlas: 32px boxes; radio buttons read the same size."
         },
         "radius": {
-          "$value": "2px",
-          "$description": "The design system's radius-sm."
+          "$value": "8px",
+          "$description": "Atlas: rounded corners, 8px on the spacing scale."
         },
         "border": {
           "$value": "1.5px solid {color.text-muted}"
         },
         "checked-bg": {
-          "$value": "{color.structure}"
+          "$value": "{color.highlight}",
+          "$description": "Atlas: checked boxes fill with Arctic (#A1B8CA) in both appearances."
         },
         "checked-fg": {
-          "$value": "{color.surface}"
+          "$value": "{color.surface}",
+          "$description": "Atlas: a white check on Arctic."
         }
       },
       "switch": {
@@ -634,6 +640,12 @@
           "title-fg": {
             "$value": "{color.highlight}",
             "$description": "Arctic #A1B8CA in dark: 9.5:1 on Blackwood."
+          }
+        },
+        "check": {
+          "checked-fg": {
+            "$value": "{color.text-strong}",
+            "$description": "Atlas: a white check on Arctic (the dark surface is Iron, so white comes from text-strong)."
           }
         }
       }
