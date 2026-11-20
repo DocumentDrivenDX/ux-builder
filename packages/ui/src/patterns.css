@@ -345,7 +345,7 @@
 .piq-page-header__heading { display: flex; flex-wrap: wrap; align-items: center; gap: var(--piq-space-3); min-inline-size: 0; }
 .piq-page-header__title {
   margin: 0;
-  color: var(--piq-color-text-strong);
+  color: var(--piq-page-header-title-fg, var(--piq-color-text-strong));
   font: var(--piq-font-weight-strong) var(--piq-page-header-title-font-size) / var(--piq-line-height-tight) var(--piq-font-heading);
   overflow-wrap: anywhere;
 }

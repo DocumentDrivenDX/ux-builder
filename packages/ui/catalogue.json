@@ -19345,6 +19345,14 @@
       "alias0": "--rail"
     },
     {
+      "name": "--piq-color-highlight",
+      "path": "color.highlight",
+      "group": "color",
+      "tier": "role",
+      "purpose": "A supporting brand colour for fills, icons and large titles; not body text",
+      "alias0": null
+    },
+    {
       "name": "--piq-color-lifecycle-decided",
       "path": "color.lifecycle-decided",
       "group": "color",
@@ -19374,6 +19382,30 @@
       "group": "color",
       "tier": "role",
       "purpose": "Text and counts drawn on the accent; today only the literal value of `--badge-fg`. Added by CONTRACT-002 (2026-10-06)",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-on-primary-fill",
+      "path": "color.on-primary-fill",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Words and icons on the primary fill",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-primary-fill",
+      "path": "color.primary-fill",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Body of primary buttons and chosen segments",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-sequential",
+      "path": "color.sequential",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Base of an ordered scale (levels, ratings), drawn as tints over the surface",
       "alias0": null
     },
     {
@@ -20062,6 +20094,14 @@
       "group": "page-header",
       "tier": "component",
       "purpose": "Space above and below the header",
+      "alias0": null
+    },
+    {
+      "name": "--piq-page-header-title-fg",
+      "path": "page-header.title-fg",
+      "group": "page-header",
+      "tier": "component",
+      "purpose": "Colour of the page title",
       "alias0": null
     },
     {

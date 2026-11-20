@@ -35,11 +35,12 @@
   gap: var(--piq-space-2);
   min-height: var(--piq-button-height);
   padding: 0 var(--piq-button-padding-x);
-  border: 1px solid var(--piq-color-structure);
+  /* the primary fill: color.primary-fill where a brand sets one, else structure, as before */
+  border: 1px solid var(--piq-color-primary-fill, var(--piq-color-structure));
   border-radius: var(--piq-button-radius);
-  background-color: var(--piq-color-structure);
+  background-color: var(--piq-color-primary-fill, var(--piq-color-structure));
   background-image: linear-gradient(color-mix(in srgb, currentColor var(--_state), transparent) 0 0);
-  color: var(--piq-color-surface);
+  color: var(--piq-color-on-primary-fill, var(--piq-color-surface));
   font: var(--piq-button-font-weight) var(--piq-button-font-size) / 1 var(--piq-font-body);
   box-shadow: var(--piq-button-shadow);
   cursor: pointer;

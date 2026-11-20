@@ -97,9 +97,9 @@ aliases for every current name.
 Every current name, its new path and CSS variable. "Defined in" says which
 themes set the token today (`all` = all six; others fall back in `ui.css`).
 
-#### Roles (51)
+#### Roles (55)
 
-#### Colour (11)
+#### Colour (15)
 
 | Current | New path | New CSS variable | Defined in | Meaning |
 |---|---|---|---|---|
@@ -114,6 +114,10 @@ themes set the token today (`all` = all six; others fall back in `ui.css`).
 | `--navy` | `color.structure` | `--piq-color-structure` | all | Structural colour: primary buttons, selection, labels. Not a hue: near-white in dark themes |
 | `--accent` | `color.accent` | `--piq-color-accent` | all | Brand accent: kickers, focus, highlights; used sparingly |
 | `--rule` | `color.border` | `--piq-color-border` | all | Dividers and borders |
+| — | `color.primary-fill` | `--piq-color-primary-fill` | optional; else `color.structure` | Body of primary buttons and chosen segments |
+| — | `color.on-primary-fill` | `--piq-color-on-primary-fill` | optional; else `color.surface` | Words and icons on the primary fill |
+| — | `color.highlight` | `--piq-color-highlight` | optional; else `color.accent` | A supporting brand colour for fills, icons and large titles; not body text |
+| — | `color.sequential` | `--piq-color-sequential` | optional; else `color.accent` | Base of an ordered scale (levels, ratings), drawn as tints over the surface |
 
 #### Status (5)
 
@@ -449,6 +453,7 @@ gets the point's default, which is also the `ui.css` fallback.
 | — | `page-header.title-font-size` | `--piq-page-header-title-font-size` | every theme, from its `page-header` variant | Size of the page title |
 | — | `page-header.padding-y` | `--piq-page-header-padding-y` | every theme, from its `page-header` variant | Space above and below the header |
 | — | `page-header.gap` | `--piq-page-header-gap` | every theme, from its `page-header` variant | Space between title, status and actions |
+| — | `page-header.title-fg` | `--piq-page-header-title-fg` | optional; else `color.text-strong` | Colour of the page title |
 | — | `table.row-stripe-bg` | `--piq-table-row-stripe-bg` | every theme, from its `table` variant | Fill of alternate rows (`transparent` when ruled) |
 | — | `table.row-border` | `--piq-table-row-border` | every theme, from its `table` variant | Rule between rows (`none` when banded) |
 
