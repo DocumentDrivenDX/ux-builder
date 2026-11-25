@@ -78,6 +78,12 @@ describe("theme CSS", () => {
     // destructive buttons: Lava in both appearances, never lightened for dark (owner, 2026-11-25)
     assert.match(css, /\[data-theme="vk-synaptiq"\]\[data-appearance="dark"\] \{[\s\S]*--piq-color-destructive: #DB1F26;/);
     assert.match(css, /--piq-color-on-destructive: #FFFFFF;/);
+    // the Figma library's decisions (2026-11-19): a darkened-Arctic selection, 8px corners, the stances' colours
+    assert.match(css, /--piq-color-selected: #527693;/);
+    assert.match(css, /--piq-check-checked-bg: var\(--piq-color-selected\);/);
+    assert.match(css, /--piq-radius-control: 8px;/);
+    assert.match(css, /--piq-button-height-small: 32px;/);
+    assert.match(css, /--piq-color-stance-watch: #7A736D;/);
     assert.match(css, /--piq-icon-set: synaptiq;/);
   });
 });

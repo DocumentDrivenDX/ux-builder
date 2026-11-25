@@ -172,8 +172,8 @@
       },
       "radius": {
         "control": {
-          "$value": "3px",
-          "$description": "The site's call-to-action buttons: 3px."
+          "$value": "8px",
+          "$description": "8px (Figma library, 2026-11-19); was 3px."
         },
         "card": {
           "$value": "20px",
@@ -221,6 +221,10 @@
         "height": {
           "$value": "max(48px, 3rem)",
           "$description": "48px, growing with the text size."
+        },
+        "height-small": {
+          "$value": "32px",
+          "$description": "Small buttons are 32px high (Figma library, 2026-11-19); the SDK default is 26px."
         },
         "padding-x": {
           "$value": "1.6875rem",
@@ -354,7 +358,8 @@
           "$value": "none"
         },
         "invalid-shadow": {
-          "$value": "inset 0 0 0 1px {state.closed}"
+          "$value": "inset 0 0 0 2px {state.closed}",
+          "$description": "A 2px red edge on an invalid field (Figma library, 2026-11-19); was 1px."
         },
         "label-fg": {
           "$value": "{color.text-muted}"
@@ -386,8 +391,8 @@
           "$value": "1.5px solid {color.text-muted}"
         },
         "checked-bg": {
-          "$value": "{color.highlight}",
-          "$description": "Atlas: checked boxes fill with Arctic (#A1B8CA) in both appearances."
+          "$value": "{color.selected}",
+          "$description": "Arctic darkened #527693 with a white check, 4.9:1 (Figma library, 2026-11-19)."
         },
         "checked-fg": {
           "$value": "{color.surface}",
@@ -420,16 +425,18 @@
           "$value": "{color.surface}"
         },
         "checked-track-bg": {
-          "$value": "{state.live}",
-          "$description": "Pine: on-track."
+          "$value": "{color.selected}",
+          "$description": "On: Arctic darkened #527693 (Figma library, 2026-11-19)."
         },
         "checked-thumb-bg": {
-          "$value": "{color.surface}"
+          "$value": "{color.surface}",
+          "$description": "A white thumb when on."
         }
       },
       "menu": {
         "radius": {
-          "$value": "4px"
+          "$value": "8px",
+          "$description": "8px (Figma library, 2026-11-19); was 4px."
         },
         "shadow": {
           "$value": "0 2px 4px rgba(49, 42, 41, 0.08), 0 8px 24px rgba(49, 42, 41, 0.1)"
@@ -526,7 +533,8 @@
       },
       "notice": {
         "radius": {
-          "$value": "4px"
+          "$value": "8px",
+          "$description": "8px (Figma library, 2026-11-19); was 4px."
         },
         "stripe-width": {
           "$value": "4px",
@@ -665,7 +673,8 @@
         },
         "switch": {
           "checked-thumb-bg": {
-            "$value": "{color.ground}"
+            "$value": "{color.text-strong}",
+            "$description": "A white thumb when on, in dark too (the dark surface is Iron, so white comes from text-strong)."
           }
         },
         "page-header": {
@@ -678,6 +687,12 @@
           "checked-fg": {
             "$value": "{color.text-strong}",
             "$description": "Atlas: a white check on Arctic (the dark surface is Iron, so white comes from text-strong)."
+          }
+        },
+        "card": {
+          "border": {
+            "$value": "1px solid color-mix(in srgb, {color.text-subtle} 32.5%, {color.border})",
+            "$description": "A brighter card outline in dark, #616161 (Figma library, 2026-11-19); was #3E3E3E."
           }
         }
       }

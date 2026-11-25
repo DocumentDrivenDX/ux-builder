@@ -59,7 +59,12 @@
             "highlight": { "$ref": "#/$defs/colour", "description": "Optional: a supporting brand colour for fills, icons and large titles, not body text (default: color.accent)." },
             "sequential": { "$ref": "#/$defs/colour", "description": "Optional: the base of an ordered scale (levels, ratings), drawn as tints of it over the surface (default: color.accent)." },
             "destructive": { "$ref": "#/$defs/colour", "description": "Optional: the body of a destructive action's button, such as a delete confirmation (default: color.status-negative)." },
-            "on-destructive": { "$ref": "#/$defs/colour", "description": "Optional: words and icons on color.destructive (default: color.on-accent)." }
+            "on-destructive": { "$ref": "#/$defs/colour", "description": "Optional: words and icons on color.destructive (default: color.on-accent)." },
+            "selected": { "$ref": "#/$defs/colour", "description": "Optional: a chosen check, radio or switch, for a theme's anatomy to use (default: color.structure)." },
+            "stance-recommended": { "$ref": "#/$defs/colour", "description": "Optional: a recommendation's stance, recommended (default: color.status-positive)." },
+            "stance-conditional": { "$ref": "#/$defs/colour", "description": "Optional: a recommendation's stance, use with conditions (default: color.status-info)." },
+            "stance-watch": { "$ref": "#/$defs/colour", "description": "Optional: a recommendation's stance, watch (default: color.status-caution)." },
+            "stance-avoid": { "$ref": "#/$defs/colour", "description": "Optional: a recommendation's stance, avoid (default: color.status-negative)." }
           },
           "patternProperties": {
             "^(status-(positive|caution|negative|info)|series-[1-8])$": { "$ref": "#/$defs/colour", "description": "Optional: replaces the SDK's default status or series colour (tokens/dataviz.json) in this appearance only (FEAT-017 VIZ-06)." }

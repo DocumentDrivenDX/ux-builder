@@ -72,7 +72,7 @@
   box-shadow: none;
 }
 .piq-btn--text:hover:not(:disabled) { box-shadow: none; }
-.piq-btn--sm { min-height: 26px; padding: 0 var(--piq-space-3); font-size: var(--piq-font-size-label); }
+.piq-btn--sm { min-height: var(--piq-button-height-small, 26px); padding: 0 var(--piq-space-3); font-size: var(--piq-font-size-label); }
 
 /* A count on a button: part of the control, never the pill's dot or the
    button's shadow, so all three stay distinct. */
