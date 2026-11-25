@@ -260,7 +260,8 @@
           "$value": "{color.accent}"
         },
         "secondary-border": {
-          "$value": "1px solid {color.accent}"
+          "$value": "1px solid {color.highlight}",
+          "$description": "Arctic outline at rest and on hover, as in the Figma library (2026-11-25); the Jasper label names the button."
         },
         "ghost-fg": {
           "$value": "{color.accent}",
