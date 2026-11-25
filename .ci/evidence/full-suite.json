@@ -4,7 +4,7 @@
     "v24.17.0",
     "11.13.0"
   ],
-  "content_hash": "c7f5d2760aed1b74ccc7184babac1eb71b227198a0bffb2c30e6b668a6366cae",
-  "timestamp": "2026-11-20T19:17:27Z",
+  "content_hash": "4e31c242e9a7daa611d23e248ed8b926068690f23efc2d0c40aa9183eadfe58c",
+  "timestamp": "2026-11-25T16:45:07Z",
   "command": "npm ci && npx playwright install chromium && npm run check && git checkout -- . && npm run e2e --workspace @ux-builder/theme-builder && npm run build-storybook --workspace @ux-builder/ui && node tools/build-pages.mjs _site && npm run test:storybook --workspace @ux-builder/ui && git checkout -- ."
 }
