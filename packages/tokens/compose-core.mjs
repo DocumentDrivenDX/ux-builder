@@ -80,6 +80,8 @@ export function brandTokens(brand, appearance, viz = brand.dataviz ?? DATAVIZ) {
   derive("on-primary-fill", "color.surface", "colour on the primary fill");
   derive("highlight", "color.accent", "highlight");
   derive("sequential", "color.accent", "sequential base");
+  derive("destructive", "color.status-negative", "destructive fill");
+  derive("on-destructive", "color.on-accent", "colour on the destructive fill");
   return m;
 }
 

@@ -73,6 +73,14 @@
         "sequential": {
           "$value": "#5C767A",
           "$description": "Agave #5C767A: an ordered scale (an assessment's levels) as tints of 20% to 100% over the surface."
+        },
+        "destructive": {
+          "$value": "#DB1F26",
+          "$description": "Lava #DB1F26 in both appearances, never lightened for dark (owner, 2026-11-25): destructive buttons' fill. White on it is 4.96:1."
+        },
+        "on-destructive": {
+          "$value": "#FFFFFF",
+          "$description": "White on Lava, 4.96:1."
         }
       },
       "state": {
@@ -189,6 +197,14 @@
         "sequential": {
           "$value": "#5C767A",
           "$description": "Agave #5C767A: an ordered scale (an assessment's levels) as tints of 20% to 100% over the surface."
+        },
+        "destructive": {
+          "$value": "#DB1F26",
+          "$description": "Lava #DB1F26 in both appearances, never lightened for dark (owner, 2026-11-25): destructive buttons' fill. White on it is 4.96:1."
+        },
+        "on-destructive": {
+          "$value": "#FFFFFF",
+          "$description": "White on Lava, 4.96:1."
         }
       },
       "state": {

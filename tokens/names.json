@@ -253,6 +253,14 @@
       "tier": "role",
       "css0": null
     },
+    "color.destructive": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.on-destructive": {
+      "tier": "role",
+      "css0": null
+    },
     "color.ground": {
       "tier": "role",
       "css0": "paper"

@@ -19281,6 +19281,14 @@
       "alias0": "--rule"
     },
     {
+      "name": "--piq-color-destructive",
+      "path": "color.destructive",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Body of a destructive action's button (a delete confirmation), which a brand may keep saturated in dark where red text cannot be",
+      "alias0": null
+    },
+    {
       "name": "--piq-color-diagram-edge",
       "path": "color.diagram-edge",
       "group": "color",
@@ -19382,6 +19390,14 @@
       "group": "color",
       "tier": "role",
       "purpose": "Text and counts drawn on the accent; today only the literal value of `--badge-fg`. Added by CONTRACT-002 (2026-10-06)",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-on-destructive",
+      "path": "color.on-destructive",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Words and icons on the destructive fill",
       "alias0": null
     },
     {

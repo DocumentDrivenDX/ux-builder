@@ -75,6 +75,9 @@ describe("theme CSS", () => {
     assert.match(css, /--piq-color-primary-fill: #B5DCEC;/);
     assert.match(css, /--piq-color-highlight: #A1B8CA;/);
     assert.match(css, /--piq-color-sequential: #5C767A;/);
+    // destructive buttons: Lava in both appearances, never lightened for dark (owner, 2026-11-25)
+    assert.match(css, /\[data-theme="vk-synaptiq"\]\[data-appearance="dark"\] \{[\s\S]*--piq-color-destructive: #DB1F26;/);
+    assert.match(css, /--piq-color-on-destructive: #FFFFFF;/);
     assert.match(css, /--piq-icon-set: synaptiq;/);
   });
 });

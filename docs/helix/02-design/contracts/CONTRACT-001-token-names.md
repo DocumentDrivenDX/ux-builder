@@ -97,9 +97,9 @@ aliases for every current name.
 Every current name, its new path and CSS variable. "Defined in" says which
 themes set the token today (`all` = all six; others fall back in `ui.css`).
 
-#### Roles (55)
+#### Roles (57)
 
-#### Colour (15)
+#### Colour (17)
 
 | Current | New path | New CSS variable | Defined in | Meaning |
 |---|---|---|---|---|
@@ -118,6 +118,8 @@ themes set the token today (`all` = all six; others fall back in `ui.css`).
 | — | `color.on-primary-fill` | `--piq-color-on-primary-fill` | optional; else `color.surface` | Words and icons on the primary fill |
 | — | `color.highlight` | `--piq-color-highlight` | optional; else `color.accent` | A supporting brand colour for fills, icons and large titles; not body text |
 | — | `color.sequential` | `--piq-color-sequential` | optional; else `color.accent` | Base of an ordered scale (levels, ratings), drawn as tints over the surface |
+| — | `color.destructive` | `--piq-color-destructive` | optional; else `color.status-negative` | Body of a destructive action's button (a delete confirmation), which a brand may keep saturated in dark where red text cannot be |
+| — | `color.on-destructive` | `--piq-color-on-destructive` | optional; else `color.on-accent` | Words and icons on the destructive fill |
 
 #### Status (5)
 
