@@ -97,9 +97,9 @@ aliases for every current name.
 Every current name, its new path and CSS variable. "Defined in" says which
 themes set the token today (`all` = all six; others fall back in `ui.css`).
 
-#### Roles (55)
+#### Roles (62)
 
-#### Colour (15)
+#### Colour (22)
 
 | Current | New path | New CSS variable | Defined in | Meaning |
 |---|---|---|---|---|
@@ -118,6 +118,13 @@ themes set the token today (`all` = all six; others fall back in `ui.css`).
 | — | `color.on-primary-fill` | `--piq-color-on-primary-fill` | optional; else `color.surface` | Words and icons on the primary fill |
 | — | `color.highlight` | `--piq-color-highlight` | optional; else `color.accent` | A supporting brand colour for fills, icons and large titles; not body text |
 | — | `color.sequential` | `--piq-color-sequential` | optional; else `color.accent` | Base of an ordered scale (levels, ratings), drawn as tints over the surface |
+| — | `color.destructive` | `--piq-color-destructive` | optional; else `color.status-negative` | Body of a destructive action's button (a delete confirmation), which a brand may keep saturated in dark where red text cannot be |
+| — | `color.on-destructive` | `--piq-color-on-destructive` | optional; else `color.on-accent` | Words and icons on the destructive fill |
+| — | `color.selected` | `--piq-color-selected` | optional; else `color.structure` | A chosen check, radio or switch, for a theme's anatomy to use |
+| — | `color.stance-recommended` | `--piq-color-stance-recommended` | optional; else `color.status-positive` | A recommendation's stance: recommended (a card's edge, a graph's halo) |
+| — | `color.stance-conditional` | `--piq-color-stance-conditional` | optional; else `color.status-info` | A recommendation's stance: use with conditions |
+| — | `color.stance-watch` | `--piq-color-stance-watch` | optional; else `color.status-caution` | A recommendation's stance: watch |
+| — | `color.stance-avoid` | `--piq-color-stance-avoid` | optional; else `color.status-negative` | A recommendation's stance: avoid |
 
 #### Status (5)
 
@@ -179,14 +186,15 @@ themes set the token today (`all` = all six; others fall back in `ui.css`).
 | `--btn-hover-mix` | `state-layer.hover` | `--piq-state-layer-hover` | M3, Fluent, Carbon | Hover state layer: share of the label colour mixed over the container |
 | `--btn-press-mix` | `state-layer.press` | `--piq-state-layer-press` | M3, Fluent, Carbon | Pressed state layer |
 
-#### Components (116)
+#### Components (117)
 
-#### `button` (15)
+#### `button` (16)
 
 | Current | New path | New CSS variable | Defined in | Meaning |
 |---|---|---|---|---|
 | `--btn-radius` | `button.radius` | `--piq-button-radius` | all | Corner radius |
 | `--btn-min-height` | `button.height` | `--piq-button-height` | all | Minimum height |
+| — | `button.height-small` | `--piq-button-height-small` | optional; else 26px in `ui.css` | Minimum height of a small button |
 | `--btn-pad-x` | `button.padding-x` | `--piq-button-padding-x` | all | Horizontal padding |
 | `--btn-weight` | `button.font-weight` | `--piq-button-font-weight` | all | Label weight |
 | `--btn-size` | `button.font-size` | `--piq-button-font-size` | all | Label size |

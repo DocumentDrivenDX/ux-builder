@@ -18969,6 +18969,14 @@
       "alias0": "--btn-min-height"
     },
     {
+      "name": "--piq-button-height-small",
+      "path": "button.height-small",
+      "group": "button",
+      "tier": "component",
+      "purpose": "Minimum height of a small button",
+      "alias0": null
+    },
+    {
       "name": "--piq-button-offset-hover",
       "path": "button.offset-hover",
       "group": "button",
@@ -19281,6 +19289,14 @@
       "alias0": "--rule"
     },
     {
+      "name": "--piq-color-destructive",
+      "path": "color.destructive",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Body of a destructive action's button (a delete confirmation), which a brand may keep saturated in dark where red text cannot be",
+      "alias0": null
+    },
+    {
       "name": "--piq-color-diagram-edge",
       "path": "color.diagram-edge",
       "group": "color",
@@ -19385,6 +19401,14 @@
       "alias0": null
     },
     {
+      "name": "--piq-color-on-destructive",
+      "path": "color.on-destructive",
+      "group": "color",
+      "tier": "role",
+      "purpose": "Words and icons on the destructive fill",
+      "alias0": null
+    },
+    {
       "name": "--piq-color-on-primary-fill",
       "path": "color.on-primary-fill",
       "group": "color",
@@ -19398,6 +19422,14 @@
       "group": "color",
       "tier": "role",
       "purpose": "Body of primary buttons and chosen segments",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-selected",
+      "path": "color.selected",
+      "group": "color",
+      "tier": "role",
+      "purpose": "A chosen check, radio or switch, for a theme's anatomy to use",
       "alias0": null
     },
     {
@@ -19470,6 +19502,38 @@
       "group": "color",
       "tier": "role",
       "purpose": "Categorical slot 8, red. Clears 3:1 on the ground, a card and the deepest region; slots are assigned in order, never cycled",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-stance-avoid",
+      "path": "color.stance-avoid",
+      "group": "color",
+      "tier": "role",
+      "purpose": "A recommendation's stance: avoid",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-stance-conditional",
+      "path": "color.stance-conditional",
+      "group": "color",
+      "tier": "role",
+      "purpose": "A recommendation's stance: use with conditions",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-stance-recommended",
+      "path": "color.stance-recommended",
+      "group": "color",
+      "tier": "role",
+      "purpose": "A recommendation's stance: recommended (a card's edge, a graph's halo)",
+      "alias0": null
+    },
+    {
+      "name": "--piq-color-stance-watch",
+      "path": "color.stance-watch",
+      "group": "color",
+      "tier": "role",
+      "purpose": "A recommendation's stance: watch",
       "alias0": null
     },
     {

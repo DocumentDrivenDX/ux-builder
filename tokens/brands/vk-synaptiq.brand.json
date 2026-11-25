@@ -73,6 +73,34 @@
         "sequential": {
           "$value": "#5C767A",
           "$description": "Agave #5C767A: an ordered scale (an assessment's levels) as tints of 20% to 100% over the surface."
+        },
+        "destructive": {
+          "$value": "#DB1F26",
+          "$description": "Lava #DB1F26 in both appearances, never lightened for dark (owner, 2026-11-25): destructive buttons' fill. White on it is 4.96:1."
+        },
+        "on-destructive": {
+          "$value": "#FFFFFF",
+          "$description": "White on Lava, 4.96:1."
+        },
+        "selected": {
+          "$value": "#527693",
+          "$description": "Arctic darkened #527693, in both appearances: a checked box, a chosen radio and a switch that is on (Figma library, 2026-11-19). White on it is 4.9:1."
+        },
+        "stance-recommended": {
+          "$value": "#5C767A",
+          "$description": "Agave: a recommended stance."
+        },
+        "stance-conditional": {
+          "$value": "#527693",
+          "$description": "Arctic darkened: use with conditions."
+        },
+        "stance-watch": {
+          "$value": "#7A736D",
+          "$description": "Stone deepened #7A736D: watch."
+        },
+        "stance-avoid": {
+          "$value": "#DB1F26",
+          "$description": "Lava, in both appearances: avoid."
         }
       },
       "state": {
@@ -189,6 +217,34 @@
         "sequential": {
           "$value": "#5C767A",
           "$description": "Agave #5C767A: an ordered scale (an assessment's levels) as tints of 20% to 100% over the surface."
+        },
+        "destructive": {
+          "$value": "#DB1F26",
+          "$description": "Lava #DB1F26 in both appearances, never lightened for dark (owner, 2026-11-25): destructive buttons' fill. White on it is 4.96:1."
+        },
+        "on-destructive": {
+          "$value": "#FFFFFF",
+          "$description": "White on Lava, 4.96:1."
+        },
+        "selected": {
+          "$value": "#527693",
+          "$description": "Arctic darkened #527693, in both appearances: a checked box, a chosen radio and a switch that is on (Figma library, 2026-11-19). White on it is 4.9:1."
+        },
+        "stance-recommended": {
+          "$value": "#5C767A",
+          "$description": "Agave: a recommended stance."
+        },
+        "stance-conditional": {
+          "$value": "#527693",
+          "$description": "Arctic darkened: use with conditions."
+        },
+        "stance-watch": {
+          "$value": "#7A736D",
+          "$description": "Stone deepened #7A736D: watch."
+        },
+        "stance-avoid": {
+          "$value": "#DB1F26",
+          "$description": "Lava, in both appearances: avoid."
         }
       },
       "state": {

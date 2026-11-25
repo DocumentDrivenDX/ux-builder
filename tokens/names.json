@@ -81,6 +81,10 @@
       "tier": "component",
       "css0": "btn-min-height"
     },
+    "button.height-small": {
+      "tier": "component",
+      "css0": null
+    },
     "button.offset-hover": {
       "tier": "component",
       "css0": "btn-shift-hover"
@@ -250,6 +254,34 @@
       "css0": null
     },
     "color.sequential": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.destructive": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.on-destructive": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.selected": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.stance-recommended": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.stance-conditional": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.stance-watch": {
+      "tier": "role",
+      "css0": null
+    },
+    "color.stance-avoid": {
       "tier": "role",
       "css0": null
     },
